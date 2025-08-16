@@ -1,0 +1,207 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或盗版内容"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">应&emsp;用</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-input ew-select-fixed" lay-filter="app" lay-search>
+                                <option value="">全部应用</option>
+                                {volist name="app_list.data.data" id="res"}
+                                <option value="{$res.id}">{$res.name}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'table', 'admin', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '{:url("/Pirate/list")}',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.data.total, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
+                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
+                    }},
+                {field: 'pirate_info', title: '盗版内容', sort: true, minWidth: 160},
+                {field: 'param', title: '请求参数', sort: true, minWidth: 120, templet: function (d){
+                        return '<a class="layui-btn layui-btn-xs" lay-event="seeParam">查看参数</a>';
+                    }
+                },
+                {field: 'ip', title: 'IP', sort: true, minWidth: 100},
+                {field: 'addtime', title: '添加时间', sort: true, minWidth: 180},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+            ]]
+        });
+
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        form.on('select(app)', function (data) {
+            if(data.value == ''){
+                insTb.reload({where: {appid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true}, {field: 'id', title: 'ID', sort: true, width: 80, fixed: true}]]});
+            }else{
+                insTb.reload({where: {appid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', sort: true, width: 80, fixed: true}]]});
+            }
+            return false;
+        });
+        {if $appid != ''}
+        insTb.reload({where: {appid:{$appid}}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', sort: true, width: 80, fixed: true}]]});
+        {/if}
+        /* 表格工具条点击事件 */
+        table.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            }else if (obj.event === 'seeParam'){
+                let content = '';
+                let arr;
+                try{
+                    arr = JSON.parse(obj.data.param);
+                    notice.msg("解析请求参数成功！", {icon: 1, audio:'1'});
+                }catch (e){
+                    notice.msg("解析请求参数失败！[errorCode:GetLogContentError]", {icon: 2, audio:'1'});
+                    return false;
+                }
+                $.each(arr,function(index, value) {
+                    content +='<div class="layui-col-md4 layui-col-sm6">' +
+                        '<div class="layui-form-item layui-form-text">' +
+                        '<label class="layui-form-label">'+index+'</label>' +
+                        '<div class="layui-input-block">' +
+                        '<textarea class="layui-textarea layui-disabled" style="min-height: 35px" disabled>' + value + '</textarea>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+                admin.open({
+                    title: '查看盗版 ID:'+obj.data.id,
+                    type: 1,
+                    area: ['80%',''],
+                    content:'<div class="layui-card">' +
+                        '<div class="layui-card-body">' +
+                        '<div class="layui-form layui-form-pane">' +
+                        '<div class="layui-container">'+
+                        '<div class="layui-row layui-col-space10">' +
+                        content +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>'
+                });
+            }
+        });
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('SF_Table');
+                if (checkRows.data.length === 0) {
+                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                console.log(ids)
+                doDel({ids: ids});
+            }
+        });
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '{:url("/Pirate/drop")}' : '{:url("/Pirate/batchDrop")}',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            table.reload('SF_Table');
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+    });
+</script>

@@ -1,0 +1,684 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="name" class="layui-input" placeholder="输入权限名称"/>
+                        </div>
+                    </div>
+<!--                    <div class="layui-inline">-->
+<!--                        <label class="layui-form-label">状&emsp;态</label>-->
+<!--                        <div class="layui-input-inline">-->
+<!--                            <select name="status" class="ew-select-fixed">-->
+<!--                                <option value="">选择状态</option>-->
+<!--                                <option value="1">显示</option>-->
+<!--                                <option value="0">隐藏</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">模&emsp;板</label>
+                        <div class="layui-input-inline">
+                            <select id="select_template_list" class="layui-input ew-select-fixed" lay-filter="template" lay-search>
+                                <option value="">全部权限</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="SF_PowerBar">
+<a lay-event="setPowerTop" lay-tips="移到顶部" lay-direction="4" lay-bg="#4facfe">
+    <img src="{__IMG__}top.svg" style="width: 25px;">
+</a>
+<a lay-event="setPowerUp" lay-tips="移到上一行" lay-direction="1" lay-bg="#4facfe">
+    <img src="{__IMG__}up.svg" style="width: 25px;">
+</a>
+<a lay-event="setPowerDown" lay-tips="移到下一行" lay-direction="3" lay-bg="#4facfe">
+    <img src="{__IMG__}down.svg" style="width: 25px;">
+</a>
+<a lay-event="setPowerBottom" lay-tips="移到底部" lay-direction="2" lay-bg="#4facfe">
+    <img src="{__IMG__}bottom.svg" style="width: 25px;">
+</a>
+</script>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="SF_TbState">
+    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="显示|隐藏" {{d.status==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbAddAuthPower">
+    <input type="checkbox" lay-filter="SF_TbAddAuthPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addauth_power==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbAddPayPower">
+    <input type="checkbox" lay-filter="SF_TbAddPayPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addpay_power==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbPiratePower">
+    <input type="checkbox" lay-filter="SF_TbPiratePowerCk" value="{{d.id}}" lay-skin="switch" {{d.pirate_power==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbAddUserPower">
+    <input type="checkbox" lay-filter="SF_TbAddUserPowerCk" value="{{d.id}}" lay-skin="switch" {{d.adduser_power==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbDefaultPower">
+    <input type="checkbox" lay-filter="SF_TbDefaultPowerCk" value="{{d.id}}" lay-skin="switch" {{d.default_power==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_Tbid">
+    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+</script>
+<!-- 表单弹窗 -->
+<script type="text/html" id="SF_EditDialog">
+    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">模板:</label>
+            <div class="layui-input-block">
+                <select id="tid" name="tid" class="layui-input ew-select-fixed" lay-search lay-filter="tid">
+                    <option value="">请选择所属模板</option>
+                </select>
+            </div>
+        </div>
+        <div id="form_data" style="display: none">
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">权限名称:</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" placeholder="请输入价格的名称" class="layui-input"
+                           lay-verType="tips" lay-verify="required" required/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">授权折扣:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="addauth_discount" placeholder="购买授权折扣百分比，0元为免费" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">认证折扣:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="addpay_discount" placeholder="认证易支付折扣百分比，0元为免费" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">盗版折扣:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="pirate_discount" placeholder="查看盗版折扣百分比，0元为免费" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">代理折扣:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="adduser_discount" placeholder="添加代理折扣百分比，0元为免费" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">上级ID:</label>
+                <div class="layui-input-block">
+                    <select id="parentid" name="parentid" class="layui-input ew-select-fixed" lay-search>
+                        <option value="">请选择上级权限ID</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">权限价格:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="money" placeholder="请输入售卖价格，留空为0元" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">权限介绍</label>
+                <div class="layui-input-block">
+                    <textarea name="introduce" class="layui-textarea" style="height:100px" placeholder="该权限的介绍,可留空"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">添加授权:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="addauth_power" value="0" lay-skin="switch"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">添加认证:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="addpay_power" value="0" lay-skin="switch"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">查看盗版:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="pirate_power" value="0" lay-skin="switch"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">添加下级:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="adduser_power" value="0" lay-skin="switch"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">状态:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'admin', 'notice','treeTable', 'util'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var treeTable = layui.treeTable;
+        var util = layui.util;
+        var tbDataList = [];
+
+        var insTb = treeTable.render({
+            elem: '#SF_Table',
+            url: '{:url("/PowerPrice/list")}',
+            method: 'post',
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            tree: {
+                idName: 'id',                                // id的字段名
+                pidName: 'parentid',                         // pid的字段名
+                openName: 'open',                            // 是否默认展开的字段名
+                iconIndex: 3,
+                isPidData: true,                             // 图标列的索引
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'templateName', title: '所属模板', sort: true, minWidth: 120, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">'+d.templateName+'</span>';
+                    }},
+                {field: 'name', title: '权限名称', sort: true, minWidth: 250},
+                {field: 'power', title: '购买折扣', align: 'right', templet: function (d) {
+                    if (d.addauth_discount >= '100') {
+                        var addauth = '<span class="layui-badge layui-badge-red">授权:无折扣</span> ';
+                    } else {
+                        var discount = parseInt(d.addauth_discount) / 10;
+                        if(discount == '0'){
+                            var addauth = '<span class="layui-badge layui-badge-green">授权:免费</span> ';
+                        }else{
+                            var addauth = '<span class="layui-badge layui-badge-blue">授权:'+discount+'折</span> ';
+                        }
+                    }
+                    if (d.addpay_discount >= '100') {
+                        var addpay = '<span class="layui-badge layui-badge-red">认证:无折扣</span> ';
+                    } else {
+                        var discount = parseInt(d.addpay_discount) / 10;
+                        if(discount == '0'){
+                            var addpay = '<span class="layui-badge layui-badge-green">认证:免费</span> ';
+                        }else{
+                            var addpay = '<span class="layui-badge layui-badge-blue">认证:'+discount+'折</span> ';
+                        }
+                    }
+                    if (d.pirate_discount >= '100') {
+                        var pirate = '<span class="layui-badge layui-badge-red">盗版:无折扣</span> ';
+                    } else {
+                        var discount = parseInt(d.pirate_discount) / 10;
+                        if(discount == '0'){
+                            var pirate = '<span class="layui-badge layui-badge-green">盗版:免费</span> ';
+                        }else{
+                            var pirate = '<span class="layui-badge layui-badge-blue">盗版:'+discount+'折</span> ';
+                        }
+                    }
+                    if (d.adduser_discount >= '100') {
+                        var adduser = '<span class="layui-badge layui-badge-red">代理:无折扣</span>';
+                    } else {
+                        var discount = parseInt(d.adduser_discount) / 10;
+                        if(discount == '0'){
+                            var adduser = '<span class="layui-badge layui-badge-green">代理:免费</span> ';
+                        }else{
+                            var adduser = '<span class="layui-badge layui-badge-blue">代理:'+discount+'折</span> ';
+                        }
+                    }
+                    return addauth + addpay + pirate + adduser;
+                    }, sort: true, minWidth: 352
+                },
+                {field: 'addauth_power', title: '添加授权', templet: '#SF_TbAddAuthPower', sort: true, minWidth: 110},
+                {field: 'addpay_power', title: '添加认证', templet: '#SF_TbAddPayPower', sort: true, minWidth: 110},
+                {field: 'pirate_power', title: '查看盗版', templet: '#SF_TbPiratePower', sort: true, minWidth: 110},
+                {field: 'adduser_power', title: '添加下级', templet: '#SF_TbAddUserPower', sort: true, minWidth: 110},
+                {field: 'introduce', title: '权限介绍', sort: true, minWidth: 120},
+                {field: 'money', title: '权限价格', sort: true, minWidth: 100},
+                {field: 'default_power', title: '默认权限', templet: '#SF_TbDefaultPower', sort: true, minWidth: 100},
+                {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
+                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 200, minWidth: 200}
+            ]],
+            done: function (data) {
+                tbDataList = data;
+            }
+        });
+
+        notice.msg('正在获取列表中..', {icon: 4, close: true});
+        $.ajax({
+            type: "POST",
+            url: '{:url("/PowerTemplate/getList")}',
+            dataType: "json",
+            success: function(data) {
+                notice.destroy();
+                if (data.code == 0) {
+                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                    var content = '';
+                    $.each(data.data.data,function(index, value){
+                        content += '<option value="'+value.id+'">'+value.name+'</option>';
+                    });
+                    $("#select_template_list").html(content);
+                } else {
+                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                }
+                form.render();
+            },
+            error: function() {
+                notice.destroy();
+                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+            }
+        });
+
+        form.on('select(tid)', function (data) {
+            if (data.value == "") {
+                $("#form_data").css("display","none");
+            }else{
+                notice.msg('正在获取列表中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: '{:url("/PowerPrice/getPowerList")}',
+                    data: {"tid":data.value},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            notice.msg('获取列表成功！', {icon: 1, audio:'1'});
+                            var content = '<option value="">请选择上级权限ID</option><option value="0">无上级</option>';
+                            $.each(data.data.data, function(index, value) {
+                                content +='<option value="'+value.id+'">'+value.name+'</option>';
+                            });
+                            $("#parentid").html(content);
+                        } else {
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                        form.render();
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+                $("#form_data").css("display","inherit");
+            }
+
+        });
+        form.on('switch(permanent_switch)', function (data) {
+            if (data.elem.checked) {
+                $("#day").css("display","none");
+            }else{
+                $("#day").css("display","inherit");
+            }
+        });
+
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            doTbSearch(data.field, 'id');
+            return false;
+        });
+
+        function doTbSearch(field, idName) {
+            var ids = [], isClear = true;
+            for (var i = 0; i < tbDataList.length; i++) {
+                var item = tbDataList[i], flag = true;
+                for (var f in field) {
+                    if (!field.hasOwnProperty(f)) continue;
+                    if (!field[f]) continue;
+                    isClear = false;
+                    if (!item[f] || item[f].indexOf(field[f]) === -1) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) ids.push(item[idName]);
+            }
+            if (isClear) {
+                insTb.clearFilter();
+            } else {
+                insTb.filterData(ids);
+            }
+        }
+
+        form.on('select(template)', function (data) {
+            if(data.value == ''){
+                insTb.reload({where: {tid:data.value}});
+            }else{
+                insTb.reload({where: {tid:data.value}});
+            }
+            return false;
+        });
+        {if $tid != ''}
+        insTb.reload({where: {tid:{$tid}}});
+        {/if}
+        /* 表格工具条点击事件 */
+        treeTable.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            }
+        });
+
+        /* 表格头工具栏点击事件 */
+        treeTable.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = insTb.checkStatus();
+                if (checkRows.length === 0) {
+                    layer.msg('请选择要删除的数据', {icon: 2});
+                    return;
+                }
+                var ids = checkRows.map(function (d) {
+                    return d.id;
+                });
+                doDel({ids: ids});
+            }
+        });
+
+        /* 显示表单弹窗 */
+        function showEditModel(mData) {
+            admin.popupRight({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '权限',
+                content: $('#SF_EditDialog').html(),
+                success: function (layero, dIndex) {
+                    notice.msg('正在获取列表中..', {icon: 4, close: true});
+                    $.ajax({
+                        type: "POST",
+                        url: '{:url("/PowerTemplate/getList")}',
+                        dataType: "json",
+                        success: function(data) {
+                            notice.destroy();
+                            if (data.code == 0) {
+                                notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                var content = '<option value="">请选择所属模板</option>';
+                                $.each(data.data.data,function(index, value){
+                                    content += '<option value="'+value.id+'">'+value.name+'</option>';
+                                });
+                                $("#tid").html(content);
+                            } else {
+                                notice.msg(data.msg, {icon: 2, audio:'1'});
+                            }
+                            form.render();
+                        },
+                        error: function() {
+                            notice.destroy();
+                            notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        }
+                    });
+                    // 回显表单数据
+                    if(mData){
+                        $("#form_data").css("display", "inherit");
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/PowerPrice/getPowerList")}',
+                            data: {"tid":mData.tid},
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                                    var content = '<option value="">请选择上级权限ID</option><option value="0">无上级</option>';
+                                    $.each(data.data.data, function(index, value) {
+                                        content +='<option value="'+value.id+'">'+value.name+'</option>';
+                                    });
+                                    $("#parentid").html(content);
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                form.render();
+                                form.val('SF_EditForm', mData);
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                    }else{
+                        form.render();
+                        $("#form_data").css("display","none");
+                    }
+
+                    // 表单提交事件
+                    form.on('submit(SF_EditSubmit)', function (data) {
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/PowerPrice/edit")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    insTb.refresh();
+                                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                        return false;
+                    });
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '{:url("/PowerPrice/drop")}' : '{:url("/PowerPrice/batchDrop")}',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            insTb.refresh();
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        /* 修改用户状态 */
+        form.on('switch(SF_TbStateCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerPrice/setStatus")}',
+                data: {id:obj.value,status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.refresh();
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        form.on('switch(SF_TbAddAuthPowerCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerPrice/setPower")}',
+                data: {id:obj.value,type:'addauth_power',status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.refresh();
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        form.on('switch(SF_TbAddPayPowerCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerPrice/setPower")}',
+                data: {id:obj.value,type:'addpay_power',status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.refresh();
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        form.on('switch(SF_TbPiratePowerCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerPrice/setPower")}',
+                data: {id:obj.value,type:'pirate_power',status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.refresh();
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        form.on('switch(SF_TbAddUserPowerCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerPrice/setPower")}',
+                data: {id:obj.value,type:'adduser_power',status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.refresh();
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        form.on('switch(SF_TbDefaultPowerCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerPrice/setDefaultPower")}',
+                data: {id:obj.value,default_power:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.refresh();
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,422 @@
+{include file="/public/header"}
+<style>
+    html,body{
+        margin: 0;
+        height: 100%;
+    }
+    body{
+        background-color: #F2F2F4;
+    }
+    * {
+        font-family: 'SF-Medium';
+    }
+    @-webkit-keyframes rotation{
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(360deg);}
+    }
+    .sf-loop{
+        -webkit-transform: rotate(360deg);
+        animation: rotation 3s linear infinite;
+        -moz-animation: rotation 3s linear infinite;
+        -webkit-animation: rotation 3s linear infinite;
+        -o-animation: rotation 3s linear infinite;
+    }
+    .sf-set{
+        position: relative;
+    }
+    .sf-set img{
+        position:absolute;
+    }
+    .sf-set-1{
+        height: 80px;
+        left:0;
+        top:0;
+        z-index:1;
+    }
+    .sf-set-2{
+        height: 64px;
+        left:8px;
+        top:8px;
+        z-index:2;
+    }
+    .sf-group{
+        position: relative;
+        margin-left: 10px;
+        margin-top: 10px;
+        color:#000000;
+        height: 400px;
+    }
+    .sf-group-btn{
+        position: relative;
+        height: 40px;
+        font-size: 16px;
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+    .layui-fluid .layui-card{
+        border-radius: 12px
+    }
+    .sf-set-font{
+        position: absolute;
+        left:100px;
+        font-size: 17px;
+        font-weight: 600;
+    }
+    .sf-set-font .sf-text{
+        font-weight: normal;
+        font-size: 14px;
+    }
+    .sf-set-introduce{
+        position: absolute;
+        top:100px;
+        font-size: 16px;
+        margin: 10px auto;
+        height:240px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    .sf-set-more{
+        position: absolute;
+        bottom:10px;
+        font-size: 16px;
+    }
+    .sf-group-btn .sf-download{
+        position: absolute;
+        bottom:10px;
+        left:10px;
+    }
+    a{
+        color:#007aff;
+    }
+    a:hover{
+        color:#D8E7FD;
+    }
+    .layui-progress-bar {
+        height: 3px;
+        color:#007aff;
+    }
+    .layui-layer .layui-layer-admin .layui-layer-title{
+        text-align: center;
+        color:#000000;
+    }
+
+    .layui-anim-downbit{
+        animation-name:layui-downbit
+    }
+    @keyframes layui-downbit{
+        0%{opacity:.3;transform:translate3d(0,-10px,0)}
+        100%{opacity:1;transform:translate3d(0,0,0)}
+    }
+
+
+
+    .loading{
+        position: absolute;
+    }
+    .loading>div{
+        position: absolute;
+        width: 5px;
+        height: 15px;
+        border-radius: 10px;
+        background-color: white;
+    }
+    .loading>div:nth-child(1){
+        top: 15px;
+        left: 0px;
+        background-color: #D9D8DD;
+        animation: loading infinite 1s 0.5s;
+    }
+    .loading>div:nth-child(2){
+        top: 10.1442px;
+        left: 10.1442px;
+        transform: rotate(-45deg);
+        background-color: #C9C8CD;
+        animation: loading infinite 1s 0.375s;
+    }
+    .loading>div:nth-child(3){
+        top: 0px;
+        left: 15px;
+        transform: rotate(90deg);
+        background-color: #B8B7BC;
+        animation: loading infinite 1s 0.25s;
+    }
+    .loading>div:nth-child(4){
+        top: -10.1442px;
+        left: 10.1442px;
+        transform: rotate(45deg);
+        background-color: #ADACB1;
+        animation: loading infinite 1s 0.125s;
+    }
+    .loading>div:nth-child(5){
+        top: -15px;
+        left: 0px;
+        transform: rotate(0deg);
+        background-color: #A09FA4;
+        animation: loading infinite 1s;
+    }
+    .loading>div:nth-child(6){
+        top: -10.1442px;
+        left: -10.1442px;
+        transform: rotate(-45deg);
+        background-color: white;
+        animation: loading infinite 1s 0.875s;
+    }
+    .loading>div:nth-child(7){
+        top: 0px;
+        left: -15px;
+        transform: rotate(90deg);
+        background-color: white;
+        animation: loading infinite 1s 0.75s;
+    }
+    .loading>div:nth-child(8){
+        top: 10.1442px;
+        left: -10.1442px;
+        transform: rotate(45deg);
+        background-color: white;
+        animation: loading infinite 1s 0.625s;
+    }
+
+    @keyframes loading {
+        100%{
+            opacity: 0.8;
+            background-color: #D9D8DD;
+        }
+        75%{
+            opacity: 0.8;
+            background-color: #C9C8CD;
+        }
+        50% {
+            opacity: 0.8;
+            background-color: #B8B7BC;
+        }
+        25%{
+            opacity: 0.8;
+            background-color: #ADACB1;
+        }
+        0% {
+            opacity: 0.8;
+            background-color: #A09FA4;
+        }
+    }
+
+    .sf-loading{
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        top:300px;
+    }
+    .sf-loading .sf-loading-font{
+        position: absolute;
+        top:70px;
+        font-size: 18px;
+        color:#626166;
+    }
+    @font-face{
+        font-family: SF;
+        src: url("{__FONT__}PingFang Bold.ttf");
+    }
+    @font-face{
+        font-family: SF-Medium;
+        src: url("{__FONT__}PingFang Medium.ttf");
+    }
+    .sf-loading .sf-new-font{
+        position: absolute;
+        top:70px;
+        font-size: 18px;
+        color:#808A87;
+    }
+    .sf-loading .sf-new-font2{
+        position: absolute;
+        top:92px;
+        font-size: 15px;
+        color:#808A87;
+    }
+</style>
+<body>
+<div class="layui-row">
+    <div class="layui-col-md6 layui-col-md-offset3 layui-col-sm8 layui-col-sm-offset2 layui-col-xs12">
+        <div class="layui-fluid">
+            <div id="sf_update" class="layui-anim layui-anim-downbit" style="display: none">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div id="sf_progress" style="display: none">
+                            <div class="layui-progress" lay-filter="uploadProgress" style="height:3px;margin-left:110px;top:68px">
+                                <div class="layui-progress-bar" lay-percent="0%"></div>
+                            </div>
+                        </div>
+                        <div class="sf-group">
+                            <div class="sf-set">
+                                <img class="sf-set-1" src="{__IMG__}sf_set.png">
+                                <img id="sf_set" class="sf-set-2" src="{__IMG__}sf_set2.png">
+                            </div>
+                            <div class="sf-set-font">
+                                MOS <span id="sf_edition">4.0</span>
+                                <div class="sf-text" style="padding-top: 2px">SF Inc.</div>
+                                <div class="sf-text" style="padding-top: 8px"><span id="sf_msg">3.3 GB</span></div>
+                            </div>
+                            <div class="sf-set-introduce">
+                                <div id="sf_introduce">暂无更新内容</div>
+                            </div>
+                            <div class="sf-set-more">
+                                <a lay-filter="uplog" lay-submit>了解更多...</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="sf_update_btn_group" class="layui-card">
+                    <div class="sf-group-btn">
+                        <div class="sf-download">
+                            <a id="sf_update_btn" lay-filter="update" lay-submit>下载并安装</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sf_loading" class="sf-loading" style="display: none">
+                <div class="loading">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <div class="sf-loading-font">正在检查更新...</div>
+            </div>
+            <div id="sf_new_version" class="sf-loading" style="display: none">
+                <div class="sf-new-font">MOS <span id="sf_current_edition">{$edition}</span></div>
+                <div class="sf-new-font2">MOS已是最新版本</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="SF_Uplog"></script>
+{include file="/public/footer"}
+<script>
+    layui.use(['element', 'form', 'notice', 'admin'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var notice = layui.notice;
+        var admin = layui.admin;
+        var element = layui.element;
+
+        $("#sf_loading").show();
+        $(function(){
+            $.ajax({
+                type: "POST",
+                url: '{:url("/Set/checkUpdate")}',
+                dataType: "json",
+                success: function(data) {
+                    $("#sf_loading").hide();
+                    if (data.code == 0) {
+                        if(data.data.code == 1){
+                            $("#sf_update").show();
+                            $("#sf_edition").text(data.data.edition);
+                            $("#sf_msg").text(data.data.filesize + ' MB');
+                            $("#sf_introduce").text('本次更新' + data.data.introduce);
+                            var html = '<div class="layui-card layui-card-body"><ul class="layui-timeline">';
+                            $.each(data.data.uplog, function(index, value){
+                                html += '<li class="layui-timeline-item">\n' +
+                                    '    <i class="layui-icon layui-timeline-axis"></i>\n' +
+                                    '    <div class="layui-timeline-content layui-text">\n' +
+                                    '      <h3 class="layui-timeline-title">'+index+'</h3>\n' +
+                                    '      <p>\n';
+                                    $.each(value, function(index, value){
+                                        html += value + '<br>';
+                                    });
+
+                                html +='      </p>\n' +
+                                    '    </div>\n' +
+                                    '  </li>';
+                            });
+                            html += '</ul></div>';
+                            $("#SF_Uplog").html(html);
+                        }else{
+                            $("#sf_new_version").show();
+                        }
+                    } else {
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    $("#sf_loading").hide();
+                    notice.msg('服务器错误！', {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        form.on('submit(uplog)', function (data) {
+            admin.open({
+                title: '关于本更新',
+                type: 1,
+                shade: .1,
+                area:['100%','100%'],
+                anim: 2,
+                content: $("#SF_Uplog").html()
+            });
+            return false;
+        });
+
+        function updateStatus(type = false){
+            if(type){
+                $("sf_msg").css('display','none');
+                $("#sf_msg").text('正在准备下载...');
+                $("#sf_update_btn").css('color','#8B8B8D');
+                $("#sf_update_btn").text('正在下载...');
+                $("#sf_set").addClass('sf-loop');
+            }else{
+                $("#sf_update_btn").css('color','#007aff');
+                $("#sf_update_btn").text('下载并安装');
+                $("#sf_set").removeClass('sf-loop');
+            }
+        }
+        var percentage = 100;
+        var progressNum = 0;
+        function updateVersion(){
+
+            setTimeout(function (){
+                $.ajax({
+                    type: "POST",
+                    url: '{:url("/Set/updateVersion")}',
+                    dataType: "json",
+                    success: function(data) {
+                        if(data.data.code == 1){
+                            if(progressNum == 0){
+                                percentage = (100 / data.data.count);
+                            }
+                            $("#sf_progress").css('display','inherit');
+                            $("#sf_msg").text(data.msg);
+                            progressNum = percentage + progressNum;
+                            element.progress('uploadProgress', progressNum + '%');
+                            updateVersion();
+                        }else if(data.data.code == 2){
+                            $("#sf_msg").text(data.msg);
+                            element.progress('uploadProgress', '100%');
+                            $("#sf_update_btn_group").css('display','none');
+                            updateStatus();
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                            $("#sf_msg").text(data.msg);
+                            updateStatus();
+                        }
+                    },
+                    error: function() {
+                        $("#sf_loading").hide();
+                        notice.msg('服务器错误！', {icon: 2, audio:'1'});
+                        updateStatus();
+                    }
+                });
+            },1000);
+        }
+        form.on('submit(update)', function (data) {
+            updateStatus(true);
+            updateVersion()
+            return false;
+        });
+    });
+</script>

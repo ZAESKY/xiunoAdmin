@@ -1,0 +1,162 @@
+{include file="/public/header"}
+<style>
+.bgimg{
+        background-image: url('{__IMG__}recharge.png');
+        border-radius: 4px 4px 0px 0px;
+        background-size:cover;
+        background-repeat:no-repeat;
+        height: 135px;
+        padding: 15px;
+    }
+.img{
+        width: 96px;
+        height: 96px;
+        margin:auto;
+        display: block;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        position: relative;
+        margin-top: -80px;
+    }
+</style>
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <!-- 左 -->
+        <div class="layui-col-sm12 layui-col-md3" style="overflow: hidden;">
+            <div class="layui-card">
+                <div class="bgimg"></div>
+                <div class="layui-card-body" style="padding: 25px;">
+                    <div class="text-center layui-text">
+                        <div class="img user-info-head" id="userInfoHead">
+                            <img src="{$userInfo['img']}" alt=""/>
+                        </div>
+                        <h2 style="padding-top: 20px;">{$userInfo['username']}</h2>
+                        <p style="padding-top: 8px;">{:hello_user($userInfo['username'])}</p>
+                    </div>
+                    <div class="layui-text" style="padding-top: 30px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 右 -->
+        <div class="layui-col-sm12 layui-col-md9">
+            <div class="layui-card">
+                <!-- 选项卡开始 -->
+                <div class="layui-tab layui-tab-brief" lay-filter="userInfoTab">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">在线充值</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <!-- tab1 -->
+                        <div class="layui-tab-item layui-show">
+                            <form class="layui-form formBasForm" id="userInfoForm" lay-filter="userInfoForm"
+                                  style="max-width: 600px;">
+                                <div class="layui-form-item">
+                                    <div class="sf-tag layui-badge-blue">
+                                        {$pay_notice|default='暂无公告'}
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label layui-form-required">充值余额:</label>
+                                    <div class="layui-input-block">
+                                        <input type="radio" name="money" value="1" title="1元" lay-verify="required" lay-filter="money" checked/>
+                                        <input type="radio" name="money" value="5" title="5元" lay-verify="required" lay-filter="money"/>
+                                        <input type="radio" name="money" value="10" title="10元" lay-verify="required" lay-filter="money"/>
+                                        <input type="radio" name="money" value="50" title="50元" lay-verify="required" lay-filter="money"/>
+                                        <input type="radio" name="money" value="100" title="100元" lay-verify="required" lay-filter="money"/>
+                                        <input type="radio" name="money" value="diy" title="自定义" lay-verify="required" lay-filter="money"/>
+                                    </div>
+                                </div>
+                                <div id="diy" style="display: none">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label layui-form-required">充值余额:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="diy" value="" class="layui-input"
+                                                   placeholder="不能低于0.01元" required/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-filter="submit" lay-submit>充值
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- tab1 -->
+                    </div>
+                </div>
+                <!-- //选项卡结束 -->
+            </div>
+        </div>
+    </div>
+</div>
+{include file="/public/footer"}
+<script>
+    layui.use(['index', 'form', 'element', 'notice', 'admin'], function () {
+        var $ = layui.jquery;
+        var index = layui.index;
+        var form = layui.form;
+        var notice = layui.notice;
+        var admin = layui.admin;
+
+        form.on('radio(money)', function (data) {
+            if(data.value == 'diy'){
+                $("#diy").css("display", "inherit");
+            }else{
+                $("#diy").css("display", "none");
+            }
+        });
+
+        form.on('submit(submit)', function (data) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            if(data.field.money == ''){
+                notice.msg('请选择需要充值的余额！', {icon: 2, audio:'1'});
+                return false;
+            }
+            if(data.field.money == 'diy'){
+                if(data.field.diy == '') {
+                    notice.msg('请输入需要充值的余额！', {icon: 2, audio: '1'});
+                    return false;
+                }
+            }
+            data.field.type = 'recharge';
+            $.ajax({
+                type: "POST",
+                url: '{:url("/MyInfo/createOrder")}',
+                data: data.field,
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                        // admin.open({
+                        //     type: 2,
+                        //     title: '付款信息',
+                        //     content: '/pay.php/Index?trade_no='+data.data.trade_no,
+                        //     area: ['100%', '100%'],
+                        // });
+                        index.openTab({
+                            title: '付款界面',
+                            url: '/pay.php/Index?trade_no='+data.data.trade_no,
+                            end: function() {
+                                // insTb.reload();
+                            }
+                        });
+                    } else {
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="layui-btn-container">
+                <a class="layui-btn layui-icon layui-icon-menu-fill" onclick="clearCache('menu')"> 清除菜单缓存</a>
+                <a class="layui-btn layui-icon layui-icon-menu-fill" onclick="clearCache('app')"> 清除应用缓存</a>
+                <a class="layui-btn layui-icon layui-icon-set-fill" onclick="clearCache('set')"> 清除系统设置缓存</a>
+                <a class="layui-btn layui-icon layui-icon-set-fill" onclick="clearCache('version')"> 清除版本缓存</a>
+                <a class="layui-btn layui-icon layui-icon-refresh" onclick="clearCache('all')"> 清除全部缓存</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{include file="/public/footer"}
+<script>
+    layui.use(['admin','notice'], function () {
+        var $ = layui.jquery;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+       window.clearCache = function (type){
+           notice.msg('正在执行中..', {icon: 4, close: true});
+           admin.ajax({
+               url: '{:addons_url("ClearData/clearCache")}',
+               data: {'type':type},
+               headers: {},
+               type: 'post',
+               dataType: 'json',
+               success: function(data){
+                   notice.destroy();
+                   if (data.code == 0) {
+                       notice.msg(data.msg, {icon: 1, audio:'1'});
+                   } else {
+                       notice.msg(data.msg, {icon: 2, audio:'1'});
+                   }
+               },
+               error: function() {
+                   notice.destroy();
+                   notice.msg("服务器错误，请检查插件是否启用！", {icon: 2, audio:'1'});
+               }
+           });
+        }
+    });
+</script>

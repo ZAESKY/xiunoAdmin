@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-cmn">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>授权查询 - SF综合验证授权系统</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="stylesheet" type="text/css" href="./check/main.css">
+    <link rel="stylesheet" type="text/css" href="./check/common.css">
+    <script src="./check/font_2416523_7f24rt7bdt4.js"></script>
+    <script src="./static/jquery-1.12.2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./check/index.css">
+    <style>
+        .menu-theme-white .a-head-btn:hover.login-btn,
+        .a-head-btn:hover.login-btn {
+            background-color: #0040ff;
+            color: #0055ff;
+        }
+    </style>
+    <style class="mpa-style-fix ImageGatherer">
+        .FotorFrame {
+            position: fixed !important
+        }
+    </style>
+    <style class="mpa-style-fix SideFunctionPanel">
+        .weui-desktop-online-faq__wrp {
+            top: 304px !important;
+            bottom: unset !important
+        }
+
+        .weui-desktop-online-faq__wrp .weui-desktop-online-faq__switch {
+            width: 38px !important
+        }
+    </style>
+</head>
+<body class="sm-hidden-cart-common" mpa-version="8.0.8" mpa-extension-id="ibefaeehajgcpooopoegkifhgecigeeg" style="">
+  <!-- 手机端菜单start -->
+  <div class="header-container sm-nohidden">
+    <div class="header auto-width">
+        <a href="https://www.shiwaiyun.com/" class="logo inlie-block" title="世外云">
+            <span class="theme-white-show hide" style="display: none;">
+              <svg class="icon-svg " style="width:125px;height:49px;background-image:url('https://img.shiwaiyun.com/images/2022/08/09/e109bff1b4d8c4db2bced71c3750bb2d.png');background-size: 100%;margin-top: 6px;" aria-hidden="true"></svg>
+            </span>
+          </a>
+      <div class="m-topbar-right">
+        <a href="javascript:;" class="m-header-btn m-user-icon login-btn">
+          登录
+        </a>
+        <span class="m-menu-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </div>
+      <div class="m-menu-content m-top-content">
+        <div class="m-menu-item side-nav-inner-box">
+          <div class="m-menu-title side-nav-title"><a href="javascript:;">产品中心</a></div>
+          <div class="m-menu-list side-nav-inner-list">
+            <ul>
+              <li>
+                <h3 class="m-sub-title">
+                  SF综合验证授权系统①
+                </h3>
+                <div class="m-sub-menu">
+                  <a href="#">SF授权系统（月付版）</a>
+                  <a href="#">SF授权系统（年付版）</a>
+                  <a href="#">SF授权系统（开源版）</a>
+                  <a class="m-not-open color-main-8f9bb2" href="javascript:;">
+                    SF授权系统（定制版）
+                    <svg class="icon-svg font-size-68" aria-hidden="true">
+                      <use xlink:href="#iconapayun_biaoqian_jijiangshangxian2"></use>
+                    </svg>
+                  </a>
+                  <a class="m-not-open color-main-8f9bb2" href="javascript:;">
+                    SF授权系统（定制版）
+                    <svg class="icon-svg font-size-68" aria-hidden="true">
+                      <use xlink:href="#iconapayun_biaoqian_jijiangshangxian2"></use>
+                    </svg>
+                  </a>
+                  <a class="m-not-open color-main-8f9bb2" href="javascript:;">
+                    SF授权系统（定制版）
+                    <svg class="icon-svg font-size-68" aria-hidden="true">
+                      <use xlink:href="#iconapayun_biaoqian_jijiangshangxian2"></use>
+                    </svg>
+                  </a>
+                </div>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <h3 class="m-sub-title">
+                  SF综合验证授权系统②
+                </h3>
+                <div class="m-sub-menu">
+                  <a href="#">SF授权系统（月付版）</a>
+                  <a href="#">SF授权系统（年付版）</a>
+                  <a href="#">SF授权系统（开源版）</a>
+                </div>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <h3 class="m-sub-title">
+                  SF综合验证授权系统③
+                </h3>
+                <div class="m-sub-menu">
+                  <a href="#">SF授权系统（月付版）</a>
+                  <a href="#">SF授权系统（年付版）</a>
+                  <a href="#">SF授权系统（开源版）</a>
+                </div>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <h3 class="m-sub-title">
+                  SF综合验证授权系统④
+                </h3>
+                <div class="m-sub-menu">
+                  <a href="#">SF授权系统（月付版）</a>
+                  <a href="#">SF授权系统（年付版）</a>
+                  <a href="#">SF授权系统（开源版）</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="m-menu-item side-nav-inner-box">
+          <div class="m-menu-title"><a href="#">服务中心</a></div>
+        </div>
+        <div class="m-menu-item side-nav-inner-box">
+          <div class="m-menu-title"><a href="#">代理查询</a></div>
+        </div>
+        <div class="m-menu-item side-nav-inner-box">
+          <div class="m-menu-title"><a href="#">授权查询</a></div>
+        </div>
+        <div class="m-menu-item side-nav-inner-box">
+          <div class="m-menu-title"><a href="#">开发文档</a></div>
+        </div>
+        <div class="m-menu-item side-nav-inner-box">
+          <div class="m-menu-title"><a href="#">关于我们</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 手机端菜单end -->
+
+    <!--banner菜单 start-->
+    <div class="check-banner-box menu-box" style="">
+      <!-- topMenu菜单 start-->
+      <div class="box-sizing-border">
+        <div id="headMenuBox" class="menu-wrap">
+          <div class="auto-width clearfix pos-rel">
+            <a class="inline-block fl apy-logo" href="#">
+              <span class="no-theme-white-show">
+                <svg class="icon-svg " style="width:159px;height:59px;background-image:url('https://img.shiwaiyun.com/images/2022/08/09/e109bff1b4d8c4db2bced71c3750bb2d.png');background-size: 100%" aria-hidden="true"></svg>
+              </span>
+              <span class="theme-white-show hide" style="display: none;">
+                <svg class="icon-svg " style="width:159px;height:59px;background-image:url('https://img.shiwaiyun.com/images/2022/08/09/e109bff1b4d8c4db2bced71c3750bb2d.png');background-size: 100%" aria-hidden="true"></svg>
+              </span>
+            </a>
+            <ul class="menu-ul fl clearfix" id="topMenu">
+              <li class="menu-item"><a href="/">首页</a></li>
+              <li class="menu-item">
+                <a href="javascript:;" data-name="/product">产品中心</a>
+                <div class="menu-detail product-menu-detail">
+                  <div>
+                    <div layout-align="start start" class="menu-detail-item">
+                      <p class="title font-size-18 font-weight-bold">
+                        SF综合验证授权系统①
+                      </p>
+                      <ul layout-wrap="wrap" layout-align="start start">
+                        <li><a href="#">SF授权系统（月付版）</a></li>
+                        <li><a href="#">SF授权系统（年付版）</a></li>
+                        <li><a href="#">SF授权系统（开源版）</a></li>
+                        <li><a class="not-open not-open-only">SF授权系统（定制版）
+                            <span>
+                              <svg class="icon-svg font-size-68" aria-hidden="true">
+                                <use xlink:href="#iconapayun_biaoqian_jijiangshangxian2"></use>
+                              </svg>
+                            </span>
+                          </a>
+                        </li>
+                        <li><a class="not-open not-open-only">SF授权系统（定制版）
+                            <span>
+                              <svg class="icon-svg font-size-68" aria-hidden="true">
+                                <use xlink:href="#iconapayun_biaoqian_jijiangshangxian2"></use>
+                              </svg>
+                            </span>
+                          </a>
+                        </li>
+                        <li><a class="not-open not-open-only">SF授权系统（定制版）
+                            <span>
+                              <svg class="icon-svg font-size-68" aria-hidden="true">
+                                <use xlink:href="#iconapayun_biaoqian_jijiangshangxian2"></use>
+                              </svg>
+                            </span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                    <div layout-align="start start" class="menu-detail-item">
+                      <p class="title font-size-18 font-weight-bold">
+                        SF综合验证授权系统②
+                      </p>
+                      <ul layout-wrap="wrap" layout-align="start start">
+                        <li><a href="#">SF授权系统（月付版）</a></li>
+                        <li><a href="#">SF授权系统（年付版）</a></li>
+                        <li><a href="#">SF授权系统（开源版）</a></li>
+                      </ul>
+                    </div>
+                    <div layout-align="start start" class="menu-detail-item clearfix">
+                      <p class="title font-size-18 font-weight-bold">
+                        SF综合验证授权系统③
+                      </p>
+                      <ul layout-wrap="wrap" layout-align="start start">
+                        <li><a href="#">SF授权系统（月付版）</a></li>
+                        <li><a href="#">SF授权系统（年付版）</a></li>
+                        <li><a href="#">SF授权系统（开源版）</a></li>
+                      </ul>
+                    </div>
+                    <div layout-align="start start" class="menu-detail-item">
+                      <p class="title font-size-18 font-weight-bold">
+                        SF综合验证授权系统④
+                      </p>
+                      <ul layout-wrap="wrap" layout-align="start start">
+                        <li><a href="#">SF授权系统（月付版）</a></li>
+                        <li><a href="#">SF授权系统（年付版）</a></li>
+                        <li><a href="#">SF授权系统（开源版）</a></li>
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
+              </li>
+              <li class="menu-item">
+                <a href="#">服务中心</a>
+              </li>
+              <li class="menu-item">
+                <a href="#">代理查询</a>
+              </li>
+              <li class="menu-item">
+                <a href="#">授权查询</a>
+              </li>
+              <li class="menu-item">
+                <a href="#">开发文档</a>
+              </li>
+              <li class="menu-item">
+                <a href="#">关于我们</a>
+              </li>
+            </ul>
+            <div class="menu-right m-t-30 pos-rel">
+              <a href="/login/" class="login-btn a-head-btn bdr-5 bg-color-white" style="border: solid 1px #fff;color: #fff;">登录账号</a>
+              <a href="/register/" class="registered-btn a-head-btn bdr-5 bg-color-0055ff" style="color: #05f;border: solid 1px #fff;background-color: #fff;">立即注册</a> 
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- topMenu菜单 end-->
+
+        <!-- banner内容 -->
+        <div class="check-banner-content auto-width">
+            <div class="content sm-p-lr-15">
+                <form id="checkForm">
+                    <div class="tac color-white">
+                        <div layout-align="center center" class="pro-auth-icon">
+                            <div class="pro-auth-border-icon">
+                                <svg class="icon-svg color-white" style="font-size:57px;" aria-hidden="true">
+                                    <use xlink:href="#iconapayun_shouquanchaxunyeicon_zhengshu"></use>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="font-size-32 apy-auth-title">
+                            SF官方授权查询系统
+                        </h3>
+                    </div>
+                    <div class="doc-search pos-rel">
+                        <input type="text" placeholder="请输入您查询的域名" class="check-input" id="keyword" name="keyword">
+                        <button type="button" class="check-btn" id="check-btn">点击查询</button>
+                    </div>
+                    <div class="result-wrap">
+                        <div class="tip">
+                            <div layout-align="center center" class="result-tip-icon bdr-5">
+                                <svg class="icon-svg color-white" style="font-size:70px;" aria-hidden="true">
+                                    <use xlink:href="#iconapayun_shouquanchaxunyeicon_weizhi"></use>
+                                </svg>
+                            </div>
+                            <p>
+                                请在上方输入框输入您所查询的域名，点击查询，查询结果将在此显示
+                            </p>
+                        </div>
+                        <div class="check-result check-correct">
+                            <p class="m-result-wrap">
+                            </p>
+                            <div layout-align="center center" class="genuine-auth-icon auth-icon-common">
+                                <svg class="icon-svg color-white" style="font-size:61px;" aria-hidden="true">
+                                    <use xlink:href="#iconapayun_shouquanchaxunyeicon_zhengshu"></use>
+                                </svg>
+                                <div class="genuine-img hide">
+                                    <svg class="icon-svg color-white auth-sub-icon" style="font-size:70px;"
+                                        aria-hidden="true">
+                                        <use xlink:href="#iconapayun_biaoqian_zhengbanshouquan"></use>
+                                    </svg>
+                                </div>
+                                <div class="agent-font hide">
+                                    <svg class="icon-svg color-white auth-sub-icon" style="font-size:70px;"
+                                        aria-hidden="true">
+                                        <use xlink:href="#iconapayun_biaoqian_dailishouquan"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p>您查询的IP/域名<span class="color-primary">（<span class="check-url"></span>）为SF官方<span
+                                        class="system-versoin"></span>授权，享受所有<span
+                                        class="system-versoin"></span>权益。</span></p> 
+                            <p></p>
+                        </div>
+                        <div class="check-result check-error">
+                            <div layout-align="center center" class="no-auth-icon auth-icon-common">
+                                <div class="no-auth-border-icon">
+                                    <svg class="icon-svg color-white" style="font-size:61px;" aria-hidden="true">
+                                        <use xlink:href="#iconapayun_shouquanchaxunyeicon_zhengshu"></use>
+                                    </svg>
+
+                                    <svg class="icon-svg color-white auth-sub-icon" style="font-size:70px;"
+                                        aria-hidden="true">
+                                        <use xlink:href="#iconapayun_biaoqian_weishouquan"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p>
+                                请注意！您查询的域名<span class="color-main-ff2a00">（<span
+                                        class="check-url"></span>）未经SF官方授权。</span>
+                            </p>
+                        </div>
+                        <div class="check-result check-expired hide">
+                            <div layout-align="center center" class="no-auth-icon auth-icon-common">
+                                <div class="no-auth-border-icon">
+                                    <svg class="icon-svg color-white" style="font-size:61px;" aria-hidden="true">
+                                        <use xlink:href="#iconapayun_shouquanchaxunyeicon_zhengshu"></use>
+                                    </svg>
+                                    <svg class="icon-svg color-white auth-sub-icon" style="font-size:70px;"
+                                        aria-hidden="true">
+                                        <use xlink:href="#iconapayun_biaoqian_shouquanyiguoqi"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p>
+                                请注意！您查询的IP/域名<span class="color-main-ff2a00">（<span
+                                        class="check-url"></span>）已过期。</span>
+                            </p>
+                        </div>
+                    </div>
+                    <p class="tip2 color-main-ff6040">正版版权享受官方金牌售后、免费升级服务，支持商业化使用。如果发现盗版，请及时联系SF官方，举报有奖，盗版必究。</p>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--banner菜单 end-->
+
+    <div style="position: absolute;left: -1000px;">
+        <div id="resultGenuineWrapper" class="result-genuine-wrapper">
+            <img class="hide result-en-image" src="./check/genuine_en.jpg" alt="">
+            <img class="hide result-genuine-image" src="./check/genuine_v1.jpg" alt="">
+            <img class="hide result-agent-image" src="./check/agent_v1.jpg" alt="">
+            <h2 class="result-genuine-title"></h2>
+            <h2 class="sub-genuine-title"></h2>
+            <ul class="result-genuine-list">
+            </ul>
+        </div>
+    </div>
+    <div class="m-slider-verify-wrap">
+        <div id="m-slider-verify" class="slider-verify"></div>
+    </div>
+    <!--开始体验start start-->
+    <div class="start-box">
+        <div class="auto-width join-apy-wrap sm-p-lr-15">
+          <ul layout-align="space-between start">
+            <li layout-align="start start">
+              <svg class="icon-svg icon-hook sm-hidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <svg class="icon-svg icon-hook sm-nohidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <div>
+                <h3 class="font-weight-bold font-size-24">18+</h3>
+                <p class="color-main-596680">18年以上软件开发经验</p>
+              </div>
+            </li>
+            <li layout-align="start start">
+              <svg class="icon-svg icon-hook sm-hidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <svg class="icon-svg icon-hook sm-nohidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <div>
+                <h3 class="font-weight-bold font-size-24">1000+</h3>
+                <p class="color-main-596680">上千家企业共同的选择</p>
+              </div>
+            </li>
+            <li layout-align="start start">
+              <svg class="icon-svg icon-hook sm-hidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <svg class="icon-svg icon-hook sm-nohidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <div>
+                <h3 class="font-weight-bold font-size-24">30+</h3>
+                <p class="color-main-596680">30余项软件著作权专利</p>
+              </div>
+            </li>
+            <li layout-align="start start">
+              <svg class="icon-svg icon-hook sm-hidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <svg class="icon-svg icon-hook sm-nohidden" aria-hidden="true">
+                <use xlink:href="#iconapayun_dibuicon_youshi"></use>
+              </svg>
+
+              <div>
+                <h3 class="font-weight-bold font-size-24">5+</h3>
+                <p class="color-main-596680">核心开发人员5年以上行业经验</p>
+              </div>
+            </li>
+          </ul>
+          <div class="text-content" layout-align="space-between center">
+            <div class="bdr-5 font-size-18 font-weight-bold">
+              <span class="sm-hidden">
+                海量应用，个性化定制服务，SF团队与您携手共赢。
+              </span>
+              <span class="sm-nohidden">
+                海量应用，个性化定制服务，SF团队与您携手共赢。
+              </span>
+            </div>
+            <a href="#" class="start-btn">
+              联系我们
+              <svg class="icon-svg color-white m-l-20" aria-hidden="true">
+                <use xlink:href="#iconapayun_tongyongicon_jiantou"></use>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    <!--开始体验start end-->
+    <div id="tool-bar" class="tool-bar">
+        <div class="tool-bar-warp">
+          <div style="cursor: initial;" class="tool-bar-common tool-bar-contact" data-type="zk_icon_tb-service"
+            id="serviceBtnWrap">
+            <a class="cursign" id="serviceBtn">
+              <svg class="icon-svg color-white font-size-26 vam m-b-10" aria-hidden="true">
+                <use xlink:href="#iconapayun_youcexuanfuicon_lianxiwomen"></use>
+              </svg>
+              <p style="width: 30px;" class="m-auto font-size-16 sm-hidden">
+                联系我们
+              </p>
+            </a>
+            <div class="common-dialog-wrap contact-wrap">
+              <div style="border-top: none;" class="phone-wrap">
+                <p class="contact-title">客服QQ</p>
+                <p class="phone-num color-main-0055ff">2840472728</p>
+              </div>
+              <div class="QRCode-wrap sm-hidden">
+                <div layout-align="space-between center">
+                  <div>
+                    <p style="margin-bottom:20px;" class="tal contact-title">扫码关注</p>
+                    <p class="text">微信公众号</p>
+                  </div>
+                  <img width="80" height="80" src="./static/611dd761517f8.jpg" alt="">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tool-bar-common tool-bar-gotop" style="display: none;" id="toTopBtn" data-type="zk_icon_tb-toTop">
+            <svg class="icon-svg color-white font-size-26 vam0" aria-hidden="true">
+              <use xlink:href="#iconapayun_tongyongicon_shang"></use>
+            </svg>
+    
+          </div>
+        </div>
+      </div>
+    <div class="footer">
+        <input type="hidden" value="#" name="" id="appUserSiteUrl">
+        <div class="top">
+          <div class="auto-width">
+            <div class="web-link">
+              <ul>
+                <li>
+                  <svg class="icon-svg footer-icon-hot vam" aria-hidden="true">
+                    <use xlink:href="#iconapayun_dibuicon_remenchanpin"></use>
+                  </svg>
+                  XXXX
+                </li>
+                <li><a href="#">XXXXXXXXX</a></li>
+                <li><a href="#">XXXXXXXXXXXX</a></li>
+                <li><a href="#">XXXXXXXXXXXX</a></li>
+              </ul>
+              <ul>
+                <li>
+                  <svg class="icon-svg footer-icon-hot vam" aria-hidden="true">
+                    <use xlink:href="#iconapayun_dibuicon_zhichiyufuwu"></use>
+                  </svg>
+                  支持与服务
+                </li>
+                <li><a href="#">文档中心</a></li>
+                <li><a href="#" target="_blank">系统手册</a></li>
+                <li><a href="#">系统运维</a></li>
+                <li><a href="#">更多服务</a></li>
+              </ul>
+              <ul>
+                <li>
+                  <svg class="icon-svg footer-icon-hot vam" aria-hidden="true">
+                    <use xlink:href="#iconapayun_dibuicon_guanzhuapayun"></use>
+                  </svg>
+                  关与SF团队
+                </li>
+                <li><a href="#">关于我们</a></li>
+                <li><a href="#">联系我们</a></li>
+                <li><a href="#">发展历程</a></li>
+                <li><a href="#">软件资质</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="bottom footer-links-wrapper sm-hidden">
+          <div class="auto-width">
+            <span class="footer-links-title color-main-a1a7b3">友情链接：</span>
+            &nbsp;&nbsp;<a target="_blank" href="https://www.shiwaiyun.com/">世外云计算</a>
+          </div>
+        </div>
+        <div class="bottom">
+          <div class="auto-width">
+            <div class="tac sm-nohidden">
+              <img width="150" height="150" src="./static/611dd761517f8.jpg" alt="">
+              <p class="color-main-8f9bb2 font-size-12 m-t-20 m-b-20 m-l-10 m-r-10">
+                长按保存图片，在微信中扫描该二维码关注SF团队官方公众号，获取一手资讯。
+              </p>
+            </div>
+            <span>Copyright © 2020-2022 shiwaiyun.com All Rights Reserved. SF综合验证授权系统系统 版权归属保定宏霆网络科技有限公司所有 </span>
+            <span class="fr"><a href="https://beian.miit.gov.cn/" target="_blank">冀ICP备2021017634号-3</a></span>
+          </div>
+        </div>
+      </div>
+    <script src="./check/common.min.js"></script>
+</body>
+</html>

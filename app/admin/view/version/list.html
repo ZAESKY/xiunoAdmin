@@ -1,0 +1,586 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<style>
+    .mask{position:fixed;width:100%;height:100%;top:0;left:0;background:#000;opacity:0.8;filter:alpha(Opacity=80);-moz-opacity:0.8;z-index:999;display:none;}
+    .loading{position:fixed;width:300px;left:50%;margin-left:-150px;top:200px;height:18px;border-radius:10px;background:#fff;z-index:9999;overflow:hidden;display:none;}
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或版本或版本号"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状&emsp;态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">选择状态</option>
+                                <option value="1">显示</option>
+                                <option value="0">隐藏</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">应&emsp;用</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-input ew-select-fixed" lay-filter="app" lay-search>
+                                <option value="">全部应用</option>
+                                {volist name="app_list.data.data" id="res"}
+                                <option value="{$res.id}">{$res.name}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-normal layui-btn-sm" lay-event="upload"><i class="layui-icon layui-icon-upload"></i>上传</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="SF_TbState">
+    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="正常|封禁" {{d.status==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbType">
+    <input type="checkbox" lay-filter="SF_TbTypeCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="更新包|安装包" {{d.type==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbBeta">
+    <input type="checkbox" lay-filter="SF_TbBetaCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="内测版|正式版" {{d.beta==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbUpload">
+    <div class="layui-card">
+        <div class="layui-card-body layui-form-pane">
+            <form class="layui-form" method="post" action="">
+                <input type="hidden" name="form_submit" value="ok" />
+                <blockquote class="layui-elem-quote-sf-info">
+                    请上传zip的压缩包，上传之后文件名默认改为SF
+                </blockquote>
+                <div class="layui-form-item text-center">
+                    <input type="hidden" id="totalPage" value="0"/>
+                    <input type="hidden" id="page" value="1"/>
+                    <input type="hidden" id="status" value="0"/>
+                    <div class="layui-upload-drag" id="fileUpload">
+                        <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
+                        <p>点击上传，或将文件拖拽到此处</p>
+                        <div class="layui-hide" id="uploadDemoView">
+                            <hr>
+                            <div class="layui-form-item">
+                                <img src="" alt="上传成功后渲染" id="demo1" style="max-width: 196px">
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">文件名</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="name" id="name" value="" lay-verify="title" autocomplete="off" readonly="true" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item text-center">
+                    <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>删除</button>
+                </div>
+                <div class="mask"></div>
+                <div class="loading">
+                    <div class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="uploadProgress">
+                        <div class="layui-progress-bar" lay-percent="0%"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="SF_Tbid">
+    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+</script>
+<!-- 表单弹窗 -->
+<script type="text/html" id="SF_EditDialog">
+    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">所属应用:</label>
+            <div class="layui-input-block">
+                <select name="appid" class="layui-input ew-select-fixed" lay-filter="appid" lay-search>
+                    <option value="">请选择所属的应用</option>
+                    {volist name="app_list.data.data" id="res"}
+                    <option value="{$res.id}">{$res.name}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div id="form_data" style="display: none">
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">版本:</label>
+                <div class="layui-input-block">
+                    <input type="text" name="edition" placeholder="请输入版本，如：1.0" class="layui-input"
+                           lay-verType="tips" lay-verify="required"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">版本号:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="version" placeholder="请输入版本号，如：1000" class="layui-input"
+                           lay-verType="tips" lay-verify="required"/>
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">更新内容:</label>
+                <div class="layui-input-block">
+                    <textarea name="update_log" class="layui-textarea" style="height:100px" placeholder="请输入更新内容"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">类型:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="type" value="1" lay-text="更新包|安装包" lay-skin="switch"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">内测:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="beta" value="1" lay-skin="switch"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">状态:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'element'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var upload = layui.upload;
+        var element = layui.element;
+
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '{:url("/Version/list")}',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.data.total, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
+                    }},
+                {field: 'edition', title: '版本', sort: true, minWidth: 120},
+                {field: 'version', title: '版本号', sort: true, minWidth: 120},
+                {field: 'update_log', title: '更新内容', minWidth: 100, templet: function (d) {
+                        return '<a class="layui-btn layui-btn-xs" lay-event="seeUpdateLog">点击查看</a>';
+                    }
+                },
+                {field: 'number', title: '下载次数', sort: true, minWidth: 100, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-green">'+d.number+'</span>';
+                    }
+                },
+                {field: 'download_catalogue', title: '目录', minWidth: 180},
+                {field: 'type', title: '类型', templet: '#SF_TbType', sort: true, minWidth: 100},
+                {field: 'beta', title: '内测版', templet: '#SF_TbBeta', sort: true, minWidth: 100},
+                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
+                {field: 'addtime', title: '添加时间', sort: true, minWidth: 180},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 260}
+            ]]
+        });
+        form.on('select(appid)', function (data) {
+            if (data.value == "") {
+                $("#form_data").css("display", "none");
+            }else{
+                $("#form_data").css("display","inherit");
+            }
+        });
+
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        form.on('select(app)', function (data) {
+            if(data.value == ''){
+                insTb.reload({where: {appid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true}, {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+            }else{
+                insTb.reload({where: {appid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+            }
+            return false;
+        });
+        {if $appid != ''}
+        insTb.reload({where: {appid:{$appid}}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+        {/if}
+        /* 表格工具条点击事件 */
+        table.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            } else if (obj.event === 'seeUpdateLog') {
+                admin.open({
+                    title: '查看 '+obj.data.edition+' 更新记录',
+                    type: 1,
+                    content: '<div class="layui-card"><div class="layui-card-body layui-form-pane"><div class="layui-form-item layui-form-text"><label class="layui-form-label">更新记录</label><div class="layui-input-block"><textarea class="layui-textarea layui-disabled" style="height:100px" disabled>'+obj.data.update_log+'</textarea></div></div></div></div>'
+                });
+            } else if (obj.event === 'upload') {
+                $.ajax({
+                    type: "POST",
+                    url: '{:url("/Version/checkFile")}',
+                    data: {id:obj.data.id},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        admin.open({
+                            title: '上传'+(obj.data.type==0?'安装包':'更新包'),
+                            type: 1,
+                            content: $('#SF_TbUpload').html(),
+                        });
+                        if (data.code == 0) {
+                            $('#name').val('SF.zip');
+                            layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', '{__MODULE__}fileChoose/img/zip.png');
+                        } else {
+                            layui.$('#uploadDemoView').addClass('layui-hide');
+                        }
+                        upload.render({
+                            elem: '#fileUpload',
+                            url: '{:url("/Upload/app")}', //处理上传文件接口
+                            accept: 'file',
+                            auto: false,
+                            acceptMime: '*.*',//允许上传的文件类型
+                            data: {id:obj.data.id},
+                            choose: function (obj) {
+                                element.progress('uploadProgress', '0%');
+                                $('.mask').show();
+                                $('.loading').show();
+                                var data = this.data;
+                                var files = obj.pushFile();
+                                var LENGTH = 500 * 1024; //每片文件大小
+                                obj.preview(function (index, file, result) {
+                                    var totalSize = file.size;
+                                    var totalPage = Math.ceil(totalSize / LENGTH);
+                                    $('#totalPage').val(totalPage);
+                                    $('#page').val('1');
+                                    $('#status').val('1');
+                                    var fileName = file.name;
+                                    $('#name').val(fileName);
+                                    var fileExt = fileName.substr(fileName.lastIndexOf('.') + 1);
+                                    fileName = fileName.substr(0, fileName.lastIndexOf('.'));
+                                    var progressTimer = setInterval(function () {
+                                        var totalPage = parseInt($('#totalPage').val());
+                                        var page = parseInt($('#page').val());
+                                        var status = $('#status').val();
+                                        if (parseInt(totalPage) == parseInt(page) && (parseInt(status) == 2 || parseInt(status) == -1)) {
+                                            clearInterval(progressTimer);
+                                        } else {
+                                            if (status == 1) {
+                                                $('#status').val('0');
+                                                data.fileName = fileName;
+                                                data.page = page;
+                                                data.totalPage = totalPage;
+                                                data.fileExt = fileExt;
+                                                obj.upload(index, file.slice((page - 1) * LENGTH, page * LENGTH));
+                                            }
+                                        }
+                                    }, 100);
+                                });
+                            },
+                            done: function (res) {
+                                if(res.code == 0) {
+                                    if (res.data.status == 1) { //分片上传
+                                        var page = parseInt($('#page').val());
+                                        var totalPage = parseInt($('#totalPage').val());
+                                        element.progress('uploadProgress', Math.ceil(page * 100 / totalPage) + '%');
+                                        page = page + 1;
+                                        console.log(page);
+                                        $('#page').val(page);
+                                        $('#status').val('1');
+                                    } else if (res.data.status == 2) { //上传完成
+                                        element.progress('uploadProgress', '100%');
+                                        $('#status').val('2');
+                                        $('#downUrl').val(res.data.downUrl);
+                                        layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', '{__MODULE__}fileChoose/img/zip.png');
+                                        notice.msg('上传成功', {icon: 1,audio: '1',onOpening: function () {
+                                                $('.mask').hide();
+                                                $('.loading').hide();}
+                                        });
+                                    } else { //上传错误
+                                        $('#status').val('-1');
+                                        element.progress('uploadProgress', '0%');
+                                        console.log(!typeof (res.data.downUrl) == "undefined");
+                                        if (typeof (res.data.downUrl) == "undefined") {
+                                        } else {
+                                            $('#downUrl').val(res.data.downUrl);
+                                        }
+                                        notice.msg(res.msg, {icon: 2,audio: '1',onOpening: function () {
+                                                $('.mask').hide();
+                                                $('.loading').hide();}
+                                        });
+                                    }
+                                }else{
+                                    $('#status').val('-1');
+                                    element.progress('uploadProgress', '0%');
+                                    console.log(!typeof (res.data.downUrl) == "undefined");
+                                    if (typeof (res.data.downUrl) == "undefined") {
+                                    } else {
+                                        $('#downUrl').val(res.data.downUrl);
+                                    }
+                                    notice.msg(res.msg, {icon: 2,audio: '1',onOpening: function () {
+                                            $('.mask').hide();
+                                            $('.loading').hide();}
+                                    });
+                                }
+                            },
+                            error: function(){
+                                notice.msg('服务器错误', {icon: 2,audio: '1',onOpening: function () {
+                                        $('.mask').hide();
+                                        $('.loading').hide();}
+                                });
+                            }
+                        });
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+                form.on('submit(SF_DeleteFile)', function () {
+                    notice.msg('正在执行中...', {icon: 4, close: true});
+                    $.ajax({
+                        type: "POST",
+                        url: '{:url("/Version/deleteFile")}',
+                        data: {id:obj.data.id},
+                        dataType: "json",
+                        success: function(data) {
+                            notice.destroy();
+                            if (data.code == 0) {
+                                notice.msg(data.msg, {icon: 1, audio:'1'});
+                                layui.$('#uploadDemoView').addClass('layui-hide');
+                            } else {
+                                notice.msg(data.msg, {icon: 2, audio:'1'});
+                            }
+                        },
+                        error: function() {
+                            notice.destroy();
+                            notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        }
+                    });
+                });
+            }
+        });
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('SF_Table');
+                if (checkRows.data.length === 0) {
+                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                console.log(ids)
+                doDel({ids: ids});
+            }
+        });
+
+        /* 显示表单弹窗 */
+        function showEditModel(mData) {
+            admin.popupRight({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '版本',
+                content: $('#SF_EditDialog').html(),
+                success: function (layero, dIndex) {
+                    // 回显表单数据
+                    if(mData){
+                        $("#form_data").css("display", "inherit");
+                        form.val('SF_EditForm', mData);
+                    }else{
+                        $("#form_data").css("display","none");
+                    }
+                    form.render();
+                    // 表单提交事件
+                    form.on('submit(SF_EditSubmit)', function (data) {
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Version/edit")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    table.reload('SF_Table');
+                                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                        return false;
+                    });
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '{:url("/Version/drop")}' : '{:url("/Version/batchDrop")}',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            table.reload('SF_Table');
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        /* 修改用户状态 */
+        form.on('switch(SF_TbStateCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/Version/setStatus")}',
+                data: {id:obj.value,status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        table.reload('SF_Table');
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+        form.on('switch(SF_TbBetaCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/Version/setBeta")}',
+                data: {id:obj.value,beta:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        table.reload('SF_Table');
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+        form.on('switch(SF_TbTypeCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/Version/setType")}',
+                data: {id:obj.value,type:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        table.reload('SF_Table');
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+    });
+</script>

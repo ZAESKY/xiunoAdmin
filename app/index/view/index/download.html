@@ -1,0 +1,239 @@
+{include file="/public/header"}
+{include file="/public/footer"}
+<div class="layui-fluid" xmlns="http://www.w3.org/1999/html">
+    <div class="layui-card" id="divLoading">
+        <div class="layui-card-body">
+        {switch name="download"}
+            {case value="1"}
+            <form class="layui-form formBasForm" lay-filter="formBasForm">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">授权内容</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="auth_info" class="layui-input" placeholder="请输入授权内容"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">授权QQ</label>
+                    <div class="layui-input-block">
+                        <input type="number" name="qq" class="layui-input" placeholder="请输入授权持有者QQ"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证码</label>
+                    <div class="layui-input-block" style="padding-right: 135px;">
+                        <input type="text" name="code" class="layui-input" placeholder="请输入验证码"/>
+                        <button id="SF_CodeBtn" type="button" lay-filter="SF_GetCode" class="layui-btn" style="width: 120px;cursor: pointer;position: absolute;right: 0;top: 0;"  lay-submit/>
+                        获取验证码
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-form-item text-right">
+                    <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>获取</button>
+                    <button type="button" class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+                </div>
+            </form>
+            <script>
+                layui.use(['layer', 'form', 'admin', 'notice'], function () {
+                    var $ = layui.jquery;
+                    var layer = layui.layer;
+                    var form = layui.form;
+                    var admin = layui.admin;
+                    var notice = layui.notice;
+
+                    form.on('submit(SF_GetCode)', function (data) {
+                        admin.btnLoading('#SF_CodeBtn');
+                        admin.showLoading('#divLoading', 3, '.8');
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Ajax/")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    if(data.data.status == 1){
+                                        notice.warning({
+                                            title: '查询通知',
+                                            message: data.msg,
+                                            animateInside:true,
+                                            position:'topCenter',
+                                            transitionOut:'flipOutX',
+                                            transitionOutMobile: 'flipOutX',
+                                            displayMode:'2',
+                                            audio:'1'
+                                        });
+                                    }else{
+                                        notice.success({
+                                            title: '查询通知',
+                                            message: data.msg,
+                                            animateInside:true,
+                                            position:'topCenter',
+                                            transitionOut:'flipOutX',
+                                            transitionOutMobile: 'flipOutX',
+                                            displayMode:'2',
+                                            audio:'1'
+                                        });
+                                    }
+                                } else {
+                                    notice.error({
+                                        title: '查询通知',
+                                        message: data.msg,
+                                        animateInside:true,
+                                        position:'topCenter',
+                                        transitionOut:'flipOutX',
+                                        transitionOutMobile: 'flipOutX',
+                                        displayMode:'2',
+                                        audio:'1'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.error({
+                                    title: '查询通知',
+                                    message: '服务器错误',
+                                    animateInside:true,
+                                    position:'topCenter',
+                                    transitionOut:'flipOutX',
+                                    transitionOutMobile: 'flipOutX',
+                                    displayMode:'2',
+                                    audio:'1'
+                                });
+                            }
+                        });
+                        return false;
+                    });
+                    form.on('submit(SF_ReplaceAuth)', function (info) {
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Ajax/checkReplaceAuth")}',
+                            data: info.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    if(data.data.status == 1){
+                                        notice.warning({
+                                            title: '更换通知',
+                                            message: data.msg,
+                                            animateInside:true,
+                                            position:'topCenter',
+                                            transitionOut:'flipOutX',
+                                            transitionOutMobile: 'flipOutX',
+                                            displayMode:'2',
+                                            audio:'1'
+                                        });
+                                    }else{
+                                        info.field.type = 'replaceAuth';
+                                        admin.open({
+                                            type: 2,
+                                            title: '扫码更换',
+                                            content: '/qrlogin/qrlogin.html',
+                                            area: ['400px', '300px'],
+                                            data: info.field
+                                        });
+                                    }
+                                } else {
+                                    notice.error({
+                                        title: '更换通知',
+                                        message: data.msg,
+                                        animateInside:true,
+                                        position:'topCenter',
+                                        transitionOut:'flipOutX',
+                                        transitionOutMobile: 'flipOutX',
+                                        displayMode:'2',
+                                        audio:'1'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.error({
+                                    title: '更换通知',
+                                    message: '服务器错误',
+                                    animateInside:true,
+                                    position:'topCenter',
+                                    transitionOut:'flipOutX',
+                                    transitionOutMobile: 'flipOutX',
+                                    displayMode:'2',
+                                    audio:'1'
+                                });
+                            }
+                        });
+                        return false;
+                    });
+                    form.on('submit(SF_ReplacePay)', function (data) {
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Ajax/replacePay")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    if(data.data.status == 1){
+                                        notice.warning({
+                                            title: '更换通知',
+                                            message: data.msg,
+                                            animateInside:true,
+                                            position:'topCenter',
+                                            transitionOut:'flipOutX',
+                                            transitionOutMobile: 'flipOutX',
+                                            displayMode:'2',
+                                            audio:'1'
+                                        });
+                                    }else{
+                                        admin.open({
+                                            type: 2,
+                                            title: '扫码更换',
+                                            content: '/qrlogin/qrlogin.html',
+                                            area: ['400px', '300px'],
+                                            data: info.field
+                                        });
+                                    }
+                                } else {
+                                    notice.error({
+                                        title: '更换通知',
+                                        message: data.msg,
+                                        animateInside:true,
+                                        position:'topCenter',
+                                        transitionOut:'flipOutX',
+                                        transitionOutMobile: 'flipOutX',
+                                        displayMode:'2',
+                                        audio:'1'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.error({
+                                    title: '更换通知',
+                                    message: '服务器错误',
+                                    animateInside:true,
+                                    position:'topCenter',
+                                    transitionOut:'flipOutX',
+                                    transitionOutMobile: 'flipOutX',
+                                    displayMode:'2',
+                                    audio:'1'
+                                });
+                            }
+                        });
+                        return false;
+                    });
+                });
+            </script>
+            {/case}
+            {case value="2"}
+
+            {/case}
+            {case value="3"}
+
+            {/case}
+            {default /}站点未开启下载源码
+        {/switch}
+        </div>
+    </div>
+</div>
+

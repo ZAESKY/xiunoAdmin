@@ -1,0 +1,239 @@
+{include file="/public/header"}
+<style>
+    .information {
+        font-size: 0.9em;
+        color: black
+    }
+</style>
+<body style="background:#f5f5f5;;overflow-x: hidden;padding: 1em;font-family: '微软雅黑 Light'">
+    <div class="layui-container" style="padding: 0;margin-top: 1em;">
+        <div class="layui-row layui-col-space8">
+            <div class="layui-col-sm12" style="padding: 0em;">
+                <div class="layui-card" style="border-radius: 0.5em">
+                    <div class="layui-card-header">
+                        <a title="关闭当前窗口" onclick="custom_close();">
+                            <p style="margin-top: 0.5em;font-size: 1.2em">
+                                <span class="layui-icon layui-icon-close"></span>
+                                关闭当前窗口
+                            </p>
+                        </a>
+                    </div>
+                    <div class="layui-row layui-col-space8">
+                        <div class="layui-col-xs2">
+                            <div style="border-radius: 0.5em;width: 3em;text-align: center;height: 3em;line-height: 3em;color:white;margin: 0.8em;box-shadow: 3px 3px 16px #eee">
+                                {if !$userInfo}
+                                <img src="{__IMG__}pays.png" alt="SF授权系统" width="35">
+                                {else}
+                                <img src="{$userInfo['img']}" alt="SF授权系统" width="35">
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="layui-col-xs10">
+                            <div class="layui-card-header" style="font-size: 1.1em;font-family: '微软雅黑 Light'">
+                                下单信息
+                            </div>
+                            <div class="layui-card-body information">
+                                {switch name="$row['type']" }
+                                    {case value="recharge"}
+                                        <div>充值金额：{$row['money']} 元</div>
+                                    {/case}
+                                    {default /}<div>充值金额：{$row['money']} 元</div>
+                                {/switch}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-sm6" style="margin-top: 0.5em;">
+                <div class="layui-card" style="border-radius: 0.5em">
+                    <div class="layui-card-header">
+                        <img src="{__IMG__}logo.png" style="height:23px; "/> {$title}
+                        <span style="float: right;">
+                            <span class="layui-badge" style="background-color: lightsalmon">自动发货</span>
+                        </span>
+                    </div>
+                    <div class="layui-row layui-col-space8">
+                        <div class="layui-col-xs2">
+                            <div style="border-radius: 0.5em;text-align: center;height: 3em;line-height: 3em;background-color: #ff6f58;color:white;margin: 0.8em;box-shadow: 3px 3px 16px #eee">
+                                <img src="{$userInfo['img']}" style="width: 100%;border-radius: 0.5em"/>
+                            </div>
+                        </div>
+                        <div class="layui-col-xs10">
+                            <div class="layui-card-header" style="font-size: 1.1em;line-height: 3.4em;height:auto;">{$row['name']}</div>
+                                <div class="layui-card-body information layui-text" style="line-height: 2em">
+                                    <p>
+                                        <span onclick="layer.msg('份数×数量=购买数量')">购买数量</span>
+                                        <span style="float: right;">1个</span>
+                                    </p>
+                                    <p>
+                                        用户权限
+                                        <span style="float: right;">
+                                            <a id="level"> {$userInfo['power_name']}</a>
+                                        </span>
+                                    </p>
+                                    <p>
+                                        商品售价
+                                        <span style="float: right;">
+                                           {$row['money']} 元
+                                        </span>
+                                    </p>
+                                    <p>
+                                        积分抵扣
+                                        <span style="float: right;">
+                                            暂不支持
+                                        </span>
+                                    </p>
+                                    <p>
+                                        积分兑换
+                                        <span style="float: right;">
+                                            暂不支持
+                                        </span>
+                                    </p>
+                                    <p style="float: right;margin-top: 0.8em;font-size: 1.05em">
+                                        共 {$row['num']} 份 小计：{$row['money'] * $row['num']} 元
+                                        <div style="color:#ff4500;font-size: 1.1em">
+                                            ￥ {$row['money'] * $row['num']}
+                                        </div>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm6" style="margin-top: 0.5em;">
+                    <div class="layui-card" style="border-radius: 0.5em">
+                        <div class="layui-card-body layui-form layui-form-pane" style="padding: 0.5em">
+                            <input type="hidden" name="orderid" value="{$row['trade_no']}" />
+                            <input type="hidden" name="type" value="" />
+                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
+                                <input type="radio" name="pay" value="1" title="<p style='width:100%'><img src='{__IMG__}alipay.png' width='13px' /> 支付宝</p>">
+                            </div>
+                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
+                                <input type="radio" name="pay"  value="2" title="<p style='width:100%'><img src='{__IMG__}wxpay.png' width='13px' /> 微信</p>">
+                            </div>
+                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
+                                <input type="radio" name="pay"  value="3" title="<p style='width:100%'><img src='{__IMG__}qqpay.png' width='13px' /> QQ钱包</p>">
+                            </div>
+                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
+                                {if $row['type'] == 'recharge'}
+                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> 余额 <span style='color:#999;font-size:0.8em;margin-left:1em'>暂不支持</span></p>">
+                                {else}
+                                <input type="radio" name="pay" value="4" title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> 余额 <span style='color:#999;font-size:0.8em;margin-left:1em'>剩 {$userInfo['balance']} 元</span></p>">
+                                {/if}
+                            </div>
+                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em">
+                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}total.png' width='13px' /> 积分 <span style='color:#999;font-size:0.8em;margin-left:1em'>暂不支持</span></p>">
+                            </div>
+                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em">
+                                <input type="radio" name="pay" value="6"
+                                       title="<p style='width:100%'><img src='{__IMG__}payd.png' width='13px' /> 帮我付 (朋友代付)</p>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm12">
+                    <div class="layui-card" style="border-radius: 0.5em">
+                        <div class="layui-card-body" style="padding: 0;height: 4em;line-height: 4em;text-align: right;border-radius: 0.8em">
+                            <button class="layui-btn layui-btn-danger layui-btn-radius" id="btnSubmit" style="float: right;margin:0.5em 1em 0 1em;background: linear-gradient(to right, #f85032, #e73827);margin-right: 0.5em;">
+                                提交订单
+                            </button>
+                            <span style="font-size: 1.2em;float: right;text-indent: 0.5em">
+                                <span style="color: #A6A6A6;font-size: 1em">
+                                    共 {$row['num']} 份，
+                                </span>
+                                <span>
+                                    合计：<span style="color:#ff4500">{$row['num'] * $row['money']} 元</span>
+                                </span>
+
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{include file="/public/footer"}
+<script>var checkstandM = 297;</script>
+<script>
+    layui.use(['form', 'admin', 'notice'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+        window.copyLink = function (){
+            var e = document.getElementById("copy");
+            e.select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+            layer.closeAll();
+            notice.msg('代付订单链接已经帮您复制到剪切板上啦，快去发送给朋友让他帮你付款吧~',{icon:1,audio:'1'});
+        }
+
+        window.custom_close =  function (){
+            layer.confirm('确定要关闭此页面吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                admin.closeThisDialog();
+                window.opener=null;
+                window.open('','_self');
+                window.close();
+            });
+        }
+        window.friend = function (){
+            admin.open({
+                type:1,
+                title: '好友代付',
+                btn:false,
+                closeBtn:1,
+                content: '<div class="layui-card">' +
+                    '<div class="layui-card-body">' +
+                    '代付订单已经创建成功，发给好友帮你付款吧~' +
+                    '<hr>' +
+                    '<textarea id="copy" class="layui-textarea">' +
+                    '我钱不够买这个东西，能够帮我买一下嘛~，这是付款订单,谢谢啦 {:SITE_URL}/pay.php/Index?orderid={$row['trade_no']}' +
+                    '</textarea>' +
+                    '<br>' +
+                    '<button class="layui-btn layui-btn-fluid" onclick="copyLink();">' +
+                    '点击复制' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>'
+            });
+        }
+        $(function(){
+            var orderid = $("input[name='orderid']").val();
+            if(orderid==''){
+                notice.msg('参数不全,请返回重新提交！',{icon:2, audio:'1'});
+                return false;
+            }
+            $("#btnSubmit").click(function(){
+                var pay = $('input:radio[name="pay"]:checked').val();
+                if(pay == null){
+                    notice.msg('请选择支付方式！',{icon:2, audio:'1'});
+                }else if(pay == 1){
+                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    window.location.href="{:url('/Index/submit')}?type=alipay&orderid="+orderid;
+                }else if(pay == 2){
+                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    window.location.href="{:url('/Index/submit')}?type=wxpay&orderid="+orderid;
+                }else if(pay == 3){
+                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    window.location.href="{:url('/Index/submit')}?type=qqpay&orderid="+orderid;
+                }else if(pay == 4){
+                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    window.location.href="{:url('/Index/submit')}?type=alipay&orderid="+orderid;
+                }else if(pay == 5){
+                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    window.location.href=".{:url('/Index/submit')}?type=alipay&orderid="+orderid;
+                }else if(pay == 6){
+                    friend();
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

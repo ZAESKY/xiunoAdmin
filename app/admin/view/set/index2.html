@@ -1,0 +1,1020 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form layui-form-pane" id="formBasForm" lay-filter="formBasForm">
+                <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">站点配置</li>
+                        <li>公告配置</li>
+                        <li>功能配置</li>
+                        <li>模板配置</li>
+                        <li>支付配置</li>
+                        <li>邮箱配置</li>
+                    </ul>
+                    <div class="layui-tab-content" >
+                        <div class="layui-tab-item layui-show">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>站点信息配置</legend>
+                                <div class="layui-field-box">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">网站名称</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="title" class="layui-input" placeholder="该站点的名称" required/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">关键字</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="keywords" class="layui-input" placeholder="该站点的关键词" required/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item layui-form-text">
+                                        <label class="layui-form-label">网站描述</label>
+                                        <div class="layui-input-block">
+                                            <textarea name="description" class="layui-input" placeholder="网站描述，可留空" style="height:120px"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">底部版权</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="foot" class="layui-input" placeholder="底部版权，可留空" />
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">备案号</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="ICP" class="layui-input" placeholder="前台显示，可留空" />
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">客服ＱＱ</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="kfqq" class="layui-input"  lay-required/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">加群链接</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="jiaqunlianjie" class="layui-input"  />
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>站点装饰配置</legend>
+                                <div class="layui-field-box">
+                                    <div class="layui-form-item" pane>
+                                        <label class="layui-form-label">背景图片</label>
+                                        <div class="layui-input-block  inline-block">
+                                            <input  type="radio"  value="0"  name="site_background" lay-filter="site_background" title="关闭" />
+                                            <input  type="radio"  value="10"  name="site_background" lay-filter="site_background" title="自定义壁纸" />
+                                            <input  type="radio"  value="1"  name="site_background" lay-filter="site_background" title="Bing随机壁纸"/>
+                                            <input  type="radio"  value="2"  name="site_background" lay-filter="site_background" title="Bing每日壁纸" />
+                                            <input  type="radio"  value="3"  name="site_background" lay-filter="site_background" title="随机美女壁纸" />
+                                            <input  type="radio"  value="4"  name="site_background" lay-filter="site_background" title="随机二次元壁纸" />
+                                            <input  type="radio"  value="5"  name="site_background" lay-filter="site_background" title="随机汽车壁纸" />
+                                            <input  type="radio"  value="6"  name="site_background" lay-filter="site_background" title="随机动漫壁纸" />
+                                            <input  type="radio"  value="7"  name="site_background" lay-filter="site_background" title="随机背景壁纸" />
+                                            <input  type="radio"  value="8"  name="site_background" lay-filter="site_background" title="随机高清风景壁纸" />
+                                            <input  type="radio"  value="9"  name="site_background" lay-filter="site_background" title="随机mc酱动漫壁纸" />
+                                        </div>
+                                    </div>
+                                    <div id="is_img" style="display:none;">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">自定义背景</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" class="layui-input" name="diy_background" placeholder="填写背景图片URL">
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <div class="layui-upload-drag" id="upload">
+                                                <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
+                                                <p>点击上传，或将文件拖拽到此处</p>
+                                                <div class="layui-hide" id="uploadDemoView">
+                                                    <hr>
+                                                    <img src="" alt="上传成功后渲染" id="demo1" style="max-width: 196px">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="is_css" style="display:none;">
+                                        <div class="layui-form-item" pane>
+                                            <label class="layui-form-label">背景样式</label>
+                                            <div class="layui-input-block  inline-block">
+                                                <input  type="radio"  value="0"  name="site_background_css" lay-filter="site_background_css" title="关闭" />
+                                                <input  type="radio"  value="1"  name="site_background_css" lay-filter="site_background_css" title="自定义样式"/>
+                                                <input  type="radio"  value="2"  name="site_background_css" lay-filter="site_background_css" title="纵向和横向重复" />
+                                                <input  type="radio"  value="3"  name="site_background_css" lay-filter="site_background_css" title="横向重复,纵向拉伸" />
+                                                <input  type="radio"  value="4"  name="site_background_css" lay-filter="site_background_css" title="纵向重复,横向拉伸" />
+                                                <input  type="radio"  value="5"  name="site_background_css" lay-filter="site_background_css" title="不重复,全屏拉伸" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="diy_css" style="display:none;">
+                                        <div class="layui-form-item layui-form-text">
+                                            <label class="layui-form-label">自定义背景样式</label>
+                                            <div class="layui-input-block">
+                                                <textarea name="zdy_site_background_css" class="layui-input" placeholder="直接写CSS代码即可，不带<style>标签" style="height:120px"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item" pane>
+                                        <label class="layui-form-label">背景音乐</label>
+                                        <div class="layui-input-block  inline-block">
+                                            <input  type="radio"  value="0"  name="site_background_music" lay-filter="site_background_music" title="关闭" />
+                                            <input  type="radio"  value="1"  name="site_background_music" lay-filter="site_background_music" title="自定义音乐代码" checked/>
+                                            <input  type="radio"  value="2"  name="site_background_music" lay-filter="site_background_music" title="自定义音乐ID" />
+                                            <input  type="radio"  value="3"  name="site_background_music" lay-filter="site_background_music" title="自定义背景语音" />
+                                            <input  type="radio"  value="4"  name="site_background_music" lay-filter="site_background_music" title="网易云榜单" />
+                                        </div>
+                                    </div>
+                                    <div id="netease_music_toplist" style="display:none;">
+                                        <div class="layui-form-item" pane>
+                                            <label class="layui-form-label">网易云榜单</label>
+                                            <div class="layui-input-block  inline-block">
+                                                <input  type="radio"  value="0"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐飙升榜" checked/>
+                                                <input  type="radio"  value="1"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐新歌榜" />
+                                                <input  type="radio"  value="2"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="网易原创歌曲榜" />
+                                                <input  type="radio"  value="3"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐热歌榜" />
+                                                <input  type="radio"  value="4"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐说唱榜" />
+                                                <input  type="radio"  value="5"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐电音榜" />
+                                                <input  type="radio"  value="6"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="抖音排行榜" />
+                                                <input  type="radio"  value="7"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="新声榜" />
+                                                <input  type="radio"  value="8"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐ACG音乐榜" />
+                                                <input  type="radio"  value="9"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="iTunes榜" />
+                                                <input  type="radio"  value="10"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐日语榜" />
+                                                <input  type="radio"  value="11"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐民谣榜" />
+                                                <input  type="radio"  value="12"  name="netease_music_toplist" lay-filter="netease_music_toplist" title="云音乐摇滚榜" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="is_music" style="display: none">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">音乐代码</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" name="diy_background_music" class="layui-input" placeholder="自定义背景音乐代码" lay-required/>
+                                            </div>
+                                            <blockquote class="layui-elem-quote-sf-info">
+                                                https://music.clwl.online/可自己上传歌单<br><a class="layui-btn layui-btn-xs layui-btn-normal" href="https://music.clwl.online/" rel="noreferrer" target="_blank">点击前往获取代码</a>
+                                            </blockquote>
+                                        </div>
+                                    </div>
+                                    <div id="is_music_id" style="display:none;">
+                                        <div class="layui-form-item layui-form-text">
+                                            <label class="layui-form-label">音乐ID</label>
+                                            <div class="layui-input-block">
+                                                <textarea lay-tips="一行一首音乐" lay-direction="1" lay-bg="#4facfe" type="text" class="layui-input" style="height:100px" name="diy_background_music_id" placeholder="一行一首音乐" rows="4">002ejEdb4KTwBw|tencent</textarea>
+                                            </div>
+                                            <blockquote class="layui-elem-quote-sf-info">
+                                                <div class="layui-collapse" lay-shrink="_all"  style="background-color:#fff">
+                                                    <div class="layui-colla-item">
+                                                        <h2 class="layui-colla-title">格式</h2>
+                                                        <div class="layui-colla-content layui-show">
+                                                            <p>音乐ID|音乐平台|ID类型<br>（ID类型可选填）</p><br>
+                                                            <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;单首音乐例如：002ejEdb4KTwBw|tencent<br>（这首歌名字叫浮夸来自QQ音乐）</li>
+                                                            <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;歌单例如：6666124298|tencent|playlist<br>（这是我QQ音乐的歌单）</li>
+                                                        </div>
+                                                    </div>
+                                                    <div class="layui-colla-item">
+                                                        <h2 class="layui-colla-title">音乐ID怎么取？</h2>
+                                                        <div class="layui-colla-content">
+                                                            <p><b><font color=#c7254e>标红</font></b> 为 <strong>音乐 ID</strong>，<u>下划线</u> 表示 <strong>音乐地址</strong></p>
+                                                            <ul>
+                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;蜻蜓 FM 的音乐 ID 需要使用 <code>| (管道符)</code> 组合，例如 <code>158696|5266259</code></li>
+                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;全民 K 歌的音乐名称请输入 <code>shareuid</code>，这是用户的 uid，搜索结果是该用户的所有公开作品</li>
+                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;全民 K 歌的音乐 ID 请输入 <code>shareid</code> 这是单曲分享 id，搜索结果是该单曲信息</li>
+                                                            </ul>
+                                                            <blockquote class="layui-elem-field layui-field-title">
+                                                                <p><span>网易：</span><u>http://music.163.com/#/song?id=<b><font color=#c7254e>25906124</font></b></u></p>
+                                                                <p><span>ＱＱ：</span><u>http://y.qq.com/n/yqq/song/<b><font color=#c7254e>002B2EAA3brD5b</font></b>.html</u></p>
+                                                                <p><span>酷狗：</span><u>http://www.kugou.com/song/#hash=<b><font color=#c7254e>08228af3cb404e8a4e7e9871bf543ff6</font></b></u></p>
+                                                                <p><span>虾米：</span><u>http://www.xiami.com/song/<b><font color=#c7254e>2113248</font></b></u></p>
+                                                                <p><span>百度：</span><u>http://music.baidu.com/song/<b><font color=#c7254e>266069</font></b></u></p>
+                                                            </blockquote>
+                                                        </div>
+                                                    </div>
+                                                    <div class="layui-colla-item">
+                                                        <h2 class="layui-colla-title">音乐平台格式</h2>
+                                                        <div class="layui-colla-content">
+                                                            例如网易云：25706282|netease
+                                                            <blockquote class="layui-elem-field layui-field-title">
+                                                                <p><span>网易：</span>netease</p>
+                                                                <p><span>ＱＱ：</span>tencent</p>
+                                                                <p><span>酷狗：</span>kugou</p>
+                                                                <p><span>虾米：</span>xiami</p>
+                                                                <p><span>百度：</span>baidu</p>
+                                                            </blockquote>
+                                                        </div>
+                                                    </div>
+                                                    <div class="layui-colla-item">
+                                                        <h2 class="layui-colla-title">ID类型</h2>
+                                                        <div class="layui-colla-content">
+                                                            playlist：代表歌单（部分歌单获取不到）
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </blockquote>
+                                        </div>
+                                    </div>
+                                    <div id="is_background" style="display:none;">
+                                        <div class="layui-form-item layui-form-text">
+                                            <label class="layui-form-label">自定义语音</label>
+                                            <div class="layui-input-block">
+                                                <textarea name="background_text" class="layui-input" lay-tips="前台播放的语音" placeholder="推荐多用英文逗号“,”分段，如：欢迎来到,授权中心！（这样说出来的语音就不会那么机械化）" style="height:120px"></textarea>
+                                            </div>
+                                        </div>
+                                        <div id="mp3"></div>
+                                        <div class="layui-form-item" lay-tips="点击可自动播放当前选择类型效果音" lay-direction="1" lay-bg="#4facfe" pane>
+                                            <label class="layui-form-label">发音类型</label>
+                                            <div class="layui-input-block  inline-block">
+                                                <input  type="radio"  value="0"  name="background_text_per" lay-filter="background_text_per" title="小孩"/>
+                                                <input  type="radio"  value="1"  name="background_text_per" lay-filter="background_text_per" title="大叔"/>
+                                                <input  type="radio"  value="2"  name="background_text_per" lay-filter="background_text_per" title="萝莉" checked/>
+                                                <input  type="radio"  value="3"  name="background_text_per" lay-filter="background_text_per" title="御姐"/>
+                                                <input  type="radio"  value="4"  name="background_text_per" lay-filter="background_text_per" title="商务男"/>
+                                                <input  type="radio"  value="5"  name="background_text_per" lay-filter="background_text_per" title="商务女"/>
+                                                <input  type="radio"  value="6"  name="background_text_per" lay-filter="background_text_per" title="客服女"/>
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item" lay-tips="点击可自动播放当前选择音速效果音" lay-direction="1" lay-bg="#4facfe" pane>
+                                            <label class="layui-form-label">语速</label>
+                                            <div class="layui-input-block  inline-block">
+                                                <input  type="radio"  value="0"  name="background_text_spd" lay-filter="background_text_spd" title="快" />
+                                                <input  type="radio"  value="1"  name="background_text_spd" lay-filter="background_text_spd" title="正常" checked/>
+                                                <input  type="radio"  value="2"  name="background_text_spd" lay-filter="background_text_spd" title="慢" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>站点功能配置</legend>
+                                <div class="layui-field-box">
+                                    <div class="layui-form-item" pane>
+                                        <label class="layui-form-label">滑动验证码</label>
+                                        <div class="layui-input-block inline-block">
+                                            <input type="checkbox" name="captcha_open" value="1" lay-skin="switch" lay-filter="captcha_open">
+                                        </div>
+                                    </div>
+                                    <div id="captcha_frame" style="display:none;">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">极验ID</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" name="captcha_id" class="layui-input"/>
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">极验KEY</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" name="captcha_key" class="layui-input"/>
+                                            </div>
+                                            <blockquote class="layui-elem-quote-sf-info">
+                                                用于登录,注册,修改信息等等，<a class="layui-btn layui-btn-xs layui-btn-normal" href="http://www.geetest.com/apply.html" rel="noreferrer" target="_blank">注册极验验证码</a>
+                                            </blockquote>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item" pane>
+                                        <label class="layui-form-label">维护状态</label>
+                                        <div class="layui-input-block  inline-block">
+                                            <input type="checkbox" name="maintain_switch" value="1" lay-skin="switch">
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item" pane>
+                                        <label class="layui-form-label">ＱＱ跳转</label>
+                                        <div class="layui-input-block  inline-block">
+                                            <input type="checkbox" name="qq_jump" value="1" lay-skin="switch">
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item" pane>
+                                        <label class="layui-form-label">其他登陆</label>
+                                        <div class="layui-input-block  inline-block">
+                                            <input type="checkbox" name="qq_oauth" value="1" lay-skin="primary" title="<img src='/Assets/img/qq.png' width='18'> ＱＱ快捷登录" checked/>
+                                            <input type="checkbox" name="qq_code" value="1" lay-skin="primary" title="<img src='/Assets/img/pays.png' width='18'> ＱＱ扫码登陆" checked/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">前台公告</label>
+                                <div class="layui-input-block">
+                                    <textarea name="notice_home" class="layui-input" style="height:120px"></textarea>
+                                </div>
+                            </div>
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">后台公告</label>
+                                <div class="layui-input-block">
+                                    <textarea name="notice_user" class="layui-input" style="height:120px"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">自助授权</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="onlinebuy_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">自助注册</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="reg_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">更换授权</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="replace_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">卡密兑换</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="cdkey_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">正版查询</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="auth_query_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">支付查询</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="pay_query_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">代理查询</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input type="checkbox" name="user_query_switch" value="1" lay-skin="switch">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">下载方式</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input  type="radio"  value="0"  name="download" title="关闭" checked/>
+                                    <input  type="radio"  value="1"  name="download" title="邮箱验证下载" />
+                                    <input  type="radio"  value="2"  name="download" title="扫码验证下载" />
+                                    <input  type="radio"  value="3"  name="download" title="信息验证下载" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-card-body" style="padding: 0;min-height: 216px;">
+                                <div class="layui-tab layui-tab-vertical" lay-filter="notice">
+                                    <ul class="layui-tab-title">
+                                        <li class="layui-this"><i class="layui-icon layui-icon-template-1"></i>前台模板</li>
+                                        <li><i class="layui-icon layui-icon-template"></i>登陆模板</li>
+                                        <li><i class="layui-icon layui-icon-auz"></i>维护模板</li>
+                                        <li><i class="layui-icon layui-icon-notice"></i>公告模板</li>
+                                    </ul>
+                                    <div class="layui-tab-content">
+                                        <div class="layui-tab-item layui-show">
+                                            <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
+                                                {volist name="home_template_list" id="res"}
+                                                <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
+                                                    <img onclick="previewImg('/template/home/img/{$res}.png')" src="/template/home/img/{$res}.png" width="100%"  border="0" />
+                                                    <br>
+                                                    <input type="radio" value="{$res}" name="template" title="{$res}" checked/>
+                                                </div>
+                                                {/volist}
+                                            </div>
+                                        </div>
+                                        <div class="layui-tab-item">
+                                            <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
+                                                {volist name="login_template_list" id="res"}
+                                                <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
+                                                    <img onclick="previewImg('/template/login/img/{$res}.png')" src="/template/login/img/{$res}.png" width="100%"  border="0" />
+                                                    <br>
+                                                    <input type="radio" value="{$res}" name="login_template" title="{$res}" />
+                                                </div>
+                                                {/volist}
+                                            </div>
+                                        </div>
+                                        <div class="layui-tab-item">
+                                            <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
+                                                {volist name="maintain_template_list" id="res"}
+                                                <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
+                                                    <img onclick="previewImg('/template/maintain/img/{$res}.png')" src="/template/maintain/img/{$res}.png" width="100%"  border="0" />
+                                                    <br>
+                                                    <input type="radio" value="{$res}" name="maintain_template" title="{$res}" checked/>
+                                                </div>
+                                                {/volist}
+                                            </div>
+                                        </div>
+                                        <div class="layui-tab-item">
+                                            <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
+                                                <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
+                                                    <img onclick="previewImg('{__IMG__}logo.png')" src="{__IMG__}logo.png" width="50px"  border="0" />
+                                                    <br>
+                                                    <input type="radio" value="0" name="notice_template" title="自定义" lay-filter="notice_select" checked/>
+                                                </div>
+                                                {volist name="notice_template_list" id="res"}
+                                                <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
+                                                    <img onclick="previewImg('/template/notice/{$res}/sf.png')" src="/template/notice/{$res}/sf.png" width="80px"  border="0" />
+                                                    <br>
+                                                    <input type="radio" value="{$res}" name="notice_template" title="{$res}" lay-filter="notice_select" checked/>
+                                                </div>
+                                                {/volist}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="notice" style="display: none">
+                                        <div id="notice_diy" style="display: none">
+                                            <div class="layui-form-item layui-form-text">
+                                                <label class="layui-form-label">自定义模板</label>
+                                                <div class="layui-input-block">
+                                                    <textarea name="notice_diy" class="layui-input" placeholder="自定义公告模板" style="height:120px"></textarea>
+                                                    <blockquote class="layui-elem-quote-sf-info">
+                                                        参数说明：[notice]代表公告内容，[cookie]代表创建cookie
+                                                    </blockquote>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="notice_template" style="display: none">
+                                            <div class="layui-form-item" pane>
+                                                <label class="layui-form-label">图标</label>
+                                                <div class="layui-input-block  inline-block">
+                                                    <input type="radio" value="-1" name="notice_icon" title="关闭" checked/>
+                                                    <input type="radio" value="0" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: 0px 0'></i>"/>
+                                                    <input type="radio" value="1" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -30px 0'></i>"/>
+                                                    <input type="radio" value="2" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -60px 0'></i>"/>
+                                                    <input type="radio" value="3" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -90px 0'></i>"/>
+                                                    <input type="radio" value="4" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -120px 0'></i>"/>
+                                                    <input type="radio" value="5" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -150px 0'></i>"/>
+                                                    <input type="radio" value="6" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -180px 0'></i>"/>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item" pane>
+                                                <label class="layui-form-label">弹出动画</label>
+                                                <div class="layui-input-block  inline-block">
+                                                    <input type="radio" value="0" name="notice_anim" title="平滑放大" checked/>
+                                                    <input type="radio" value="1" name="notice_anim" title="从上掉落"/>
+                                                    <input type="radio" value="2" name="notice_anim" title="从最底部往上滑入"/>
+                                                    <input type="radio" value="3" name="notice_anim" title="从左滑入"/>
+                                                    <input type="radio" value="4" name="notice_anim" title="从左翻滚"/>
+                                                    <input type="radio" value="5" name="notice_anim" title="渐显"/>
+                                                    <input type="radio" value="6" name="notice_anim" title="抖动"/>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label">遮罩层</label>
+                                                <div class="layui-input-block">
+                                                    <input type="number" name="notice_shade" class="layui-input" placeholder="0~1之间"/>
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label">显示时长</label>
+                                                <div class="layui-input-block">
+                                                    <input type="number" name="notice_time" class="layui-input" placeholder="自动关闭所需毫秒，0则代表不关闭"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">支付宝</label>
+                                <div class="layui-input-block">
+                                    <select class="layui-input" name="alipay_api" lay-search lay-filter="alipay_api">
+                                        <option value="0">关闭</option>
+                                        <option value="1">支付宝官方即时到账接口</option>
+                                        <option value="3">支付宝当面付扫码支付</option>
+                                        <option selected value="2">易支付免签约接口</option>
+                                        <option value="5">码支付免签约接口</option>
+                                    </select>
+                                </div>
+                                <small id="payapi_06" style="display:none;"><font color="green">*支付宝当面付接口配置请修改other/f2fpay/config.php</font></small>
+                            </div>
+                            <div id="payapi_01" style="display:none;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">合作者身份(PID)</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="alipay_pid2" class="layui-input" value="">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">收款账户(ACCOUNT)</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="alipay_account" class="layui-input" value="">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">安全校验码(Key)</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="alipay_key2" class="layui-input" value="">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">支付宝手机网站支付</label>
+                                    <div class="layui-input-block">
+                                        <select class="layui-input" name="alipay2_api" lay-search lay-filter="alipay2_api">
+                                            <option selected value="0">关闭</option>
+                                            <option value="1">支付宝手机网站支付接口</option>
+                                        </select>
+                                    </div>
+                                    <small id="payapi_02" style="display:none;">相关信息与以上支付宝即时到账接口一致，开启前请确保已开通支付宝手机支付，否则会导致手机用户无法支付！</small>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">ＱＱ</label>
+                                <div class="layui-input-block">
+                                    <select class="layui-input" name="qqpay_api" lay-search lay-filter="qqpay_api">
+                                        <option value="0">关闭</option>
+                                        <option value="1">QQ钱包官方支付接口</option>
+                                        <option selected value="2">易支付免签约接口</option>
+                                        <option value="5">码支付免签约接口</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="payapi_05" style="display:none;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">MCH_ID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="qqpay_mchid" class="layui-input"/>
+                                    </div>
+                                    <small>商户号</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">MCH_KEY</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="qqpay_mchkey" class="layui-input"/>
+                                    </div>
+                                    <small>QQ钱包商户平台(http://qpay.qq.com/)获取</small>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">微信</label>
+                                <div class="layui-input-block">
+                                    <select class="layui-input" name="wxpay_api" lay-search lay-filter="wxpay_api">
+                                        <option value="0">关闭</option>
+                                        <option value="1">微信官方扫码+公众号支付接口</option>
+                                        <option value="3">微信官方扫码+H5支付接口</option>
+                                        <option selected value="2">易支付免签约接口</option>
+                                        <option value="5">码支付免签约接口</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="payapi_04" style="display:none;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">APPID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_appid" class="layui-input"/>
+                                    </div>
+                                    <small>绑定支付的APPID（必须配置，开户邮件中可查看）</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">MCHID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_mchid" class="layui-input"/>
+                                    </div>
+                                    <small>商户号（必须配置，开户邮件中可查看）</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">KEY</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_key2" class="layui-input"/>
+                                    </div>
+                                    <small>商户支付密钥，参考开户邮件设置（必须配置，登录商户平台自行设置） <br>设置地址：https://pay.weixin.qq.com/index.php/account/api_cert</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">APPSECRET</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_appsecret" class="layui-input"/>
+                                    </div>
+                                    <small>公众帐号secert（仅JSAPI支付的时候需要配置， 登录公众平台，进入开发者中心可设置）<br>获取地址：https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&token=2005451881&lang=zh_CN</small>
+                                </div>
+                            </div>
+                            <div id="epay" style="display:inherit">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">易支付接口</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="epay_url" class="layui-input" placeholder="填写对接的易支付URL,例如：http://pay.sf-team.cn/">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户ID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="epay_pid" class="layui-input" placeholder="易支付ID,例如：123456" value="">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户密钥</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="epay_key" class="layui-input" placeholder="易支付密钥,例如：03bfg234sfftg" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="codepay" style="display:none">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">码支付ID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="codepay_id" class="layui-input" value="">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">码支付通信密钥</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="codepay_key" class="layui-input" value="">
+                                    </div>
+                                    <small><font color="green">codepay.fateqq.com 码支付支付宝和QQ需要挂电脑软件，微信不需要挂软件</font></small>
+                                </div>
+                            </div>
+                            <div class="layui-elem-quote">使用本功能可在一定程度上避免被某支付商圈钱，望大家在选择某支付对接商时多多观察避免产生利润亏损</div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">独立支付</label>
+                                <div class="layui-input-block">
+                                    <select class="layui-input" name="epays_open" lay-search lay-filter="epays_open">
+                                        <option selected value="0">关闭</option>
+                                        <option value="1">开启</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="dlpay" style="display:none ">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户ID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="qqpay_pid" class="layui-input" placeholder="QQ钱包支付账号"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户密钥</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="qqpay_key" class="layui-input" placeholder="QQ钱包接口密码"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">ＱＱ接口</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="qqpay_url" class="layui-input" placeholder="QQ钱包接口地址"/>
+                                    </div>
+                                    <small>请填写单独对接QQ钱包的完整易支付接口地址，此QQ钱包配置不完整时将使用默认接口</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户ID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="alipay_pid" class="layui-input" placeholder="支付宝支付账号"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户密钥</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="alipay_key" class="layui-input" placeholder="支付宝接口密码"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">支付宝接口</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="alipay_url" class="layui-input" placeholder="支付宝接口地址"/>
+                                    </div>
+                                    <small>请填写单独对接支付宝的完整易支付接口地址，此支付宝配置不完整时将使用默认接口</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户ID</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_pid" class="layui-input" placeholder="微信支付支付账号"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">商户密钥</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_key" class="layui-input" placeholder="微信支付接口密码"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">微信接口</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_url" class="layui-input" placeholder="微信支付接口地址"/>
+                                    </div>
+                                    <small>请填写单独对接微信支付的完整易支付接口地址，此微信支付配置不完整时将使用默认接口</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form-item" pane>
+                                <label class="layui-form-label">发信模式</label>
+                                <div class="layui-input-block  inline-block">
+                                    <input  type="radio"  value="0"  name="mail_cloud" title="普通模式" checked/>
+                                </div>
+                            </div>
+                            <div id="frame_set1" style="display: inherit">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">SMTP服务器</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="mail_smtp" class="layui-input"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">SMTP端口</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="mail_port" class="layui-input"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">邮箱账号</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="mail_name" class="layui-input"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">邮箱密码</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="mail_pwd" class="layui-input"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">收信邮箱</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="mail_recv" class="layui-input" placeholder="不填默认为发信邮箱"/>
+                                </div>
+                            </div>
+                            <blockquote class="layui-elem-quote-sf-info">
+                                <button type="button" class="layui-btn layui-btn-xs layui-btn-normal" id="mailtest">给 2129876388@qq.com 发一封测试邮件</button><br>
+                                此功能为用户下单时给自己发邮件提醒。<br/>使用普通模式发信时，建议使用QQ邮箱，SMTP服务器smtp.qq.com，端口465，密码不是QQ密码也不是邮箱独立密码，是QQ邮箱设置界面生成的<a class="layui-btn layui-btn-xs layui-btn-warm" ew-href="http://service.mail.qq.com/cgi-bin/help?subtype=1&&no=1001256&&id=28"  target="_blank" rel="noreferrer">授权码</a>。为确保发信成功率，发信邮箱和收信邮箱最好同一个
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <hr style="width:0px"><hr>
+                <div class="layui-form-item layui-row layui-col-space10 ">
+                    <div class="layui-col-md2">
+                        <button type="submit" class="layui-btn layui-btn-fluid" lay-filter="noticeBtn" lay-submit>保存配置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+{include file="/public/footer"}
+<script>
+    layui.use(['upload', 'element', 'layer', 'form', 'admin', 'notice', 'laydate'], function () {
+        var $ = layui.jquery;
+        var upload = layui.upload;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var laydate = layui.laydate;
+
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Set/config")}',
+            dataType: "json",
+            success: function(data) {
+                notice.destroy();
+                if (data.code == 0) {
+                    if(data.data.data.captcha_open == 1){
+                        $("#captcha_frame").css("display","inherit");
+                    }
+                    if(data.data.data.site_background != 0){
+                        $("#is_css").css("display","inherit");
+                        if(data.data.data.site_background == 10){
+                            layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', data.data.data.diy_background);
+                            $("#is_img").css("display","inherit");
+                        }else if(data.data.data.site_background_music == 1){
+                            $("#is_music").css("display","inherit");
+                        }else if(data.data.data.site_background_music == 2){
+                            $("#is_music_id").css("display","inherit");
+                        }else if(data.data.data.site_background_music == 3){
+                            $("#is_background").css("display","inherit");
+                        }else if(data.data.data.site_background_music == 4){
+                            $("#netease_music_toplist").css("display","inherit");
+                        }else if(data.data.data.site_background_music == 5){
+                            $("#tencent_music_toplist").css("display","inherit");
+                        }
+                    }
+
+                    if(data.data.data.site_background_music == 1){
+                        $("#is_music").css("display","inherit");
+                    }else if(data.data.data.site_background_music == 2){
+                        $("#is_music_id").css("display","inherit");
+                    }else if(data.data.data.site_background_music == 3){
+                        $("#is_background").css("display","inherit");
+                    }else if(data.data.data.site_background_music == 4){
+                        $("#netease_music_toplist").css("display","inherit");
+                    }else if(data.data.data.site_background_music == 5){
+                        $("#tencent_music_toplist").css("display","inherit");
+                    }
+
+                    if(data.data.data.site_background_css == 1){
+                        $("#diy_css").css("display","inherit");
+                    }
+
+                    if(data.data.data.notice_template == 0){
+                        $("#notice_diy").css("display","inherit");
+                    }else{
+                        $("#notice_template").css("display","inherit");
+                    }
+                    notice.msg("获取信息成功！", {icon: 1, audio:'1'});
+                } else {
+                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                }
+                form.render();
+                form.val('formBasForm', data.data.data);
+            },
+            error: function() {
+                notice.destroy();
+                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+            }
+        });
+
+        var uploadInst = upload.render({
+            elem: '#upload'
+            ,url: '{:url("/Upload/image")}'
+            ,before: function(obj){
+                //预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#demo1').attr('src', result); //图片链接（base64）
+                });
+                notice.msg('上传中...', {icon: 4, close: true});
+            }
+            ,done: function(res){
+                notice.destroy();
+                //如果上传失败
+                if(res.code == 0){
+                    $("input[name='diy_background']").val(res.data.path);
+                    layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', res.files.file);
+                    notice.msg('上传成功！', {icon: 1, audio:'1'});
+                }else{
+                    notice.msg('上传失败！', {icon: 2, audio:'1'});
+                }
+            }
+        });
+
+        element.on('tab(notice)', function(data){
+            if(data.index == 3){
+                $("#notice").css("display","inherit");
+            }else{
+                $("#notice").css("display","none");
+            }
+        });
+
+        form.on('select(alipay_api)', function(data){
+            if(data.value == '1'){
+                $("#payapi_01").show();
+                $("#payapi_06").hide();
+            }else if(data.value == '3'){
+                $("#payapi_01").hide();
+                $("#payapi_06").show();
+            }else{
+                $("#payapi_01").hide();
+                $("#payapi_06").hide();
+            }
+        });
+        form.on('select(wxpay_api)', function(data){
+            if(data.value == '1' || data.value == '3'){
+                $("#payapi_04").show();
+            }else{
+                $("#payapi_04").hide();
+            }
+        });
+        form.on('select(qqpay_api)', function(data){
+            if(data.value == '1'){
+                $("#payapi_05").show();
+            }else{
+                $("#payapi_05").hide();
+            }
+        });
+        form.on('select(alipay2_api)', function(data){
+            if(data.value == '1'){
+                $("#payapi_02").show();
+            }else{
+                $("#payapi_02").hide();
+            }
+        });
+        form.on('select(epays_open)', function(data){
+            if(data.value == '1'){
+                $("#dlpay").show();
+            }else{
+                $("#dlpay").hide();
+            }
+        });
+        form.on('radio(background_text_per)', function (data) {
+            var text = $("textarea[name='background_text']").val();
+            var text_per = data.value;
+            var text_spd = $("input[name='background_text_spd']:checked").val();
+            $("#mp3").html('<embed src="https://fanyi.sogou.com/reventondc/synthesis?text='+text+'&speed='+text_spd+'&lang=zh-CHS&from=translateweb&speaker='+text_per+'" id="media" width="0" height="0" allowNetworking="all">');
+            form.render('radio');
+        });
+        form.on('radio(background_text_spd)', function (data) {
+            var text = $("textarea[name='background_text']").val();
+            var text_per = $("input[name='background_text_per']:checked").val();
+            var text_spd = data.value;
+            $("#mp3").html('<embed src="https://fanyi.sogou.com/reventondc/synthesis?text='+text+'&speed='+text_spd+'&lang=zh-CHS&from=translateweb&speaker='+text_per+'" id="media" width="0" height="0" allowNetworking="all">');        });
+        form.on('radio(site_background)', function (data) {
+            if(data.value != 0){
+                $("#is_css").css("display","inherit");
+                if(data.value == 10){
+                    layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', $("input[name='diy_background']").val());
+                    $("#is_img").css("display","inherit");
+                }else{
+                    $("#is_img").css("display","none");
+                }
+            }else{
+                $("#is_img").css("display","none");
+            }
+            form.render('radio');
+        });
+        form.on('radio(site_background_css)', function (data) {
+            if(data.value == 1){
+                $("#diy_css").css("display","inherit");
+            }else{
+                $("#diy_css").css("display","none");
+            }
+            form.render('radio');
+        });
+        form.on('radio(site_background_music)', function (data) {
+            if(data.value==0){
+                $("#is_music").css("display","none");
+                $("#is_background").css("display","none");
+                $("#netease_music_toplist").css("display","none");
+                $("#tencent_music_toplist").css("display","none");
+                $("#is_music_id").css("display","none");
+            }else if(data.value==1){
+                $("#is_music").css("display","inherit");
+                $("#is_background").css("display","none");
+                $("#netease_music_toplist").css("display","none");
+                $("#tencent_music_toplist").css("display","none");
+                $("#is_music_id").css("display","none");
+            }else if(data.value==2){
+                $("#netease_music_toplist").css("display","none");
+                $("#tencent_music_toplist").css("display","none");
+                $("#is_music").css("display","none");
+                $("#is_background").css("display","none");
+                $("#is_music_id").css("display","inherit");
+            }else if(data.value==3){
+                $("#netease_music_toplist").css("display","none");
+                $("#tencent_music_toplist").css("display","none");
+                $("#is_music").css("display","none");
+                $("#is_background").css("display","inherit");
+                $("#is_music_id").css("display","none");
+            }else if(data.value==4){
+                $("#netease_music_toplist").css("display","inherit");
+                $("#tencent_music_toplist").css("display","none");
+                $("#is_music").css("display","none");
+                $("#is_background").css("display","none");
+                $("#is_music_id").css("display","none");
+            }else if(data.value==5){
+                $("#tencent_music_toplist").css("display","inherit");
+                $("#netease_music_toplist").css("display","none");
+                $("#is_music").css("display","none");
+                $("#is_background").css("display","none");
+                $("#is_music_id").css("display","none");
+            }
+            form.render('radio');
+        });
+        form.on('switch(captcha_open)', function(data){
+            if(this.checked){
+                $("#captcha_frame").css("display","inherit");
+            }else{
+                $("#captcha_frame").css("display","none");
+            }
+        });
+        form.on('radio(notice_select)', function (data) {
+            if(data.value == 0){
+                $("#notice_diy").css("display","inherit");
+                $("#notice_template").css("display","none");
+            }else{
+                $("#notice_diy").css("display","none");
+                $("#notice_template").css("display","inherit");
+            }
+            form.render('radio');
+        });
+        // 表单提交事件
+        form.on('submit(noticeBtn)', function (data) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url: '{:url("/Set/edit")}',
+                data: data.field,
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    } else {
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+            return false;
+        });
+        window.previewImg = function (src) {
+            layer.photos({ photos: { "data": [{ "src": src }] } });
+        }
+    });
+</script>

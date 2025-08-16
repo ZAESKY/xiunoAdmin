@@ -1,0 +1,540 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或名称"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状&emsp;态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">选择状态</option>
+                                <option value="1">显示</option>
+                                <option value="0">隐藏</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">模&emsp;板</label>
+                        <div class="layui-input-inline">
+                            <select id="select_template_list" class="layui-input ew-select-fixed" lay-filter="template" lay-search>
+                                <option value="">全部价格</option>
+
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="SF_SortBar">
+<a lay-event="setSortTop" lay-tips="移到顶部" lay-direction="4" lay-bg="#4facfe">
+    <img src="{__IMG__}top.svg" style="width: 25px;">
+</a>
+<a lay-event="setSortUp" lay-tips="移到上一行" lay-direction="1" lay-bg="#4facfe">
+    <img src="{__IMG__}up.svg" style="width: 25px;">
+</a>
+<a lay-event="setSortDown" lay-tips="移到下一行" lay-direction="3" lay-bg="#4facfe">
+    <img src="{__IMG__}down.svg" style="width: 25px;">
+</a>
+<a lay-event="setSortBottom" lay-tips="移到底部" lay-direction="2" lay-bg="#4facfe">
+    <img src="{__IMG__}bottom.svg" style="width: 25px;">
+</a>
+</script>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="SF_TbState">
+    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="显示|隐藏" {{d.status==1?'checked':''}} style="display: none;"/>
+    <p style="display: none;">{{d.status==0?'显示':'隐藏'}}</p>
+</script>
+
+<script type="text/html" id="SF_Tbid">
+    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+</script>
+<!-- 表单弹窗 -->
+<script type="text/html" id="SF_EditDialog">
+    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">模板:</label>
+            <div class="layui-input-block">
+                <select id="template_list" name="tid" class="layui-input ew-select-fixed" lay-filter="tid" lay-search>
+                    <option value="">请选择所属模板</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">价格名称:</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" placeholder="请输入价格的名称" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">价格:</label>
+            <div class="layui-input-block">
+                <input type="number" name="money" placeholder="请输入售卖价格，留空为0元" class="layui-input"
+                       lay-verType="tips"/>
+            </div>
+        </div>
+        <div id="all" style="display: none">
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">泛域名价格:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="all_money" placeholder="请输入泛域名价格，留空为0元" class="layui-input"
+                           lay-verType="tips"/>
+                </div>
+            </div>
+        </div>
+        <div id="day" style="display: none">
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">授权天数:</label>
+                <div class="layui-input-block">
+                    <input type="number" name="day" placeholder="请输入授权的天数，不能为0" class="layui-input"
+                           lay-verType="tips"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">自定义时间:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="diy_switch" value="1" lay-skin="switch" lay-filter="diy_switch"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">永久授权:</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="permanent_switch" value="1" lay-skin="switch" lay-filter="permanent_switch" checked/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">状态:</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'table', 'util', 'admin', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var util = layui.util;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '{:url("/AuthPrice/list")}',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            where: {tid:{$tid}},
+            toolbar: ['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.data.total, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {notempty name="tid"}
+                {field: 'sort', title: '排序', templet: '#SF_SortBar', width: 150, fixed: true},
+                {/notempty}
+                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'templateName', title: '所属模板', sort: true, minWidth: 120, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">'+d.templateName+'</span>';
+                    }},
+                {field: 'name', title: '价格名称', sort: true, minWidth: 120},
+                {
+                    field: 'day', title: '授权天数', align: 'right', templet: function (d) {
+                        if (d.permanent_switch == '1') {
+                            return '<span class="layui-badge layui-badge-green">永久授权</span>';
+                        } else if (d.diy_switch == '1'){
+
+                            return '<span class="layui-badge layui-badge-yellow">￥ ' + Math.ceil((d.money / d.day) * 100) / 100 + ' / 天</span>';
+                        } else {
+                            return '<span class="layui-badge layui-badge-blue">'+d.day+' 天</span>';
+                        }
+                    }, sort: true, minWidth: 150
+                },
+                {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
+                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+            ]]
+        });
+
+        notice.msg('正在获取列表中..', {icon: 4, close: true});
+        $.ajax({
+            type: "POST",
+            url: '{:url("/AuthTemplate/getList")}',
+            dataType: "json",
+            success: function(data) {
+                notice.destroy();
+                if (data.code == 0) {
+                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                    var content = '<option value="">请选择所属模板</option>';
+                    $.each(data.data,function(index, value){
+                        $.each(value,function(index, value){
+                            content += '<option value="'+value.id+'">'+value.name+'</option>';
+                        });
+                    });
+                    $("#select_template_list").html(content);
+                } else {
+                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                }
+                form.render();
+            },
+            error: function() {
+                notice.destroy();
+                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+            }
+        });
+
+        form.on('switch(permanent_switch)', function (data) {
+            if (data.elem.checked) {
+                $("#day").css("display","none");
+            }else{
+                $("#day").css("display","inherit");
+            }
+        });
+
+        form.on('select(tid)', function (data) {
+            let check_type = $("#template_list option:selected").attr('check_type');
+            if(check_type == 'domain'){
+                $("#all").css("display","inherit");
+            } else {
+                $("#all").css("display","none");
+            }
+        });
+
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        form.on('select(template)', function (data) {
+            if(data.value == ''){
+                insTb.reload({where: {tid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true}, {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+            }else{
+                insTb.reload({where: {tid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'sort', title: '排序', templet: '#SF_SortBar', width: 150, fixed: true}]]});
+            }
+            return false;
+        });
+        /* 表格工具条点击事件 */
+        table.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            } else if (obj.event === 'setSortTop') {
+                setSortTop(obj.data);
+            } else if (obj.event === 'setSortUp') {
+                setSortUp(obj.data);
+            } else if (obj.event === 'setSortDown') {
+                setSortDown(obj.data);
+            } else if (obj.event === 'setSortBottom') {
+                setSortBottom(obj.data);
+            }
+        });
+
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('SF_Table');
+                if (checkRows.data.length === 0) {
+                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                console.log(ids)
+                doDel({ids: ids});
+            }
+        });
+        function setSortTop(data){
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type : 'POST',
+                url : '{:url("/AuthPrice/setSort")}',
+                data : {tid:data.tid, id:data.id, type:'4'},
+                dataType : 'json',
+                success : function(data) {
+                    table.reload('SF_Table');
+                    notice.destroy();
+                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                },
+                error:function(data){
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    return false;
+                }
+            });
+        }
+        function setSortUp(data){
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type : 'POST',
+                url : '{:url("/AuthPrice/setSort")}',
+                data : {tid:data.tid, id:data.id, type:'1'},
+                dataType : 'json',
+                success : function(data) {
+                    table.reload('SF_Table');
+                    notice.destroy();
+                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                },
+                error:function(data){
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    return false;
+                }
+            });
+        }
+        function setSortDown(data){
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type : 'POST',
+                url : '{:url("/AuthPrice/setSort")}',
+                data : {tid:data.tid, id:data.id, type:'2'},
+                dataType : 'json',
+                success : function(data) {
+                    table.reload('SF_Table');
+                    notice.destroy();
+                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                },
+                error:function(data){
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    return false;
+                }
+            });
+        }
+        function setSortBottom(data){
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type : 'POST',
+                url : '{:url("/AuthPrice/setSort")}',
+                data : {tid:data.tid, id:data.id, type:'3'},
+                dataType : 'json',
+                success : function(data) {
+                    table.reload('SF_Table');
+                    notice.destroy();
+                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                },
+                error:function(data){
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    return false;
+                }
+            });
+        }
+        /* 显示表单弹窗 */
+        function showEditModel(mData) {
+            admin.popupRight({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '价格',
+                content: $('#SF_EditDialog').html(),
+                success: function (layero, dIndex) {
+
+                    // 回显表单数据
+                    if(mData){
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/AuthTemplate/getList")}',
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                    var content = '<option value="">请选择所属模板</option>';
+                                    $.each(data.data,function(index, value){
+                                        $.each(value,function(index, value){
+                                            content += '<option value="'+value.id+'" check_type="'+value.check_type+'">'+value.name+'</option>';
+                                        });
+                                    });
+                                    $("#template_list").html(content);
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                if(mData.check_type == 'domain') {
+                                    $("#all").css("display", "inherit");
+                                }
+                                if (mData.permanent_switch != 1) {
+                                    $("#day").css("display", "inherit");
+                                }
+                                form.val('SF_EditForm', mData);
+                                form.render();
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                    }else{
+                        $("#all").css("display", "none");
+                        $("#day").css("display", "none");
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/AuthTemplate/getList")}',
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                    var content = '<option value="">请选择所属模板</option>';
+                                    $.each(data.data,function(index, value){
+                                        $.each(value,function(index, value){
+                                            content += '<option value="'+value.id+'" check_type="'+value.check_type+'">'+value.name+'</option>';
+                                        });
+                                    });
+                                    $("#template_list").html(content);
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                form.render();
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                    }
+                    // 表单提交事件
+                    form.on('submit(SF_EditSubmit)', function (data) {
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/AuthPrice/edit")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    table.reload('SF_Table');
+                                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                        return false;
+                    });
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '{:url("/AuthPrice/drop")}' : '{:url("/AuthPrice/batchDrop")}',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            insTb.reload({page: {curr: 1}});
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        /* 修改用户状态 */
+        form.on('switch(SF_TbStateCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/AuthPrice/setStatus")}',
+                data: {id:obj.value,status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.reload({page: {curr: 1}});
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+    });
+</script>

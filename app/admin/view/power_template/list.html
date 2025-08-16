@@ -1,0 +1,263 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或名称"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状态:</label>
+                        <div class="layui-input-inline">
+                            <select name="status">
+                                <option value="">选择状态</option>
+                                <option value="1">显示</option>
+                                <option value="0">隐藏</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-warm layui-btn-sm" lay-event="priceList"><i class="layui-icon layui-icon-diamond"></i>权限</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="SF_TbState">
+    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="显示|隐藏" {{d.status==1?'checked':''}} style="display: none;"/>
+    <p style="display: none;">{{d.status==1?'显示':'隐藏'}}</p>
+</script>
+<script type="text/html" id="SF_Tbid">
+    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+</script>
+<!-- 表单弹窗 -->
+<script type="text/html" id="SF_EditDialog">
+    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">模板名称:</label>
+            <div class="layui-input-block">
+                <input name="name" placeholder="请输入模板的名称" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">状态:</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'index', 'form', 'table', 'util', 'admin', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var util = layui.util;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var index = layui.index;
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '{:url("/PowerTemplate/list")}',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.data.total, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'name', title: '模板名称', sort: true, width: 180},
+                {field: 'addtime', title: '添加时间', sort: true, width: 200},
+                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, width: 100},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 250}
+            ]]
+        });
+
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        /* 表格工具条点击事件 */
+        table.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            } else if (obj.event === 'priceList') {
+                priceList(obj.data);
+            }
+        });
+
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('SF_Table');
+                if (checkRows.data.length === 0) {
+                    layer.msg('请选择要删除的数据！', {icon: 2});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                doDel({ids: ids});
+            }
+        });
+
+        /* 显示表单弹窗 */
+        function showEditModel(mData) {
+            admin.popupRight({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '模板',
+                content: $('#SF_EditDialog').html(),
+                success: function (layero, dIndex) {
+                    // 回显表单数据
+                    form.val('SF_EditForm', mData);
+                    // 表单提交事件
+                    form.on('submit(SF_EditSubmit)', function (data) {
+                        //var loadIndex = layer.load(2);
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/PowerTemplate/edit")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    table.reload('SF_Table');
+                                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                        return false;
+                    });
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '{:url("/PowerTemplate/drop")}' : '{:url("/PowerTemplate/batchDrop")}',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            insTb.reload({page: {curr: 1}});
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        /* 修改用户状态 */
+        form.on('switch(SF_TbStateCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/PowerTemplate/setStatus")}',
+                data: {id:obj.value,status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.reload({page: {curr: 1}});
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+        function priceList(obj) {
+            index.openTab({
+                title: '价格列表 TID:'+ obj.id,
+                url: '{:url("/PowerPrice/list")}?tid='+ obj.id,
+                end: function() {
+                    // insTb.reload();
+                }
+            });
+        }
+
+    });
+</script>

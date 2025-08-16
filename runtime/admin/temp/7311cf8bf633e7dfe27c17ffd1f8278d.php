@@ -1,0 +1,307 @@
+<?php /*a:3:{s:67:"D:\phpstudy_pro\WWW\www.admindev.com\app\admin\view\order\list.html";i:1658500398;s:70:"D:\phpstudy_pro\WWW\www.admindev.com\app\admin\view\public\header.html";i:1659781097;s:70:"D:\phpstudy_pro\WWW\www.admindev.com\app\admin\view\public\footer.html";i:1652719209;}*/ ?>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title><?php echo htmlentities($title); ?>|后台管理中心</title>
+	<meta name="keywords" content="<?php echo htmlentities($keywords); ?>"/>
+	<meta name="description" content="<?php echo htmlentities($description); ?>"/>
+	<meta name="keywords" content=""/>
+	<meta name="description" content=""/>
+	<link rel="stylesheet" href="/Assets/libs/layui/css/layui.css"/>
+	<link rel="stylesheet" href="/Assets/module/admin.css?v=318"/>
+	<link rel="stylesheet" href="/Assets/css/sf-style.css"/>
+
+	<!--[if lt IE 9]>
+	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+	<style>
+		.layui-card .layui-table-view {
+			margin: 0;
+		}
+		.layui-table td, .layui-table th, .layui-table-col-set, .layui-table-fixed-r, .layui-table-grid-down, .layui-table-header, .layui-table-page, .layui-table-tips-main, .layui-table-tool, .layui-table-total, .layui-table-view, .layui-table[lay-skin=line], .layui-table[lay-skin=row] {
+			color: #515a6e;
+			border: 0;
+			border-width: 1px;
+			border-bottom-style: solid;
+			border-color: #E8EAEC;
+			white-space: nowrap;
+		}
+	</style>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或订单号"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状&emsp;态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">选择状态</option>
+                                <option value="0">待处理</option>
+                                <option value="1">已完成</option>
+                                <option value="2">正在处理</option>
+                                <option value="3">异常</option>
+                                <option value="4">已退单</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-sm" data-dropdown="#userTbDrop{{d.LAY_INDEX}}" no-shade="true">
+        更多<i class="layui-icon layui-icon-drop" style="font-size: 12px;margin-right: 0;"></i></a>
+    <!-- 下拉菜单 -->
+    <ul class="dropdown-menu-nav dropdown-bottom-right layui-hide" id="userTbDrop{{d.LAY_INDEX}}">
+        <div class="dropdown-anchor"></div>
+        <li><a onclick="setStatus('{{d.id}}',0)"><i class="layui-icon layui-icon-tips"></i>待处理</a></li>
+        <li><a onclick="setStatus('{{d.id}}',1)"><i class="layui-icon layui-icon-ok"></i>已完成</a></li>
+        <li><a onclick="setStatus('{{d.id}}',2)"><i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i>正在处理</a></li>
+        <li><a onclick="setStatus('{{d.id}}',3)"><i class="layui-icon layui-icon-close"></i>异常</a></li>
+        <li><a onclick="setStatus('{{d.id}}',4)"><i class="layui-icon layui-icon-file-b"></i>已退单</a></li>
+        <hr>
+        <li><a onclick="setStatus('{{d.id}}',5,'{{d.status}}')"><i class="layui-icon layui-icon-rmb"></i>退款</a></li>
+    </ul>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+
+<script type="text/javascript" src="/Assets/libs/layui/layui.js"></script>
+<script type="text/javascript" src="/Assets/js/common.js?v=318"></script>
+<!--<script type="text/javascript" src="/Assets/js/template.js"></script>-->
+<script>
+    layui.use(['layer', 'dropdown', 'form', 'table', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var notice = layui.notice;
+
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '<?php echo url("/Order/list"); ?>',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.data.total, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true, templet: function (d) {
+                        switch(d.status){
+                            case 1:
+                                return '<span><span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                            case 2:
+                                return '<span><span class="layui-badge-dot layui-bg-sf-yellow" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                            case 3:
+                                return '<span><span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                            case 4:
+                                return '<span><span class="layui-badge-dot layui-bg-gray" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                            default:
+                                return '<span><span class="layui-badge-dot layui-bg-sf-purple" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                        }
+                    }
+                },
+                {field: 'name', title: '商品名称', sort: true, minWidth: 140},
+                {field: 'trade_no', title: '订单号', sort: true, minWidth: 200, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">系统订单号：'+d.trade_no+'</span><br><span class="layui-badge layui-badge-blue">对接订单号：'+d.api_trade_no+'</span>';
+                    }
+                },
+                {field: 'buy_type', title: '订单类型', sort: true, minWidth: 120, templet: function (d) {
+                        return buyType(d.buy_type);
+                    },
+                },
+                {field: 'type', title: '支付方式', sort: true, minWidth: 120, templet: function (d) {
+                        switch(d.type){
+                            case 'alipay':
+                                return '<span class="layui-badge layui-badge-blue">支付宝</span>';
+                            case 'wxpay':
+                                return '<span class="layui-badge layui-badge-green">微信</span>';
+                            case 'qqpay':
+                                return '<span class="layui-badge layui-badge-red">QQ</span>';
+                        }
+                    }
+                },
+                {field: 'money', title: '订单金额', sort: true, minWidth: 120},
+                {field: 'input', title: '订单信息', sort: true, minWidth: 120, templet: function (d) {
+                        if(d.input == '' || d.input == null){
+                            return '无信息';
+                        }else{
+                            return d.input;
+                        }
+                    }
+                },
+                {field: 'num', title: '数量', sort: true, minWidth: 80},
+                {field: 'ip', title: 'IP地址', sort: true, minWidth: 100},
+                {field: 'addtime', title: '订单时间', sort: true, minWidth: 200, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">创建时间：'+d.addtime+'</span><br><span class="layui-badge layui-badge-green">完成时间：'+d.endtime+'</span>';
+                    }
+                },
+                {field: 'userid', title: '用户ID', minWidth: 100},
+                {field: 'status', title: '状态', templet: '#SF_TbState', minWidth: 100, templet: function (d) {
+                        switch(d.status){
+                            case 1:
+                                return '<span class="layui-badge layui-badge-green">已完成</span>';
+                            case 2:
+                                return '<span class="layui-badge layui-badge-yellow">正在处理</span>';
+                            case 3:
+                                return '<span class="layui-badge layui-badge-red">异常</span>';
+                            case 4:
+                                return '<span class="layui-badge layui-badge-gray">已退单</span>';
+                            default:
+                                return '<span class="layui-badge layui-badge-purple">待处理</span>';
+                        }
+                    }
+                },
+                {field: 'return', title: '返回信息', minWidth: 100, templet: function (d) {
+                        if(d.return == '' || d.return == null){
+                            return '无信息';
+                        }else{
+                            return d.return;
+                        }
+                    }
+                },
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+            ]]
+        });
+
+        function buyType(type){
+            switch (type){
+                case 'recharge':
+                    return '用户充值';
+                default:
+                    return '类型错误';
+            }
+        }
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        /* 表格工具条点击事件 */
+        table.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'del') { // 删除
+                doDel(obj);
+            }
+        });
+
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('SF_Table');
+                if (checkRows.data.length === 0) {
+                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                console.log(ids)
+                doDel({ids: ids});
+            }
+        });
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '<?php echo url("/Order/drop"); ?>' : '<?php echo url("/Order/batchDrop"); ?>',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            table.reload('SF_Table');
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        window.setStatus = function (id, status, nowStatus = null){
+            if(nowStatus == 4){
+                layer.confirm('该订单已执行过退单操作，是否再次执行？', {
+                    skin: 'layui-layer-admin',
+                    icon: 3,
+                    shade: .1
+                }, function (i) {
+                    layer.close(i);
+                    setStatus(id, status);
+                });
+                return false;
+            }
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'<?php echo url("/Order/setStatus"); ?>',
+                data: {id:id, status:status},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        table.reload('SF_Table');
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        }
+    });
+</script>

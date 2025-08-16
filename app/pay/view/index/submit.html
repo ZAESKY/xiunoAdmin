@@ -1,0 +1,73 @@
+{include file="/public/header"}
+<!-- 加载动画 -->
+<div class="page-loading">
+    <div class="signal-loader">
+        <span></span><span></span><span></span><span></span>
+    </div>
+</div>
+<div id="SF"></div>
+{include file="/public/footer"}
+<script>
+    layui.use(['form', 'admin', 'notice'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        notice.msg('正在为您跳转到支付页面，请稍候...', {icon: 4, close: true});
+        $(document).ready(function(){
+            $.ajax({
+                type: "POST",
+                url: '{:url("/Index/check")}',
+                data :{'type': '{$type}', 'orderid': '{$orderid}'},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    admin.removeLoading();
+                    if (data.code == 0) {
+                        if(data.data.hasOwnProperty('url')){
+                            window.location.replace(data.data.url);
+                        }else if(data.data.hasOwnProperty('html')){
+                            $("#SF").html(data.data.html);
+                        }else{
+                            notice.error({
+                                title: '跳转失败',
+                                message: '获取跳转支付链接失败',
+                                animateInside:true,
+                                position:'topCenter',
+                                transitionOut:'flipOutX',
+                                transitionOutMobile: 'flipOutX',
+                                displayMode:'2',
+                                audio:'1',
+                                onClosing: function () {
+                                    window.location.href = '/';
+                                }
+                            });
+                        }
+                    } else {
+                        notice.error({
+                            title: '跳转失败',
+                            message: data.msg,
+                            animateInside:true,
+                            position:'topCenter',
+                            transitionOut:'flipOutX',
+                            transitionOutMobile: 'flipOutX',
+                            displayMode:'2',
+                            audio:'1',
+                            onClosing: function () {
+                                window.location.href = '/';
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    admin.removeLoading();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+
+    });
+</script>
+</body>
+</html>

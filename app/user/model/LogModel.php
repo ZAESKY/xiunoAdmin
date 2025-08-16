@@ -1,0 +1,100 @@
+<?php
+namespace app\user\model;
+
+use app\common\model\BaseModel;
+use think\Exception;
+
+/**
+ * 日志-模型
+ * @author 陌上花开
+ * @since 2022/1/30
+ * Class LogModel
+ * @package app\user\model
+ */
+class LogModel extends BaseModel
+{
+    // 设置数据表名
+    protected $name = "log";
+
+    public function getInfo($id){
+        try{
+            $userInfo = parent::getUserInfo();
+            if(!$userInfo){
+                return false;
+            }
+            $result = self::where(['id' => $id, 'username' => $userInfo['id']])->find();
+            if($result){
+                $content = [
+                    'Title' => '查找日志',
+                    '操作' => '查找日志',
+                    '日志ID' => $id,
+                    'Result' => 'success'
+                ];
+                event('ActionLog', $content);
+                return $result;
+            }else{
+                $content = [
+                    'Title' => '查找日志',
+                    '操作' => '查找日志',
+                    '日志ID' => $id,
+                    'Result' => '[errorCode:GetLogInfoError]'
+                ];
+                event('ActionLog', $content);
+                return false;
+            }
+        }catch (\Exception $e){
+            return false;
+        }
+    }
+
+    public function list(){
+        try{
+            try{
+                $userInfo = parent::getUserInfo();
+                if(!$userInfo){
+                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                }
+            }catch (\Exception $e){
+                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+            }
+            $post = request()->post();
+            $limit = !empty($post['limit'])?$post['limit']:10;
+            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $text = isset($post['text'])?$post['text']:null;
+            $data = [];
+            $data[] = ['is_admin', '=', 0];
+            $data[] = ['username', '=', $userInfo['id']];
+
+            if($text !== null){
+                $data[] = ['id|title|ip', 'like', '%'.$text.'%'];
+            }
+            $data[] = ['username', '=', $userInfo['id']];
+            $data[] = ['mark', '=', 1];
+            try{
+                $list = self::order('id' ,'desc')->where($data)->paginate([
+                    'list_rows'=> $limit,
+                    'page' => $current_page,
+                ]);
+                $content = [
+                    'Title' => '日志列表',
+                    '操作' => '获取日志列表',
+                    '获取条数' => $list->total().' 条',
+                    'Result' => 'success'
+                ];
+                event('ActionLog', $content);
+                return $list;
+            } catch (\Exception $e) {
+                $content = [
+                    'Title' => '日志列表',
+                    '操作' => '获取日志列表',
+                    '获取条数' => '0 条',
+                    'Result' => '[errorCode:GetLogListError]'
+                ];
+                event('ActionLog', $content);
+                throw new Exception('获取列表失败！[errorCode:GetLogListError]');
+            }
+        }catch (\Exception $e){
+            throw new Exception('获取列表失败！[errorCode:GetLogListError]');
+        }
+    }
+}

@@ -1,0 +1,450 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或授权内容或QQ"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状&emsp;态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">选择状态</option>
+                                <option value="1">显示</option>
+                                <option value="0">隐藏</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="SF_TbState">
+    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="正常|封禁" {{d.status==1?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_Tbid">
+    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+</script>
+<!-- 表单弹窗 -->
+<script type="text/html" id="SF_EditDialog">
+    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">易支付网址:</label>
+            <div class="layui-input-block">
+                <input type="text" name="url" placeholder="带http(s)://" class="layui-input"
+                       lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">QQ:</label>
+            <div class="layui-input-block">
+                <input type="number" name="qq" placeholder="请输入持有者QQ" class="layui-input"
+                       lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">授权时间:</label>
+            <div class="layui-input-block">
+                <select id="auth_price_list" name="type" class="layui-input ew-select-fixed" lay-filter="type">
+                    <option value="">请选择授权时间</option>
+                </select>
+            </div>
+        </div>
+        <div id="diy" style="display: none">
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">到期时间:</label>
+                <div class="layui-input-block">
+                    <input type="text" id="test" name="endtime" placeholder="请选择到期时间" class="icon-date layui-input"
+                           lay-verType="tips"/>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">状态:</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">价格:</label>
+            <div class="layui-input-block">
+                <input type="text" id="input_price" name="price" value="￥0" class="layui-input layui-disabled"
+                       lay-verType="tips" disabled/>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'table', 'admin', 'notice', 'laydate'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var laydate = layui.laydate;
+
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '{:url("/Payment/list")}',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.count, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
+                    }},
+                {field: 'url', title: '易支付网址', sort: true, minWidth: 160},
+                {field: 'qq', title: '持有者QQ', sort: true, minWidth: 120},
+                {
+                    field: 'endtime', title: '到期时间', align: 'right', templet: function (d) {
+                        if (d.permanent_switch == '1') {
+                            return '<span class="layui-badge layui-badge-green">永久授权</span>';
+                        } else {
+                            if(checkEndTime(d.endtime) == false){
+                                return '<span class="layui-badge layui-badge-orange">授权已到期</span>';
+                            }else{
+                                return '<span class="layui-badge layui-badge-blue">'+d.endtime+'</span>';
+                            }
+                        }
+                    }, sort: true, minWidth: 150
+                },
+                {field: 'addtime', title: '添加时间', sort: true, minWidth: 180},
+                {field: 'status', title: '状态', templet: '#SF_TbState', minWidth: 100},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+            ]]
+        });
+        function checkEndTime(date){
+            var oDate1 = new Date();
+            var oDate2 = new Date(date);
+            if(oDate1.getTime() > oDate2.getTime()){
+                return false;
+            } else  if(oDate1.getTime() < oDate2.getTime()){
+                return true;
+            }else if(oDate1.getTime() == oDate2.getTime()){
+                return false;
+            }
+        }
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        form.on('select(type)', function (data) {
+            let diy = $("#auth_price_list option:selected").attr('diy');
+            let price = $("#auth_price_list option:selected").attr('price');
+            if (diy == "1") {
+                $("#diy").css("display", "inherit");
+                if(data.value == ''){
+                    $('#input_price').val('请先输入到期时间！');
+                }else{
+                    $('#input_price').val('￥0');
+                }
+            }else{
+                $("#diy").css("display", "none");
+                if(data.value == ''){
+                    $('#input_price').val('请先选择授权时间！');
+                }else{
+                    $('#input_price').val('￥' + price * {$userInfo['addpay_discount']});
+                }
+            }
+        });
+
+        function DateDiff(sDate2, sDate1) {
+            var aDate, oDate1, oDate2, iDays, info, time;
+
+            if(sDate1 == null){
+                oDate1 = new Date();  //转换为yyyy-MM-dd格式
+            } else {
+                info = sDate1.split(" ");
+                aDate = info[0].split("-");
+                oDate1 = new Date(aDate[0] + '-' + aDate[1] + '-' + aDate[2]);
+            }
+
+            info = sDate2.split(" ");
+            aDate = info[0].split("-");
+            time = info[1].split(":");
+            oDate2 = new Date(aDate[0] + '-' + aDate[1] + '-' + aDate[2]);
+            iDays = Math.ceil((oDate2 - oDate1) / 1000 / 60 / 60 / 24); //把相差的毫秒数转换为天数
+            if(time[0] != '00' || time[1] != '00' || time[2] != '00'){
+                iDays++;
+            }
+            if(iDays < 0){
+                iDays = 0;
+            }
+            return iDays;  //返回相差天数
+        }
+
+        /* 表格工具条点击事件 */
+        table.on('tool(SF_Table)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            }
+            laydate.render({
+                elem: '#test', //指定元素
+                mark: {
+                    '0-3-15': 'SF'
+                },
+                type: 'datetime',
+                trigger: 'click',
+                done: function(value, date){
+                    let price = $("#auth_price_list option:selected").attr('price');
+                    let day = $("#auth_price_list option:selected").attr('day');
+                    if(value == ''){
+                        $('#input_price').val('请先输入到期时间！');
+                    }else{
+                        $('#input_price').val('￥' + (DateDiff(value, obj.data.endtime) * Math.ceil((price / day) * 100) / 100) * {$userInfo['addpay_discount']});
+                    }
+                }
+            });
+        });
+
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(SF_Table)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('SF_Table');
+                if (checkRows.data.length === 0) {
+                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                console.log(ids)
+                doDel({ids: ids});
+            }
+            laydate.render({
+                elem: '#test', //指定元素
+                mark: {
+                    '0-3-15': 'SF'
+                },
+                type: 'datetime',
+                trigger: 'click',
+                done: function(value, date){
+                    let price = $("#auth_price_list option:selected").attr('price');
+                    let day = $("#auth_price_list option:selected").attr('day');
+                    if(value == ''){
+                        $('#input_price').val('请先输入到期时间！');
+                    }else{
+                        $('#input_price').val('￥' + (DateDiff(value, null) * Math.ceil((price / day) * 100) / 100) * {$userInfo['addpay_discount']});
+                    }
+                }
+            });
+        });
+
+        /* 显示表单弹窗 */
+        function showEditModel(mData) {
+            admin.popupRight({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '授权',
+                content: $('#SF_EditDialog').html(),
+                success: function (layero, dIndex) {
+                    // 回显表单数据
+                    if(mData){
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Auth/getAuthPriceList")}',
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                    var content = '<option value="-1" diy="0" day="0" price="0">不续费</option>';
+                                    $.each(data.data,function(index, value){
+                                        $.each(value,function(index, value){
+                                            if(value.diy_switch == 1){
+                                                content += '<option value="'+value.id+'" diy="1" day="'+value.day+'" price="'+value.money+'">'+value.name+'</option>';
+                                            }else{
+                                                content += '<option value="'+value.id+'" diy="0" price="'+value.money+'">'+value.name+'</option>';
+                                            }
+                                        });
+                                    });
+                                    $("#auth_price_list").html(content);
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                form.val('SF_EditForm', mData);
+                                form.render();
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                    } else {
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Auth/getAuthPriceList")}',
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                    var content = '<option value="">请选择授权时间</option>';
+                                    $.each(data.data,function(index, value){
+                                        $.each(value,function(index, value){
+                                            if(value.diy_switch == 1){
+                                                content += '<option value="'+value.id+'" diy="1" day="'+value.day+'" price="'+value.money+'">'+value.name+'</option>';
+                                            }else{
+                                                content += '<option value="'+value.id+'" diy="0" price="'+value.money+'">'+value.name+'</option>';
+                                            }
+                                        });
+                                    });
+                                    $("#auth_price_list").html(content);
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                form.render();
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                    }
+
+                    // 表单提交事件
+                    form.on('submit(SF_EditSubmit)', function (data) {
+                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/Payment/edit")}',
+                            data: data.field,
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    table.reload('SF_Table');
+                                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+                        return false;
+                    });
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url: obj.data ? '{:url("/Payment/drop")}' : '{:url("/Payment/batchDrop")}',
+                    data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            insTb.reload({page: {curr: 1}});
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        /* 修改用户状态 */
+        form.on('switch(SF_TbStateCk)', function (obj) {
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url:'{:url("/Payment/setStatus")}',
+                data: {id:obj.value,status:obj.elem.checked ? 1 : 0},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        insTb.reload({page: {curr: 1}});
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+    });
+</script>

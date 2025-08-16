@@ -1,0 +1,161 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card" id="divLoading">
+        <div class="layui-card-body">
+            <form class="layui-form formBasForm" lay-filter="formBasForm">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">所属应用</label>
+                    <div class="layui-input-block">
+                        <select name="appid" class="layui-input ew-select-fixed" lay-filter="app" lay-search lay-verify="required">
+                            <option value="">请选择应用</option>
+                            {volist name="app_list.data.data" id="res"}
+                            <option value="{$res.id}">{$res.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">授权内容</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="auth_info" class="layui-input" placeholder="请输入授权内容" lay-verify="required"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">授权QQ</label>
+                    <div class="layui-input-block">
+                        <input type="number" name="qq" class="layui-input" placeholder="请输入授权持有者QQ" lay-verify="required"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证码</label>
+                    <div class="layui-input-block" style="padding-right: 135px;">
+                        <input type="text" name="code" class="layui-input" placeholder="请输入验证码"/>
+                        <button id="SF_CodeBtn" type="button" lay-filter="SF_GetCode" class="layui-btn" style="width: 120px;cursor: pointer;position: absolute;right: 0;top: 0;"  lay-submit/>
+                        获取验证码
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-form-item text-right">
+                    <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>获取</button>
+                    <button type="button" class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'admin', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+        form.on('submit(SF_GetCode)', function (data) {
+            admin.btnLoading('#SF_CodeBtn');
+            admin.showLoading('#divLoading', 3, '.8');
+            $.ajax({
+                type: "POST",
+                url: '{:url("/DownloadMail/getCode")}',
+                data: data.field,
+                dataType: "json",
+                success: function(data) {
+                    admin.btnLoading('#SF_CodeBtn', false);
+                    admin.removeLoading('#divLoading', true, true);
+                    if (data.code == 0) {
+                        parent.layui.notice.success({
+                            title: '获取通知',
+                            message: data.msg,
+                            animateInside:true,
+                            position:'topCenter',
+                            transitionOut:'flipOutX',
+                            transitionOutMobile: 'flipOutX',
+                            displayMode:'2',
+                            audio:'1'
+                        });
+                    } else {
+                        parent.layui.notice.error({
+                            title: '获取通知',
+                            message: data.msg,
+                            animateInside:true,
+                            position:'topCenter',
+                            transitionOut:'flipOutX',
+                            transitionOutMobile: 'flipOutX',
+                            displayMode:'2',
+                            audio:'1'
+                        });
+                    }
+                },
+                error: function() {
+                    admin.btnLoading('#SF_CodeBtn', false);
+                    admin.removeLoading('#divLoading', true, true);
+                    parent.layui.notice.error({
+                        title: '获取通知',
+                        message: '服务器错误',
+                        animateInside:true,
+                        position:'topCenter',
+                        transitionOut:'flipOutX',
+                        transitionOutMobile: 'flipOutX',
+                        displayMode:'2',
+                        audio:'1'
+                    });
+                }
+            });
+            return false;
+        });
+        form.on('submit(SF_DownloadSubmit)', function (info) {
+            admin.btnLoading('#SF_DownloadBtn');
+            admin.showLoading('#divLoading', 3, '.8');
+            $.ajax({
+                type: "POST",
+                url: '{:url("/DownloadMail/verification")}',
+                data: info.field,
+                dataType: "json",
+                success: function(data) {
+                    admin.btnLoading('#SF_DownloadBtn', false);
+                    admin.removeLoading('#divLoading', true, true);
+                    if (data.code == 0) {
+                        parent.layui.notice.success({
+                            title: '获取通知',
+                            message: data.msg,
+                            animateInside:true,
+                            position:'topCenter',
+                            transitionOut:'flipOutX',
+                            transitionOutMobile: 'flipOutX',
+                            displayMode:'2',
+                            audio:'1'
+                        });
+                        window.open(data.data.url);
+                    } else {
+                        parent.layui.notice.error({
+                            title: '获取通知',
+                            message: data.msg,
+                            animateInside:true,
+                            position:'topCenter',
+                            transitionOut:'flipOutX',
+                            transitionOutMobile: 'flipOutX',
+                            displayMode:'2',
+                            audio:'1'
+                        });
+                    }
+                },
+                error: function() {
+                    admin.btnLoading('#SF_DownloadBtn', false);
+                    admin.removeLoading('#divLoading', true, true);
+                    parent.layui.notice.error({
+                        title: '获取通知',
+                        message: '服务器错误',
+                        animateInside:true,
+                        position:'topCenter',
+                        transitionOut:'flipOutX',
+                        transitionOutMobile: 'flipOutX',
+                        displayMode:'2',
+                        audio:'1'
+                    });
+                }
+            });
+            return false;
+        });
+    });
+</script>

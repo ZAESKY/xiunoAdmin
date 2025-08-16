@@ -1,0 +1,503 @@
+{include file="/public/header"}
+<style>
+    /* 用户信息 */
+    .user-info-head {
+        width: 110px;
+        height: 110px;
+        line-height: 110px;
+        position: relative;
+        display: inline-block;
+        border: 2px solid #eee;
+        border-radius: 50%;
+        overflow: hidden;
+        cursor: pointer;
+        margin: 0 auto;
+    }
+
+    .user-info-head:hover:after {
+        content: '\e681';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.3);
+        font-size: 28px;
+        padding-top: 2px;
+        font-style: normal;
+        font-family: layui-icon;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .user-info-head img {
+        width: 110px;
+        height: 110px;
+    }
+
+    .user-info-list-item {
+        position: relative;
+        padding-bottom: 8px;
+        height: 50px;
+        line-height:50px;
+    }
+
+    .user-info-list-item > img {
+        position: absolute;
+        height: 34px;
+        padding-top: 8px;
+        vertical-align: middle;
+    }
+
+    .discount-list {
+        height: 100px;
+        line-height:50px;
+    }
+
+    .discount-list > img {
+        position: absolute;
+        height: 34px;
+        padding-top: 32px;
+        vertical-align: middle;
+    }
+
+    .user-info-list-item > p {
+        padding-left: 60px;
+        font-size: 15px;
+    }
+
+    .layui-line-dash {
+        border-bottom: 1px dashed #ccc;
+        margin: 15px 0;
+    }
+
+    /* 基本信息 */
+    #userInfoForm .layui-form-item {
+        margin-bottom: 25px;
+    }
+
+    /* 账号绑定 */
+    .user-bd-list-item {
+        padding: 14px 60px 14px 10px;
+        border-bottom: 1px solid #e8e8e8;
+        position: relative;
+    }
+
+    .user-bd-list-item .user-bd-list-lable {
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .user-bd-list-item .user-bd-list-oper {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        margin-top: -8px;
+        cursor: pointer;
+    }
+
+    .user-bd-list-item .user-bd-list-img {
+        width: 48px;
+        height: 48px;
+        line-height: 48px;
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        margin-top: -24px;
+    }
+
+    .user-bd-list-item .user-bd-list-img + .user-bd-list-content {
+        margin-left: 68px;
+    }
+    .bgimg{
+        background-image: url('{__IMG__}bg1.png');
+        border-radius: 4px 4px 0px 0px;
+        background-size:100% 100%;
+        background-repeat:no-repeat;
+        height: 96px;
+        padding: 15px;
+    }
+    .img{
+        width: 96px;
+        height: 96px;
+        margin:auto;
+        display: block;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        position: relative;
+        margin-top: -80px;
+    }
+</style>
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <!-- 左 -->
+        <div class="layui-col-sm12 layui-col-md3">
+            <div class="layui-card">
+                <div class="bgimg"></div>
+                <div class="layui-card-body" style="padding: 25px;background-image: url('{__IMG__}background.svg');background-size: cover;">
+                    <div class="text-center layui-text">
+                        <div class="img user-info-head" id="userInfoHead">
+                            <img src="{$userInfo['img']}" alt=""/>
+                        </div>
+                        <h2 style="padding-top: 20px;">{$userInfo['username']}</h2>
+                        <p style="padding-top: 8px;">{:hello_user($userInfo['username'])}</p>
+                    </div>
+                    <div class="layui-text" style="padding-top: 30px;">
+                        <div class="user-info-list-item">
+                            <img src="{__IMG__}app.png">
+                            <p><span class="layui-badge layui-badge-purple">应用：{$userInfo['app_name']}</span></p>
+                        </div>
+                        <div class="user-info-list-item">
+                            <img src="{__IMG__}power2.png">
+                            <p><span class="layui-badge layui-badge-red">权限：{$userInfo['power_name']}</span></p>
+                        </div>
+                        <div class="user-info-list-item discount-list">
+                            <img src="{__IMG__}discount.png">
+                            <p>
+                                {if $userInfo['addauth_discount'] <= 0}
+                                <span class="layui-badge layui-badge-green">添加授权：免费</span>
+                                {elseif $userInfo['addauth_discount'] >= 1}
+                                <span class="layui-badge layui-badge-gray">添加授权：原价</span>
+                                {else}
+                                <span class="layui-badge layui-badge-orange">添加授权：{$userInfo['addauth_discount'] * 10} 折</span>
+                                {/if}
+
+                                {if $userInfo['adduser_discount'] <= 0}
+                                <span class="layui-badge layui-badge-green">添加用户：免费 </span>
+                                {elseif $userInfo['adduser_discount'] >= 1}
+                                <span class="layui-badge layui-badge-gray">添加用户：原价</span>
+                                {else}
+                                <span class="layui-badge layui-badge-orange">添加用户：{$userInfo['adduser_discount'] * 10} 折</span>
+                                {/if}
+
+                                {if $userInfo['addpay_discount'] <= 0}
+                                <span class="layui-badge layui-badge-green">添加认证：免费 </span>
+                                {elseif $userInfo['addpay_discount'] >= 1}
+                                <span class="layui-badge layui-badge-gray">添加认证：原价</span>
+                                {else}
+                                <span class="layui-badge layui-badge-orange">添加认证：{$userInfo['addpay_discount'] * 10} 折</span>
+                                {/if}
+
+                                {if $userInfo['pirate_discount'] <= 0}
+                                <span class="layui-badge layui-badge-green">查看盗版：免费</span>
+                                {elseif $userInfo['pirate_discount'] >= 1}
+                                <span class="layui-badge layui-badge-gray">查看盗版：原价</span>
+                                {else}
+                                <span class="layui-badge layui-badge-orange">查看盗版：{$userInfo['pirate_discount'] * 10} 折</span>
+                                {/if}
+                            </p>
+                        </div>
+                        <div class="user-info-list-item">
+                            <img src="{__IMG__}qqicon.png">
+                            <p><span class="layui-badge layui-badge-blue">QQ：{$userInfo['qq']}</span></p>
+                        </div>
+                        <div class="user-info-list-item">
+                            <img src="{__IMG__}moneypay.png"/>
+                            <p><span class="layui-badge layui-badge-green">余额：{$userInfo['balance']} 元</span><a ew-href="{:url('/MyInfo/recharge')}" class="pull-right">充值</a></p>
+                        </div>
+                        <div class="user-info-list-item">
+                            <img src="{__IMG__}total.png"/>
+                            <p><span class="layui-badge layui-badge-yellow">积分：{$userInfo['integral']} 个</span><a ew-href="{:url('/Integral/market')}" class="pull-right">兑换</a></p>
+                        </div>
+                    </div>
+                    <div class="layui-line-dash"></div>
+                    <h3>更多信息</h3>
+                    <div class="layui-badge-list" style="padding-top: 6px;">
+                        <span class="layui-badge layui-bg-gray">注册时间：{$userInfo['addtime']}</span>
+                        <span class="layui-badge layui-bg-gray">最后登陆时间：{$userInfo['lasttime']}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 右 -->
+        <div class="layui-col-sm12 layui-col-md9">
+            <div class="layui-card">
+                <!-- 选项卡开始 -->
+                <div class="layui-tab layui-tab-brief" lay-filter="userInfoTab">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">账号绑定</li>
+                        <li>权限升级</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <!-- tab1 -->
+                        <div class="layui-tab-item layui-show" style="padding-bottom: 20px;">
+                            <div class="user-bd-list layui-text">
+                                <div class="user-bd-list-item">
+                                    <div class="user-bd-list-img">
+                                        <i class="layui-icon layui-icon-cellphone"
+                                           style="color: #52c41a;font-size: 48px;"></i>
+                                    </div>
+                                    <div class="user-bd-list-content">
+                                        <div class="user-bd-list-lable">密保手机</div>
+                                        {if $userInfo['phone'] == ''}
+                                        <div class="user-bd-list-text">未绑定</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>绑定</a>
+                                        {else}
+                                        <div class="user-bd-list-text">已绑定手机：{:substr_replace($userInfo['phone'],'****',3,4)}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>修改</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <div class="user-bd-list-item">
+                                    <div class="user-bd-list-img">
+                                        <i class="layui-icon layui-icon-email"
+                                           style="color: #faad14;font-size: 48px;"></i>
+                                    </div>
+                                    <div class="user-bd-list-content">
+                                        <div class="user-bd-list-lable">密保邮箱</div>
+                                        {if $userInfo['email'] == ''}
+                                        <div class="user-bd-list-text">未绑定</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>绑定</a>
+                                        {else}
+                                        <div class="user-bd-list-text">已绑定邮箱：{:substr_replace($userInfo['email'],'****',3,4)}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>修改</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <div class="user-bd-list-item">
+                                    <div class="user-bd-list-img">
+                                        <i class="layui-icon layui-icon-login-qq"
+                                           style="color: #3492ED;font-size: 48px;"></i>
+                                    </div>
+                                    <div class="user-bd-list-content">
+                                        <div class="user-bd-list-lable">绑定QQ</div>
+                                        {if $userInfo['access_token'] == ''}
+                                        <div class="user-bd-list-text">当前未绑定QQ账号</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>绑定</a>
+                                        {else}
+                                        <div class="user-bd-list-text">{:substr_replace($userInfo['access_token'],'********',3,8)}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>解绑</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item" style="padding-bottom: 20px;">
+                            <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form formBasForm">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label layui-form-required">升级权限:</label>
+                                    <div class="layui-input-block">
+                                        <select id="updatePower" name="power" class="layui-input ew-select-fixed" lay-filter="updatePower" lay-search>
+                                            <option value="">请选择要升级的权限</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="introduce"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- //选项卡结束 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bindingEmail">
+    <form class="layui-form model-form layui-row">
+        <input name="schedulingId" type="hidden"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">邮箱:</label>
+            <div class="layui-input-block">
+                <input type="text" name="email" placeholder="请输入要绑定的邮箱" class="layui-input"
+                       lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">验证码:</label>
+            <div class="layui-input-block layui-col-space5">
+                    <div class="layui-col-lg6 layui-col-md6 layui-col-sm6 layui-col-xs6">
+                        <input type="text" name="code" placeholder="请输入验证码" class="layui-input"
+                               lay-verType="tips"/>
+                    </div>
+                    <div class="layui-col-lg6 layui-col-md6 layui-col-sm6 layui-col-xs6">
+                        <button id="sendCode" class="layui-btn layui-btn-primary" lay-filter="sendCode" lay-submit>发送验证码</button>
+                    </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="submitMail" lay-submit>绑定</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'element', 'admin', 'notice', 'jQueryCookie'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var cookie = layui.jQueryCookie;
+
+        $(function(){
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            admin.ajax({
+                url: '{:url("/MyInfo/getUserUpdatePowerList")}',
+                data: {},
+                headers: {},
+                type: 'post',
+                dataType: 'json',
+                success: function(res){
+                    notice.destroy();
+                    if(res.code == 0){
+                        notice.msg('获取列表成功！', {icon: 1});
+                        var content = '';
+                        if(res.data.data.length === 0){
+                            content += '<option value="">您当前已是最高权限</option>';
+                        }else{
+                            content += '<option value="">请选择要升级的权限</option>';
+                            $.each(res.data.data,function(index, value){
+                                content += '<option value="'+value.id+'" price="'+value.money+'" introduce="'+value.introduce+'">'+value.name+'</option>';
+                            });
+                        }
+                        $("#updatePower").html(content);
+                        form.render('select');
+                    } else {
+                        notice.msg(res.msg, {icon: 2, audio: '1'});
+                    }
+                }
+            });
+
+        });
+
+        form.on('select(updatePower)', function (data) {
+            if(data.value == ''){
+                $("#introduce").css('display','none');
+            }else{
+                $("#introduce").css('display','inherit');
+                let introduce = $("#updatePower option:selected").attr('introduce');
+                let price = $("#updatePower option:selected").attr('price');
+                $("#introduce").html('<div class="layui-form-item"><div class="sf-tag">升级所需金额：'+price+' 元</div><div class="sf-tips">'+(introduce?introduce:'暂无介绍')+'</div></div><div class="layui-form-item"><button class="layui-btn" lay-filter="SF_UpdatePower" lay-submit>点击升级</button></div>');
+            }
+        });
+
+        form.on('submit(SF_UpdatePower)', function (data) {
+            if(data.field.power == ''){
+                notice.msg('请选择要升级的权限！', {icon: 2, audio: '1'});
+                return false;
+            }
+
+            if(data.field.power < 0){
+                notice.msg('不存在此权限！', {icon: 2, audio: '1'});
+                return false;
+            }
+            let name = $("#updatePower option:selected").text();
+            let price = $("#updatePower option:selected").attr('price');
+            layer.confirm('确定要花费 <span class="layui-badge layui-badge-yellow">'+price+' 元</span> 升级成 <span class="layui-badge layui-badge-orange">'+name+'</span> 吗？', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                admin.ajax({
+                    url: '{:url("/MyInfo/updatePower")}',
+                    data: {power:data.field.power},
+                    headers: {},
+                    type: 'post',
+                    dataType: 'json',
+                    success: function(res){
+                        notice.destroy();
+                        if(res.code == 0){
+                            notice.msg('升级权限成功！', {icon: 1, audio: '1'});
+                        } else {
+                            notice.msg(res.msg, {icon: 2, audio: '1'});
+                        }
+                    }
+                });
+            });
+            return false;
+        });
+
+        function setTime(val,time){
+            var countdown = time;
+            function a(val) {
+                if (countdown == 0) {
+                    val.removeProp("disabled");
+                    val.removeClass("layui-disabled");
+                    val.text("发送验证码");
+                    countdown = 60;
+                    return false;
+                } else {
+                    val.prop("disabled", "true");
+                    val.addClass("layui-disabled");
+                    val.text("还剩 " + countdown + " S");
+                    countdown--;
+                }
+                setTimeout(function() {
+                    a(val);
+                },1000);
+            }
+            a(val);
+        }
+
+        form.on('submit(bindingEmail)', function (data) {
+            admin.ajax({
+                url: '{:url("/MyInfo/checkBinding")}',
+                data: {type:'email'},
+                headers: {},
+                type: 'post',
+                dataType: 'json',
+                success: function(res){
+                    admin.open({
+                        type: 1,
+                        title: (res.code == 0?'更换':'绑定') + '邮箱',
+                        content: $('#bindingEmail').html(),
+                        success: function (layero, dIndex) {
+                            form.render();
+                            form.on('submit(sendCode)', function (data) {
+                                notice.msg('正在执行中..', {icon: 4, close: true});
+                                admin.ajax({
+                                    url: '{:url("/MyInfo/sendCode")}',
+                                    data: {type:'changeBindingMail',content:data.field.email},
+                                    headers: {},
+                                    type: 'post',
+                                    dataType: 'json',
+                                    success: function(res){
+                                        notice.destroy();
+                                        if(res.code == 0){
+                                            notice.msg('发送验证码成功！', {icon: 1, audio: '1'});
+                                            setTime($("#sendCode"), 60);
+                                        } else {
+                                            notice.msg(res.msg, {icon: 2, audio: '1'});
+                                        }
+                                    }
+                                });
+                                return false;
+                            });
+                            form.on('submit(submitMail)', function (data) {
+                                notice.msg('正在执行中..', {icon: 4, close: true});
+                                admin.ajax({
+                                    url: '{:url("/MyInfo/editUserInfo")}',
+                                    data: {type:'changeBindingMail',code:data.field.code,content:data.field.email},
+                                    headers: {},
+                                    type: 'post',
+                                    dataType: 'json',
+                                    success: function(data){
+                                        notice.destroy();
+                                        if(data.code == 0){
+                                            notice.msg((res.code == 0?'更换':'绑定')+ '成功！', {icon: 1, audio: '1'});
+                                        } else {
+                                            notice.msg(data.msg, {icon: 2, audio: '1'});
+                                        }
+                                    }
+                                });
+                                return false;
+                            });
+                        }
+                    });
+                }
+            });
+
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

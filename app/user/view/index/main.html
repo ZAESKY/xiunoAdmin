@@ -1,0 +1,264 @@
+{include file="/public/header"}
+
+<div class="layui-fluid ew-console-wrapper">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-sm12 layui-col-space15">
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/Auth/list')}" ew-title="授权列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-green layui-icon layui-icon-auz"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$auth_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">
+                        授权总数
+                    </div>
+                    {lt name="auth_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$auth_increase|abs} 个</span>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/User/list')}" ew-title="用户列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-blue layui-icon layui-icon-group"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$user_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">
+                        用户总数
+                    </div>
+                    {lt name="user_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$user_increase|abs} 个</span>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/Pirate/list')}" ew-title="盗版列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-red layui-icon layui-icon-website"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$pirate_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">
+                        盗版总数
+                    </div>
+                    {lt name="pirate_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$pirate_increase|abs} 个</span>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/Payment/list')}" ew-title="认证列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-purple layui-icon layui-icon-ok-circle"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$payment_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">
+                        认证总数
+                    </div>
+                    {lt name="payment_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$payment_increase|abs} 个</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">官方公告
+                    <span class="pull-right">
+                        <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-green layui-icon layui-icon-notice"></i>
+                    </span>
+                </div>
+                <div class="layui-card-body">
+                    {notempty name="notice"}{$notice}{else/}暂无公告{/notempty}
+                </div>
+            </div>
+            <div class="layui-card">
+                <div class="layui-card-header">应用公告
+                    <span class="pull-right">
+                        <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-purple layui-icon layui-icon-notice"></i>
+                    </span>
+                </div>
+                <div class="layui-card-body">
+                    {notempty name="app_notice"}{$app_notice}{else/}暂无公告{/notempty}
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    排行榜
+                    <span class="pull-right">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-pink layui-icon layui-icon-fire"></i>
+                </span>
+                </div>
+                <div class="layui-card-body">
+                    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                        <ul class="layui-tab-title">
+                            <li class="layui-this">余额排行</li>
+                            <li>积分排行</li>
+                        </ul>
+                        <div class="layui-tab-content">
+                            <div class="layui-tab-item layui-show">
+                                <table class="layui-table" lay-skin="line">
+                                    <colgroup>
+                                        <col style="width:80px"/>
+                                        <col/>
+                                        <col style="width:80px"/>
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <td style="text-align: center">排名</td>
+                                        <td>用户名</td>
+                                        <td style="text-align: center">余额</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {php}$i = 1;{/php}
+                                    {foreach $balance_ranking as $res}
+                                    {php}
+                                        switch($i){
+                                            case 1:
+                                                $color = 'red';
+                                                break;
+                                            case 2:
+                                                $color = 'blue';
+                                                break;
+                                            case 3:
+                                                $color = 'green';
+                                                break;
+                                            default:
+                                                $color = 'gray';
+                                                break;
+                                        }
+                                    {/php}
+                                    <tr>
+                                        <td style="text-align: center">
+                                            <span class="layui-badge layui-badge-{$color} layui-badge-priority">{$i}</span>
+                                        </td>
+                                        <td><span class="layui-text"><a>{$res.username}</a></span></td>
+                                        <td style="text-align: center"><span class="text-warning">{$res.balance}</span></td>
+                                    </tr>
+                                    {php}$i++;{/php}
+                                    {/foreach}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="layui-tab-item">
+                                <table class="layui-table" lay-skin="line">
+                                    <colgroup>
+                                        <col style="width:80px"/>
+                                        <col/>
+                                        <col style="width:80px"/>
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <td style="text-align: center">排名</td>
+                                        <td>用户名</td>
+                                        <td style="text-align: center">积分</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {php}$i = 1;{/php}
+                                    {foreach $integral_ranking as $res}
+                                    {php}
+                                        switch($i){
+                                            case 1:
+                                                $color = 'red';
+                                                break;
+                                            case 2:
+                                                $color = 'blue';
+                                                break;
+                                            case 3:
+                                                $color = 'green';
+                                                break;
+                                            default:
+                                                $color = 'gray';
+                                                break;
+                                        }
+                                    {/php}
+                                    <tr>
+                                        <td style="text-align: center">
+                                            <span class="layui-badge layui-badge-{$color} layui-badge-priority">{$i}</span>
+                                        </td>
+                                        <td><span class="layui-text"><a>{$res.username}</a></span></td>
+                                        <td style="text-align: center"><span class="text-warning">{$res.integral}</span></td>
+                                    </tr>
+                                    {php}$i++;{/php}
+                                    {/foreach}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">最新日志
+                    <span class="pull-right">
+                        <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-orange layui-icon layui-icon-log"></i>
+                    </span>
+                </div>
+                <div class="layui-card-body dynamic-card-body mini-bar" style="height: 265px;">
+                    <ul class="layui-timeline layui-timeline-dynamic">
+                        {empty name="log_list"}
+                        <li class="layui-timeline-item">
+                            <i class="layui-icon layui-timeline-axis {if $i % 2 == 0}active{/if}"></i>
+                            <div class="layui-timeline-content layui-text">
+                                <div class="layui-timeline-title">暂未日志
+                                    <span class="pull-right">{:date('Y-m-d H:i:s')}</span>
+                                </div>
+                            </div>
+                        </li>
+                        {else/}
+                        {php}$i = 1;{/php}
+                        {foreach $log_list as $res}
+                        <li class="layui-timeline-item">
+                            <i class="layui-icon layui-timeline-axis {if $i % 2 == 0}active{/if}"></i>
+                            <div class="layui-timeline-content layui-text">
+                                <div class="layui-timeline-title">{$res.title}
+                                    <span class="pull-right">{$res.create_time}</span>
+                                </div>
+                            </div>
+                        </li>
+                        {php}$i++;{/php}
+                        {/foreach}
+                        {/empty}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+    });
+</script>

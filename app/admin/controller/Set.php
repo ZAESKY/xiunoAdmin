@@ -45,6 +45,9 @@ class Set extends Backend
                 if($res['type'] != 'config'){
                     $res['content'] = json_decode($res['content'], true);
                 }
+                if (in_array($res['name'], ['notice_home', 'notice_user'], true)) {
+                    $res['type'] = 'ueditor';
+                }
                 $res['tip'] = $res['tip'];
                 $siteList[$res['group']]['list'][] = $res;
             }
@@ -80,6 +83,9 @@ class Set extends Backend
                             } else {
                                 $value = is_array($value) ? implode(',', array_values(array_filter($value))) : $value;
                             }
+                            if (in_array($v['name'], ['notice_home', 'notice_user'], true)) {
+                                $value = clean_rich_text($value);
+                            }
                             $v['value'] = $value;
                             $configList[] = $v->toArray();
                         }
@@ -91,9 +97,9 @@ class Set extends Backend
                 } catch (\Exception $e) {
                     return message($e->getMessage() ,false);
                 }
-                return message('保存成功！' ,true);
+                return message(t('system.save_success') ,true);
             }
-            return message('保存失败！' ,false);
+            return message(t('system.save_failed') ,false);
         }
     }
 
@@ -102,7 +108,7 @@ class Set extends Backend
             $post = $this->request->post();
             $type = !empty($post['type'])?$post['type']:null;
             if(empty($type)){
-                return message('缺少TYPE参数！' ,false);
+                return message(t('validation.missing_type') ,false);
             }
             switch ($type){
                 case 'home':
@@ -111,12 +117,12 @@ class Set extends Backend
                 case 'notice':
                     break;
                 default:
-                    return message('类型错误！' ,false);
+                    return message(t('validation.type_error') ,false);
             }
             $templates = config('self_template');
             $path = PUBLIC_PATH . DS . 'template' . DS . 'modules' . DS . $type . DS . $templates[$type]['name'] . DS;
             if (!is_file($path. 'config.ini')) {
-                return message('模板配置文件不存在',false);
+                return message(t('template.config_not_exist'),false);
             }
             $config = include($path. 'config.ini');
             $params = $this->request->post('row/a', [], 'trim');
@@ -140,21 +146,21 @@ class Set extends Backend
                 try {
                     //更新配置文件
                     if (!is_really_writable($path . 'config.ini')) {
-                        return message('文件没有写入权限',false);
+                        return message(t('validation.file_no_write'),false);
                     }
                     if ($handle = fopen($path . 'config.ini', 'w')) {
                         fwrite($handle, '<?php'.PHP_EOL.PHP_EOL.'return ' . VarExporter::export($config) . ';'.PHP_EOL);
                         fclose($handle);
                         Cache::tag('SF_Template')->clear();
-                        return message('更新模板配置成功',true);
+                        return message(t('template.update_success'),true);
                     } else {
-                        return message('文件没有写入权限',false);
+                        return message(t('validation.file_no_write'),false);
                     }
                 } catch (Exception $e) {
-                    return message('更新配置信息失败！'.$e->getMessage(), false);
+                    return message(t('system.save_failed').$e->getMessage(), false);
                 }
             }
-            return message('获取模板配置成功！', true, $config);
+            return message(t('template.get_success'), true, $config);
         }
     }
 
@@ -164,10 +170,10 @@ class Set extends Backend
             $type = !empty($post['type'])?$post['type']:null;
             $name = !empty($post['name'])?$post['name']:null;
             if(empty($type)){
-                return message('缺少TYPE参数！' ,false);
+                return message(t('validation.missing_type') ,false);
             }
             if(empty($name)){
-                return message('缺少NAME参数！' ,false);
+                return message(t('validation.missing_name') ,false);
             }
             switch ($type){
                 case 'home':
@@ -176,15 +182,15 @@ class Set extends Backend
                 case 'notice':
                     break;
                 default:
-                    return message('类型错误！' ,false);
+                    return message(t('validation.type_error') ,false);
             }
             $templates = config('self_template');
             $path = PUBLIC_PATH . DS . 'template' . DS . 'modules' . DS . $type . DS . $name . DS;
             if (!is_file($path. 'info.ini')) {
-                return message('模板配置文件不存在',false);
+                return message(t('template.config_not_exist'),false);
             }
             if (!is_file($path. 'config.ini')) {
-                return message('模板配置文件不存在',false);
+                return message(t('template.config_not_exist'),false);
             }
             $config = include($path. 'config.ini');
             $templates[$type]['name'] = $name;
@@ -209,13 +215,13 @@ class Set extends Backend
             $type = !empty($post['type']) ? $post['type'] : null;
             $name = !empty($post['name']) ? $post['name'] : null;
             if(empty($type)){
-                return message('缺少TYPE参数！' ,false);
+                return message(t('validation.missing_type') ,false);
             }
             if(empty($name)){
-                return message('缺少NAME参数！' ,false);
+                return message(t('validation.missing_name') ,false);
             }
             if($name == 'default'){
-                return message('默认模板无法删除！' ,false);
+                return message(t('template.default_cannot_delete') ,false);
             }
             //获取模板信息
             switch ($type){
@@ -225,15 +231,15 @@ class Set extends Backend
                 case 'notice':
                     break;
                 default:
-                    return message('类型错误！' ,false);
+                    return message(t('validation.type_error') ,false);
             }
             $path = PUBLIC_PATH . DS . 'template' . DS . 'modules' . DS . $type . DS . $name . DS;
             if (!is_dir($path)) {
-                return message('模板目录不存在！' ,false);
+                return message(t('template.dir_not_exist') ,false);
             }
             //判断模板是否使用中，如果使用中不给删除
             if(config('self_template.' . $type . '.name') == $name){
-                return message('使用中的模板不能删除！' ,false);
+                return message(t('template.in_use_cannot_delete') ,false);
             }
             //删除模板
             rmdirs($path);
@@ -242,7 +248,7 @@ class Set extends Backend
             if (!is_dir($assets)) {
                 rmdirs($assets);
             }
-            return message('删除成功！' ,true);
+            return message(t('user.delete_success') ,true);
         }
     }
 
@@ -253,10 +259,10 @@ class Set extends Backend
             $type = !empty($post['type']) ? $post['type'] : null;
             $name = !empty($post['name']) ? $post['name'] : null;
             if (empty($type)) {
-                return message('缺少TYPE参数！', false);
+                return message(t('validation.missing_type'), false);
             }
             if (empty($name)) {
-                return message('缺少NAME参数！', false);
+                return message(t('validation.missing_name'), false);
             }
             //获取模板信息
             switch ($type){
@@ -266,13 +272,13 @@ class Set extends Backend
                 case 'notice':
                     break;
                 default:
-                    return message('类型错误！' ,false);
+                    return message(t('validation.type_error') ,false);
             }
             $templates_relativePath = str_replace(DS, '/', 'public' . DS . 'template' . DS . 'modules' . DS . $type . DS . $name . DS);
             $assets_relativePath = str_replace(DS, '/', 'public' . DS . 'template' . DS . 'assets' . DS . $type . DS . $name . DS);
             $path = ROOT_PATH . $templates_relativePath . 'info.ini';
             if (!is_file($path)) {
-                return message('模板配置文件不存在',false);
+                return message(t('template.config_not_exist'),false);
             }
             $config_info = parse_ini_file($path, true, INI_SCANNER_TYPED) ?: [];//获取模板配置信息
             //移动项目更新的文件end
@@ -283,7 +289,7 @@ class Set extends Backend
             $templates_name = 'SF-' . $type . '-' . $name . '-' . $config_info['version'] . '.zip';
             $templates_file = $tmp_dir . $templates_name;
             if (!class_exists('ZipArchive')) {
-                return message('ZinArchive 没有安装',false);
+                return message(t('system.zip_not_installed'),false);
             }
 
             $template_dir = ROOT_PATH . $templates_relativePath;
@@ -305,7 +311,7 @@ class Set extends Backend
                 }
                 unset($files);
             } catch (\Exception $e) {
-                return message('打包模板出错'.$e->getMessage(),false);
+                return message(t('template.pack_error').$e->getMessage(),false);
             }
             //打包资源
             try {
@@ -321,11 +327,11 @@ class Set extends Backend
                     }
                 }
             } catch (\Exception $e) {
-                return message('打包模板出错'.$e->getMessage(),false);
+                return message(t('template.pack_error').$e->getMessage(),false);
             }
 
             $zip->close();
-            return message('打包成功',true, $templates_name);
+            return message(t('template.pack_success'),true, $templates_name);
         }
 
     }
@@ -335,7 +341,7 @@ class Set extends Backend
             $post = $this->request->post();
             $type = !empty($post['type']) ? $post['type'] : null;
             if (empty($type)) {
-                return message('缺少TYPE参数！', false);
+                return message(t('validation.missing_type'), false);
             }
             //获取模板信息
             switch ($type) {
@@ -345,7 +351,7 @@ class Set extends Backend
                 case 'notice':
                     break;
                 default:
-                    return message('类型错误！', false);
+                    return message(t('validation.type_error'), false);
             }
             $templates = config('self_template');
             $templates[$type]['name'] = 'default';
@@ -356,14 +362,14 @@ class Set extends Backend
 
     public function download($name = null, $type = null){
         if(empty($name)){
-            return $this->render('/public/error', ['msg' => '压缩包名不能为空！']);
+            return $this->render('/public/error', ['msg' => t('validation.params_missing')]);
         }
         if(empty($type)){
-            return $this->render('/public/error', ['msg' => '类型不能为空！']);
+            return $this->render('/public/error', ['msg' => t('validation.params_missing')]);
         }
         $templates_file = RUNTIME_PATH . DS . 'template' . DS . $type . DS . $name;
         if(!is_file($templates_file)){
-            return $this->render('/public/error', ['msg' => '不存在此压缩包！']);
+            return $this->render('/public/error', ['msg' => t('common.no_data')]);
         }
         return download($templates_file, $name);
     }
@@ -390,15 +396,15 @@ class Set extends Backend
             file_put_contents($file, '');
         }
         if (!is_really_writable($file)) {
-            return message('文件没有写入权限', false);
+            return message(t('validation.file_no_write'), false);
         }
         if ($handle = fopen($file, 'w')) {
             fwrite($handle, "<?php\n\n" . "return " . var_export($templates, TRUE) . ";\n");
             fclose($handle);
         } else {
-            return message('文件没有写入权限', false);
+            return message(t('validation.file_no_write'), false);
         }
-        return message('操作成功！', true);
+        return message(t('system.save_success'), true);
     }
 
     private static function getServerUrl()
@@ -441,12 +447,12 @@ class Set extends Backend
                         session('updateSession', $content);
                         return message($json['msg'], true, $json['data']);
                     }else{
-                        return message('链接更新服务器失败！', false);
+                        return message(t('system.update_check_failed'), false);
                     }
                     //如果传回的是一个下载链接,则再次下载
                 }
             } catch (TransferException $e) {
-                return message('链接更新服务器失败！'.$e->getMessage(), false);
+                return message(t('system.update_check_failed').$e->getMessage(), false);
             }
         }
     }
@@ -455,11 +461,11 @@ class Set extends Backend
         if(IS_POST){
             $json = session('updateSession');
             if(empty($json)){
-                return message('请刷新页面重试！', false, ['code' => -1]);
+                return message(t('system.update_retry'), false, ['code' => -1]);
             }
             $json = json_decode($json, true);
             if(!is_array($json)){
-                return message('请刷新页面重试！', false, ['code' => -1]);
+                return message(t('system.update_retry'), false, ['code' => -1]);
             }
 
             $tempCatalogue = RUNTIME_PATH . DS . 'update' . DS;
@@ -479,25 +485,25 @@ class Set extends Backend
                         return message($json['msg'], false, ['code' => -1]);
                     }
                 } catch (TransferException $e) {
-                    return message('软件更新失败！'.$e->getMessage(), false, ['code' => -1]);
+                    return message(t('system.update_failed').$e->getMessage(), false, ['code' => -1]);
                 }
                 file_put_contents($tempCatalogue . $res, $content);
                 $zip = new ZipFile();
                 try {
                     $zip->openFile($tempCatalogue . $res);
                 } catch (ZipException $e) {
-                    return message('打开压缩文件'.$res.'失败！', false, ['code' => -1]);
+                    return message(t('system.update_failed'), false, ['code' => -1]);
                 }
                 try {
                     $zip->extractTo(ROOT_PATH);
                     self::importsql();
                 } catch (ZipException $e) {
-                    return message('解压压缩文件'.$res.'失败！', false, ['code' => -1]);
+                    return message(t('system.update_failed'), false, ['code' => -1]);
                 }
                 unset($json['data']['download'][$k]);
                 Session::set('updateSession', json_encode($json));
                 Session::save();
-                return message('更新包'.$res.'解压成功', true, ['code' => 1, 'count' => $count]);
+                return message(t('system.update_unzip_success', ['res' => $res]), true, ['code' => 1, 'count' => $count]);
             }
             $file = ROOT_PATH . DS . 'config' . DS . 'sf.php';
             $config = config('sf');
@@ -507,16 +513,16 @@ class Set extends Backend
                 file_put_contents($file, '');
             }
             if (!is_really_writable($file)) {
-                return message('软件版本MOS '.$config['edition'].'更新失败！', false, ['code' => -1]);
+                return message(t('system.update_version_success', ['edition' => $config['edition']]), false, ['code' => -1]);
             }
             if ($handle = fopen($file, 'w')) {
                 fwrite($handle, "<?php\n\n" . "return " . var_export($config, TRUE) . ";\n");
                 fclose($handle);
             } else {
-                return message('软件版本MOS '.$config['edition'].'更新失败！', false, ['code' => -1]);
+                return message(t('system.update_version_success', ['edition' => $config['edition']]), false, ['code' => -1]);
             }
             session('updateSession',null);
-            return message('软件版本MOS '.$config['edition'].'更新成功', true, ['code' => 2]);
+            return message(t('system.update_version_success', ['edition' => $config['edition']]), true, ['code' => 2]);
 
         }
     }

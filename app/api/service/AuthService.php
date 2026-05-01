@@ -39,12 +39,12 @@ class AuthService extends BaseService
                 break;
         }
         if(Cache::has('queue_check'.$param['auth_info'])){
-            return json(message('您以入队，请等待结果',true, ['queue' => 1]));
+            return json(message(t('login.in_queue'),true, ['queue' => 1]));
         }else{
             $isPushed = Queue::push($jobHandlerClassName, $jobDataArr, $jobQueueName);
             if ($isPushed !== false) {
-                Cache::tag('SF_CheckAuth')->set('queue_check'.$param['auth_info'],json_encode(message('等待结果',true, ['queue' => 1])));
-                return json(message('以入队',true, ['queue' => 1]));
+                Cache::tag('SF_CheckAuth')->set('queue_check'.$param['auth_info'],json_encode(message(t('login.waiting'),true, ['queue' => 1])));
+                return json(message(t('login.waiting_result'),true, ['queue' => 1]));
             }else{
                 return json(message('push a new '.$taskType.' of MultiTask Job Failed!',false, ['queue' => 1]));
             }
@@ -71,10 +71,10 @@ class AuthService extends BaseService
         $api_key = !empty($param['api_key'])?$param['api_key']:null;
         $auth_info = !empty($param['auth_info'])?$param['auth_info']:null;
         if(empty($appid)){
-            return json(message('请提交APPID！',false));
+            return json(message(t('auth.enter_qq_code'),false));
         }
         if(empty($api_key)){
-            return json(message('请提交API_KEY！',false));
+            return json(message(t('app.api_key_error'),false));
         }
         // 队列
         if(conf('queue_query_switch') == 1){
@@ -90,13 +90,13 @@ class AuthService extends BaseService
         try{
             $appInfo = parent::getAppInfo($appid);
             if($appInfo == false){
-                return json(message('不存在此应用！',false));
+                return json(message(t('app.not_exist'),false));
             }
             if($api_key != $appInfo['api_key']){
-                return json(message('API_KEY错误！',false));
+                return json(message(t('app.api_key_error'),false));
             }
         }catch (\Exception $e){
-            return json(message('服务器错误！'.$e->getMessage() ,false));
+            return json(message(t('common.server_error').$e->getMessage() ,false));
         }
         if(empty($param)){
             $allInfo = $appInfo['check_auth_method'] == 0?request()->get():request()->post();
@@ -236,9 +236,9 @@ class AuthService extends BaseService
                     ->data(['checktime' => datetime()])
                     ->update();
             } catch (\Exception $e) {
-                return json(message('更新检测授权时间失败！'.$e->getMessage() ,false));
+                return json(message(t('auth.update_check_time_failed').$e->getMessage() ,false));
             }
-            return json(message('正版授权' ,true, $data));
+            return json(message(t('auth.genuine') ,true, $data));
         } else {
             $data = [
                 'data' => [
@@ -247,8 +247,8 @@ class AuthService extends BaseService
                 ]
             ];
             $data['sign'] = Rsa::createSign(json_encode($data['data']), $appInfo['private_key']);
-            Cache::tag('SF_CheckAuth')->set('check_auth'.$auth_info,json_encode(message('正版授权' ,true, $data)),3600);
-            return json(message('正版授权' ,true, $data));
+            Cache::tag('SF_CheckAuth')->set('check_auth'.$auth_info,json_encode(message(t('auth.genuine') ,true, $data)),3600);
+            return json(message(t('auth.genuine') ,true, $data));
         }
     }
 
@@ -271,15 +271,15 @@ class AuthService extends BaseService
         $param = request()->param();
         $appid = !empty($param['appid'])?intval($param['appid']):null;
         if(!$appid){
-            return json(message('请提交APPID！',false));
+            return json(message(t('auth.enter_qq_code'),false));
         }
         try{
             $appInfo = parent::getAppInfo($appid);
             if($appInfo == false){
-                return json(message('不存在此应用！',false));
+                return json(message(t('app.not_exist'),false));
             }
         }catch (\Exception $e){
-            return json(message('服务器错误！' ,false));
+            return json(message(t('common.server_error') ,false));
         }
         $allInfo = $appInfo['check_auth_method'] == 0?request()->get():request()->post();
         $auth_info = !empty($allInfo['auth_info'])?$allInfo['auth_info']:null;
@@ -297,9 +297,10 @@ class AuthService extends BaseService
                 ]
             ];
             $data['sign'] = Rsa::createSign(json_encode($data['data']), $appInfo['private_key']);
-            return json(message('VERSION版本号不能为空' ,false, $data));
+            return json(message(t('version.version_empty') ,false, $data));
         }
-        $versionData = $this->versionModel->getAppUpdateVersionList($appid,$version,$beta);
+        $betaFilter = ($authInfo['beta'] == 1) ? [0, 1] : [$beta];
+        $versionData = $this->versionModel->getAppUpdateVersionList($appid,$version,$betaFilter);
         if($versionData['count'] == 0){
             $data = [
                 'data' => [
@@ -308,72 +309,66 @@ class AuthService extends BaseService
                 ]
             ];
             $data['sign'] = Rsa::createSign(json_encode($data['data']), $appInfo['private_key']);
-            return json(message('当前已经是最新版' ,true, $data));
+            return json(message(t('version.is_latest') ,true, $data));
         }
-        if($beta == 1){
-            if($authInfo['beta'] != 1){
+        if($beta == 1 && $authInfo['beta'] != 1){
+            $data = [
+                'data' => [
+                    'code' => -1,
+                    'msg' => t('version.no_beta_access'),
+                    'time' => time()
+                ]
+            ];
+            $data['sign'] = Rsa::createSign(json_encode($data['data']), $appInfo['private_key']);
+            return json(message(t('version.no_beta_access') ,false, $data));
+        }
+        try{
+            $cache = cache($auth_info.'-'.$appid.'-'.$version.'-'.$beta);
+            if(!empty($cache)){
+                $data = json_decode($cache,true);
+                $allVersion = $data['data']['data'];
+            }else{
+                $allVersion = [
+                    'count' => $versionData['count'],
+                    'edition' => '1.0',
+                    'version' => $version,
+                    'update_log' => [],
+                    'download' => [],
+                    'filesize' => 0,
+                    'introduce' => '',
+                    'url' => 'http://'.DOMAIN.'/api.php/Download/download/?sign='
+                ];
+                foreach($versionData['list'] as $res){
+                    $value = serialize([
+                        'versionInfo' => $res,
+                        'authInfo' => $authInfo
+                    ]);
+                    $key = md5(uniqid());
+                    cache($key, $value, 43200);
+                    if($allVersion['version'] < $res['version']){
+                        $allVersion['version'] = $res['version'];
+                        $allVersion['edition'] = $res['edition'];
+                    }
+                    $allVersion['filesize'] += round(filesize(APP_PATH . DS . 'common' . DS . 'download' . DS . 'update' . DS . $res['download_catalogue'] . DS . 'SF.zip') / 1048576 * 100) / 100;
+                    $allVersion['download'][] = $key;
+                    $allVersion['introduce'] .= $res['update_log'].',';
+                    $update_log = [$res['addtime'] => explode("\n", $res['update_log'])];
+                    $allVersion['update_log'] = array_merge($update_log??[] ,$allVersion['update_log']);
+                }
+                $allVersion['introduce'] = rtrim($allVersion['introduce'], ',');
                 $data = [
                     'data' => [
-                        'code' => -1,
-                        'msg' => '您没有内测版使用资格',
+                        'code' => 1,
+                        'data' =>$allVersion,
                         'time' => time()
                     ]
                 ];
                 $data['sign'] = Rsa::createSign(json_encode($data['data']), $appInfo['private_key']);
-                return json(message('您没有内测版使用资格' ,false, $data));
-            }else{
-
+                cache($auth_info.'-'.$appid.'-'.$version.'-'.$beta, json_encode($data), 600);
             }
-        }else{
-            try{
-                $cache = cache($auth_info.'-'.$appid.'-'.$version.'-'.$beta);
-                if(!empty($cache)){
-                    $data = json_decode($cache,true);
-                    $allVersion = $data['data']['data'];
-                }else{
-                    $allVersion = [
-                        'count' => $versionData['count'],
-                        'edition' => '1.0',
-                        'version' => $version,
-                        'update_log' => [],
-                        'download' => [],
-                        'filesize' => 0,
-                        'introduce' => '',
-                        'url' => 'http://'.DOMAIN.'/api.php/Download/download/?sign='
-                    ];
-                    foreach($versionData['list'] as $res){
-                        $value = serialize([
-                            'versionInfo' => $res,
-                            'authInfo' => $authInfo
-                        ]);
-                        $key = md5(uniqid());
-                        cache($key, $value, 43200);
-                        if($allVersion['version'] < $res['version']){
-                            $allVersion['version'] = $res['version'];
-                            $allVersion['edition'] = $res['edition'];
-                        }
-                        $allVersion['filesize'] += round(filesize(APP_PATH . DS . 'common' . DS . 'download' . DS . 'update' . DS . $res['download_catalogue'] . DS . 'SF.zip') / 1048576 * 100) / 100;
-                        $allVersion['download'][] = $key;
-                        $allVersion['introduce'] .= $res['update_log'].',';
-                        $update_log = [$res['addtime'] => explode("\n", $res['update_log'])];
-                        $allVersion['update_log'] = array_merge($update_log??[] ,$allVersion['update_log']);
-                    }
-                    $allVersion['introduce'] = rtrim($allVersion['introduce'], ',');
-                    $data = [
-                        'data' => [
-                            'code' => 1,
-                            'data' =>$allVersion,
-                            'time' => time()
-                        ]
-                    ];
-                    $data['sign'] = Rsa::createSign(json_encode($data['data']), $appInfo['private_key']);
-                    cache($auth_info.'-'.$appid.'-'.$version.'-'.$beta, json_encode($data), 600);
-                }
-                return json(message('最新版 '.$allVersion['edition'] ,true , $data));
-            }catch (\Exception $e){
-                return json(message('服务器错误！'.$e->getMessage() ,false));
-            }
-
+            return json(message(t('version.latest_version').$allVersion['edition'] ,true , $data));
+        }catch (\Exception $e){
+            return json(message(t('common.server_error').$e->getMessage() ,false));
         }
     }
 }

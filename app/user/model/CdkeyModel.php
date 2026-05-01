@@ -55,10 +55,10 @@ class CdkeyModel extends BaseModel
         try{
             $userInfo = parent::getUserInfo();
             if(!$userInfo){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
         }catch (\Exception $e){
-            throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+            throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
         }
         $post = request()->post();
         $cdkey = !empty($post['cdkey'])?$post['cdkey']:null;
@@ -66,17 +66,17 @@ class CdkeyModel extends BaseModel
         $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
         $cdkey_type = !empty($post['cdkey_type'])?$post['cdkey_type']:null;
         if(empty($cdkey)){
-            throw new Exception('请填写卡密内容！');
+            throw new Exception(t('cdkey.enter_content'));
         }
         if(empty($appid)){
-            throw new Exception('获取用户信息失败！[errorCode:UserAppIdEmpty]');
+            throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
         }
         $row = self::where(['cdkey' => $cdkey, 'appid' => $appid])->field('cdkey_type,info,status')->find();
         if(empty($row)){
-            throw new Exception('此卡密不存在！');
+            throw new Exception(t('cdkey.not_exist'));
         }
         if($row['status'] != 0){
-            throw new Exception('此卡密已使用！');
+            throw new Exception(t('cdkey.used'));
         }
         switch ($step){
             case 1:
@@ -86,19 +86,19 @@ class CdkeyModel extends BaseModel
                         $qq = !empty($post['qq'])?intval($post['qq']):null;
                         $info = json_decode($row['info'],true);
                         if(empty($auth_info)){
-                            throw new Exception('请输入授权内容！');
+                            throw new Exception(t('cdkey.enter_auth_content'));
                         }
                         if(empty($qq)){
-                            throw new Exception('请输入授权者QQ！');
+                            throw new Exception(t('cdkey.enter_auth_qq'));
                         }
                         $authRow = Db::name('auth')->where(['auth_info' => $auth_info, 'appid' => $appid])->find();
                         if ($authRow) {
-                            return message('该应用已存在此授权！', false);
+                            return message(t('auth.already_exist'), false);
                         }
                         try{
                             $appInfo = parent::getAppInfo($appid);
                             if($appInfo == false){
-                                return message('获取应用信息失败！[errorCode:GetUserAppInfoError]',false);
+                                return message(t('app.get_info_failed').'[errorCode:GetUserAppInfoError]',false);
                             }
                             $checkInfo = new CheckInfo();
                             $checkResult = $checkInfo->check($appInfo['check_type'], $auth_info);
@@ -106,7 +106,7 @@ class CdkeyModel extends BaseModel
                                 return $checkResult;
                             }
                         } catch (\Exception $e) {
-                            return message('检测授权格式失败！[errorCode:CheckTypeError]' ,false);
+                            return message(t('replace.auth_type_error').'[errorCode:CheckTypeError]' ,false);
                         }
                         $result = Db::name('auth')->where('qq', $qq)->field('sign,authcode')->find();
                         if(empty($result)){
@@ -155,7 +155,7 @@ class CdkeyModel extends BaseModel
                                 'Result' => 'success'
                             ];
                             event('ActionLog', $content);
-                            return message('兑换授权成功！', true);
+                            return message(t('cdkey.exchange_success'), true);
                         } catch (\Exception $e) {
                             // 回滚事务
                             Db::rollback();
@@ -166,19 +166,19 @@ class CdkeyModel extends BaseModel
                                 'Result' => $e->getMessage()
                             ];
                             event('ActionLog', $content);
-                            return message('兑换授权失败！'.$e->getMessage(), false);
+                            return message(t('cdkey.exchange_failed').$e->getMessage(), false);
                         }
                     default:
-                        throw new Exception('不存在此卡密类型！');
+                        throw new Exception(t('cdkey.type_error'));
                 }
             default:
                 switch ($row['cdkey_type']){
                     case 'auth':
-                        return message('获取卡密类型成功，请继续填写信息！', true, $row['cdkey_type']);
+                        return message(t('cdkey.get_type_success'), true, $row['cdkey_type']);
                     case 'user':
                         $info = json_decode($row['info'],true);
                         if(empty($info['power']) || !is_numeric($info['power'])){
-                            return message('获取卡密信息错误，请联系上级更换！', false);
+                            return message(t('cdkey.get_info_error'), false);
                         }
                         $power = intval($info['power']);
                         $powerPriceModel = new \app\admin\model\PowerPriceModel();
@@ -186,7 +186,7 @@ class CdkeyModel extends BaseModel
                         $cdkeyPower = $powerPriceModel->getInfo($power);
                         $userPower = $powerPriceModel->getInfo($userInfo['power']);
                         if(!in_array($power,$result)){
-                            return message('此权限您无权限升级!<br>兑换权限：'.$cdkeyPower['name'].'<br>当前权限：'.$userPower['name'] ,false, $result);
+                            return message(t('user.power_cannot_upgrade').'<br>'.t('common_ui.power_field').$cdkeyPower['name'].'<br>'.t('common_ui.power_field').$userPower['name'] ,false, $result);
                         }
                         Db::startTrans();
                         try {
@@ -206,11 +206,11 @@ class CdkeyModel extends BaseModel
                                 ->update();
                             // 提交事务
                             Db::commit();
-                            return message('兑换权限成功！', true);
+                            return message(t('cdkey.exchange_power_success'), true);
                         } catch (\Exception $e) {
                             // 回滚事务
                             Db::rollback();
-                            return message('兑换权限失败！'.$e->getMessage(), true);
+                            return message(t('cdkey.exchange_power_failed').$e->getMessage(), true);
                         }
                     case 'balance':
                         $info = json_decode($row['info'],true);
@@ -229,11 +229,11 @@ class CdkeyModel extends BaseModel
                                 ->update();
                             // 提交事务
                             Db::commit();
-                            return message('兑换余额成功！', true);
+                            return message(t('cdkey.exchange_balance_success'), true);
                         } catch (\Exception $e) {
                             // 回滚事务
                             Db::rollback();
-                            return message('兑换余额失败！'.$e->getMessage(), true);
+                            return message(t('cdkey.exchange_balance_failed').$e->getMessage(), true);
                         }
                     case 'integral':
                         $info = json_decode($row['info'],true);
@@ -248,9 +248,9 @@ class CdkeyModel extends BaseModel
                                 'usetime' => datetime()
                             ])
                             ->update();
-                        return message('兑换余额成功！', true);
+                        return message(t('cdkey.exchange_balance_success'), true);
                     default:
-                        throw new Exception('该卡密类型不存在，请联系上级更换！');
+                        throw new Exception(t('cdkey.type_not_exist_contact'));
                 }
         }
 
@@ -259,11 +259,11 @@ class CdkeyModel extends BaseModel
     public function edit(){
         $userInfo = parent::getUserInfo();
         if(!$userInfo){
-            return message('获取用户信息失败！[errorCode:UserInfoError]' ,false);
+            return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
         }
         $powerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
         if(!$powerPriceInfo) {
-            return message('获取用户权限信息失败！[errorCode:GetUserPowerInfoError]' ,false);
+            return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]' ,false);
         }
         $post = request()->post();
         $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
@@ -286,29 +286,29 @@ class CdkeyModel extends BaseModel
         $info = array();
 
         if($number <= 0){
-            return message('生成的数量不能小于等于0！' ,false);
+            return message(t('cdkey.count_positive') ,false);
         }
         if($number > conf('create_cdkey_max_number')){
-            return message('生成的数量不能大于'.conf('cdkey_max_number').'！' ,false);
+            return message(t('cdkey.count_positive').conf('cdkey_max_number').'！' ,false);
         }
         $userCdkeyCount = self::where(['userid' => $userInfo['id'], 'status' => 0])->count('id');
         if(($userCdkeyCount + $number) > conf('have_cdkey_max_number')){
-            return message('您当前未使用卡密无法超过'.conf('have_cdkey_max_number').'张，无法继续生成卡密！' ,false);
+            return message(str_replace('{limit}', conf('have_cdkey_max_number'), t('cdkey.limit_exceeded')) ,false);
         }
         switch ($cdkey_type){
             case 'auth':
-                $cdkey_type_name = '授权';
+                $cdkey_type_name = t('common_ui.auth_type');
                 if(empty($type)){
-                    return message('请选择授权时间！' ,false);
+                    return message(t('cdkey.select_time') ,false);
                 }
                 try{
                     $authPriceInfo = parent::getAuthPriceInfo($type);
                     if($authPriceInfo == false){
-                        return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]',false);
+                        return message(t('cdkey.get_price_failed').'[errorCode:GetAuthPriceInfoError]',false);
                     }
                     if($authPriceInfo['diy_switch'] == 1){
                         if(empty($endtime)){
-                            return message('请输入到期时间！' ,false);
+                            return message(t('cdkey.enter_expire_time') ,false);
                         }
                         $date = explode(' ', $endtime);
                         $time = explode(':', $date[1]);
@@ -317,19 +317,19 @@ class CdkeyModel extends BaseModel
                             $differDay++;
                         }
                         if($differDay <= 0){
-                            return message('请填写正确到期时间！' ,false);
+                            return message(t('auth.correct_expire_time') ,false);
                         }else{
                             $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
                             $allmoney = ($price * $differDay * $number) * floatval($powerPriceInfo['addauth_discount'] / 100);
                         }
                         if($allmoney > $userInfo['balance']){
-                            return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元' ,false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
                         $allmoney = ($price * $number) * floatval($powerPriceInfo['addauth_discount'] / 100);
                         if($allmoney > $userInfo['balance']){
-                            return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元',false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
                         }
                         if($authPriceInfo['permanent_switch'] == 1){
                             $endtime = datetime();
@@ -339,7 +339,7 @@ class CdkeyModel extends BaseModel
                         }
                     }
                 } catch (\Exception $e) {
-                    return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]' ,false);
+                    return message(t('cdkey.get_price_failed').'[errorCode:GetAuthPriceInfoError]' ,false);
                 }
                 $info['permanent_switch'] = $permanent_switch;
                 $info['type'] = $type;
@@ -347,34 +347,34 @@ class CdkeyModel extends BaseModel
                 $info['auth_status'] = $auth_status;
                 break;
             case 'user':
-                $cdkey_type_name = '权限';
+                $cdkey_type_name = t('common_ui.power_type');
                 try{
                     $powerInfo = parent::getPowerPriceInfo($power);
                     if($powerInfo == false){
-                        return message('获取权限信息失败！[errorCode:GetPowerInfoError]' ,false);
+                        return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]' ,false);
                     }
                     $price = $powerInfo['money'];
                     $allmoney = ($price * $number) * floatval($powerPriceInfo['adduser_discount'] / 100);
                     if($allmoney > $userInfo['balance']){
-                        return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元',false);
+                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
                     }
                     $info['power'] = $power;
                     $info['user_status'] = $user_status;
                 } catch (\Exception $e) {
-                    return message('获取权限信息失败！[errorCode:GetPowerInfoError]',false);
+                    return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]',false);
                 }
                 break;
             default:
-                return message('卡密类型错误！[errorCode:CDKEYTypeError]',false);
+                return message(t('cdkey.type_error').'[errorCode:CDKEYTypeError]',false);
         }
         $remainderBalance = $userInfo['balance'] - $allmoney;
         try{
             $result = parent::updateUserInfo(['balance' => $remainderBalance]);
             if(!$result){
-                return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]' ,false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
             }
         } catch (\Exception $e) {
-            return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]',false);
+            return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
         }
         for($i=0;$i<$number;$i++){
             $cdkey = (conf('cdkey_head')??'SF').'_'.get_random_str(20,5);
@@ -410,20 +410,20 @@ class CdkeyModel extends BaseModel
                     'Result' => '[errorCode:AddCDKEYError]'
                 ];
                 event('ActionLog', $content);
-                return message('共'.$number.'张卡密，成功生成 '.$i.' 张卡密！[errorCode:AddCDKEYError]' ,false);
+                return message(t('common.preview').$number.t('common_ui.cdkey').t('common.add_success').$i.t('common_ui.cdkey_label').'[errorCode:AddCDKEYError]' ,false);
             }
         }
-        return message('成功生成 '.$i.' 张卡密！' ,true);
+        return message(str_replace('{count}', $i, t('cdkey.generate_success')) ,true);
     }
 
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此卡密！');
+                throw new Exception(t('cdkey.not_exist'));
             }
             try{
                 self::where('id', $id)->delete();
@@ -443,10 +443,10 @@ class CdkeyModel extends BaseModel
                     'Result' => '[errorCode:DeleteCDKEYError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('删除失败！[errorCode:DeleteCDKEYError]');
+                throw new Exception(t('user.delete_failed').'[errorCode:DeleteCDKEYError]');
             }
         }catch (\Exception $e){
-            throw new Exception('删除失败！[errorCode:DeleteCDKEYError]');
+            throw new Exception(t('user.delete_failed').'[errorCode:DeleteCDKEYError]');
         }
     }
 
@@ -455,10 +455,10 @@ class CdkeyModel extends BaseModel
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
@@ -472,7 +472,7 @@ class CdkeyModel extends BaseModel
                 $data[] = ['appid', '=', $appid];
                 $order = 'id';
             }else{
-                throw new Exception('获取用户信息失败！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
 
             if(!empty($text)){
@@ -505,10 +505,10 @@ class CdkeyModel extends BaseModel
                     'Result' => '[errorCode:GetCDKEYListError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('获取列表失败！[errorCode:GetCDKEYListError]');
+                throw new Exception(t('user.list_failed').'[errorCode:GetCDKEYListError]');
             }
         }catch (\Exception $e) {
-            throw new Exception('获取列表失败！[errorCode:GetCDKEYListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetCDKEYListError]');
         }
     }
 }

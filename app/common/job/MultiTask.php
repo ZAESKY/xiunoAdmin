@@ -71,10 +71,10 @@ class MultiTask{
                 ])
                 ->find();
             if($appInfo == false){
-                return self::cache($param_auth_info, json_encode(message('不存在此应用！',false)));
+                return self::cache($param_auth_info, json_encode(message(t('app.not_exist'), false)));
             }
             if($api_key != $appInfo['api_key']){
-                return self::cache($param_auth_info, json_encode(message('API_KEY错误！',false)));
+                return self::cache($param_auth_info, json_encode(message(t('app.api_key_error'), false)));
             }
             $allInfo = $appInfo['check_auth_method'] == 0?$get:$post;
             $auth_info = !empty($allInfo['auth_info'])?$allInfo['auth_info']:null;
@@ -83,7 +83,7 @@ class MultiTask{
             $param = json_decode(base64_decode($param), true);
             $authcode = !empty($param['authcode'])?$param['authcode']:null;
             if(empty($auth_info)){
-                return self::cache($param_auth_info, json_encode(message('缺少授权信息参数！',false)));
+                return self::cache($param_auth_info, json_encode(message(t('auth.missing_info'), false)));
             }
             $rsa = new Rsa($appInfo['private_key'],$appInfo['public_key']);
             $authInfo = Db::name('auth')
@@ -199,18 +199,18 @@ class MultiTask{
                         ->data(['checktime' => datetime()])
                         ->update();
                 } catch (\Exception $e) {
-                    return self::cache($param_auth_info, json_encode(message('更新检测授权时间失败！'.$e->getMessage() ,false)));
+                    return self::cache($param_auth_info, json_encode(message(t('auth.update_check_time_failed').$e->getMessage(), false)));
                 }
-                return self::cache($param_auth_info, json_encode(message('正版授权' ,true, $data)));
+                return self::cache($param_auth_info, json_encode(message(t('auth.genuine'), true, $data)));
             } else {
                 $data = [
                     'code' => 1,
                     'time' => $rsa::privateEncrypt((string)time())
                 ];
-                return self::cache($param_auth_info, json_encode(message('正版授权' ,true, $data)));
+                return self::cache($param_auth_info, json_encode(message(t('auth.genuine'), true, $data)));
             }
         }catch (\Exception $e){
-            return self::cache($param_auth_info, json_encode(message('服务器错误！'.$e->getMessage() ,false)));
+            return self::cache($param_auth_info, json_encode(message(t('common.server_error').$e->getMessage(), false)));
         }
         return true;
     }

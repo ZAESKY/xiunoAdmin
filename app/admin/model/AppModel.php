@@ -97,11 +97,11 @@ class AppModel extends BaseModel
         $hacker_file = !empty($post['hacker_file'])?$post['hacker_file']:'';
         $hacker_key = !empty($post['hacker_key'])?$post['hacker_key']:'';
         $pirate_msg_switch = !empty($post['pirate_msg_switch'])?1:0;
-        $app_notice = !empty($post['app_notice'])?htmlspecialchars($post['app_notice']):'';
-        $cdkey_notice = !empty($post['cdkey_notice'])?htmlspecialchars($post['cdkey_notice']):'';
-        $pay_notice = !empty($post['pay_notice'])?htmlspecialchars($post['pay_notice']):'';
-        $register_notice = !empty($post['register_notice'])?htmlspecialchars($post['register_notice']):'';
-        $replace_notice = !empty($post['replace_notice'])?htmlspecialchars($post['replace_notice']):'';
+        $app_notice = !empty($post['app_notice'])?clean_rich_text($post['app_notice']):'';
+        $cdkey_notice = !empty($post['cdkey_notice'])?clean_rich_text($post['cdkey_notice']):'';
+        $pay_notice = !empty($post['pay_notice'])?clean_rich_text($post['pay_notice']):'';
+        $register_notice = !empty($post['register_notice'])?clean_rich_text($post['register_notice']):'';
+        $replace_notice = !empty($post['replace_notice'])?clean_rich_text($post['replace_notice']):'';
         $status = !empty($post['status'])?intval($post['status']):0;
         $api_key = !empty($post['api_key'])?$post['api_key']:md5(get_random_code().time());
         $free_replace_number = !empty($post['free_replace_number'])?intval($post['free_replace_number']):0;
@@ -170,9 +170,9 @@ class AppModel extends BaseModel
                     ->data($data)
                     ->update();
                 Cache::tag('SF_App')->clear();
-                return message('编辑成功！' ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message('编辑失败！'.$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $download_file = md5(time() . 'SF2129876388');
@@ -181,7 +181,7 @@ class AppModel extends BaseModel
                 mkdir(APP_PATH . '/common/download/' . $download_file . '/release');
                 mkdir(APP_PATH . '/common/download/' . $download_file . '/update');
             } catch (\Exception $e) {
-                return message('创建目录失败！' . $e->getMessage(), false);
+                return message(t('app.create_dir_failed') . $e->getMessage(), false);
             }
             $data = [
                 'name' => $name,
@@ -236,10 +236,10 @@ class AppModel extends BaseModel
             try {
                 self::insert($data);
                 Cache::tag('SF_App')->clear();
-                return message('添加成功！', true);
+                return message(t('user.add_success'), true);
             } catch (\Exception $e) {
                 $this->deleteDownloadPath($download_file);
-                return message('添加失败！' . $e->getMessage(), false);
+                return message(t('user.add_failed') . $e->getMessage(), false);
             }
         }
     }
@@ -261,11 +261,11 @@ class AppModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此应用！');
+                throw new Exception(t('app.not_exist'));
             }
             self::where('id', $id)->delete();
             $this->deleteDownloadPath($row['download_file']);
@@ -300,11 +300,11 @@ class AppModel extends BaseModel
             $status = !empty($post['status'])?intval($post['status']):0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此应用！');
+                throw new Exception(t('app.not_exist'));
             }
             self::where('id', $id)
                 ->data(['status' => $status])

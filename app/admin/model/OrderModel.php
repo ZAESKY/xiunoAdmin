@@ -81,11 +81,11 @@ class OrderModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('order.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此订单！');
+                throw new Exception(t('order.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -101,11 +101,11 @@ class OrderModel extends BaseModel
             $status = !empty($post['status'])?intval($post['status']):0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('order.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此订单！');
+                throw new Exception(t('order.not_exist'));
             }
 
             if($status == 5){

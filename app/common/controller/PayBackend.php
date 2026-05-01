@@ -50,7 +50,7 @@ class PayBackend extends CommonBase
             $userInfo = $userModel->getInfo();
             $this->userInfo = $userInfo;
             if(!empty($userId) && $sign != data_auth_sign($this->userInfo['appid'].$this->userInfo['username'].$this->userInfo['password'].sf_password_hash())){
-                throw new Exception('用户登录信息已过期，请刷新界面重新登录！');
+                throw new Exception(t('login.user_session_expired'));
             }
             if(!$this->userInfo){
                 $this->logOut();
@@ -100,6 +100,6 @@ class PayBackend extends CommonBase
         Cookie::delete('userId');
         Cookie::delete('userSign');
         Cookie::save();
-        return message('退出登录成功', false);
+        return message(t('login.logout_success'), false);
     }
 }

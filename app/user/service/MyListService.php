@@ -23,7 +23,7 @@ class MyListService extends UserBaseService
                     throw new Exception($e->getMessage());
                 }
             default:
-                throw new Exception('不存在此类型！');
+                throw new Exception(t('common_ui.type_error'));
         }
     }
 
@@ -46,7 +46,7 @@ class MyListService extends UserBaseService
                     throw new Exception($e->getMessage());
                 }
             default:
-                throw new Exception('不存在此类型！');
+                throw new Exception(t('common_ui.type_error'));
         }
     }
 
@@ -61,8 +61,8 @@ class MyListService extends UserBaseService
                     $appInfo = false;
                 }
                 if(!$appInfo){
-                    $res['appName'] = '获取失败';
-                    $res['remainderReplaceNumber'] = '获取失败';
+                    $res['appName'] = t('common.load_failed');
+                    $res['remainderReplaceNumber'] = t('common.load_failed');
                 }else{
                     $res['appName'] = $appInfo['name'];
                     $remainderReplaceNumber = intval($appInfo['free_replace_number'] - $res['replace_number']);
@@ -86,8 +86,8 @@ class MyListService extends UserBaseService
                     $appInfo = false;
                 }
                 if(!$appInfo){
-                    $res['appName'] = '获取失败';
-                    $res['remainderReplaceNumber'] = '获取失败';
+                    $res['appName'] = t('common.load_failed');
+                    $res['remainderReplaceNumber'] = t('common.load_failed');
                 }else{
                     $res['appName'] = $appInfo['name'];
                     $remainderReplaceNumber = intval($appInfo['free_replace_number'] - $res['replace_number']);

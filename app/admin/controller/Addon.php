@@ -19,18 +19,18 @@ class Addon extends Backend
         if (IS_POST) {
             $name = $name ?? $this->request->post("name");
             if (!$name) {
-                return message('缺少NAME参数！', false);
+                return message(t('validation.missing_name'), false);
             }
             if (!preg_match("/^[a-zA-Z0-9]+$/", $name)) {
-                return message('插件名不合法！', false);
+                return message(t('addon.name_illegal'), false);
             }
             if (!is_dir(ADDONS_PATH . DS . $name)) {
-                return message('不存在此插件！', false);
+                return message(t('addon.not_exist'), false);
             }
             $info = get_addons_info($name);
             $config = get_addons_fullconfig($name);
             if (!$info) {
-                return message('获取插件配置信息失败！', false);
+                return message(t('addon.config_failed'), false);
             }
 
             $params = $this->request->post('row/a', [], 'trim');
@@ -56,31 +56,31 @@ class Addon extends Backend
                     $result = set_addons_fullconfig($name, $config);
                     Service::refresh();
                     if($result){
-                        return message('更新插件配置信息成功！', true);
+                        return message(t('addon.config_update_success'), true);
                     }else{
-                        return message('更新插件配置信息失败！<br> 没有写入权限！', false);
+                        return message(t('addon.config_update_failed'), false);
                     }
                 } catch (Exception $e) {
-                    return message('更新插件配置信息失败！'.$e->getMessage(), false);
+                    return message(t('addon.config_update_failed').$e->getMessage(), false);
                 }
             }
-            return message('参数不能为空！', false);
+            return message(t('validation.params_missing'), false);
         }
 
         $name = $name ?? $this->request->post("name");
         if (!$name) {
-            return $this->render('/public/error', ['msg' => '缺少NAME参数！']);
+            return $this->render('/public/error', ['msg' => t('validation.missing_name')]);
         }
         if (!preg_match("/^[a-zA-Z0-9]+$/", $name)) {
-            return $this->render('/public/error', ['msg' => '插件名不合法！'.$name]);
+            return $this->render('/public/error', ['msg' => t('addon.name_illegal').$name]);
         }
         if (!is_dir(ADDONS_PATH . DS . $name)) {
-            return $this->render('/public/error', ['msg' => '不存在此插件！']);
+            return $this->render('/public/error', ['msg' => t('addon.not_exist')]);
         }
         $info = get_addons_info($name);
         $config = get_addons_fullconfig($name);
         if (!$info) {
-            return $this->render('/public/error', ['msg' => '获取插件配置信息失败！']);
+            return $this->render('/public/error', ['msg' => t('addon.config_failed')]);
         }
 
 
@@ -109,13 +109,13 @@ class Addon extends Backend
             //return method_exists(get_addons_instance($name), "disable");
             $action = $this->request->post("action");
             if (!$name) {
-                return message('缺少NAME参数！', false);
+                return message(t('validation.missing_name'), false);
             }
             if (!preg_match("/^[a-zA-Z0-9]+$/", $name)) {
-                return message('插件名不合法！', false);
+                return message(t('addon.name_illegal'), false);
             }
             if (!is_dir(ADDONS_PATH . DS . $name)) {
-                return message('不存在此插件！', false);
+                return message(t('addon.not_exist'), false);
             }
             try {
                 $action = $action == 'enable' ? 'enable' : 'disable';
@@ -125,7 +125,7 @@ class Addon extends Backend
             } catch (Exception $e) {
                 return message($e->getMessage(), false);
             }
-            return message('插件'.($action=='enable'?'启用':'禁用').'成功！', true);
+            return message($action=='enable' ? t('addon.enabled') : t('addon.disabled'), true);
         }
     }
 
@@ -140,7 +140,7 @@ class Addon extends Backend
         } catch (Exception $e) {
             return message($e->getMessage(), false);
         }
-        return message('插件安装成功！', true);
+        return message(t('addon.install_success'), true);
     }
 
     /**
@@ -156,13 +156,13 @@ class Addon extends Backend
         } catch (Exception $e) {
             return message($e->getMessage(), false);
         }
-        return message('插件更新成功！', true);
+        return message(t('addon.update_success'), true);
     }
 
     public function list(){
         try{
             if(IS_POST){
-                return message("获取列表成功！", true, $this->service->list());
+                return message(t('common.list_success'), true, $this->service->list());
             }
         }catch (\Exception $e){
             return message($e->getMessage());
@@ -182,13 +182,13 @@ class Addon extends Backend
         $name = $this->request->post("name");
         $droptables = (int)$this->request->post("droptables");
         if (!$name) {
-            return message('缺少NAME参数！', false);
+            return message(t('validation.missing_name'), false);
         }
         if (!preg_match("/^[a-zA-Z0-9]+$/", $name)) {
-            return message('插件名不合法！', false);
+            return message(t('addon.name_illegal'), false);
         }
         if (!is_dir(ADDONS_PATH . DS . $name)) {
-            return message('不存在此插件！', false);
+            return message(t('addon.not_exist'), false);
         }
 
         $tables = [];
@@ -213,7 +213,7 @@ class Addon extends Backend
         } catch (Exception $e) {
             return message($e->getMessage(), false);
         }
-        return message('插件删除成功！', true);
+        return message(t('addon.delete_success'), true);
     }
 
 }

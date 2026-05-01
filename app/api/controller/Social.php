@@ -14,12 +14,12 @@ class Social extends Backend
         $userType = isset($post['userType'])?$post['userType']:'';
         $callback = ($userType=='admin')?'admin.php/login/index.html':'user.php/login/index.html';
         if(empty($userType)){
-            return message("缺少用户类型参数！" ,false);
+            return message(t("validation.missing_user_type") ,false);
         }
         $Oauth = new Oauth($callback);
         if (!empty($code)) {
             if(empty($state)){
-                return message("缺少STATE参数！" ,false);
+                return message(t("validation.missing_state") ,false);
             }
             if($state != session('Oauth_state')){
                 return message("The state does not match. You may be a victim of CSRF." ,false);
@@ -36,7 +36,7 @@ class Social extends Backend
                         session('adminId', $result['id']);
                         return message("success" ,true,['url'=>'/admin.php']);
                     }else{
-                        return message("该QQ未绑定任何账户！" ,false);
+                        return message(t("user.qq_not_bound") ,false);
                     }
                 }else {
                     $userModel = new User();
@@ -45,22 +45,22 @@ class Social extends Backend
                         session('userId', $result['id']);
                         return message("success" ,true,['url'=>'/user.php']);
                     }else{
-                        return message("该QQ未绑定任何账户！" ,false);
+                        return message(t("user.qq_not_bound") ,false);
                     }
                 }
             }elseif(isset($array['code'])){
-                return message("登录失败，返回错误原因：".$array['msg'] ,false);
+                return message(t("social.login_fail").$array['msg'] ,false);
             }else{
-                return message("获取登录数据失败" ,false);
+                return message(t("social.get_login_data_fail") ,false);
             }
         } else {
             $array = $Oauth->login('qq');
             if(isset($array['code']) && $array['code']==0){
                 return message("success" ,true,['url'=>$array['url']]);
             }elseif(isset($array['code'])){
-                return message("登录接口返回：".$array['msg'] ,false);
+                return message(t("social.login_return").$array['msg'] ,false);
             }else{
-                return message("获取登录地址失败" ,false);
+                return message(t("social.get_login_url_fail") ,false);
             }
         }
     }
@@ -71,21 +71,21 @@ class Social extends Backend
         $userType = isset($post['userType'])?$post['userType']:'';
         $callback = ($userType=='admin')?'admin.php/index/index.html':'user.php/index/index.html';
         if(empty($userType)){
-            return message("缺少用户类型参数！" ,false);
+            return message(t("validation.missing_user_type") ,false);
         }
         if($userType=='admin'){
             if(!session('adminId')){
-                return message("未登录！" ,false);
+                return message(t("login.not_logged_in") ,false);
             }
         }else{
             if(!session('userId')){
-                return message("未登录！" ,false);
+                return message(t("login.not_logged_in") ,false);
             }
         }
         $Oauth = new Oauth($callback);
         if (!empty($code)) {
             if(empty($state)){
-                return message("缺少STATE参数！" ,false);
+                return message(t("validation.missing_state") ,false);
             }
             if($state != session('Oauth_state')){
                 return message("The state does not match. You may be a victim of CSRF." ,false);
@@ -99,32 +99,32 @@ class Social extends Backend
                     $adminModel = new Admin();
                     $result = $adminModel->updateAccessToken($access_token);
                     if($result){
-                        return message("绑定成功！" ,true);
+                        return message(t("user.bind_success") ,true);
                     }else{
-                        return message("绑定失败！" ,false);
+                        return message(t("user.bind_failed") ,false);
                     }
                 }else {
                     $userModel = new User();
                     $result = $userModel->updateAccessToken($access_token);
                     if($result){
-                        return message("绑定成功！" ,true);
+                        return message(t("user.bind_success") ,true);
                     }else{
-                        return message("绑定失败！" ,false);
+                        return message(t("user.bind_failed") ,false);
                     }
                 }
             }elseif(isset($array['code'])){
-                return message("登录失败，返回错误原因：".$array['msg'] ,false);
+                return message(t("social.login_fail").$array['msg'] ,false);
             }else{
-                return message("获取登录数据失败" ,false);
+                return message(t("social.get_login_data_fail") ,false);
             }
         } else {
             $array = $Oauth->login('qq');
             if(isset($array['code']) && $array['code']==0){
                 return message("success" ,true,['url'=>$array['url']]);
             }elseif(isset($array['code'])){
-                return message("登录接口返回：".$array['msg'] ,false);
+                return message(t("social.login_return").$array['msg'] ,false);
             }else{
-                return message("获取登录地址失败" ,false);
+                return message(t("social.get_login_url_fail") ,false);
             }
         }
     }

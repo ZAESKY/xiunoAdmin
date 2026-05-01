@@ -19,7 +19,7 @@ class AuthTemplate extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->getList();
-                return message('获取列表成功！' ,true, ['data' => $result]);
+                return message(t('common.list_success') ,true, ['data' => $result]);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);
@@ -30,7 +30,7 @@ class AuthTemplate extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->list();
-                return message('获取列表成功！' ,true, ['data' => $result]);
+                return message(t('common.list_success') ,true, ['data' => $result]);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);

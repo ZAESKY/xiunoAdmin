@@ -57,37 +57,37 @@ class CdkeyModel extends BaseModel
         if(!empty($id)) {
             $row = $this->getInfo($id);
             if(!$row){
-                return message("不存在此授权！" ,false);
+                return message(t('auth.not_exist') ,false);
             }
             $cdkeyInfo = json_decode($row['info'],true);
             if(empty($cdkey)){
-                return message("请输入卡密内容！" ,false);
+                return message(t('cdkey.enter_content') ,false);
             }
             if($cdkey != $row['cdkey']){
                 $result = self::where('cdkey', $cdkey)->find();
                 if($result){
-                    return message("系统已存在该卡密，请更换卡密内容！" ,false);
+                    return message(t('cdkey.already_exist') ,false);
                 }
             }
             switch ($cdkey_type){
                 case 'auth':
                     if($permanent_switch == 0){
                         if(empty($type)){
-                            return message("请选择授权时间！" ,false);
+                            return message(t('cdkey.select_time') ,false);
                         }else{
                             if($type == 'diy'){
                                 if(empty($endtime)){
-                                    return message("请输入到期时间！" ,false);
+                                    return message(t('cdkey.enter_expire_time') ,false);
                                 }
                             }else{
                                 try{
                                     $authPriceInfo = parent::getAuthPriceInfo($type);
                                     if($authPriceInfo == false){
-                                        return message("获取价格信息失败！",false);
+                                        return message(t('cdkey.get_price_failed'),false);
                                     }
                                     $endtime = date("Y-m-d H:i:s",strtotime(' +'.$authPriceInfo['day'].' day'));
                                 } catch (\Exception $e) {
-                                    return message("获取价格信息失败！".$e->getMessage() ,false);
+                                    return message(t('cdkey.get_price_failed').$e->getMessage() ,false);
                                 }
                             }
                         }
@@ -101,25 +101,25 @@ class CdkeyModel extends BaseModel
                     break;
                 case 'user':
                     if(parent::getPowerPriceInfo($power) == false){
-                        return message("该权限不存在！" ,false);
+                        return message(t('cdkey.power_not_exist') ,false);
                     }
                     $info['power'] = $power;
                     $info['user_status'] = $user_status;
                     break;
                 case 'balance':
                     if($balance <= 0){
-                        return message("余额不能小于等于0！" ,false);
+                        return message(t('cdkey.balance_positive') ,false);
                     }
                     $info['balance'] = $balance;
                     break;
                 case 'integral':
                     if($integral <= 0){
-                        return message("积分不能小于等于0！" ,false);
+                        return message(t('cdkey.integral_positive') ,false);
                     }
                     $info['integral'] = $integral;
                     break;
                 default:
-                    return message("卡密类型错误！" ,false);
+                    return message(t('cdkey.type_error') ,false);
                     break;
             }
             $data = [
@@ -132,33 +132,33 @@ class CdkeyModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                return message("编辑成功！" ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message("编辑失败！".$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             if($number <= 0){
-                return message("生成的数量不能小于等于0！" ,false);
+                return message(t('cdkey.count_positive') ,false);
             }
             switch ($cdkey_type){
                 case 'auth':
                     if($permanent_switch == 0){
                         if(empty($type)){
-                            return message("请选择授权时间！" ,false);
+                            return message(t('cdkey.select_time') ,false);
                         }else{
                             if($type == 'diy'){
                                 if(empty($endtime)){
-                                    return message("请输入到期时间！" ,false);
+                                    return message(t('cdkey.enter_expire_time') ,false);
                                 }
                             }else{
                                 try{
                                     $authPriceInfo = parent::getAuthPriceInfo($type);
                                     if($authPriceInfo == false){
-                                        return message("获取价格信息失败！",false);
+                                        return message(t('cdkey.get_price_failed'),false);
                                     }
                                     $endtime = date("Y-m-d H:i:s",strtotime(' +'.$authPriceInfo['day'].' day'));
                                 } catch (\Exception $e) {
-                                    return message("获取价格信息失败！".$e->getMessage() ,false);
+                                    return message(t('cdkey.get_price_failed').$e->getMessage() ,false);
                                 }
                             }
                         }
@@ -172,25 +172,25 @@ class CdkeyModel extends BaseModel
                     break;
                 case 'user':
                     if(parent::getPowerPriceInfo($power) == false){
-                        return message("该权限不存在！" ,false);
+                        return message(t('cdkey.power_not_exist') ,false);
                     }
                     $info['power'] = $power;
                     $info['user_status'] = $user_status;
                     break;
                 case 'balance':
                     if($balance <= 0){
-                        return message("余额不能小于等于0！" ,false);
+                        return message(t('cdkey.balance_positive') ,false);
                     }
                     $info['balance'] = $balance;
                     break;
                 case 'integral':
                     if($integral <= 0){
-                        return message("积分不能小于等于0！" ,false);
+                        return message(t('cdkey.integral_positive') ,false);
                     }
                     $info['integral'] = $integral;
                     break;
                 default:
-                    return message("卡密类型错误！" ,false);
+                    return message(t('cdkey.type_error') ,false);
                     break;
             }
             for($i=0;$i<$number;$i++){
@@ -207,21 +207,21 @@ class CdkeyModel extends BaseModel
                 try{
                     self::insert($data);
                 } catch (\Exception $e) {
-                    return message("成功生成 ".$i." 张卡密，失败！".$e->getMessage() ,false);
+                    return message(t('cdkey.generate_success', ['count' => $i]).t('common.failed').$e->getMessage() ,false);
                 }
             }
-            return message("成功生成 ".$i." 张卡密！" ,true);
+            return message(t('cdkey.generate_success', ['count' => $i]) ,true);
         }
     }
 
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此卡密！');
+                throw new Exception(t('cdkey.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -237,11 +237,11 @@ class CdkeyModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此卡密！');
+                throw new Exception(t('cdkey.not_exist'));
             }
 
             self::where('id', $id)

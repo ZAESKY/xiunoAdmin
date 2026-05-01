@@ -43,18 +43,18 @@
                 <div class="layui-tab layui-tab-brief" lay-filter="notice">
                     <ul class="layui-tab-title">
                         <li class="layui-this"><i class="layui-icon layui-icon-website"></i>前台配置</li>
-                        <li><i class="layui-icon layui-icon-username"></i>登陆模板</li>
-                        <li><i class="layui-icon layui-icon-404"></i>维护模板</li>
-                        <li><i class="layui-icon layui-icon-notice"></i>公告模板</li>
-                        <li><i class="layui-icon layui-icon-set-sm"></i>模板配置</li>
+                        <li><i class="layui-icon layui-icon-username"></i>{:t('set_ui.login_template')}</li>
+                        <li><i class="layui-icon layui-icon-404"></i>{:t('set_ui.maintain_template')}</li>
+                        <li><i class="layui-icon layui-icon-notice"></i>{:t('set_ui.notice_template')}</li>
+                        <li><i class="layui-icon layui-icon-set-sm"></i>{:t('set_ui.template_config')}</li>
                     </ul>
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show">
                             <div class="layui-form-item">
                                 <div class="layui-btn-container">
-                                    <a onclick="uploadTemplate('home')" class="layui-btn layui-icon layui-icon-upload">上传模板</a>
+                                    <a onclick="uploadTemplate('home')" class="layui-btn layui-icon layui-icon-upload">{:t('common.upload')}模板</a>
                                     <a onclick="defaultTemplate('home')" class="layui-btn layui-btn-warm layui-icon layui-icon-template">一键还原</a>
-                                    <a onclick="settingTemplate('home')" class="layui-btn layui-btn-primary layui-icon layui-icon-set-fill">模板配置</a>
+                                    <a onclick="settingTemplate('home')" class="layui-btn layui-btn-primary layui-icon layui-icon-set-fill">{:t('set_ui.template_config')}</a>
                                 </div>
                             </div>
                             <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
@@ -70,8 +70,8 @@
                                             <div class="text-center">
                                                 <!--如果需要响应编辑或删除事件，可以给元素添加 btn-edit或btn-del的类和data-id这个属性值-->
                                                 <a onclick="saveTemplate('home','{$res.name}')" class="layui-btn layui-btn-sm layui-icon layui-icon-ok">使用</a>
-                                                <a onclick="previewNotice('/?preview={$res.name}')" class="layui-btn layui-btn-sm layui-btn-warm layui-icon layui-icon-search">预览</a>
-                                                <a onclick="deleteTemplate('home','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete">删除</a>
+                                                <a onclick="previewNotice('/?preview={$res.name}')" class="layui-btn layui-btn-sm layui-btn-warm layui-icon layui-icon-search">{:t('common.preview')}</a>
+                                                <a onclick="deleteTemplate('home','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete">{:t('common.delete')}</a>
                                                 <a onclick="packTemplate('home','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-primary layui-icon layui-icon-download-circle">打包</a>
                                             </div>
                                             <div style="margin-top:20px;position: relative;color: #999;font-size: 12px;">
@@ -90,9 +90,9 @@
                         <div class="layui-tab-item">
                             <div class="layui-form-item">
                                 <div class="layui-btn-container">
-                                    <a onclick="uploadTemplate('login')" class="layui-btn layui-icon layui-icon-upload">上传模板</a>
+                                    <a onclick="uploadTemplate('login')" class="layui-btn layui-icon layui-icon-upload">{:t('common.upload')}模板</a>
                                     <a onclick="defaultTemplate('login')" class="layui-btn layui-btn-warm layui-icon layui-icon-template">一键还原</a>
-                                    <a onclick="settingTemplate('login')" class="layui-btn layui-btn-primary layui-icon layui-icon-set-fill">模板配置</a>
+                                    <a onclick="settingTemplate('login')" class="layui-btn layui-btn-primary layui-icon layui-icon-set-fill">{:t('set_ui.template_config')}</a>
                                 </div>
                             </div>
                             <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
@@ -108,8 +108,8 @@
                                             <div class="text-center">
                                                 <!--如果需要响应编辑或删除事件，可以给元素添加 btn-edit或btn-del的类和data-id这个属性值-->
                                                 <a onclick="saveTemplate('login','{$res.name}')" class="layui-btn layui-btn-sm layui-icon layui-icon-ok">使用</a>
-                                                <a {eq name='preview' value='1'}href="/?preview={$res.name}&type=1"{else/}onclick="previewNotice()"{/eq} class="layui-btn layui-btn-sm layui-btn-warm layui-icon layui-icon-search" target="_blank">预览</a>
-                                                <a onclick="deleteTemplate('login','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete">删除</a>
+                                                <a {eq name='preview' value='1'}href="/?preview={$res.name}&type=1"{else/}onclick="previewNotice()"{/eq} class="layui-btn layui-btn-sm layui-btn-warm layui-icon layui-icon-search" target="_blank">{:t('common.preview')}</a>
+                                                <a onclick="deleteTemplate('login','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete">{:t('common.delete')}</a>
                                                 <a onclick="packTemplate('login','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-primary layui-icon layui-icon-download-circle">打包</a>
                                             </div>
                                             <div style="margin-top:20px;position: relative;color: #999;font-size: 12px;">
@@ -128,9 +128,9 @@
                         <div class="layui-tab-item">
                             <div class="layui-form-item">
                                 <div class="layui-btn-container">
-                                    <a onclick="uploadTemplate('maintain')" class="layui-btn layui-icon layui-icon-upload">上传模板</a>
+                                    <a onclick="uploadTemplate('maintain')" class="layui-btn layui-icon layui-icon-upload">{:t('common.upload')}模板</a>
                                     <a onclick="defaultTemplate('maintain')" class="layui-btn layui-btn-warm layui-icon layui-icon-template">一键还原</a>
-                                    <a onclick="settingTemplate('maintain')" class="layui-btn layui-btn-primary layui-icon layui-icon-set-fill">模板配置</a>
+                                    <a onclick="settingTemplate('maintain')" class="layui-btn layui-btn-primary layui-icon layui-icon-set-fill">{:t('set_ui.template_config')}</a>
                                 </div>
                             </div>
                             <div class="layui-row layui-col-space10" style="float: left;width: 100%;">
@@ -146,8 +146,8 @@
                                             <div class="text-center">
                                                 <!--如果需要响应编辑或删除事件，可以给元素添加 btn-edit或btn-del的类和data-id这个属性值-->
                                                 <a onclick="saveTemplate('maintain','{$res.name}')" class="layui-btn layui-btn-sm layui-icon layui-icon-ok">使用</a>
-                                                <a {eq name='preview' value='1'}href="/?preview={$res.name}&type=2"{else/}onclick="previewNotice()"{/eq} class="layui-btn layui-btn-sm layui-btn-warm layui-icon layui-icon-search" target="_blank">预览</a>
-                                                <a onclick="deleteTemplate('maintain','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete">删除</a>
+                                                <a {eq name='preview' value='1'}href="/?preview={$res.name}&type=2"{else/}onclick="previewNotice()"{/eq} class="layui-btn layui-btn-sm layui-btn-warm layui-icon layui-icon-search" target="_blank">{:t('common.preview')}</a>
+                                                <a onclick="deleteTemplate('maintain','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete">{:t('common.delete')}</a>
                                                 <a onclick="packTemplate('maintain','{$res.name}')" class="layui-btn layui-btn-sm layui-btn-primary layui-icon layui-icon-download-circle">打包</a>
                                             </div>
                                             <div style="margin-top:20px;position: relative;color: #999;font-size: 12px;">
@@ -183,7 +183,7 @@
                                     <div class="layui-form-item layui-form-text">
                                         <label class="layui-form-label">自定义模板</label>
                                         <div class="layui-input-block">
-                                            <textarea name="notice_diy" class="layui-input" placeholder="自定义公告模板" style="height:120px"></textarea>
+                                            <textarea name="notice_diy" class="layui-input" placeholder="自定义{:t('set_ui.notice_template')}" style="height:120px"></textarea>
                                             <div class="sf-tips">
                                                 参数说明：[notice]代表公告内容，[cookie]代表创建cookie
                                             </div>
@@ -194,7 +194,7 @@
                                     <div class="layui-form-item" pane>
                                         <label class="layui-form-label">图标</label>
                                         <div class="layui-input-block  inline-block">
-                                            <input type="radio" value="-1" name="notice_icon" title="关闭" checked/>
+                                            <input type="radio" value="-1" name="notice_icon" title="{:t('set_ui.bg_closed')}" checked/>
                                             <input type="radio" value="0" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: 0px 0'></i>"/>
                                             <input type="radio" value="1" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -30px 0'></i>"/>
                                             <input type="radio" value="2" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -60px 0'></i>"/>
@@ -223,9 +223,9 @@
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">显示时长</label>
+                                        <label class="layui-form-label">{:t('common.show')}时长</label>
                                         <div class="layui-input-block">
-                                            <input type="number" name="notice_time" class="layui-input" placeholder="自动关闭所需毫秒，0则代表不关闭"/>
+                                            <input type="number" name="notice_time" class="layui-input" placeholder="{:t('set_ui.notice_time_placeholder')}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -233,9 +233,9 @@
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item">
-                                <label class="layui-form-label">模板预览</label>
+                                <label class="layui-form-label">模板{:t('common.preview')}</label>
                                 <div class="layui-input-block">
-                                    <input type="checkbox" name="preview" value="1" lay-skin="switch" lay-tips="开启后可使用模板预览" lay-filter="preview" {eq name="preview" value="1"}checked{/eq}>
+                                    <input type="checkbox" name="preview" value="1" lay-skin="switch" lay-tips="{:t('common.open')}后可使用模板{:t('common.preview')}" lay-filter="preview" {eq name="preview" value="1"}checked{/eq}>
                                 </div>
                             </div>
                         </div>

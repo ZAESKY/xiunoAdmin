@@ -6,46 +6,46 @@
             <form class="layui-form layui-form-pane" id="formBasForm" lay-filter="formBasForm">
                 <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">站点配置</li>
-                        <li>公告配置</li>
-                        <li>功能配置</li>
-                        <li>模板配置</li>
-                        <li>支付配置</li>
-                        <li>邮箱配置</li>
+                        <li class="layui-this">{:t('install_ui.site_config')}</li>
+                        <li>{:t('set_ui.notice_config')}</li>
+                        <li>{:t('set_ui.feature_config')}</li>
+                        <li>{:t('set_ui.template_config')}</li>
+                        <li>{:t('set_ui.payment_config')}</li>
+                        <li>{:t('set_ui.email_config')}</li>
                     </ul>
                     <div class="layui-tab-content" >
                         <div class="layui-tab-item layui-show">
                             <fieldset class="layui-elem-field layui-field-title">
-                                <legend>站点信息配置</legend>
+                                <legend>{:t('set_ui.site_info_config')}</legend>
                                 <div class="layui-field-box">
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">网站名称</label>
+                                        <label class="layui-form-label">{:t('set_ui.site_name')}</label>
                                         <div class="layui-input-block">
-                                            <input type="text" name="title" class="layui-input" placeholder="该站点的名称" required/>
+                                            <input type="text" name="title" class="layui-input" placeholder="{:t('install_ui.site_name_placeholder')}" required/>
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">关键字</label>
+                                        <label class="layui-form-label">{:t('set_ui.keywords')}</label>
                                         <div class="layui-input-block">
                                             <input type="text" name="keywords" class="layui-input" placeholder="该站点的关键词" required/>
                                         </div>
                                     </div>
                                     <div class="layui-form-item layui-form-text">
-                                        <label class="layui-form-label">网站描述</label>
+                                        <label class="layui-form-label">{:t('set_ui.site_desc')}</label>
                                         <div class="layui-input-block">
-                                            <textarea name="description" class="layui-input" placeholder="网站描述，可留空" style="height:120px"></textarea>
+                                            <textarea name="description" class="layui-input" placeholder="{:t('set_ui.site_desc')}，可留空" style="height:120px"></textarea>
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">底部版权</label>
+                                        <label class="layui-form-label">{:t('set_ui.footer_copyright')}</label>
                                         <div class="layui-input-block">
-                                            <input type="text" name="foot" class="layui-input" placeholder="底部版权，可留空" />
+                                            <input type="text" name="foot" class="layui-input" placeholder="{:t('set_ui.footer_copyright')}，可留空" />
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">备案号</label>
+                                        <label class="layui-form-label">{:t('set_ui.beian_number')}</label>
                                         <div class="layui-input-block">
-                                            <input type="text" name="ICP" class="layui-input" placeholder="前台显示，可留空" />
+                                            <input type="text" name="ICP" class="layui-input" placeholder="前台{:t('common.show')}，可留空" />
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
@@ -55,7 +55,7 @@
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">加群链接</label>
+                                        <label class="layui-form-label">{:t('set_ui.join_group_link')}</label>
                                         <div class="layui-input-block">
                                             <input type="text" name="jiaqunlianjie" class="layui-input"  />
                                         </div>
@@ -63,21 +63,21 @@
                                 </div>
                             </fieldset>
                             <fieldset class="layui-elem-field layui-field-title">
-                                <legend>站点装饰配置</legend>
+                                <legend>{:t('set_ui.site_decorate_config')}</legend>
                                 <div class="layui-field-box">
                                     <div class="layui-form-item" pane>
                                         <label class="layui-form-label">背景图片</label>
                                         <div class="layui-input-block  inline-block">
-                                            <input  type="radio"  value="0"  name="site_background" lay-filter="site_background" title="关闭" />
-                                            <input  type="radio"  value="10"  name="site_background" lay-filter="site_background" title="自定义壁纸" />
+                                            <input  type="radio"  value="0"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_closed')}" />
+                                            <input  type="radio"  value="10"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_custom')}" />
                                             <input  type="radio"  value="1"  name="site_background" lay-filter="site_background" title="Bing随机壁纸"/>
                                             <input  type="radio"  value="2"  name="site_background" lay-filter="site_background" title="Bing每日壁纸" />
-                                            <input  type="radio"  value="3"  name="site_background" lay-filter="site_background" title="随机美女壁纸" />
-                                            <input  type="radio"  value="4"  name="site_background" lay-filter="site_background" title="随机二次元壁纸" />
-                                            <input  type="radio"  value="5"  name="site_background" lay-filter="site_background" title="随机汽车壁纸" />
-                                            <input  type="radio"  value="6"  name="site_background" lay-filter="site_background" title="随机动漫壁纸" />
-                                            <input  type="radio"  value="7"  name="site_background" lay-filter="site_background" title="随机背景壁纸" />
-                                            <input  type="radio"  value="8"  name="site_background" lay-filter="site_background" title="随机高清风景壁纸" />
+                                            <input  type="radio"  value="3"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_beauty_random')}" />
+                                            <input  type="radio"  value="4"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_acg_random')}" />
+                                            <input  type="radio"  value="5"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_car_random')}" />
+                                            <input  type="radio"  value="6"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_anime_random')}" />
+                                            <input  type="radio"  value="7"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_random')}" />
+                                            <input  type="radio"  value="8"  name="site_background" lay-filter="site_background" title="{:t('set_ui.bg_landscape_random')}" />
                                             <input  type="radio"  value="9"  name="site_background" lay-filter="site_background" title="随机mc酱动漫壁纸" />
                                         </div>
                                     </div>
@@ -91,10 +91,10 @@
                                         <div class="layui-form-item">
                                             <div class="layui-upload-drag" id="upload">
                                                 <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                                <p>点击上传，或将文件拖拽到此处</p>
+                                                <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
                                                 <div class="layui-hide" id="uploadDemoView">
                                                     <hr>
-                                                    <img src="" alt="上传成功后渲染" id="demo1" style="max-width: 196px">
+                                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="demo1" style="max-width: 196px">
                                                 </div>
                                             </div>
                                         </div>
@@ -103,12 +103,12 @@
                                         <div class="layui-form-item" pane>
                                             <label class="layui-form-label">背景样式</label>
                                             <div class="layui-input-block  inline-block">
-                                                <input  type="radio"  value="0"  name="site_background_css" lay-filter="site_background_css" title="关闭" />
+                                                <input  type="radio"  value="0"  name="site_background_css" lay-filter="site_background_css" title="{:t('set_ui.bg_closed')}" />
                                                 <input  type="radio"  value="1"  name="site_background_css" lay-filter="site_background_css" title="自定义样式"/>
                                                 <input  type="radio"  value="2"  name="site_background_css" lay-filter="site_background_css" title="纵向和横向重复" />
                                                 <input  type="radio"  value="3"  name="site_background_css" lay-filter="site_background_css" title="横向重复,纵向拉伸" />
                                                 <input  type="radio"  value="4"  name="site_background_css" lay-filter="site_background_css" title="纵向重复,横向拉伸" />
-                                                <input  type="radio"  value="5"  name="site_background_css" lay-filter="site_background_css" title="不重复,全屏拉伸" />
+                                                <input  type="radio"  value="5"  name="site_background_css" lay-filter="site_background_css" title="不重复,{:t('layout.fullscreen')}拉伸" />
                                             </div>
                                         </div>
                                     </div>
@@ -123,9 +123,9 @@
                                     <div class="layui-form-item" pane>
                                         <label class="layui-form-label">背景音乐</label>
                                         <div class="layui-input-block  inline-block">
-                                            <input  type="radio"  value="0"  name="site_background_music" lay-filter="site_background_music" title="关闭" />
+                                            <input  type="radio"  value="0"  name="site_background_music" lay-filter="site_background_music" title="{:t('set_ui.bg_closed')}" />
                                             <input  type="radio"  value="1"  name="site_background_music" lay-filter="site_background_music" title="自定义音乐代码" checked/>
-                                            <input  type="radio"  value="2"  name="site_background_music" lay-filter="site_background_music" title="自定义音乐ID" />
+                                            <input  type="radio"  value="2"  name="site_background_music" lay-filter="site_background_music" title="自定义音乐{:t('common.id')}" />
                                             <input  type="radio"  value="3"  name="site_background_music" lay-filter="site_background_music" title="自定义背景语音" />
                                             <input  type="radio"  value="4"  name="site_background_music" lay-filter="site_background_music" title="网易云榜单" />
                                         </div>
@@ -157,13 +157,13 @@
                                                 <input type="text" name="diy_background_music" class="layui-input" placeholder="自定义背景音乐代码" lay-required/>
                                             </div>
                                             <blockquote class="layui-elem-quote-sf-info">
-                                                https://music.clwl.online/可自己上传歌单<br><a class="layui-btn layui-btn-xs layui-btn-normal" href="https://music.clwl.online/" rel="noreferrer" target="_blank">点击前往获取代码</a>
+                                                https://music.clwl.online/可自己{:t('common.upload')}歌单<br><a class="layui-btn layui-btn-xs layui-btn-normal" href="https://music.clwl.online/" rel="noreferrer" target="_blank">点击前往{:t('download_ui.get_btn')}代码</a>
                                             </blockquote>
                                         </div>
                                     </div>
                                     <div id="is_music_id" style="display:none;">
                                         <div class="layui-form-item layui-form-text">
-                                            <label class="layui-form-label">音乐ID</label>
+                                            <label class="layui-form-label">音乐{:t('common.id')}</label>
                                             <div class="layui-input-block">
                                                 <textarea lay-tips="一行一首音乐" lay-direction="1" lay-bg="#4facfe" type="text" class="layui-input" style="height:100px" name="diy_background_music_id" placeholder="一行一首音乐" rows="4">002ejEdb4KTwBw|tencent</textarea>
                                             </div>
@@ -172,19 +172,19 @@
                                                     <div class="layui-colla-item">
                                                         <h2 class="layui-colla-title">格式</h2>
                                                         <div class="layui-colla-content layui-show">
-                                                            <p>音乐ID|音乐平台|ID类型<br>（ID类型可选填）</p><br>
+                                                            <p>音乐{:t('common.id')}|音乐平台|{:t('common.id')}{:t('common_ui.type')}<br>（{:t('common.id')}{:t('common_ui.type')}可选填）</p><br>
                                                             <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;单首音乐例如：002ejEdb4KTwBw|tencent<br>（这首歌名字叫浮夸来自QQ音乐）</li>
                                                             <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;歌单例如：6666124298|tencent|playlist<br>（这是我QQ音乐的歌单）</li>
                                                         </div>
                                                     </div>
                                                     <div class="layui-colla-item">
-                                                        <h2 class="layui-colla-title">音乐ID怎么取？</h2>
+                                                        <h2 class="layui-colla-title">音乐{:t('common.id')}怎么取？</h2>
                                                         <div class="layui-colla-content">
-                                                            <p><b><font color=#c7254e>标红</font></b> 为 <strong>音乐 ID</strong>，<u>下划线</u> 表示 <strong>音乐地址</strong></p>
+                                                            <p><b><font color=#c7254e>标红</font></b> 为 <strong>音乐 {:t('common.id')}</strong>，<u>下划线</u> 表示 <strong>音乐地址</strong></p>
                                                             <ul>
-                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;蜻蜓 FM 的音乐 ID 需要使用 <code>| (管道符)</code> 组合，例如 <code>158696|5266259</code></li>
-                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;全民 K 歌的音乐名称请输入 <code>shareuid</code>，这是用户的 uid，搜索结果是该用户的所有公开作品</li>
-                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;全民 K 歌的音乐 ID 请输入 <code>shareid</code> 这是单曲分享 id，搜索结果是该单曲信息</li>
+                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;蜻蜓 FM 的音乐 {:t('common.id')} 需要使用 <code>| (管道符)</code> 组合，例如 <code>158696|5266259</code></li>
+                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;全民 K 歌的音乐名称请输入 <code>shareuid</code>，这是用户的 uid，{:t('common_ui.search_btn')}结果是该用户的所有公开作品</li>
+                                                                <li><span class="layui-badge-dot layui-bg-cyan"></span>&nbsp;全民 K 歌的音乐 {:t('common.id')} 请输入 <code>shareid</code> 这是单曲分享 id，{:t('common_ui.search_btn')}结果是该单曲信息</li>
                                                             </ul>
                                                             <blockquote class="layui-elem-field layui-field-title">
                                                                 <p><span>网易：</span><u>http://music.163.com/#/song?id=<b><font color=#c7254e>25906124</font></b></u></p>
@@ -209,9 +209,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="layui-colla-item">
-                                                        <h2 class="layui-colla-title">ID类型</h2>
+                                                        <h2 class="layui-colla-title">{:t('common.id')}{:t('common_ui.type')}</h2>
                                                         <div class="layui-colla-content">
-                                                            playlist：代表歌单（部分歌单获取不到）
+                                                            playlist：代表歌单（部分歌单{:t('download_ui.get_btn')}不到）
                                                         </div>
                                                     </div>
                                                 </div>
@@ -222,27 +222,27 @@
                                         <div class="layui-form-item layui-form-text">
                                             <label class="layui-form-label">自定义语音</label>
                                             <div class="layui-input-block">
-                                                <textarea name="background_text" class="layui-input" lay-tips="前台播放的语音" placeholder="推荐多用英文逗号“,”分段，如：欢迎来到,授权中心！（这样说出来的语音就不会那么机械化）" style="height:120px"></textarea>
+                                                <textarea name="background_text" class="layui-input" lay-tips="前台{:t('wxpay_ui.play')}的语音" placeholder="推荐多用英文逗号“,”分段，如：欢迎来到,{:t('common_ui.auth_type')}中心！（这样说出来的语音就不会那么机械化）" style="height:120px"></textarea>
                                             </div>
                                         </div>
                                         <div id="mp3"></div>
-                                        <div class="layui-form-item" lay-tips="点击可自动播放当前选择类型效果音" lay-direction="1" lay-bg="#4facfe" pane>
-                                            <label class="layui-form-label">发音类型</label>
+                                        <div class="layui-form-item" lay-tips="点击可自动{:t('wxpay_ui.play')}当前{:t('common_ui.choose')}{:t('common_ui.type')}效果音" lay-direction="1" lay-bg="#4facfe" pane>
+                                            <label class="layui-form-label">发音{:t('common_ui.type')}</label>
                                             <div class="layui-input-block  inline-block">
-                                                <input  type="radio"  value="0"  name="background_text_per" lay-filter="background_text_per" title="小孩"/>
-                                                <input  type="radio"  value="1"  name="background_text_per" lay-filter="background_text_per" title="大叔"/>
-                                                <input  type="radio"  value="2"  name="background_text_per" lay-filter="background_text_per" title="萝莉" checked/>
-                                                <input  type="radio"  value="3"  name="background_text_per" lay-filter="background_text_per" title="御姐"/>
-                                                <input  type="radio"  value="4"  name="background_text_per" lay-filter="background_text_per" title="商务男"/>
-                                                <input  type="radio"  value="5"  name="background_text_per" lay-filter="background_text_per" title="商务女"/>
-                                                <input  type="radio"  value="6"  name="background_text_per" lay-filter="background_text_per" title="客服女"/>
+                                                <input  type="radio"  value="0"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_child')}"/>
+                                                <input  type="radio"  value="1"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_uncle')}"/>
+                                                <input  type="radio"  value="2"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_loli')}" checked/>
+                                                <input  type="radio"  value="3"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_queen')}"/>
+                                                <input  type="radio"  value="4"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_business_man')}"/>
+                                                <input  type="radio"  value="5"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_business_woman')}"/>
+                                                <input  type="radio"  value="6"  name="background_text_per" lay-filter="background_text_per" title="{:t('set_ui.voice_service_woman')}"/>
                                             </div>
                                         </div>
-                                        <div class="layui-form-item" lay-tips="点击可自动播放当前选择音速效果音" lay-direction="1" lay-bg="#4facfe" pane>
+                                        <div class="layui-form-item" lay-tips="点击可自动{:t('wxpay_ui.play')}当前{:t('common_ui.choose')}音速效果音" lay-direction="1" lay-bg="#4facfe" pane>
                                             <label class="layui-form-label">语速</label>
                                             <div class="layui-input-block  inline-block">
                                                 <input  type="radio"  value="0"  name="background_text_spd" lay-filter="background_text_spd" title="快" />
-                                                <input  type="radio"  value="1"  name="background_text_spd" lay-filter="background_text_spd" title="正常" checked/>
+                                                <input  type="radio"  value="1"  name="background_text_spd" lay-filter="background_text_spd" title="{:t('set_ui.speed_normal')}" checked/>
                                                 <input  type="radio"  value="2"  name="background_text_spd" lay-filter="background_text_spd" title="慢" />
                                             </div>
                                         </div>
@@ -250,17 +250,17 @@
                                 </div>
                             </fieldset>
                             <fieldset class="layui-elem-field layui-field-title">
-                                <legend>站点功能配置</legend>
+                                <legend>{:t('set_ui.site_feature_config')}</legend>
                                 <div class="layui-field-box">
                                     <div class="layui-form-item" pane>
-                                        <label class="layui-form-label">滑动验证码</label>
+                                        <label class="layui-form-label">{:t('set_ui.slide_captcha')}</label>
                                         <div class="layui-input-block inline-block">
                                             <input type="checkbox" name="captcha_open" value="1" lay-skin="switch" lay-filter="captcha_open">
                                         </div>
                                     </div>
                                     <div id="captcha_frame" style="display:none;">
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">极验ID</label>
+                                            <label class="layui-form-label">极验{:t('common.id')}</label>
                                             <div class="layui-input-block">
                                                 <input type="text" name="captcha_id" class="layui-input"/>
                                             </div>
@@ -271,12 +271,12 @@
                                                 <input type="text" name="captcha_key" class="layui-input"/>
                                             </div>
                                             <blockquote class="layui-elem-quote-sf-info">
-                                                用于登录,注册,修改信息等等，<a class="layui-btn layui-btn-xs layui-btn-normal" href="http://www.geetest.com/apply.html" rel="noreferrer" target="_blank">注册极验验证码</a>
+                                                用于登录,注册,{:t('common_ui.repair')}信息等等，<a class="layui-btn layui-btn-xs layui-btn-normal" href="http://www.geetest.com/apply.html" rel="noreferrer" target="_blank">注册极验{:t('download_ui.captcha_label')}</a>
                                             </blockquote>
                                         </div>
                                     </div>
                                     <div class="layui-form-item" pane>
-                                        <label class="layui-form-label">维护状态</label>
+                                        <label class="layui-form-label">{:t('set_ui.maintain_mode')}</label>
                                         <div class="layui-input-block  inline-block">
                                             <input type="checkbox" name="maintain_switch" value="1" lay-skin="switch">
                                         </div>
@@ -288,10 +288,10 @@
                                         </div>
                                     </div>
                                     <div class="layui-form-item" pane>
-                                        <label class="layui-form-label">其他登陆</label>
+                                        <label class="layui-form-label">{:t('set_ui.other_login')}</label>
                                         <div class="layui-input-block  inline-block">
                                             <input type="checkbox" name="qq_oauth" value="1" lay-skin="primary" title="<img src='/Assets/img/qq.png' width='18'> ＱＱ快捷登录" checked/>
-                                            <input type="checkbox" name="qq_code" value="1" lay-skin="primary" title="<img src='/Assets/img/pays.png' width='18'> ＱＱ扫码登陆" checked/>
+                                            <input type="checkbox" name="qq_code" value="1" lay-skin="primary" title="<img src='/Assets/img/pays.png' width='18'> ＱＱ{:t('login.qq_scan')}登陆" checked/>
                                         </div>
                                     </div>
                                 </div>
@@ -299,13 +299,13 @@
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">前台公告</label>
+                                <label class="layui-form-label">{:t('set_ui.front_notice')}</label>
                                 <div class="layui-input-block">
                                     <textarea name="notice_home" class="layui-input" style="height:120px"></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">后台公告</label>
+                                <label class="layui-form-label">{:t('set_ui.backend_notice')}</label>
                                 <div class="layui-input-block">
                                     <textarea name="notice_user" class="layui-input" style="height:120px"></textarea>
                                 </div>
@@ -313,25 +313,25 @@
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">自助授权</label>
+                                <label class="layui-form-label">{:t('app_ui.self_auth')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input type="checkbox" name="onlinebuy_switch" value="1" lay-skin="switch">
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">自助注册</label>
+                                <label class="layui-form-label">{:t('app_ui.self_register')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input type="checkbox" name="reg_switch" value="1" lay-skin="switch">
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">更换授权</label>
+                                <label class="layui-form-label">{:t('app_ui.replace_auth')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input type="checkbox" name="replace_switch" value="1" lay-skin="switch">
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">卡密兑换</label>
+                                <label class="layui-form-label">{:t('app_ui.cdkey_exchange')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input type="checkbox" name="cdkey_switch" value="1" lay-skin="switch">
                                 </div>
@@ -343,24 +343,24 @@
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">支付查询</label>
+                                <label class="layui-form-label">{:t('app_ui.payment_query')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input type="checkbox" name="pay_query_switch" value="1" lay-skin="switch">
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">代理查询</label>
+                                <label class="layui-form-label">{:t('app_ui.proxy_query')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input type="checkbox" name="user_query_switch" value="1" lay-skin="switch">
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">下载方式</label>
+                                <label class="layui-form-label">{:t('wxpay_ui.download')}方式</label>
                                 <div class="layui-input-block  inline-block">
-                                    <input  type="radio"  value="0"  name="download" title="关闭" checked/>
-                                    <input  type="radio"  value="1"  name="download" title="邮箱验证下载" />
-                                    <input  type="radio"  value="2"  name="download" title="扫码验证下载" />
-                                    <input  type="radio"  value="3"  name="download" title="信息验证下载" />
+                                    <input  type="radio"  value="0"  name="download" title="{:t('set_ui.bg_closed')}" checked/>
+                                    <input  type="radio"  value="1"  name="download" title="邮箱{:t('login.verify_token')}{:t('wxpay_ui.download')}" />
+                                    <input  type="radio"  value="2"  name="download" title="{:t('login.qq_scan')}{:t('login.verify_token')}{:t('wxpay_ui.download')}" />
+                                    <input  type="radio"  value="3"  name="download" title="信息{:t('login.verify_token')}{:t('wxpay_ui.download')}" />
                                 </div>
                             </div>
                         </div>
@@ -368,10 +368,10 @@
                             <div class="layui-card-body" style="padding: 0;min-height: 216px;">
                                 <div class="layui-tab layui-tab-vertical" lay-filter="notice">
                                     <ul class="layui-tab-title">
-                                        <li class="layui-this"><i class="layui-icon layui-icon-template-1"></i>前台模板</li>
-                                        <li><i class="layui-icon layui-icon-template"></i>登陆模板</li>
-                                        <li><i class="layui-icon layui-icon-auz"></i>维护模板</li>
-                                        <li><i class="layui-icon layui-icon-notice"></i>公告模板</li>
+                                        <li class="layui-this"><i class="layui-icon layui-icon-template-1"></i>{:t('set_ui.front_template')}</li>
+                                        <li><i class="layui-icon layui-icon-template"></i>{:t('set_ui.login_template')}</li>
+                                        <li><i class="layui-icon layui-icon-auz"></i>{:t('set_ui.maintain_template')}</li>
+                                        <li><i class="layui-icon layui-icon-notice"></i>{:t('set_ui.notice_template')}</li>
                                     </ul>
                                     <div class="layui-tab-content">
                                         <div class="layui-tab-item layui-show">
@@ -429,7 +429,7 @@
                                             <div class="layui-form-item layui-form-text">
                                                 <label class="layui-form-label">自定义模板</label>
                                                 <div class="layui-input-block">
-                                                    <textarea name="notice_diy" class="layui-input" placeholder="自定义公告模板" style="height:120px"></textarea>
+                                                    <textarea name="notice_diy" class="layui-input" placeholder="自定义{:t('set_ui.notice_template')}" style="height:120px"></textarea>
                                                     <blockquote class="layui-elem-quote-sf-info">
                                                         参数说明：[notice]代表公告内容，[cookie]代表创建cookie
                                                     </blockquote>
@@ -440,7 +440,7 @@
                                             <div class="layui-form-item" pane>
                                                 <label class="layui-form-label">图标</label>
                                                 <div class="layui-input-block  inline-block">
-                                                    <input type="radio" value="-1" name="notice_icon" title="关闭" checked/>
+                                                    <input type="radio" value="-1" name="notice_icon" title="{:t('set_ui.bg_closed')}" checked/>
                                                     <input type="radio" value="0" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: 0px 0'></i>"/>
                                                     <input type="radio" value="1" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -30px 0'></i>"/>
                                                     <input type="radio" value="2" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -60px 0'></i>"/>
@@ -469,9 +469,9 @@
                                                 </div>
                                             </div>
                                             <div class="layui-form-item">
-                                                <label class="layui-form-label">显示时长</label>
+                                                <label class="layui-form-label">{:t('common.show')}时长</label>
                                                 <div class="layui-input-block">
-                                                    <input type="number" name="notice_time" class="layui-input" placeholder="自动关闭所需毫秒，0则代表不关闭"/>
+                                                    <input type="number" name="notice_time" class="layui-input" placeholder="{:t('set_ui.notice_time_placeholder')}"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -481,21 +481,21 @@
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item">
-                                <label class="layui-form-label">支付宝</label>
+                                <label class="layui-form-label">{:t('common_ui.alipay')}</label>
                                 <div class="layui-input-block">
                                     <select class="layui-input" name="alipay_api" lay-search lay-filter="alipay_api">
-                                        <option value="0">关闭</option>
-                                        <option value="1">支付宝官方即时到账接口</option>
-                                        <option value="3">支付宝当面付扫码支付</option>
+                                        <option value="0">{:t('set_ui.bg_closed')}</option>
+                                        <option value="1">{:t('common_ui.alipay')}官方即时到账接口</option>
+                                        <option value="3">{:t('common_ui.alipay')}当面付{:t('payment_ui.code_pay')}</option>
                                         <option selected value="2">易支付免签约接口</option>
                                         <option value="5">码支付免签约接口</option>
                                     </select>
                                 </div>
-                                <small id="payapi_06" style="display:none;"><font color="green">*支付宝当面付接口配置请修改other/f2fpay/config.php</font></small>
+                                <small id="payapi_06" style="display:none;"><font color="green">*{:t('common_ui.alipay')}当面付接口配置请{:t('common_ui.repair')}other/f2fpay/config.php</font></small>
                             </div>
                             <div id="payapi_01" style="display:none;">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">合作者身份(PID)</label>
+                                    <label class="layui-form-label">合作者身份(P{:t('common.id')})</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="alipay_pid2" class="layui-input" value="">
                                     </div>
@@ -507,27 +507,27 @@
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">安全校验码(Key)</label>
+                                    <label class="layui-form-label">{:t('dashboard.secure')}校验码(Key)</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="alipay_key2" class="layui-input" value="">
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">支付宝手机网站支付</label>
+                                    <label class="layui-form-label">{:t('common_ui.alipay')}手机网站支付</label>
                                     <div class="layui-input-block">
                                         <select class="layui-input" name="alipay2_api" lay-search lay-filter="alipay2_api">
-                                            <option selected value="0">关闭</option>
-                                            <option value="1">支付宝手机网站支付接口</option>
+                                            <option selected value="0">{:t('set_ui.bg_closed')}</option>
+                                            <option value="1">{:t('common_ui.alipay')}手机网站支付接口</option>
                                         </select>
                                     </div>
-                                    <small id="payapi_02" style="display:none;">相关信息与以上支付宝即时到账接口一致，开启前请确保已开通支付宝手机支付，否则会导致手机用户无法支付！</small>
+                                    <small id="payapi_02" style="display:none;">相关信息与以上{:t('common_ui.alipay')}即时到账接口一致，{:t('common.open')}前请确保已开通{:t('common_ui.alipay')}手机支付，否则会导致手机用户无法支付！</small>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <label class="layui-form-label">ＱＱ</label>
                                 <div class="layui-input-block">
                                     <select class="layui-input" name="qqpay_api" lay-search lay-filter="qqpay_api">
-                                        <option value="0">关闭</option>
+                                        <option value="0">{:t('set_ui.bg_closed')}</option>
                                         <option value="1">QQ钱包官方支付接口</option>
                                         <option selected value="2">易支付免签约接口</option>
                                         <option value="5">码支付免签约接口</option>
@@ -536,7 +536,7 @@
                             </div>
                             <div id="payapi_05" style="display:none;">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">MCH_ID</label>
+                                    <label class="layui-form-label">MCH_{:t('common.id')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="qqpay_mchid" class="layui-input"/>
                                     </div>
@@ -547,16 +547,16 @@
                                     <div class="layui-input-block">
                                         <input type="text" name="qqpay_mchkey" class="layui-input"/>
                                     </div>
-                                    <small>QQ钱包商户平台(http://qpay.qq.com/)获取</small>
+                                    <small>QQ钱包商户平台(http://qpay.qq.com/){:t('download_ui.get_btn')}</small>
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">微信</label>
+                                <label class="layui-form-label">{:t('common_ui.wechat')}</label>
                                 <div class="layui-input-block">
                                     <select class="layui-input" name="wxpay_api" lay-search lay-filter="wxpay_api">
-                                        <option value="0">关闭</option>
-                                        <option value="1">微信官方扫码+公众号支付接口</option>
-                                        <option value="3">微信官方扫码+H5支付接口</option>
+                                        <option value="0">{:t('set_ui.bg_closed')}</option>
+                                        <option value="1">{:t('common_ui.wechat')}官方{:t('login.qq_scan')}+公众号支付接口</option>
+                                        <option value="3">{:t('common_ui.wechat')}官方{:t('login.qq_scan')}+H5支付接口</option>
                                         <option selected value="2">易支付免签约接口</option>
                                         <option value="5">码支付免签约接口</option>
                                     </select>
@@ -564,18 +564,18 @@
                             </div>
                             <div id="payapi_04" style="display:none;">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">APPID</label>
+                                    <label class="layui-form-label">APP{:t('common.id')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="wxpay_appid" class="layui-input"/>
                                     </div>
-                                    <small>绑定支付的APPID（必须配置，开户邮件中可查看）</small>
+                                    <small>{:t('install_ui.binding_title')}支付的APP{:t('common.id')}（必须配置，开户邮件中可{:t('common.view')}）</small>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">MCHID</label>
+                                    <label class="layui-form-label">MCH{:t('common.id')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="wxpay_mchid" class="layui-input"/>
                                     </div>
-                                    <small>商户号（必须配置，开户邮件中可查看）</small>
+                                    <small>商户号（必须配置，开户邮件中可{:t('common.view')}）</small>
                                 </div>
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">KEY</label>
@@ -589,24 +589,24 @@
                                     <div class="layui-input-block">
                                         <input type="text" name="wxpay_appsecret" class="layui-input"/>
                                     </div>
-                                    <small>公众帐号secert（仅JSAPI支付的时候需要配置， 登录公众平台，进入开发者中心可设置）<br>获取地址：https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&token=2005451881&lang=zh_CN</small>
+                                    <small>公众帐号secert（仅JSAPI支付的时候需要配置， 登录公众平台，进入开发者中心可设置）<br>{:t('download_ui.get_btn')}地址：https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&token=2005451881&lang=zh_CN</small>
                                 </div>
                             </div>
                             <div id="epay" style="display:inherit">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">易支付接口</label>
+                                    <label class="layui-form-label">{:t('set_ui.epay_api')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="epay_url" class="layui-input" placeholder="填写对接的易支付URL,例如：http://pay.sf-team.cn/">
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户ID</label>
+                                    <label class="layui-form-label">商户{:t('common.id')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="epay_pid" class="layui-input" placeholder="易支付ID,例如：123456" value="">
+                                        <input type="text" name="epay_pid" class="layui-input" placeholder="易支付{:t('common.id')},例如：123456" value="">
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户密钥</label>
+                                    <label class="layui-form-label">{:t('set_ui.merchant_key')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="epay_key" class="layui-input" placeholder="易支付密钥,例如：03bfg234sfftg" value="">
                                     </div>
@@ -614,7 +614,7 @@
                             </div>
                             <div id="codepay" style="display:none">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">码支付ID</label>
+                                    <label class="layui-form-label">码支付{:t('common.id')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="codepay_id" class="layui-input" value="">
                                     </div>
@@ -624,28 +624,28 @@
                                     <div class="layui-input-block">
                                         <input type="text" name="codepay_key" class="layui-input" value="">
                                     </div>
-                                    <small><font color="green">codepay.fateqq.com 码支付支付宝和QQ需要挂电脑软件，微信不需要挂软件</font></small>
+                                    <small><font color="green">codepay.fateqq.com 码支付{:t('common_ui.alipay')}和QQ需要挂电脑软件，{:t('common_ui.wechat')}不需要挂软件</font></small>
                                 </div>
                             </div>
-                            <div class="layui-elem-quote">使用本功能可在一定程度上避免被某支付商圈钱，望大家在选择某支付对接商时多多观察避免产生利润亏损</div>
+                            <div class="layui-elem-quote">使用本功能可在一定程度上避免被某支付商圈钱，望大家在{:t('common_ui.choose')}某支付对接商时多多观察避免产生利润亏损</div>
                             <div class="layui-form-item">
                                 <label class="layui-form-label">独立支付</label>
                                 <div class="layui-input-block">
                                     <select class="layui-input" name="epays_open" lay-search lay-filter="epays_open">
-                                        <option selected value="0">关闭</option>
-                                        <option value="1">开启</option>
+                                        <option selected value="0">{:t('set_ui.bg_closed')}</option>
+                                        <option value="1">{:t('common.open')}</option>
                                     </select>
                                 </div>
                             </div>
                             <div id="dlpay" style="display:none ">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户ID</label>
+                                    <label class="layui-form-label">商户{:t('common.id')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="qqpay_pid" class="layui-input" placeholder="QQ钱包支付账号"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户密钥</label>
+                                    <label class="layui-form-label">{:t('set_ui.merchant_key')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="qqpay_key" class="layui-input" placeholder="QQ钱包接口密码"/>
                                     </div>
@@ -655,51 +655,51 @@
                                     <div class="layui-input-block">
                                         <input type="text" name="qqpay_url" class="layui-input" placeholder="QQ钱包接口地址"/>
                                     </div>
-                                    <small>请填写单独对接QQ钱包的完整易支付接口地址，此QQ钱包配置不完整时将使用默认接口</small>
+                                    <small>请填写单独对接QQ钱包的完整{:t('set_ui.epay_api')}地址，此QQ钱包配置不完整时将使用默认接口</small>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户ID</label>
+                                    <label class="layui-form-label">商户{:t('common.id')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="alipay_pid" class="layui-input" placeholder="支付宝支付账号"/>
+                                        <input type="text" name="alipay_pid" class="layui-input" placeholder="{:t('common_ui.alipay')}支付账号"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户密钥</label>
+                                    <label class="layui-form-label">{:t('set_ui.merchant_key')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="alipay_key" class="layui-input" placeholder="支付宝接口密码"/>
+                                        <input type="text" name="alipay_key" class="layui-input" placeholder="{:t('common_ui.alipay')}接口密码"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">支付宝接口</label>
+                                    <label class="layui-form-label">{:t('common_ui.alipay')}接口</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="alipay_url" class="layui-input" placeholder="支付宝接口地址"/>
+                                        <input type="text" name="alipay_url" class="layui-input" placeholder="{:t('common_ui.alipay')}接口地址"/>
                                     </div>
-                                    <small>请填写单独对接支付宝的完整易支付接口地址，此支付宝配置不完整时将使用默认接口</small>
+                                    <small>请填写单独对接{:t('common_ui.alipay')}的完整{:t('set_ui.epay_api')}地址，此{:t('common_ui.alipay')}配置不完整时将使用默认接口</small>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">商户ID</label>
+                                    <label class="layui-form-label">商户{:t('common.id')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="wxpay_pid" class="layui-input" placeholder="微信支付支付账号"/>
-                                    </div>
-                                </div>
-                                <div class="layui-form-item">
-                                    <label class="layui-form-label">商户密钥</label>
-                                    <div class="layui-input-block">
-                                        <input type="text" name="wxpay_key" class="layui-input" placeholder="微信支付接口密码"/>
+                                        <input type="text" name="wxpay_pid" class="layui-input" placeholder="{:t('payment_ui.wxpay')}支付账号"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">微信接口</label>
+                                    <label class="layui-form-label">{:t('set_ui.merchant_key')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="wxpay_url" class="layui-input" placeholder="微信支付接口地址"/>
+                                        <input type="text" name="wxpay_key" class="layui-input" placeholder="{:t('payment_ui.wxpay')}接口密码"/>
                                     </div>
-                                    <small>请填写单独对接微信支付的完整易支付接口地址，此微信支付配置不完整时将使用默认接口</small>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">{:t('common_ui.wechat')}接口</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="wxpay_url" class="layui-input" placeholder="{:t('payment_ui.wxpay')}接口地址"/>
+                                    </div>
+                                    <small>请填写单独对接{:t('payment_ui.wxpay')}的完整{:t('set_ui.epay_api')}地址，此{:t('payment_ui.wxpay')}配置不完整时将使用默认接口</small>
                                 </div>
                             </div>
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">发信模式</label>
+                                <label class="layui-form-label">{:t('set_ui.send_mode')}</label>
                                 <div class="layui-input-block  inline-block">
                                     <input  type="radio"  value="0"  name="mail_cloud" title="普通模式" checked/>
                                 </div>
@@ -718,27 +718,27 @@
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">邮箱账号</label>
+                                    <label class="layui-form-label">{:t('set_ui.email_account')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="mail_name" class="layui-input"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">邮箱密码</label>
+                                    <label class="layui-form-label">{:t('set_ui.email_password')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="mail_pwd" class="layui-input"/>
                                     </div>
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">收信邮箱</label>
+                                <label class="layui-form-label">{:t('set_ui.receive_email')}</label>
                                 <div class="layui-input-block">
                                     <input type="text" name="mail_recv" class="layui-input" placeholder="不填默认为发信邮箱"/>
                                 </div>
                             </div>
                             <blockquote class="layui-elem-quote-sf-info">
                                 <button type="button" class="layui-btn layui-btn-xs layui-btn-normal" id="mailtest">给 2129876388@qq.com 发一封测试邮件</button><br>
-                                此功能为用户下单时给自己发邮件提醒。<br/>使用普通模式发信时，建议使用QQ邮箱，SMTP服务器smtp.qq.com，端口465，密码不是QQ密码也不是邮箱独立密码，是QQ邮箱设置界面生成的<a class="layui-btn layui-btn-xs layui-btn-warm" ew-href="http://service.mail.qq.com/cgi-bin/help?subtype=1&&no=1001256&&id=28"  target="_blank" rel="noreferrer">授权码</a>。为确保发信成功率，发信邮箱和收信邮箱最好同一个
+                                此功能为用户下单时给自己发邮件提醒。<br/>使用普通模式发信时，建议使用QQ邮箱，SMTP服务器smtp.qq.com，端口465，密码不是QQ密码也不是邮箱独立密码，是QQ邮箱设置界面生成的<a class="layui-btn layui-btn-xs layui-btn-warm" ew-href="http://service.mail.qq.com/cgi-bin/help?subtype=1&&no=1001256&&id=28"  target="_blank" rel="noreferrer">{:t('download_ui.auth_code_label')}</a>。为确保发信{:t('common.success')}率，发信邮箱和{:t('set_ui.receive_email')}最好同一个
                             </blockquote>
                         </div>
                     </div>
@@ -746,7 +746,7 @@
                 <hr style="width:0px"><hr>
                 <div class="layui-form-item layui-row layui-col-space10 ">
                     <div class="layui-col-md2">
-                        <button type="submit" class="layui-btn layui-btn-fluid" lay-filter="noticeBtn" lay-submit>保存配置</button>
+                        <button type="submit" class="layui-btn layui-btn-fluid" lay-filter="noticeBtn" lay-submit>{:t('set_ui.save_config')}</button>
                     </div>
                 </div>
             </form>

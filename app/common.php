@@ -260,21 +260,21 @@ if (!function_exists('hello_user')) {
     function hello_user($name){
         $date = date("H:i:s");
         if ($date >= '03:00:00' && $date < '06:00:00') {
-            return '凌晨好，' . $name;
+            return t('greeting.early_morning', ['name' => $name]);
         } elseif ($date >= '06:00:00' && $date < '08:00:00') {
-            return '早晨好，' . $name;
+            return t('greeting.morning', ['name' => $name]);
         } elseif ($date >= '08:00:00' && $date < '11:00:00') {
-            return '上午好，' . $name;
+            return t('greeting.forenoon', ['name' => $name]);
         } elseif ($date >= '11:00:00' && $date < '13:00:00') {
-            return '中午好，' . $name;
+            return t('greeting.noon', ['name' => $name]);
         } elseif ($date >= '13:00:00' && $date < '17:00:00') {
-            return '下午好，' . $name;
+            return t('greeting.afternoon', ['name' => $name]);
         } elseif ($date >= '17:00:00' && $date < '19:00:00') {
-            return '傍晚好，' . $name;
+            return t('greeting.evening', ['name' => $name]);
         } elseif ($date >= '19:00:00' && $date < '23:00:00') {
-            return '晚上好，' . $name . '<i class="layui-icon layui-icon-heart-fill" style="color:red"></i>~';
+            return t('greeting.night', ['name' => $name]) . '<i class="layui-icon layui-icon-heart-fill" style="color:red"></i>~';
         } else {
-            return '深夜了，SF助手去睡觉了，' . $name . '也早点睡觉吧<i class="layui-icon layui-icon-heart-fill" style="color:red"></i>~';
+            return t('greeting.late_night', ['name' => $name]) . '<i class="layui-icon layui-icon-heart-fill" style="color:red"></i>~';
         }
     }
 }
@@ -326,7 +326,7 @@ if (!function_exists('__')) {
             array_shift($vars);
             $lang = '';
         }
-        return \think\Lang::get($name, $vars, $lang);
+        return lang($name, $vars, $lang);
     }
 
 }
@@ -334,11 +334,74 @@ if (!function_exists('__')) {
 if (!function_exists('t')) {
     /**
      * Lightweight i18n helper. Use dot keys such as common.save or auth.login.
+     * Lang::get() internally wraps keys with {:} so callers use bare keys.
+     *
+     * Usage:
+     *   t('common.save')                 // simple
+     *   t('greeting.hello', ['name' => 'World'])  // with vars
      */
     function t($name, $vars = [], $lang = '')
     {
-        $text = __($name, $vars, $lang);
-        return $text === '' ? $name : $text;
+        static $loaded = [];
+        static $detected = false;
+
+        if (!$detected) {
+            $detected = true;
+            $request = app()->request;
+            $langConfig = app()->config->get('lang');
+            $langSet = $langConfig['default_lang'] ?? 'en-us';
+            $normalizer = function ($value) use ($langConfig) {
+                $value = strtolower(trim((string)$value));
+                if ($value === '') {
+                    return '';
+                }
+                $value = str_replace('_', '-', $value);
+                $map = $langConfig['accept_language'] ?? [];
+                if (isset($map[$value])) {
+                    return $map[$value];
+                }
+                if (strpos($value, 'zh') === 0) {
+                    return 'zh-cn';
+                }
+                if (strpos($value, 'en') === 0) {
+                    return 'en-us';
+                }
+                return '';
+            };
+
+            if ($request->get($langConfig['detect_var'] ?? 'lang')) {
+                $langSet = $normalizer($request->get($langConfig['detect_var']));
+            } elseif ($request->header($langConfig['header_var'] ?? 'think-lang')) {
+                $langSet = $normalizer($request->header($langConfig['header_var']));
+            } elseif ($request->cookie($langConfig['cookie_var'] ?? 'think_lang')) {
+                $langSet = $normalizer($request->cookie($langConfig['cookie_var']));
+            } elseif ($request->server('HTTP_ACCEPT_LANGUAGE')) {
+                $accepted = explode(',', (string)$request->server('HTTP_ACCEPT_LANGUAGE'));
+                $langSet = $normalizer($accepted[0] ?? '');
+            }
+
+            if (!in_array($langSet, ['zh-cn', 'en-us'])) {
+                $langSet = 'en-us';
+            }
+            app()->lang->setLangSet($langSet);
+        }
+
+        $range = $lang ? strtolower(str_replace('_', '-', $lang)) : app()->lang->getLangSet();
+        if ($range === 'zh') {
+            $range = 'zh-cn';
+        } elseif ($range === 'en') {
+            $range = 'en-us';
+        }
+
+        if (empty($loaded[$range])) {
+            $langFile = app()->getRootPath() . 'app' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'lang' . DIRECTORY_SEPARATOR . $range . '.php';
+            if (is_file($langFile)) {
+                app()->lang->load($langFile, $range);
+            }
+            $loaded[$range] = true;
+        }
+        $text = __($name, $vars, $range);
+        return ($text === '' || $text === $name) ? $name : $text;
     }
 }
 
@@ -1028,18 +1091,18 @@ if (!function_exists('get_zodiac_sign')) {
 
         // 星座名称以及开始日期
         $signs = array(
-            array("20" => "水瓶座"),
-            array("19" => "双鱼座"),
-            array("21" => "白羊座"),
-            array("20" => "金牛座"),
-            array("21" => "双子座"),
-            array("22" => "巨蟹座"),
-            array("23" => "狮子座"),
-            array("23" => "处女座"),
-            array("23" => "天秤座"),
-            array("24" => "天蝎座"),
-            array("22" => "射手座"),
-            array("22" => "摩羯座")
+            array("20" => t('zodiac.aquarius')),
+            array("19" => t('zodiac.pisces')),
+            array("21" => t('zodiac.aries')),
+            array("20" => t('zodiac.taurus')),
+            array("21" => t('zodiac.gemini')),
+            array("22" => t('zodiac.cancer')),
+            array("23" => t('zodiac.leo')),
+            array("23" => t('zodiac.virgo')),
+            array("23" => t('zodiac.libra')),
+            array("24" => t('zodiac.scorpio')),
+            array("22" => t('zodiac.sagittarius')),
+            array("22" => t('zodiac.capricorn'))
         );
         list($sign_start, $sign_name) = each($signs[(int)$month - 1]);
         if ($day < $sign_start) {
@@ -1065,17 +1128,17 @@ if (!function_exists('get_format_time')) {
         $int = time() - $time;
         $str = '';
         if ($int <= 2) {
-            $str = sprintf('刚刚', $int);
+            $str = t('time.just_now');
         } elseif ($int < 60) {
-            $str = sprintf('%d秒前', $int);
+            $str = t('time.seconds_ago', ['seconds' => $int]);
         } elseif ($int < 3600) {
-            $str = sprintf('%d分钟前', floor($int / 60));
+            $str = t('time.minutes_ago', ['minutes' => floor($int / 60)]);
         } elseif ($int < 86400) {
-            $str = sprintf('%d小时前', floor($int / 3600));
+            $str = t('time.hours_ago', ['hours' => floor($int / 3600)]);
         } elseif ($int < 1728000) {
-            $str = sprintf('%d天前', floor($int / 86400));
+            $str = t('time.days_ago', ['days' => floor($int / 86400)]);
         } else {
-            $str = date('Y年m月d日', $time);
+            $str = date(t('time.year_month_day'), $time);
         }
         return $str;
     }
@@ -1862,6 +1925,26 @@ if (!function_exists('save_image_content')) {
         return true;
     }
 }
+if (!function_exists('clean_rich_text')) {
+
+    /**
+     * Clean user-provided rich text while preserving common formatting tags.
+     */
+    function clean_rich_text($content)
+    {
+        if ($content === null || $content === '') {
+            return '';
+        }
+
+        $content = html_entity_decode(stripslashes((string)$content), ENT_QUOTES, 'UTF-8');
+        $content = preg_replace('/<\s*(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base)[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $content);
+        $content = preg_replace('/<\s*\/?\s*(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base)[^>]*>/is', '', $content);
+        $content = preg_replace('/\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $content);
+        $content = preg_replace('/\s+(href|src)\s*=\s*([\'"])\s*(javascript|vbscript):.*?\2/i', '', $content);
+
+        return strip_tags($content, '<p><br><strong><b><em><i><u><s><span><div><blockquote><pre><code><ul><ol><li><table><thead><tbody><tr><th><td><h1><h2><h3><h4><h5><h6><a><img><hr>');
+    }
+}
 if (!function_exists('sysmsg')) {
 
     /**
@@ -1874,25 +1957,34 @@ if (!function_exists('sysmsg')) {
      * @author 陌上花开
      * @date 2021-12-26
      */
-    function sysmsg($msg = '未知的异常', $type = 0, $url = '', $time = 3, $die = true)
+    function sysmsg($msg = '', $type = 0, $url = '', $time = 3, $die = true)
     {
+        if (empty($msg)) {
+            $msg = t('common.unknown_error');
+        }
         if ($type == 1) {
             $type = 'success';
         } else {
             $type = 'error';
         }
+        $goBackLabel = t('common.go_back');
+        $goHomeLabel = t('common.go_home');
+        $jumpNowLabel = t('common.jump_now');
+        $pageTitle = t('common.nice_tips');
+        $redirectMsg = t('common.page_auto_redirect', ['time' => $time]);
+
         if (empty($url)) {
             $url = '<p class="clearfix">
-                <a href="javascript:window.history.go(-1);" class="btn btn-grey">返回上一页</a>
-                <a href="/" class="btn btn-primary">返回首页</a>
+                <a href="javascript:window.history.go(-1);" class="btn btn-grey">' . $goBackLabel . '</a>
+                <a href="/" class="btn btn-primary">' . $goHomeLabel . '</a>
             </p>
             </div>';
         } else {
             $url = '<p class="jump">
-                页面将在 <span id="wait">' . $time . '</span> 秒后自动跳转</p>
+                ' . $redirectMsg . '</p>
             <p class="clearfix">
-                <a href="javascript:window.history.go(-1);" class="btn btn-grey">返回上一页</a>
-                <a href="' . $url . '" class="btn btn-primary">立即跳转</a>
+                <a href="javascript:window.history.go(-1);" class="btn btn-grey">' . $goBackLabel . '</a>
+                <a href="' . $url . '" class="btn btn-primary">' . $jumpNowLabel . '</a>
             </p>
         </div>
         <script type="text/javascript">
@@ -1913,7 +2005,7 @@ if (!function_exists('sysmsg')) {
         <html>
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-            <title>温馨提示</title>
+            <title>' . $pageTitle . '</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="shortcut icon" href="/favicon.ico" />
             <style type="text/css">
@@ -1970,7 +2062,7 @@ if (!function_exists('upload_image')) {
         $files = \request()->file($form_name);
         // 判断是否有上传的文件
         if (!$files) {
-            $error = "请选择图片";
+            $error = t('upload.please_select_image');
             return false;
         }
 
@@ -2116,7 +2208,7 @@ if (!function_exists('upload_file')) {
         $files = \request()->file($form_name);
         // 判断是否有上传的文件
         if (!$files) {
-            $error = "请选择文件";
+            $error = t('upload.please_select_file');
             return false;
         }
 
@@ -2289,7 +2381,7 @@ if (!function_exists('zip_file')) {
          * ZipArchive::OVERWRITE 不会新建，只有当前存在这个压缩包的时候，它才有效
          * */
         if ($zip->open($zipName, \ZIPARCHIVE::OVERWRITE | \ZIPARCHIVE::CREATE) !== true) {
-            exit('无法打开文件，或者文件创建失败');
+            exit(t('upload.cannot_open_zip'));
         }
 
         // 打包处理
@@ -2310,7 +2402,7 @@ if (!function_exists('zip_file')) {
 
         // 验证文件是否存在
         if (!file_exists($zipName)) {
-            exit("文件不存在");
+            exit(t('version.file_not_exist'));
         }
 
         if ($isDown) {
@@ -2430,10 +2522,10 @@ if (!function_exists('checkWords')) {
         }
         $log = "原句为 [ {$str} ]<br/>";
         if ($count == 0) {
-            $log .= "暂未匹配到敏感词！";
+            $log .= t('sensitive.none_found');
         } else {
-            $log .= "匹配到 [ {$count} ]个敏感词：[ {$sensitiveWord} ]<br/>" .
-                "替换后为：[ {$stringAfter} ]";
+            $log .= t('sensitive.found_count', ['count' => $count, 'words' => $sensitiveWord]) . '<br/>' .
+                t('sensitive.replaced', ['text' => $stringAfter]);
         }
         if (!$flag) {
             return $stringAfter;

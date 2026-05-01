@@ -40,8 +40,8 @@ handleDashboardGritterNotification = function() {
     $(window).load(function() {
         setTimeout(function() {
             $.gritter.add({
-                title: "欢迎使用SF授权系统!",
-                text: "2021全新定义，倾情设计，全力打造，全网最牛逼的授权系统！<br>By：陌上花开",
+                title: window.t('dashboard.welcome'),
+                text: window.t('dashboard.subtitle'),
                 image: "/assets/images/logo.png",
                 sticky: !0,
                 time: "",

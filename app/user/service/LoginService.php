@@ -44,7 +44,7 @@ class LoginService extends UserBaseService
     {
         $param = request()->param();
         if(!$param){
-            return message('请勿留空！', false);
+            return message(t('validation.not_empty'), false);
         }
         if (conf('captcha_open') == 1) {
             $captcha_id = conf('captcha_id');
@@ -67,27 +67,27 @@ class LoginService extends UserBaseService
             if ($res !== false) {
                 $obj = json_decode($res,true);
                 if (!is_array($obj)) {
-                    return message('验证码校验异常', false);
+                    return message(t('login.captcha_error'), false);
                 }
                 if (isset($obj['result']) && in_array($obj['result'], ['error', 'fail'])) {
-                    return message($obj['reason'] ?? '验证码验证失败', false);
+                    return message($obj['reason'] ?? t('login.captcha_error'), false);
                 }
             }
         }
         // 登录用户名
         $username = $param['username'];
         if (!$username) {
-            return message('登录用户名不能为空', false, 'username');
+            return message(t('login.username_empty'), false, 'username');
         }
         // 登录密码
         $password = $param['password'];
         if (!$password) {
-            return message('登录密码不能为空', false, 'password');
+            return message(t('login.password_empty'), false, 'password');
         }
         // 用户验证
         $info = $this->model->getOne($username);
         if (!$info) {
-            return message('您的登录用户名不存在', false, 'username');
+            return message(t('login.username_not_exist'), false, 'username');
         }
         // 密码校验
         if ($password != $info['password']) {
@@ -97,7 +97,7 @@ class LoginService extends UserBaseService
                 'Result' => 'success'
             ];
             event('UserLogin', $content);
-            return message('您的登录密码不正确', false, 'password');
+            return message(t('login.password_incorrect'), false, 'password');
         }
 
         // 使用状态校验
@@ -108,7 +108,7 @@ class LoginService extends UserBaseService
                 'Result' => 'success'
             ];
             event('UserLogin', $content);
-            return message('您的帐号已被禁用', false);
+            return message(t('login.account_disabled'), false);
         }
         if(!empty($userInfo['ip'])) {
             if (!in_array(get_client_ip(), unserialize($info['ip']))) {
@@ -118,7 +118,7 @@ class LoginService extends UserBaseService
                     'Result' => 'success'
                 ];
                 event('UserLogin', $content);
-                return message('您当前的IP不在白名单内！', false);
+                return message(t('user.ip_not_whitelist_login'), false);
             }
         }
         // 本地cookie存储登录信息
@@ -131,7 +131,7 @@ class LoginService extends UserBaseService
             'Result' => 'success'
         ];
         event('UserLogin', $content);
-        return message('尊敬的'.$username.', 欢迎回来~', true);
+        return message(t('login.success').' '.$username.', '.t('common.home').t('common.back').'~', true);
     }
 
     private function post_request($url, $postdata) {

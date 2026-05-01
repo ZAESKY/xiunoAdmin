@@ -162,10 +162,10 @@
                         <div class="layui-form-item">
                             <div class="layui-upload-drag" id="image{$item.name}">
                                 <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                <p>点击上传，或将文件拖拽到此处</p>
+                                <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
                                 <div class="layui-hide" id="uploadImage{$item.name}">
                                     <hr>
-                                    <img src="" alt="上传成功后渲染" id="img{$item.name}" style="max-width: 196px">
+                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="img{$item.name}" style="max-width: 196px">
                                 </div>
                             </div>
                         </div>
@@ -211,11 +211,11 @@
                             <input type="hidden" id="status" value="0"/>
                             <div class="layui-upload-drag" id="fileUpload{$item.name}">
                                 <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                <p>点击上传，或将文件拖拽到此处</p>
+                                <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
                                 <div class="layui-hide" id="uploadFile{$item.name}">
                                     <hr>
                                     <div class="layui-form-item">
-                                        <img src="" alt="上传成功后渲染" id="fileImg{$item.name}" style="max-width: 196px">
+                                        <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="fileImg{$item.name}" style="max-width: 196px">
                                     </div>
                                     <div class="layui-form-item">
                                         <label class="layui-form-label">文件名</label>
@@ -227,7 +227,7 @@
                             </div>
                         </div>
                         <div class="layui-form-item text-center">
-                            <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>删除</button>
+                            <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>
                         </div>
                         <div class="mask"></div>
                         <div class="loading">
@@ -371,8 +371,8 @@
                 </div>
                 {/foreach}
                 <div class="layui-form-item text-right">
-                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-                    <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+                    <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
                 </div>
             </form>
         </div>

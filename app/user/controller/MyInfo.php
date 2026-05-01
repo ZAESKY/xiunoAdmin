@@ -69,7 +69,7 @@ class MyInfo extends UserBackend
     public function updatePower(){
         if(IS_POST){
             if($this->myPowerInfo['parentid'] == 0){
-                return message('您当前已经是最高权限！', false);
+                return message(t('user.highest_power'), false);
             }
             return $this->service->updatePower();
         }

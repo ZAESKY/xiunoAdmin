@@ -31,7 +31,7 @@ class Upload extends Backend
             return message('success' ,true ,['path' => '/upload/'. $saveName]);
         } catch (\Exception $e) {
             // 验证失败 输出错误信息
-            return $this->exceptionHandle($e,'图片上传失败!' . $e->getMessage(),'json','');
+            return $this->exceptionHandle($e,t('upload.upload_failed') . $e->getMessage(),'json','');
         }
     }
     /**应用上传**/
@@ -53,10 +53,10 @@ class Upload extends Backend
             $page = !empty($post['page'])?intval($post['page']):0;
             $file = $this->request->file('file');
             if(empty($fileName)){
-                return message('缺少FILENAME参数',false, ['status' => 0, 'downUrl' => '']);
+                return message(t('validation.missing_filename'),false, ['status' => 0, 'downUrl' => '']);
             }
             if(empty($fileExt)){
-                return message('缺少FILEEXT参数',false, ['status' => 0, 'downUrl' => '']);
+                return message(t('validation.missing_fileext'),false, ['status' => 0, 'downUrl' => '']);
             }
             try {
                 validate([
@@ -82,10 +82,10 @@ class Upload extends Backend
             $page = !empty($post['page'])?intval($post['page']):0;
             $file = $this->request->file('file');
             if(empty($fileName)){
-                return message('缺少FILENAME参数',false, ['status' => 0, 'downUrl' => '']);
+                return message(t('validation.missing_filename'),false, ['status' => 0, 'downUrl' => '']);
             }
             if(empty($fileExt)){
-                return message('缺少FILEEXT参数',false, ['status' => 0, 'downUrl' => '']);
+                return message(t('validation.missing_fileext'),false, ['status' => 0, 'downUrl' => '']);
             }
             try {
                 validate([

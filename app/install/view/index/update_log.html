@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>SF授权系统|更新记录</title>
+    <title>SF{:t('common_ui.auth_type')}系统|{:t('install_ui.tab_update_log')}</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -33,7 +33,7 @@
     <div class="layui-row layui-col-space15">
         <div class="layui-col-md12">
             <div class="layui-card">
-                <div class="layui-card-header">更新历程</div>
+                <div class="layui-card-header">{:t('install_ui.update_journey')}</div>
                 <div class="layui-card-body">
                     <li class="layui-timeline-item">
                         <i class="layui-icon layui-timeline-axis">&#xe756;</i>
@@ -42,18 +42,18 @@
                             <p>V4.0强势回归</p>
                             <ul>
                                 <li>采用ThinkPHP V6.0 + EasyWebAdmin</li>
-                                <li>新增自定义用户等级权限</li>
-                                <li>新增自定义授权价格</li>
-                                <li>新增自定义判断授权规则</li>
-                                <li>新增插件管理，系统插件化，可自定义上传插件安装</li>
-                                <li>新增版本管理，每个版本单独储存</li>
-                                <li>新增日志管理，每步操作都将记录</li>
-                                <li>新增绑定授权，用户后台扫码即可绑定</li>
-                                <li>新增模板配置，可在线预览，自定义上传模板安装</li>
-                                <li>新增登录后台口令二次验证</li>
-                                <li>新增安全中心</li>
-                                <li>新增卡密生成授权，权限，余额，积分</li>
-                                <li>重写检测授权文件</li>
+                                <li>新增自定义用户等级{:t('common_ui.power_type')}</li>
+                                <li>新增自定义{:t('common_ui.auth_price')}</li>
+                                <li>新增自定义判断{:t('common_ui.auth_type')}规则</li>
+                                <li>新增插件管理，系统插件化，可自定义{:t('common.upload')}插件安装</li>
+                                <li>新增{:t('common_ui.version')}管理，每个{:t('common_ui.version')}单独储存</li>
+                                <li>新增日志管理，每步{:t('common.operation')}都将记录</li>
+                                <li>新增{:t('app_ui.bind_auth')}，用户后台{:t('login.qq_scan')}即可{:t('install_ui.binding_title')}</li>
+                                <li>新增{:t('set_ui.template_config')}，可在线{:t('common.preview')}，自定义{:t('common.upload')}模板安装</li>
+                                <li>新增{:t('install_ui.login_backend_btn')}口令二次{:t('login.verify_token')}</li>
+                                <li>新增{:t('dashboard.security_center')}</li>
+                                <li>新增{:t('common_ui.cdkey')}生成{:t('common_ui.auth_type')}，{:t('common_ui.power_type')}，{:t('common_ui.balance_type')}，{:t('common_ui.integral_type')}</li>
+                                <li>重写{:t('code_view.detect_auth')}文件</li>
                             </ul>
                         </div>
                     </li>
@@ -63,23 +63,23 @@
                             <h3 class="layui-timeline-title">2020 年  8 月 10 日</h3>
                             <p>V3.0震撼来袭</p>
                             <ul>
-                                <li>新增QQ扫码登录</li>
-                                <li>多程序授权系统</li>
-                                <li>新增2套前台模板,删除无用模板</li>
+                                <li>新增QQ{:t('login.scan_login')}</li>
+                                <li>多程序{:t('common_ui.auth_type')}系统</li>
+                                <li>新增2套{:t('set_ui.front_template')},{:t('common.delete')}无用模板</li>
                                 <li>新增可切换电脑端和移动端模板</li>
                                 <li>新增站点维护模式</li>
                                 <li>新增检测QQ是否跳转浏览器</li>
                                 <li>重写安装界面</li>
-                                <li>重写check检测授权文件</li>
+                                <li>重写check{:t('code_view.detect_auth')}文件</li>
                                 <li>新增COOKIE入库</li>
                                 <li>后台采用EasyWebAdmin</li>
-                                <li>完善积分商城</li>
-                                <li>支付界面可用余额和积分支付</li>
-                                <li>新增多种方式下载</li>
-                                <li>完善黑站操作,新增一键删库,一键打包等..</li>
-                                <li>数据库备份添加监控</li>
+                                <li>完善{:t('common_ui.integral_type')}商城</li>
+                                <li>支付界面可用{:t('common_ui.balance_type')}和{:t('common_ui.integral_type')}支付</li>
+                                <li>新增多种方式{:t('wxpay_ui.download')}</li>
+                                <li>完善黑站{:t('common.operation')},新增一键删库,一键打包等..</li>
+                                <li>数据库备份{:t('common.add')}监控</li>
                                 <li>优化全局</li>
-                                <li>修复扫码验证</li>
+                                <li>修复{:t('login.qq_scan')}{:t('login.verify_token')}</li>
                                 <li>修复部分BUG</li>
                             </ul>
                         </div>
@@ -91,14 +91,14 @@
                             <p>V2.0强势来袭</p>
                             <ul>
                                 <li>新增QQ快捷登录</li>
-                                <li>新增卡密兑换</li>
-                                <li>新增自助授权</li>
-                                <li>加强自助注册</li>
+                                <li>新增{:t('app_ui.cdkey_exchange')}</li>
+                                <li>新增{:t('app_ui.self_auth')}</li>
+                                <li>加强{:t('app_ui.self_register')}</li>
                                 <li>新增系统开关</li>
-                                <li>新增公告配置</li>
+                                <li>新增{:t('set_ui.notice_config')}</li>
                                 <li>优化支付页面</li>
-                                <li>新增多种方式下载</li>
-                                <li>新增底部版权,ICP备案号修改</li>
+                                <li>新增多种方式{:t('wxpay_ui.download')}</li>
+                                <li>新增{:t('set_ui.footer_copyright')},ICP{:t('set_ui.beian_number')}{:t('common_ui.repair')}</li>
                                 <li>加强前台的6套模板</li>
                                 <li>新增易支付认证查询</li>
                                 <li>优化全局</li>
@@ -112,21 +112,21 @@
                             <h3 class="layui-timeline-title">2020 年  3 月 15 日</h3>
                             <p>历时15天,V1.0发布</p>
                             <ul>
-                                <li>三种用户权限</li>
-                                <li>积分商城(每日签到，积分抽奖,积分兑换...)</li>
-                                <li>前台更换授权</li>
-                                <li>邮箱验证下载</li>
-                                <li>6套前台模板，2套后台模板</li>
+                                <li>三种{:t('order_ui.user_power')}</li>
+                                <li>{:t('common_ui.integral_type')}商城(每日签到，{:t('common_ui.integral_type')}抽奖,{:t('order_ui.integral_exchange')}...)</li>
+                                <li>前台{:t('app_ui.replace_auth')}</li>
+                                <li>邮箱{:t('login.verify_token')}{:t('wxpay_ui.download')}</li>
+                                <li>6套{:t('set_ui.front_template')}，2套后台模板</li>
                                 <li>后台一键切换前台/后台模板</li>
-                                <li>用户在线购买余额/积分</li>
-                                <li>多信息盗版入库</li>
+                                <li>用户在线购买{:t('common_ui.balance_type')}/{:t('common_ui.integral_type')}</li>
+                                <li>多信息{:t('app_ui.pirate_save')}</li>
                                 <li>工单系统</li>
                                 <li>站内通知</li>
                                 <li>小型资源网</li>
-                                <li>系统操作记录</li>
-                                <li>设置用户操作权限</li>
-                                <li>添加域名/代理扣除余额配置</li>
-                                <li>极限验证模块</li>
+                                <li>系统{:t('common.operation')}记录</li>
+                                <li>设置用户{:t('common.operation')}{:t('common_ui.power_type')}</li>
+                                <li>{:t('common.add')}域名/代理扣除{:t('common_ui.balance_type')}配置</li>
+                                <li>极限{:t('login.verify_token')}模块</li>
                             </ul>
                         </div>
                     </li>
@@ -134,7 +134,7 @@
                         <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop layui-timeline-axis">&#xe63e;</i>
                         <div class="layui-timeline-content layui-text">
                             <h3 class="layui-timeline-title">2020 年  3 月 1 日</h3>
-                            <div class="layui-timeline-title">SF授权系统V1.0准备中...</div>
+                            <div class="layui-timeline-title">SF{:t('common_ui.auth_type')}系统V1.0准备中...</div>
                         </div>
                     </li>
                     </ul>
@@ -144,7 +144,7 @@
     </div>
 </div>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script type="text/javascript" src="{__JS__}common.js?v=320"></script>
+<script type="text/javascript" src="{__JS__}common.js?v=321"></script>
 
 </body>
 </html>

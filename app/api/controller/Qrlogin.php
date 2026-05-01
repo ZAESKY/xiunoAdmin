@@ -25,7 +25,7 @@ class Qrlogin extends ApiBackend
             if ($qrsig = $match[1]){
                 return message('success！' ,true ,['qrsig' => $qrsig, 'data' => base64_encode($arr['body'])]);
             }else{
-                return message('二维码获取失败！' ,false);
+                return message(t('auth.qrcode_failed') ,false);
             }
         }
     }
@@ -37,15 +37,15 @@ class Qrlogin extends ApiBackend
             $qrsig = !empty($post['qrsig']) ? $post['qrsig'] : null;
             $type = !empty($post['type']) ? $post['type'] : null;
             if(empty($qrsig)){
-                return message('缺少QRSIG参数！' ,false ,['code' => 6]);
+                return message(t('auth.missing_qrsig') ,false ,['code' => 6]);
             }
             if (empty($type)){
-                return message('缺少TYPE参数！' ,false ,['code' => 6]);
+                return message(t('validation.missing_type') ,false ,['code' => 6]);
             }
 
             switch ($type){
                 case 'userLogin':
-                    if(!in_array('qrcode',conf('login_switch'))) return message('站点未开启扫码登录！' ,false ,['code' => 6]);
+                    if(!in_array('qrcode',conf('login_switch'))) return message(t('auth.site_scan_disabled') ,false ,['code' => 6]);
                     break;
                 case 'binding':
                     try{
@@ -53,16 +53,16 @@ class Qrlogin extends ApiBackend
                     }catch (\Exception $e){
                         return message($e->getMessage() ,false ,['code' => 6]);
                     }
-                    if($this->myAppInfo['binding_auth_switch'] != 1) return message('当前应用未开启绑定授权功能！' ,false ,['code' => 6]);
+                    if($this->myAppInfo['binding_auth_switch'] != 1) return message(t('auth.bind_auth_disabled') ,false ,['code' => 6]);
                     break;
                 case 'download':
                     $appid = !empty($post['appid'])?intval($post['appid']):null;
                     $auth_info = !empty($post['auth_info'])?$post['auth_info']:null;
                     if(empty($appid)){
-                        return message('请选择所属应用！' ,false);
+                        return message(t('auth.select_app') ,false);
                     }
                     if(empty($auth_info)){
-                        return message('请填写授权内容！' ,false);
+                        return message(t('auth.enter_content') ,false);
                     }
 
                     $row = Db::name('auth')
@@ -73,11 +73,11 @@ class Qrlogin extends ApiBackend
                         ->field('qq')
                         ->find();
                     if(empty($row)){
-                        return message('不存在此授权！' ,false);
+                        return message(t('auth.not_exist') ,false);
                     }
                     break;
                 default:
-                    return message('不存在此类型！' ,false ,['code' => 6]);
+                    return message(t('common_ui.type_error') ,false ,['code' => 6]);
             }
 
             $url = 'https://ssl.ptlogin2.qq.com/ptqrlogin?u1=https%3A%2F%2Fgraph.qq.com%2Foauth2.0%2Flogin_jump&ptqrtoken=' . $this->getqrtoken($qrsig) . '&ptredirect=1&h=1&t=1&g=1&from_ui=1&ptlang=2052&action=0-0-' . time() . '&js_ver=22011714&js_type=1&login_sig=&pt_uistyle=40&aid=716027609&daid=383&pt_3rd_aid=101996138&has_onekey=1&';
@@ -93,11 +93,11 @@ class Qrlogin extends ApiBackend
                         session('get_qq', $uin);
                         return message('success！' ,true ,['code' => 0, 'nick' => urlencode($r[5]), 'qq' => $uin]);
                     case 65:
-                        return message('二维码已失效。' ,false ,['code' => 1]);
+                        return message(t('auth.qrcode_invalid') ,false ,['code' => 1]);
                     case 66:
-                        return message('二维码未失效。' ,true ,['code' => 2]);
+                        return message(t('auth.qrcode_valid') ,true ,['code' => 2]);
                     case 67:
-                        return message('正在验证二维码。' ,true ,['code' => 3]);
+                        return message(t('auth.qrcode_verifying') ,true ,['code' => 3]);
                     default:
                         return message($r[4] ,false ,['code' => 6]);
                 }
@@ -114,14 +114,14 @@ class Qrlogin extends ApiBackend
         $username = !empty($post['username']) ? $post['username'] : null;
         $appid = !empty($post['appid']) ? intval($post['appid']) : null;
         if(empty($get_token)){
-            return message('TOKEN失效，请重新扫码！' ,false);
+            return message(t('auth.token_expired') ,false);
         }
         if(empty($get_qq)){
-            return message('TOKEN失效，请重新扫码！' ,false);
+            return message(t('auth.token_expired') ,false);
         }
         if(!empty($username) && !empty($appid)){
             $row = Db::name('user')->where(['username' => $username, 'appid' => $appid, 'status' => 1])->find();
-            if(empty($row))return message('不存在此用户！' ,false);
+            if(empty($row))return message(t('user.not_exist') ,false);
             Session::set('userId', $row['id']);
             Session::set('userSign',data_auth_sign($row['username'].'SF'.$row['password']));
             Session::delete('get_token');
@@ -133,16 +133,16 @@ class Qrlogin extends ApiBackend
                 'Result' => 'success'
             ];
             event('UserLogin', $content);
-            return message('登陆成功！' ,true);
+            return message(t('login.success') ,true);
         }else{
             $row = Db::name('user')->where(['qq' => $get_qq, 'status' => 1])->select();
             $count = $row->count();
             $data = [];
             switch ($count){
                 case 0:
-                    return message('不存在此用户！' ,false);
+                    return message(t('user.not_exist') ,false);
                 case 1:
-                    return message('登陆成功！' ,true);
+                    return message(t('login.success') ,true);
                 default:
                     foreach ($row as $res){
                         if(empty($res['appid'])){
@@ -155,12 +155,12 @@ class Qrlogin extends ApiBackend
                         if($appInfo){
                             $appName = $appInfo['name'];
                         }else{
-                            $appName = '获取失败';
+                            $appName = t('common.load_failed');
                         }
 
                         $data[] = ['username' => $res['username'], 'qq' => $res['qq'], 'appname' => $appName, 'appid' => $res['appid']];
                     }
-                    return message('请选择要登录的账号！' ,true, $data);
+                    return message(t('login.select_account') ,true, $data);
             }
         }
     }
@@ -172,10 +172,10 @@ class Qrlogin extends ApiBackend
         $bindingType = !empty($post['bindingType']) ? $post['bindingType'] : null;
         $list = !empty($post['list']) ? $post['list'] : null;
         if(empty($get_token)){
-            return message('TOKEN失效，请重新扫码！' ,false);
+            return message(t('auth.token_expired') ,false);
         }
         if(empty($get_qq)){
-            return message('TOKEN失效，请重新扫码！' ,false);
+            return message(t('auth.token_expired') ,false);
         }
         try{
             parent::userLogin();
@@ -183,17 +183,17 @@ class Qrlogin extends ApiBackend
             return message($e->getMessage() ,false ,['code' => 6]);
         }
         if($get_qq != $this->userInfo['qq']){
-            return message('请使用当前账户绑定的QQ扫码！' ,false);
+            return message(t('user.qq_bind_auth_mismatch') ,false);
         }
         switch($bindingType){
             case 'auth':
                 if(!empty($list)){
-                    if(empty($list))return message('请选择要绑定的授权！' ,false);
+                    if(empty($list))return message(t('auth.select_bind_auth') ,false);
                     foreach ($list as $res){
                         $row = Db::name('auth')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->field('id,bindingid,qq')->find();
-                        if(empty($row)) return message('不存在此ID:'.$res.'授权！' ,false);
-                        if($row['bindingid'] != 0) return message('ID:'.$res.'，授权:'.$res['auth_info'].'已被绑定，请勿重复绑定！' ,false);
-                        if($row['qq'] != $get_qq) return message('ID:'.$res.'，授权:'.$res['auth_info'].'不是您的授权，无法绑定！' ,false);
+                        if(empty($row)) return message(t('auth.not_exist').' [ID:'.$res.']' ,false);
+                        if($row['bindingid'] != 0) return message(t('auth.not_exist').' [ID:'.$res.', auth_info:'.$res['auth_info'].'] '.t('auth.already_exist') ,false);
+                        if($row['qq'] != $get_qq) return message(t('auth.not_exist').' [ID:'.$res.', auth_info:'.$res['auth_info'].'] '.t('auth.qq_mismatch') ,false);
                         try{
                             Db::name('auth')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->data(['bindingid' => $this->userId])->update();
                         }catch (\Exception $e){
@@ -203,24 +203,24 @@ class Qrlogin extends ApiBackend
                     Session::delete('get_token');
                     Session::delete('get_qq');
                     Session::save();
-                    return message('绑定成功！' ,true);
+                    return message(t('auth.bind_success') ,true);
                 }else{
                     $row = Db::name('auth')->where(['qq' => $get_qq, 'bindingid' => 0, 'appid' => $this->userInfo['appid']])->field('id,auth_info')->select();
-                    if($row->isEmpty()) return message('该QQ已无要绑定的授权！' ,false);
+                    if($row->isEmpty()) return message(t('auth.no_auth_to_bind') ,false);
                     $data = [];
                     foreach ($row as $res){
                         $data[] = ['id' => $res['id'], 'auth_info' => $res['auth_info']];
                     }
-                    return message('请选择要绑定的授权！' ,true, $data);
+                    return message(t('auth.select_bind_auth') ,true, $data);
                 }
             case 'payment':
                 if(!empty($list)){
-                    if(empty($list))return message('请选择要绑定的认证！' ,false);
+                    if(empty($list))return message(t('auth.select_bind_payment') ,false);
                     foreach ($list as $res){
                         $row = Db::name('payment')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->field('id,bindingid,qq')->find();
-                        if(empty($row)) return message('不存在此ID:'.$res.'认证！' ,false);
-                        if($row['bindingid'] != 0) return message('ID:'.$res.'，认证:'.$res['url'].'已被绑定，请勿重复绑定！' ,false);
-                        if($row['qq'] != $get_qq) return message('ID:'.$res.'，认证:'.$res['url'].'不是您的认证，无法绑定！' ,false);
+                        if(empty($row)) return message(t('payment.not_exist').' [ID:'.$res.']' ,false);
+                        if($row['bindingid'] != 0) return message(t('payment.not_exist').' [ID:'.$res.', url:'.$res['url'].'] '.t('payment.already_exist') ,false);
+                        if($row['qq'] != $get_qq) return message(t('payment.not_exist').' [ID:'.$res.', url:'.$res['url'].']', false);
                         try{
                             Db::name('payment')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->data(['bindingid' => $this->userId])->update();
                         }catch (\Exception $e){
@@ -230,18 +230,18 @@ class Qrlogin extends ApiBackend
                     Session::delete('get_token');
                     Session::delete('get_qq');
                     Session::save();
-                    return message('绑定成功！' ,true);
+                    return message(t('auth.bind_success') ,true);
                 }else{
                     $row = Db::name('payment')->where(['qq' => $get_qq, 'bindingid' => 0, 'appid' => $this->userInfo['appid']])->field('id,url')->select();
-                    if($row->isEmpty()) return message('该QQ已无要绑定的授权！' ,false);
+                    if($row->isEmpty()) return message(t('auth.no_auth_to_bind') ,false);
                     $data = [];
                     foreach ($row as $res){
                         $data[] = ['id' => $res['id'], 'auth_info' => $res['url']];
                     }
-                    return message('请选择要绑定的授权！' ,true, $data);
+                    return message(t('auth.select_bind_auth') ,true, $data);
                 }
             default:
-                return message('类型错误！' ,false);
+                return message(t('common_ui.type_error') ,false);
         }
     }
 
@@ -252,18 +252,18 @@ class Qrlogin extends ApiBackend
         $appid = !empty($post['appid'])?intval($post['appid']):null;
         $auth_info = !empty($post['auth_info'])?$post['auth_info']:null;
         if(empty($get_token)){
-            return message('TOKEN失效，请重新扫码！' ,false);
+            return message(t('auth.token_expired') ,false);
         }
         if(empty($get_qq)){
-            return message('TOKEN失效，请重新扫码！' ,false);
+            return message(t('auth.token_expired') ,false);
         }
 
         if(empty($appid)){
-            return message('请选择所属应用！' ,false);
+            return message(t('auth.select_app') ,false);
         }
 
         if(empty($auth_info)){
-            return message('请填写授权内容！' ,false);
+            return message(t('auth.enter_content') ,false);
         }
         $row = Db::name('auth')
             ->where([
@@ -273,13 +273,13 @@ class Qrlogin extends ApiBackend
             ->field('qq')
             ->find();
         if(empty($row)){
-            return message('不存在此授权！' ,false);
+            return message(t('auth.not_exist') ,false);
         }
         Session::delete('get_token');
         Session::delete('get_qq');
         Session::save();
         if($row['qq'] != $get_qq){
-            return message('该授权QQ与所填QQ不匹配！' ,false);
+            return message(t('auth.qq_mismatch') ,false);
         }
 
         $res = Db::name('version')
@@ -290,7 +290,7 @@ class Qrlogin extends ApiBackend
             ])
             ->find();
         if(empty($res)){
-            return message('此应用无安装包' ,false);
+            return message(t('app.no_install_package') ,false);
         }
         $value = serialize([
             'versionInfo' => $res,
@@ -298,7 +298,7 @@ class Qrlogin extends ApiBackend
         ]);
         $key = md5(uniqid());
         Cache::set($key, $value, 43200);
-        return message('获取下载链接成功' ,true, ['url' => 'http://'.DOMAIN.'/api.php/Download/download/?sign='.$key]);
+        return message(t('app.download_link_success') ,true, ['url' => 'http://'.DOMAIN.'/api.php/Download/download/?sign='.$key]);
     }
     private function getGTK($skey){
         $len = strlen($skey);

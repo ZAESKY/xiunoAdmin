@@ -55,18 +55,18 @@ class AuthModel extends BaseModel
         if(!empty($id)) {
             $row = $this->getInfo($id);
             if(!$row){
-                return message('不存在此授权！' ,false);
+                return message(t('auth.not_exist') ,false);
             }
             if($auth_info != $row['auth_info']){
                 $row2 = self::where(['auth_info' => $auth_info, 'appid' => $appid])->find();
                 if ($row2) {
-                    return message('该应用已存在此授权！', false);
+                    return message(t('auth.already_exist'), false);
                 }
             }
             try{
                 $appInfo = parent::getAppInfo($appid);
                 if($appInfo == false){
-                    return message('获取应用信息失败！',false);
+                    return message(t('app.get_info_failed'),false);
                 }
                 $checkInfo = new CheckInfo();
                 $checkResult = $checkInfo->check($appInfo['check_type'], $auth_info);
@@ -74,18 +74,18 @@ class AuthModel extends BaseModel
                     return $checkResult;
                 }
             } catch (\Exception $e) {
-                return message('获取失败！'.$e->getMessage() ,false);
+                return message(t('common.failed').$e->getMessage() ,false);
             }
 
             if($type != -1) {
                 try {
                     $authPriceInfo = parent::getAuthPriceInfo($type);
                     if ($authPriceInfo == false) {
-                        return message('获取价格信息失败！', false);
+                        return message(t('auth.get_price_failed'), false);
                     }
                     if ($authPriceInfo['diy_switch'] == 1) {
                         if (empty($endtime)) {
-                            return message('请输入到期时间！', false);
+                            return message(t('auth.enter_expire_time'), false);
                         }
                     } else {
                         if ($authPriceInfo['permanent_switch'] == 1) {
@@ -96,7 +96,7 @@ class AuthModel extends BaseModel
                         }
                     }
                 } catch (\Exception $e) {
-                    return message('获取价格信息失败！' . $e->getMessage(), false);
+                    return message(t('auth.get_price_failed') . $e->getMessage(), false);
                 }
             }else{
                 $endtime = $row['endtime'];
@@ -117,19 +117,19 @@ class AuthModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                return message('编辑成功！' ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message('编辑失败！'.$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $row = self::where(['auth_info' => $auth_info, 'appid' => $appid])->find();
             if ($row) {
-                return message('该应用已存在此授权！', false);
+                return message(t('auth.already_exist'), false);
             }
             try{
                 $appInfo = parent::getAppInfo($appid);
                 if($appInfo == false){
-                    return message('获取判断类型失败！',false);
+                    return message(t('auth.get_check_type_failed'),false);
                 }
                 $checkInfo = new CheckInfo();
                 $checkResult = $checkInfo->check($appInfo['check_type'], $auth_info);
@@ -137,24 +137,24 @@ class AuthModel extends BaseModel
                     return $checkResult;
                 }
                 $authTemplateInfo = intval($appInfo['auth_template']);
-                if(empty($authTemplateInfo))return message('获取价格模板信息失败！',false);
+                if(empty($authTemplateInfo))return message(t('auth.get_template_info_failed'),false);
                 $authPriceInfo = parent::getAuthPriceInfo($type);
                 if($authPriceInfo == false){
-                    return message('获取价格信息失败！',false);
+                    return message(t('auth.get_price_failed'),false);
                 }
                 $endtime = date('Y-m-d H:i:s',strtotime(' +'.$authPriceInfo['day'].' day'));
                 $permanent_switch = !empty($post['permanent_switch'])?intval($post['permanent_switch']):0;
             } catch (\Exception $e) {
-                return message('添加失败！'.$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
             try{
                 $authPriceInfo = parent::getAuthPriceInfo($type);
                 if($authPriceInfo == false){
-                    return message('获取价格信息失败！',false);
+                    return message(t('auth.get_price_failed'),false);
                 }
                 if($authPriceInfo['diy_switch'] == 1){
                     if(empty($endtime)){
-                        return message('请输入到期时间！' ,false);
+                        return message(t('auth.enter_expire_time') ,false);
                     }
                 }else{
                     if($authPriceInfo['permanent_switch'] == 1){
@@ -165,7 +165,7 @@ class AuthModel extends BaseModel
                     }
                 }
             } catch (\Exception $e) {
-                return message('获取价格信息失败！'.$e->getMessage() ,false);
+                return message(t('auth.get_price_failed').$e->getMessage() ,false);
             }
 
             $row = self::where('qq', $qq)->field('sign,authcode')->find();
@@ -200,9 +200,9 @@ class AuthModel extends BaseModel
 
             try{
                 self::insert($data);
-                return message('添加成功！' ,true);
+                return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
-                return message('添加失败！'.$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
     }
@@ -210,11 +210,11 @@ class AuthModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此授权！');
+                throw new Exception(t('auth.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -230,11 +230,11 @@ class AuthModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此授权！');
+                throw new Exception(t('auth.not_exist'));
             }
 
             self::where('id', $id)
@@ -253,11 +253,11 @@ class AuthModel extends BaseModel
             $permanent_switch = !empty($post['permanent_switch'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此授权！');
+                throw new Exception(t('auth.not_exist'));
             }
 
             self::where('id', $id)
@@ -276,11 +276,11 @@ class AuthModel extends BaseModel
             $beta = !empty($post['beta'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此授权！');
+                throw new Exception(t('auth.not_exist'));
             }
 
             self::where('id', $id)

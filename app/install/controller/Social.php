@@ -15,7 +15,7 @@ class Social extends Install
         $Oauth = new Oauth($callback);
         if (!empty($code)) {
             if(empty($state)){
-                sysmsg("缺少STATE参数！", 0);
+                sysmsg(t("validation.missing_state"), 0);
             }
             if($state != session('Oauth_state')){
                 sysmsg("The state does not match. You may be a victim of CSRF.", 0);
@@ -30,23 +30,23 @@ class Social extends Install
                     ->data(['access_token' => $access_token])
                     ->update();
                 if($result){
-                    sysmsg("绑定成功,请返回原界面继续操作！", 1);
+                    sysmsg(t("social.bind_success_reopen"), 1);
                 }else{
-                    sysmsg("绑定失败,请勿使用同一QQ绑定！", 0);
+                    sysmsg(t("social.bind_fail_same_qq"), 0);
                 }
             }elseif(isset($array['code'])){
-                sysmsg("登录失败，返回错误原因：".$array['msg'], 0);
+                sysmsg(t("social.login_fail").$array['msg'], 0);
             }else{
-                sysmsg("获取登录数据失败", 0);
+                sysmsg(t("social.get_login_data_fail"), 0);
             }
         } else {
             $array = $Oauth->login('qq');
             if(isset($array['code']) && $array['code']==0){
                 header('Location: '.$array['url']);
             }elseif(isset($array['code'])){
-                sysmsg("登录接口返回：".$array['msg'], 0);
+                sysmsg(t("social.login_return").$array['msg'], 0);
             }else{
-                sysmsg("获取登录地址失败", 0);
+                sysmsg(t("social.get_login_url_fail"), 0);
             }
         }
     }

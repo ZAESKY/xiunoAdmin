@@ -71,7 +71,7 @@ class Login extends CommonBase
                 $result = $this->service->login();
                 return $result;
             }catch (\Exception $e){
-                return message("登录失败！".$e->getMessage() ,false);
+                return message(t('login.failed').$e->getMessage() ,false);
             }
         }
     }

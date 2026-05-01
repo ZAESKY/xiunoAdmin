@@ -39,7 +39,7 @@ class SafeService extends BaseService
         $SF_info = count($check_msg['info']);
         $safenum = intval(100- $SF_danger*50 - $SF_warning*10 - $SF_info*1);
 
-        return message('检测成功', true, ['safe' => $safenum, 'check_msg' => $check_msg]);
+        return message(t('system.detect_success'), true, ['safe' => $safenum, 'check_msg' => $check_msg]);
     }
 
     public function checkPassword($pwd)

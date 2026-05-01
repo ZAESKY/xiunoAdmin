@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
         <title>
-            {:conf('title')} - 维护中
+            {:conf('title')} - {:t('maintain.title')}
         </title>
         <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
         </script>
@@ -128,14 +128,14 @@
             <div class="box__description">
                 <div class="box__description-container">
                     <div class="box__description-title">
-                        站点正在维护中！
+                        {:t('maintain.message')}
                     </div>
                     <div class="box__description-text">
-                        请耐心等待恢复...
+                        {:t('maintain.patient')}
                     </div>
                 </div>
                 <a href="/" class="box__button">
-                    刷新
+                    {:t('maintain.refresh')}
                 </a>
             </div>
         </div>

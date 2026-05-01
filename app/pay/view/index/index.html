@@ -11,10 +11,10 @@
             <div class="layui-col-sm12" style="padding: 0em;">
                 <div class="layui-card" style="border-radius: 0.5em">
                     <div class="layui-card-header">
-                        <a title="关闭当前窗口" onclick="custom_close();">
+                        <a title="{:t('order_ui.close_window')}" onclick="custom_close();">
                             <p style="margin-top: 0.5em;font-size: 1.2em">
                                 <span class="layui-icon layui-icon-close"></span>
-                                关闭当前窗口
+                                {:t('order_ui.close_window')}
                             </p>
                         </a>
                     </div>
@@ -22,22 +22,22 @@
                         <div class="layui-col-xs2">
                             <div style="border-radius: 0.5em;width: 3em;text-align: center;height: 3em;line-height: 3em;color:white;margin: 0.8em;box-shadow: 3px 3px 16px #eee">
                                 {if !$userInfo}
-                                <img src="{__IMG__}pays.png" alt="SF授权系统" width="35">
+                                <img src="{__IMG__}pays.png" alt="SF{:t('common_ui.auth_type')}系统" width="35">
                                 {else}
-                                <img src="{$userInfo['img']}" alt="SF授权系统" width="35">
+                                <img src="{$userInfo['img']}" alt="SF{:t('common_ui.auth_type')}系统" width="35">
                                 {/if}
                             </div>
                         </div>
                         <div class="layui-col-xs10">
                             <div class="layui-card-header" style="font-size: 1.1em;font-family: '微软雅黑 Light'">
-                                下单信息
+                                {:t('order_ui.order_info')}
                             </div>
                             <div class="layui-card-body information">
                                 {switch name="$row['type']" }
                                     {case value="recharge"}
-                                        <div>充值金额：{$row['money']} 元</div>
+                                        <div>{:t('common_ui.recharge')}{:t('codepay_ui.label_amount')}：{$row['money']} 元</div>
                                     {/case}
-                                    {default /}<div>充值金额：{$row['money']} 元</div>
+                                    {default /}<div>{:t('common_ui.recharge')}{:t('codepay_ui.label_amount')}：{$row['money']} 元</div>
                                 {/switch}
                             </div>
                         </div>
@@ -49,7 +49,7 @@
                     <div class="layui-card-header">
                         <img src="{__IMG__}logo.png" style="height:23px; "/> {$title}
                         <span style="float: right;">
-                            <span class="layui-badge" style="background-color: lightsalmon">自动发货</span>
+                            <span class="layui-badge" style="background-color: lightsalmon">{:t('order_ui.auto_delivery')}</span>
                         </span>
                     </div>
                     <div class="layui-row layui-col-space8">
@@ -62,31 +62,31 @@
                             <div class="layui-card-header" style="font-size: 1.1em;line-height: 3.4em;height:auto;">{$row['name']}</div>
                                 <div class="layui-card-body information layui-text" style="line-height: 2em">
                                     <p>
-                                        <span onclick="layer.msg('份数×数量=购买数量')">购买数量</span>
+                                        <span onclick="layer.msg('份数×{:t('common_ui.quantity_field')}={:t('order_ui.quantity')}')">{:t('order_ui.quantity')}</span>
                                         <span style="float: right;">1个</span>
                                     </p>
                                     <p>
-                                        用户权限
+                                        {:t('order_ui.user_power')}
                                         <span style="float: right;">
                                             <a id="level"> {$userInfo['power_name']}</a>
                                         </span>
                                     </p>
                                     <p>
-                                        商品售价
+                                        {:t('order_ui.product_price')}
                                         <span style="float: right;">
                                            {$row['money']} 元
                                         </span>
                                     </p>
                                     <p>
-                                        积分抵扣
+                                        {:t('order_ui.integral_deduct')}
                                         <span style="float: right;">
-                                            暂不支持
+                                            {:t('order_ui.not_supported')}
                                         </span>
                                     </p>
                                     <p>
-                                        积分兑换
+                                        {:t('order_ui.integral_exchange')}
                                         <span style="float: right;">
-                                            暂不支持
+                                            {:t('order_ui.not_supported')}
                                         </span>
                                     </p>
                                     <p style="float: right;margin-top: 0.8em;font-size: 1.05em">
@@ -106,27 +106,27 @@
                             <input type="hidden" name="orderid" value="{$row['trade_no']}" />
                             <input type="hidden" name="type" value="" />
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
-                                <input type="radio" name="pay" value="1" title="<p style='width:100%'><img src='{__IMG__}alipay.png' width='13px' /> 支付宝</p>">
+                                <input type="radio" name="pay" value="1" title="<p style='width:100%'><img src='{__IMG__}alipay.png' width='13px' /> {:t('common_ui.alipay')}</p>">
                             </div>
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
-                                <input type="radio" name="pay"  value="2" title="<p style='width:100%'><img src='{__IMG__}wxpay.png' width='13px' /> 微信</p>">
+                                <input type="radio" name="pay"  value="2" title="<p style='width:100%'><img src='{__IMG__}wxpay.png' width='13px' /> {:t('common_ui.wechat')}</p>">
                             </div>
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
                                 <input type="radio" name="pay"  value="3" title="<p style='width:100%'><img src='{__IMG__}qqpay.png' width='13px' /> QQ钱包</p>">
                             </div>
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
                                 {if $row['type'] == 'recharge'}
-                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> 余额 <span style='color:#999;font-size:0.8em;margin-left:1em'>暂不支持</span></p>">
+                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> {:t('common_ui.balance_type')} <span style='color:#999;font-size:0.8em;margin-left:1em'>{:t('order_ui.not_supported')}</span></p>">
                                 {else}
-                                <input type="radio" name="pay" value="4" title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> 余额 <span style='color:#999;font-size:0.8em;margin-left:1em'>剩 {$userInfo['balance']} 元</span></p>">
+                                <input type="radio" name="pay" value="4" title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> {:t('common_ui.balance_type')} <span style='color:#999;font-size:0.8em;margin-left:1em'>剩 {$userInfo['balance']} 元</span></p>">
                                 {/if}
                             </div>
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em">
-                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}total.png' width='13px' /> 积分 <span style='color:#999;font-size:0.8em;margin-left:1em'>暂不支持</span></p>">
+                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}total.png' width='13px' /> {:t('common_ui.integral_type')} <span style='color:#999;font-size:0.8em;margin-left:1em'>{:t('order_ui.not_supported')}</span></p>">
                             </div>
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em">
                                 <input type="radio" name="pay" value="6"
-                                       title="<p style='width:100%'><img src='{__IMG__}payd.png' width='13px' /> 帮我付 (朋友代付)</p>">
+                                       title="<p style='width:100%'><img src='{__IMG__}payd.png' width='13px' /> {:t('order_ui.friend_pay')} (朋友代付)</p>">
                             </div>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                     <div class="layui-card" style="border-radius: 0.5em">
                         <div class="layui-card-body" style="padding: 0;height: 4em;line-height: 4em;text-align: right;border-radius: 0.8em">
                             <button class="layui-btn layui-btn-danger layui-btn-radius" id="btnSubmit" style="float: right;margin:0.5em 1em 0 1em;background: linear-gradient(to right, #f85032, #e73827);margin-right: 0.5em;">
-                                提交订单
+                                {:t('order_ui.submit_order')}
                             </button>
                             <span style="font-size: 1.2em;float: right;text-indent: 0.5em">
                                 <span style="color: #A6A6A6;font-size: 1em">

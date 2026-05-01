@@ -43,7 +43,7 @@ class Index extends Backend
             View::assign([
                 'layoutRole' => 'admin',
                 'layoutAvatar' => '//q4.qlogo.cn/headimg_dl?dst_uin='.$this->adminInfo['qq'].'&spec=100',
-                'layoutUsername' => '管理员',
+                'layoutUsername' => t('common_ui.admin_label'),
                 'menuList' => $menuList,
             ]);
             return View::fetch(APP_PATH . DS . 'common' . DS . 'view' . DS . 'layout' . DS . 'main_layout.html');
@@ -113,44 +113,44 @@ class Index extends Backend
             $oldPassword = !empty($post['oldPassword'])?$post['oldPassword']:null;
             $newPassword = !empty($post['newPassword'])?$post['newPassword']:null;
             if(empty($username)){
-                return message('请填写用户名！', false);
+                return message(t('login.please_enter_username'), false);
             }
             if(empty($oldPassword)){
-                return message('请填写原密码！', false);
+                return message(t('user.old_password_empty'), false);
             }
             if($oldPassword != $this->adminInfo['password']){
-                return message('原密码不正确！', false);
+                return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->adminInfo['username']){
                 if(empty($newPassword)){
-                    return message('请填写新密码！', false);
+                    return message(t('user.new_password_empty'), false);
                 }
                 if($oldPassword == $newPassword){
-                    return message('新密码不能与原密码相同！', false);
+                    return message(t('user.new_password_same'), false);
                 }
                 if(strlen($newPassword) < 6){
-                    return message('新密码不能小于6位！', false);
+                    return message(t('user.new_password_short'), false);
                 }
                 try{
                     Db::name('admin')
                         ->where('id', $this->adminId)
                         ->data(['password' => $newPassword])
                         ->update();
-                    return message('修改密码成功！', true);
+                    return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
                     return message($e->getMessage(), false);
                 }
             }else{
                 $row = Db::name('admin')->where('username', $username)->find();
                 if($row){
-                    return message('系统已存在该用户名，请更换后重试！', false);
+                    return message(t('user.username_exists'), false);
                 }
                 if(!empty($newPassword)){
                     if($oldPassword == $newPassword){
-                        return message('新密码不能与原密码相同！', false);
+                        return message(t('user.new_password_same'), false);
                     }
                     if(strlen($newPassword) < 6){
-                        return message('新密码不能小于6位！', false);
+                        return message(t('user.new_password_short'), false);
                     }
                     $password = $newPassword;
                 }else{
@@ -161,7 +161,7 @@ class Index extends Backend
                         ->where('id', $this->adminId)
                         ->data(['username' => $username, 'password' => $password])
                         ->update();
-                    return message('修改用户名成功！', true);
+                    return message(t('user.username_change_success'), true);
                 }catch (\Exception $e){
                     return message($e->getMessage(), false);
                 }

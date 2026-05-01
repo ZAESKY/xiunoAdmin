@@ -6,7 +6,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
         var admin = layui.admin;
         var formX = layui.formX;
         var notice = layui.notice;
-       
+
         // 填写手机号
         form.on('submit(stepDemoFormSubmit1)', function (data) {
             admin.showLoading('#divLoading', 2, '.8');
@@ -19,16 +19,16 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 if (chk_value == ""){
                 admin.removeLoading('#divLoading', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit1"]', false);
-                notice.msg('请同意服务协议！', {icon: 3});
-                layer.tips('请勾选该选项', '#id', {
-  tips: 1
+                notice.msg(window.t('install.agree_service'), {icon: 3});
+                layer.tips(window.t('install.check_option'), '#id', {
+	  tips: 1
 });
                 return false;
                 }else{
                 admin.removeLoading('#divLoading', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit1"]', false);
-                steps.next('stepsDemoForget');  
-                $('#SF_title').html('环境检测');
+                steps.next('stepsDemoForget');
+                $('#SF_title').html(window.t('install.env_check'));
                 }
             }, 600);
             return false;
@@ -44,31 +44,31 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             var d = $("input[name='session']").val();
             var e = $("input[name='mkdir']").val();
             var f = $("input[name='put']").val();
-             
+
             if(a+b+c+d+e+f != '111111'){
             admin.removeLoading('#divLoading2', true, true);
             admin.btnLoading('[lay-filter="stepDemoFormSubmit2"]', false);
-            layer.confirm('当前环境可能不适合本程序运行，是否继续安装？', {
-		btn: ['是','否'],icon:3,closeBtn:0
+            layer.confirm(window.t('install.env_not_compatible'), {
+		btn: [window.t('common.yes'),window.t('common.no')],icon:3,closeBtn:0
 		}, function(index){
 		    $.ajax({
-             type: "GET",
-             url: "SF_install_ajax.php?SF=is_config",
-             dataType: "json",
-             success: function(data) {
-               if (data.code == 0) {
-               steps.next('stepsDemoForget');
-               steps.next('stepsDemoForget');
-               $('#SF_title').html('创建数据表'); 
-               } else {
-               steps.next('stepsDemoForget');
-               $('#SF_title').html('填写数据库信息'); 
-               }
-             }
-            });
-            layer.close(index);
+	             type: "GET",
+	             url: "SF_install_ajax.php?SF=is_config",
+	             dataType: "json",
+	             success: function(data) {
+	               if (data.code == 0) {
+	               steps.next('stepsDemoForget');
+	               steps.next('stepsDemoForget');
+	               $('#SF_title').html(window.t('install.create_table'));
+	               } else {
+	               steps.next('stepsDemoForget');
+	               $('#SF_title').html(window.t('install.db_info'));
+	               }
+	             }
+	            });
+	            layer.close(index);
 		}, function(){
-			}); 
+			});
 			return false;
             }else{
             setTimeout(function () {
@@ -82,12 +82,12 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                         if (data.code == 0) {
                             steps.next('stepsDemoForget');
                             steps.next('stepsDemoForget');
-                            $('#SF_title').html('创建数据表');
+                            $('#SF_title').html(window.t('install.create_table'));
                             $('#mysql_install').html(data.data);
-                            notice.msg('连接数据库成功，已自动为您跳过填写数据库步骤！', {icon: 1});
+                            notice.msg(window.t('install.db_connected'), {icon: 1});
                         } else {
                             steps.next('stepsDemoForget');
-                            $('#SF_title').html('填写数据库信息'); 
+                            $('#SF_title').html(window.t('install.db_info'));
                         }
                     }
                 });
@@ -96,7 +96,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             }
         });
 
-        
+
         form.on('submit(stepDemoFormSubmit3)', function (data) {
             admin.showLoading('#divLoading3', 2, '.8');
             admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]');
@@ -108,7 +108,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             if(a=='' || b=='' || c=='' || d=='' || e==''){
             admin.removeLoading('#divLoading3', true, true);
             admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
-            notice.msg('请填写完整的数据库信息！', {icon: 3});  
+            notice.msg(window.t('install.fill_db_info'), {icon: 3});
             return false;
             }
              $.ajax({
@@ -122,9 +122,9 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
                 steps.next('stepsDemoForget');
                 notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html('创建数据表');
+                $('#SF_title').html(window.t('install.create_table'));
                 $('#mysql_install').html(data.data);
-		        
+
                } else {
                 admin.removeLoading('#divLoading3', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
@@ -132,68 +132,68 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                }
         }
     });
-            
+
             return false;
         });
-        
+
         form.on('submit(jump_install)', function (data) {
 		    admin.showLoading('#divLoading4', 2, '.8');
             admin.btnLoading('[lay-filter="jump_install"]');
 		    steps.next('stepsDemoForget');
 		    steps.next('stepsDemoForget');
-		    $('#SF_title').html('完成安装');
+		    $('#SF_title').html(window.t('install.complete'));
 		    admin.removeLoading('#divLoading4', true, true);
             admin.btnLoading('[lay-filter="jump_install"]', false);
             $.ajax({
-             type: "GET",
-             url: "SF_install_ajax.php?SF=put_SF_install_lock",
-             dataType: "json",
-             success: function(data) {
-               if (data.code == 0) {
-               notice.msg('恭喜您，安装程序成功！', {icon: 1});
-               $('#SF_user').html(data.user);
-               $('#SF_pwd').html(data.pwd);
-               $('#SF_qq').html(data.qq);
-               } else {
-               notice.msg('安装锁未创建成功，请您手动在install目录下创建SF_auth.lock！', {icon: 2});
-               }
-              }
-            });
-            
+	             type: "GET",
+	             url: "SF_install_ajax.php?SF=put_SF_install_lock",
+	             dataType: "json",
+	             success: function(data) {
+	               if (data.code == 0) {
+	               notice.msg(window.t('install.install_success'), {icon: 1});
+	               $('#SF_user').html(data.user);
+	               $('#SF_pwd').html(data.pwd);
+	               $('#SF_qq').html(data.qq);
+	               } else {
+	               notice.msg(window.t('install.lock_not_created'), {icon: 2});
+	               }
+	              }
+	            });
+
         });
-    
+
         form.on('submit(must_install)', function (data) {
-            layer.confirm('全新安装将会清空所有数据，是否继续？', {
-		btn: ['是','否'],icon:3,closeBtn:0
+            layer.confirm(window.t('install.clear_all_data'), {
+		btn: [window.t('common.yes'),window.t('common.no')],icon:3,closeBtn:0
 		}, function(index){
 		    admin.showLoading('#divLoading4', 2, '.8');
             admin.btnLoading('[lay-filter="must_install"]');
 		     $.ajax({
-             type: "GET",
-             url: "SF_install_ajax.php?SF=mysql",
-             dataType: "json",
-             success: function(data) {
-               if (data.code == 0) {
-                admin.removeLoading('#divLoading4', true, true);
-                admin.btnLoading('[lay-filter="must_install"]', false);
-                steps.next('stepsDemoForget');
-                notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html('填写管理员信息');
-                $('#admin').html(data.data);
-		
-               } else {
-                admin.removeLoading('#divLoading4', true, true);
-                admin.btnLoading('[lay-filter="must_install"]', false);
-                notice.msg(data.msg, {icon: 2});
-                $('[lay-filter="must_install"]').html('点击重试');
-               }
-        }
-    });
+	             type: "GET",
+	             url: "SF_install_ajax.php?SF=mysql",
+	             dataType: "json",
+	             success: function(data) {
+	               if (data.code == 0) {
+	                admin.removeLoading('#divLoading4', true, true);
+	                admin.btnLoading('[lay-filter="must_install"]', false);
+	                steps.next('stepsDemoForget');
+	                notice.msg(data.msg, {icon: 1});
+	                $('#SF_title').html(window.t('install.admin_info'));
+	                $('#admin').html(data.data);
+
+	               } else {
+	                admin.removeLoading('#divLoading4', true, true);
+	                admin.btnLoading('[lay-filter="must_install"]', false);
+	                notice.msg(data.msg, {icon: 2});
+	                $('[lay-filter="must_install"]').html(window.t('install.retry'));
+	               }
+	        }
+	    });
             layer.close(index);
 		}, function(){
-			}); 
-           return false; 
-        });   
+			});
+           return false;
+        });
         form.on('submit(mysql_install)', function (data) {
             admin.showLoading('#divLoading4', 2, '.8');
             admin.btnLoading('[lay-filter="mysql_install"]');
@@ -207,21 +207,21 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="mysql_install"]', false);
                 steps.next('stepsDemoForget');
                 notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html('填写管理员信息');
+                $('#SF_title').html(window.t('install.admin_info'));
                 $('#admin').html(data.data);
-		
+
                } else {
                 admin.removeLoading('#divLoading4', true, true);
                 admin.btnLoading('[lay-filter="mysql_install"]', false);
                 notice.msg(data.msg, {icon: 2});
-               $('[lay-filter="mysql_install"]').html('点击重试');
+               $('[lay-filter="mysql_install"]').html(window.t('install.retry'));
                }
         }
     });
-            
+
             return false;
         });
-        
+
         form.on('submit(admin_info)', function (data) {
             admin.showLoading('#divLoading5', 2, '.8');
             admin.btnLoading('[lay-filter="admin_info"]');
@@ -235,7 +235,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             if(a=='' || b=='' || c=='' || d=='' || e=='' || login_key=='' || sitename==''){
             admin.removeLoading('#divLoading5', true, true);
             admin.btnLoading('[lay-filter="admin_info"]', false);
-            notice.msg('请勿留空！', {icon: 3});  
+            notice.msg(window.t('validation.not_empty'), {icon: 3});
             return false;
             }
              $.ajax({
@@ -249,38 +249,38 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="admin_info"]', false);
                 steps.next('stepsDemoForget');
                 notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html('完成安装');
+                $('#SF_title').html(window.t('install.complete'));
                 $.ajax({
                  type: "GET",
                  url: "SF_install_ajax.php?SF=put_SF_install_lock",
                  dataType: "json",
                  success: function(data) {
                    if (data.code == 0) {
-                       notice.msg('恭喜您，安装程序成功！', {icon: 1})
+                       notice.msg(window.t('install.install_success'), {icon: 1})
                    } else {
-                       notice.msg('安装锁未创建成功，请您手动在install目录下创建SF_auth.lock！', {icon: 2});
-                   } 
+                       notice.msg(window.t('install.lock_not_created'), {icon: 2});
+                   }
                    }
                });
                } else {
                 admin.removeLoading('#divLoading5', true, true);
                 admin.btnLoading('[lay-filter="admin_info"]', false);
                 notice.msg(data.msg, {icon: 2});
-                $('[lay-filter="admin_info"]').html('点击重试');
+                $('[lay-filter="admin_info"]').html(window.t('install.retry'));
                }
         }
     });
-            
+
             return false;
         });
-        
+
         form.on('submit(SFindex)', function (data) {
             admin.showLoading('#divLoading6', 2, '.8');
             admin.btnLoading('[lay-filter="SFindex"]');
             window.location.href="/";
             return false;
     });
-    
+
     form.on('submit(loginadmin)', function (data) {
             admin.showLoading('#divLoading6', 2, '.8');
             admin.btnLoading('[lay-filter="loginadmin"]');
@@ -296,7 +296,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                }
              }
        });
-            
+
             return false;
     });
 

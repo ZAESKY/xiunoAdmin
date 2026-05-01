@@ -30,11 +30,11 @@ class PirateModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('pirate.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此盗版！');
+                throw new Exception(t('pirate.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;

@@ -4,10 +4,10 @@
         <div class="layui-card-body">
             <form class="layui-form formBasForm" lay-filter="formBasForm">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">所属应用</label>
+                    <label class="layui-form-label">{:t('common_ui.belong_app')}</label>
                     <div class="layui-input-block">
                         <select name="appid" class="layui-input ew-select-fixed" lay-filter="app" lay-search lay-verify="required">
-                            <option value="">请选择应用</option>
+                            <option value="">{:t('download_ui.select_app')}</option>
                             {volist name="app_list.data.data" id="res"}
                             <option value="{$res.id}">{$res.name}</option>
                             {/volist}
@@ -15,26 +15,26 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">授权内容</label>
+                    <label class="layui-form-label">{:t('download_ui.auth_content_label')}</label>
                     <div class="layui-input-block">
-                        <input type="text" name="auth_info" class="layui-input" placeholder="请输入授权内容" lay-verify="required"/>
+                        <input type="text" name="auth_info" class="layui-input" placeholder="{:t('download_ui.auth_content_placeholder')}" lay-verify="required"/>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">授权QQ</label>
+                    <label class="layui-form-label">{:t('common_ui.auth_type')}QQ</label>
                     <div class="layui-input-block">
-                        <input type="number" name="qq" class="layui-input" placeholder="请输入授权持有者QQ" lay-verify="required"/>
+                        <input type="number" name="qq" class="layui-input" placeholder="{:t('common.enter_auth_holder_qq')}" lay-verify="required"/>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">授权码</label>
+                    <label class="layui-form-label">{:t('download_ui.auth_code_label')}</label>
                     <div class="layui-input-block">
-                        <input type="text" name="authcode" class="layui-input" placeholder="请输入授权码" lay-verify="required"/>
+                        <input type="text" name="authcode" class="layui-input" placeholder="{:t('download_ui.auth_code_placeholder')}" lay-verify="required"/>
                     </div>
                 </div>
                 <div class="layui-form-item text-right">
-                    <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>获取</button>
-                    <button type="button" class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+                    <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>{:t('download_ui.get_btn')}</button>
+                    <button type="button" class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
                 </div>
             </form>
         </div>

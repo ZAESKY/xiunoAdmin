@@ -32,13 +32,13 @@ class PayModel extends BaseModel
         $userId = !empty($wap['userid']) ? intval($wap['userid']) : null;
 
         if(empty($buy_type)){
-            return message('创建订单失败！[errorCode:CreateOrderBuyTypeEmpty]', false);
+            return message(t('order.create_buy_type_empty'), false);
         }
         if(empty($name)){
-            return message('创建订单失败！[errorCode:CreateOrderNameEmpty]', false);
+            return message(t('order.create_name_empty'), false);
         }
         if(empty($userId)){
-            return message('创建订单失败！[errorCode:CreateOrderUserIdEmpty]'.$userId, false);
+            return message(t('order.create_user_id_empty').$userId, false);
         }
         $trade_no = date("YmdHis") . mt_rand(111, 999);
         $data = [
@@ -55,9 +55,9 @@ class PayModel extends BaseModel
         ];
         try {
             self::insert($data);
-            return message('创建订单成功！', true, ['trade_no' => $trade_no]);
+            return message(t('order.create_success'), true, ['trade_no' => $trade_no]);
         } catch (\Exception $e) {
-            return message('创建订单失败！[errorCode:CreateOrderError]', false);
+            return message(t('order.create_error'), false);
         }
 
     }
@@ -65,11 +65,11 @@ class PayModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('order.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此支付订单！');
+                throw new Exception(t('common.no_data'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -85,11 +85,11 @@ class PayModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('order.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此支付订单！');
+                throw new Exception(t('common.no_data'));
             }
 
             self::where('id', $id)

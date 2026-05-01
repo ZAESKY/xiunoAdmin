@@ -38,7 +38,7 @@ class BaseService
             $userModel = new \app\user\model\User();
             $userInfo = $userModel->getInfo();
             if(!$userInfo){
-                throw new Exception('获取用户信息失败！');
+                throw new Exception(t('user.info_error'));
             }
             return $userInfo;
         }catch (\Exception $e){
@@ -182,7 +182,7 @@ class BaseService
             if(IS_POST){
                 $appid = intval(input('post.appid'));
                 if(empty($appid)){
-                    throw new Exception('APPID不能为空！');
+                    throw new Exception(t('app.appid_empty'));
                 }
                 $authPriceModel = new \app\admin\model\AuthPriceModel();
                 $appInfo = $this->getAppInfo($appid);

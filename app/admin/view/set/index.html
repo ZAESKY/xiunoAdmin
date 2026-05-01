@@ -26,6 +26,9 @@
                                     {case text}
                                     <textarea {$item.extend} name="row[{$item.name}]" class="layui-textarea" lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} row="5">{$item.value|htmlentities}</textarea>
                                     {/case}
+                                    {case ueditor}
+                                    <textarea {$item.extend} id="rich_{$item.name}" name="row[{$item.name}]" class="layui-textarea sf-rich-editor" lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} row="8">{$item.value|htmlentities}</textarea>
+                                    {/case}
                                     {case array}
                                     <div style="white-space:nowrap;overflow-x: auto;">
                                         <table class="layui-table" id="addField{$item.name}">
@@ -190,10 +193,10 @@
                                     <div class="layui-form-item">
                                         <div class="layui-upload-drag" id="image{$item.name}">
                                             <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                            <p>点击上传，或将文件拖拽到此处</p>
+                                            <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
                                             <div class="layui-hide" id="uploadImage{$item.name}">
                                                 <hr>
-                                                <img src="" alt="上传成功后渲染" id="img{$item.name}" style="max-width: 196px">
+                                                <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="img{$item.name}" style="max-width: 196px">
                                             </div>
                                         </div>
                                     </div>
@@ -239,11 +242,11 @@
                                         <input type="hidden" id="status" value="0"/>
                                         <div class="layui-upload-drag" id="fileUpload{$item.name}">
                                             <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                            <p>点击上传，或将文件拖拽到此处</p>
+                                            <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
                                             <div class="layui-hide" id="uploadFile{$item.name}">
                                                 <hr>
                                                 <div class="layui-form-item">
-                                                    <img src="" alt="上传成功后渲染" id="fileImg{$item.name}" style="max-width: 196px">
+                                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="fileImg{$item.name}" style="max-width: 196px">
                                                 </div>
                                                 <div class="layui-form-item">
                                                     <label class="layui-form-label">文件名</label>
@@ -255,7 +258,7 @@
                                         </div>
                                     </div>
                                     <div class="layui-form-item text-center">
-                                        <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>删除</button>
+                                        <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>
                                     </div>
                                     <div class="mask"></div>
                                     <div class="loading">
@@ -469,7 +472,7 @@
                 <hr style="width:0px"><hr>
                 <div class="layui-form-item layui-row layui-col-space10 ">
                     <div class="layui-col-md2">
-                        <button type="submit" class="layui-btn layui-btn-fluid" lay-filter="noticeBtn" lay-submit>保存配置</button>
+                        <button type="submit" class="layui-btn layui-btn-fluid" lay-filter="noticeBtn" lay-submit>{:t('set_ui.save_config')}</button>
                     </div>
                 </div>
             </form>
@@ -479,12 +482,37 @@
 </div>
 
 <script>
-    layui.use(['element', 'form', 'notice'], function () {
+    layui.use(['element', 'form', 'notice', 'layedit'], function () {
         var $ = layui.jquery;
         var form = layui.form;
         var notice = layui.notice;
+        var layedit = layui.layedit;
+        var richEditors = [];
+
+        $('.sf-rich-editor, textarea[name="row[notice_home]"], textarea[name="row[notice_user]"]').each(function () {
+            var id = $(this).attr('id');
+            if (!id) {
+                id = 'rich_' + $(this).attr('name').replace(/[^a-zA-Z0-9_]/g, '_');
+                $(this).attr('id', id);
+            }
+            richEditors.push(layedit.build(id, {
+                height: 220,
+                tool: ['strong', 'italic', 'underline', 'del', '|', 'left', 'center', 'right', '|', 'link', 'unlink', 'face']
+            }));
+        });
+
+        function syncRichEditors() {
+            $.each(richEditors, function (_, index) {
+                layedit.sync(index);
+            });
+        }
 
         form.on('submit(noticeBtn)', function (data) {
+            syncRichEditors();
+            data.field = {};
+            $.each($('#formBasForm').serializeArray(), function (_, item) {
+                data.field[item.name] = item.value;
+            });
             notice.msg('正在执行中..', {icon: 4, close: true});
             $.ajax({
                 type: "POST",

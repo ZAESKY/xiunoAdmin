@@ -115,7 +115,7 @@
                     $('<span>').text(value).append('&nbsp;&nbsp;'),
                     $('<a>', {
                         href: 'javascript:;',
-                        title: '移除',
+                        title: window.t('common.remove'),
                         html: closeText
                     }).click(function () {
                         return $('#' + id).removeTag(escape(value));

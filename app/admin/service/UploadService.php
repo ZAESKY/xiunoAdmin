@@ -25,30 +25,30 @@ class UploadService extends BaseService
             return message('upload.invalid_chunk', false, ['status' => 0, 'downUrl' => '']);
         }
         if(empty($id)){
-            return message("缺少ID参数",false, ['status' => 0, 'downUrl' => '']);
+            return message(t('validation.missing_id'),false, ['status' => 0, 'downUrl' => '']);
         }
         if(empty($fileName)){
-            return message("缺少FILENAME参数",false, ['status' => 0, 'downUrl' => '']);
+            return message(t('validation.missing_filename'),false, ['status' => 0, 'downUrl' => '']);
         }
         if(empty($fileExt)){
-            return message("缺少FILEEXT参数",false, ['status' => 0, 'downUrl' => '']);
+            return message(t('validation.missing_fileext'),false, ['status' => 0, 'downUrl' => '']);
         }
         if($fileExt != 'zip'){
-            return message("请上传zip格式的压缩包",false, ['status' => 0, 'downUrl' => '']);
+            return message(t('upload.please_upload_zip'),false, ['status' => 0, 'downUrl' => '']);
         }
         try{
             $versionInfo = $this->versionModel->getInfo($id);
             $download_catalogue = $versionInfo['download_catalogue'];
             if(empty($download_catalogue)){
-                return message("该版本的下载目录为空，请手动去数据库修改“download_catalogue”字段，并在app/common/download/".(($versionInfo['type'] == 0)?"release":"update")."目录下创建目录名为”你所修改的download_catalogue字段”的目录", false, ['status' => 0, 'downUrl' => '']);
+                return message(t('version.get_download_dir_empty'), false, ['status' => 0, 'downUrl' => '']);
             }
             $filePath = APP_PATH.'/common/download/'.(($versionInfo['type'] == 0)?'release':'update').'/'.$versionInfo['download_catalogue'];
             if(!is_dir($filePath)){
-                return message("该应用的下载目录不存在，请手动在app/common/download/".(($versionInfo['type'] == 0)?"release":"update")."目录下创建目录”".$versionInfo['download_catalogue']."”", false, ['status' => 0, 'downUrl' => '']);
+                return message(t('version.download_dir_not_exist'), false, ['status' => 0, 'downUrl' => '']);
             }
 
         } catch (\Exception $e) {
-            return message("获取信息失败！".$e->getMessage() ,false, ['status' => 0, 'downUrl' => '']);
+            return message(t('app.get_info_failed').$e->getMessage() ,false, ['status' => 0, 'downUrl' => '']);
         }
         //处理分片上传文件
         $status = 1;
@@ -89,7 +89,7 @@ class UploadService extends BaseService
                 @mkdir($filePath, 0755, true);
             }
         } catch (\Exception $e) {
-            $msg = $e->getMessage() === 'upload.invalid_filename' ? 'upload.invalid_filename' : '上传失败！'.$e->getMessage();
+            $msg = $e->getMessage() === 'upload.invalid_filename' ? 'upload.invalid_filename' : t('upload.upload_failed').$e->getMessage();
             return message($msg ,false, ['status' => 0, 'downUrl' => '']);
         }
         //处理分片上传文件
@@ -123,7 +123,7 @@ class UploadService extends BaseService
                 } catch (ZipException $e) {
                     $zip->close();
                     rmdirs($filePath);
-                    return message('无法打开压缩文件！' ,false, ['status' => 0]);
+                    return message(t('upload.cannot_open_zip') ,false, ['status' => 0]);
                 }
 
                 $tempDir = $filePath . 'temp';
@@ -136,7 +136,7 @@ class UploadService extends BaseService
                 } catch (ZipException $e) {
                     $zip->close();
                     rmdirs($filePath);
-                    return message('解压文件失败！' ,false, ['status' => 0]);
+                    return message(t('upload.unzip_failed') ,false, ['status' => 0]);
                 }
                 $fileArray = scan_dir($tempDir);
                 foreach ($fileArray as $res){
@@ -144,7 +144,7 @@ class UploadService extends BaseService
                     if($fileinfo['extension'] == 'php'){
                         $zip->close();
                         rmdirs($filePath);
-                        return message('该模板中存在PHP文件，请删除后重新上传！' ,false, ['status' => 0]);
+                        return message(t('upload.php_in_template') ,false, ['status' => 0]);
                     }
                 }
                 copydirs($tempDir, ROOT_PATH);
@@ -172,7 +172,7 @@ class UploadService extends BaseService
                 @mkdir($filePath, 0755, true);
             }
         } catch (\Exception $e) {
-            $msg = $e->getMessage() === 'upload.invalid_filename' ? 'upload.invalid_filename' : '上传失败！'.$e->getMessage();
+            $msg = $e->getMessage() === 'upload.invalid_filename' ? 'upload.invalid_filename' : t('upload.upload_failed').$e->getMessage();
             return message($msg ,false, ['status' => 0, 'downUrl' => '']);
         }
         //处理分片上传文件

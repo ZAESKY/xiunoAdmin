@@ -46,11 +46,11 @@ class LoginService extends BaseService
     {
         // 参数
         if(session('SF_LOGIN_KEY') != conf('SF_LOGIN_KEY')) {
-            return message('请返回登录口令界面输入口令后在进行登录！', false);
+            return message(t('login.token_empty'), false);
         }
         $param = request()->param();
         if(!$param){
-            return message('请勿留空！', false);
+            return message(t('validation.not_empty'), false);
         }
         if (conf('captcha_open') == 1) {
             $captcha_id = conf('captcha_id');
@@ -73,38 +73,38 @@ class LoginService extends BaseService
             if ($res !== false) {
                 $obj = json_decode($res,true);
                 if (!is_array($obj)) {
-                    return message('验证码校验异常', false);
+                    return message(t('login.captcha_error'), false);
                 }
                 if (isset($obj['result']) && in_array($obj['result'], ['error', 'fail'])) {
-                    return message($obj['reason'] ?? '验证码验证失败', false);
+                    return message($obj['reason'] ?? t('login.captcha_error'), false);
                 }
             }
         }
-        ActionLog::setTitle("登录后台");
+        ActionLog::setTitle(t('login.login_backend'));
         // 登录用户名
         $username = $param['username'];
         if (!$username) {
-            return message('登录用户名不能为空', false, 'username');
+            return message(t('login.username_empty'), false, 'username');
         }
         // 登录密码
         $password = $param['password'];
         if (!$password) {
-            return message('登录密码不能为空', false, 'password');
+            return message(t('login.password_empty'), false, 'password');
         }
         // 用户验证
         $info = $this->model->getOne($username);
         if (!$info) {
-            return message('您的登录用户名不存在', false, 'username');
+            return message(t('login.username_not_exist'), false, 'username');
         }
         // 密码校验
         if ($password != $info['password']) {
             ActionLog::setContent("账号密码错误|用户名:".$username."|IP:".get_client_ip());
-            return message("您的登录密码不正确", false, "password");
+            return message(t('login.password_incorrect'), false, "password");
         }
 
         // 使用状态校验
         if ($info['status'] != 1) {
-            return message("您的帐号已被禁用", false);
+            return message(t('login.account_disabled'), false);
         }
 
         // 本地SESSION存储登录信息
@@ -112,7 +112,7 @@ class LoginService extends BaseService
         session('adminSign', data_auth_sign($info['username'].$info['password'].sf_password_hash()), 86400);
 
         ActionLog::setContent("登录成功|用户名:".$username."|IP:".get_client_ip());
-        return message('尊敬的'.$username.', 欢迎回来~', true);
+        return message(t('login.success'), true);
     }
     /**
      * 系统登录
@@ -122,25 +122,25 @@ class LoginService extends BaseService
      */
     public function checkLoginKey()
     {
-        ActionLog::setTitle("登录口令");
+        ActionLog::setTitle(t('login.verify_token_title'));
         // 参数
         $param = request()->param();
         if(!$param){
-            return message('请勿留空！', false);
+            return message(t('validation.not_empty'), false);
         }
         // 使用状态校验
         if (empty($param['SF_LOGIN_KEY'])) {
-            return message("请填写登录口令！", false);
+            return message(t('login.token_empty'), false);
         }
-        
+
         if ($param['SF_LOGIN_KEY'] != conf('SF_LOGIN_KEY')) {
             ActionLog::setContent("口令输入错误|IP:".get_client_ip());
-            return message("登录口令不正确！", false);
+            return message(t('login.token_incorrect'), false);
         }
         // 本地SESSION存储登录口令信息
         session('SF_LOGIN_KEY', conf('SF_LOGIN_KEY'));
         ActionLog::setContent("口令输入正确|IP:".get_client_ip());
-        return message('验证成功！', true);
+        return message(t('login.verify_success'), true);
     }
 
     private function post_request($url, $postdata) {

@@ -7,6 +7,43 @@ use think\facade\Cache;
 class Background
 {
     public function notice($type){
+        $cacheKey = 'notice_' . $type;
+        if(!empty(Cache::get($cacheKey))){
+            return Cache::get($cacheKey);
+        }
+        if (conf('notice_' . $type) != 1) {
+            Cache::tag('SF_Set')->set($cacheKey, '');
+            return '';
+        }
+        $info = [];
+        if (conf('notice_icon') != -1) {
+            $info['icon'] = intval(conf('notice_icon'));
+        }
+        $info['anim'] = intval(conf('notice_anim'));
+        $info['shade'] = conf('notice_shade');
+        $info['time'] = intval(conf('notice_time'));
+        $method = in_array(conf('notice_template'), ['default', 'alert', 'black'], true) ? conf('notice_template') : 'open';
+        $notice_content = '';
+        if ($type === 'home') {
+            $notice_content = clean_rich_text(conf('notice_home'));
+        } elseif ($type === 'user') {
+            $notice_content = clean_rich_text(conf('notice_user'));
+        }
+        $content = json_encode($notice_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $options = json_encode($info, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $notice = '<script>if(!getCookie("gonggao")){layui.use([\'layer\'],function(){var layer=layui.layer;layer.ready(function(){setTimeout(function(){var content=' . $content . ';var options=' . $options . ';';
+        if ($method === 'default') {
+            $notice .= 'layer.msg(content,options);';
+        } elseif ($method === 'alert') {
+            $notice .= 'layer.alert(content,options);';
+        } elseif ($method === 'black') {
+            $notice .= 'layer.open(Object.assign({type:1,title:false,closeBtn:0,area:"300px",btn:["好的了解","<div style=\"color:#4FC3F7\">不再提醒</div>"],btnAlign:"c",moveOut:true,moveType:0,btn2:function(){setCookie("gonggao","SF2129876388",1);},content:"<div style=\"background-color:#393D49;color:#eeeeee;padding:0.5em\"><h2 style=\"text-align:center;padding-top:0.5em\">平台公告</h2><hr>"+content+"</div>"},options));';
+        } else {
+            $notice .= 'layer.open(Object.assign({type:1,title:false,area:["420px","auto"],content:\'<div class="layui-card layui-card-body">\'+content+\'</div>\'},options));';
+        }
+        $notice .= '},500);});});}</script>';
+        Cache::tag('SF_Set')->set($cacheKey, $notice);
+        return $notice;
         if(!empty(Cache::get('notice'))){
             return Cache::get('notice');
         }else {

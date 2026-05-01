@@ -28,7 +28,7 @@ class AppService extends BaseService
             $result = $this->model->list();
             foreach($result as $res){
                 $checkTypeInfo = $this->checkTypeModel->getCheckTypeName($res['check_type']);
-                $res['checkTypeName'] = '获取判断模式错误';
+                $res['checkTypeName'] = t('auth.get_check_type_failed');
                 if($checkTypeInfo){
                     $res['checkTypeName'] = $checkTypeInfo['name'];
                 }

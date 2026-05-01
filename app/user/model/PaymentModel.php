@@ -53,11 +53,11 @@ class PaymentModel extends BaseModel
     public function editBinding(){
         $userInfo = parent::getUserInfo();
         if(!$userInfo){
-            return message('获取用户信息失败！[errorCode:UserInfoError]' ,false);
+            return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
         }
         $powerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
         if(!$powerPriceInfo) {
-            return message('获取用户权限信息失败！[errorCode:GetUserPowerInfoError]' ,false);
+            return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]' ,false);
         }
         $post = request()->post();
         $id = !empty($post['id']) ? intval($post['id']) : null;
@@ -67,33 +67,33 @@ class PaymentModel extends BaseModel
         $type = !empty($post['type'])?$post['type']:null;
         $endtime = !empty($post['endtime'])?$post['endtime']:null;
         $permanent_switch = 0;
-        if(empty($id)) return message('缺少ID参数！' ,false);
-        if(empty($appid)) return message('缺少APPID参数！' ,false);
-        if(empty($qq)) return message('缺少QQ参数！' ,false);
-        if(empty($url)) return message('缺少URL参数！' ,false);
-        if(empty($type)) return message('缺少TYPE参数！' ,false);
+        if(empty($id)) return message(t('validation.missing_id') ,false);
+        if(empty($appid)) return message(t('validation.missing_appid') ,false);
+        if(empty($qq)) return message(t('validation.missing_qq') ,false);
+        if(empty($url)) return message(t('validation.missing_url') ,false);
+        if(empty($type)) return message(t('validation.missing_type') ,false);
         $row = self::where(['id' => $id, 'bindingid' => $userInfo['id']])->find();
         if (!$row) {
-            return message('不存在此认证！', false);
+            return message(t('payment.not_exist'), false);
         }
 
         if ($url != $row['url']) {
             $row2 = self::where(['url' => $url, 'appid' => $appid])->find();
             if ($row2) {
-                return message('该应用已存在此认证！', false);
+                return message(t('payment.already_exist'), false);
             }
         }
 
         try{
             $appInfo = parent::getAppInfo($appid);
             if($appInfo == false){
-                return message('获取应用信息失败！[errorCode:GetUserAppInfoError]',false);
+                return message(t('app.get_info_failed').'[errorCode:GetUserAppInfoError]',false);
             }
             if($appInfo['replace_switch'] != 0){
-                return message('当前应用未开启更换授权功能',false);
+                return message(t('app.replace_not_open'),false);
             }
         } catch (\Exception $e) {
-            return message('获取应用信息失败！[errorCode:GetUserAppInfoError]' ,false);
+            return message(t('app.get_info_failed').'[errorCode:GetUserAppInfoError]' ,false);
         }
 
         if($row['qq'] == $qq && $row['url'] == $url){
@@ -111,14 +111,14 @@ class PaymentModel extends BaseModel
             try {
                 $authPriceInfo = parent::getAuthPriceInfo($type);
                 if ($authPriceInfo == false) {
-                    return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]', false);
+                    return message(t('payment.get_price_failed').'[errorCode:GetAuthPriceInfoError]', false);
                 }
                 if($row['permanent_switch'] == 1){
-                    return message('该认证已是永久授权，请选择不续费！', false);
+                    return message(t('payment.permanent_no_renew'), false);
                 }
                 if ($authPriceInfo['diy_switch'] == 1) {
                     if (empty($endtime)) {
-                        return message('请输入到期时间！', false);
+                        return message(t('payment.enter_expire_time'), false);
                     }
                     $date = explode(' ', $endtime);
                     $time = explode(':', $date[1]);
@@ -128,7 +128,7 @@ class PaymentModel extends BaseModel
                         $differDay++;
                     }
                     if($differDay <= 0){
-                        return message('请填写正确到期时间！' ,false);
+                        return message(t('auth.correct_expire_time') ,false);
                     }else{
                         $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
                         $allmoney += round(($price * $differDay) * floatval($powerPriceInfo['addpay_discount'] / 100), 2);
@@ -144,23 +144,23 @@ class PaymentModel extends BaseModel
                     }
                 }
             } catch (\Exception $e) {
-                return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]', false);
+                return message(t('payment.get_price_failed').'[errorCode:GetAuthPriceInfoError]', false);
             }
         }else{
             $endtime = $row['endtime'];
             $permanent_switch = $row['permanent_switch'];
         }
         if($allmoney > $userInfo['balance']){
-            return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元' ,false);
+            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
         }
         $remainderBalance = $userInfo['balance'] - $allmoney;
         try{
             $result = parent::updateUserInfo(['balance' => $remainderBalance]);
             if(!$result){
-                return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]' ,false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
             }
         } catch (\Exception $e) {
-            return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]',false);
+            return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
         }
         $data = [
             'url' => $url,
@@ -182,7 +182,7 @@ class PaymentModel extends BaseModel
                 'Result' => 'success'
             ];
             event('ActionLog', $content);
-            return message('更换成功！<br> 花费：'.$allmoney.' 元 <br> 余额：'.$remainderBalance.' 元', true);
+            return message(t('payment.change_deadline_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total'), true);
         } catch (\Exception $e) {
             $content = [
                 'Title' => '编辑认证',
@@ -193,18 +193,18 @@ class PaymentModel extends BaseModel
                 'Result' => '[errorCode:ReplacePaymentError]'
             ];
             event('ActionLog', $content);
-            return message('更换失败！[errorCode:ReplacePaymentError]', false);
+            return message(t('replace.auth_failed').'[errorCode:ReplacePaymentError]', false);
         }
     }
 
     public function edit(){
         $userInfo = parent::getUserInfo();
         if(!$userInfo){
-            return message('获取用户信息失败！[errorCode:UserInfoError]' ,false);
+            return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
         }
         $powerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
         if(!$powerPriceInfo) {
-            return message('获取用户权限信息失败！[errorCode:GetUserPowerInfoError]' ,false);
+            return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]' ,false);
         }
         $post = request()->post();
         $id = !empty($post['id']) ? intval($post['id']) : null;
@@ -227,26 +227,26 @@ class PaymentModel extends BaseModel
         if (!empty($id)) {
             $row = $this->getInfo($id);
             if (!$row) {
-                return message('不存在此认证！', false);
+                return message(t('payment.not_exist'), false);
             }
             if ($url != $row['url']) {
                 $row2 = self::where(['url' => $url, 'appid' => $appid])->find();
                 if ($row2) {
-                    return message('该应用已存在此认证！', false);
+                    return message(t('payment.already_exist'), false);
                 }
             }
             if($type != -1) {
                 try {
                     $authPriceInfo = parent::getAuthPriceInfo($type);
                     if ($authPriceInfo == false) {
-                        return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]', false);
+                        return message(t('payment.get_price_failed').'[errorCode:GetAuthPriceInfoError]', false);
                     }
                     if($row['permanent_switch'] == 1){
-                        return message('该认证已是永久授权，请选择不续费！', false);
+                        return message(t('payment.permanent_no_renew'), false);
                     }
                     if ($authPriceInfo['diy_switch'] == 1) {
                         if (empty($endtime)) {
-                            return message('请输入到期时间！', false);
+                            return message(t('payment.enter_expire_time'), false);
                         }
                         $date = explode(' ', $endtime);
                         $time = explode(':', $date[1]);
@@ -256,19 +256,19 @@ class PaymentModel extends BaseModel
                             $differDay++;
                         }
                         if($differDay <= 0){
-                            return message('请填写正确到期时间！' ,false);
+                            return message(t('auth.correct_expire_time') ,false);
                         }else{
                             $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
                             $allmoney = round(($price * $differDay) * floatval($powerPriceInfo['addpay_discount'] / 100), 2);
                         }
                         if($allmoney > $userInfo['balance']){
-                            return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元' ,false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
                         }
                     } else {
                         $price = $authPriceInfo['money'];
                         $allmoney = round($price * floatval($powerPriceInfo['addpay_discount'] / 100) ,2);
                         if($allmoney > $userInfo['balance']){
-                            return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元',false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
                         }
                         if($authPriceInfo['permanent_switch'] == 1){
                             $endtime = $row['endtime'];
@@ -278,16 +278,16 @@ class PaymentModel extends BaseModel
                         }
                     }
                 } catch (\Exception $e) {
-                    return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]', false);
+                    return message(t('payment.get_price_failed').'[errorCode:GetAuthPriceInfoError]', false);
                 }
                 $remainderBalance = $userInfo['balance'] - $allmoney;
                 try{
                     $result = parent::updateUserInfo(['balance' => $remainderBalance]);
                     if(!$result){
-                        return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]' ,false);
+                        return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                     }
                 } catch (\Exception $e) {
-                    return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]',false);
+                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
                 }
             }else{
                 $remainderBalance = $userInfo['balance'];
@@ -316,7 +316,7 @@ class PaymentModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message('编辑成功！<br> 花费：'.$allmoney.' 元 <br> 余额：'.$remainderBalance.' 元', true);
+                return message(t('user.edit_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total'), true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '编辑认证',
@@ -327,22 +327,22 @@ class PaymentModel extends BaseModel
                     'Result' => '[errorCode:EditPaymentError]'
                 ];
                 event('ActionLog', $content);
-                return message('编辑失败！[errorCode:EditPaymentError]', false);
+                return message(t('user.edit_failed').'[errorCode:EditPaymentError]', false);
             }
         } else {
             $row = self::where(['url' => $url, 'appid' => $appid])->find();
             if ($row) {
-                return message('该应用已存在此认证！', false);
+                return message(t('payment.already_exist'), false);
             }
 
             try{
                 $authPriceInfo = parent::getAuthPriceInfo($type);
                 if($authPriceInfo == false){
-                    return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]',false);
+                    return message(t('payment.get_price_failed').'[errorCode:GetAuthPriceInfoError]',false);
                 }
                 if($authPriceInfo['diy_switch'] == 1){
                     if(empty($endtime)){
-                        return message('请输入到期时间！' ,false);
+                        return message(t('payment.enter_expire_time') ,false);
                     }
                     $date = explode(' ', $endtime);
                     $time = explode(':', $date[1]);
@@ -351,19 +351,19 @@ class PaymentModel extends BaseModel
                         $differDay++;
                     }
                     if($differDay <= 0){
-                        return message('请填写正确到期时间！' ,false);
+                        return message(t('auth.correct_expire_time') ,false);
                     }else{
                         $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
                         $allmoney = round(($price * $differDay) * floatval($powerPriceInfo['addpay_discount'] / 100), 2);
                     }
                     if($allmoney > $userInfo['balance']){
-                        return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元' ,false);
+                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
                     }
                 }else{
                     $price = $authPriceInfo['money'];
                     $allmoney = round($price * floatval($powerPriceInfo['addpay_discount'] / 100) ,2);
                     if($allmoney > $userInfo['balance']){
-                        return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元',false);
+                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
                     }
                     if($authPriceInfo['permanent_switch'] == 1){
                         $endtime = datetime();
@@ -373,16 +373,16 @@ class PaymentModel extends BaseModel
                     }
                 }
             } catch (\Exception $e) {
-                return message('获取价格信息失败！[errorCode:GetAuthPriceInfoError]' ,false);
+                return message(t('payment.get_price_failed').'[errorCode:GetAuthPriceInfoError]' ,false);
             }
             $remainderBalance = $userInfo['balance'] - $allmoney;
             try{
                 $result = parent::updateUserInfo(['balance' => $remainderBalance]);
                 if(!$result){
-                    return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]' ,false);
+                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }
             } catch (\Exception $e) {
-                return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]',false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
             }
 
             $data = [
@@ -406,7 +406,7 @@ class PaymentModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message('添加成功！<br> 花费：'.$allmoney.' 元 <br> 余额：'.$remainderBalance.' 元' , true);
+                return message(t('user.add_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total') , true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '添加认证',
@@ -416,7 +416,7 @@ class PaymentModel extends BaseModel
                     'Result' => '[errorCode:AddPaymentError]'
                 ];
                 event('ActionLog', $content);
-                return message('添加失败！[errorCode:AddPaymentError]', false);
+                return message(t('user.add_failed').'[errorCode:AddPaymentError]', false);
             }
         }
     }
@@ -424,19 +424,19 @@ class PaymentModel extends BaseModel
     public function unbind($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    return message('获取用户信息失败！[errorCode:UserInfoError]' ,false);
+                    return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $row = self::where(['id' => $id, 'bindingid' => $userInfo['id']])->find();
             if(!$row){
-                throw new Exception('不存在此认证！');
+                throw new Exception(t('payment.not_exist'));
             }
             self::where('id', $id)
                 ->data([
@@ -459,7 +459,7 @@ class PaymentModel extends BaseModel
                 'Result' => '[errorCode:UnbindPaymentError]'
             ];
             event('ActionLog', $content);
-            throw new Exception('删除失败！[errorCode:UnbindPaymentError]');
+            throw new Exception(t('user.delete_failed').'[errorCode:UnbindPaymentError]');
         }
     }
 
@@ -467,11 +467,11 @@ class PaymentModel extends BaseModel
     {
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此认证！');
+                throw new Exception(t('payment.not_exist'));
             }
             try {
                 self::where('id', $id)->delete();
@@ -491,10 +491,10 @@ class PaymentModel extends BaseModel
                     'Result' => '[errorCode:DeletePaymentError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('删除失败！[errorCode:DeletePaymentError]');
+                throw new Exception(t('user.delete_failed').'[errorCode:DeletePaymentError]');
             }
         }catch (\Exception $e){
-            throw new Exception('删除失败！[errorCode:DeletePaymentError]');
+            throw new Exception(t('user.delete_failed').'[errorCode:DeletePaymentError]');
         }
     }
 
@@ -506,11 +506,11 @@ class PaymentModel extends BaseModel
             $status = !empty($post['status']) ? 1 : 0;
 
             if (empty($id)) {
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此认证！');
+                throw new Exception(t('payment.not_exist'));
             }
             try {
                 self::where('id', $id)
@@ -532,10 +532,10 @@ class PaymentModel extends BaseModel
                     'Result' => '[errorCode:EditPaymentStatusError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('修改状态失败！[errorCode:EditPaymentStatusError]');
+                throw new Exception(t('user.status_change_success').'[errorCode:EditPaymentStatusError]');
             }
         }catch (\Exception $e){
-            throw new Exception('修改状态失败！[errorCode:EditPaymentStatusError]');
+            throw new Exception(t('user.status_change_success').'[errorCode:EditPaymentStatusError]');
         }
     }
 
@@ -543,10 +543,10 @@ class PaymentModel extends BaseModel
         try{
             $userInfo = parent::getUserInfo();
             if(!$userInfo){
-                return message('获取用户信息失败！[errorCode:UserInfoError]' ,false);
+                return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
             }
         }catch (\Exception $e){
-            throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+            throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
         }
         try{
             $post = request()->post();
@@ -559,7 +559,7 @@ class PaymentModel extends BaseModel
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
             }else{
-                throw new Exception('获取用户信息失败！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
             if($text !== null){
                 $data[] = ['id|url|qq', 'like', '%'.$text.'%'];
@@ -589,10 +589,10 @@ class PaymentModel extends BaseModel
                     'Result' => '[errorCode:GetMyPaymentListError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('获取列表失败！[errorCode:GetMyPaymentListError]');
+                throw new Exception(t('user.list_failed').'[errorCode:GetMyPaymentListError]');
             }
         }catch (\Exception $e){
-            throw new Exception('获取列表失败！[errorCode:GetMyPaymentListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetMyPaymentListError]');
         }
     }
 
@@ -601,10 +601,10 @@ class PaymentModel extends BaseModel
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
 
             $post = request()->post();
@@ -617,7 +617,7 @@ class PaymentModel extends BaseModel
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
             }else{
-                throw new Exception('获取用户信息失败！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
 
             if($text !== null){
@@ -648,10 +648,10 @@ class PaymentModel extends BaseModel
                     'Result' => '[errorCode:GetPaymentListError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('获取列表失败！[errorCode:GetPaymentListError]');
+                throw new Exception(t('user.list_failed').'[errorCode:GetPaymentListError]');
             }
         }catch (\Exception $e){
-            throw new Exception('获取列表失败！[errorCode:GetPaymentListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetPaymentListError]');
         }
     }
 }

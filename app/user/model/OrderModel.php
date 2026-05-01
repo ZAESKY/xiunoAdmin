@@ -26,10 +26,10 @@ class OrderModel extends BaseModel
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
@@ -67,7 +67,7 @@ class OrderModel extends BaseModel
                 'Result' => '[errorCode:GetCDKEYListError]'
             ];
             event('ActionLog', $content);
-            throw new Exception('获取列表失败！[errorCode:GetOrderListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetOrderListError]');
         }
     }
 }

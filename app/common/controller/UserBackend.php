@@ -70,34 +70,34 @@ class UserBackend extends CommonBase
             if(!empty($userId) && $sign != data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash())){
                 cookie('userId',null);
                 cookie('userSign',null);
-                throw new Exception('用户登录信息已过期，请刷新界面重新登录！');
+                throw new Exception(t('login.user_session_expired'));
             }
             if(!$userInfo){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:UserInfoError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
             }
             $this->userInfo = $userInfo;
             if(empty($userInfo['appid'])){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserAppIdEmpty]');
             }
             if(!is_numeric($userInfo['appid']) || $userInfo['appid'] <= 0){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:UserAppIdError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserAppIdError]');
             }
             if($userInfo['status'] != 1){
-                throw new Exception('您的账号已被封禁，请联系上级处理！[errorCode:UserStatusBlocked]');
+                throw new Exception(t('user.account_blocked').'[errorCode:UserStatusBlocked]');
             }
             if(!empty($userInfo['ip'])){
                 if(!in_array(get_client_ip(),unserialize($userInfo['ip']))){
-                    throw new Exception('您当前的IP不在白名单内，请返回重新登录！');
+                    throw new Exception(t('user.ip_not_whitelist'));
                 }
             }
             $appModel = new \app\admin\model\AppModel();
             $this->myAppInfo = $appModel->getInfo(intval($userInfo['appid']));
             if(!$this->myAppInfo){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:GetUserAppInfoError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:GetUserAppInfoError]');
             }
             $this->myPowerInfo = $this->getPowerPriceInfo(intval($userInfo['power']));
             if(!$this->myPowerInfo){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:GetUserPowerInfoError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:GetUserPowerInfoError]');
             }
             // 数据绑定
             $this->userInfo['app_name'] = $this->myAppInfo['name'];
@@ -131,7 +131,7 @@ class UserBackend extends CommonBase
         Cookie::delete('userId');
         Cookie::delete('userSign');
         Cookie::save();
-        return message('退出登录成功', true);
+        return message(t('login.logout_success'), true);
     }
 
     /**
@@ -153,7 +153,7 @@ class UserBackend extends CommonBase
             $cleartime = 180;// 过期时间 单位:秒
             $type = input('post.type');
             if(empty($type)){
-                return message("缺少TYPE参数！" ,false);
+                return message(t('validation.missing_type'), false);
             }
             $code = get_random_code(6);
             switch ($type){
@@ -171,7 +171,7 @@ class UserBackend extends CommonBase
                     }else{
                         $email = input('post.content');
                         if(empty($email)){
-                            return message("请填写要绑定的邮箱！" ,false);
+                            return message(t('user.bind_email_empty'), false);
                         }
                         $param = [
                             'to' => $email,
@@ -185,7 +185,7 @@ class UserBackend extends CommonBase
                     Cache::set('changeBindingMail'.$this->userId, $code, $cleartime);
                     return Event::trigger('ChangeBindingMailNotice', $param)[0];
                 default:
-                    return message("不存在此操作！" ,false);
+                    return message(t('validation.param_error'), false);
             }
         }
     }
@@ -258,17 +258,17 @@ class UserBackend extends CommonBase
             if(IS_POST){
                 $appid = intval($this->userInfo['appid']);
                 if(empty($appid)){
-                    return message("APPID不能为空！" ,false);
+                    return message(t('app.appid_empty'), false);
                 }
                 $authPriceModel = new \app\admin\model\AuthPriceModel();
                 $appModel = new \app\admin\model\AppModel();
                 $appInfo = $appModel->getInfo($appid);
                 if(!$appInfo){
-                    return message("获取用户信息失败！[errorCode:GetUserAppInfoError]" ,false);
+                    return message(t('user.info_error').'[errorCode:GetUserAppInfoError]', false);
                 }
                 $tid = intval($appInfo['auth_template']);
                 if(empty($tid)){
-                    return message("获取模板ID失败！[errorCode:GetAuthPriceTIDError]" ,false);
+                    return message(t('app.get_template_failed').'[errorCode:GetAuthPriceTIDError]', false);
                 }
                 $content = [
                     'Title' => '获取列表',
@@ -277,10 +277,10 @@ class UserBackend extends CommonBase
                 ];
                 event('ActionLog', $content);
                 $result = $authPriceModel->getAuthPriceList($tid);
-                return message('获取成功！',true, ['data' => $result]);
+                return message(t('common.list_success'), true, ['data' => $result]);
             }
         }catch (\Exception $e){
-            return message("获取失败！[errorCode:GetAuthPriceList]",false);
+            return message(t('common.server_error').'[errorCode:GetAuthPriceList]', false);
         }
     }
 
@@ -334,13 +334,13 @@ class UserBackend extends CommonBase
             $appModel = new \app\admin\model\AppModel();
             $appInfo = $appModel->getInfo($appid);
             if(!$appInfo){
-                return message('获取用户应用信息失败！[errorCode:GetUserAppInfoError]' ,false);
+                return message(t('user.app_info_error').'[errorCode:GetUserAppInfoError]', false);
             }
             $powerPriceModel = new \app\admin\model\PowerPriceModel();
             $result = $powerPriceModel->getAddPowerList($this->userInfo['power']);
-            return message('获取列表成功！' , true, ['data' => $result]);
+            return message(t('common.list_success'), true, ['data' => $result]);
         } catch (\Exception $e) {
-            return message('获取权限列表失败！[errorCode:GetUserAddPowerListError]',false);
+            return message(t('power.get_list_failed').'[errorCode:GetUserAddPowerListError]', false);
         }
     }
 
@@ -356,13 +356,13 @@ class UserBackend extends CommonBase
                 $post = request()->post();
                 $power = !empty($post['power'])?intval($post['power']):null;
                 if(empty($power) || $power < 1){
-                    return message("获取可升级权限列表失败！[errorCode:GetUpdatePowerListError]" ,false);
+                    return message(t('common.server_error').'[errorCode:GetUpdatePowerListError]', false);
                 }
                 $powerPriceModel = new \app\admin\model\PowerPriceModel();
                 $result = $powerPriceModel->getUpdatePowerList($power, $this->userInfo['power']);
-                return message("获取列表成功！" ,true, ["data" => $result]);
+                return message(t('common.list_success'), true, ['data' => $result]);
             } catch (\Exception $e) {
-                return message('获取失败！[errorCode:GetUpdatePowerListError]' ,false);
+                return message(t('common.server_error').'[errorCode:GetUpdatePowerListError]', false);
             }
         }
     }
@@ -378,9 +378,9 @@ class UserBackend extends CommonBase
             try {
                 $powerPriceModel = new \app\admin\model\PowerPriceModel();
                 $result = $powerPriceModel->getUserUpdatePowerList($this->userInfo['power']);
-                return message('获取列表成功！', true, ['data' => $result]);
+                return message(t('common.list_success'), true, ['data' => $result]);
             } catch (\Exception $e) {
-                return message("获取失败！[errorCode:GetUserUpdatePowerListError]", false);
+                return message(t('common.server_error').'[errorCode:GetUserUpdatePowerListError]', false);
             }
         }
     }
@@ -396,32 +396,32 @@ class UserBackend extends CommonBase
             try{
                 try{
                     if(!$this->myPowerInfo) {
-                        return message('获取用户权限信息失败！[errorCode:GetUserPowerInfoError]' ,false);
+                        return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]', false);
                     }
                     // 权限检测
                     if($this->service instanceof \app\user\service\AuthService){
                         if($this->myPowerInfo['addauth_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     } else if ($this->service instanceof \app\user\service\PaymentService){
                         if($this->myPowerInfo['addpay_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     } else if ($this->service instanceof \app\user\service\PirateService){
                         if($this->myPowerInfo['pirate_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     } else if ($this->service instanceof \app\user\service\UserService){
                         if($this->myPowerInfo['adduser_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     }
                 }catch (\Exception $e){
-                    return message('获取访问权限失败！[errorCode:GetAccessRightsError]' ,false);
+                    return message(t('common.server_error').'[errorCode:GetAccessRightsError]', false);
                 }
                 return $this->service->edit();
             }catch (\Exception $e){
-                return message($e->getMessage() ,false);
+                return message($e->getMessage(), false);
             }
         }
     }
@@ -440,9 +440,9 @@ class UserBackend extends CommonBase
                 $info = $this->service->getInfo($id);
                 if ($info) {
                     $this->service->drop($id);
-                    return message('删除成功！', true);
+                    return message(t('user.delete_success'), true);
                 }
-                return message('不存在该ID！', false);
+                return message(t('validation.invalid_id'), false);
             }catch (\Exception $e){
                 return message($e->getMessage(), false);
             }
@@ -472,7 +472,7 @@ class UserBackend extends CommonBase
                         $num++;
                     }
                 }
-                return message('本次共选择' . count($ids) . '个条数据,删除' . $num . '个');
+                return message(t('batch.delete_count', ['total' => count($ids), 'count' => $num]));
             }catch (\Exception $e){
                 return message($e->getMessage(), false);
             }
@@ -491,61 +491,61 @@ class UserBackend extends CommonBase
             try{
                 try{
                     if(!$this->myPowerInfo) {
-                        return message('获取用户权限信息失败！[errorCode:GetUserPowerInfoError]' ,false);
+                        return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]', false);
                     }
                     // 权限检测
                     if($this->service instanceof \app\user\service\AuthService){
                         if($this->myPowerInfo['addauth_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     } else if ($this->service instanceof \app\user\service\PaymentService){
                         if($this->myPowerInfo['addpay_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     } else if ($this->service instanceof \app\user\service\PirateService){
                         if($this->myPowerInfo['pirate_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     } else if ($this->service instanceof \app\user\service\UserService){
                         if($this->myPowerInfo['adduser_power'] != 1){
-                            return message('无权限访问！' ,false);
+                            return message(t('login.no_access'), false);
                         }
                     }
                 }catch (\Exception $e){
-                    return message('获取访问权限失败！[errorCode:GetAccessRightsError]' ,false);
+                    return message(t('common.server_error').'[errorCode:GetAccessRightsError]', false);
                 }
                 $result = $this->service->list();
-                return message('获取列表成功！', true, ['data' => $result]);
+                return message(t('common.list_success'), true, ['data' => $result]);
             }catch (\Exception $e){
                 return message($e->getMessage(), false, ['data' => []]);
             }
         }
         try{
             if(!$this->myPowerInfo) {
-                return $this->render('public/error', ['msg' => '获取用户权限信息失败！[errorCode:GetUserPowerInfoError]']);
+                return $this->render('public/error', ['msg' => t('user.power_info_error').'[errorCode:GetUserPowerInfoError]']);
             }
             // 权限检测
             if($this->service instanceof \app\user\service\AuthService){
                 if($this->myPowerInfo['addauth_power'] != 1){
-                    return $this->render('public/error', ['msg' => '无权限访问！']);
+                    return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
             } else if ($this->service instanceof \app\user\service\PaymentService){
                 if($this->myPowerInfo['addpay_power'] != 1){
-                    return $this->render('public/error', ['msg' => '无权限访问！']);
+                    return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
             } else if ($this->service instanceof \app\user\service\PirateService){
                 if($this->myPowerInfo['pirate_power'] != 1){
-                    return $this->render('public/error', ['msg' => '无权限访问！']);
+                    return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
                 View::assign('price', round($this->myAppInfo['pirate_money'] * floatval($this->myPowerInfo['pirate_discount'] / 100), 2));
             } else if ($this->service instanceof \app\user\service\UserService){
                 if($this->myPowerInfo['adduser_power'] != 1){
-                    return $this->render('public/error', ['msg' => '无权限访问！']);
+                    return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
             }
             return $this->render();
         }catch (\Exception $e){
-            return $this->render('public/error', ['msg' => '获取访问权限失败！[errorCode:GetAccessRightsError]']);
+            return $this->render('public/error', ['msg' => t('common.server_error').'[errorCode:GetAccessRightsError]']);
         }
     }
 
@@ -560,7 +560,7 @@ class UserBackend extends CommonBase
         if (IS_POST) {
             try{
                 $this->service->setStatus();
-                return message('更改状态成功！', true);
+                return message(t('user.status_change_success'), true);
             }catch (\Exception $e){
                 return message($e->getMessage(), false);
             }

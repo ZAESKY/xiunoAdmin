@@ -151,59 +151,59 @@
                         </div>
                         <div class="user-info-list-item">
                             <img src="{__IMG__}power2.png">
-                            <p><span class="layui-badge layui-badge-red">权限：{$userInfo['power_name']}</span></p>
+                            <p><span class="layui-badge layui-badge-red">{:t('common_ui.power_label')}{$userInfo['power_name']}</span></p>
                         </div>
                         <div class="user-info-list-item discount-list">
                             <img src="{__IMG__}discount.png">
                             <p>
                                 {if $userInfo['addauth_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">添加授权：免费</span>
+                                <span class="layui-badge layui-badge-green">{:t('common.add')}{:t('common_ui.auth_type')}：免费</span>
                                 {elseif $userInfo['addauth_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">添加授权：原价</span>
+                                <span class="layui-badge layui-badge-gray">{:t('common.add')}{:t('common_ui.auth_type')}：原价</span>
                                 {else}
-                                <span class="layui-badge layui-badge-orange">添加授权：{$userInfo['addauth_discount'] * 10} 折</span>
+                                <span class="layui-badge layui-badge-orange">{:t('common.add')}{:t('common_ui.auth_type')}：{$userInfo['addauth_discount'] * 10} 折</span>
                                 {/if}
 
                                 {if $userInfo['adduser_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">添加用户：免费 </span>
+                                <span class="layui-badge layui-badge-green">{:t('common.add')}{:t('common_ui.user_label')}免费 </span>
                                 {elseif $userInfo['adduser_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">添加用户：原价</span>
+                                <span class="layui-badge layui-badge-gray">{:t('common.add')}{:t('common_ui.user_label')}原价</span>
                                 {else}
-                                <span class="layui-badge layui-badge-orange">添加用户：{$userInfo['adduser_discount'] * 10} 折</span>
+                                <span class="layui-badge layui-badge-orange">{:t('common.add')}{:t('common_ui.user_label')}{$userInfo['adduser_discount'] * 10} 折</span>
                                 {/if}
 
                                 {if $userInfo['addpay_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">添加认证：免费 </span>
+                                <span class="layui-badge layui-badge-green">{:t('common.add')}认证：免费 </span>
                                 {elseif $userInfo['addpay_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">添加认证：原价</span>
+                                <span class="layui-badge layui-badge-gray">{:t('common.add')}认证：原价</span>
                                 {else}
-                                <span class="layui-badge layui-badge-orange">添加认证：{$userInfo['addpay_discount'] * 10} 折</span>
+                                <span class="layui-badge layui-badge-orange">{:t('common.add')}认证：{$userInfo['addpay_discount'] * 10} 折</span>
                                 {/if}
 
                                 {if $userInfo['pirate_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">查看盗版：免费</span>
+                                <span class="layui-badge layui-badge-green">{:t('app_ui.view_pirate')}：免费</span>
                                 {elseif $userInfo['pirate_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">查看盗版：原价</span>
+                                <span class="layui-badge layui-badge-gray">{:t('app_ui.view_pirate')}：原价</span>
                                 {else}
-                                <span class="layui-badge layui-badge-orange">查看盗版：{$userInfo['pirate_discount'] * 10} 折</span>
+                                <span class="layui-badge layui-badge-orange">{:t('app_ui.view_pirate')}：{$userInfo['pirate_discount'] * 10} 折</span>
                                 {/if}
                             </p>
                         </div>
                         <div class="user-info-list-item">
                             <img src="{__IMG__}qqicon.png">
-                            <p><span class="layui-badge layui-badge-blue">QQ：{$userInfo['qq']}</span></p>
+                            <p><span class="layui-badge layui-badge-blue">{:t('common_ui.qq_field')}{$userInfo['qq']}</span></p>
                         </div>
                         <div class="user-info-list-item">
                             <img src="{__IMG__}moneypay.png"/>
-                            <p><span class="layui-badge layui-badge-green">余额：{$userInfo['balance']} 元</span><a ew-href="{:url('/MyInfo/recharge')}" class="pull-right">充值</a></p>
+                            <p><span class="layui-badge layui-badge-green">{:t('common_ui.balance_field')}{$userInfo['balance']} 元</span><a ew-href="{:url('/MyInfo/recharge')}" class="pull-right">{:t('common_ui.recharge')}</a></p>
                         </div>
                         <div class="user-info-list-item">
                             <img src="{__IMG__}total.png"/>
-                            <p><span class="layui-badge layui-badge-yellow">积分：{$userInfo['integral']} 个</span><a ew-href="{:url('/Integral/market')}" class="pull-right">兑换</a></p>
+                            <p><span class="layui-badge layui-badge-yellow">{:t('common_ui.integral_field')}{$userInfo['integral']} 个</span><a ew-href="{:url('/Integral/market')}" class="pull-right">兑换</a></p>
                         </div>
                     </div>
                     <div class="layui-line-dash"></div>
-                    <h3>更多信息</h3>
+                    <h3>{:t('common.more')}信息</h3>
                     <div class="layui-badge-list" style="padding-top: 6px;">
                         <span class="layui-badge layui-bg-gray">注册时间：{$userInfo['addtime']}</span>
                         <span class="layui-badge layui-bg-gray">最后登陆时间：{$userInfo['lasttime']}</span>
@@ -217,8 +217,8 @@
                 <!-- 选项卡开始 -->
                 <div class="layui-tab layui-tab-brief" lay-filter="userInfoTab">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">账号绑定</li>
-                        <li>权限升级</li>
+                        <li class="layui-this">账号{:t('install_ui.binding_title')}</li>
+                        <li>{:t('common_ui.power_type')}升级</li>
                     </ul>
                     <div class="layui-tab-content">
                         <!-- tab1 -->
@@ -232,11 +232,11 @@
                                     <div class="user-bd-list-content">
                                         <div class="user-bd-list-lable">密保手机</div>
                                         {if $userInfo['phone'] == ''}
-                                        <div class="user-bd-list-text">未绑定</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>绑定</a>
+                                        <div class="user-bd-list-text">未{:t('install_ui.binding_title')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>{:t('install_ui.binding_title')}</a>
                                         {else}
-                                        <div class="user-bd-list-text">已绑定手机：{:substr_replace($userInfo['phone'],'****',3,4)}</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>修改</a>
+                                        <div class="user-bd-list-text">{:t('install_bind.bound')}手机：{:substr_replace($userInfo['phone'],'****',3,4)}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>{:t('common_ui.repair')}</a>
                                         {/if}
                                     </div>
                                 </div>
@@ -248,11 +248,11 @@
                                     <div class="user-bd-list-content">
                                         <div class="user-bd-list-lable">密保邮箱</div>
                                         {if $userInfo['email'] == ''}
-                                        <div class="user-bd-list-text">未绑定</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>绑定</a>
+                                        <div class="user-bd-list-text">未{:t('install_ui.binding_title')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>{:t('install_ui.binding_title')}</a>
                                         {else}
-                                        <div class="user-bd-list-text">已绑定邮箱：{:substr_replace($userInfo['email'],'****',3,4)}</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>修改</a>
+                                        <div class="user-bd-list-text">{:t('install_bind.bound')}{:t('common_ui.email_field')}{:substr_replace($userInfo['email'],'****',3,4)}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>{:t('common_ui.repair')}</a>
                                         {/if}
                                     </div>
                                 </div>
@@ -262,10 +262,10 @@
                                            style="color: #3492ED;font-size: 48px;"></i>
                                     </div>
                                     <div class="user-bd-list-content">
-                                        <div class="user-bd-list-lable">绑定QQ</div>
+                                        <div class="user-bd-list-lable">{:t('install_ui.binding_title')}QQ</div>
                                         {if $userInfo['access_token'] == ''}
-                                        <div class="user-bd-list-text">当前未绑定QQ账号</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>绑定</a>
+                                        <div class="user-bd-list-text">当前未{:t('install_ui.binding_title')}QQ账号</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>{:t('install_ui.binding_title')}</a>
                                         {else}
                                         <div class="user-bd-list-text">{:substr_replace($userInfo['access_token'],'********',3,8)}</div>
                                         <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>解绑</a>
@@ -277,10 +277,10 @@
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form formBasForm">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label layui-form-required">升级权限:</label>
+                                    <label class="layui-form-label layui-form-required">升级{:t('common_ui.power_type')}:</label>
                                     <div class="layui-input-block">
                                         <select id="updatePower" name="power" class="layui-input ew-select-fixed" lay-filter="updatePower" lay-search>
-                                            <option value="">请选择要升级的权限</option>
+                                            <option value="">{:t('common.nothing_selected')}要升级的{:t('common_ui.power_type')}</option>
                                         </select>
                                     </div>
                                 </div>

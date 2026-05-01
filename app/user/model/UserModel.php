@@ -56,11 +56,11 @@ class UserModel extends BaseModel
     public function edit(){
         $userInfo = parent::getUserInfo();
         if(!$userInfo){
-            return message("获取用户信息失败！[errorCode:UserInfoError]" ,false);
+            return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
         }
         $userPowerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
         if(!$userPowerPriceInfo) {
-            return message("获取用户权限信息失败！[errorCode:GetUserPowerInfoError]" ,false);
+            return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]' ,false);
         }
         $post = request()->post();
         $id = !empty($post['id'])?intval($post['id']):null;
@@ -87,37 +87,37 @@ class UserModel extends BaseModel
         if(!empty($id)){
             $row = $this->getInfo($id);
             if(!$row){
-                return message("不存在此用户！" ,false);
+                return message(t('user.not_exist') ,false);
             }
             $isSubordinatePower = parent::isSubordinatePower($row['power']);
             if(!$isSubordinatePower){
-                return message("该权限不是您的下级，无权限修改！" ,false);
+                return message(t('user.not_your_subordinate') ,false);
             }
             if($username != $row['username']){
                 $row2 = self::where(['username' => $username, 'appid'=> $appid])->find();
                 if($row2){
-                    return message("该应用已存在此用户名！" ,false);
+                    return message(t('user.username_exists') ,false);
                 }
             }
             if($power != -1) {
                 if(parent::getPowerPriceInfo($power) == false){
-                    return message("该权限不存在！" ,false);
+                    return message(t('power.not_exist') ,false);
                 }
                 $isSubordinatePower = parent::isSubordinatePower($power);
                 if(!$isSubordinatePower){
-                    return message("该权限不是您的下级，无权限升级！" ,false);
+                    return message(t('user.not_your_subordinate_upgrade') ,false);
                 }
                 $isSubordinatePower = parent::isSubordinatePower($power, $row['power']);
                 if ($isSubordinatePower) {
-                    return message("您无法进行降级操作！", false);
+                    return message(t('user.cannot_downgrade'), false);
                 }
                 $nowPowerPriceInfo = parent::getPowerPriceInfo($row['power']);
                 if (!$nowPowerPriceInfo) {
-                    return message("获取权限信息失败！[errorCode:GetPowerInfoError]", false);
+                    return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]', false);
                 }
                 $newPowerPriceInfo = parent::getPowerPriceInfo($power);
                 if (!$newPowerPriceInfo) {
-                    return message("获取权限信息失败！[errorCode:GetPowerInfoError]", false);
+                    return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]', false);
                 }
                 $price = round(($newPowerPriceInfo['money'] - $nowPowerPriceInfo['money']) * floatval($userPowerPriceInfo['adduser_discount'] / 100) ,2);
             }else{
@@ -126,12 +126,12 @@ class UserModel extends BaseModel
             $allmoney = $price + $balance;
 
             if($allmoney > $userInfo['balance']){
-                return message("您的余额不足，请充值后再来！<br> 您的余额：".$userInfo['balance']." 元<br>需要金额：".$allmoney." 元" ,false);
+                return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
             }
 
             if($integral != $row['integral']){
                 if($integral > $userInfo['integral']){
-                    return message("您的积分不足，请获取后再来！<br> 您的积分：".$userInfo['integral']." 个<br>需要积分：".$integral." 个" ,false);
+                    return message(t('user.integral_insufficient').'<br> '.t('common_ui.integral_field').$userInfo['integral'].' '.t('common_ui.cdkey_type_label').'<br>'.t('common_ui.integral_field').$integral.' '.t('common_ui.cdkey_type_label') ,false);
                 }
             }
             $remainderBalance = $userInfo['balance'] - $allmoney;
@@ -139,10 +139,10 @@ class UserModel extends BaseModel
             try{
                 $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral]);
                 if(!$result){
-                    return message("更新用户信息失败！[errorCode:ReduceUserBalanceError]" ,false);
+                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }
             } catch (\Exception $e) {
-                return message("更新用户信息失败！[errorCode:ReduceUserBalanceError]",false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
             }
 
             $data = [
@@ -172,7 +172,7 @@ class UserModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message("编辑成功！<br> 花费：".$allmoney." 元 , ".$integral." 积分<br> 余额：".$remainderBalance." 元 <br> 积分：".$remainderIntegral." 个" ,true);
+                return message(t('user.edit_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' , '.$integral.' '.t('common_ui.integral_field').'<br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total').' <br> '.t('common_ui.integral_field').$remainderIntegral.' '.t('common_ui.cdkey_type_label') ,true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '编辑用户',
@@ -185,39 +185,39 @@ class UserModel extends BaseModel
                     'Result' => '[errorCode:EditUserInfoError]'
                 ];
                 event('ActionLog', $content);
-                return message("编辑失败！[errorCode:EditUserInfoError]" ,false);
+                return message(t('user.edit_failed').'[errorCode:EditUserInfoError]' ,false);
             }
         }else{
             try{
                 $appInfo = parent::getAppInfo($userInfo['appid']);
             }catch (\Exception $e){
-                return message("获取应用信息失败！" ,false);
+                return message(t('app.get_info_failed') ,false);
             }
             $row = self::where(['username' => $username, 'appid' => $appid])->find();
             if($row){
-                return message("该应用已存在此用户名！" ,false);
+                return message(t('user.username_exists') ,false);
             }
             if(parent::getPowerPriceInfo($power) == false){
-                return message("该权限不存在！" ,false);
+                return message(t('power.not_exist') ,false);
             }
             $isSubordinatePower = parent::isSubordinatePower($power);
             if(!$isSubordinatePower){
-                return message("该权限不是您的下级，无权限添加！" ,false);
+                return message(t('user.not_your_subordinate_add') ,false);
             }
             $powerPriceInfo = parent::getPowerPriceInfo($power);
             if (!$powerPriceInfo) {
-                return message("获取权限信息失败！[errorCode:GetPowerInfoError]", false);
+                return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]', false);
             }
             $price = round($powerPriceInfo['money'] * floatval($userPowerPriceInfo['adduser_discount'] / 100), 2);
             $allmoney = $price + $balance;
 
             if($allmoney > $userInfo['balance']){
-                return message("您的余额不足，请充值后再来！<br> 您的余额：".$userInfo['balance']." 元<br>需要金额：".$allmoney." 元" ,false);
+                return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
             }
 
             if($integral != $row['integral']){
                 if($integral > $userInfo['integral']){
-                    return message("您的积分不足，请获取后再来！<br> 您的积分：".$userInfo['integral']." 个<br>需要积分：".$integral." 个" ,false);
+                    return message(t('user.integral_insufficient').'<br> '.t('common_ui.integral_field').$userInfo['integral'].' '.t('common_ui.cdkey_type_label').'<br>'.t('common_ui.integral_field').$integral.' '.t('common_ui.cdkey_type_label') ,false);
                 }
             }
             $remainderBalance = $userInfo['balance'] - $allmoney;
@@ -225,10 +225,10 @@ class UserModel extends BaseModel
             try{
                 $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral]);
                 if(!$result){
-                    return message("更新用户信息失败！[errorCode:ReduceUserBalanceError]" ,false);
+                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }
             } catch (\Exception $e) {
-                return message("更新用户信息失败！[errorCode:ReduceUserBalanceError]",false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
             }
 
             $data = [
@@ -258,7 +258,7 @@ class UserModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message("添加成功！<br> 花费：".$allmoney." 元 , ".$integral." 积分<br> 余额：".$remainderBalance." 元 <br> 积分：".$remainderIntegral." 个" ,true);
+                return message(t('user.add_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' , '.$integral.' '.t('common_ui.integral_field').'<br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total').' <br> '.t('common_ui.integral_field').$remainderIntegral.' '.t('common_ui.cdkey_type_label') ,true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '添加用户',
@@ -270,7 +270,7 @@ class UserModel extends BaseModel
                     'Result' => '[errorCode:AddUserError]'
                 ];
                 event('ActionLog', $content);
-                return message("添加失败！[errorCode:AddUserError]" ,false);
+                return message(t('user.add_failed').'[errorCode:AddUserError]' ,false);
             }
         }
     }
@@ -278,15 +278,15 @@ class UserModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此用户！');
+                throw new Exception(t('user.not_exist'));
             }
             $isSubordinatePower = parent::isSubordinatePower($row['power']);
             if(!$isSubordinatePower){
-                throw new Exception('该权限不是您的下级，无权限删除！');
+                throw new Exception(t('user.not_your_subordinate_delete'));
             }
             try{
                 self::where('id', $id)->delete();
@@ -306,10 +306,10 @@ class UserModel extends BaseModel
                     'Result' => '[errorCode:DeleteUserError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('删除失败！[errorCode:DeleteUserError]');
+                throw new Exception(t('user.delete_failed').'[errorCode:DeleteUserError]');
             }
         }catch (\Exception $e){
-            throw new Exception('删除失败！[errorCode:DeleteUserError]');
+            throw new Exception(t('user.delete_failed').'[errorCode:DeleteUserError]');
         }
     }
 
@@ -320,15 +320,15 @@ class UserModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此用户！');
+                throw new Exception(t('user.not_exist'));
             }
             $isSubordinatePower = parent::isSubordinatePower($row['power']);
             if(!$isSubordinatePower){
-                throw new Exception('该权限不是您的下级，无权限修改状态！');
+                throw new Exception(t('user.not_your_subordinate_status'));
             }
             try{
                 self::where('id', $id)
@@ -350,10 +350,10 @@ class UserModel extends BaseModel
                     'Result' => '[errorCode:EditUserStatusError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('修改状态失败！[errorCode:EditUserStatusError]');
+                throw new Exception(t('user.status_change_success').'[errorCode:EditUserStatusError]');
             }
         }catch (\Exception $e){
-            throw new Exception('修改状态失败！[errorCode:EditUserStatusError]');
+            throw new Exception(t('user.status_change_success').'[errorCode:EditUserStatusError]');
         }
     }
 
@@ -362,10 +362,10 @@ class UserModel extends BaseModel
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
@@ -379,7 +379,7 @@ class UserModel extends BaseModel
                 $data[] = ['appid', '=', $appid];
                 $order = 'id';
             }else{
-                throw new Exception('获取用户应用信息失败！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
             if($text !== null){
                 $data[] = ['id|username', 'like', '%'.$text.'%'];
@@ -409,10 +409,10 @@ class UserModel extends BaseModel
                     'Result' => '[errorCode:GetUserListError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('获取列表失败！[errorCode:GetUserListError]');
+                throw new Exception(t('user.list_failed').'[errorCode:GetUserListError]');
             }
         }catch (\Exception $e){
-            throw new Exception('获取列表失败！[errorCode:GetUserListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetUserListError]');
         }
     }
 }

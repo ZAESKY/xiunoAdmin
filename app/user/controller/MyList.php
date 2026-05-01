@@ -20,7 +20,7 @@ class MyList extends UserBackend
             try{
                 return $this->service->editBinding($bindingType);
             }catch (\Exception $e){
-                return message('更换授权失败'.$e->getMessage(), false);
+                return message(t('replace.auth_failed').$e->getMessage(), false);
             }
         }
     }
@@ -32,7 +32,7 @@ class MyList extends UserBackend
             $type = input('post.type');
             try{
                 $this->service->unbind($id,$type);
-                return message('取绑成功！', true);
+                return message(t('user.unbind_success'), true);
             }catch (\Exception $e){
                 return message($e->getMessage(), false);
             }
@@ -53,7 +53,7 @@ class MyList extends UserBackend
                         $num++;
                     }
                 }
-                return message('本次共选择' . count($ids) . '个条数据,取绑' . $num . '个');
+                return message(str_replace(['{total}', '{count}'], [count($ids), $num], t('user.unbind_count')));
             }catch (\Exception $e){
                 return message($e->getMessage(), false);
             }
@@ -64,7 +64,7 @@ class MyList extends UserBackend
         try{
             if (IS_POST) {
                 $result = $this->service->auth();
-                return message('获取列表成功！', true, ['data' => $result]);
+                return message(t('common.list_success'), true, ['data' => $result]);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false, ['data' => []]);
@@ -81,7 +81,7 @@ class MyList extends UserBackend
         try{
             if (IS_POST) {
                 $result = $this->service->payment();
-                return message('获取列表成功！', true, ['data' => $result]);
+                return message(t('common.list_success'), true, ['data' => $result]);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false, ['data' => []]);

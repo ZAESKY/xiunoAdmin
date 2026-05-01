@@ -245,7 +245,7 @@ class UserBaseService
             if(IS_POST){
                 $appid = intval($this->userInfo['appid']);
                 if(empty($appid)){
-                    throw new Exception('APPID不能为空！');
+                    throw new Exception(t('app.appid_empty'));
                 }
                 $authPriceModel = new \app\admin\model\AuthPriceModel();
                 $appInfo = $this->getAppInfo($appid);

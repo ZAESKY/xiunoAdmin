@@ -58,11 +58,11 @@ class PowerPriceModel extends BaseModel
         try{
             $row = $this->getInfo($userPower);
             if(!$row){
-                throw new Exception('用户权限格式错误！[errorCode:UserPowerError]');
+                throw new Exception(t('user.power_format_error'));
             }
             $row = $this->getInfo($power);
             if(!$row){
-                throw new Exception('用户权限格式错误！[errorCode:UserPowerError]');
+                throw new Exception(t('user.power_format_error'));
             }
             $row = self::where(['id' => $row['parentid'], 'status' => 1])->find();
             if($row){
@@ -82,10 +82,10 @@ class PowerPriceModel extends BaseModel
         try{
             $userRow = $this->getInfo($userPower);
             if(!$userRow){
-                throw new Exception('用户权限格式错误！[errorCode:UserPowerError]');
+                throw new Exception(t('user.power_format_error'));
             }
             if($userRow['status'] == 0){
-                throw new Exception('不存在此权限！[errorCode:UserPowerStatus]');
+                throw new Exception(t('power.not_exist'));
             }
             if(empty($parentid)){
                 $row = self::where(['id' => $userRow['parentid'], 'status' => 1])->find();
@@ -115,7 +115,7 @@ class PowerPriceModel extends BaseModel
         try{
             $row = $this->getInfo($pid);
             if(!$row){
-                throw new Exception('您的权限格式错误，请联系站长处理！[errorCode:UserPowerError]');
+                throw new Exception(t('user.power_format_error'));
             }
             $row = self::field('id,name,money')->where(['parentid' => $pid, 'status' => 1])->find();
             if($row){
@@ -167,9 +167,9 @@ class PowerPriceModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                return message("编辑成功！" ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message("编辑失败！".$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $data = [
@@ -188,9 +188,9 @@ class PowerPriceModel extends BaseModel
             ];
             try{
                 self::insert($data);
-                return message("添加成功！" ,true);
+                return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
-                return message("添加失败！".$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
     }
@@ -198,11 +198,11 @@ class PowerPriceModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此权限！');
+                throw new Exception(t('power.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -218,11 +218,11 @@ class PowerPriceModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此权限！');
+                throw new Exception(t('power.not_exist'));
             }
 
             self::where('id', $id)
@@ -238,7 +238,7 @@ class PowerPriceModel extends BaseModel
         try{
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此权限！');
+                throw new Exception(t('power.not_exist'));
             }
             self::where('id', $id)
                 ->data([$type => $status])
@@ -256,11 +256,11 @@ class PowerPriceModel extends BaseModel
             $default_power = !empty($post['default_power'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $powerPriceInfo = $this->getInfo($id);
             if(!$powerPriceInfo){
-                throw new Exception('不存在此权限！');
+                throw new Exception(t('power.not_exist'));
             }
             $row = self::where(['tid' => $powerPriceInfo['tid'], 'default_power' => 1])->find();
             if($row){
@@ -280,7 +280,7 @@ class PowerPriceModel extends BaseModel
     public function getDefaultPower($tid = ''){
         try{
             if(empty($tid)){
-                throw new Exception('缺少TID参数！');
+                throw new Exception(t('validation.params_missing'));
             }
             $row = self::field('id')
                 ->where([
@@ -292,7 +292,7 @@ class PowerPriceModel extends BaseModel
             if($row){
                 return $row['id'];
             }else{
-                throw new Exception('该应用未设置默认权限！');
+                throw new Exception(t('power.get_info_failed'));
             }
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -302,7 +302,7 @@ class PowerPriceModel extends BaseModel
     public function getPowerList($tid = ''){
         try{
             if(empty($tid)){
-                throw new Exception('缺少TID参数！');
+                throw new Exception(t('validation.params_missing'));
             }
             $data = array();
             $list = self::field('id,name,money')->where(['tid' => $tid, 'status' => 1])->select();

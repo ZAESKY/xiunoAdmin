@@ -175,15 +175,15 @@ class CommonBase extends BaseController
         if(IS_POST){
             $post = request()->post();
             $type = !empty($post['type'])?$post['type']:null;
-            if(empty($type)) return message('创建订单失败！[errorCode:CreateOrderTypeEmpty]', false);
+            if(empty($type)) return message(t('order.create_type_empty'), false);
             $payModel = new PayModel();
             switch ($type){
                 case 'recharge':
                     $money = !empty($post['money'])?$post['money']:null;
-                    if(empty($money)) return message('所充值的金额格式错误！[errorCode:RechargeMoneyError]', false);
+                    if(empty($money)) return message(t('order.recharge_money_error'), false);
                     if($money == 'diy'){
                         $money = !empty($post['diy'])?$post['diy']:null;
-                        if(empty($money)) return message('所充值的金额格式错误！[errorCode:RechargeMoneyError]', false);
+                        if(empty($money)) return message(t('order.recharge_money_error'), false);
                     }
                     if (!is_numeric($money) || $money <= 0) {
                         return message('order.recharge_money_error', false);
@@ -199,7 +199,7 @@ class CommonBase extends BaseController
                     ];
                     return $payModel->edit($data);
                 default:
-                    return message('创建订单失败！[errorCode:CreateOrderTypeError]', false);
+                    return message(t('order.create_type_error'), false);
             }
         }
     }

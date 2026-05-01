@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="/favicon.ico" rel="icon">
-    <title>{$title}|后台管理中心</title>
+    <title>{$title}|{:t('layout.backend_center')}</title>
     <meta name="keywords" content="{$keywords}"/>
     <meta name="description" content="{$description}"/>
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
@@ -28,10 +28,10 @@
         </div>
         <ul class="layui-nav layui-layout-left">
             <li class="layui-nav-item" lay-unselect>
-                <a ew-event="flexible" title="侧边伸缩"><i class="layui-icon layui-icon-shrink-right"></i></a>
+                <a ew-event="flexible" title="{:t('layout.sidebar_toggle')}"><i class="layui-icon layui-icon-shrink-right"></i></a>
             </li>
             <li class="layui-nav-item" lay-unselect>
-                <a ew-event="refresh" title="刷新"><i class="layui-icon layui-icon-refresh-3"></i></a>
+                <a ew-event="refresh" title="{:t('maintain.refresh')}"><i class="layui-icon layui-icon-refresh-3"></i></a>
             </li>
             <li class="layui-nav-item layui-hide-xs sf-header-crumb" lay-unselect>
                 <a><i class="layui-icon layui-icon-home"></i><span>/ Dashboard / 监控页</span></a>
@@ -39,13 +39,13 @@
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item" lay-unselect>
-                <a ew-event="note" title="便签"><i class="layui-icon layui-icon-note"></i></a>
+                <a ew-event="note" title="{:t('layout.notes')}"><i class="layui-icon layui-icon-note"></i></a>
             </li>
             <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                <a ew-event="fullScreen" title="全屏"><i class="layui-icon layui-icon-screen-full"></i></a>
+                <a ew-event="fullScreen" title="{:t('layout.fullscreen')}"><i class="layui-icon layui-icon-screen-full"></i></a>
             </li>
             <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                <a ew-event="lockScreen" title="锁屏"><i class="layui-icon layui-icon-password"></i></a>
+                <a ew-event="lockScreen" title="{:t('layout.lockscreen')}"><i class="layui-icon layui-icon-password"></i></a>
             </li>
 
 
@@ -56,16 +56,16 @@
                 </a>
                 <dl class="layui-nav-child">
                     <dd lay-unselect>
-                        <a ew-href="{:url('/Index/editPassword')}">修改密码</a>
+                        <a ew-href="{:url('/Index/editPassword')}">{:t('layout.modify_password')}</a>
                     </dd>
                     <hr>
                     <dd lay-unselect>
-                        <a lay-filter="logout" lay-submit>退出登录</a>
+                        <a lay-filter="logout" lay-submit>{:t('layout.logout')}</a>
                     </dd>
                 </dl>
             </li>
             <li class="layui-nav-item" lay-unselect>
-                <a ew-event="theme" title="主题"><i class="layui-icon layui-icon-more-vertical"></i></a>
+                <a ew-event="theme" title="{:t('layout.theme')}"><i class="layui-icon layui-icon-more-vertical"></i></a>
             </li>
 
         </ul>
@@ -120,7 +120,7 @@
 </div>
 
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script type="text/javascript" src="{__JS__}common.js?v=320"></script>
+<script type="text/javascript" src="{__JS__}common.js?v=321"></script>
 <script>
     layui.use(['index', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;

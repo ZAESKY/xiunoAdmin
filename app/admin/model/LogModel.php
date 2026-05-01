@@ -30,11 +30,11 @@ class LogModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('log.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此日志！');
+                throw new Exception(t('log.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;

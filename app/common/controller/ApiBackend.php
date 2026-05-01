@@ -46,34 +46,34 @@ class ApiBackend extends CommonBase
             $userModel = new \app\user\model\User();
             $userInfo = $userModel->getInfo();
              if(!empty($userId) && $sign != data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash())){
-                throw new Exception('用户登录信息已过期，请刷新界面重新登录！');
+                throw new Exception(t('login.user_session_expired'));
             }
             if(!$userInfo){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:UserInfoError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
             }
             $this->userInfo = $userInfo;
             if(empty($userInfo['appid'])){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserAppIdEmpty]');
             }
             if(!is_numeric($userInfo['appid']) || $userInfo['appid'] <= 0){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:UserAppIdError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserAppIdError]');
             }
             if($userInfo['status'] != 1){
-                throw new Exception('您的账号已被封禁，请联系上级处理！[errorCode:UserStatusBlocked]');
+                throw new Exception(t('user.account_blocked').'[errorCode:UserStatusBlocked]');
             }
             if(!empty($userInfo['ip'])){
                 if(!in_array(get_client_ip(),unserialize($userInfo['ip']))){
-                    throw new Exception('您当前的IP不在白名单内，请返回重新登录！');
+                    throw new Exception(t('user.ip_not_whitelist'));
                 }
             }
             $appModel = new \app\admin\model\AppModel();
             $this->myAppInfo = $appModel->getInfo(intval($userInfo['appid']));
             if(!$this->myAppInfo){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:GetUserAppInfoError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:GetUserAppInfoError]');
             }
             $this->myPowerInfo = $this->getPowerPriceInfo(intval($userInfo['power']));
             if(!$this->myPowerInfo){
-                throw new Exception('您的账号异常，请联系站长处理！[errorCode:GetUserPowerInfoError]');
+                throw new Exception(t('user.account_abnormal').'[errorCode:GetUserPowerInfoError]');
             }
             // 数据绑定
         }catch (\Exception $e){
@@ -105,6 +105,6 @@ class ApiBackend extends CommonBase
     public function logOut(){
         cookie('userId',null);
         cookie('userSign',null);
-        return message('退出登录成功', true);
+        return message(t('login.logout_success'), true);
     }
 }

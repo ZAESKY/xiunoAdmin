@@ -21,18 +21,18 @@
                 <h1>￥{$row['money']}</h1>
             </div>
             <div class="list-group-item">
-                商品名称：{$row['name']}<br/>
-                商户订单号：{$row['trade_no']}<br/>
-                创建时间：{$row['addtime']}
+                {:t('payment_ui.product_name')}{$row['name']}<br/>
+                {:t('payment_ui.merchant_order_no')}{$row['trade_no']}<br/>
+                {:t('codepay_ui.label_create_time')}：{$row['addtime']}
             </div>
             <div class="list-group-item">
                 <a href="" id="openUrl" class="btn btn-primary btn-block">跳转到QQ支付</a>
             </div>
             <div class="list-group-item">
-                <a href="#" onclick="checkresult()" class="btn btn-success btn-block">检测支付状态</a>
+                <a href="#" onclick="checkresult()" class="btn btn-success btn-block">{:t('payment_ui.check_pay_status')}</a>
             </div>
             <div class="list-group-item">
-                <a href="{:url('/QqPay/index')}?trade_no={$row['trade_no']}&sitename={$title}" class="btn btn-default btn-sm btn-block">使用扫码支付</a>
+                <a href="{:url('/QqPay/index')}?trade_no={$row['trade_no']}&sitename={$title}" class="btn btn-default btn-sm btn-block">{:t('payment_ui.use_scan_pay')}</a>
             </div>
         </div>
     </div>

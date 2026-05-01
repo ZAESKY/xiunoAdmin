@@ -13,10 +13,10 @@
                 <input type="hidden" id="status" value="0"/>
                 <input type="hidden" name="filename" value=""/>
                 <div class="layui-form-item">
-                    <label class="layui-form-label layui-form-required">所属应用:</label>
+                    <label class="layui-form-label layui-form-required">{:t('common_ui.belong_app')}:</label>
                     <div class="layui-input-block">
                         <select name="appid" class="layui-input ew-select-fixed" lay-filter="appid" lay-search>
-                            <option value="">请选择所属的应用</option>
+                            <option value="">{:t('common.nothing_selected')}所属的应用</option>
                             {volist name="app_list.data.data" id="res"}
                             <option value="{$res.id}">{$res.name}</option>
                             {/volist}
@@ -24,15 +24,15 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label layui-form-required">上传文件:</label>
+                    <label class="layui-form-label layui-form-required">{:t('common.upload')}文件:</label>
                     <div class="layui-input-block">
                         <div class="layui-upload-drag" id="fileUpload">
                             <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                            <p>点击上传，或将文件拖拽到此处</p>
+                            <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
                             <div class="layui-hide" id="uploadDemoView">
                                 <hr>
                                 <div class="layui-form-item">
-                                    <img src="" alt="上传成功后渲染" id="demo1" style="max-width: 196px">
+                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="demo1" style="max-width: 196px">
                                 </div>
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">文件名</label>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="layui-form-item text-right">
                     <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>开始</button>
-                    <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">重置</button>
+                    <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.reset')}</button>
                 </div>
                 <div class="layui-form-item">
                     <div class="sf-tips">

@@ -25,17 +25,17 @@ class PirateModel extends BaseModel
     public function edit($param){
         $appid = !empty($param['appid'])?intval($param['appid']):null;
         if(!$appid){
-            return message('请提交APPID！',false);
+            return message(t('auth.enter_qq_code'),false);
         }
         try{
             $appInfo = parent::getAppInfo($appid);
             if($appInfo == false){
-                return message('不存在此应用！',false);
+                return message(t('app.not_exist'),false);
             }
         }catch (\Exception $e){
-            return message('服务器错误！'.$e->getMessage() ,false);
+            return message(t('common.server_error').$e->getMessage() ,false);
         }
-        
+
         $auth_info = !empty($param['auth_info'])?$param['auth_info']:null;
         $param = !empty($param)?json_encode($param):null;
 
@@ -50,9 +50,9 @@ class PirateModel extends BaseModel
                 PirateModel::where('id', $pirateInfo['id'])
                     ->data($data)
                     ->update();
-                return message('更新成功！' ,true);
+                return message(t('pirate.update_success') ,true);
             } catch (\Exception $e) {
-                return message('更新失败！'.$e->getMessage() ,false);
+                return message(t('pirate.update_failed').$e->getMessage() ,false);
             }
         }else{
             $data = [
@@ -65,9 +65,9 @@ class PirateModel extends BaseModel
 
             try{
                 PirateModel::insert($data);
-                return message('入库成功！' ,true);
+                return message(t('pirate.save_success') ,true);
             } catch (\Exception $e) {
-                return message('入库失败！'.$e->getMessage(),false);
+                return message(t('pirate.save_failed').$e->getMessage(),false);
             }
         }
     }

@@ -49,8 +49,8 @@ class UserService extends BaseService
             $result = $this->model->list();
             foreach($result as $res){
                 $res['powerSpan'] = 'gray';
-                $res['powerName'] = '权限错误';
-                $res['appName'] = '应用错误';
+                $res['powerName'] = t('user.power_error');
+                $res['appName'] = t('app.not_exist');
                 $powerInfo = parent::getPowerPriceInfo($res['power']);
                 $appInfo = parent::getAppInfo($res['appid']);
                 if($powerInfo) {

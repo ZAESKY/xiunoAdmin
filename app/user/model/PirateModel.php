@@ -51,32 +51,32 @@ class PirateModel extends BaseModel
     public function edit(){
         $userInfo = parent::getUserInfo();
         if(!$userInfo){
-            return message("获取用户信息失败！[errorCode:UserInfoError]" ,false);
+            return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
         }
         $userPowerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
         if(!$userPowerPriceInfo) {
-            return message("获取用户权限信息失败！[errorCode:GetUserPowerInfoError]" ,false);
+            return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]' ,false);
         }
         $userAppInfo = parent::getAppInfo($userInfo['appid']);
         if(!$userAppInfo) {
-            return message("获取用户应用信息失败！[errorCode:GetUserAppInfoError]" ,false);
+            return message(t('user.app_info_error').'[errorCode:GetUserAppInfoError]' ,false);
         }
         $post = request()->post();
         $id = !empty($post['id'])?intval($post['id']):null;
         $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
         if(empty($id)){
-            return message("缺少ID参数！" ,false);
+            return message(t('validation.missing_id') ,false);
         }
         if(empty($appid)){
-            return message("获取用户应用信息失败！[errroCode:UserAppIdEmpty]" ,false);
+            return message(t('user.app_info_error').'[errroCode:UserAppIdEmpty]' ,false);
         }
         $row = $this->getInfo($id);
         if(!$row){
-            return message("不存在此盗版信息！" ,false);
+            return message(t('pirate.not_exist') ,false);
         }
         $allmoney = round($userAppInfo['pirate_money'] * floatval($userPowerPriceInfo['pirate_discount'] / 100), 2);
         if($allmoney > $userInfo['balance']){
-            return message("您的余额不足，请充值后再来！<br> 您的余额：".$userInfo['balance']." 元<br>需要金额：".$allmoney." 元" ,false);
+            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
         }
 
         $remainderBalance = $userInfo['balance'] - $allmoney;
@@ -84,10 +84,10 @@ class PirateModel extends BaseModel
         try{
             $result = parent::updateUserInfo(['balance' => $remainderBalance]);
             if(!$result){
-                return message("更新用户信息失败！[errorCode:ReduceUserBalanceError]" ,false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
             }
         } catch (\Exception $e) {
-            return message("更新用户信息失败！[errorCode:ReduceUserBalanceError]",false);
+            return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
         }
         $content = [
             'Title' => '查看盗版',
@@ -98,7 +98,7 @@ class PirateModel extends BaseModel
             'Result' => 'success'
         ];
         event('ActionLog', $content);
-        return message("获取盗版信息成功！<br> 花费：".$allmoney." 元 <br> 余额：".$remainderBalance." 元 " ,true, ["data" => $row]);
+        return message(t('pirate.get_info_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total') ,true, ["data" => $row]);
 
     }
 
@@ -107,10 +107,10 @@ class PirateModel extends BaseModel
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
@@ -122,7 +122,7 @@ class PirateModel extends BaseModel
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
             }else{
-                throw new Exception('获取用户信息失败！[errorCode:UserAppIdEmpty]');
+                throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
             if($text !== null){
                 $data[] = ['id|pirate_info', 'like', '%'.$text.'%'];
@@ -150,10 +150,10 @@ class PirateModel extends BaseModel
                     'Result' => '[errorCode:GetPirateListError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('获取列表失败！[errorCode:GetPirateListError]');
+                throw new Exception(t('user.list_failed').'[errorCode:GetPirateListError]');
             }
         }catch (\Exception $e){
-            throw new Exception('获取列表失败！[errorCode:GetPirateListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetPirateListError]');
         }
     }
 }

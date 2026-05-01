@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="Content-Language" content="zh-cn">
     <meta name="renderer" content="webkit">
-    <title>QQ钱包安全支付 - {$title}</title>
+    <title>QQ钱包{:t('dashboard.secure')}支付 - {$title}</title>
     <link href="{__PAY__}mqq_pay.css?v=1" rel="stylesheet" media="screen">
 </head>
 <body>
@@ -21,13 +21,13 @@
 
         <div class="detail" id="orderDetail">
             <dl class="detail-ct" style="display: none;">
-                <dt>商家</dt>
+                <dt>{:t('payment_ui.merchant')}</dt>
                 <dd id="storeName">{$title}</dd>
-                <dt>购买物品</dt>
+                <dt>{:t('payment_ui.product')}</dt>
                 <dd id="productName">{$row['name']}</dd>
-                <dt>商户订单号</dt>
+                <dt>{:t('payment_ui.order_no')}</dt>
                 <dd id="billId">{$row['trade_no']}</dd>
-                <dt>创建时间</dt>
+                <dt>{:t('codepay_ui.label_create_time')}</dt>
                 <dd id="createTime">{$row['addtime']}</dd>
             </dl>
             <a href="javascript:void(0)" class="arrow"><i class="ico-arrow"></i></a>
@@ -38,7 +38,7 @@
             <div class="ico-scan"></div>
             <div class="tip-text">
                 <p>请使用手机QQ扫一扫</p>
-                <p>扫描二维码完成支付</p>
+                <p>{:t('payment_ui.scan_pay')}</p>
             </div>
         </div>
         <div class="tip-text">
@@ -46,8 +46,8 @@
     </div>
     <div class="foot">
         <div class="inner">
-            <p>手机用户可保存上方二维码到手机中</p>
-            <p>在手机QQ扫一扫中选择“相册”即可</p>
+            <p>{:t('payment_ui.save_qr_mobile')}</p>
+            <p>在手机QQ扫一扫中{:t('common_ui.choose')}“相册”即可</p>
         </div>
     </div>
 </div>

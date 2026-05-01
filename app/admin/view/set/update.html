@@ -259,10 +259,10 @@
                                 <div class="sf-text" style="padding-top: 8px"><span id="sf_msg">3.3 GB</span></div>
                             </div>
                             <div class="sf-set-introduce">
-                                <div id="sf_introduce">暂无更新内容</div>
+                                <div id="sf_introduce">{:t('notify.no_update_content')}</div>
                             </div>
                             <div class="sf-set-more">
-                                <a lay-filter="uplog" lay-submit>了解更多...</a>
+                                <a lay-filter="uplog" lay-submit>了解{:t('common.more')}...</a>
                             </div>
                         </div>
                     </div>
@@ -270,7 +270,7 @@
                 <div id="sf_update_btn_group" class="layui-card">
                     <div class="sf-group-btn">
                         <div class="sf-download">
-                            <a id="sf_update_btn" lay-filter="update" lay-submit>下载并安装</a>
+                            <a id="sf_update_btn" lay-filter="update" lay-submit>{:t('notify.download_install')}</a>
                         </div>
                     </div>
                 </div>
@@ -286,11 +286,11 @@
                     <div></div>
                     <div></div>
                 </div>
-                <div class="sf-loading-font">正在检查更新...</div>
+                <div class="sf-loading-font">{:t('notify.checking_update')}</div>
             </div>
             <div id="sf_new_version" class="sf-loading" style="display: none">
                 <div class="sf-new-font">MOS <span id="sf_current_edition">{$edition}</span></div>
-                <div class="sf-new-font2">MOS已是最新版本</div>
+                <div class="sf-new-font2">MOS已是最新{:t('common_ui.version')}</div>
             </div>
         </div>
     </div>

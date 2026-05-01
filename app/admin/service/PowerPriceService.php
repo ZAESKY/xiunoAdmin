@@ -30,7 +30,7 @@ class PowerPriceService extends BaseService
                 if($powerInfo){
                     $res['templateName'] = $powerInfo['name'];
                 }else{
-                    $res['templateName'] = '获取模板名称失败';
+                    $res['templateName'] = t('common.no_data');
                 }
                 $res['open'] = true;
             }
@@ -47,7 +47,7 @@ class PowerPriceService extends BaseService
             $type = !empty($post['type'])?$post['type']:null;
             $status = !empty($post['status'])?1:0;
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $this->model->setPower($id, $type, $status);
             return true;

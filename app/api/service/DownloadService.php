@@ -23,17 +23,17 @@ class DownloadService extends BaseService
         $param = request()->param();
         $sign = !empty($param['sign']) ? $param['sign'] : null;
         if (!$sign) {
-            return json(message('请提交SIGN！', false));
+            return json(message(t('validation.missing_sign'), false));
         }
 
         $signData = @unserialize((string)cache($sign), ['allowed_classes' => false]);
         if (empty($signData) || !is_array($signData)) {
-            return json(message('不存在此SIGN！', false));
+            return json(message(t('validation.invalid_sign'), false));
         }
 
         $versionData = !empty($signData['versionInfo']) && is_array($signData['versionInfo']) ? $signData['versionInfo'] : [];
         if (empty($versionData) || empty($versionData['appid'])) {
-            return json(message('SIGN损坏，请重新生成！', false));
+            return json(message(t('validation.sign_damaged'), false));
         }
 
         $appInfo = Db::name('app')
@@ -44,22 +44,22 @@ class DownloadService extends BaseService
             ->field('authcode_file,public_key,pirate_msg_switch')
             ->find();
         if (empty($appInfo)) {
-            return json(message('不存在此版本', false));
+            return json(message(t('version.not_exist'), false));
         }
 
         $type = !empty($versionData['type']) ? (int)$versionData['type'] : 0;
         $downloadCatalogueName = $this->normalizePathName($versionData['download_catalogue'] ?? '');
         if ($downloadCatalogueName === '') {
-            return json(message('下载目录不合法', false));
+            return json(message(t('version.dir_empty'), false));
         }
 
         $downloadCatalogue = APP_PATH . DS . 'common' . DS . 'download' . DS . ($type === 0 ? 'release' : 'update') . DS . $downloadCatalogueName . DS;
         $sourceZip = $downloadCatalogue . 'SF.zip';
         if (!is_dir($downloadCatalogue)) {
-            return json(message('该版本下载目录不存在', false));
+            return json(message(t('version.dir_not_exist'), false));
         }
         if (!is_file($sourceZip)) {
-            return json(message('该版本更新文件不存在', false));
+            return json(message(t('version.file_not_exist'), false));
         }
 
         $downloadZip = $sourceZip;
@@ -69,7 +69,7 @@ class DownloadService extends BaseService
             if ((int)$appInfo['pirate_msg_switch'] === 1) {
                 $authData = !empty($signData['authInfo']) && is_array($signData['authInfo']) ? $signData['authInfo'] : [];
                 if (empty($authData)) {
-                    return json(message('SIGN损坏，请重新生成！', false));
+                    return json(message(t('validation.sign_damaged'), false));
                 }
                 $authcode = $authData['authcode'] ?? '';
             }
@@ -92,12 +92,12 @@ class DownloadService extends BaseService
     private function buildAuthDownloadZip($sourceZip, array $appInfo, array $versionData, $authcode)
     {
         if (!class_exists('ZipArchive')) {
-            return message('ZipArchive 没有安装', false);
+            return message(t('version.zip_not_installed'), false);
         }
 
         $authCodeFile = $this->normalizeRelativeFile($appInfo['authcode_file'] ?? '');
         if ($authCodeFile === '') {
-            return message('授权文件路径不合法', false);
+            return message(t('version.auth_path_invalid'), false);
         }
 
         $tempDir = RUNTIME_PATH . DS . 'download' . DS;
@@ -112,13 +112,13 @@ class DownloadService extends BaseService
 
         try {
             if (!copy($sourceZip, $tempFile) || !is_file($tempFile)) {
-                return message('复制文件失败', false);
+                return message(t('version.copy_file_failed'), false);
             }
 
             $template = APP_PATH . DS . 'common' . DS . 'download' . DS . 'AuthInfo.php';
             $fileContent = file_get_contents($template);
             if ($fileContent === false) {
-                return message('授权模板读取失败', false);
+                return message(t('version.auth_template_read_failed'), false);
             }
 
             $fileContent = str_replace('SF_AUTHCODE', (string)$authcode, $fileContent);
@@ -131,11 +131,11 @@ class DownloadService extends BaseService
                 @mkdir(dirname($targetFile), 0755, true);
             }
             if (file_put_contents($targetFile, $fileContent) === false) {
-                return message('授权文件生成失败', false);
+                return message(t('version.auth_file_gen_failed'), false);
             }
 
             if ($zip->open($tempFile) !== true) {
-                return message('临时压缩包打开失败', false);
+                return message(t('version.temp_zip_open_failed'), false);
             }
             $zip->addFile($targetFile, $authCodeFile);
             $zip->close();

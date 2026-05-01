@@ -18,10 +18,10 @@ layui.define(["laytpl", "laypage", "form"],
             first: true,
             curr: 1,
             limit: 10,
-            text: "加载更多",
-            loadingText: "加载中...",
-            noMoreText: "没有更多数据了~",
-            errorText: "加载失败，请重试"
+            text: window.t('common.load_more'),
+            loadingText: window.t('common.loading_text'),
+            noMoreText: window.t('common.no_more_data'),
+            errorText: window.t('common.load_failed_retry')
         };
         var o = function(p) {
             this.options = g.extend(true, {

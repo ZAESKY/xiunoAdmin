@@ -52,9 +52,9 @@ class AuthTemplateModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                return message("编辑成功！" ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message("编辑失败！".$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $data = [
@@ -65,9 +65,9 @@ class AuthTemplateModel extends BaseModel
             ];
             try{
                 self::insert($data);
-                return message("添加成功！" ,true);
+                return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
-                return message("添加失败！".$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
     }
@@ -75,11 +75,11 @@ class AuthTemplateModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此价格模板！');
+                throw new Exception(t('common.no_data'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -95,11 +95,11 @@ class AuthTemplateModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此价格模板！');
+                throw new Exception(t('common.no_data'));
             }
 
             self::where('id', $id)

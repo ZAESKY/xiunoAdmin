@@ -52,10 +52,10 @@ class LogModel extends BaseModel
             try{
                 $userInfo = parent::getUserInfo();
                 if(!$userInfo){
-                    throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
                 }
             }catch (\Exception $e){
-                throw new Exception('获取用户信息失败！[errorCode:UserInfoError]');
+                throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
@@ -91,10 +91,10 @@ class LogModel extends BaseModel
                     'Result' => '[errorCode:GetLogListError]'
                 ];
                 event('ActionLog', $content);
-                throw new Exception('获取列表失败！[errorCode:GetLogListError]');
+                throw new Exception(t('user.list_failed').'[errorCode:GetLogListError]');
             }
         }catch (\Exception $e){
-            throw new Exception('获取列表失败！[errorCode:GetLogListError]');
+            throw new Exception(t('user.list_failed').'[errorCode:GetLogListError]');
         }
     }
 }

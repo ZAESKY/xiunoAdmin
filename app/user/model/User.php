@@ -50,10 +50,10 @@ class User extends BaseModel
         $type = !empty($post['type'])?$post['type']:null;
         $code = !empty($post['code'])?$post['code']:null;
         $content = !empty($post['content'])?$post['content']:null;
-        if(empty($code)) return message("请输入验证码！" ,false);
+        if(empty($code)) return message(t('notify.enter_captcha') ,false);
         switch ($type){
             case 'changeBindingMail':
-                if(empty($content)) return message('请输入要绑定的邮箱！' ,false);
+                if(empty($content)) return message(t('user.bind_email_empty') ,false);
                 if(!empty(cache('changeBindingMail'.cookie('userId')))){
                     cache('changeBindingMail'.cookie('userId'),null);
                     $validate = new Validate([
@@ -62,15 +62,15 @@ class User extends BaseModel
                     if (!$validate->check(['content' => $content])) return message($validate->getError() ,false);
                     $result = $this->setOne(['email' => $content]);
                     if($result){
-                        return message('绑定成功！' ,true);
+                        return message(t('user.bind_success') ,true);
                     }else{
-                        return message('绑定邮箱失败！[errorCode:UserBindingMailError]' ,false);
+                        return message(t('user.bind_failed').'[errorCode:UserBindingMailError]' ,false);
                     }
                 }else{
-                    return message('不存在此验证码！' ,false);
+                    return message(t('notify.captcha_expired') ,false);
                 }
             default:
-                return message('不存在此操作！' ,false);
+                return message(t('common_ui.type_error') ,false);
         }
     }
 
@@ -125,29 +125,29 @@ class User extends BaseModel
     public function updatePower(){
         $post = request()->post();
         $power = !empty($post['power'])?intval($post['power']):null;
-        if(empty($power)) return message('缺少POWER参数！' ,false);
+        if(empty($power)) return message(t('validation.missing_power') ,false);
         try{
             $userInfo = $this->getInfo();
-            if(!$userInfo) return message('获取用户信息错误！' ,false);
+            if(!$userInfo) return message(t('user.info_error') ,false);
             $userPower = Db::name('power_price')->where('id',$userInfo['power'])->find();
             $powerPriceModel = new \app\admin\model\PowerPriceModel();
             $result = $powerPriceModel->getUserUpdatePowerList($userInfo['power'], true);
             if(!in_array($power,$result)){
-                return message('此权限您无权限升级！' ,false, $result);
+                return message(t('user.power_cannot_upgrade') ,false, $result);
             }
             $row = Db::name('power_price')->where('id',$power)->find();
-            if(!$row) return message('不存在此权限！' ,false);
-            if(!$userPower) return message('用户权限错误！' ,false);
+            if(!$row) return message(t('power.not_exist') ,false);
+            if(!$userPower) return message(t('user.power_error') ,false);
             $allmoney = round((($row['money'] - $userPower['money']) > 0 ? ($row['money'] - $userPower['money']) : 0), 2);
-            if($allmoney > $userInfo['balance']) return message('您的余额不足，请充值后再来！<br> 您的余额：'.$userInfo['balance'].' 元<br>需要金额：'.$allmoney.' 元' ,false);
+            if($allmoney > $userInfo['balance']) return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
             $remainderBalance = $userInfo['balance'] - $allmoney;
             try{
                 $result = parent::updateUserInfo(['balance' => $remainderBalance]);
                 if(!$result){
-                    return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]' ,false);
+                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }
             } catch (\Exception $e) {
-                return message('更新用户信息失败！[errorCode:ReduceUserBalanceError]',false);
+                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
             }
             $data = [
                 "power" => $row['id']
@@ -166,7 +166,7 @@ class User extends BaseModel
                 ];
                 event('ActionLog', $content);
                 Cache::delete('SF_UserMenu'.$userInfo['id']);
-                return message('升级成功！<br> 花费：'.$allmoney.' 元 <br> 余额：'.$remainderBalance.' 元', true);
+                return message(t('user.upgrade_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total'), true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '升级权限',
@@ -177,10 +177,10 @@ class User extends BaseModel
                     'Result' => '[errorCode:EditPaymentError]'
                 ];
                 event('ActionLog', $content);
-                return message('升级失败！[errorCode:EditUserPowerError]', false);
+                return message(t('user.upgrade_failed').'[errorCode:EditUserPowerError]', false);
             }
         } catch (\Exception $e) {
-            return message('获取失败！[errorCode:GetUserUpdatePowerListError]'.$e->getMessage() ,false);
+            return message(t('common.load_failed').'[errorCode:GetUserUpdatePowerListError]'.$e->getMessage() ,false);
         }
 
 

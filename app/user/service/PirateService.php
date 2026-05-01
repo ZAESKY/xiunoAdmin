@@ -16,7 +16,7 @@ class PirateService extends UserBaseService
             $result = $this->model->list();
             foreach($result as $res){
                 if(empty($res['param'])){
-                    $res['param'] = '无参数';
+                    $res['param'] = t('common.no_data');
                 }else{
                     $res['param'] = '******';
                 }

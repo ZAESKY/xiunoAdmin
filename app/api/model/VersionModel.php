@@ -24,13 +24,19 @@ class VersionModel extends BaseModel
     }
 
     public function getAppUpdateVersionList($appid,$version,$beta = 0){
-        if(!empty(Cache::get('VersionList'.$appid.$version.$beta))){
-            return Cache::get('VersionList'.$appid.$version.$beta);
+        $cacheKey = 'VersionList'.$appid.$version.(is_array($beta) ? implode(',', $beta) : $beta);
+        if(!empty(Cache::get($cacheKey))){
+            return Cache::get($cacheKey);
         }else{
-            $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['beta', '=', $beta],['type', '=', 1]])->select();
+            if(is_array($beta)){
+                $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['type', '=', 1]])
+                    ->whereIn('beta', $beta)->select();
+            }else{
+                $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['beta', '=', $beta],['type', '=', 1]])->select();
+            }
             $count = count($list);
             $data = ['list' => $list, 'count' => $count];
-            Cache::tag('SF_Version')->set('VersionList'.$appid.$version.$beta, $data);
+            Cache::tag('SF_Version')->set($cacheKey, $data);
             return $data;
         }
     }

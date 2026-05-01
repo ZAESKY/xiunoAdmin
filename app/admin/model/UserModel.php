@@ -54,17 +54,17 @@ class UserModel extends BaseModel
             return message($e->getError() ,false);
         }
         if(parent::getPowerPriceInfo($power) == false){
-            return message('该权限不存在！' ,false);
+            return message(t('user.power_not_exist') ,false);
         }
         if(!empty($id)){
             $row = $this->getInfo($id);
             if(!$row){
-                return message('不存在此用户！' ,false);
+                return message(t('user.not_exist') ,false);
             }
             if($username != $row['username']){
                 $row2 = self::where(['username'=>$username, 'appid'=>$appid])->find();
                 if($row2){
-                    return message('该应用已存在此用户名！' ,false);
+                    return message(t('app.username_exists') ,false);
                 }
             }
             $data = [
@@ -86,14 +86,14 @@ class UserModel extends BaseModel
                     ->data($data)
                     ->update();
                 Cache::delete('SF_UserMenu'.$id);
-                return message('编辑成功！' ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message('编辑失败！'.$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $row = self::where(['username'=>$username, 'appid'=>$appid])->find();
             if($row){
-                return message('该应用已存在此用户名！' ,false);
+                return message(t('app.username_exists') ,false);
             }
             $data = [
                 'power' => $power,
@@ -112,9 +112,9 @@ class UserModel extends BaseModel
             ];
             try{
                 self::insert($data);
-                return message('添加成功！' ,true);
+                return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
-                return message('添加失败！'.$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
     }
@@ -122,11 +122,11 @@ class UserModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此用户！');
+                throw new Exception(t('user.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -142,11 +142,11 @@ class UserModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此用户！');
+                throw new Exception(t('user.not_exist'));
             }
 
             self::where('id', $id)

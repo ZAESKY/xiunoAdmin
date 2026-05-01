@@ -9,24 +9,24 @@
                     <div class="layui-inline">
                         <label class="layui-form-label">内&emsp;容</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="输入ID或日志标题或IP"/>
+                            <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_log_title_or_ip')}"/>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">权限</label>
+                        <label class="layui-form-label">{:t('common_ui.power_type')}</label>
                         <div class="layui-input-inline">
                             <select class="layui-input ew-select-fixed" lay-filter="power" lay-search>
-                                <option value="">全部</option>
+                                <option value="">{:t('common.all')}</option>
                                 <option value="1">站长</option>
                                 <option value="2">用户</option>
-                                <option value="3">游客</option>
+                                <option value="3">{:t('common_ui.guest_label')}</option>
                             </select>
                         </div>
                     </div>

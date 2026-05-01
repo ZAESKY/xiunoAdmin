@@ -15,9 +15,9 @@ class ConfigService extends UserBaseService
     public function editConfig(){
         $result = $this->model->editConfig();
         if($result){
-            return message('保存配置成功！', true);
+            return message(t('system.save_success'), true);
         }else{
-            return message('保存配置失败！[errorCode:EditUserConfigError]', false);
+            return message(t('system.save_failed').'[errorCode:EditUserConfigError]', false);
         }
     }
 }

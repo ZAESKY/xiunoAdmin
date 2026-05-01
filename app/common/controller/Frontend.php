@@ -44,7 +44,7 @@ class Frontend extends CommonBase
     public function checkMaintain(){
         if(conf('maintain_switch') == 1){
             if(IS_POST){
-                exit(json_encode(message('站点正在维护中' ,false)));
+                exit(json_encode(message(t('system.site_under_maintenance'), false)));
             }
             View::config(['view_path' => config('self_template')['maintain']['view_base']]);
             exit($this->render('index/index'));
@@ -90,7 +90,7 @@ class Frontend extends CommonBase
         try{
             $appModel = new \app\admin\model\AppModel();
             $result = $appModel->getAllList();
-            return message('获取列表成功！', true, ['data' => $result]);
+            return message(t('common.list_success'), true, ['data' => $result]);
         }catch (\Exception $e){
             return message($e->getMessage(), false);
         }

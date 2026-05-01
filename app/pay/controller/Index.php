@@ -25,9 +25,9 @@ class Index extends PayBackend
         $trade_no = !empty($param['trade_no'])?$param['trade_no']:null;
         View::assign('time', 5);
         View::assign('url', '/');
-        if(empty($trade_no))return $this->render('public/error', ['msg' => '订单号不能为空！[errorCode:PayOrderIdEmpty]']);
+        if(empty($trade_no))return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdEmpty]']);
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
-        if(!$row)return $this->render('public/error', ['msg' => '不存在此订单！[errorCode:PayOrderIdError]']);
+        if(!$row)return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdError]']);
         View::assign([
             'row' => $row,
         ]);
@@ -40,8 +40,8 @@ class Index extends PayBackend
         $orderid = !empty($param['orderid'])?$param['orderid']:null;
         View::assign('time', 5);
         View::assign('url', '/');
-        if(empty($type))return $this->render('public/error', ['msg' => '支付类型不能为空！[errorCode:PayTypeEmpty]']);
-        if(empty($orderid))return $this->render('public/error', ['msg' => '订单号不能为空！[errorCode:PayOrderIdEmpty]']);
+        if(empty($type))return $this->render('public/error', ['msg' => t('pay.type_error').'[errorCode:PayTypeEmpty]']);
+        if(empty($orderid))return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdEmpty]']);
         View::assign([
             'type' => $type,
             'orderid' =>$orderid
@@ -62,9 +62,9 @@ class Index extends PayBackend
                 return message($e->getError(), false);
             }
             $row = Db::name('pay')->where('trade_no', $orderid)->find();
-            if (!$row['trade_no']) return message('该订单号不存在，请返回来源地重新发起请求！', false);
-            if ($row['money'] == '0' || !preg_match('/^[0-9.]+$/', $row['money'])) return message('订单金额不合法！', false);
-            if ($row['status'] >= 1) return message('该订单已支付完成，请返回重新生成订单！', false);
+            if (!$row['trade_no']) return message(t('pay.order_not_exist'), false);
+            if ($row['money'] == '0' || !preg_match('/^[0-9.]+$/', $row['money'])) return message(t('pay.amount_invalid'), false);
+            if ($row['status'] >= 1) return message(t('pay.already_paid'), false);
             switch ($type) {
                 case 'alipay':
                     switch (conf('alipay_api')) {
@@ -99,9 +99,9 @@ class Index extends PayBackend
                         case 2://易支付
                             Db::name('pay')->where('trade_no', $orderid)->update(['type' => $type, 'channel' => 'zfb_epay']);
                             $payConfig = Config::get('payconfig.zfb.epay_config');
-                            if(empty($payConfig['apiurl']))return message('获取支付配置失败！[errorCode:GetPayConfigApiUrlEmpty]', false);
-                            if(empty($payConfig['partner']))return message('获取支付配置失败！[errorCode:GetPayConfigPartnerEmpty]', false);
-                            if(empty($payConfig['key']))return message('获取支付配置失败！[errorCode:GetPayConfigKeyEmpty]', false);
+                            if(empty($payConfig['apiurl']))return message(t('pay.config_api_empty'), false);
+                            if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
+                            if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
                             $parameter = array(
                                 "pid" => trim($payConfig['partner']),
                                 "type" => $type,
@@ -118,7 +118,7 @@ class Index extends PayBackend
                                 $jump_url = $epaySubmit->buildRequestUrl($parameter);
                                 return message('success', true, ['url' => $jump_url]);
                             } else {
-                                $html_text = $epaySubmit->buildRequestForm($parameter, 'POST', "正在跳转");
+                                $html_text = $epaySubmit->buildRequestForm($parameter, 'POST', t('order_ui.redirecting_pay'));
                                 return message('success', true, ['html' => $html_text]);
                             }
                         case 3://当面付
@@ -135,8 +135,8 @@ class Index extends PayBackend
                             }
                             Db::name('pay')->where('trade_no', $orderid)->update(['type' => $type, 'channel' => 'kayixin']);
                             $payConfig = Config::get('payconfig.zfb.kayixin_config');
-                            if(empty($payConfig['partner']))return message('获取支付配置失败！[errorCode:GetPayConfigPartnerEmpty]', false);
-                            if(empty($payConfig['key']))return message('获取支付配置失败！[errorCode:GetPayConfigKeyEmpty]', false);
+                            if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
+                            if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
                             if (IS_MOBILE == true) {
                                 $alipay_service = "alipay.wap";
                             } else {
@@ -155,10 +155,10 @@ class Index extends PayBackend
                                 "_input_charset" => strtolower('utf-8')
                             );
                             $alipaySubmit = new KaYiXinSubmit($payConfig);
-                            $html_text = $alipaySubmit->buildRequestForm($parameter, "POST", "正在跳转");
+                            $html_text = $alipaySubmit->buildRequestForm($parameter, "POST", t('order_ui.redirecting_pay'));
                             return message('success', true, ['html' => $html_text]);
                         default:
-                            return message('该支付方式已关闭！', false);
+                            return message(t('pay.method_closed'), false);
                     }
                 case 'wxpay':
                     switch (conf('wxpay_api')) {
@@ -177,9 +177,9 @@ class Index extends PayBackend
                         case 2://易支付
                             Db::name('pay')->where('trade_no', $orderid)->update(['type' => $type, 'channel' => 'wx_epay']);
                             $payConfig = Config::get('payconfig.wx.epay_config');
-                            if(empty($payConfig['apiurl']))return message('获取支付配置失败！[errorCode:GetPayConfigApiUrlEmpty]', false);
-                            if(empty($payConfig['partner']))return message('获取支付配置失败！[errorCode:GetPayConfigPartnerEmpty]', false);
-                            if(empty($payConfig['key']))return message('获取支付配置失败！[errorCode:GetPayConfigKeyEmpty]', false);
+                            if(empty($payConfig['apiurl']))return message(t('pay.config_api_empty'), false);
+                            if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
+                            if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
                             $parameter = array(
                                 "pid" => trim($payConfig['partner']),
                                 "type" => $type,
@@ -196,7 +196,7 @@ class Index extends PayBackend
                                 $jump_url = $epaySubmit->buildRequestUrl($parameter);
                                 return message('success', true, ['url' => $jump_url]);
                             } else {
-                                $html_text = $epaySubmit->buildRequestForm($parameter, 'POST', "正在跳转");
+                                $html_text = $epaySubmit->buildRequestForm($parameter, 'POST', t('order_ui.redirecting_pay'));
                                 return message('success', true, ['html' => $html_text]);
                             }
                         case 5://码支付
@@ -204,7 +204,7 @@ class Index extends PayBackend
                             $jump_url = url('/CodePay/index').'?type=' . $type . '&trade_no=' . $orderid;
                             return message('success', true, ['url' => $jump_url]);
                         default:
-                            return message('该支付方式已关闭！', false);
+                            return message(t('pay.method_closed'), false);
                     }
                 case 'qqpay':
                     switch (conf('qqpay_api')) {
@@ -220,9 +220,9 @@ class Index extends PayBackend
                         case 2://易支付
                             Db::name('pay')->where('trade_no', $orderid)->update(['type' => $type, 'channel' => 'qq_epay']);
                             $payConfig = Config::get('payconfig.qq.epay_config');
-                            if(empty($payConfig['apiurl']))return message('获取支付配置失败！[errorCode:GetPayConfigApiUrlEmpty]', false);
-                            if(empty($payConfig['partner']))return message('获取支付配置失败！[errorCode:GetPayConfigPartnerEmpty]', false);
-                            if(empty($payConfig['key']))return message('获取支付配置失败！[errorCode:GetPayConfigKeyEmpty]', false);
+                            if(empty($payConfig['apiurl']))return message(t('pay.config_api_empty'), false);
+                            if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
+                            if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
                             $parameter = array(
                                 "pid" => trim(Config::get('payconfig.qq.epay_config.partner')),
                                 "type" => $type,
@@ -239,7 +239,7 @@ class Index extends PayBackend
                                 $jump_url = $epaySubmit->buildRequestUrl($parameter);
                                 return message('success', true, ['url' => $jump_url]);
                             } else {
-                                $html_text = $epaySubmit->buildRequestForm($parameter, 'POST', "正在跳转");
+                                $html_text = $epaySubmit->buildRequestForm($parameter, 'POST', t('order_ui.redirecting_pay'));
                                 return message('success', true, ['html' => $html_text]);
                             }
                         case 5://码支付
@@ -247,10 +247,10 @@ class Index extends PayBackend
                             $jump_url = url('/CodePay/index').'?type=' . $type . '&trade_no=' . $orderid;
                             return message('success', true, ['url' => $jump_url]);
                         default:
-                            return message('该支付方式已关闭！', false);
+                            return message(t('pay.method_closed'), false);
                     }
                 default:
-                    return message('支付类型错误！', false);
+                    return message(t('pay.type_error'), false);
             }
         }
         return $this->render('/public/404.html');
@@ -260,11 +260,11 @@ class Index extends PayBackend
         $post = request()->post();
         $trade_no = isset($post['trade_no'])?$post['trade_no']:null;
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
-        if (!$row['trade_no']) return message('该订单号不存在，请返回来源地重新发起请求！', false);
+        if (!$row['trade_no']) return message(t('pay.order_not_exist'), false);
         if($row['status'] >= 1){
-            return message('该订单号不存在，请返回来源地重新发起请求！', true, ['backurl' => '/']);
+            return message(t('pay.order_not_exist'), true, ['backurl' => '/']);
         }else{
-            return message('未付款！', false);
+            return message(t('pay.not_paid'), false);
         }
     }
 }

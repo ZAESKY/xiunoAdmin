@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>温馨提示</title>
+    <title>{:t('common.nice_tips')}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/favicon.ico" />
     <style type="text/css">
@@ -36,8 +36,8 @@
     <p class="jump">
         页面将在 <span id="wait">{$time}</span> 秒后自动跳转</p>
     <p class="clearfix">
-        <a href="/" class="btn btn-grey">返回上一页</a>
-        <a id="href" href="{$url}" class="btn btn-primary">立即跳转</a>
+        <a href="/" class="btn btn-grey">{:t('common.go_back')}</a>
+        <a id="href" href="{$url}" class="btn btn-primary">{:t('common.jump_now')}</a>
     </p>
 </div>
 {include file="/public/footer"}

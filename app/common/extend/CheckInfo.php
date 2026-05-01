@@ -15,23 +15,23 @@ class CheckInfo
     public function check($type = null, $content = null){
         
         if($type == null){
-            return message('需要检测的内容类型不能为空', false);
+            return message(t('auth.content_type_empty'), false);
         }
         if($content == null){
-            return message('需要检测的内容不能为空', false);
+            return message(t('auth.content_empty'), false);
         }
         switch ($type){
             case 'domain':
                 $Punycode = new Punycode();
                 if(!$this->isValidDomain($Punycode->encode($content))){
-                    return message('请输入正确的授权内容（格式：域名）！', false);
+                    return message(t('auth.domain_format_error'), false);
                 }else{
                     return message('success', true);
                 }
                 break;
             case 'qq':
                 if (!$this->isQQ($content)){
-                    return message('请输入正确的授权内容（格式：QQ）！', false);
+                    return message(t('auth.qq_format_error'), false);
                 }else{
                     return message('success', true);
                 }
@@ -39,7 +39,7 @@ class CheckInfo
             case 'musicAnalysis':
                 //这是一个示例
                 if(!is_numeric($content)){
-                    return message('请输入正确的授权内容（格式：数字）！', false);
+                    return message(t('auth.number_format_error'), false);
                 }
                 break;
         }

@@ -6,7 +6,7 @@
 
         <div class="layui-card-body images" style="background-image: url('https://bing.ioliu.cn/v1/rand?h=70');">
             <img style="border-radius:50%;width:50px;height:50px;" src="{__IMG__}logo.png" alt="SF"/>
-            <b id="SF_title" style="color:#fff;font-size: 18px">SF授权系统</b>
+            <b id="SF_title" style="color:#fff;font-size: 18px">SF{:t('common_ui.auth_type')}系统</b>
             <span id="tip" class="pull-right">
                 <i class="sf-avatar sf-avatar-icon sf-avatar-small layui-icon layui-icon-help" style="position: relative;top: 12px;color: rgb(255, 169, 64); background-color: rgb(255, 247, 230);"></i>
             </span>
@@ -18,7 +18,7 @@
                     <li class="layui-this">
                         <i class="layui-icon layui-icon-ok">1</i>
                         <span class="layui-steps-title">第一步</span>
-                        <span class="layui-steps-content">同意服务协议</span>
+                        <span class="layui-steps-content">同意{:t('install_ui.tab_agreement')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">2</i>
@@ -28,12 +28,12 @@
                     <li>
                         <i class="layui-icon layui-icon-ok">3</i>
                         <span class="layui-steps-title">第三步</span>
-                        <span class="layui-steps-content">填写数据库信息</span>
+                        <span class="layui-steps-content">{:t('install.fill_db_info')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">4</i>
                         <span class="layui-steps-title">第四步</span>
-                        <span class="layui-steps-content">创建数据表</span>
+                        <span class="layui-steps-content">{:t('install_ui.create_data_table')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">5</i>
@@ -43,7 +43,7 @@
                     <li>
                         <i class="layui-icon layui-icon-ok">6</i>
                         <span class="layui-steps-title">第六步</span>
-                        <span class="layui-steps-content">完成安装</span>
+                        <span class="layui-steps-content">{:t('install.finish_install')}</span>
                     </li>
                 </ul>
                 <div class="layui-tab-content">
@@ -51,10 +51,10 @@
                         <form class="layui-form layui-form-pane">
                             <div class="layui-tab layui-tab-brief">
                                 <ul class="layui-tab-title">
-                                    <li class="layui-this">服务协议</li>
-                                    <li>更新记录</li>
-                                    <li>授权代码</li>
-                                    <li>关于我们</li>
+                                    <li class="layui-this">{:t('install_ui.tab_agreement')}</li>
+                                    <li>{:t('install_ui.tab_update_log')}</li>
+                                    <li>{:t('install_ui.tab_auth_code')}</li>
+                                    <li>{:t('install_ui.tab_about')}</li>
                                 </ul>
                                 <div class="layui-tab-content">
                                     <div class="layui-tab-item layui-show" id="divLoading"><iframe style="width:100%;height:400px;border: 1px solid #fff ;" src="{:url('/Index/userAgreen')}"></iframe></div>
@@ -68,8 +68,8 @@
                                                         <div class="user-info-head" id="userInfoHead">
                                                             <img src="//q4.qlogo.cn/headimg_dl?dst_uin=2129876388&amp;spec=100" alt=""/>
                                                         </div>
-                                                        <h2 style="padding-top: 20px;">陌上花开</h2>
-                                                        <p style="padding-top: 8px;">花开的再灿烂，也有凋谢的一天，致我们过去的青春</p>
+                                                        <h2 style="padding-top: 20px;">{:t('install_ui.author')}</h2>
+                                                        <p style="padding-top: 8px;">{:t('install_ui.motto')}</p>
                                                     </div>
                                                     <div class="layui-text" style="padding-top: 30px;">
                                                         <div class="user-info-list-item">
@@ -78,21 +78,21 @@
                                                         </div>
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-app"></i>
-                                                            <p>SF-全力打造最好的授权系统</p>
+                                                            <p>{:t('install_ui.sf_slogan')}</p>
                                                         </div>
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-location"></i>
-                                                            <p>河北省沧州市</p>
+                                                            <p>{:t('install_ui.location')}</p>
                                                         </div>
                                                     </div>
                                                     <div class="layui-line-dash"></div>
                                                     <h3>标签</h3>
                                                     <div class="layui-badge-list" style="padding-top: 6px;">
-                                                        <span class="layui-badge layui-badge-red">很有想法的</span>
-                                                        <span class="layui-badge layui-badge-orange">专注设计</span>
-                                                        <span class="layui-badge layui-badge-yellow">强迫症</span>
+                                                        <span class="layui-badge layui-badge-red">{:t('install_ui.tag_creative')}</span>
+                                                        <span class="layui-badge layui-badge-orange">{:t('install_ui.tag_design')}</span>
+                                                        <span class="layui-badge layui-badge-yellow">{:t('install_ui.tag_ocd')}</span>
                                                         <span class="layui-badge layui-badge-green">懒</span>
-                                                        <span class="layui-badge layui-badge-blue">热爱编程</span>
+                                                        <span class="layui-badge layui-badge-blue">{:t('install_ui.tag_coding')}</span>
                                                         <span class="layui-badge layui-badge-purple">hhhc</span>
                                                     </div>
                                                 </div>
@@ -105,8 +105,8 @@
                                                         <div class="user-info-head" id="userInfoHead">
                                                             <img src="//q4.qlogo.cn/headimg_dl?dst_uin=869998889&amp;spec=100" alt=""/>
                                                         </div>
-                                                        <h2 style="padding-top: 20px;">世外云计算</h2>
-                                                        <p style="padding-top: 8px;"><a target="_blank" href="https://www.shiwaiyun.com/" style="text-decoration: none;font-weight: 700;">www.shiwaiyun.com</a> 企业级云服务器，品牌成立于2016年，拥有多年云计算经验，使用本授权系统<font style="color:#ff0000">免费领取8核8G云主机一月!</font></p>
+                                                        <h2 style="padding-top: 20px;">{:t('install_ui.sponsor_name')}</h2>
+                                                        <p style="padding-top: 8px;"><a target="_blank" href="https://www.shiwaiyun.com/" style="text-decoration: none;font-weight: 700;">www.shiwaiyun.com</a> {:t('install_ui.sponsor_desc')}，品牌成立于2016年，拥有多年云计算经验，使用本{:t('common_ui.auth_type')}系统<font style="color:#ff0000">免费领取8核8G云主机一月!</font></p>
                                                     </div>
                                                     <div class="layui-text" style="padding-top: 30px;">
                                                         <div class="user-info-list-item">
@@ -115,11 +115,11 @@
                                                         </div>
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-app"></i>
-                                                            <p>世外云-企业级云服务器</p>
+                                                            <p>世外云-{:t('install_ui.sponsor_desc')}</p>
                                                         </div>
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-location"></i>
-                                                            <p>河北省保定市</p>
+                                                            <p>{:t('install_ui.sponsor_location')}</p>
                                                         </div>
                                                     </div>
                                                     <div class="layui-line-dash"></div>
@@ -141,9 +141,9 @@
                                 </div>
                             </div>
                             <div id="id" class="layui-form-item">
-                                <input type="checkbox" name="agreen" id="agreen" value="agreen_SF" lay-skin="primary"  title="我已同意服务协议"/></div>
+                                <input type="checkbox" name="agreen" id="agreen" value="agreen_SF" lay-skin="primary"  title="{:t('install_ui.i_agree')}"/></div>
                             <button class="layui-btn layui-btn-fluid layui-btn-radius"
-                                    lay-filter="stepDemoFormSubmit1" lay-submit>开始安装
+                                    lay-filter="stepDemoFormSubmit1" lay-submit>{:t('install_ui.start_install')}
                             </button>
                         </form>
                     </div>
@@ -155,44 +155,44 @@
                         <div id="sfhtml"></div>
 
                         <div id="stepButton" style="display: none;margin-top: 20px;">
-                            <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">上一步
+                            <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
                             </button>
-                            <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="stepDemoFormSubmit2" lay-submit>下一步
+                            <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="stepDemoFormSubmit2" lay-submit>{:t('intro_ui.next')}
                             </button>
                         </div>
                     </div>
                     <div class="layui-tab-item layui-form-pane" id="divLoading3">
                         <form class="layui-form layui-form-pane" id="formBasForm" lay-filter="formBasForm">
                             <div class="layui-form-item">
-                                <label class="layui-form-label">数据库地址</label>
+                                <label class="layui-form-label">{:t('install_ui.db_host')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="hostname" value="localhost" class="layui-input"  placeholder="数据库的地址" autocomplete="off" required/>
+                                    <input type="text" name="hostname" value="localhost" class="layui-input"  placeholder="{:t('install_ui.db_host_placeholder')}" autocomplete="off" required/>
                                 </div></div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">数据库端口</label>
+                                <label class="layui-form-label">{:t('install_ui.db_port')}</label>
                                 <div class="layui-input-block">
-                                    <input type="number" name="hostport" value="3306" class="layui-input" placeholder="数据库的端口" autocomplete="off" required/>
+                                    <input type="number" name="hostport" value="3306" class="layui-input" placeholder="{:t('install_ui.db_port_placeholder')}" autocomplete="off" required/>
                                 </div></div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">数据库账号</label>
+                                <label class="layui-form-label">{:t('install_ui.db_user')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="username" value="" class="layui-input" placeholder="数据库的登录用户名" autocomplete="off" required/>
+                                    <input type="text" name="username" value="" class="layui-input" placeholder="{:t('install_ui.db_user_placeholder')}" autocomplete="off" required/>
                                 </div></div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">数据库密码</label>
+                                <label class="layui-form-label">{:t('install_ui.db_password')}</label>
                                 <div class="layui-input-block">
-                                    <input type="password" name="password" value="" class="layui-input" placeholder="数据库的登录密码" autocomplete="off" required/>
+                                    <input type="password" name="password" value="" class="layui-input" placeholder="{:t('install_ui.db_password_placeholder')}" autocomplete="off" required/>
                                 </div></div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">数据库库名</label>
+                                <label class="layui-form-label">{:t('install_ui.db_name')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="database" value="" class="layui-input" placeholder="数据库的库名" autocomplete="off" required/>
+                                    <input type="text" name="database" value="" class="layui-input" placeholder="{:t('install_ui.db_name_placeholder')}" autocomplete="off" required/>
                                 </div></div>
 
                             <div class="text-center">
-                                <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">上一步
+                                <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
                                 </button>
-                                <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="stepDemoFormSubmit3" lay-submit>下一步
+                                <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="stepDemoFormSubmit3" lay-submit>{:t('intro_ui.next')}
                                 </button>
                             </div>
                         </form>
@@ -203,19 +203,19 @@
                                 <div class="layui-row layui-col-space20">
                                     <div class="layui-col-md12">
                                         <blockquote class="layui-elem-quote-sf-info">
-                                            系统检测到你已安装过SF授权系统
+                                            系统检测到你已安装过SF{:t('common_ui.auth_type')}系统
                                         </blockquote>
                                     </div>
                                     <div class="layui-col-md4">
-                                        <button data-steps="prev" type="button" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">上一步
+                                        <button data-steps="prev" type="button" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
                                         </button>
                                     </div>
                                     <div class="layui-col-md4">
-                                        <button class="layui-btn layui-btn-SF-green layui-btn-fluid layui-btn-radius" lay-filter="jump_install" lay-submit>跳过安装
+                                        <button class="layui-btn layui-btn-SF-green layui-btn-fluid layui-btn-radius" lay-filter="jump_install" lay-submit>{:t('install_ui.skip_install')}
                                         </button>
                                     </div>
                                     <div class="layui-col-md4">
-                                        <button class="layui-btn layui-btn-fluid layui-btn-warm layui-btn-radius" lay-filter="must_install" lay-submit>强制重新安装
+                                        <button class="layui-btn layui-btn-fluid layui-btn-warm layui-btn-radius" lay-filter="must_install" lay-submit>{:t('install_ui.force_reinstall')}
                                         </button>
                                     </div>
                                 </div>
@@ -223,11 +223,11 @@
                             <div id="mysql_new" style="display: none">
                                 <div class="layui-row layui-col-space20">
                                     <div class="layui-col-md6">
-                                        <button data-steps="prev" type="button" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">上一步
+                                        <button data-steps="prev" type="button" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
                                         </button>
                                     </div>
                                     <div class="layui-col-md6">
-                                        <button class="layui-btn layui-btn-fluid layui-btn-radius" lay-filter="mysql_install" lay-submit>创建数据表
+                                        <button class="layui-btn layui-btn-fluid layui-btn-radius" lay-filter="mysql_install" lay-submit>{:t('install_ui.create_data_table')}
                                         </button>
                                     </div>
                                 </div>
@@ -238,22 +238,22 @@
                         <form class="layui-form layui-form-pane" id="adminForm" lay-filter="adminForm">
                             <div class="layui-tab layui-tab-brief">
                                 <ul class="layui-tab-title">
-                                    <li class="layui-this">站长信息</li>
-                                    <li>站点配置</li>
-                                    <li>安全配置</li>
+                                    <li class="layui-this">{:t('install_ui.admin_info')}</li>
+                                    <li>{:t('install_ui.site_config')}</li>
+                                    <li>{:t('install_ui.safe_config')}</li>
                                 </ul>
                                 <div class="layui-tab-content">
                                     <div class="layui-tab-item layui-show">
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">管理员账号</label>
+                                            <label class="layui-form-label">{:t('install_ui.admin_account')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="admin_username" value="admin" class="layui-input"  placeholder="登录后台的账号" lay-required/>
+                                                <input type="text" name="admin_username" value="admin" class="layui-input"  placeholder="{:t('install_ui.admin_account_placeholder')}" lay-required/>
                                             </div>
                                         </div>
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">管理员密码</label>
+                                            <label class="layui-form-label">{:t('install_ui.admin_password')}</label>
                                             <div class="layui-input-block">
-                                                <input type="password" name="admin_password" value="123456" class="layui-input" placeholder="登录后台的密码" autocomplete="off" lay-required/>
+                                                <input type="password" name="admin_password" value="123456" class="layui-input" placeholder="{:t('install_ui.admin_password_placeholder')}" autocomplete="off" lay-required/>
                                             </div>
                                         </div>
                                         <div class="layui-form-item">
@@ -263,26 +263,26 @@
                                             </div>
                                         </div>
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">管理员邮箱</label>
+                                            <label class="layui-form-label">{:t('install_ui.admin_email')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="admin_email" value="" class="layui-input" placeholder="管理员的邮箱" lay-required/>
+                                                <input type="text" name="admin_email" value="" class="layui-input" placeholder="{:t('install_ui.admin_email_placeholder')}" lay-required/>
                                             </div>
-                                            <blockquote class="layui-elem-quote-sf-warning">请填写您的邮箱,用于登录后台</blockquote>
+                                            <blockquote class="layui-elem-quote-sf-warning">请填写您的邮箱,用于{:t('install_ui.login_backend_btn')}</blockquote>
                                         </div>
-                                        <hr/><i class="layui-icon layui-icon-tips"></i> 安装后可登录后台配置更多信息~
+                                        <hr/><i class="layui-icon layui-icon-tips"></i> {:t('install_ui.install_tip')}
                                     </div>
                                     <div class="layui-tab-item">
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">站点名称</label>
+                                            <label class="layui-form-label">{:t('install_ui.site_name')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="sitename" value="SF系统授权中心" class="layui-input" placeholder="该站点的名称" lay-required/>
+                                                <input type="text" name="sitename" value="SF系统{:t('common_ui.auth_type')}中心" class="layui-input" placeholder="{:t('install_ui.site_name_placeholder')}" lay-required/>
                                             </div>
                                         </div>
-                                        <hr/><i class="layui-icon layui-icon-tips"></i> 安装后可登录后台配置更多信息~
+                                        <hr/><i class="layui-icon layui-icon-tips"></i> {:t('install_ui.install_tip')}
                                     </div>
                                     <div class="layui-tab-item">
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">后台入口</label>
+                                            <label class="layui-form-label">{:t('install_ui.backend_entry')}</label>
                                             <div class="layui-input-block">
                                                 <input type="text" name="login_address" value="admin" class="layui-input"  placeholder="留空则默认为admin.php"/>
                                             </div>
@@ -291,25 +291,25 @@
                                             </blockquote>
                                         </div>
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">登陆口令</label>
+                                            <label class="layui-form-label">{:t('install_ui.login_token')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="SF_LOGIN_KEY" value="" class="layui-input"  placeholder="留空则不验证口令"/>
+                                                <input type="text" name="SF_LOGIN_KEY" value="" class="layui-input"  placeholder="留空则不{:t('login.verify_token_title')}"/>
                                             </div>
                                             <blockquote class="layui-elem-quote-sf-warning">
-                                                登陆后台所需的口令，留空则不需要验证口令<br><br>若口令为：123456<br>
-                                                登陆示例：{:DOMAIN}/后台入口?123456
+                                                {:t('install_ui.login_token_tip')}<br><br>若口令为：123456<br>
+                                                登陆示例：{:DOMAIN}/{:t('install_ui.backend_entry')}?123456
                                             </blockquote>
                                         </div>
-                                        <button type="button" id="binding" class="layui-btn layui-btn-warm layui-btn-fluid layui-btn-radius">点击绑定QQ快捷登陆
+                                        <button type="button" id="binding" class="layui-btn layui-btn-warm layui-btn-fluid layui-btn-radius">点击{:t('install_ui.binding_title')}QQ快捷登陆
                                         </button>
-                                        <hr/><i class="layui-icon layui-icon-tips"></i> 安装后可登录后台配置更多信息~
+                                        <hr/><i class="layui-icon layui-icon-tips"></i> {:t('install_ui.install_tip')}
                                     </div>
                                 </div>
                             </div>
                             <div class="text-center">
-                                <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">上一步
+                                <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
                                 </button>
-                                <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="admin_info" lay-submit>保存信息
+                                <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="admin_info" lay-submit>{:t('install_ui.save_info')}
                                 </button>
                             </div>
                         </form>
@@ -317,12 +317,12 @@
                     <div class="layui-tab-item text-center" id="divLoading6">
                         <i class="layui-icon layui-icon-ok layui-circle"
                            style="background: #52C41A;color: #fff;font-size:30px;font-weight:bold;padding: 20px;line-height: 80px;"></i>
-                        <div style="font-size: 24px;color: #333;margin-top: 30px;">安装成功</div>
-                        <div style="font-size: 14px;color: #666;margin-top: 20px;">欢迎使用SF授权系统！</div>
+                        <div style="font-size: 24px;color: #333;margin-top: 30px;">安装{:t('common.success')}</div>
+                        <div style="font-size: 14px;color: #666;margin-top: 20px;">欢迎使用SF{:t('common_ui.auth_type')}系统！</div>
                         <div style="text-align: center;margin: 50px 0 25px 0;">
-                            <button align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius" lay-filter="SFindex" lay-submit>网站首页
+                            <button align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius" lay-filter="SFindex" lay-submit>{:t('install_ui.website_home')}
                             </button>
-                            <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="loginadmin" lay-submit>登录后台
+                            <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="loginadmin" lay-submit>{:t('install_ui.login_backend_btn')}
                             </button>
                         </div>
                     </div>

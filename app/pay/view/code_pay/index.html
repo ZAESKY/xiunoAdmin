@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="white">
   <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>{$typeName}扫码支付</title>
+  <title>{$typeName}{:t('payment_ui.code_pay')}</title>
   <link href="{$codepay_path}/css/wechat_pay.css" rel="stylesheet" media="screen">
   <link href="//cdn.staticfile.org/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
   <link href="//cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -22,15 +22,15 @@
   </h1>
 
   <div class="mod-ct">
-    <div class="order" style="color:red;font-size:16px">请务必规定时间内支付下面显示的金额
+    <div class="order" style="color:red;font-size:16px">{:t('payment_ui.pay_in_time')}
     </div>
 
-    <div class="amount"  style="position: relative;" ><span id="money">￥{$price}</span><div style="position: absolute;font-size: 10px;top: 29px;left: 75%;"><a href="#" class="copy" id="copy" data-clipboard-text="{$user_data['money']}">复制金额</a></div></div>
+    <div class="amount"  style="position: relative;" ><span id="money">￥{$price}</span><div style="position: absolute;font-size: 10px;top: 29px;left: 75%;"><a href="#" class="copy" id="copy" data-clipboard-text="{$user_data['money']}">{:t('payment_ui.copy_amount')}</a></div></div>
     <div class="qrcode-img-wrapper" data-role="qrPayImgWrapper">
       <div data-role="qrPayImg" class="qrcode-img-area">
-        <div class="ui-loading qrcode-loading" data-role="qrPayImgLoading" style="display: none;">加载中</div>
+        <div class="ui-loading qrcode-loading" data-role="qrPayImgLoading" style="display: none;">{:t('payment_ui.loading_dots')}</div>
         <div style="position: relative;display: inline-block;">
-          <img id='show_qrcode' alt="加载中..." src="{$qr}" width="210" height="210" style="display: block;">
+          <img id='show_qrcode' alt="{:t('payment_ui.loading_dots')}..." src="{$qr}" width="210" height="210" style="display: block;">
           <img onclick="$('#use').hide()" id="use" src="{$codepay_path}/img/use_{$type}.png"
                style="position: absolute;top: 50%;left: 50%;width:32px;height:32px;margin-left: -21px;margin-top: -21px">
         </div>
@@ -41,7 +41,7 @@
 
     <!--        这里加一些自己的提示-->
     <div class="time-item" id="msg">
-      <h1>二维码过期时间</h1>
+      <h1>{:t('payment_ui.qr_expire_time')}</h1>
       <strong id="hour_show">0时</strong>
       <strong id="minute_show">0分</strong>
       <strong id="second_show">0秒</strong>
@@ -51,7 +51,7 @@
       <div class="ico-scan"></div>
       <div class="tip-text">
         <p>请使用{$typeName}扫一扫</p>
-        <p>扫描二维码完成支付</p>
+        <p>{:t('payment_ui.scan_pay')}</p>
         <p><div id="kf" ></div></p>
       </div>
     </div>
@@ -71,8 +71,8 @@
   </div>
   <div class="foot">
     <div class="inner">
-      <p>手机用户可保存上方二维码到手机中</p>
-      <p>在{$typeName}扫一扫中选择“相册”即可</p>
+      <p>{:t('payment_ui.save_qr_mobile')}</p>
+      <p>在{$typeName}扫一扫中{:t('common_ui.choose')}“相册”即可</p>
 
     </div>
   </div>

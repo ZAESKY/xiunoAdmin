@@ -38,12 +38,12 @@ class Menu extends BaseModel
         try{
             $userInfo = parent::getUserInfo();
         }catch (\Exception $e){
-            return message("获取用户信息失败！[errorCode:UserInfoError]" ,false);
+            return message(t("user.info_error").'[errorCode:UserInfoError]' ,false);
         }
 
         $powerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
         if(!$powerPriceInfo) {
-            return message("获取用户权限信息失败！[errorCode:GetUserPowerInfoError]" ,false);
+            return message(t("user.power_info_error").'[errorCode:GetUserPowerInfoError]' ,false);
         }
         $parent_id = [];
         // Role-based menu control: user sees shared + user menu entries.

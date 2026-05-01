@@ -341,31 +341,31 @@
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">应用公告</label>
                                 <div class="layui-input-block">
-                                    <textarea name="app_notice" class="layui-textarea" style="height:100px" placeholder="该应用的公告，可留空" ></textarea>
+                                    <textarea id="app_notice_editor" name="app_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用的公告，可留空" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">卡密兑换公告</label>
                                 <div class="layui-input-block">
-                                    <textarea name="cdkey_notice" class="layui-textarea" style="height:100px" placeholder="该应用卡密兑换时的公告" ></textarea>
+                                    <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用卡密兑换时的公告" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">余额充值公告</label>
                                 <div class="layui-input-block">
-                                    <textarea name="pay_notice" class="layui-textarea" style="height:100px" placeholder="该应用余额充值时的公告" ></textarea>
+                                    <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用余额充值时的公告" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">用户自助注册公告</label>
                                 <div class="layui-input-block">
-                                    <textarea name="register_notice" class="layui-textarea" style="height:100px" placeholder="该应用用户自助注册时的公告" ></textarea>
+                                    <textarea id="register_notice_editor" name="register_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用用户自助注册时的公告" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">更换授权公告</label>
                                 <div class="layui-input-block">
-                                    <textarea name="replace_notice" class="layui-textarea" style="height:100px" placeholder="该应用更换授权时的公告" ></textarea>
+                                    <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用更换授权时的公告" ></textarea>
                                 </div>
                             </div>
                         </div>
@@ -384,22 +384,44 @@
 </div>
 {include file="/public/footer"}
 <script>
-    layui.use(['upload', 'admin', 'form', 'element','jquery', 'notice'], function () {
+    layui.use(['upload', 'admin', 'form', 'element','jquery', 'notice', 'layedit'], function () {
         var form = layui.form;
         var upload = layui.upload;
         var $ = layui.jquery;
         var notice = layui.notice;
         var element = layui.element;
         var admin = layui.admin;
+        var layedit = layui.layedit;
         admin.iframeAuto();
+        var richEditors = [];
+
+        function initRichEditors() {
+            if (richEditors.length) {
+                return;
+            }
+            $('.sf-rich-editor').each(function () {
+                richEditors.push(layedit.build($(this).attr('id'), {
+                    height: 220,
+                    tool: ['strong', 'italic', 'underline', 'del', '|', 'left', 'center', 'right', '|', 'link', 'unlink', 'face']
+                }));
+            });
+        }
+
+        function syncRichEditors() {
+            $.each(richEditors, function (_, index) {
+                layedit.sync(index);
+            });
+        }
 
         var appInfoData = JSON.parse(JSON.stringify(admin.getLayerData()));
         if(!appInfoData.sf){
             $("input[name='logo']").val(appInfoData.logo);
             layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', appInfoData.logo);
             form.val('formBasForm', appInfoData);
+            initRichEditors();
             form.render();
         }
+        initRichEditors();
 
         notice.msg('正在获取列表中..', {icon: 4, close: true});
         $.ajax({
@@ -485,6 +507,11 @@
             }
         });
         form.on('submit(submitBtn)', function (data) {
+            syncRichEditors();
+            data.field = {};
+            $.each($('#formBasForm').serializeArray(), function (_, item) {
+                data.field[item.name] = item.value;
+            });
             if (data.field.name == "") {
                 notice.msg('请输入应用名称！', {icon: 3, audio:'1'});
                 return false;

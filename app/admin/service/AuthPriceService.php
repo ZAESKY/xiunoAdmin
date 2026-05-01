@@ -39,7 +39,7 @@ class AuthPriceService extends BaseService
                 if($authInfo){
                     $res['templateName'] = $authInfo['name'];
                 }else{
-                    $res['templateName'] = '获取模板名称失败';
+                    $res['templateName'] = t('auth.get_template_info_failed');
                 }
             }
             return $result;

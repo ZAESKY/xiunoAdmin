@@ -9,22 +9,22 @@
                     <div class="layui-inline">
                         <label class="layui-form-label">内&emsp;容</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="输入ID或名称"/>
+                            <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_name')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
                         <label class="layui-form-label">状&emsp;态</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
-                                <option value="">选择状态</option>
-                                <option value="1">显示</option>
-                                <option value="0">隐藏</option>
+                                <option value="">{:t('common_ui.select_used_status')}</option>
+                                <option value="1">{:t('common.show')}</option>
+                                <option value="0">{:t('common.hide')}</option>
                             </select>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         <label class="layui-form-label">应&emsp;用</label>
                         <div class="layui-input-inline">
                             <select class="layui-input ew-select-fixed" lay-filter="template" lay-search>
-                                <option value="">全部应用</option>
+                                <option value="">{:t('common_ui.select_all_apps')}</option>
                                 {volist name="app_list.data.data" id="res"}
                                 <option value="{$res.id}">{$res.name}</option>
                                 {/volist}

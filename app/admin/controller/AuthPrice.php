@@ -18,7 +18,7 @@ class AuthPrice extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->list();
-                return message('获取列表成功！' ,true ,['data' => $result]);
+                return message(t('common.list_success') ,true ,['data' => $result]);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);
@@ -35,7 +35,7 @@ class AuthPrice extends Backend
         try{
             if(IS_POST){
                 $this->service->setSort();
-                return message('排序成功！' ,true);
+                return message(t('sort.success') ,true);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);

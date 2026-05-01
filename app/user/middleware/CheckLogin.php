@@ -22,7 +22,7 @@ class CheckLogin
     {
         if (empty(cookie('userId')) && !preg_match('/login/', $request->pathinfo())) {
             if(request()->isPost()){
-                exit(json_encode(message("未登录！" ,false)));
+                exit(json_encode(message(t("login.not_logged_in") ,false)));
             }else{
                 return redirect((string)url('/login/index'));
             }

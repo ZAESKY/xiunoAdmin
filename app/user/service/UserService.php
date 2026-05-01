@@ -41,11 +41,11 @@ class UserService extends UserBaseService
             $result = $this->model->list();
             foreach($result as $res){
                 if(!parent::isSubordinatePower($res['power'])){
-                    $res['password'] = '权限不足无法查看';
+                    $res['password'] = t('user.no_permission_to_view');
                 }
                 $res['powerSpan'] = 'gray';
-                $res['powerName'] = '权限错误';
-                $res['appName'] = '应用错误';
+                $res['powerName'] = t('user.power_error');
+                $res['appName'] = t('app.get_info_failed');
                 $powerInfo = parent::getPowerPriceInfo($res['power']);
                 $appInfo = parent::getAppInfo($res['appid']);
                 if($powerInfo){

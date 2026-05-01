@@ -62,7 +62,7 @@ class AuthPriceModel extends BaseModel
         }
         if($permanent_switch != 1){
             if($day == '0'){
-                return message("请输入授权天数, 不能为0！" ,false);
+                return message(t('auth.correct_expire_time') ,false);
             }
         }
         if(!empty($id)){
@@ -80,9 +80,9 @@ class AuthPriceModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                return message("编辑成功！" ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message("编辑失败！".$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $result = self::order('sort' ,'desc')
@@ -102,9 +102,9 @@ class AuthPriceModel extends BaseModel
             ];
             try{
                 self::insert($data);
-                return message("添加成功！" ,true);
+                return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
-                return message("添加失败！".$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
     }
@@ -112,11 +112,11 @@ class AuthPriceModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此价格！');
+                throw new Exception(t('common.no_data'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -132,11 +132,11 @@ class AuthPriceModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此价格！');
+                throw new Exception(t('common.no_data'));
             }
 
             self::where('id', $id)
@@ -155,13 +155,13 @@ class AuthPriceModel extends BaseModel
             $id = !empty($post['id'])?intval($post['id']):null;
             $type = !empty($post['type'])?intval($post['type']):null;
             if(empty($tid)){
-                throw new Exception('缺少TID参数！');
+                throw new Exception(t('validation.params_missing'));
             }
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             if(empty($type)){
-                throw new Exception('缺少类型参数！');
+                throw new Exception(t('validation.missing_type'));
             }
             $row = self::where('id', $id)->find();
             $sort = $row['sort'];
@@ -213,7 +213,7 @@ class AuthPriceModel extends BaseModel
                         ->update();
                     return true;
                 default:
-                    throw new Exception('不存在此操作！');
+                    throw new Exception(t('common_ui.type_error'));
             }
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

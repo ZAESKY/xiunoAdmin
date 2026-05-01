@@ -17,7 +17,7 @@ class Version extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->setType();
-                return message('更改类型成功！' ,true);
+                return message(t('version.change_type_success') ,true);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);
@@ -28,7 +28,7 @@ class Version extends Backend
         try{
             if(IS_POST){
                 $this->service->setBeta();
-                return message('更改资格成功！' ,true);
+                return message(t('version.change_qualify_success') ,true);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);
@@ -39,7 +39,7 @@ class Version extends Backend
         try{
             if(IS_POST){
                 $this->service->deleteFile();
-                return message('删除成功！' ,true);
+                return message(t('user.delete_success') ,true);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);
@@ -50,7 +50,7 @@ class Version extends Backend
         try{
             if(IS_POST){
                 $this->service->checkFile();
-                return message('存在' ,true);
+                return message(t('common.success') ,true);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);
@@ -61,7 +61,7 @@ class Version extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->list();
-                return message('获取列表成功！' ,true, ['data' => $result]);
+                return message(t('common.list_success') ,true, ['data' => $result]);
             }
         }catch (\Exception $e){
             return message($e->getMessage(), false);

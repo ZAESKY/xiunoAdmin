@@ -38,24 +38,24 @@ class VersionModel extends BaseModel
             $post = request()->post();
             $id = !empty($post['id'])?intval($post['id']):null;
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此版本！');
+                throw new Exception(t('version.not_exist'));
             }
             if(empty($row['download_catalogue'])){
-                throw new Exception('该版本的下载目录为空，请手动去数据库修改“download_catalogue”字段，并在app/common/download/'.(($row['type'] == 0)?'release':'update').'目录下创建目录名为”你所修改的download_catalogue字段”的目录');
+                throw new Exception(t('version.get_download_dir_empty'));
             }
             $filePath = APP_PATH.'/common/download/'.(($row['type'] == 0)?'release':'update').'/'.$row['download_catalogue'];
             if(!is_dir($filePath)){
-                throw new Exception('该应用的下载目录不存在，请手动在app/common/download/'.(($row['type'] == 0)?'release':'update').'目录下创建目录”'.$row['download_catalogue'].'”');
+                throw new Exception(t('version.download_dir_not_exist'));
             }
             if(rmdirs($filePath,false)){
                 Cache::tag('SF_Version')->clear();
                 return true;
             }else{
-                throw new Exception('删除失败！');
+                throw new Exception(t('user.delete_failed'));
             }
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -67,21 +67,21 @@ class VersionModel extends BaseModel
             $post = request()->post();
             $id = !empty($post['id'])?intval($post['id']):null;
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此版本！');
+                throw new Exception(t('version.not_exist'));
             }
             if(empty($row['download_catalogue'])){
-                throw new Exception('该版本的下载目录为空，请手动去数据库修改“download_catalogue”字段，并在app/common/download/'.(($row['type'] == 0)?'release':'update').'目录下创建目录名为”你所修改的download_catalogue字段”的目录');
+                throw new Exception(t('version.get_download_dir_empty'));
             }
             $filePath = APP_PATH.'/common/download/'.(($row['type'] == 0)?'release':'update').'/'.$row['download_catalogue'];
             if(!is_dir($filePath)){
-                throw new Exception('该应用的下载目录不存在，请手动在app/common/download/'.(($row['type'] == 0)?'release':'update').'目录下创建目录”'.$row['download_catalogue'].'”');
+                throw new Exception(t('version.download_dir_not_exist'));
             }
             if(!is_file($filePath.'/SF.zip')){
-                throw new Exception('不存在');
+                throw new Exception(t('common.no_data'));
             }else{
                 return true;
             }
@@ -110,25 +110,25 @@ class VersionModel extends BaseModel
         if(!empty($id)) {
             $row = $this->getInfo($id);
             if(!$row){
-                return message('不存在此版本！' ,false);
+                return message(t('version.not_exist') ,false);
             }
             if($edition != $row['edition']){
                 $row2 = self::where(['edition' => $edition, 'appid' => $appid])->find();
                 if ($row2) {
-                    return message('该应用已存在此版本！', false);
+                    return message(t('version.already_exist'), false);
                 }
             }
             if($version != $row['version']){
                 $row3 = self::where(['version' => $version, 'appid' => $appid])->find();
                 if ($row3) {
-                    return message('该应用已存在此版本号！', false);
+                    return message(t('version.number_exists'), false);
                 }
             }
             if(empty($row['download_catalogue'])){
-                return message('该版本的下载目录为空，请手动去数据库修改“download_catalogue”字段，并在app/common/download/'.(($row['type'] == 0)?'release':'update').'目录下创建目录名为”你所修改的download_catalogue字段”的目录', false);
+                return message(t('version.get_download_dir_empty'), false);
             }
             if(!is_dir(APP_PATH.'/common/download/'.(($row['type'] == 0)?'release':'update').'/'.$row['download_catalogue'])){
-                return message('该版本的下载目录不存在，请手动在app/common/download/'.(($row['type'] == 0)?'release':'update').'目录下创建目录”'.$row['download_catalogue'].'”', false);
+                return message(t('version.download_dir_not_exist'), false);
             }
             $data = [
                 'edition' => $edition,
@@ -144,27 +144,27 @@ class VersionModel extends BaseModel
                     ->data($data)
                     ->update();
                 Cache::tag('SF_Version')->clear();
-                return message('编辑成功！' ,true);
+                return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                return message('编辑失败！'.$e->getMessage() ,false);
+                return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
             $row = self::where(['edition' => $edition, 'appid' => $appid])->find();
             if ($row) {
-                return message('该应用已存在此版本！', false);
+                return message(t('version.already_exist'), false);
             }
             $row = self::where(['version' => $version, 'appid' => $appid])->find();
             if ($row) {
-                return message('该应用已存在此版本号！', false);
+                return message(t('version.number_exists'), false);
             }
             $download_catalogue = $appid.'_'.$version.'_'.md5(time() . 'SF2129876388');
             try {
                 $result = mkdirs(APP_PATH.'/common/download/'.(($type == 0)?'release':'update').'/'.$download_catalogue);
                 if(!$result){
-                    return message('创建目录失败！', false);
+                    return message(t('app.create_dir_failed'), false);
                 }
             } catch (\Exception $e) {
-                return message('创建目录失败！' . $e->getMessage(), false);
+                return message(t('app.create_dir_failed') . $e->getMessage(), false);
             }
             $data = [
                 'edition' => $edition,
@@ -180,9 +180,9 @@ class VersionModel extends BaseModel
             try{
                 self::insert($data);
                 Cache::tag('SF_Version')->clear();
-                return message('添加成功！' ,true);
+                return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
-                return message('添加失败！'.$e->getMessage() ,false);
+                return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
     }
@@ -190,11 +190,11 @@ class VersionModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此版本！');
+                throw new Exception(t('version.not_exist'));
             }
             self::where('id', $id)->delete();
             Cache::tag('SF_Version')->clear();
@@ -211,11 +211,11 @@ class VersionModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此版本！');
+                throw new Exception(t('version.not_exist'));
             }
 
             self::where('id', $id)
@@ -235,11 +235,11 @@ class VersionModel extends BaseModel
             $type = !empty($post['type'])?intval($post['type']):0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此授权！');
+                throw new Exception(t('version.not_exist'));
             }
             self::where('id', $id)
                 ->data(['type' => $type])
@@ -258,11 +258,11 @@ class VersionModel extends BaseModel
             $beta = !empty($post['beta'])?intval($post['beta']):0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此授权！');
+                throw new Exception(t('version.not_exist'));
             }
             self::where('id', $id)
                 ->data(['beta' => $beta])

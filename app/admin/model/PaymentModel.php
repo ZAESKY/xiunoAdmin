@@ -50,23 +50,23 @@ class PaymentModel extends BaseModel
         if (!empty($id)) {
             $row = $this->getInfo($id);
             if (!$row) {
-                return message("不存在此认证！", false);
+                return message(t('payment.not_exist'), false);
             }
             if ($url != $row['url']) {
                 $row2 = self::where(['url' => $url, 'appid' => $appid])->find();
                 if ($row2) {
-                    return message("该应用已存在此认证！", false);
+                    return message(t('payment.already_exist'), false);
                 }
             }
             if($type != -1) {
                 try {
                     $authPriceInfo = parent::getAuthPriceInfo($type);
                     if ($authPriceInfo == false) {
-                        return message("获取价格信息失败！", false);
+                        return message(t('payment.get_price_failed'), false);
                     }
                     if ($authPriceInfo['diy_switch'] == 1) {
                         if (empty($endtime)) {
-                            return message("请输入到期时间！", false);
+                            return message(t('payment.enter_expire_time'), false);
                         }
                     } else {
                         if ($authPriceInfo['permanent_switch'] == 1) {
@@ -77,7 +77,7 @@ class PaymentModel extends BaseModel
                         }
                     }
                 } catch (\Exception $e) {
-                    return message("获取价格信息失败！" . $e->getMessage(), false);
+                    return message(t('payment.get_price_failed') . $e->getMessage(), false);
                 }
             }else{
                 $endtime = $row['endtime'];
@@ -96,24 +96,24 @@ class PaymentModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                return message("编辑成功！", true);
+                return message(t('user.edit_success'), true);
             } catch (\Exception $e) {
-                return message("编辑失败！" . $e->getMessage(), false);
+                return message(t('user.edit_failed') . $e->getMessage(), false);
             }
         } else {
             $row = self::where(['url' => $url, 'appid' => $appid])->find();
             if ($row) {
-                return message("该应用已存在此认证！", false);
+                return message(t('payment.already_exist'), false);
             }
 
             try{
                 $authPriceInfo = parent::getAuthPriceInfo($type);
                 if($authPriceInfo == false){
-                    return message("获取价格信息失败！",false);
+                    return message(t('payment.get_price_failed'),false);
                 }
                 if($authPriceInfo['diy_switch'] == 1){
                     if(empty($endtime)){
-                        return message("请输入到期时间！" ,false);
+                        return message(t('payment.enter_expire_time') ,false);
                     }
                 }else{
                     if($authPriceInfo['permanent_switch'] == 1){
@@ -124,7 +124,7 @@ class PaymentModel extends BaseModel
                     }
                 }
             } catch (\Exception $e) {
-                return message("获取价格信息失败！".$e->getMessage() ,false);
+                return message(t('payment.get_price_failed').$e->getMessage() ,false);
             }
 
             $data = [
@@ -140,9 +140,9 @@ class PaymentModel extends BaseModel
             ];
             try {
                 self::insert($data);
-                return message("添加成功！", true);
+                return message(t('user.add_success'), true);
             } catch (\Exception $e) {
-                return message("添加失败！" . $e->getMessage(), false);
+                return message(t('user.add_failed') . $e->getMessage(), false);
             }
         }
     }
@@ -150,11 +150,11 @@ class PaymentModel extends BaseModel
     public function drop($id){
         try{
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此认证！');
+                throw new Exception(t('payment.not_exist'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -170,11 +170,11 @@ class PaymentModel extends BaseModel
             $status = !empty($post['status'])?1:0;
 
             if(empty($id)){
-                throw new Exception('缺少ID参数！');
+                throw new Exception(t('validation.missing_id'));
             }
             $row = $this->getInfo($id);
             if(!$row){
-                throw new Exception('不存在此认证！');
+                throw new Exception(t('payment.not_exist'));
             }
 
             self::where('id', $id)
@@ -193,12 +193,12 @@ class PaymentModel extends BaseModel
             $permanent_switch = !empty($post['permanent_switch'])?1:0;
 
             if(empty($id)){
-                return message("缺少ID参数！" ,false);
+                return message(t('validation.missing_id') ,false);
             }
 
             $row = $this->getInfo($id);
             if(!$row){
-                return message("不存在此认证！" ,false);
+                return message(t('payment.not_exist') ,false);
             }
 
             self::where('id', $id)

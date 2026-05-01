@@ -2,44 +2,44 @@
 
 <div class="layui-fluid sf-dashboard">
     <div class="sf-stat-grid">
-        <a class="sf-stat-card" ew-href="{:url('/Auth/list')}" ew-title="授权列表">
+        <a class="sf-stat-card" ew-href="{:url('/Auth/list')}" ew-title="{:t('common_ui.auth_list')}">
             <span class="sf-stat-icon sf-stat-icon-blue"><i class="layui-icon layui-icon-auz"></i></span>
             <strong>{$auth_count}</strong>
-            <span class="sf-stat-label">授权总数</span>
+            <span class="sf-stat-label">{:t('dashboard.auth_total')}</span>
             {lt name="auth_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$auth_increase|abs} 个</em>
+            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$auth_increase|abs}</em>
             {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$auth_increase|abs} 个</em>
+            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$auth_increase|abs}</em>
             {/lt}
         </a>
         <a class="sf-stat-card" ew-href="{:url('/User/list')}" ew-title="用户列表">
             <span class="sf-stat-icon sf-stat-icon-gold"><i class="layui-icon layui-icon-group"></i></span>
             <strong>{$user_count}</strong>
-            <span class="sf-stat-label">用户总数</span>
+            <span class="sf-stat-label">{:t('dashboard.user_total')}</span>
             {lt name="user_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$user_increase|abs} 个</em>
+            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$user_increase|abs}</em>
             {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$user_increase|abs} 个</em>
+            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$user_increase|abs}</em>
             {/lt}
         </a>
-        <a class="sf-stat-card" ew-href="{:url('/Pirate/list')}" ew-title="盗版列表">
+        <a class="sf-stat-card" ew-href="{:url('/Pirate/list')}" ew-title="{:t('common_ui.pirate_list')}">
             <span class="sf-stat-icon sf-stat-icon-red"><i class="layui-icon layui-icon-website"></i></span>
             <strong>{$pirate_count}</strong>
-            <span class="sf-stat-label">盗版总数</span>
+            <span class="sf-stat-label">{:t('dashboard.pirate_total')}</span>
             {lt name="pirate_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$pirate_increase|abs} 个</em>
+            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$pirate_increase|abs}</em>
             {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$pirate_increase|abs} 个</em>
+            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$pirate_increase|abs}</em>
             {/lt}
         </a>
         <a class="sf-stat-card" ew-href="{:url('/Payment/list')}" ew-title="认证列表">
             <span class="sf-stat-icon sf-stat-icon-green"><i class="layui-icon layui-icon-ok-circle"></i></span>
             <strong>{$payment_count}</strong>
-            <span class="sf-stat-label">认证总数</span>
+            <span class="sf-stat-label">{:t('dashboard.payment_total')}</span>
             {lt name="payment_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$payment_increase|abs} 个</em>
+            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$payment_increase|abs}</em>
             {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$payment_increase|abs} 个</em>
+            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$payment_increase|abs}</em>
             {/lt}
         </a>
     </div>
@@ -47,8 +47,8 @@
     <div class="sf-dashboard-grid">
         <section class="sf-panel sf-panel-map">
             <div class="sf-panel-header">
-                <h3>用户分布</h3>
-                <span>核心业务数据概览</span>
+                <h3>{:t('dashboard.user_distribution')}</h3>
+                <span>{:t('dashboard.business_overview')}</span>
             </div>
             <div class="sf-map-layout">
                 <div class="sf-china-map" aria-hidden="true">
@@ -56,10 +56,10 @@
                     <span class="map-dot dot-south"></span>
                     <span class="map-dot dot-west"></span>
                     <span class="map-dot dot-north"></span>
-                    <span class="map-label label-a">华东</span>
-                    <span class="map-label label-b">华南</span>
-                    <span class="map-label label-c">西南</span>
-                    <span class="map-label label-d">华北</span>
+                    <span class="map-label label-a">{:t('dashboard.east_china')}</span>
+                    <span class="map-label label-b">{:t('dashboard.south_china')}</span>
+                    <span class="map-label label-c">{:t('dashboard.southwest_china')}</span>
+                    <span class="map-label label-d">{:t('dashboard.north_china')}</span>
                 </div>
                 <div class="sf-rank-list">
                     {foreach $balance_ranking as $key=>$res}
@@ -76,16 +76,16 @@
         <aside class="sf-side-stack">
             <section class="sf-panel sf-online-panel">
                 <div class="sf-panel-header">
-                    <h3>在线人数</h3>
+                    <h3>{:t('dashboard.online_count')}</h3>
                     <span>{:date('H:i:s')}</span>
                 </div>
                 <div class="sf-online-number">{$user_count}</div>
-                <p><i></i>9 秒后更新</p>
+                <p><i></i>{:t('dashboard.seconds_update', ['seconds' => 9])}</p>
             </section>
             <section class="sf-panel sf-browser-panel">
                 <div class="sf-panel-header">
-                    <h3>浏览器分布</h3>
-                    <span>访问占比</span>
+                    <h3>{:t('dashboard.browser_distribution')}</h3>
+                    <span>{:t('dashboard.visit_ratio')}</span>
                 </div>
                 <div class="sf-donut"></div>
                 <div class="sf-browser-legend">
@@ -101,14 +101,14 @@
     <div class="sf-bottom-grid">
         <section class="sf-panel">
             <div class="sf-panel-header">
-                <h3>今日最新日志</h3>
+                <h3>{:t('dashboard.today_log')}</h3>
                 <span>Recent logs</span>
             </div>
             <div class="sf-log-list mini-bar">
                 {empty name="log_list"}
                 <div class="sf-log-item">
                     <i></i>
-                    <span>暂无日志</span>
+                    <span>{:t('dashboard.no_log')}</span>
                     <time>{:date('Y-m-d H:i:s')}</time>
                 </div>
                 {else/}
@@ -125,7 +125,7 @@
 
         <section class="sf-panel sf-safe-panel">
             <div class="sf-panel-header">
-                <h3>安全中心</h3>
+                <h3>{:t('dashboard.security_center')}</h3>
                 <span>Security center</span>
             </div>
             <div class="sf-safe-content">
@@ -146,7 +146,7 @@
         var notice = layui.notice;
         var CircleProgress = layui.CircleProgress;
 
-        $('#loading').html('<h2><b>正在检测中<span id="loginload">.</span></b></h2>');
+        $('#loading').html('<h2><b>{:t("system.detect_checking")}<span id="loginload">.</span></b></h2>');
         var loadnum = 1;
 
         setInterval(function (){
@@ -174,19 +174,19 @@
                         max: 100,
                         value: 0,
                         textFormat: function (value) {
-                            return value == 100 ? '安全' : value + '分';
+                            return value == 100 ? '{:t("dashboard.secure")}' : value + '{:t("common.score")}';
                         }
                     });
                     var htmlarr = [];
-                    htmlarr.push('<div class="sf-safe-scroll"><table class="layui-table sf-table" lay-even lay-skin="nob"><thead><tr><th><b>重要度</b></th><th><b>详情</b></th></tr></thead>');
+                    htmlarr.push('<div class="sf-safe-scroll"><table class="layui-table sf-table" lay-even lay-skin="nob"><thead><tr><th><b>{:t("common.importance")}</b></th><th><b>{:t("common.detail")}</b></th></tr></thead>');
                     $.each(data.data.check_msg.danger, function(){
-                        htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-danger">重要</span></td><td>'+ this +'</td></tr>');
+                        htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-danger">{:t("dashboard.security_important")}</span></td><td>'+ this +'</td></tr>');
                     });
                     $.each(data.data.check_msg.warning, function(){
-                        htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-warm">注意</span></td><td>'+ this +'</td></tr>');
+                        htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-warm">{:t("dashboard.security_notice")}</span></td><td>'+ this +'</td></tr>');
                     });
                     $.each(data.data.check_msg.info, function(){
-                        htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-info">一般</span></td><td>'+ this +'</td></tr>');
+                        htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-info">{:t("dashboard.security_normal")}</span></td><td>'+ this +'</td></tr>');
                     });
                     htmlarr.push('</table></div>');
                     var html = htmlarr.join("");
@@ -195,27 +195,27 @@
                             progress.value += 1;
                             if (progress.value == progress.max) {
                                 $('#SF_Progress').addClass('circle-progress-success');
-                                $('#loading').html('<h2>当前安全系数：<b class="sf-safe-high">极高</b></h2>');
+                                $('#loading').html('<h2>{:t("common.current_safety")}：<b class="sf-safe-high">{:t("dashboard.security_extreme")}</b></h2>');
                                 $('#sfhtml').html(html);
                                 clearInterval(timer);
                             }
                         } else {
                             if(data.data.safe >= 80){
                                 $('#SF_Progress').addClass('circle-progress-info');
-                                $('#loading').html('<h2>当前安全系数：<b class="sf-safe-info">高</b></h2>');
+                                $('#loading').html('<h2>{:t("common.current_safety")}：<b class="sf-safe-info">{:t("dashboard.security_high")}</b></h2>');
                             } else if(data.data.safe >= 60){
                                 $('#SF_Progress').addClass('circle-progress-warning');
-                                $('#loading').html('<h2>当前安全系数：<b class="sf-safe-warn">中</b></h2>');
+                                $('#loading').html('<h2>{:t("common.current_safety")}：<b class="sf-safe-warn">{:t("dashboard.security_medium")}</b></h2>');
                             } else {
                                 $('#SF_Progress').addClass('circle-progress-danger');
-                                $('#loading').html('<h2>当前安全系数：<b class="sf-safe-danger">低</b></h2>');
+                                $('#loading').html('<h2>{:t("common.current_safety")}：<b class="sf-safe-danger">{:t("dashboard.security_low")}</b></h2>');
                             }
                             $('#sfhtml').html(html);
                             clearInterval(timer);
                         }
                     }, 30);
                 } else {
-                    notice.msg('服务器错误！', {icon: 2});
+                    notice.msg('{:t("common.server_error")}', {icon: 2});
                 }
             }
         });

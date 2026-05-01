@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{$title}|验证口令</title>
+    <title>{$title}|{:t('login.verify_token_title')}</title>
     <meta name="keywords" content="{$keywords}"/>
     <meta name="description" content="{$description}"/>
     <meta name="renderer" content="webkit">
@@ -59,7 +59,7 @@
             <div class="layui-card layui-hide" id="loading" style="opacity: 0.95">
                 <div class="layui-card-body images" style="color:black;background-image: url('https://bing.ioliu.cn/v1/rand?h=70');">
                     <img style="border-radius:50%;width:50px;height:50px;"  src="{__IMG__}logo.png" alt="SF">
-                    <b style="color:#fff;font-size: 18px">登陆口令验证</b>
+                    <b style="color:#fff;font-size: 18px">{:t('login.token_tip')}</b>
                     <span id="tip" class="pull-right">
                         <i class="sf-avatar sf-avatar-icon sf-avatar-small layui-icon layui-icon-help" style="position: relative;top: 12px;color: rgb(255, 169, 64); background-color: rgb(255, 247, 230);"></i>
                     </span>
@@ -67,24 +67,24 @@
                 <div class="layui-card-body">
                     <form class="layui-form layui-form-pane" id="formBasForm" lay-filter="formBasForm">
                         <div class="layui-form-item">
-                            <blockquote class="layui-elem-quote-sf-danger">无访问权限！，您的IP：<b>{:get_client_ip()}</b> 已被记录
+                            <blockquote class="layui-elem-quote-sf-danger">{:t('login.no_access')}，您的IP：<b>{:get_client_ip()}</b> 已被记录
                             </blockquote>
                             <blockquote class="layui-elem-quote-sf-warning">
-                                若您记得目录保护密码，也可访问：http://{:DOMAIN}/admin/Login?登录口令 ，进入登录哦~
+                                若您记得{:t('common_ui.dir')}保护密码，也可访问：http://{:DOMAIN}/admin/Login?登录口令 ，进入登录哦~
                             </blockquote>
                         </div>
                         <div class="layui-form-item">
                             <label class="layui-form-label">口令</label>
                             <div class="layui-input-block">
-                                <input type="password" name="SF_LOGIN_KEY" class="layui-input"  placeholder="请输入登陆口令" required/>
+                                <input type="password" name="SF_LOGIN_KEY" class="layui-input"  placeholder="{:t('login.token_placeholder')}" required/>
                             </div>
                         </div>
                         <div class="layui-form-item layui-row layui-col-space10 ">
                             <div class="layui-col-md2">
-                                <button type="button" class="layui-btn layui-btn-fluid" id="noticeBtn" lay-filter="noticeBtn">&emsp;验证&emsp;</button>
+                                <button type="button" class="layui-btn layui-btn-fluid" id="noticeBtn" lay-filter="noticeBtn">&emsp;{:t('login.verify_token')}&emsp;</button>
                             </div>
                             <div class="layui-col-md2">
-                                <button type="reset" id="formreset" class="layui-btn layui-btn-primary layui-btn-fluid">&emsp;重置&emsp;</button>
+                                <button type="reset" id="formreset" class="layui-btn layui-btn-primary layui-btn-fluid">&emsp;{:t('common.reset')}&emsp;</button>
                             </div>
                         </div>
                     </form>
@@ -95,7 +95,7 @@
 </div>
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script type="text/javascript" src="{__JS__}common.js?v=320"></script>
+<script type="text/javascript" src="{__JS__}common.js?v=321"></script>
 <script>
     layui.use(['layer', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;

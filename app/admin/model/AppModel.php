@@ -238,7 +238,7 @@ class AppModel extends BaseModel
                 Cache::tag('SF_App')->clear();
                 return message('添加成功！', true);
             } catch (\Exception $e) {
-                unlink(APP_PATH.'/common/download/'.$download_file);
+                $this->deleteDownloadPath($download_file);
                 return message('添加失败！' . $e->getMessage(), false);
             }
         }
@@ -268,12 +268,29 @@ class AppModel extends BaseModel
                 throw new Exception('不存在此应用！');
             }
             self::where('id', $id)->delete();
-            unlink(APP_PATH.'/common/download/'.$row['download_file']);
+            $this->deleteDownloadPath($row['download_file']);
             Cache::tag('SF_App')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
         }
+    }
+
+    private function deleteDownloadPath($downloadFile)
+    {
+        if (empty($downloadFile)) {
+            return;
+        }
+        $path = APP_PATH . DS . 'common' . DS . 'download' . DS . $downloadFile;
+        if (!file_exists($path)) {
+            return;
+        }
+        // download_file normally stores a directory name; keep file support for legacy rows.
+        if (is_dir($path)) {
+            rmdirs($path);
+            return;
+        }
+        unlink($path);
     }
 
     public function setStatus(){

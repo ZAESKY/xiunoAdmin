@@ -36,11 +36,17 @@ class Index extends UserBackend
         try{
             $meunService = new MenuService();
             $menuList = $meunService->getList();
-            View::assign('menuList', $menuList);
+            // Shared layout is role-driven; business menu source remains unchanged.
+            View::assign([
+                'layoutRole' => 'user',
+                'layoutAvatar' => $this->userInfo['img'],
+                'layoutUsername' => $this->userInfo['username'],
+                'menuList' => $menuList,
+            ]);
         }catch (\Exception $e){
             return $this->render('/public/error', ['msg' => '获取菜单失败！[errorCode:GetMenuListError]']);
         }
-        return $this->render();
+        return View::fetch(APP_PATH . DS . 'common' . DS . 'view' . DS . 'layout' . DS . 'main_layout.html');
     }
 
     /**

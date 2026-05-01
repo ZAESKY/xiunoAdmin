@@ -758,9 +758,9 @@ layui.define([], function (exports) {
             });
         }
         // 播放声音
-        if (settings.audio) {
-            that.playSound(settings.audio);
-        }
+        // if (settings.audio) {
+        //     that.playSound(settings.audio);
+        // }
         that.toast = $DOM.toast;
     };
 
@@ -789,7 +789,7 @@ layui.define([], function (exports) {
                             }
                         }
                     }, settings.timeout);
-                    that.setSetting(ref, 'time', settings.time);
+                    // that.setSetting(ref, 'time', settings.time);
                 }
             },
             pause: function () {
@@ -1198,35 +1198,35 @@ layui.define([], function (exports) {
     }
 
     // 播放声音
-    $iziToast.playSound = function (src) {
-        if (!(src.indexOf('http') == 0)) {
-            src = layui.cache.base + 'notice/' + src + '.wav';
-        }
-        if (!!window.ActiveXObject || "ActiveXObject" in window) {  // IE
-            var embed = document.noticePlay;
-            if (embed) {
-                embed.remove();
-            }
-            embed = document.createElement('embed');
-            embed.setAttribute('name', 'noticePlay');
-            embed.setAttribute('src', src);
-            embed.setAttribute('autostart', true);
-            embed.setAttribute('loop', false);
-            embed.setAttribute('hidden', true);
-            document.body.appendChild(embed);
-            embed = document.noticePlay;
-            embed.volume = 100;
-        } else {   // 非IE
-            var audio = document.createElement('audio');
-            audio.setAttribute('hidden', true);
-            audio.setAttribute('src', src);
-            document.body.appendChild(audio);
-            audio.addEventListener('ended', function () {
-                audio.parentNode.removeChild(audio);
-            }, false);
-            audio.play();
-        }
-    };
+    // $iziToast.playSound = function (src) {
+    //     if (!(src.indexOf('http') == 0)) {
+    //         src = layui.cache.base + 'notice/' + src + '.wav';
+    //     }
+    //     if (!!window.ActiveXObject || "ActiveXObject" in window) {  // IE
+    //         var embed = document.noticePlay;
+    //         if (embed) {
+    //             embed.remove();
+    //         }
+    //         embed = document.createElement('embed');
+    //         embed.setAttribute('name', 'noticePlay');
+    //         embed.setAttribute('src', src);
+    //         embed.setAttribute('autostart', true);
+    //         embed.setAttribute('loop', false);
+    //         embed.setAttribute('hidden', true);
+    //         document.body.appendChild(embed);
+    //         embed = document.noticePlay;
+    //         embed.volume = 100;
+    //     } else {   // 非IE
+    //         var audio = document.createElement('audio');
+    //         audio.setAttribute('hidden', true);
+    //         audio.setAttribute('src', src);
+    //         document.body.appendChild(audio);
+    //         audio.addEventListener('ended', function () {
+    //             audio.parentNode.removeChild(audio);
+    //         }, false);
+    //         audio.play();
+    //     }
+    // };
 
     // 不同主题的通知
     forEach(THEMES, function (theme, name) {

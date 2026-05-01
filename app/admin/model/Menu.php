@@ -14,6 +14,7 @@
 namespace app\admin\model;
 
 use app\common\model\BaseModel;
+use app\common\service\MenuPermissionService;
 use think\Exception;
 use think\facade\Cache;
 /**
@@ -60,13 +61,15 @@ class Menu extends BaseModel
                 return $cache;
             }
             $parent_id = [];
-            $data = self::where([['status', '=', 1], ['power', 'IN', [0,1]]])->select();
+            // Role-based menu control: admin sees shared + admin menu entries.
+            $data = self::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('admin')]])->select();
             foreach ($data as $key => $value) {
                 if ($value['parentid'] === 0) {
                     $parent_id[$key] = $value;
                 }
             }
             $all_node_lists = $this->setMenuTree($parent_id, $data); //用于检测是否有子菜单
+            $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
             Cache::tag('SF_Menu')->set('SF_AdminMenu', $all_node_lists);
             return $all_node_lists;
         }catch (\Exception $e){

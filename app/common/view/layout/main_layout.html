@@ -12,15 +12,11 @@
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
     <link rel="stylesheet" href="{__CSS__}sf-style.css"/>
     <link rel="stylesheet" href="{__CSS__}sf-dashboard.css?v=20260501"/>
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
 </head>
 <body class="page-no-scroll">
 
-<div class="layui-layout layui-layout-admin sf-admin-shell">
-    <!-- 头部 -->
+<!-- Shared main layout: admin/user differences are driven by layoutRole and menu roles. -->
+<div class="layui-layout layui-layout-admin sf-admin-shell" data-role="{$layoutRole}">
     <div class="layui-header">
         <div class="layui-logo">
             <img src="{__IMG__}logo.png"/>
@@ -38,6 +34,14 @@
             </li>
         </ul>
         <ul class="layui-nav layui-layout-right">
+            {eq name="layoutRole" value="user"}
+            <li class="layui-nav-item" lay-unselect>
+                <a ew-event="message" title="消息">
+                    <i class="layui-icon layui-icon-notice"></i>
+                    <span class="layui-badge-dot"></span>
+                </a>
+            </li>
+            {/eq}
             <li class="layui-nav-item" lay-unselect>
                 <a ew-event="note" title="便签"><i class="layui-icon layui-icon-note"></i></a>
             </li>
@@ -47,14 +51,17 @@
             <li class="layui-nav-item layui-hide-xs" lay-unselect>
                 <a ew-event="lockScreen" title="锁屏"><i class="layui-icon layui-icon-password"></i></a>
             </li>
-
-
             <li class="layui-nav-item" lay-unselect>
                 <a>
-                    <img src="//q4.qlogo.cn/headimg_dl?dst_uin={$adminInfo['qq']}&spec=100" class="layui-nav-img">
-                    <cite>管理员</cite>
+                    <img src="{$layoutAvatar}" class="layui-nav-img">
+                    <cite>{$layoutUsername}</cite>
                 </a>
                 <dl class="layui-nav-child">
+                    {eq name="layoutRole" value="user"}
+                    <dd lay-unselect>
+                        <a ew-href="{:url('/MyInfo/index')}">个人中心</a>
+                    </dd>
+                    {/eq}
                     <dd lay-unselect>
                         <a ew-href="{:url('/Index/editPassword')}">修改密码</a>
                     </dd>
@@ -67,37 +74,34 @@
             <li class="layui-nav-item" lay-unselect>
                 <a ew-event="theme" title="主题"><i class="layui-icon layui-icon-more-vertical"></i></a>
             </li>
-
         </ul>
     </div>
 
-    <!-- 侧边栏 -->
     <div class="layui-side">
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree arrow2" lay-filter="admin-side-nav" lay-accordion="true" lay-shrink="_all">
                 {volist name='menuList' id='val' key='key'}
-                <li class="layui-nav-item">
+                <li class="layui-nav-item" data-role="{$val.role|default='all'}">
                     {if $val['url'] == '#'}
                     <a><i class="layui-icon {$val['icon']}"></i>&emsp;<cite>{$val.name}</cite></a>
-                        {if isset($val['children']) && !empty($val['children'])}
-                        <dl class="layui-nav-child">
+                    {if isset($val['children']) && !empty($val['children'])}
+                    <dl class="layui-nav-child">
                         {volist name='val.children' id='vo' key='ko'}
-                            {if isset($vo['children']) && !empty($vo['children'])}
-                            <dd>
-                                <a>{$vo['name']}</a>
-                                {volist name='vo.children' id='v' key='k'}
-                                    <dl class="layui-nav-child">
-                                        <dd><a lay-href="{:url('/'.$v['url'])}">{$v['name']}</a></dd>
-                                    </dl>
-
-                                {/volist}
-                            </dd>
-                            {else}
-                            <dd><a lay-href="{:url('/'.$vo['url'])}">{$vo.name}</a></dd>
-                            {/if}
-                        {/volist}
-                        </dl>
+                        {if isset($vo['children']) && !empty($vo['children'])}
+                        <dd data-role="{$vo.role|default='all'}">
+                            <a>{$vo['name']}</a>
+                            {volist name='vo.children' id='v' key='k'}
+                            <dl class="layui-nav-child">
+                                <dd data-role="{$v.role|default='all'}"><a lay-href="{:url('/'.$v['url'])}">{$v['name']}</a></dd>
+                            </dl>
+                            {/volist}
+                        </dd>
+                        {else}
+                        <dd data-role="{$vo.role|default='all'}"><a lay-href="{:url('/'.$vo['url'])}">{$vo.name}</a></dd>
                         {/if}
+                        {/volist}
+                    </dl>
+                    {/if}
                     {else}
                     <a lay-href="{:url('/'.$val['url'])}" ><i class="layui-icon {$val['icon']}"></i>&emsp;<cite>{$val['name']}</cite></a>
                     {/if}
@@ -107,12 +111,9 @@
         </div>
     </div>
 
-    <!-- 主体部分 -->
     <div class="layui-body"></div>
-    <!-- 底部 -->
 </div>
 
-<!-- 加载动画 -->
 <div class="page-loading">
     <div class="signal-loader">
         <span></span><span></span><span></span><span></span>
@@ -125,11 +126,9 @@
     layui.use(['index', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;
         var form = layui.form;
-        var admin = layui.admin;
         var notice = layui.notice;
         var index = layui.index;
 
-        // 默认加载主页
         index.loadHome({
             menuPath: '{:url("/Index/main")}',
             menuName: '<i class="layui-icon layui-icon-home"></i>'
@@ -158,7 +157,6 @@
                 parent.layer.close(index);
             });
         });
-
     });
 </script>
 </body>

@@ -70,9 +70,14 @@ class LoginService extends BaseService
             );
             $url = sprintf($api_server . '/validate' . '?captcha_id=%s', $captcha_id);
             $res = $this->post_request($url,$query);
-            $obj = json_decode($res,true);
-            if($obj['result'] == 'error'){
-                return message($obj['reason'], false);
+            if ($res !== false) {
+                $obj = json_decode($res,true);
+                if (!is_array($obj)) {
+                    return message('验证码校验异常', false);
+                }
+                if (isset($obj['result']) && in_array($obj['result'], ['error', 'fail'])) {
+                    return message($obj['reason'] ?? '验证码验证失败', false);
+                }
             }
         }
         ActionLog::setTitle("登录后台");
@@ -145,19 +150,16 @@ class LoginService extends BaseService
                 'method'  => 'POST',
                 'header'  => "Content-type: application/x-www-form-urlencoded",
                 'content' => $data,
-                'timeout' => 5
+                'timeout' => 5,
+                'ignore_errors' => true
             )
         );
         $context = stream_context_create($options);
-        $result    = file_get_contents($url, false, $context);
-        if($http_response_header[0] != 'HTTP/1.1 200 OK'){
-            $result = array(
-                'result' => 'error',
-                'reason' => '验证失败'
-            );
-            return json_encode($result);
-        }else{
-            return $result;
+        $result = @file_get_contents($url, false, $context);
+        $status = isset($http_response_header[0]) ? $http_response_header[0] : '';
+        if ($result === false || strpos($status, '200') === false) {
+            return false;
         }
+        return $result;
     }
 }

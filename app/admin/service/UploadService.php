@@ -21,6 +21,9 @@ class UploadService extends BaseService
         $fileExt = !empty($post['fileExt'])?$post['fileExt']:null;
         $totalPage = !empty($post['totalPage'])?intval($post['totalPage']):0;
         $page = !empty($post['page'])?intval($post['page']):0;
+        if (!$this->isValidChunk($totalPage, $page) || empty($_FILES['file']['tmp_name']) || !is_uploaded_file($_FILES['file']['tmp_name'])) {
+            return message('upload.invalid_chunk', false, ['status' => 0, 'downUrl' => '']);
+        }
         if(empty($id)){
             return message("缺少ID参数",false, ['status' => 0, 'downUrl' => '']);
         }
@@ -52,12 +55,18 @@ class UploadService extends BaseService
         //上传文件要保存的路径
         $fname = sprintf($filePath . '/SF.zip');
         $data = file_get_contents($_FILES['file']['tmp_name']);
+        if ($data === false) {
+            return message('upload.read_failed', false, ['status' => 0, 'downUrl' => '']);
+        }
 
         if ($page == 1) {
-            file_put_contents($fname, $data);
+            $written = file_put_contents($fname, $data);
         } else {
             //其余文件追加到文件末尾
-            file_put_contents($fname, $data, FILE_APPEND);
+            $written = file_put_contents($fname, $data, FILE_APPEND);
+        }
+        if ($written === false) {
+            return message('upload.write_failed', false, ['status' => 0, 'downUrl' => '']);
         }
 
         //最后一片文件
@@ -71,24 +80,35 @@ class UploadService extends BaseService
 
     public function template($fileName, $fileExt, $file, $totalPage, $page){
         try{
+            [$fileName, $fileExt] = $this->normalizeUploadTarget($fileName, $fileExt);
+            if (!$this->isValidChunk($totalPage, $page) || empty($file)) {
+                return message('upload.invalid_chunk', false, ['status' => 0, 'downUrl' => '']);
+            }
             $filePath = RUNTIME_PATH . DS . 'template' . DS . 'upload' . DS;
             if (!is_dir($filePath)) {
                 @mkdir($filePath, 0755, true);
             }
         } catch (\Exception $e) {
-            return message('上传失败！'.$e->getMessage() ,false, ['status' => 0, 'downUrl' => '']);
+            $msg = $e->getMessage() === 'upload.invalid_filename' ? 'upload.invalid_filename' : '上传失败！'.$e->getMessage();
+            return message($msg ,false, ['status' => 0, 'downUrl' => '']);
         }
         //处理分片上传文件
         $status = 1;
         //上传文件要保存的路径
         $fname = sprintf($filePath . $fileName . '.' . $fileExt);
         $data = file_get_contents($file);
+        if ($data === false) {
+            return message('upload.read_failed', false, ['status' => 0, 'downUrl' => '']);
+        }
 
         if ($page == 1) {
-            file_put_contents($fname, $data);
+            $written = file_put_contents($fname, $data);
         } else {
             //其余文件追加到文件末尾
-            file_put_contents($fname, $data, FILE_APPEND);
+            $written = file_put_contents($fname, $data, FILE_APPEND);
+        }
+        if ($written === false) {
+            return message('upload.write_failed', false, ['status' => 0, 'downUrl' => '']);
         }
 
         //最后一片文件
@@ -143,24 +163,35 @@ class UploadService extends BaseService
 
     public function temp($fileName, $fileExt, $file, $totalPage, $page){
         try{
+            [$fileName, $fileExt] = $this->normalizeUploadTarget($fileName, $fileExt);
+            if (!$this->isValidChunk($totalPage, $page) || empty($file)) {
+                return message('upload.invalid_chunk', false, ['status' => 0, 'downUrl' => '']);
+            }
             $filePath = RUNTIME_PATH . DS . 'temp' . DS . 'upload' . DS;
             if (!is_dir($filePath)) {
                 @mkdir($filePath, 0755, true);
             }
         } catch (\Exception $e) {
-            return message('上传失败！'.$e->getMessage() ,false, ['status' => 0, 'downUrl' => '']);
+            $msg = $e->getMessage() === 'upload.invalid_filename' ? 'upload.invalid_filename' : '上传失败！'.$e->getMessage();
+            return message($msg ,false, ['status' => 0, 'downUrl' => '']);
         }
         //处理分片上传文件
         $status = 1;
         //上传文件要保存的路径
         $fname = sprintf($filePath . $fileName . '.' . $fileExt);
         $data = file_get_contents($file);
+        if ($data === false) {
+            return message('upload.read_failed', false, ['status' => 0, 'downUrl' => '']);
+        }
 
         if ($page == 1) {
-            file_put_contents($fname, $data);
+            $written = file_put_contents($fname, $data);
         } else {
             //其余文件追加到文件末尾
-            file_put_contents($fname, $data, FILE_APPEND);
+            $written = file_put_contents($fname, $data, FILE_APPEND);
+        }
+        if ($written === false) {
+            return message('upload.write_failed', false, ['status' => 0, 'downUrl' => '']);
         }
 
         //最后一片文件
@@ -170,5 +201,21 @@ class UploadService extends BaseService
         //返回上传状态
         $res = ['status' => $status, 'filename' => $fileName . '.' . $fileExt];
         return message('success',true, $res);
+    }
+
+    private function isValidChunk($totalPage, $page): bool
+    {
+        return $totalPage >= 1 && $page >= 1 && $page <= $totalPage;
+    }
+
+    private function normalizeUploadTarget($fileName, $fileExt): array
+    {
+        // Keep uploaded chunk targets inside runtime upload directories.
+        $fileName = pathinfo((string)$fileName, PATHINFO_FILENAME);
+        $fileExt = strtolower(trim((string)$fileExt, ". \t\n\r\0\x0B"));
+        if (!preg_match('/^[A-Za-z0-9_-]{1,120}$/', $fileName) || !preg_match('/^[A-Za-z0-9]{1,12}$/', $fileExt)) {
+            throw new \InvalidArgumentException('upload.invalid_filename');
+        }
+        return [$fileName, $fileExt];
     }
 }

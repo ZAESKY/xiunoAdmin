@@ -331,6 +331,17 @@ if (!function_exists('__')) {
 
 }
 
+if (!function_exists('t')) {
+    /**
+     * Lightweight i18n helper. Use dot keys such as common.save or auth.login.
+     */
+    function t($name, $vars = [], $lang = '')
+    {
+        $text = __($name, $vars, $lang);
+        return $text === '' ? $name : $text;
+    }
+}
+
 if (!function_exists('array2xml')) {
 
     /**
@@ -1510,6 +1521,11 @@ if (!function_exists('message')) {
      */
     function message($msg = "系统繁忙，请稍候再试", $success = true, $data = [], $code = 0)
     {
+        // Allow callers to pass i18n keys without changing the response schema.
+        if (is_string($msg) && preg_match('/^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/i', $msg)) {
+            $translated = t($msg);
+            $msg = $translated === $msg ? $msg : $translated;
+        }
         $result = ['msg' => $msg, 'data' => $data, 'success' => $success];
         if ($success) {
             // 成功统一返回0
@@ -2426,4 +2442,3 @@ if (!function_exists('checkWords')) {
         }
     }
 }
-

@@ -1,35 +1,13 @@
 <div class="layui-card-header">主题设置</div>
 <div class="more-theme-list">
-
+    <!-- Only keep the supported themes to avoid stale color-theme classes. -->
     <div class="more-theme-item active" data-theme="theme-sf">
-        <img src="/Assets/module/img/theme-sf.png"/>
+        <span class="theme-preview theme-preview-default"></span>
+        <b>默认主题</b>
     </div>
-    <div class="more-theme-item" data-theme="theme-admin">
-        <img src="/Assets/module/img/theme-admin.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-cyan">
-        <img src="/Assets/module/img/theme-cyan.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-white">
-        <img src="/Assets/module/img/theme-white.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-pink">
-        <img src="/Assets/module/img/theme-pink.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-colorful">
-        <img src="/Assets/module/img/theme-colorful.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-blue">
-        <img src="/Assets/module/img/theme-blue.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-green">
-        <img src="/Assets/module/img/theme-green.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-purple">
-        <img src="/Assets/module/img/theme-purple.png"/>
-    </div>
-    <div class="more-theme-item" data-theme="theme-red">
-        <img src="/Assets/module/img/theme-red.png"/>
+    <div class="more-theme-item" data-theme="theme-dark">
+        <span class="theme-preview theme-preview-dark"></span>
+        <b>暗黑模式</b>
     </div>
 </div>
 <!-- 导航 -->
@@ -80,21 +58,27 @@
         var admin = layui.admin;
         var setter = admin.setter;
         var $body = $('body');
+        var allowedThemes = ['theme-sf', 'theme-dark'];
 
-        // 切换主题
+        // Theme switch is intentionally limited to default and dark mode.
         var $themItem = $('.more-theme-item');
         $themItem.click(function () {
+            var theme = $(this).data('theme');
+            if (allowedThemes.indexOf(theme) === -1) {
+                theme = 'theme-sf';
+            }
             $themItem.removeClass('active');
             $(this).addClass('active');
-            admin.changeTheme($(this).data('theme'));
+            admin.changeTheme(theme);
         });
         var theme = $body.data('theme');
-        if (theme) {
-            $themItem.removeClass('active');
-            $themItem.filter('[data-theme="' + theme + '"]').addClass('active');
+        if (allowedThemes.indexOf(theme) === -1) {
+            theme = 'theme-sf';
+            admin.changeTheme(theme);
         }
+        $themItem.removeClass('active');
+        $themItem.filter('[data-theme="' + theme + '"]').addClass('active');
 
-        // 关闭/开启页脚
         form.on('switch(setFooter)', function (data) {
             var checked = data.elem.checked;
             admin.putSetting('closeFooter', !checked);
@@ -102,13 +86,11 @@
         });
         $('#setFooter').prop('checked', !$body.hasClass('close-footer'));
 
-        // 关闭/开启Tab记忆功能
         form.on('switch(setTab)', function (data) {
             layui.index.setTabCache(data.elem.checked);
         });
         $('#setTab').prop('checked', setter.cacheTab);
 
-        // 关闭/开启多标签
         form.on('switch(setMoreTab)', function (data) {
             var checked = data.elem.checked;
             admin.putSetting('pageTabs', checked);
@@ -117,7 +99,6 @@
         });
         $('#setMoreTab').prop('checked', setter.pageTabs);
 
-        // 切换Tab自动刷新
         var $mainTab = $('.layui-body>.layui-tab[lay-filter="admin-pagetabs"]');
         form.on('switch(setRefresh)', function (data) {
             var checked = data.elem.checked;
@@ -126,7 +107,6 @@
         });
         $('#setRefresh').prop('checked', setter.tabAutoRefresh === true);
 
-        // 导航小三角
         var $leftNav = $('.layui-layout-admin>.layui-side>.layui-side-scroll>.layui-nav');
         form.on('radio(navArrow)', function (data) {
             $leftNav.removeClass('arrow2 arrow3');
@@ -142,32 +122,50 @@
 </script>
 
 <style>
-
-    /* theme */
     .more-theme-list {
-        padding-left: 15px;
-        padding-top: 20px;
-        margin-bottom: 10px;
+        padding: 18px 15px 10px;
     }
 
     .more-theme-item {
-        padding: 4px;
-        margin: 0 6px 15px 0;
+        width: 132px;
+        padding: 8px;
+        margin: 0 8px 12px 0;
         display: inline-block;
         border: 1px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        vertical-align: top;
     }
 
-    .more-theme-item img {
-        width: 80px;
-        height: 50px;
-        background: #f5f7f9;
-        box-sizing: border-box;
-        border: 1px solid #f5f7f9;
-        cursor: pointer;
+    .more-theme-item b {
+        display: block;
+        margin-top: 8px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .theme-preview {
+        display: block;
+        width: 114px;
+        height: 64px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .theme-preview-default {
+        background: linear-gradient(90deg, #fff 0 26%, #eef7fb 26% 100%);
+    }
+
+    .theme-preview-dark {
+        background: linear-gradient(90deg, #111827 0 26%, #0f172a 26% 100%);
     }
 
     .more-theme-item:hover, .more-theme-item.active {
-        border-color: #5FB878;
+        border-color: #2d8cf0;
+        background: rgba(45, 140, 240, .06);
     }
 
     .more-menu-item {
@@ -181,7 +179,6 @@
         display: block;
     }
 
-    /* menu */
     .more-menu-item:first-child {
         border-top: 1px solid #e8e8e8;
     }
@@ -208,7 +205,6 @@
         display: none;
     }
 
-    /* setting from */
     .set-item-label {
         height: 38px;
         line-height: 38px;

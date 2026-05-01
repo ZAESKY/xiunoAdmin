@@ -9,11 +9,11 @@ return [
     'connections' => [
         'mysql' => [
             'type' => 'mysql',
-            'hostname' => 'localhost',
-            'database' => 'www_admindev_com',
-            'username' => 'admin',
-            'password' => '123456',
-            'hostport' => 3306,
+            'hostname' => env('database.hostname', 'localhost'),
+            'database' => env('database.database', 'www_admindev_com'),
+            'username' => env('database.username', 'admin'),
+            'password' => env('database.password', '123456'),
+            'hostport' => env('database.hostport', 3306),
             'params' => [],
             'charset' => 'utf8',
             'prefix' => 'SF_',

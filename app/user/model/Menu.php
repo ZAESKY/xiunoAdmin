@@ -2,6 +2,7 @@
 namespace app\user\model;
 
 use app\common\model\BaseModel;
+use app\common\service\MenuPermissionService;
 use think\facade\Cache;
 
 /**
@@ -45,7 +46,8 @@ class Menu extends BaseModel
             return message("获取用户权限信息失败！[errorCode:GetUserPowerInfoError]" ,false);
         }
         $parent_id = [];
-        $data = Menu::where([['status', '=', 1], ['power', 'IN', [0,2]]])->select();
+        // Role-based menu control: user sees shared + user menu entries.
+        $data = Menu::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('user')]])->select();
 
         foreach ($data as $key => $value) {
             if($value['url'] == 'Auth/list'){
@@ -81,6 +83,7 @@ class Menu extends BaseModel
             }
         }
         $all_node_lists = $this->setMenuTree($parent_id, $data); //用于检测是否有子菜单
+        $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
         Cache::tag('SF_Menu')->set('SF_UserMenu'.cookie('userId'), $all_node_lists);
         return $all_node_lists;
     }

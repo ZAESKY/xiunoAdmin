@@ -133,8 +133,11 @@ class CommonBase extends BaseController
         $this->param = $this->request->param();
 
         // 分页基础默认值
-        defined('PERPAGE') or define('PERPAGE', isset($this->param['limit']) ? $this->param['limit'] : 20);
-        defined('PAGE') or define('PAGE', isset($this->param['page']) ? $this->param['page'] : 1);
+        // Clamp pagination inputs to avoid invalid offsets and oversized queries.
+        $perPage = isset($this->param['limit']) ? (int)$this->param['limit'] : 20;
+        $page = isset($this->param['page']) ? (int)$this->param['page'] : 1;
+        defined('PERPAGE') or define('PERPAGE', max(1, min($perPage, 200)));
+        defined('PAGE') or define('PAGE', max(1, $page));
     }
 
     /**
@@ -148,6 +151,9 @@ class CommonBase extends BaseController
 
         // 获取参数
         $arr = func_get_args();
+        if (empty($arr)) {
+            $arr = [message()];
+        }
 
         if (!is_array($arr[0])) {
             // 回调函数
@@ -160,7 +166,7 @@ class CommonBase extends BaseController
         $result = $this->getStringArray($result);
 
         // 返回结果
-        $output = json_encode($result);
+        $output = json_encode($result, JSON_UNESCAPED_UNICODE);
         echo $output;
         exit();
     }
@@ -178,10 +184,11 @@ class CommonBase extends BaseController
                     if($money == 'diy'){
                         $money = !empty($post['diy'])?$post['diy']:null;
                         if(empty($money)) return message('所充值的金额格式错误！[errorCode:RechargeMoneyError]', false);
-                        $money = round($money, 2);
-                    }else{
-                        $money = round($money, 2);
                     }
+                    if (!is_numeric($money) || $money <= 0) {
+                        return message('order.recharge_money_error', false);
+                    }
+                    $money = round((float)$money, 2);
 
                     $name = '充值余额 - '. $money .'元';
                     $data = [

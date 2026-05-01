@@ -3,11 +3,10 @@
 return array (
   'home' => 
   array (
-    'name' => 'shiwaiyun',
-    'view_base' => '../public/template/modules/home/shiwaiyun/',
+    'name' => 'default',
+    'view_base' => '../public/template/modules/home/default/',
     'config' => 
     array (
-      'sad' => '3122',
     ),
   ),
   'login' => 

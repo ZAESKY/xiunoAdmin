@@ -39,9 +39,14 @@ class Index extends Backend
         try{
             $meunService = new MenuService();
             $menuList = $meunService->getList();
-            View::assign('menuList', $menuList);
-            // 获取导航菜单
-            return $this->render();
+            // Shared layout is role-driven; business menu source remains unchanged.
+            View::assign([
+                'layoutRole' => 'admin',
+                'layoutAvatar' => '//q4.qlogo.cn/headimg_dl?dst_uin='.$this->adminInfo['qq'].'&spec=100',
+                'layoutUsername' => '管理员',
+                'menuList' => $menuList,
+            ]);
+            return View::fetch(APP_PATH . DS . 'common' . DS . 'view' . DS . 'layout' . DS . 'main_layout.html');
         }catch (\Exception $e){
             return $this->render('/public/error', ['msg' => $e->getMessage()]);
         }

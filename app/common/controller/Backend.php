@@ -305,7 +305,11 @@ class Backend extends CommonBase
     {
         if (IS_POST) {
             try{
-                $ids = explode(',', input('post.id'));
+                // Normalize ids from request before passing them into service layer.
+                $ids = array_values(array_filter(array_unique(array_map('intval', explode(',', (string)input('post.id'))))));
+                if (empty($ids)) {
+                    return message('common.invalid_id', false);
+                }
                 //批量删除
                 $num = 0;
                 foreach ($ids as $key => $val) {

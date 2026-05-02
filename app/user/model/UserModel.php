@@ -78,7 +78,8 @@ class UserModel extends BaseModel
         $status = !empty($post['status'])?1:0;
 
         try {
-            validate(User::class)->check($post);
+            $scene = ($post['form_mode'] ?? '') === 'edit' ? 'edit' : 'add';
+            validate(User::class)->scene($scene)->check($post);
         } catch (ValidateException $e) {
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
@@ -148,7 +149,7 @@ class UserModel extends BaseModel
             $data = [
                 "power" => ($power == -1)?$row['power']:$power,
                 "username" => $username,
-                "password" => $password,
+                "password" => !empty($password) ? get_password($password) : $row['password'],
                 "qq" => $qq,
                 "email" => $email,
                 "phone" => $phone,
@@ -191,6 +192,9 @@ class UserModel extends BaseModel
                 return message(t('user.edit_failed').'[errorCode:EditUserInfoError]' ,false);
             }
         }else{
+            if (empty($password)) {
+                return message('请填写密码', false);
+            }
             try{
                 $appInfo = parent::getAppInfo($userInfo['appid']);
             }catch (\Exception $e){
@@ -237,7 +241,7 @@ class UserModel extends BaseModel
             $data = [
                 "power" => $power,
                 "username" => $username,
-                "password" => $password,
+                "password" => get_password($password),
                 "qq" => $qq,
                 "email" => $email,
                 "phone" => $phone,

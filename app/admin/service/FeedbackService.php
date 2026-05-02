@@ -38,7 +38,7 @@ class FeedbackService extends BaseService
     public function handle()
     {
         try {
-            $result = $this->model->handle();
+            $this->model->handle();
             return message(t('feedback.handle_success'), true);
         } catch (\Throwable $e) {
             return message($e->getMessage(), false);

@@ -24,11 +24,7 @@ class Feedback extends Backend
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false));
         }
-        try {
-            return $this->render();
-        } catch (\Exception $e) {
-            return $this->render('/public/error', ['msg' => $e->getMessage()]);
-        }
+        return $this->render();
     }
 
     public function handle()
@@ -36,9 +32,38 @@ class Feedback extends Backend
         return json($this->service->handle());
     }
 
-    /**
-     * Get notification count for the admin bell badge
-     */
+    public function uploadImage()
+    {
+        try {
+            $file = request()->file('file');
+            if (!$file) {
+                return json(['code' => 1, 'msg' => '请选择图片']);
+            }
+            $allowedExt = 'jpg,jpeg,png,gif,bmp,webp';
+            $maxSize = 5 * 1024 * 1024;
+            $ext = strtolower($file->getOriginalExtension());
+            if (!in_array($ext, explode(',', $allowedExt))) {
+                return json(['code' => 1, 'msg' => '仅支持 jpg/png/gif/bmp/webp 图片']);
+            }
+            if ($file->getSize() > $maxSize) {
+                return json(['code' => 1, 'msg' => '图片不能超过5MB']);
+            }
+            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'Uploads' . DIRECTORY_SEPARATOR . 'feedback' . DIRECTORY_SEPARATOR . date('Ymd');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $info = $file->move($uploadDir);
+            if (!$info) {
+                return json(['code' => 1, 'msg' => $file->getError()]);
+            }
+            $url = '/Uploads/feedback/' . date('Ymd') . '/' . $info->getFilename();
+            return json(['code' => 0, 'msg' => 'ok', 'data' => ['src' => $url, 'title' => $file->getOriginalName()]]);
+        } catch (\Throwable $e) {
+            return json(['code' => 1, 'msg' => $e->getMessage()]);
+        }
+    }
+
+    // === 通知相关 ===
     public function notificationCount()
     {
         try {
@@ -49,9 +74,6 @@ class Feedback extends Backend
         }
     }
 
-    /**
-     * Get notification list for the admin bell popup
-     */
     public function notificationList()
     {
         try {
@@ -62,23 +84,17 @@ class Feedback extends Backend
         }
     }
 
-    /**
-     * Mark a notification as read
-     */
     public function notificationRead()
     {
         try {
             $id = request()->post('id', 0);
-            NotificationModel::markRead((int)$id, 0, true);
+            NotificationModel::markRead((int) $id, 0, true);
             return json(message('', true));
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false));
         }
     }
 
-    /**
-     * Mark all notifications as read
-     */
     public function notificationReadAll()
     {
         try {

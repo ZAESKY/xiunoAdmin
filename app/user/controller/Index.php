@@ -107,7 +107,7 @@ class Index extends UserBackend
             if(empty($oldPassword)){
                 return message(t('user.old_password_empty'), false);
             }
-            if($oldPassword != $this->userInfo['password']){
+            if(get_password($oldPassword) != $this->userInfo['password']){
                 return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->userInfo['username']){
@@ -123,7 +123,7 @@ class Index extends UserBackend
                 try{
                     Db::name('user')
                         ->where('id', $this->userId)
-                        ->data(['password' => $newPassword])
+                        ->data(['password' => get_password($newPassword)])
                         ->update();
                     return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
@@ -148,7 +148,7 @@ class Index extends UserBackend
                 try{
                     Db::name('user')
                         ->where('id', $this->userId)
-                        ->data(['username' => $username, 'password' => $password])
+                        ->data(['username' => $username, 'password' => get_password($password)])
                         ->update();
                     return message(t('user.username_change_success'), true);
                 }catch (\Exception $e){

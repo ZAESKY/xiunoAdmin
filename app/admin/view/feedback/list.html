@@ -1,29 +1,43 @@
 {include file="/public/header"}
+<style>
+    .layui-layer-content img { max-width: 60% !important; height: auto !important; vertical-align: middle; }
+</style>
 <div class="layui-fluid">
     <div class="layui-card">
         <div class="layui-card-body">
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">{:t('feedback.content')}</label>
+                        <label class="layui-form-label">搜索</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('feedback.search_by_id_or_title')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">{:t('common.status')}</label>
+                        <label class="layui-form-label">状态</label>
                         <div class="layui-input-inline">
                             <select name="status">
-                                <option value="">{:t('feedback.all_statuses')}</option>
+                                <option value="">全部</option>
                                 <option value="0">{:t('feedback.status_pending')}</option>
                                 <option value="1">{:t('feedback.status_accepted')}</option>
                                 <option value="2">{:t('feedback.status_rejected')}</option>
                             </select>
                         </div>
                     </div>
-                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                    <div class="layui-inline">
+                        <label class="layui-form-label">类型</label>
+                        <div class="layui-input-inline">
+                            <select name="type">
+                                <option value="">全部类型</option>
+                                <option value="bug">BUG反馈</option>
+                                <option value="feature">功能需求</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
+                            <i class="layui-icon">&#xe615;</i>搜索
                         </button>
                     </div>
                 </div>
@@ -44,97 +58,60 @@
 </script>
 
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-normal layui-btn-sm" lay-event="handle"><i class="layui-icon layui-icon-edit"></i>{:t('feedback.handle')}</a>
-</script>
-
-<script type="text/html" id="SF_HandleDialog">
-    <form id="SF_HandleForm" lay-filter="SF_HandleForm" class="layui-form model-form">
-        <input name="id" type="hidden"/>
-        <div class="layui-form-item">
-            <label class="layui-form-label">{:t('feedback.submit_user')}</label>
-            <div class="layui-input-block">
-                <input name="username" class="layui-input" readonly disabled/>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">{:t('feedback.title')}</label>
-            <div class="layui-input-block">
-                <input name="title" class="layui-input" readonly disabled/>
-            </div>
-        </div>
-        <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">{:t('feedback.content')}</label>
-            <div class="layui-input-block">
-                <textarea name="content" class="layui-textarea" style="height:120px" readonly disabled></textarea>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">{:t('feedback.handle_status')}</label>
-            <div class="layui-input-block">
-                <select name="status" lay-verify="required">
-                    <option value="0">{:t('feedback.status_pending')}</option>
-                    <option value="1">{:t('feedback.status_accepted')}</option>
-                    <option value="2">{:t('feedback.status_rejected')}</option>
-                </select>
-            </div>
-        </div>
-        <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">{:t('feedback.reply')}</label>
-            <div class="layui-input-block">
-                <textarea name="reply" class="layui-textarea" style="height:100px" placeholder="{:t('feedback.reply_placeholder')}"></textarea>
-            </div>
-        </div>
-        <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_HandleSubmit" lay-submit>{:t('feedback.save_handle')}</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
-        </div>
-    </form>
+    <a class="layui-btn layui-btn-xs layui-btn-primary" lay-event="view">查看</a>
+    <a class="layui-btn layui-btn-xs" data-dropdown="#feedbackDrop{{d.LAY_INDEX}}" no-shade="true">
+        <i class="layui-icon layui-icon-down" style="font-size:12px;margin-right:0;"></i>状态
+    </a>
+    <ul class="dropdown-menu-nav dropdown-bottom-right layui-hide" id="feedbackDrop{{d.LAY_INDEX}}">
+        <div class="dropdown-anchor"></div>
+        <li><a onclick="setFeedbackStatus('{{d.id}}',0)"><i class="layui-icon layui-icon-tips"></i>待处理</a></li>
+        <li><a onclick="setFeedbackStatus('{{d.id}}',1)"><i class="layui-icon layui-icon-ok"></i>已受理</a></li>
+        <li><a onclick="setFeedbackStatus('{{d.id}}',2)"><i class="layui-icon layui-icon-close"></i>已驳回</a></li>
+    </ul>
 </script>
 
 {include file="/public/footer"}
 <script>
-    layui.use(['layer', 'form', 'table', 'admin', 'notice'], function () {
+    layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit', 'dropdown'], function () {
         var $ = layui.jquery;
         var form = layui.form;
         var table = layui.table;
         var admin = layui.admin;
         var notice = layui.notice;
+        var layedit = layui.layedit;
+        var dropdown = layui.dropdown;
+
+        function decodeHtml(v) {
+            var t = document.createElement('textarea');
+            t.innerHTML = v || '';
+            return t.value;
+        }
 
         var insTb = table.render({
             elem: '#SF_Table',
             url: '{:url("/Feedback/list")}',
-            method: 'post',
-            page: true,
-            skin: 'line',
-            size: 'lg',
-            cellMinWidth: 100,
-            request: {
-                pageName: 'current_page',
-                limitName: 'limit'
-            },
+            method: 'post', page: true, skin: 'line', size: 'lg',
+            request: { pageName: 'current_page', limitName: 'limit' },
             parseData: function(res){
                 var pageData = res.data && res.data.data ? res.data.data : {total: 0, data: []};
-                return {
-                    "code": res.code,
-                    "msg": res.msg,
-                    "count": pageData.total || 0,
-                    "data": pageData.data || []
-                };
+                return { "code": res.code, "msg": res.msg, "count": pageData.total || 0, "data": pageData.data || [] };
             },
             cols: [[
-                {field: 'id', title: '{:t("common.id")}', sort: true, width: 80},
-                {field: 'username', title: '{:t("feedback.submit_user")}', sort: true, width: 130},
-                {field: 'title', title: '{:t("feedback.title")}', sort: true, minWidth: 180},
-                {field: 'content', title: '{:t("feedback.content")}', minWidth: 200, templet: function(d){
-                    return (d.content || '').length > 60 ? d.content.substring(0, 60) + '...' : (d.content || '');
+                {field: 'id', title: 'ID', sort: true, width: 80},
+                {field: 'username', title: '提交用户', sort: true, width: 130},
+                {field: 'type', title: '类型', sort: true, width: 100, templet: function(d){
+                    var m = {bug:'<span class="layui-badge layui-badge-red">BUG</span>', feature:'<span class="layui-badge layui-badge-blue">需求</span>', other:'<span class="layui-badge layui-badge-gray">其他</span>'};
+                    return m[d.type] || d.type;
                 }},
-                {field: 'reply', title: '{:t("feedback.reply")}', minWidth: 150, templet: function(d){
-                    return d.reply ? ((d.reply.length > 40 ? d.reply.substring(0, 40) + '...' : d.reply)) : '<span style="color:#999">{:t("feedback.no_reply_short")}</span>';
+                {field: 'title', title: '标题', sort: true, minWidth: 180},
+                {field: 'reply', title: '回复', minWidth: 150, templet: function(d){
+                    var t = (d.reply||'').replace(/<[^>]+>/g,'');
+                    return t ? (t.length > 40 ? t.substring(0,40)+'...' : t) : '<span style="color:#999">暂无</span>';
                 }},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, width: 100},
-                {field: 'created_at', title: '{:t("feedback.submit_time")}', sort: true, width: 170},
-                {field: 'updated_at', title: '{:t("feedback.handle_time")}', sort: true, width: 170},
-                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 100}
+                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, width: 100},
+                {field: 'created_at', title: '提交时间', sort: true, width: 170},
+                {field: 'updated_at', title: '处理时间', sort: true, width: 170},
+                {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 160}
             ]]
         });
 
@@ -143,60 +120,100 @@
             return false;
         });
 
-        window.refreshTab = function () {
-            insTb.reload({page: {curr: 1}});
+        // 快捷状态修改
+        function setStatus(id, status) {
+            notice.msg('处理中...', {icon: 4, close: true});
+            $.ajax({
+                type: "POST", url: '{:url("/Feedback/handle")}',
+                data: {id: id, status: status}, dataType: "json",
+                success: function(res) {
+                    notice.destroy();
+                    if (res.code == 0) {
+                        insTb.reload({page: {curr: 1}});
+                        notice.msg(res.msg, {icon: 1, audio:'1'});
+                        if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
+                    } else { notice.msg(res.msg, {icon: 2}); }
+                },
+                error: function() { notice.destroy(); notice.msg('服务器错误！', {icon: 2}); }
+            });
+        }
+
+        window.setFeedbackStatus = function (id, status) {
+            setStatus(id, status);
         };
 
         table.on('tool(SF_Table)', function (obj) {
-            if (obj.event === 'handle') {
-                showHandleModel(obj.data);
+            if (obj.event === 'view') {
+                showView(obj.data);
             }
         });
 
-        function showHandleModel(mData) {
-            admin.popupRight({
-                type: 1,
-                title: '{:t("feedback.handle_dialog_title")} - ' + mData.title,
-                content: $('#SF_HandleDialog').html(),
-                success: function (layero) {
-                    form.val('SF_HandleForm', {
-                        id: mData.id,
-                        username: mData.username || '',
-                        title: mData.title,
-                        content: mData.content,
-                        status: mData.status !== undefined ? mData.status : 0,
-                        reply: mData.reply || ''
+        function showView(d) {
+            var typeMap = {bug:'BUG反馈', feature:'功能需求', other:'其他'};
+            var statusMap = {0:'<span class="layui-badge layui-badge-orange" style="float:right;">待处理</span>',
+                             1:'<span class="layui-badge layui-badge-green" style="float:right;">已受理</span>',
+                             2:'<span class="layui-badge layui-badge-red" style="float:right;">已驳回</span>'};
+            var replyId = 'SF_Reply_' + d.id;
+            var html = '<div style="padding:16px;max-height:700px;overflow:auto;">'+
+                '<div style="border:1px solid #e6e6e6;border-radius:6px;padding:14px 16px;margin-bottom:12px;background:#fafafa;">'+
+                '<div style="margin-bottom:8px;font-size:13px;color:#999;">'+
+                '<span>'+(d.username||'')+'</span> '+
+                '<span class="layui-badge layui-badge-blue" style="margin-left:8px;">'+(typeMap[d.type]||d.type||'')+'</span> '+
+                '<span style="margin-left:8px;">'+(d.created_at||'')+'</span>'+
+                (statusMap[d.status]||'')+
+                '</div>'+
+                '<div style="font-size:15px;font-weight:bold;margin-bottom:8px;">'+(d.title||'')+'</div>'+
+                '<div style="font-size:14px;line-height:1.8;word-break:break-all;">'+decodeHtml(d.content||'')+'</div>'+
+                '</div>';
+            if (d.reply) {
+                html += '<div style="border:1px solid #d2e8c8;border-radius:6px;padding:14px 16px;background:#f0f9eb;margin-bottom:12px;">'+
+                    '<div style="margin-bottom:6px;font-size:13px;color:#67c23a;"><i class="layui-icon layui-icon-user"></i> 管理员回复 '+
+                    '<span style="margin-left:8px;">'+(d.updated_at||'')+'</span></div>'+
+                    '<div style="font-size:14px;line-height:1.8;word-break:break-all;color:#333;">'+decodeHtml(d.reply||'')+'</div></div>';
+            }
+            html += '<div style="margin-top:8px;font-size:13px;color:#666;margin-bottom:6px;">回复</div>'+
+                '<textarea id="'+replyId+'" style="display:none;"></textarea>'+
+                '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm" id="SF_ReplyBtn">回复</button></div>'+
+                '</div>';
+            layer.open({
+                type: 1, title: '反馈详情', area: ['760px', '680px'], content: html,
+                success: function(layero, index) {
+                    var replyLayedit = layedit.build(replyId, {
+                        height: 150,
+                        uploadImage: { url: '{:url("/Feedback/uploadImage")}', type: 'post' }
                     });
-                    form.render();
-
-                    form.on('submit(SF_HandleSubmit)', function (data) {
-                        notice.msg('{:t("feedback.processing")}', {icon: 4, close: true});
+                    setTimeout(function(){
+                        var ifr = $('#LAY_layedit_' + replyLayedit)[0];
+                        if (ifr && ifr.contentWindow) {
+                            var doc = ifr.contentWindow.document;
+                            var s = doc.createElement('style');
+                            s.innerHTML = 'img{max-width:60%!important;height:auto!important;}';
+                            doc.head.appendChild(s);
+                        }
+                    }, 500);
+                    $(layero).find('#SF_ReplyBtn').on('click', function(){
+                        var reply = layedit.getContent(replyLayedit);
+                        var hasImg = /<img[^>]+>/i.test(reply || '');
+                        var hasText = (reply || '').replace(/<[^>]+>/g, '').trim() !== '';
+                        if (!hasImg && !hasText) {
+                            notice.msg('请填写回复内容', {icon: 3}); return;
+                        }
+                        notice.msg('处理中...', {icon: 4, close: true});
                         $.ajax({
-                            type: "POST",
-                            url: '{:url("/Feedback/handle")}',
-                            data: data.field,
-                            dataType: "json",
-                            success: function(data) {
+                            type: 'POST', url: '{:url("/Feedback/handle")}',
+                            data: {id: d.id, reply: reply, status: d.status}, dataType: 'json',
+                            success: function(res) {
                                 notice.destroy();
-                                if (data.code == 0) {
+                                if (res.code == 0) {
+                                    layer.close(index);
                                     insTb.reload({page: {curr: 1}});
-                                    notice.msg(data.msg, {icon: 1, audio:'1'});
-                                    if (parent && parent.SF_updateNotifyBadge) {
-                                        parent.SF_updateNotifyBadge();
-                                    }
-                                } else {
-                                    notice.msg(data.msg, {icon: 2, audio:'1'});
-                                }
+                                    notice.msg(res.msg, {icon: 1, audio:'1'});
+                                    if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
+                                } else { notice.msg(res.msg, {icon: 2}); }
                             },
-                            error: function() {
-                                notice.destroy();
-                                notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
-                            }
+                            error: function() { notice.destroy(); notice.msg('服务器错误！', {icon: 2}); }
                         });
-                        return false;
                     });
-
-                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
                 }
             });
         }

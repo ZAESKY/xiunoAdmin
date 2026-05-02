@@ -71,8 +71,8 @@
         <div class="layui-form-item">
             <label class="layui-form-label layui-form-required">密码:</label>
             <div class="layui-input-block">
-                <input type="text" name="password" placeholder="请输入密码" class="layui-input"
-                       lay-verType="tips" lay-verify="required"/>
+                <input type="text" name="password" placeholder="留空则不修改密码" class="layui-input"
+                       lay-verType="tips"/>
             </div>
         </div>
         <div class="layui-form-item">
@@ -176,10 +176,6 @@
                         return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
                     }},
                 {field: 'username', title: '用户名', sort: true, minWidth: 150},
-                {field: 'password', title: '密码', minWidth: 100, templet: function (d) {
-                        return '<a lay-event="seePassword" class="layui-btn layui-btn-xs">点击查看</a>';
-                    }
-                },
                 {field: 'powerName', title: '权限', align: 'right', sort: true, minWidth: 130, templet: function (d) {
                         return '<span class="layui-badge layui-badge-'+d.powerSpan+'">'+d.powerName+'</span>';
                     }},
@@ -219,23 +215,8 @@
                 showEditModel(obj.data);
             } else if (obj.event === 'del') { // 删除
                 doDel(obj);
-            } else if (obj.event === 'seePassword') {
-                admin.open({
-                    title: '查看用户 '+obj.data.username+' 密码',
-                    type: 1,
-                    content: '<div class="layui-card"><div class="layui-card-body"><div class="layui-form layui-form-pane"><div class="layui-form-item"><label class="layui-form-label">密码</label><div class="layui-input-block"><input type="text" id="pwd" class="layui-input layui-disabled" value="'+obj.data.password+'"/></div></div></div><a class="layui-btn layui-btn-fluid sf" data-clipboard-text="'+obj.data.password+'" onclick="copy()">点击复制</a></div></div>'
-                });
             }
         });
-
-        window.copy = function (){
-            notice.msg('正在执行中..', {icon: 4, close: true});
-            var e = document.getElementById("pwd");
-            e.select();
-            document.execCommand("Copy");//执行复制
-            notice.destroy();
-            notice.msg('复制成功！', {icon: 1, audio:'1'});
-        }
 
         /* 表格头工具栏点击事件 */
         table.on('toolbar(SF_Table)', function (obj) {

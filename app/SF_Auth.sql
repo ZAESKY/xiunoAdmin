@@ -517,12 +517,27 @@ CREATE TABLE `SF_feedback` (
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `title` varchar(255) NOT NULL COMMENT '反馈标题',
   `content` text NOT NULL COMMENT '反馈内容',
-  `reply` text COMMENT '管理员回复',
-  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0待处理 1已受理 2已驳回',
+  `type` varchar(20) NOT NULL DEFAULT 'other' COMMENT '反馈类型：bug/feature/other',
+  `reply` text COMMENT '历史回复字段，新增回复请写入SF_feedback_reply',
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0待处理 1已受理 2已驳回 3已解决',
   `created_at` datetime NOT NULL COMMENT '提交时间',
   `updated_at` datetime DEFAULT NULL COMMENT '处理时间',
   PRIMARY KEY (`id`),
   KEY `idx_user_status` (`user_id`, `status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `SF_feedback_reply`;
+CREATE TABLE `SF_feedback_reply` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `feedback_id` int(11) unsigned NOT NULL COMMENT '反馈ID',
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '回复用户ID，0=管理员',
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否管理员回复',
+  `author` varchar(150) NOT NULL DEFAULT '' COMMENT '回复人名称',
+  `content` text NOT NULL COMMENT '回复内容',
+  `created_at` datetime NOT NULL COMMENT '回复时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_feedback_id` (`feedback_id`),
+  KEY `idx_feedback_admin` (`feedback_id`, `is_admin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `SF_notification`;

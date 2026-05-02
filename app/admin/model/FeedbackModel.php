@@ -14,15 +14,6 @@ class FeedbackModel extends BaseModel
     const STATUS_ACCEPTED = 1;
     const STATUS_REJECTED = 2;
 
-    public static function statusMap(): array
-    {
-        return [
-            self::STATUS_PENDING  => t('feedback.status_pending'),
-            self::STATUS_ACCEPTED => t('feedback.status_accepted'),
-            self::STATUS_REJECTED => t('feedback.status_rejected'),
-        ];
-    }
-
     public function getInfo($id)
     {
         try {
@@ -45,8 +36,12 @@ class FeedbackModel extends BaseModel
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
 
             $data = $this->buildSearchWhere('id|title', 'text', 'status');
+            $type = $post['type'] ?? '';
+            if ($type !== '' && in_array($type, ['bug', 'feature', 'other'])) {
+                $data[] = ['f.type', '=', $type];
+            }
 
-            $list = self::alias('f')
+            return self::alias('f')
                 ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
                 ->field('f.*, u.username')
                 ->order('f.id', 'desc')
@@ -55,7 +50,6 @@ class FeedbackModel extends BaseModel
                     'list_rows' => $limit,
                     'page'      => $current_page,
                 ]);
-            return $list;
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -80,15 +74,19 @@ class FeedbackModel extends BaseModel
             throw new Exception(t('common.no_data'));
         }
 
-        $data = [
+        self::where('id', $id)->data([
             'reply'      => $reply,
             'status'     => $status,
             'updated_at' => datetime(),
-        ];
-        self::where('id', $id)->data($data)->update();
+        ])->update();
 
         try {
-            $statusLabel = self::statusMap()[$status] ?? '';
+            $statusMap = [
+                self::STATUS_PENDING  => t('feedback.status_pending'),
+                self::STATUS_ACCEPTED => t('feedback.status_accepted'),
+                self::STATUS_REJECTED => t('feedback.status_rejected'),
+            ];
+            $statusLabel = $statusMap[$status] ?? '';
             NotificationModel::add([
                 'user_id'    => $row['user_id'],
                 'title'      => t('feedback.notify_title_handled'),
@@ -101,9 +99,7 @@ class FeedbackModel extends BaseModel
                 'is_read'    => 0,
                 'created_at' => datetime(),
             ]);
-        } catch (\Throwable $e) {
-            trace('Feedback notification failed: ' . $e->getMessage(), 'error');
-        }
+        } catch (\Throwable $e) {}
 
         return true;
     }

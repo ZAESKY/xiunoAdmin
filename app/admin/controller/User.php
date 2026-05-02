@@ -48,6 +48,9 @@ class User extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->list();
+                foreach ($result as $item) {
+                    unset($item['password']);
+                }
                 return message(t('common.list_success') ,true, ['data' => $result]);
             }
         }catch (\Exception $e){

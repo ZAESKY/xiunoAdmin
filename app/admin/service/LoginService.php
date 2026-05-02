@@ -85,7 +85,7 @@ class LoginService extends BaseService
             return message(t('login.username_not_exist'), false, 'username');
         }
         // 密码校验
-        if ($password != $info['password']) {
+        if (get_password($password) != $info['password']) {
             ActionLog::setContent("账号密码错误|用户名:".$username."|IP:".get_client_ip());
             return message(t('login.password_incorrect'), false, "password");
         }

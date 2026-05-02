@@ -17,7 +17,7 @@ class FeedbackService extends UserBaseService
     {
         try {
             $userInfo = $this->getCurrentUserInfo();
-            $result = $this->model->submit($userInfo);
+            $this->model->submit($userInfo);
             return message(t('feedback.submit_success'), true);
         } catch (\Throwable $e) {
             return message($e->getMessage(), false);
@@ -51,17 +51,14 @@ class FeedbackService extends UserBaseService
         if (!$userInfo) {
             throw new Exception(t('user.info_error'));
         }
-
         if (is_object($userInfo) && method_exists($userInfo, 'toArray')) {
             $userInfo = $userInfo->toArray();
         } elseif (is_object($userInfo)) {
             $userInfo = get_object_vars($userInfo);
         }
-
         if (empty($userInfo['id'])) {
             throw new Exception(t('user.info_error'));
         }
-
         return $userInfo;
     }
 }

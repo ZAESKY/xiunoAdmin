@@ -74,7 +74,7 @@ class Ajax extends Frontend
             try{
                 $data = [
                     'username' => $username,
-                    'password' => $password,
+                    'password' => get_password($password),
                     'qq' => $qq,
                     'email' => $email,
                     'phone' => $phone,

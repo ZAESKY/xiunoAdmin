@@ -21,14 +21,24 @@ class User extends Validate
      * 提示消息.
      */
     protected $message  =   [
-
+        'appid.require' => '请选择所属应用',
+        'appid.integer'  => '应用ID格式错误',
+        'power.require'  => '请选择用户权限',
+        'power.integer'   => '权限格式错误',
+        'username.require' => '请填写用户名',
+        'password.require' => '请填写密码',
+        'qq.require'     => '请填写QQ号',
+        'qq.integer'     => 'QQ号只能填写数字',
+        'qq.max'         => 'QQ号不能超过12位',
+        'email.email'    => '邮箱格式不正确',
+        'phone.integer'  => '手机号只能填写数字',
+        'phone.max'      => '手机号不能超过11位',
     ];
     /**
      * 验证场景.
      */
     protected $scene = [
-        'add'  => [],
-        'edit' => [],
+        'edit' => ['password' => 'remove'],
     ];
 
 }

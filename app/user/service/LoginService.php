@@ -78,7 +78,7 @@ class LoginService extends UserBaseService
             return message(t('login.username_not_exist'), false, 'username');
         }
         // 密码校验
-        if ($password != $info['password']) {
+        if (get_password($password) != $info['password']) {
             $content = [
                 'Title' => '登录后台',
                 '结果' => '登陆失败[账号密码错误]',

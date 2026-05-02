@@ -114,7 +114,7 @@ class Index extends Backend
             if(empty($oldPassword)){
                 return message(t('user.old_password_empty'), false);
             }
-            if($oldPassword != $this->adminInfo['password']){
+            if(get_password($oldPassword) != $this->adminInfo['password']){
                 return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->adminInfo['username']){
@@ -130,7 +130,7 @@ class Index extends Backend
                 try{
                     Db::name('admin')
                         ->where('id', $this->adminId)
-                        ->data(['password' => $newPassword])
+                        ->data(['password' => get_password($newPassword)])
                         ->update();
                     return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
@@ -155,7 +155,7 @@ class Index extends Backend
                 try{
                     Db::name('admin')
                         ->where('id', $this->adminId)
-                        ->data(['username' => $username, 'password' => $password])
+                        ->data(['username' => $username, 'password' => get_password($password)])
                         ->update();
                     return message(t('user.username_change_success'), true);
                 }catch (\Exception $e){

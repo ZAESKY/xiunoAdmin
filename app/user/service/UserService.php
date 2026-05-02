@@ -28,9 +28,7 @@ class UserService extends UserBaseService
         try{
             $result = $this->model->list();
             foreach($result as $res){
-                if(!parent::isSubordinatePower($res['power'])){
-                    $res['password'] = t('user.no_permission_to_view');
-                }
+                unset($res['password']);
                 $res['powerSpan'] = 'gray';
                 $res['powerName'] = t('user.power_error');
                 $res['appName'] = t('app.get_info_failed');

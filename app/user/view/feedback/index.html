@@ -1,4 +1,8 @@
 {include file="/public/header"}
+<style>
+    .feedback-content img, .layui-layer-content img { max-width: 60% !important; height: auto !important; vertical-align: middle; }
+    #LAY_layedit_SF_FeedbackContent { transition: height .3s; }
+</style>
 <div class="layui-fluid">
     <div class="layui-row layui-col-space15">
         <div class="layui-col-md8">
@@ -7,20 +11,28 @@
                 <div class="layui-card-body">
                     <form id="SF_FeedbackForm" class="layui-form" lay-filter="SF_FeedbackForm">
                         <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-required">{:t('feedback.type_label')}</label>
+                            <div class="layui-input-block">
+                                <select name="type" lay-verify="required">
+                                    <option value="">请选择反馈类型</option>
+                                    <option value="bug">BUG反馈</option>
+                                    <option value="feature">功能需求</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
                             <label class="layui-form-label layui-form-required">{:t('feedback.title')}</label>
                             <div class="layui-input-block">
                                 <input type="text" name="title" class="layui-input"
                                        placeholder="{:t('feedback.title_placeholder')}"
-                                       lay-verify="required" lay-verType="tips"
-                                       autocomplete="off"/>
+                                       lay-verify="required" lay-verType="tips" autocomplete="off"/>
                             </div>
                         </div>
                         <div class="layui-form-item layui-form-text">
                             <label class="layui-form-label layui-form-required">{:t('feedback.content')}</label>
                             <div class="layui-input-block">
-                                <textarea name="content" class="layui-textarea" style="height:200px"
-                                          placeholder="{:t('feedback.content_placeholder')}"
-                                          lay-verify="required" lay-verType="tips"></textarea>
+                                <textarea id="SF_FeedbackContent" name="content" style="display:none;"></textarea>
                             </div>
                         </div>
                         <div class="layui-form-item">
@@ -66,29 +78,44 @@
     {{# } }}
 </script>
 
-<script type="text/html" id="SF_MyReply">
-    {{# if(d.reply) { }}
-    <span style="color:#666;">{{ d.reply.length > 30 ? d.reply.substring(0,30)+'...' : d.reply }}</span>
-    {{# } else { }}
-    <span style="color:#999;">-</span>
-    {{# } }}
+<script type="text/html" id="SF_MyToolbar">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view">查看</a>
 </script>
 
 {include file="/public/footer"}
 <script>
-    layui.use(['layer', 'form', 'table', 'notice'], function () {
+    layui.use(['layer', 'form', 'table', 'notice', 'layedit'], function () {
         var $ = layui.jquery;
         var layer = layui.layer;
         var form = layui.form;
         var table = layui.table;
         var notice = layui.notice;
+        var layedit = layui.layedit;
         var submitLocked = false;
 
-        // Check for existing pending feedback on page load
+        function decodeHtml(v) {
+            var t = document.createElement('textarea');
+            t.innerHTML = v || '';
+            return t.value;
+        }
+
+        var layeditIndex = layedit.build('SF_FeedbackContent', {
+            height: 600,
+            uploadImage: { url: '{:url("/Feedback/uploadImage")}', type: 'post' }
+        });
+        // 限制 iframe 内图片宽度
+        setTimeout(function(){
+            var ifr = $('#LAY_layedit_' + layeditIndex)[0];
+            if (ifr && ifr.contentWindow) {
+                var doc = ifr.contentWindow.document;
+                var s = doc.createElement('style');
+                s.innerHTML = 'img{max-width:60%!important;height:auto!important;}';
+                doc.head.appendChild(s);
+            }
+        }, 500);
+
         $.ajax({
-            type: "POST",
-            url: '{:url("/Feedback/checkPending")}',
-            dataType: "json",
+            type: "POST", url: '{:url("/Feedback/checkPending")}', dataType: "json",
             success: function(res) {
                 if (res.code == 0 && res.data && res.data.has_pending) {
                     submitLocked = true;
@@ -98,81 +125,87 @@
             }
         });
 
-        // My feedback history table
         var myFeedbackTable = table.render({
             elem: '#SF_MyFeedbackTable',
             url: '{:url("/Feedback/myList")}',
-            method: 'post',
-            page: false,
-            skin: 'line',
-            size: 'sm',
-            limit: 10,
-            request: {
-                pageName: 'current_page',
-                limitName: 'limit'
-            },
+            method: 'post', page: false, skin: 'line', size: 'sm', limit: 10,
+            request: { pageName: 'current_page', limitName: 'limit' },
             parseData: function(res){
                 var pageData = res.data && res.data.data ? res.data.data : {total: 0, data: []};
-                return {
-                    "code": res.code,
-                    "msg": res.msg,
-                    "count": pageData.total || 0,
-                    "data": pageData.data || []
-                };
+                return { "code": res.code, "msg": res.msg, "count": pageData.total || 0, "data": pageData.data || [] };
             },
             cols: [[
-                {field: 'title', title: '{:t("feedback.title")}', minWidth: 120, templet: function(d){
+                {field: 'title', title: '标题', minWidth: 100, templet: function(d){
                     return (d.title || '').length > 15 ? d.title.substring(0,15) + '...' : (d.title || '');
                 }},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_MyStatus', width: 80},
-                {field: 'reply', title: '{:t("feedback.reply")}', templet: '#SF_MyReply', width: 100}
+                {field: 'status', title: '状态', templet: '#SF_MyStatus', width: 90},
+                {title: '', toolbar: '#SF_MyToolbar', width: 60}
             ]]
         });
 
-        window.refreshTab = function () {
-            myFeedbackTable.reload();
-        };
+        table.on('tool(SF_MyFeedbackTable)', function(obj){
+            if (obj.event === 'view') showView(obj.data);
+        });
 
         form.on('submit(SF_FeedbackSubmit)', function (data) {
             if (submitLocked) {
-                notice.msg('{:t("feedback.has_pending")}', {icon: 3, audio:'1'});
-                return false;
+                notice.msg('{:t("feedback.has_pending")}', {icon: 3}); return false;
             }
+            data.field.content = layedit.getContent(layeditIndex);
             if (!data.field.title || !data.field.title.trim()) {
-                notice.msg('{:t("feedback.title_required")}', {icon: 3});
-                return false;
+                notice.msg('{:t("feedback.title_required")}', {icon: 3}); return false;
             }
-            if (!data.field.content || !data.field.content.trim()) {
-                notice.msg('{:t("feedback.content_required")}', {icon: 3});
-                return false;
+            var hasImg = /<img[^>]+>/i.test(data.field.content || '');
+            var hasText = (data.field.content || '').replace(/<[^>]+>/g, '').trim() !== '';
+            if (!hasImg && !hasText) {
+                notice.msg('{:t("feedback.content_required")}', {icon: 3}); return false;
             }
-            notice.msg('{:t("feedback.submitting")}', {icon: 4, close: true});
+            notice.msg('提交中...', {icon: 4, close: true});
             $.ajax({
-                type: "POST",
-                url: '{:url("/Feedback/index")}',
-                data: data.field,
-                dataType: "json",
+                type: "POST", url: '{:url("/Feedback/index")}', data: data.field, dataType: "json",
                 success: function(res) {
                     notice.destroy();
                     if (res.code == 0) {
                         notice.msg(res.msg, {icon: 1, audio:'1'});
                         $('#SF_FeedbackForm')[0].reset();
+                        layedit.setContent(layeditIndex, '');
                         submitLocked = true;
                         $('#SF_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
                         table.reload('SF_MyFeedbackTable');
-                        if (parent && parent.SF_updateNotifyBadge) {
-                            parent.SF_updateNotifyBadge();
-                        }
-                    } else {
-                        notice.msg(res.msg, {icon: 2, audio:'1'});
-                    }
+                        if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
+                    } else { notice.msg(res.msg, {icon: 2, audio:'1'}); }
                 },
-                error: function() {
-                    notice.destroy();
-                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
-                }
+                error: function() { notice.destroy(); notice.msg('服务器错误！', {icon: 2}); }
             });
             return false;
         });
+
+        function showView(d) {
+            var typeMap = {bug:'BUG反馈', feature:'功能需求', other:'其他'};
+            var statusMap = {0:'<span class="layui-badge layui-badge-orange" style="float:right;">待处理</span>',
+                             1:'<span class="layui-badge layui-badge-green" style="float:right;">已受理</span>',
+                             2:'<span class="layui-badge layui-badge-red" style="float:right;">已驳回</span>'};
+            var html = '<div style="padding:16px;max-height:500px;overflow:auto;">'+
+                '<div style="border:1px solid #e6e6e6;border-radius:6px;padding:14px 16px;margin-bottom:12px;background:#fafafa;">'+
+                '<div style="margin-bottom:8px;font-size:13px;color:#999;">'+
+                '<span>'+(d.username||'')+'</span> '+
+                '<span class="layui-badge layui-badge-blue" style="margin-left:8px;">'+(typeMap[d.type]||d.type||'')+'</span> '+
+                '<span style="margin-left:8px;">'+(d.created_at||'')+'</span>'+
+                (statusMap[d.status]||'')+
+                '</div>'+
+                '<div style="font-size:15px;font-weight:bold;margin-bottom:8px;">'+(d.title||'')+'</div>'+
+                '<div style="font-size:14px;line-height:1.8;word-break:break-all;">'+decodeHtml(d.content||'')+'</div>'+
+                '</div>';
+            if (d.reply) {
+                html += '<div style="border:1px solid #d2e8c8;border-radius:6px;padding:14px 16px;background:#f0f9eb;">'+
+                    '<div style="margin-bottom:6px;font-size:13px;color:#67c23a;"><i class="layui-icon layui-icon-user"></i> 管理员回复 '+
+                    '<span style="margin-left:8px;">'+(d.updated_at||'')+'</span></div>'+
+                    '<div style="font-size:14px;line-height:1.8;word-break:break-all;color:#333;">'+decodeHtml(d.reply||'')+'</div></div>';
+            } else {
+                html += '<div style="text-align:center;padding:20px;color:#999;">暂无回复</div>';
+            }
+            html += '</div>';
+            layer.open({ type: 1, title: '反馈详情', area: ['700px', '500px'], content: html });
+        }
     });
 </script>

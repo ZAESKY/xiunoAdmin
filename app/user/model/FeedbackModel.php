@@ -35,12 +35,13 @@ class FeedbackModel extends BaseModel
     {
         $post = request()->post();
         $title = trim((string)($post['title'] ?? ''));
-        $content = trim((string)($post['content'] ?? ''));
+        $content = $post['content'] ?? '';
+        $type = !empty($post['type']) && in_array($post['type'], ['bug', 'feature', 'other']) ? $post['type'] : 'other';
 
         if (empty($title)) {
             throw new Exception(t('feedback.title_required'));
         }
-        if (empty($content)) {
+        if (empty(strip_tags($content))) {
             throw new Exception(t('feedback.content_required'));
         }
 
@@ -55,6 +56,7 @@ class FeedbackModel extends BaseModel
             'user_id'    => $userId,
             'title'      => $title,
             'content'    => $content,
+            'type'       => $type,
             'status'     => self::STATUS_PENDING,
             'created_at' => datetime(),
         ]);
@@ -71,9 +73,7 @@ class FeedbackModel extends BaseModel
                 'is_read'    => 0,
                 'created_at' => datetime(),
             ]);
-        } catch (\Throwable $e) {
-            trace('Feedback notification failed: ' . $e->getMessage(), 'error');
-        }
+        } catch (\Throwable $e) {}
 
         return true;
     }
@@ -96,10 +96,14 @@ class FeedbackModel extends BaseModel
             }
             $data[] = ['user_id', '=', $userId];
 
-            return self::order('id', 'desc')->where($data)->paginate([
-                'list_rows' => $limit,
-                'page'      => $current_page,
-            ]);
+            return self::alias('f')
+                ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
+                ->field('f.*, u.username')
+                ->order('f.id', 'desc')
+                ->where($data)->paginate([
+                    'list_rows' => $limit,
+                    'page'      => $current_page,
+                ]);
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }

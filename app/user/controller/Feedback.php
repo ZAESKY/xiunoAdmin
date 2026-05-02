@@ -57,15 +57,16 @@ class Feedback extends UserBackend
             if ($file->getSize() > $maxSize) {
                 return json(['code' => 1, 'msg' => '图片不能超过5MB']);
             }
-            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'Uploads' . DIRECTORY_SEPARATOR . 'feedback' . DIRECTORY_SEPARATOR . date('Ymd');
+            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . date('Ymd');
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
-            $info = $file->move($uploadDir);
+            $fileName = md5(uniqid(mt_rand(), true)) . '.' . $ext;
+            $info = $file->move($uploadDir, $fileName);
             if (!$info) {
                 return json(['code' => 1, 'msg' => $file->getError()]);
             }
-            $url = '/Uploads/feedback/' . date('Ymd') . '/' . $info->getFilename();
+            $url = '/upload/' . date('Ymd') . '/' . $fileName;
             return json(['code' => 0, 'msg' => 'ok', 'data' => ['src' => $url, 'title' => $file->getOriginalName()]]);
         } catch (\Throwable $e) {
             return json(['code' => 1, 'msg' => $e->getMessage()]);

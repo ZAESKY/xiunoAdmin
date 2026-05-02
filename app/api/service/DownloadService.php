@@ -82,6 +82,11 @@ class DownloadService extends BaseService
             $isTempDownload = true;
         }
 
+        // 下载次数+1
+        if (!empty($versionData['id'])) {
+            Db::name('version')->where('id', intval($versionData['id']))->inc('number')->update();
+        }
+
         $response = download($downloadZip, 'SF_' . uniqid() . '.zip');
         if ($isTempDownload && method_exists($response, 'deleteFileAfterSend')) {
             $response->deleteFileAfterSend(true);

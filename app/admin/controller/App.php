@@ -31,6 +31,11 @@ class App extends Backend
         }catch (\Exception $e){
             return message($e->getMessage() ,false);
         }
+        // 每天自动清理一次已删除应用的孤立下载目录
+        if (!cache('?clean_download_dirs_done')) {
+            (new \app\admin\model\AppModel())->cleanOrphanDownloadDirs();
+            cache('clean_download_dirs_done', 1, 86400);
+        }
         try{
             View::assign('check_type_list',  $this->service->getCheckTypeList());
             View::assign('id', $id);

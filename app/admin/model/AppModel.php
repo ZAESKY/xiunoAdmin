@@ -265,12 +265,30 @@ class AppModel extends BaseModel
         if (!file_exists($path)) {
             return;
         }
-        // download_file normally stores a directory name; keep file support for legacy rows.
         if (is_dir($path)) {
             rmdirs($path);
             return;
         }
         unlink($path);
+    }
+
+    /**
+     * 清理已删除应用的孤立下载目录
+     */
+    public function cleanOrphanDownloadDirs()
+    {
+        $downloadRoot = APP_PATH . DS . 'common' . DS . 'download';
+        if (!is_dir($downloadRoot)) return;
+        $activeFiles = self::column('download_file');
+        $handle = opendir($downloadRoot);
+        while (($entry = readdir($handle)) !== false) {
+            if ($entry === '.' || $entry === '..' || $entry === 'release' || $entry === 'update' || $entry === 'AuthInfo.php') continue;
+            if (!in_array($entry, $activeFiles)) {
+                $path = $downloadRoot . DS . $entry;
+                if (is_dir($path)) rmdirs($path);
+            }
+        }
+        closedir($handle);
     }
 
     public function setStatus(){

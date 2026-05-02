@@ -139,7 +139,7 @@ class User extends BaseModel
             if(!$row) return message(t('power.not_exist') ,false);
             if(!$userPower) return message(t('user.power_error') ,false);
             $allmoney = round((($row['money'] - $userPower['money']) > 0 ? ($row['money'] - $userPower['money']) : 0), 2);
-            if($allmoney > $userInfo['balance']) return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+            if($allmoney > $userInfo['balance']) return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
             $remainderBalance = $userInfo['balance'] - $allmoney;
             try{
                 $result = parent::updateUserInfo(['balance' => $remainderBalance]);
@@ -166,7 +166,7 @@ class User extends BaseModel
                 ];
                 event('ActionLog', $content);
                 Cache::delete('SF_UserMenu'.$userInfo['id']);
-                return message(t('user.upgrade_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total'), true);
+                return message(t('user.upgrade_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' <br> '.t('common_ui.balance_field').$remainderBalance, true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '升级权限',

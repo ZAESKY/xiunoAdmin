@@ -1,141 +1,146 @@
 {include file="/public/header"}
 
-<div class="layui-fluid sf-dashboard">
-    <div class="sf-stat-grid">
-        <a class="sf-stat-card" ew-href="{:url('/Auth/list')}" ew-title="{:t('common_ui.auth_list')}">
-            <span class="sf-stat-icon sf-stat-icon-blue"><i class="layui-icon layui-icon-auz"></i></span>
-            <strong>{$auth_count}</strong>
-            <span class="sf-stat-label">{:t('dashboard.auth_total')}</span>
-            {lt name="auth_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$auth_increase|abs}</em>
-            {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$auth_increase|abs}</em>
-            {/lt}
-        </a>
-        <a class="sf-stat-card" ew-href="{:url('/User/list')}" ew-title="用户列表">
-            <span class="sf-stat-icon sf-stat-icon-gold"><i class="layui-icon layui-icon-group"></i></span>
-            <strong>{$user_count}</strong>
-            <span class="sf-stat-label">{:t('dashboard.user_total')}</span>
-            {lt name="user_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$user_increase|abs}</em>
-            {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$user_increase|abs}</em>
-            {/lt}
-        </a>
-        <a class="sf-stat-card" ew-href="{:url('/Pirate/list')}" ew-title="{:t('common_ui.pirate_list')}">
-            <span class="sf-stat-icon sf-stat-icon-red"><i class="layui-icon layui-icon-website"></i></span>
-            <strong>{$pirate_count}</strong>
-            <span class="sf-stat-label">{:t('dashboard.pirate_total')}</span>
-            {lt name="pirate_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$pirate_increase|abs}</em>
-            {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$pirate_increase|abs}</em>
-            {/lt}
-        </a>
-        <a class="sf-stat-card" ew-href="{:url('/Payment/list')}" ew-title="认证列表">
-            <span class="sf-stat-icon sf-stat-icon-green"><i class="layui-icon layui-icon-ok-circle"></i></span>
-            <strong>{$payment_count}</strong>
-            <span class="sf-stat-label">{:t('dashboard.payment_total')}</span>
-            {lt name="payment_increase" value="0"}
-            <em class="sf-stat-trend is-down"><i class="layui-icon layui-icon-down"></i>{$payment_increase|abs}</em>
-            {else/}
-            <em class="sf-stat-trend is-up"><i class="layui-icon layui-icon-up"></i>{$payment_increase|abs}</em>
-            {/lt}
-        </a>
-    </div>
-
-    <div class="sf-dashboard-grid">
-        <section class="sf-panel sf-panel-map">
-            <div class="sf-panel-header">
-                <h3>{:t('dashboard.user_distribution')}</h3>
-                <span>{:t('dashboard.business_overview')}</span>
-            </div>
-            <div class="sf-map-layout">
-                <div class="sf-china-map" aria-hidden="true">
-                    <span class="map-dot dot-east"></span>
-                    <span class="map-dot dot-south"></span>
-                    <span class="map-dot dot-west"></span>
-                    <span class="map-dot dot-north"></span>
-                    <span class="map-label label-a">{:t('dashboard.east_china')}</span>
-                    <span class="map-label label-b">{:t('dashboard.south_china')}</span>
-                    <span class="map-label label-c">{:t('dashboard.southwest_china')}</span>
-                    <span class="map-label label-d">{:t('dashboard.north_china')}</span>
-                </div>
-                <div class="sf-rank-list">
-                    {foreach $balance_ranking as $key=>$res}
-                    <div class="sf-rank-item">
-                        <span>{$res.username}</span>
-                        <div class="sf-rank-bar"><i style="width:{php}echo max(16, 96 - $key * 7);{/php}%"></i></div>
-                        <b>{$res.balance}</b>
+<div class="layui-fluid ew-console-wrapper">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-sm12 layui-col-space15">
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/Auth/list')}" ew-title="{:t('common_ui.auth_list')}">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-green layui-icon layui-icon-auz"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$auth_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">{:t('dashboard.auth_total')}</div>
+                    {lt name="auth_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$auth_increase|abs} 个</span>
                     </div>
-                    {/foreach}
                 </div>
             </div>
-        </section>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/App/list')}" ew-title="应用列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-blue layui-icon layui-icon-app"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$app_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">{:t('dashboard.app_total')}</div>
+                </div>
+            </div>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/User/list')}" ew-title="用户列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-purple layui-icon layui-icon-group"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$user_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">{:t('dashboard.user_total')}</div>
+                    {lt name="user_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$user_increase|abs} 个</span>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/Pirate/list')}" ew-title="{:t('common_ui.pirate_list')}">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-red layui-icon layui-icon-website"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$pirate_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">{:t('dashboard.pirate_total')}</div>
+                    {lt name="pirate_increase" value="0"}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                    {else/}
+                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                    {/lt}
+                        <span>{$pirate_increase|abs} 个</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <aside class="sf-side-stack">
-            <section class="sf-panel sf-online-panel">
-                <div class="sf-panel-header">
-                    <h3>{:t('dashboard.online_count')}</h3>
-                    <span>{:date('H:i:s')}</span>
+        <div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    余额排行
+                    <span class="pull-right"><i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-pink layui-icon layui-icon-fire"></i></span>
                 </div>
-                <div class="sf-online-number">{$user_count}</div>
-                <p><i></i>{:t('dashboard.seconds_update', ['seconds' => 9])}</p>
-            </section>
-            <section class="sf-panel sf-browser-panel">
-                <div class="sf-panel-header">
-                    <h3>{:t('dashboard.browser_distribution')}</h3>
-                    <span>{:t('dashboard.visit_ratio')}</span>
+                <div class="layui-card-body">
+                    <table class="layui-table" lay-even lay-skin="nob">
+                        <thead><tr><th>用户</th><th>余额</th></tr></thead>
+                        <tbody>
+                        {foreach $balance_ranking as $res}
+                        <tr><td>{$res.username}</td><td>{$res.balance}</td></tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="sf-donut"></div>
-                <div class="sf-browser-legend">
-                    <span><i class="legend-blue"></i>Chrome</span>
-                    <span><i class="legend-cyan"></i>Safari</span>
-                    <span><i class="legend-yellow"></i>Edge</span>
-                    <span><i class="legend-purple"></i>Other</span>
-                </div>
-            </section>
-        </aside>
-    </div>
+            </div>
+        </div>
 
-    <div class="sf-bottom-grid">
-        <section class="sf-panel">
-            <div class="sf-panel-header">
-                <h3>{:t('dashboard.today_log')}</h3>
-                <span>Recent logs</span>
-            </div>
-            <div class="sf-log-list mini-bar">
-                {empty name="log_list"}
-                <div class="sf-log-item">
-                    <i></i>
-                    <span>{:t('dashboard.no_log')}</span>
-                    <time>{:date('Y-m-d H:i:s')}</time>
+        <div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    积分排行
+                    <span class="pull-right"><i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-green layui-icon layui-icon-star"></i></span>
                 </div>
-                {else/}
-                {foreach $log_list as $res}
-                <div class="sf-log-item">
-                    <i></i>
-                    <span>{$res.title}</span>
-                    <time>{$res.create_time}</time>
+                <div class="layui-card-body">
+                    <table class="layui-table" lay-even lay-skin="nob">
+                        <thead><tr><th>用户</th><th>积分</th></tr></thead>
+                        <tbody>
+                        {foreach $integral_ranking as $res}
+                        <tr><td>{$res.username}</td><td>{$res.integral}</td></tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
                 </div>
-                {/foreach}
-                {/empty}
             </div>
-        </section>
+        </div>
 
-        <section class="sf-panel sf-safe-panel">
-            <div class="sf-panel-header">
-                <h3>{:t('dashboard.security_center')}</h3>
-                <span>Security center</span>
-            </div>
-            <div class="sf-safe-content">
-                <div class="sf-progress-wrap">
-                    <div id="SF_Progress"></div>
-                    <div id="loading"></div>
+        <div class="layui-col-xs12">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    安全检测
+                    <span class="pull-right">{:date('H:i:s')}</span>
                 </div>
-                <div id="sfhtml" class="sf-safe-table"></div>
+                <div class="layui-card-body">
+                    <div class="layui-row">
+                        <div class="layui-col-xs3" style="text-align:center">
+                            <div id="SF_Progress"></div>
+                            <div id="loading" style="margin-top:10px"></div>
+                        </div>
+                        <div class="layui-col-xs9">
+                            <div id="sfhtml"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </section>
+        </div>
+
+        <div class="layui-col-xs12">
+            <div class="layui-card">
+                <div class="layui-card-header">操作日志</div>
+                <div class="layui-card-body" style="max-height:320px;overflow:auto">
+                    {empty name="log_list"}
+                    <p style="color:#999">{:t('dashboard.no_log')}</p>
+                    {else/}
+                    <table class="layui-table" lay-even lay-skin="nob">
+                        <thead><tr><th>操作</th><th>时间</th></tr></thead>
+                        <tbody>
+                        {foreach $log_list as $res}
+                        <tr><td>{$res.title}</td><td>{$res.create_time}</td></tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                    {/empty}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -148,7 +153,6 @@
 
         $('#loading').html('<h2><b>{:t("system.detect_checking")}<span id="loginload">.</span></b></h2>');
         var loadnum = 1;
-
         setInterval(function (){
             var load = '.';
             if (loadnum == 1) {
@@ -178,7 +182,7 @@
                         }
                     });
                     var htmlarr = [];
-                    htmlarr.push('<div class="sf-safe-scroll"><table class="layui-table sf-table" lay-even lay-skin="nob"><thead><tr><th><b>{:t("common.importance")}</b></th><th><b>{:t("common.detail")}</b></th></tr></thead>');
+                    htmlarr.push('<table class="layui-table" lay-even lay-skin="nob"><thead><tr><th><b>{:t("common.importance")}</b></th><th><b>{:t("common.detail")}</b></th></tr></thead>');
                     $.each(data.data.check_msg.danger, function(){
                         htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-danger">{:t("dashboard.security_important")}</span></td><td>'+ this +'</td></tr>');
                     });
@@ -188,7 +192,7 @@
                     $.each(data.data.check_msg.info, function(){
                         htmlarr.push('<tr><td><span class="layui-btn layui-btn-sm layui-btn-info">{:t("dashboard.security_normal")}</span></td><td>'+ this +'</td></tr>');
                     });
-                    htmlarr.push('</table></div>');
+                    htmlarr.push('</table>');
                     var html = htmlarr.join("");
                     var timer = setInterval(function () {
                         if(data.data.safe > progress.value){

@@ -83,7 +83,7 @@
                 {field: 'title', title: '日志标题', sort: true, minWidth: 120},
                 {field: 'username', title: '操作人', sort: true, minWidth: 120, templet: function (d) {
                     if(d.username == 1 && d.is_admin == 1){
-                        return '<span class="layui-badge layui-badge-orange">管理员:'+d.username+'</span>';
+                        return '<span class="layui-badge layui-badge-orange">管理员'+d.username+'</span>';
                     }else if(d.username == 0){
                         return '<span class="layui-badge layui-badge-yellow">游客</span>';
                     }else{

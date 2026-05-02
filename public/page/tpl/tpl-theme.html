@@ -1,16 +1,10 @@
 <div class="layui-card-header">主题设置</div>
 <div class="more-theme-list">
-    <!-- Only keep the supported themes to avoid stale color-theme classes. -->
     <div class="more-theme-item active" data-theme="theme-sf">
         <span class="theme-preview theme-preview-default"></span>
         <b>默认主题</b>
     </div>
-    <div class="more-theme-item" data-theme="theme-dark">
-        <span class="theme-preview theme-preview-dark"></span>
-        <b>暗黑模式</b>
-    </div>
 </div>
-<!-- 导航 -->
 <div class="more-menu-list">
     <a class="more-menu-item" href="http://wpa.qq.com/msgrd?v=3&uin=2129876388&site=qq&menu=yes" target="_blank">
         <i class="layui-icon layui-icon-read" style="font-size: 19px;"></i> 联系作者
@@ -19,107 +13,6 @@
         <i class="layui-icon layui-icon-tabs" style="font-size: 16px;"></i> &nbsp;官方网站
     </a>
 </div>
-<!-- 控制开关 -->
-<div class="layui-form" style="margin: 25px 0;" lay-filter="more-set-form">
-    <div class="layui-form-item">
-        <label class="set-item-label">页&emsp;脚：</label>
-        <div class="set-item-ctrl">
-            <input id="setFooter" lay-filter="setFooter" type="checkbox" lay-skin="switch" lay-text="开启|关闭">
-        </div>
-        <label class="set-item-label"> Tab&nbsp;记忆：</label>
-        <div class="set-item-ctrl">
-            <input id="setTab" lay-filter="setTab" type="checkbox" lay-skin="switch" lay-text="开启|关闭">
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="set-item-label">多标签：</label>
-        <div class="set-item-ctrl">
-            <input id="setMoreTab" lay-filter="setMoreTab" type="checkbox" lay-skin="switch" lay-text="开启|关闭">
-        </div>
-        <label class="set-item-label">切换刷新：</label>
-        <div class="set-item-ctrl">
-            <input id="setRefresh" lay-filter="setRefresh" type="checkbox" lay-skin="switch" lay-text="开启|关闭">
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="set-item-label">导航箭头：</label>
-        <div class="set-item-ctrl">
-            <input lay-filter="navArrow" type="radio" value="" title="默认" name="navArrow">
-            <input lay-filter="navArrow" type="radio" value="arrow2" title="箭头" name="navArrow">
-            <input lay-filter="navArrow" type="radio" value="arrow3" title="加号" name="navArrow">
-        </div>
-    </div>
-</div>
-
-<script>
-    layui.use(['form', 'admin'], function () {
-        var $ = layui.jquery;
-        var form = layui.form;
-        var admin = layui.admin;
-        var setter = admin.setter;
-        var $body = $('body');
-        var allowedThemes = ['theme-sf', 'theme-dark'];
-
-        // Theme switch is intentionally limited to default and dark mode.
-        var $themItem = $('.more-theme-item');
-        $themItem.click(function () {
-            var theme = $(this).data('theme');
-            if (allowedThemes.indexOf(theme) === -1) {
-                theme = 'theme-sf';
-            }
-            $themItem.removeClass('active');
-            $(this).addClass('active');
-            admin.changeTheme(theme);
-        });
-        var theme = $body.data('theme');
-        if (allowedThemes.indexOf(theme) === -1) {
-            theme = 'theme-sf';
-            admin.changeTheme(theme);
-        }
-        $themItem.removeClass('active');
-        $themItem.filter('[data-theme="' + theme + '"]').addClass('active');
-
-        form.on('switch(setFooter)', function (data) {
-            var checked = data.elem.checked;
-            admin.putSetting('closeFooter', !checked);
-            checked ? $body.removeClass('close-footer') : $body.addClass('close-footer');
-        });
-        $('#setFooter').prop('checked', !$body.hasClass('close-footer'));
-
-        form.on('switch(setTab)', function (data) {
-            layui.index.setTabCache(data.elem.checked);
-        });
-        $('#setTab').prop('checked', setter.cacheTab);
-
-        form.on('switch(setMoreTab)', function (data) {
-            var checked = data.elem.checked;
-            admin.putSetting('pageTabs', checked);
-            admin.putTempData('indexTabs', undefined);
-            location.reload();
-        });
-        $('#setMoreTab').prop('checked', setter.pageTabs);
-
-        var $mainTab = $('.layui-body>.layui-tab[lay-filter="admin-pagetabs"]');
-        form.on('switch(setRefresh)', function (data) {
-            var checked = data.elem.checked;
-            admin.putSetting('tabAutoRefresh', checked);
-            checked ? $mainTab.attr('lay-autoRefresh', 'true') : $mainTab.removeAttr('lay-autoRefresh');
-        });
-        $('#setRefresh').prop('checked', setter.tabAutoRefresh === true);
-
-        var $leftNav = $('.layui-layout-admin>.layui-side>.layui-side-scroll>.layui-nav');
-        form.on('radio(navArrow)', function (data) {
-            $leftNav.removeClass('arrow2 arrow3');
-            data.value && $leftNav.addClass(data.value);
-            admin.putSetting('navArrow', data.value);
-        });
-        var navArrow = $leftNav.hasClass('arrow2') ? 'arrow2' : $leftNav.hasClass('arrow3') ? 'arrow3' : '';
-        $('[name="navArrow"][value="' + navArrow + '"]').prop('checked', true);
-
-        form.render('radio', 'more-set-form');
-        form.render('checkbox', 'more-set-form');
-    });
-</script>
 
 <style>
     .more-theme-list {
@@ -157,10 +50,6 @@
 
     .theme-preview-default {
         background: linear-gradient(90deg, #fff 0 26%, #eef7fb 26% 100%);
-    }
-
-    .theme-preview-dark {
-        background: linear-gradient(90deg, #111827 0 26%, #0f172a 26% 100%);
     }
 
     .more-theme-item:hover, .more-theme-item.active {
@@ -203,22 +92,5 @@
 
     .more-menu-item.no-icon:after {
         display: none;
-    }
-
-    .set-item-label {
-        height: 38px;
-        line-height: 38px;
-        padding-left: 20px;
-        display: inline-block;
-    }
-
-    .set-item-ctrl {
-        height: 38px;
-        line-height: 38px;
-        display: inline-block;
-    }
-
-    .set-item-ctrl > * {
-        margin: 0 !important;
     }
 </style>

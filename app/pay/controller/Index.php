@@ -28,8 +28,19 @@ class Index extends PayBackend
         if(empty($trade_no))return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdEmpty]']);
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
         if(!$row)return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdError]']);
+
+        $alipay_api = conf('alipay_api');
+        $wxpay_api = conf('wxpay_api');
+        $qqpay_api = conf('qqpay_api');
+        if (empty($alipay_api) && empty($wxpay_api) && empty($qqpay_api)) {
+            return $this->render('public/error', ['msg' => '暂无可用支付方式，请联系管理员！']);
+        }
+
         View::assign([
             'row' => $row,
+            'alipay_api' => $alipay_api,
+            'wxpay_api' => $wxpay_api,
+            'qqpay_api' => $qqpay_api,
         ]);
         return $this->render();
     }

@@ -293,7 +293,7 @@ class CdkeyModel extends BaseModel
         }
         $userCdkeyCount = self::where(['userid' => $userInfo['id'], 'status' => 0])->count('id');
         if(($userCdkeyCount + $number) > conf('have_cdkey_max_number')){
-            return message(str_replace('{limit}', conf('have_cdkey_max_number'), t('cdkey.limit_exceeded')) ,false);
+            return message(t('cdkey.limit_exceeded', ['limit' => conf('have_cdkey_max_number')]) ,false);
         }
         switch ($cdkey_type){
             case 'auth':
@@ -323,13 +323,13 @@ class CdkeyModel extends BaseModel
                             $allmoney = ($price * $differDay * $number) * floatval($powerPriceInfo['addauth_discount'] / 100);
                         }
                         if($allmoney > $userInfo['balance']){
-                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
                         $allmoney = ($price * $number) * floatval($powerPriceInfo['addauth_discount'] / 100);
                         if($allmoney > $userInfo['balance']){
-                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                         }
                         if($authPriceInfo['permanent_switch'] == 1){
                             $endtime = datetime();
@@ -356,7 +356,7 @@ class CdkeyModel extends BaseModel
                     $price = $powerInfo['money'];
                     $allmoney = ($price * $number) * floatval($powerPriceInfo['adduser_discount'] / 100);
                     if($allmoney > $userInfo['balance']){
-                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
+                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                     }
                     $info['power'] = $power;
                     $info['user_status'] = $user_status;
@@ -413,7 +413,7 @@ class CdkeyModel extends BaseModel
                 return message(t('common.preview').$number.t('common_ui.cdkey').t('common.add_success').$i.t('common_ui.cdkey_label').'[errorCode:AddCDKEYError]' ,false);
             }
         }
-        return message(str_replace('{count}', $i, t('cdkey.generate_success')) ,true);
+        return message(t('cdkey.generate_success', ['count' => $i]) ,true);
     }
 
     public function drop($id){

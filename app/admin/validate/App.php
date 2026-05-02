@@ -24,7 +24,6 @@ class App extends Validate
         'check_type|判断规则'  => 'require',
         'name|应用名称'   => 'require',
         'auth_template|价格模板' => 'require|integer',
-        'payment_template|认证模板' => 'require|integer',
         'power_template|权限模板' => 'require|integer',
         'public_key|授权公钥' => 'require',
         'private_key|授权私钥' => 'require',

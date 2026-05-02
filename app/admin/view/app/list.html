@@ -800,12 +800,6 @@ if(Object.keys(session).length > 0){
                         </div>
                     </div>
                     <div class="layui-form-item" pane>
-                        <label class="layui-form-label">支付查询</label>
-                        <div class="layui-input-block">
-                            <input type="checkbox" name="pay_query_switch" value="1" lay-skin="switch" />
-                        </div>
-                    </div>
-                    <div class="layui-form-item" pane>
                         <label class="layui-form-label">自助注册</label>
                         <div class="layui-input-block">
                             <input type="checkbox" name="register_switch" value="1" lay-filter="register_switch" lay-skin="switch" />
@@ -847,12 +841,6 @@ if(Object.keys(session).length > 0){
                             <input type="checkbox" name="binding_auth_switch" value="1" lay-skin="switch" />
                         </div>
                     </div>
-                    <div class="layui-form-item" pane>
-                        <label class="layui-form-label">绑定认证</label>
-                        <div class="layui-input-block">
-                            <input type="checkbox" name="binding_payment_switch" value="1" lay-skin="switch" />
-                        </div>
-                    </div>
                     <div class="layui-form-item">
                         <label class="layui-form-label">API密钥</label>
                         <div class="layui-input-block">
@@ -883,22 +871,6 @@ if(Object.keys(session).length > 0){
                             </div>
                         </div>
                     </fieldset>
-                    <div id="payrmb">
-                        <fieldset class="layui-elem-field layui-field-title">
-                            <legend>认证价格配置</legend>
-                            <div class="layui-field-box">
-                                <div class="layui-form-item">
-                                    <label class="layui-form-label">价格模板</label>
-                                    <div class="layui-input-block">
-                                        <select id="payment_template" class="layui-input" name="payment_template" lay-search>
-                                            <option value="">请选择价格模板</option>
-                                            <option value="1">默认模板</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </fieldset>
-                    </div>
                     <fieldset class="layui-elem-field layui-field-title">
                         <legend>权限价格配置</legend>
                         <div class="layui-field-box">
@@ -1331,7 +1303,6 @@ if(Object.keys(session).length > 0){
                                         });
                                     });
                                     $("#auth_template").html(content);
-                                    $("#payment_template").html(content);
                                     if(mData) {
                                         form.val('formBasForm', mData);
                                     }

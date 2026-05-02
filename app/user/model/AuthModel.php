@@ -170,7 +170,7 @@ class AuthModel extends BaseModel
             $permanent_switch = $row['permanent_switch'];
         }
         if($allmoney > $userInfo['balance']){
-            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
+            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
         }
         $remainderBalance = $userInfo['balance'] - $allmoney;
         try{
@@ -201,7 +201,7 @@ class AuthModel extends BaseModel
                 'Result' => 'success'
             ];
             event('ActionLog', $content);
-            return message(t('replace.auth_failed').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total') ,true);
+            return message(t('replace.auth_failed').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' <br> '.t('common_ui.balance_field').$remainderBalance ,true);
         } catch (\Exception $e) {
             $content = [
                 'Title' => '更换授权',
@@ -295,13 +295,13 @@ class AuthModel extends BaseModel
                             $allmoney = round(($price * $differDay) * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
                         }
                         if($allmoney > $userInfo['balance']){
-                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
                         $allmoney = round($price * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
                         if($allmoney > $userInfo['balance']){
-                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
+                            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                         }
                         if($authPriceInfo['permanent_switch'] == 1){
                             $endtime = $row['endtime'];
@@ -349,7 +349,7 @@ class AuthModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message(t('user.edit_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total') ,true);
+                return message(t('user.edit_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' <br> '.t('common_ui.balance_field').$remainderBalance ,true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '编辑授权',
@@ -402,13 +402,13 @@ class AuthModel extends BaseModel
                         $allmoney = round(($price * $differDay) * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
                     }
                     if($allmoney > $userInfo['balance']){
-                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                     }
                 }else{
                     $price = $authPriceInfo['money'];
                     $allmoney = round($price * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
                     if($allmoney > $userInfo['balance']){
-                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total'),false);
+                        return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                     }
                     if($authPriceInfo['permanent_switch'] == 1){
                         $endtime = datetime();
@@ -468,7 +468,7 @@ class AuthModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message(t('user.add_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total') ,true);
+                return message(t('user.add_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' <br> '.t('common_ui.balance_field').$remainderBalance ,true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '添加授权',

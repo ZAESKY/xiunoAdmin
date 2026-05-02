@@ -126,7 +126,7 @@ class UserModel extends BaseModel
             $allmoney = $price + $balance;
 
             if($allmoney > $userInfo['balance']){
-                return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+                return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
             }
 
             if($integral != $row['integral']){
@@ -172,7 +172,7 @@ class UserModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message(t('user.edit_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' , '.$integral.' '.t('common_ui.integral_field').'<br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total').' <br> '.t('common_ui.integral_field').$remainderIntegral.' '.t('common_ui.cdkey_type_label') ,true);
+                return message(t('user.edit_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' , '.$integral.' '.t('common_ui.integral_field').'<br> '.t('common_ui.balance_field').$remainderBalance.' <br> '.t('common_ui.integral_field').$remainderIntegral ,true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '编辑用户',
@@ -212,10 +212,10 @@ class UserModel extends BaseModel
             $allmoney = $price + $balance;
 
             if($allmoney > $userInfo['balance']){
-                return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+                return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
             }
 
-            if($integral != $row['integral']){
+            if(empty($row) || $integral != $row['integral']){
                 if($integral > $userInfo['integral']){
                     return message(t('user.integral_insufficient').'<br> '.t('common_ui.integral_field').$userInfo['integral'].' '.t('common_ui.cdkey_type_label').'<br>'.t('common_ui.integral_field').$integral.' '.t('common_ui.cdkey_type_label') ,false);
                 }
@@ -258,7 +258,7 @@ class UserModel extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                return message(t('user.add_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' , '.$integral.' '.t('common_ui.integral_field').'<br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total').' <br> '.t('common_ui.integral_field').$remainderIntegral.' '.t('common_ui.cdkey_type_label') ,true);
+                return message(t('user.add_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' , '.$integral.' '.t('common_ui.integral_field').'<br> '.t('common_ui.balance_field').$remainderBalance.' <br> '.t('common_ui.integral_field').$remainderIntegral ,true);
             } catch (\Exception $e) {
                 $content = [
                     'Title' => '添加用户',

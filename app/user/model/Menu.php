@@ -45,44 +45,31 @@ class Menu extends BaseModel
         if(!$powerPriceInfo) {
             return message(t("user.power_info_error").'[errorCode:GetUserPowerInfoError]' ,false);
         }
+        // select()->toArray() 转为普通数组，避免 ThinkPHP Collection 上 unset 不可靠
+        $data = Menu::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('user')]])->select()->toArray();
+
         $parent_id = [];
-        // Role-based menu control: user sees shared + user menu entries.
-        $data = Menu::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('user')]])->select();
+        $hiddenUrls = [];
+        if ($powerPriceInfo['addauth_power'] != 1) {
+            $hiddenUrls[] = 'Auth/list';
+        }
+        if ($powerPriceInfo['adduser_power'] != 1) {
+            $hiddenUrls[] = 'User/list';
+        }
+        if ($powerPriceInfo['pirate_power'] != 1) {
+            $hiddenUrls[] = 'Pirate/list';
+        }
 
         foreach ($data as $key => $value) {
-            if($value['url'] == 'Auth/list'){
-                if($powerPriceInfo['addauth_power'] != 1) {
-                    unset($data[$key]);
-                    continue;
-                }
-            } else if ($value['url'] == 'Payment/list'){
-                if($powerPriceInfo['addpay_power'] != 1) {
-                    unset($data[$key]);
-                    continue;
-                }
-            } else if ($value['url'] == 'User/list'){
-                if($powerPriceInfo['adduser_power'] != 1) {
-                    unset($data[$key]);
-                    continue;
-                }
-            } else if ($value['url'] == 'Pirate/list'){
-                if($powerPriceInfo['pirate_power'] != 1) {
-                    unset($data[$key]);
-                    continue;
-                }
+            if (in_array($value['url'], $hiddenUrls)) {
+                unset($data[$key]);
+                continue;
             }
-
             if ($value['parentid'] == 0) {
-                if($value['name'] == '授权管理'){
-                    if($powerPriceInfo['addpay_power'] != 1 && $powerPriceInfo['addauth_power'] != 1){
-                        unset($data[$key]);
-                        continue;
-                    }
-                }
-                $parent_id[$key] = $value;
+                $parent_id[] = $value;
             }
         }
-        $all_node_lists = $this->setMenuTree($parent_id, $data); //用于检测是否有子菜单
+        $all_node_lists = $this->setMenuTree($parent_id, $data);
         $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
         Cache::tag('SF_Menu')->set('SF_UserMenu'.cookie('userId'), $all_node_lists);
         return $all_node_lists;

@@ -213,33 +213,6 @@ class Qrlogin extends ApiBackend
                     }
                     return message(t('auth.select_bind_auth') ,true, $data);
                 }
-            case 'payment':
-                if(!empty($list)){
-                    if(empty($list))return message(t('auth.select_bind_payment') ,false);
-                    foreach ($list as $res){
-                        $row = Db::name('payment')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->field('id,bindingid,qq')->find();
-                        if(empty($row)) return message(t('payment.not_exist').' [ID:'.$res.']' ,false);
-                        if($row['bindingid'] != 0) return message(t('payment.not_exist').' [ID:'.$res.', url:'.$res['url'].'] '.t('payment.already_exist') ,false);
-                        if($row['qq'] != $get_qq) return message(t('payment.not_exist').' [ID:'.$res.', url:'.$res['url'].']', false);
-                        try{
-                            Db::name('payment')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->data(['bindingid' => $this->userId])->update();
-                        }catch (\Exception $e){
-                            return message($e->getMessage() ,false);
-                        }
-                    }
-                    Session::delete('get_token');
-                    Session::delete('get_qq');
-                    Session::save();
-                    return message(t('auth.bind_success') ,true);
-                }else{
-                    $row = Db::name('payment')->where(['qq' => $get_qq, 'bindingid' => 0, 'appid' => $this->userInfo['appid']])->field('id,url')->select();
-                    if($row->isEmpty()) return message(t('auth.no_auth_to_bind') ,false);
-                    $data = [];
-                    foreach ($row as $res){
-                        $data[] = ['id' => $res['id'], 'auth_info' => $res['url']];
-                    }
-                    return message(t('auth.select_bind_auth') ,true, $data);
-                }
             default:
                 return message(t('common_ui.type_error') ,false);
         }

@@ -23,6 +23,16 @@
                 </div>
             </div>
             <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
+                <div class="console-app-group" ew-href="{:url('/Cdkey/list')}" ew-title="卡密列表">
+                    <i class="sf-avatar sf-avatar-icon sf-avatar-purple layui-icon layui-icon-cols"
+                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
+                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$cdkey_count} 个</span></div>
+                    <div class="dashboard-monitor-base-info-desc">
+                        卡密总数
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
                 <div class="console-app-group" ew-href="{:url('/User/list')}" ew-title="用户列表">
                     <i class="sf-avatar sf-avatar-icon sf-avatar-blue layui-icon layui-icon-group"
                        style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
@@ -41,43 +51,6 @@
                     </div>
                 </div>
             </div>
-            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
-                <div class="console-app-group" ew-href="{:url('/Pirate/list')}" ew-title="盗版列表">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-red layui-icon layui-icon-website"
-                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
-                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$pirate_count} 个</span></div>
-                    <div class="dashboard-monitor-base-info-desc">
-                        盗版总数
-                    </div>
-                    {lt name="pirate_increase" value="0"}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
-                        <i class="layui-icon layui-icon-down"></i>
-                    {else/}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
-                        <i class="layui-icon layui-icon-up"></i>
-                    {/lt}
-                        <span>{$pirate_increase|abs} 个</span>
-                    </div>
-                </div>
-            </div>
-            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
-                <div class="console-app-group" ew-href="{:url('/Payment/list')}" ew-title="认证列表">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-purple layui-icon layui-icon-ok-circle"
-                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
-                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$payment_count} 个</span></div>
-                    <div class="dashboard-monitor-base-info-desc">
-                        认证总数
-                    </div>
-                    {lt name="payment_increase" value="0"}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
-                        <i class="layui-icon layui-icon-down"></i>
-                    {else/}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
-                        <i class="layui-icon layui-icon-up"></i>
-                    {/lt}
-                        <span>{$payment_increase|abs} 个</span>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">

@@ -77,18 +77,6 @@
                                            {$row['money']} 元
                                         </span>
                                     </p>
-                                    <p>
-                                        {:t('order_ui.integral_deduct')}
-                                        <span style="float: right;">
-                                            {:t('order_ui.not_supported')}
-                                        </span>
-                                    </p>
-                                    <p>
-                                        {:t('order_ui.integral_exchange')}
-                                        <span style="float: right;">
-                                            {:t('order_ui.not_supported')}
-                                        </span>
-                                    </p>
                                     <p style="float: right;margin-top: 0.8em;font-size: 1.05em">
                                         共 {$row['num']} 份 小计：{$row['money'] * $row['num']} 元
                                         <div style="color:#ff4500;font-size: 1.1em">
@@ -105,29 +93,21 @@
                         <div class="layui-card-body layui-form layui-form-pane" style="padding: 0.5em">
                             <input type="hidden" name="orderid" value="{$row['trade_no']}" />
                             <input type="hidden" name="type" value="" />
+                            {if !empty($alipay_api)}
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
                                 <input type="radio" name="pay" value="1" title="<p style='width:100%'><img src='{__IMG__}alipay.png' width='13px' /> {:t('common_ui.alipay')}</p>">
                             </div>
+                            {/if}
+                            {if !empty($wxpay_api)}
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
                                 <input type="radio" name="pay"  value="2" title="<p style='width:100%'><img src='{__IMG__}wxpay.png' width='13px' /> {:t('common_ui.wechat')}</p>">
                             </div>
+                            {/if}
+                            {if !empty($qqpay_api)}
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
                                 <input type="radio" name="pay"  value="3" title="<p style='width:100%'><img src='{__IMG__}qqpay.png' width='13px' /> QQ钱包</p>">
                             </div>
-                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
-                                {if $row['type'] == 'recharge'}
-                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> {:t('common_ui.balance_type')} <span style='color:#999;font-size:0.8em;margin-left:1em'>{:t('order_ui.not_supported')}</span></p>">
-                                {else}
-                                <input type="radio" name="pay" value="4" title="<p style='width:100%'><img src='{__IMG__}moneypay.png' width='13px' /> {:t('common_ui.balance_type')} <span style='color:#999;font-size:0.8em;margin-left:1em'>剩 {$userInfo['balance']} 元</span></p>">
-                                {/if}
-                            </div>
-                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em">
-                                <input type="radio" name="pay" value="4" disabled title="<p style='width:100%'><img src='{__IMG__}total.png' width='13px' /> {:t('common_ui.integral_type')} <span style='color:#999;font-size:0.8em;margin-left:1em'>{:t('order_ui.not_supported')}</span></p>">
-                            </div>
-                            <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em">
-                                <input type="radio" name="pay" value="6"
-                                       title="<p style='width:100%'><img src='{__IMG__}payd.png' width='13px' /> {:t('order_ui.friend_pay')} (朋友代付)</p>">
-                            </div>
+                            {/if}
                         </div>
                     </div>
                 </div>
@@ -161,14 +141,6 @@
         var admin = layui.admin;
         var notice = layui.notice;
 
-        window.copyLink = function (){
-            var e = document.getElementById("copy");
-            e.select(); // 选择对象
-            document.execCommand("Copy"); // 执行浏览器复制命令
-            layer.closeAll();
-            notice.msg('代付订单链接已经帮您复制到剪切板上啦，快去发送给朋友让他帮你付款吧~',{icon:1,audio:'1'});
-        }
-
         window.custom_close =  function (){
             layer.confirm('确定要关闭此页面吗？', {
                 skin: 'layui-layer-admin',
@@ -176,31 +148,7 @@
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                admin.closeThisDialog();
-                window.opener=null;
-                window.open('','_self');
-                window.close();
-            });
-        }
-        window.friend = function (){
-            admin.open({
-                type:1,
-                title: '好友代付',
-                btn:false,
-                closeBtn:1,
-                content: '<div class="layui-card">' +
-                    '<div class="layui-card-body">' +
-                    '代付订单已经创建成功，发给好友帮你付款吧~' +
-                    '<hr>' +
-                    '<textarea id="copy" class="layui-textarea">' +
-                    '我钱不够买这个东西，能够帮我买一下嘛~，这是付款订单,谢谢啦 {:SITE_URL}/pay.php/Index?orderid={$row['trade_no']}' +
-                    '</textarea>' +
-                    '<br>' +
-                    '<button class="layui-btn layui-btn-fluid" onclick="copyLink();">' +
-                    '点击复制' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>'
+                top.location.href = '{:SITE_URL}/MyInfo/recharge';
             });
         }
         $(function(){
@@ -222,14 +170,6 @@
                 }else if(pay == 3){
                     notice.msg('正在跳转支付页面...', {icon: 4, close: true});
                     window.location.href="{:url('/Index/submit')}?type=qqpay&orderid="+orderid;
-                }else if(pay == 4){
-                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
-                    window.location.href="{:url('/Index/submit')}?type=alipay&orderid="+orderid;
-                }else if(pay == 5){
-                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
-                    window.location.href=".{:url('/Index/submit')}?type=alipay&orderid="+orderid;
-                }else if(pay == 6){
-                    friend();
                 }
             });
         });

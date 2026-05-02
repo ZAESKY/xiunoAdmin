@@ -43,7 +43,6 @@ INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `cont
 ('replace_switch', 'function', '更换授权', '', 'bool', '0', '', 'required', '', NULL),
 ('cdkey_exchange_switch', 'function', '卡密兑换', '', 'bool', '0', '', '', '', NULL),
 ('auth_query_switch', 'function', '正版查询', '', 'bool', '0', '', 'required', '', NULL),
-('pay_query_switch', 'function', '支付查询', '', 'bool', '0', '', '', '', NULL),
 ('user_query_switch', 'function', '代理查询', '', 'bool', '0', '', '', '', NULL),
 ('queue_query_switch', 'function', '队列查询', '', 'bool', '0', '', '', '', NULL),
 ('download', 'function', '下载方式', '', 'radio', '0', '{"0":"关闭","mail":"邮箱验证","qrcode":"QQ扫码","info":"信息验证"}', '', '', NULL),
@@ -316,21 +315,16 @@ INSERT INTO `SF_menu`(`id`,`name`, `url`, `icon`, `parentid`, `addtime`, `power`
 (15, '应用列表', 'App/list', '', 14, NOW(), 1, 1),
 (16, '版本列表', 'Version/list', '', 14, NOW(), 1, 1),
 (17, '模式列表', 'CheckType/list', '', 14, NOW(), 1, 1),
-(18, '我的授权', '#', 'layui-icon-face-smile-b', 0, NOW(), 2, 1),
-(19, '授权列表', 'MyList/auth', '', 18, NOW(), 2, 1),
-(20, '认证列表', 'MyList/payment', '', 18, NOW(), 2, 1),
-(21, '授权管理', '#', 'layui-icon-auz', 0, NOW(), 0, 1),
-(22, '授权列表', 'Auth/list', '', 21, NOW(), 0, 1),
-(23, '认证列表', 'Payment/list', '', 21, NOW(), 0, 1),
-(24, '用户管理', '#', 'layui-icon-user', 0, NOW(), 0, 1),
-(25, '用户列表', 'User/list', '', 24, NOW(), 0, 1),
-(26, '盗版管理', 'Pirate/list', 'layui-icon-website', 0, NOW(), 0, 1),
+(18, '我的授权', 'MyList/auth', 'layui-icon-face-smile-b', 0, NOW(), 2, 1),
+(21, '授权管理', 'Auth/list', 'layui-icon-auz', 0, NOW(), 0, 1),
+(24, '用户管理', 'User/list', 'layui-icon-user', 0, NOW(), 0, 1),
+(26, '盗版管理', 'Pirate/list', 'layui-icon-website', 0, NOW(), 1, 1),
 (27, '系统设置', '#', 'layui-icon-set', 0, NOW(), 1, 1),
 (28, '系统配置', 'Set/index', '', 27, NOW(), 1, 1),
 (29, '模板配置', 'Set/template', '', 27, NOW(), 1, 1),
 (30, '软件更新', 'Set/update', '', 27, NOW(), 1, 1),
 (31, '插件管理', 'Addon/list', 'layui-icon-component', 0, NOW(), 1, 1),
-(32, '系统日志', 'Log/list', 'layui-icon-log', 0, NOW(), 0, 1);
+(32, '系统日志', 'Log/list', 'layui-icon-log', 0, NOW(), 1, 1);
 
 DROP TABLE IF EXISTS `SF_log`;
 CREATE TABLE `SF_log` (

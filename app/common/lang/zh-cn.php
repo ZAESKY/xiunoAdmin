@@ -623,6 +623,7 @@ return [
     // ==================== 仪表盘 / dashboard ====================
     'dashboard.welcome' => '欢迎使用SF授权系统!',
     'dashboard.subtitle' => '2021全新定义，倾情设计，全力打造，全网最牛逼的授权系统！',
+    'dashboard.app_total' => '应用总数',
     'dashboard.auth_total' => '授权总数',
     'dashboard.user_total' => '用户总数',
     'dashboard.pirate_total' => '盗版总数',
@@ -653,9 +654,7 @@ return [
     'layout.backend_center' => '后台管理中心',
     'layout.sidebar_toggle' => '侧边伸缩',
     'layout.messages' => '消息',
-    'layout.notes' => '便签',
     'layout.fullscreen' => '全屏',
-    'layout.lockscreen' => '锁屏',
     'layout.theme' => '主题',
     'layout.personal_center' => '个人中心',
     'layout.modify_password' => '修改密码',

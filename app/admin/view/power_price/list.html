@@ -72,12 +72,6 @@
 <script type="text/html" id="SF_TbAddAuthPower">
     <input type="checkbox" lay-filter="SF_TbAddAuthPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addauth_power==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_TbAddPayPower">
-    <input type="checkbox" lay-filter="SF_TbAddPayPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addpay_power==1?'checked':''}} style="display: none;"/>
-</script>
-<script type="text/html" id="SF_TbPiratePower">
-    <input type="checkbox" lay-filter="SF_TbPiratePowerCk" value="{{d.id}}" lay-skin="switch" {{d.pirate_power==1?'checked':''}} style="display: none;"/>
-</script>
 <script type="text/html" id="SF_TbAddUserPower">
     <input type="checkbox" lay-filter="SF_TbAddUserPowerCk" value="{{d.id}}" lay-skin="switch" {{d.adduser_power==1?'checked':''}} style="display: none;"/>
 </script>
@@ -120,12 +114,6 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">盗版折扣:</label>
-                <div class="layui-input-block">
-                    <input type="number" name="pirate_discount" placeholder="查看盗版折扣百分比，0元为免费" class="layui-input"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
                 <label class="layui-form-label layui-form-required">代理折扣:</label>
                 <div class="layui-input-block">
                     <input type="number" name="adduser_discount" placeholder="添加代理折扣百分比，0元为免费" class="layui-input"/>
@@ -155,18 +143,6 @@
                 <label class="layui-form-label layui-form-required">添加授权:</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="addauth_power" value="0" lay-skin="switch"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">添加认证:</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" name="addpay_power" value="0" lay-skin="switch"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">查看盗版:</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" name="pirate_power" value="0" lay-skin="switch"/>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -234,26 +210,6 @@
                             var addauth = '<span class="layui-badge layui-badge-blue">授权:'+discount+'折</span> ';
                         }
                     }
-                    if (d.addpay_discount >= '100') {
-                        var addpay = '<span class="layui-badge layui-badge-red">认证:无折扣</span> ';
-                    } else {
-                        var discount = parseInt(d.addpay_discount) / 10;
-                        if(discount == '0'){
-                            var addpay = '<span class="layui-badge layui-badge-green">认证:免费</span> ';
-                        }else{
-                            var addpay = '<span class="layui-badge layui-badge-blue">认证:'+discount+'折</span> ';
-                        }
-                    }
-                    if (d.pirate_discount >= '100') {
-                        var pirate = '<span class="layui-badge layui-badge-red">盗版:无折扣</span> ';
-                    } else {
-                        var discount = parseInt(d.pirate_discount) / 10;
-                        if(discount == '0'){
-                            var pirate = '<span class="layui-badge layui-badge-green">盗版:免费</span> ';
-                        }else{
-                            var pirate = '<span class="layui-badge layui-badge-blue">盗版:'+discount+'折</span> ';
-                        }
-                    }
                     if (d.adduser_discount >= '100') {
                         var adduser = '<span class="layui-badge layui-badge-red">代理:无折扣</span>';
                     } else {
@@ -264,12 +220,10 @@
                             var adduser = '<span class="layui-badge layui-badge-blue">代理:'+discount+'折</span> ';
                         }
                     }
-                    return addauth + addpay + pirate + adduser;
+                    return addauth + adduser;
                     }, sort: true, minWidth: 352
                 },
                 {field: 'addauth_power', title: '添加授权', templet: '#SF_TbAddAuthPower', sort: true, minWidth: 110},
-                {field: 'addpay_power', title: '添加认证', templet: '#SF_TbAddPayPower', sort: true, minWidth: 110},
-                {field: 'pirate_power', title: '查看盗版', templet: '#SF_TbPiratePower', sort: true, minWidth: 110},
                 {field: 'adduser_power', title: '添加下级', templet: '#SF_TbAddUserPower', sort: true, minWidth: 110},
                 {field: 'introduce', title: '权限介绍', sort: true, minWidth: 120},
                 {field: 'money', title: '权限价格', sort: true, minWidth: 100},
@@ -562,51 +516,7 @@
             });
         });
 
-        form.on('switch(SF_TbAddPayPowerCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
-            $.ajax({
-                type: "POST",
-                url:'{:url("/PowerPrice/setPower")}',
-                data: {id:obj.value,type:'addpay_power',status:obj.elem.checked ? 1 : 0},
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        insTb.refresh();
-                        notice.msg(data.msg, {icon: 1, audio:'1'});
-                    }else{
-                        notice.msg(data.msg, {icon: 2, audio:'1'});
-                    }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
-                }
-            });
-        });
 
-        form.on('switch(SF_TbPiratePowerCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
-            $.ajax({
-                type: "POST",
-                url:'{:url("/PowerPrice/setPower")}',
-                data: {id:obj.value,type:'pirate_power',status:obj.elem.checked ? 1 : 0},
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        insTb.refresh();
-                        notice.msg(data.msg, {icon: 1, audio:'1'});
-                    }else{
-                        notice.msg(data.msg, {icon: 2, audio:'1'});
-                    }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
-                }
-            });
-        });
 
         form.on('switch(SF_TbAddUserPowerCk)', function (obj) {
             notice.msg('正在执行中..', {icon: 4, close: true});

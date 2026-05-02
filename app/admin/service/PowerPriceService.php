@@ -6,6 +6,7 @@ use app\admin\model\PowerPriceModel;
 use app\admin\model\PowerTemplateModel;
 use app\common\service\BaseService;
 use think\Exception;
+use think\facade\Cache;
 
 /**
  * 权限-服务类
@@ -50,6 +51,7 @@ class PowerPriceService extends BaseService
                 throw new Exception(t('validation.missing_id'));
             }
             $this->model->setPower($id, $type, $status);
+            Cache::tag('SF_Menu')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

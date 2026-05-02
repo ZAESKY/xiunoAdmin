@@ -65,7 +65,6 @@ class AppModel extends BaseModel
         $check_type = !empty($post['check_type'])?$post['check_type']:null;
         $auth_query_switch = !empty($post['auth_query_switch'])?1:0;
         $user_query_switch = !empty($post['user_query_switch'])?1:0;
-        $pay_query_switch = !empty($post['pay_query_switch'])?1:0;
         $register_switch = !empty($post['register_switch'])?1:0;
         $cdkey_switch = !empty($post['cdkey_switch'])?1:0;
         $replace_switch = !empty($post['replace_switch'])?1:0;
@@ -75,11 +74,9 @@ class AppModel extends BaseModel
         $check_auth_method = !empty($post['check_auth_method'])?1:0;
         $pay_switch = !empty($post['pay_switch'])?1:0;
         $binding_auth_switch = !empty($post['binding_auth_switch'])?1:0;
-        $binding_payment_switch = !empty($post['binding_payment_switch'])?1:0;
         $update_switch = !empty($post['update_switch'])?1:0;
         $register_blacklist = !empty($post['register_blacklist'])?$post['register_blacklist']:null;
         $auth_template = !empty($post['auth_template'])?intval($post['auth_template']):0;
-        $payment_template = !empty($post['payment_template'])?intval($post['payment_template']):0;
         $power_template = !empty($post['power_template'])?intval($post['power_template']):0;
         $pirate_switch = !empty($post['pirate_switch'])?intval($post['pirate_switch']):0;
         $pirate_money = !empty($post['pirate_money'])?floatval($post['pirate_money']):0;
@@ -124,7 +121,6 @@ class AppModel extends BaseModel
                 'check_type' => $check_type,
                 'auth_query_switch' => $auth_query_switch,
                 'user_query_switch' => $user_query_switch,
-                'pay_query_switch' => $pay_query_switch,
                 'register_switch' => $register_switch,
                 'cdkey_switch' => $cdkey_switch,
                 'replace_switch' => $replace_switch,
@@ -136,7 +132,6 @@ class AppModel extends BaseModel
                 'update_switch' => $update_switch,
                 'register_blacklist' => $register_blacklist,
                 'auth_template' => $auth_template,
-                'payment_template' => $payment_template,
                 'power_template' => $power_template,
                 'pirate_switch' => $pirate_switch,
                 'pirate_money' => $pirate_money,
@@ -155,7 +150,6 @@ class AppModel extends BaseModel
                 'hacker_key' => $hacker_key,
                 'pirate_msg_switch' => $pirate_msg_switch,
                 'binding_auth_switch' => $binding_auth_switch,
-                'binding_payment_switch' => $binding_payment_switch,
                 'status' => $status,
                 'app_notice' => $app_notice,
                 'cdkey_notice' => $cdkey_notice,
@@ -190,7 +184,6 @@ class AppModel extends BaseModel
                 'check_type' => $check_type,
                 'auth_query_switch' => $auth_query_switch,
                 'user_query_switch' => $user_query_switch,
-                'pay_query_switch' => $pay_query_switch,
                 'register_switch' => $register_switch,
                 'cdkey_switch' => $cdkey_switch,
                 'replace_switch' => $replace_switch,
@@ -202,7 +195,6 @@ class AppModel extends BaseModel
                 'update_switch' => $update_switch,
                 'register_blacklist' => $register_blacklist,
                 'auth_template' => $auth_template,
-                'payment_template' => $payment_template,
                 'power_template' => $power_template,
                 'pirate_switch' => $pirate_switch,
                 'pirate_money' => $pirate_money,
@@ -221,7 +213,6 @@ class AppModel extends BaseModel
                 'hacker_key' => $hacker_key,
                 'pirate_msg_switch' => $pirate_msg_switch,
                 'binding_auth_switch' => $binding_auth_switch,
-                'binding_payment_switch' => $binding_payment_switch,
                 'status' => $status,
                 'app_notice' => $app_notice,
                 'cdkey_notice' => $cdkey_notice,

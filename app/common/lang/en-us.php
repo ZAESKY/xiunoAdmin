@@ -623,6 +623,7 @@ return [
     // ==================== Dashboard ====================
     'dashboard.welcome' => 'Welcome to SF Authorization System!',
     'dashboard.subtitle' => 'Professionally designed, robust authorization management system.',
+    'dashboard.app_total' => 'Total Apps',
     'dashboard.auth_total' => 'Total Auths',
     'dashboard.user_total' => 'Total Users',
     'dashboard.pirate_total' => 'Total Pirates',
@@ -653,9 +654,7 @@ return [
     'layout.backend_center' => 'Backend Center',
     'layout.sidebar_toggle' => 'Toggle Sidebar',
     'layout.messages' => 'Messages',
-    'layout.notes' => 'Notes',
     'layout.fullscreen' => 'Fullscreen',
-    'layout.lockscreen' => 'Lock Screen',
     'layout.theme' => 'Theme',
     'layout.personal_center' => 'Profile',
     'layout.modify_password' => 'Change Password',

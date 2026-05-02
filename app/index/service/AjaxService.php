@@ -108,29 +108,6 @@ class AjaxService extends BaseService
                     ->find();
                 return message('权限名称:'.$powerPriceInfo['name'].'！<br>用户QQ:'.$authInfo['qq'] ,true ,['status' => 2]);
 
-            case 'pay':
-                $authInfo = Db::name('payment')
-                    ->where([
-                        'url' => $auth_info,
-                        'appid' => $appid
-                    ])
-                    ->field('status,permanent_switch,endtime,qq')
-                    ->find();
-                if(!$authInfo){
-                    return message('不存在此授权！' ,false ,['status' => 0]);
-                }
-                if($authInfo['status'] == 0){
-                    return message('该授权以封禁！<br>持有者QQ:'.$authInfo['qq'] ,true ,['status' => 1]);
-                }
-                if($authInfo['permanent_switch'] == 1){
-                    return message('正版授权！<br>持有者QQ:'.$authInfo['qq'].'<br>到期时间:永久授权' ,true ,['status' => 2]);
-                }else{
-                    if($authInfo['endtime']>datetime()){
-                        return message('正版授权！<br>持有者QQ:'.$authInfo['qq'].'<br>到期时间:'.$authInfo['endtime'] ,true ,['status' => 2]);
-                    }else{
-                        return message('授权已到期！<br>持有者QQ:'.$authInfo['qq'].'<br>到期时间:'.$authInfo['endtime'] ,true ,['status' => 1]);
-                    }
-                }
         }
 
     }

@@ -63,10 +63,7 @@ class Index extends Backend
         $authToday = Db::name('auth')->whereTime('addtime', 'today')->count('id');
         $authIncrease = $authToday - $authYesterday;
 
-        $paymentCount = Db::name('payment')->count('id');
-        $paymentYesterday = Db::name('payment')->whereTime('addtime', 'yesterday')->count('id');
-        $paymentToday = Db::name('payment')->whereTime('addtime', 'today')->count('id');
-        $paymentIncrease = $paymentToday - $paymentYesterday;
+        $appCount = Db::name('app')->count('id');
 
         $pirateCount = Db::name('pirate')->count('id');
         $pirateYesterday = Db::name('pirate')->whereTime('addtime', 'yesterday')->count('id');
@@ -96,8 +93,7 @@ class Index extends Backend
             'integral_ranking' => $integralRanking,
             'auth_count' => $authCount,
             'auth_increase' => $authIncrease,
-            'payment_count' => $paymentCount,
-            'payment_increase' => $paymentIncrease,
+            'app_count' => $appCount,
             'pirate_count' => $pirateCount,
             'pirate_increase' => $pirateIncrease,
             'user_count' => $userCount,

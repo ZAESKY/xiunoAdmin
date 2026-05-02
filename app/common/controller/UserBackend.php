@@ -403,10 +403,6 @@ class UserBackend extends CommonBase
                         if($this->myPowerInfo['addauth_power'] != 1){
                             return message(t('login.no_access'), false);
                         }
-                    } else if ($this->service instanceof \app\user\service\PaymentService){
-                        if($this->myPowerInfo['addpay_power'] != 1){
-                            return message(t('login.no_access'), false);
-                        }
                     } else if ($this->service instanceof \app\user\service\PirateService){
                         if($this->myPowerInfo['pirate_power'] != 1){
                             return message(t('login.no_access'), false);
@@ -498,10 +494,6 @@ class UserBackend extends CommonBase
                         if($this->myPowerInfo['addauth_power'] != 1){
                             return message(t('login.no_access'), false);
                         }
-                    } else if ($this->service instanceof \app\user\service\PaymentService){
-                        if($this->myPowerInfo['addpay_power'] != 1){
-                            return message(t('login.no_access'), false);
-                        }
                     } else if ($this->service instanceof \app\user\service\PirateService){
                         if($this->myPowerInfo['pirate_power'] != 1){
                             return message(t('login.no_access'), false);
@@ -527,10 +519,6 @@ class UserBackend extends CommonBase
             // 权限检测
             if($this->service instanceof \app\user\service\AuthService){
                 if($this->myPowerInfo['addauth_power'] != 1){
-                    return $this->render('public/error', ['msg' => t('login.no_access')]);
-                }
-            } else if ($this->service instanceof \app\user\service\PaymentService){
-                if($this->myPowerInfo['addpay_power'] != 1){
                     return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
             } else if ($this->service instanceof \app\user\service\PirateService){

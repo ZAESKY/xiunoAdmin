@@ -55,24 +55,16 @@ class Index extends UserBackend
      * @since: 2022/6/30
      */
     public function main() {
-        $authCount = Db::name('auth')->where(['appid' => $this->userInfo['appid']])->count('id');
-        $authYesterday = Db::name('auth')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'yesterday')->count('id');
-        $authToday = Db::name('auth')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'today')->count('id');
+        $authCount = Db::name('auth')->where(['userid' => $this->userId])->count('id');
+        $authYesterday = Db::name('auth')->where(['userid' => $this->userId])->whereTime('addtime', 'yesterday')->count('id');
+        $authToday = Db::name('auth')->where(['userid' => $this->userId])->whereTime('addtime', 'today')->count('id');
         $authIncrease = $authToday - $authYesterday;
 
-        $paymentCount = Db::name('payment')->where(['appid' => $this->userInfo['appid']])->count('id');
-        $paymentYesterday = Db::name('payment')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'yesterday')->count('id');
-        $paymentToday = Db::name('payment')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'today')->count('id');
-        $paymentIncrease = $paymentToday - $paymentYesterday;
+        $cdkeyCount = Db::name('cdkey')->where(['userid' => $this->userId])->count('id');
 
-        $pirateCount = Db::name('pirate')->where(['appid' => $this->userInfo['appid']])->count('id');
-        $pirateYesterday = Db::name('pirate')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'yesterday')->count('id');
-        $pirateToday = Db::name('pirate')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'today')->count('id');
-        $pirateIncrease = $pirateToday - $pirateYesterday;
-
-        $userCount = Db::name('user')->where(['appid' => $this->userInfo['appid']])->count('id');
-        $userYesterday = Db::name('user')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'yesterday')->count('id');
-        $userToday = Db::name('user')->where(['appid' => $this->userInfo['appid']])->whereTime('addtime', 'today')->count('id');
+        $userCount = Db::name('user')->where(['userid' => $this->userId])->count('id');
+        $userYesterday = Db::name('user')->where(['userid' => $this->userId])->whereTime('addtime', 'yesterday')->count('id');
+        $userToday = Db::name('user')->where(['userid' => $this->userId])->whereTime('addtime', 'today')->count('id');
         $userIncrease = $userToday - $userYesterday;
         $logList = Db::name('log')->order('id' ,'desc')->field('title,create_time')->where(['username' => $this->userId, 'is_admin' => 0])->paginate([
             'list_rows'=> 10,
@@ -96,10 +88,7 @@ class Index extends UserBackend
             'integral_ranking' => $integralRanking,
             'auth_count' => $authCount,
             'auth_increase' => $authIncrease,
-            'payment_count' => $paymentCount,
-            'payment_increase' => $paymentIncrease,
-            'pirate_count' => $pirateCount,
-            'pirate_increase' => $pirateIncrease,
+            'cdkey_count' => $cdkeyCount,
             'user_count' => $userCount,
             'user_increase' => $userIncrease
         ]);

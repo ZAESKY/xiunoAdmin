@@ -53,7 +53,7 @@ class MyList extends UserBackend
                         $num++;
                     }
                 }
-                return message(str_replace(['{total}', '{count}'], [count($ids), $num], t('user.unbind_count')));
+                return message(t('user.unbind_count', ['total' => count($ids), 'count' => $num]));
             }catch (\Exception $e){
                 return message($e->getMessage(), false);
             }
@@ -77,20 +77,4 @@ class MyList extends UserBackend
         }
     }
 
-    public function payment(){
-        try{
-            if (IS_POST) {
-                $result = $this->service->payment();
-                return message(t('common.list_success'), true, ['data' => $result]);
-            }
-        }catch (\Exception $e){
-            return message($e->getMessage(), false, ['data' => []]);
-        }
-        try{
-            View::assign('replace_notice', $this->myAppInfo['replace_notice']);
-            return $this->render();
-        }catch (\Exception $e){
-            return $this->render('public/error', ['msg' => $e->getMessage()]);
-        }
-    }
 }

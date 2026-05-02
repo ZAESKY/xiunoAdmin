@@ -18,10 +18,6 @@ class Auth extends Frontend
         return $this->service->checkAuth();
     }
 
-    public function checkPayment(){
-        return $this->service->checkPayment();
-    }
-
     public function checkUpdate(){
         return $this->service->checkUpdate();
     }

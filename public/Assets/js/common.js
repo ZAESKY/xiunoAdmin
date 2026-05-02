@@ -369,6 +369,9 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
     base: getProjectUrl() + 'Assets/module/',
     defaultTheme: 'theme-sf',
     closeFooter: true,
+    pageTabs: false,
+    cacheTab: false,
+    tabAutoRefresh: false,
     navArrow: 'arrow2',
     defaultLoading: 3,
     tableName: 'SF-AUTH',
@@ -388,19 +391,7 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
     var $ = layui.jquery;
     var layer = layui.layer;
     var admin = layui.admin;
-    var allowedThemes = ['theme-sf', 'theme-dark'];
-    var rawChangeTheme = admin.changeTheme;
     var rawModelForm = admin.modelForm;
-
-    // Theme guard: legacy cached color themes are no longer supported.
-    admin.changeTheme = function (theme, win, notSave, recursive) {
-        theme = allowedThemes.indexOf(theme) === -1 ? 'theme-sf' : theme;
-        return rawChangeTheme.call(admin, theme, win, notSave, recursive);
-    };
-
-    if (allowedThemes.indexOf(layui.cache.defaultTheme) === -1) {
-        admin.changeTheme('theme-sf');
-    }
 
     function getSubmitScope($layer) {
         var $scope = $layer.find('form.layui-form').first();

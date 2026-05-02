@@ -40,7 +40,6 @@ class MenuService extends UserBaseService
                 '用户管理' => 'menu.user',
                 '应用管理' => 'menu.app',
                 '授权管理' => 'menu.auth',
-                '认证管理' => 'menu.payment',
                 '价格管理' => 'menu.price',
                 '模板管理' => 'menu.template',
                 '日志管理' => 'menu.log',

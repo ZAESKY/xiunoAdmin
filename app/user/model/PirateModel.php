@@ -76,7 +76,7 @@ class PirateModel extends BaseModel
         }
         $allmoney = round($userAppInfo['pirate_money'] * floatval($userPowerPriceInfo['pirate_discount'] / 100), 2);
         if($allmoney > $userInfo['balance']){
-            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total').'<br>'.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total') ,false);
+            return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
         }
 
         $remainderBalance = $userInfo['balance'] - $allmoney;
@@ -98,7 +98,7 @@ class PirateModel extends BaseModel
             'Result' => 'success'
         ];
         event('ActionLog', $content);
-        return message(t('pirate.get_info_success').'<br> '.t('common_ui.epay_url_label').$allmoney.' '.t('order_ui.total').' <br> '.t('common_ui.balance_field').$remainderBalance.' '.t('order_ui.total') ,true, ["data" => $row]);
+        return message(t('pirate.get_info_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' <br> '.t('common_ui.balance_field').$remainderBalance ,true, ["data" => $row]);
 
     }
 

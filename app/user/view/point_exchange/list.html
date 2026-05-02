@@ -1,143 +1,288 @@
 {include file="/public/header"}
-<style>
-    .point-summary {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-    .point-value {font-size:24px;font-weight:700;color:#ff6a00;}
-    .product-img {width:48px;height:48px;object-fit:cover;border-radius:4px;background:#f5f5f5;}
-</style>
+<link rel="stylesheet" href="{__CSS__}point-exchange.css"/>
+
 <div class="layui-fluid">
     <div class="layui-card">
-        <div class="layui-card-body point-summary">
-            <div>当前积分：<span class="point-value">{$userInfo.integral|default=0}</span></div>
-            <button class="layui-btn layui-btn-primary" id="SF_MyRecords"><i class="layui-icon layui-icon-list"></i> 我的兑换</button>
+        <div class="layui-card-body point-header">
+            <div>当前积分：<span class="point-value" id="SF_MyPoints">{$userInfo.integral|default=0}</span></div>
+            <div class="search-bar">
+                <input name="text" id="SF_SearchText" class="layui-input" placeholder="搜索礼品名称" autocomplete="off"/>
+                <button class="layui-btn" id="SF_SearchBtn"><i class="layui-icon">&#xe615;</i></button>
+                <button class="layui-btn layui-btn-primary" id="SF_MyRecords"><i class="layui-icon layui-icon-list"></i> 我的兑换</button>
+            </div>
         </div>
     </div>
-    <div class="layui-card">
-        <div class="layui-card-body">
-            <form class="layui-form toolbar">
-                <div class="layui-form-item">
-                    <div class="layui-inline">
-                        <label class="layui-form-label">商品</label>
-                        <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="搜索商品名称"/>
-                        </div>
-                    </div>
-                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
-                        </button>
-                    </div>
-                </div>
-            </form>
-            <table id="SF_Table" lay-filter="SF_Table"></table>
-        </div>
-    </div>
-</div>
 
-<script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-sm" lay-event="exchange">兑换</a>
-</script>
+    <div class="card-grid" id="SF_CardGrid"></div>
+    <div class="card-pager" id="SF_Pager"></div>
+</div>
 
 {include file="/public/footer"}
 <script>
-layui.use(['table', 'form', 'layer', 'notice'], function(){
+layui.use(['layer', 'notice', 'laypage'], function(){
     var $ = layui.jquery;
-    var table = layui.table;
-    var form = layui.form;
     var layer = layui.layer;
     var notice = layui.notice;
+    var laypage = layui.laypage;
+    var myPoints = {$userInfo.integral|default=0};
+    var currentPage = 1;
+    var pageLimit = 12;
+    var productCache = {}; // id → item 缓存
 
-    var insTb = table.render({
-        elem: '#SF_Table',
-        url: '{:url("/PointExchange/list")}',
-        method: 'post',
-        page: true,
-        skin: 'line',
-        size: 'lg',
-        request: {pageName:'current_page', limitName:'limit'},
-        parseData: function(res){
-            return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
-        },
-        cols: [[
-            {field:'image', title:'图片', width:80, templet:function(d){
-                return d.image ? '<img class="product-img" src="'+d.image+'">' : '<div class="product-img"></div>';
-            }},
-            {field:'name', title:'商品名称', minWidth:170},
-            {field:'description', title:'描述', minWidth:180, templet:function(d){
-                return d.description || '-';
-            }},
-            {field:'required_points', title:'所需积分', width:110, sort:true, templet:function(d){
-                return '<span style="color:#ff6a00;font-weight:bold;">'+d.required_points+'</span>';
-            }},
-            {field:'stock', title:'剩余库存', width:100, sort:true},
-            {field:'exchange_limit', title:'兑换上限', width:100, templet:function(d){return d.exchange_limit > 0 ? d.exchange_limit : '不限';}},
-            {title:'操作', toolbar:'#SF_TbBar', width:100, align:'center'}
-        ]]
+    function loadData(page, keyword){
+        notice.msg('加载中...', {icon: 4, close: true});
+        $.post('{:url("/PointExchange/list")}', {
+            current_page: page || 1,
+            limit: pageLimit,
+            text: keyword || ''
+        }, function(res){
+            notice.destroy();
+            if(res.code !== 0){ notice.msg(res.msg||'加载失败', {icon:2}); return; }
+            var pageData = res.data && res.data.data ? res.data.data : {};
+            var list = pageData.data || [];
+            var total = pageData.total || 0;
+            renderCards(list);
+            if(total > pageLimit) renderPager(total, page, keyword);
+            else $('#SF_Pager').html('');
+        }, 'json').fail(function(){
+            notice.destroy();
+            notice.msg('服务器错误', {icon:2});
+        });
+    }
+
+    function renderCards(list){
+        var html = '';
+        $.each(list, function(i, item){
+            productCache[item.id] = item; // 缓存
+            var canExchange = myPoints >= item.required_points && (item.stock > 0 || item.stock === null);
+            var stockClass = item.stock !== null && item.stock <= 10 ? ' low' : '';
+            var stockText = item.stock !== null ? '库存 ' + item.stock : '';
+            var btnClass = canExchange ? '' : ' disabled';
+            var btnText = !canExchange ? (myPoints < item.required_points ? '积分不足' : '库存不足') : '立即兑换';
+            // 将完整礼品数据存到 JSON 属性供详情弹窗使用
+            html += '<div class="product-card" data-pid="'+item.id+'">';
+            html += '<div class="card-img-wrap">';
+            if(item.image){
+                html += '<img src="'+escapeHtml(item.image)+'" alt="'+escapeHtml(item.name)+'">';
+            } else {
+                html += '<i class="layui-icon layui-icon-component no-img"></i>';
+            }
+            html += '</div>';
+            html += '<div class="card-body">';
+            html += '<div class="card-info">';
+            html += '<div class="card-title">'+escapeHtml(item.name)+'</div>';
+            html += '<div class="card-meta">';
+            html += '<div class="card-points">'+item.required_points+'<small> 积分</small></div>';
+            html += '<div class="card-stock'+stockClass+'">'+stockText+'</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '<button class="card-btn'+btnClass+'" data-id="'+item.id+'" data-name="'+escapeHtml(item.name)+'" data-points="'+item.required_points+'" '+(!canExchange?'disabled':'')+'>'+btnText+'</button>';
+            html += '</div></div>';
+        });
+        if(!list.length) html = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#999;">暂无礼品</div>';
+        $('#SF_CardGrid').html(html);
+    }
+
+    function renderPager(total, page, keyword){
+        laypage.render({
+            elem: 'SF_Pager',
+            count: total,
+            limit: pageLimit,
+            curr: page,
+            layout: ['prev', 'page', 'next', 'count'],
+            jump: function(obj, first){
+                if(!first){ currentPage = obj.curr; loadData(obj.curr, keyword); }
+            }
+        });
+    }
+
+    function escapeHtml(v){
+        return String(v||'').replace(/[&<>"']/g, function(s){
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
+        });
+    }
+
+    // 搜索
+    $('#SF_SearchBtn').on('click', function(){ currentPage = 1; loadData(1, $('#SF_SearchText').val().trim()); });
+    $('#SF_SearchText').on('keydown', function(e){ if(e.keyCode===13){ currentPage=1; loadData(1, $(this).val().trim()); } });
+
+    // 点击卡片 → 详情弹窗（按钮除外）
+    $(document).on('click', '.product-card', function(e){
+        if ($(e.target).closest('.card-btn').length) return; // 点击按钮不触发
+        var pid = $(this).data('pid');
+        var d = productCache[pid];
+        if (d) showProductDetail(d);
     });
 
-    form.on('submit(SF_TbSearch)', function(data){
-        insTb.reload({where:data.field, page:{curr:1}});
-        return false;
+    // 兑换按钮 → 阻止冒泡
+    $(document).on('click', '.card-btn:not(.disabled)', function(e){
+        e.stopPropagation();
+        var btn = $(this);
+        var id = btn.data('id');
+        var name = btn.data('name');
+        var points = btn.data('points');
+        layer.confirm('确定消耗 <b>'+points+'</b> 积分兑换「<b>'+name+'</b>」吗？', {icon:3, shade:.1}, function(i){
+            layer.close(i);
+            notice.msg('正在兑换...', {icon:4, close:true});
+            $.post('{:url("/PointExchange/exchange")}', {id: id}, function(res){
+                notice.destroy();
+                notice.msg(res.msg, {icon: res.code==0?1:2, audio:'1'});
+                if(res.code==0){
+                    myPoints = res.data && res.data.points_after != null ? res.data.points_after : myPoints - points;
+                    $('#SF_MyPoints').text(myPoints);
+                    setTimeout(function(){ loadData(currentPage, $('#SF_SearchText').val().trim()); }, 800);
+                }
+            }, 'json').fail(function(){
+                notice.destroy();
+                notice.msg('服务器错误', {icon:2});
+            });
+        });
     });
 
-    table.on('tool(SF_Table)', function(obj){
-        if(obj.event === 'exchange'){
-            layer.confirm('确定消耗 '+obj.data.required_points+' 积分兑换「'+obj.data.name+'」吗？', {icon:3, shade:.1}, function(i){
+    // 礼品详情弹窗
+    function showProductDetail(d){
+        var canExchange = myPoints >= d.required_points && (d.stock > 0 || d.stock === null);
+        var limitText = d.exchange_limit > 0 ? '每人限兑 '+d.exchange_limit+' 次' : '不限兑换次数';
+        var stockText = d.stock !== null ? '剩余 ' + d.stock : '有货';
+        var stockColor = d.stock !== null && d.stock <= 10 ? '#f56c6c' : '#909399';
+        var btnClass = canExchange ? '' : ' disabled';
+        var btnText = !canExchange ? (myPoints < d.required_points ? '积分不足' : '库存不足') : '立即兑换';
+        var html = '<div style="padding:8px 12px 4px;">'+
+            // 顶部大图 + 信息
+            '<div style="display:flex;gap:20px;margin-bottom:18px;flex-wrap:wrap;">'+
+            '<div style="width:200px;height:200px;background:#f7f8fa;border-radius:12px;overflow:hidden;flex-shrink:0;">'+
+            (d.image ? '<img src="'+escapeHtml(d.image)+'" style="width:100%;height:100%;object-fit:cover;">' : '<i class="layui-icon layui-icon-component" style="font-size:72px;color:#d0d4dc;display:flex;align-items:center;justify-content:center;height:100%;"></i>')+
+            '</div>'+
+            '<div style="flex:1;min-width:200px;display:flex;flex-direction:column;">'+
+            '<div style="font-size:18px;font-weight:700;color:#303133;margin-bottom:12px;">'+escapeHtml(d.name)+'</div>'+
+            '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">'+
+            '<span style="background:#fff3e6;color:#ff6a00;padding:5px 14px;border-radius:8px;font-size:20px;font-weight:700;">'+d.required_points+'<small style="font-size:12px;font-weight:400;"> 积分</small></span>'+
+            '<span style="background:#f0f2f5;color:'+stockColor+';padding:5px 14px;border-radius:8px;font-size:13px;">'+stockText+'</span>'+
+            '<span style="background:#f0f2f5;color:#909399;padding:5px 14px;border-radius:8px;font-size:13px;">'+limitText+'</span>'+
+            '</div>'+
+            '<div style="flex:1;"></div>'+
+            '<button class="card-btn'+btnClass+'" style="width:100%;height:38px;line-height:38px;border:none;border-radius:8px;font-size:14px;color:#fff;font-weight:500;background:'+(canExchange?'linear-gradient(135deg,#ff6a00,#ff8c33)':'#c0c4cc')+';cursor:'+(canExchange?'pointer':'not-allowed')+';" data-detail-id="'+d.id+'" data-detail-name="'+escapeHtml(d.name)+'" data-detail-points="'+d.required_points+'" '+(!canExchange?'disabled':'')+'>'+btnText+'</button>'+
+            '</div></div>'+
+            // 礼品说明
+            '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:12px;">'+
+            '<div style="font-size:13px;color:#909399;margin-bottom:8px;font-weight:600;">礼品说明</div>'+
+            '<div style="font-size:14px;color:#606266;line-height:1.8;">'+(d.description ? escapeHtml(d.description) : '暂无说明')+'</div>'+
+            '</div>'+
+            '</div>';
+        var popW = $(window).width() < 700 ? '95%' : '680px';
+        var popH = $(window).width() < 700 ? '85%' : '560px';
+        var idx = layer.open({
+            type: 1, title: '礼品详情', area: [popW, popH], content: html
+        });
+        // 详情弹窗内的兑换按钮
+        $(document).on('click', '.card-btn[data-detail-id="'+d.id+'"]:not(.disabled)', function(){
+            var id = $(this).data('detail-id');
+            var name = $(this).data('detail-name');
+            var points = $(this).data('detail-points');
+            layer.confirm('确定消耗 <b>'+points+'</b> 积分兑换「<b>'+name+'</b>」吗？', {icon:3, shade:.1}, function(i){
                 layer.close(i);
                 notice.msg('正在兑换...', {icon:4, close:true});
-                $.post('{:url("/PointExchange/exchange")}', {id: obj.data.id}, function(res){
+                $.post('{:url("/PointExchange/exchange")}', {id: id}, function(res){
                     notice.destroy();
-                    notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2, audio:'1'});
-                    if(res.code == 0){
-                        insTb.reload();
-                        setTimeout(function(){ location.reload(); }, 900);
+                    notice.msg(res.msg, {icon: res.code==0?1:2, audio:'1'});
+                    if(res.code==0){
+                        myPoints = res.data && res.data.points_after != null ? res.data.points_after : myPoints - points;
+                        $('#SF_MyPoints').text(myPoints);
+                        layer.close(idx);
+                        setTimeout(function(){ loadData(currentPage, $('#SF_SearchText').val().trim()); }, 500);
                     }
                 }, 'json').fail(function(){
                     notice.destroy();
                     notice.msg('服务器错误', {icon:2});
                 });
             });
-        }
-    });
+        });
+    }
 
+    // 我的兑换记录
     $('#SF_MyRecords').on('click', function(){
         layer.open({
-            type: 1,
-            title: '我的兑换',
-            area: ['860px', '620px'],
-            content: '<div style="padding:12px;"><table id="SF_RecordTable" lay-filter="SF_RecordTable"></table></div>',
+            type: 1, title: '我的兑换', area: [$(window).width()<860?'95%':'860px', $(window).width()<860?'85%':'620px'],
+            content: '<div style="padding:12px;overflow-x:auto;"><table id="SF_RecordTable" lay-filter="SF_RecordTable" style="min-width:600px;"></table></div>',
             success: function(){
-                table.render({
+                layui.table.render({
                     elem: '#SF_RecordTable',
                     url: '{:url("/PointExchange/myRecords")}',
-                    method: 'post',
-                    page: true,
+                    method: 'post', page: true,
                     request: {pageName:'current_page', limitName:'limit'},
                     parseData: function(res){
-                        return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
+                        return {code:res.code, msg:res.msg, count:(res.data&&res.data.data?res.data.data.total:0)||0, data:(res.data&&res.data.data?res.data.data.data:[])||[]};
                     },
                     cols: [[
                         {field:'id', title:'ID', width:70},
-                        {field:'product_name', title:'商品', minWidth:160},
+                        {field:'product_name', title:'礼品', minWidth:160},
                         {field:'cost_points', title:'消耗积分', width:100},
                         {field:'created_at', title:'兑换时间', minWidth:170},
-                        {title:'奖品详情', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>';}}
+                        {title:'礼品详情', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>';}}
                     ]]
                 });
             }
         });
     });
-
-    table.on('tool(SF_RecordTable)', function(obj){
-        if(obj.event === 'detail'){
-            layer.open({
-                title: '奖品详情',
-                area: ['640px', '420px'],
-                content: '<pre style="padding:15px;white-space:pre-wrap;word-break:break-all;">'+escapeHtml(obj.data.reward_info || '-')+'</pre>'
-            });
-        }
+    layui.use('table', function(){
+        var t = layui.table;
+        t.on('tool(SF_RecordTable)', function(obj){
+            if(obj.event === 'detail'){
+                showRewardDetail(obj.data);
+            }
+        });
     });
-    function escapeHtml(value){
-        return String(value).replace(/[&<>"']/g, function(s){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];});
+    function showRewardDetail(d){
+        var info = d.reward_info || '';
+        var name = d.product_name || '礼品';
+        var points = d.cost_points || 0;
+        var time = d.created_at || '';
+        var isCard = /^(SF_|[A-Z0-9]{12,})/.test(info);
+        var html = '<div style="padding:12px 16px 8px;">'+
+            // 顶部礼品信息区
+            '<div style="background:linear-gradient(135deg,#f8f9fc,#eef1f8);border-radius:12px;padding:20px;margin-bottom:16px;">'+
+            '<div style="display:flex;align-items:center;gap:16px;">'+
+            '<div style="width:72px;height:72px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;">'+
+            (d.image ? '<img src="'+escapeHtml(d.image)+'" style="width:100%;height:100%;object-fit:cover;">' : '<i class="layui-icon layui-icon-gift" style="font-size:36px;color:#ff6a00;"></i>')+
+            '</div>'+
+            '<div style="flex:1;min-width:0;">'+
+            '<div style="font-size:16px;font-weight:600;color:#303133;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(name)+'</div>'+
+            '<div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">'+
+            '<span style="background:#fff3e6;color:#ff6a00;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:500;">'+points+' 积分</span>'+
+            '<span style="background:#f0f2f5;color:#909399;padding:3px 10px;border-radius:6px;font-size:12px;">'+escapeHtml(time)+'</span>'+
+            '</div></div></div></div>'+
+            // 礼品信息区
+            '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:16px;">'+
+            '<div style="font-size:13px;color:#909399;margin-bottom:10px;"><i class="layui-icon layui-icon-tips"></i> 礼品/卡密内容</div>'+
+            '<div style="background:#fff;border:1px solid #e4e7ed;border-radius:8px;padding:14px;font-family:'+(isCard?"'SF Mono','Consolas','Courier New',":'')+'monospace;font-size:14px;line-height:1.8;word-break:break-all;color:#303133;">'+escapeHtml(info)+'</div>';
+        if (info && info.length > 1) {
+            html += '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm layui-btn-primary" onclick="copyReward(this)" data-text="'+escapeHtml(info)+'"><i class="layui-icon layui-icon-upload-circle"></i> 一键复制</button></div>';
+        }
+        html += '</div></div>';
+        layer.open({
+            type: 1,
+            title: '礼品详情',
+            area: [$(window).width()<600?'95%':'600px', $(window).width()<600?'85%':'480px'],
+            content: html
+        });
     }
+    window.copyReward = function(btn){
+        var text = $(btn).data('text') || $(btn).attr('data-text') || '';
+        if(navigator.clipboard){
+            navigator.clipboard.writeText(text).then(function(){
+                $(btn).html('<i class="layui-icon layui-icon-ok-circle"></i> 已复制').addClass('layui-btn-disabled');
+                setTimeout(function(){ $(btn).html('<i class="layui-icon layui-icon-upload-circle"></i> 一键复制').removeClass('layui-btn-disabled'); }, 2000);
+            });
+        } else {
+            var ipt = $('<textarea>').val(text).appendTo('body').select();
+            document.execCommand('copy');
+            ipt.remove();
+            $(btn).html('<i class="layui-icon layui-icon-ok-circle"></i> 已复制').addClass('layui-btn-disabled');
+            setTimeout(function(){ $(btn).html('<i class="layui-icon layui-icon-upload-circle"></i> 一键复制').removeClass('layui-btn-disabled'); }, 2000);
+        }
+    };
+
+    // 初始加载
+    loadData(1, '');
 });
 </script>

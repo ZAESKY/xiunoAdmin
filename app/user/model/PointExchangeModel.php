@@ -146,9 +146,11 @@ class PointExchangeModel extends BaseModel
         $limit = !empty($post['limit']) ? $post['limit'] : 10;
         $currentPage = !empty($post['current_page']) ? $post['current_page'] : 1;
 
-        return Db::name('point_exchange_record')
-            ->where('user_id', $userId)
-            ->order('id', 'desc')
+        return Db::name('point_exchange_record')->alias('r')
+            ->join('point_product p', 'r.product_id = p.id', 'LEFT')
+            ->field('r.*, p.image')
+            ->where('r.user_id', $userId)
+            ->order('r.id', 'desc')
             ->paginate([
                 'list_rows' => $limit,
                 'page' => $currentPage,

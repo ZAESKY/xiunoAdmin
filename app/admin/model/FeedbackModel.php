@@ -35,7 +35,12 @@ class FeedbackModel extends BaseModel
             $limit = !empty($post['limit']) ? $post['limit'] : 10;
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
 
-            $data = $this->buildSearchWhere('id|title', 'text', 'status');
+            $data = $this->buildSearchWhere('f.id|f.title', 'text', '');
+            // 手动处理 status 筛选避免 join 后歧义
+            $status = $post['status'] ?? '';
+            if ($status !== '' && $status !== null) {
+                $data[] = ['f.status', '=', intval($status)];
+            }
             $type = $post['type'] ?? '';
             if ($type !== '' && in_array($type, ['bug', 'feature', 'other'])) {
                 $data[] = ['f.type', '=', $type];

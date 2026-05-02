@@ -92,7 +92,7 @@ class FeedbackModel extends BaseModel
             }
             $status = $post['status'] ?? '';
             if ($status !== '' && $status !== null) {
-                $data[] = ['status', '=', intval($status)];
+                $data[] = ['f.status', '=', intval($status)];
             }
             $data[] = ['user_id', '=', $userId];
 

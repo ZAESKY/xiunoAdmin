@@ -215,18 +215,7 @@ class PaymentModel extends BaseModel
             $post = request()->post();
             $limit = !empty($post['limit']) ? $post['limit'] : 10;
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
-            $text = isset($post['text'])?$post['text']:null;
-            $status = isset($post['status'])?intval($post['status']):null;
-
-            $data = [];
-
-            if($text !== null) {
-                $data[] = ['id|url|qq', 'like', '%' . $text . '%'];
-            }
-
-            if($status !== null){
-                $data[] = ['status', '=', $status];
-            }
+            $data = $this->buildSearchWhere('id|url|qq');
 
             $list = self::order('id', 'desc')->where($data)->paginate([
                 'list_rows' => $limit,

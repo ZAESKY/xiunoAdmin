@@ -226,21 +226,10 @@ class AuthPriceModel extends BaseModel
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
             $tid = !empty($post['tid'])?intval($post['tid']):null;
-            $text = isset($post['text'])?$post['text']:null;
-            $status = isset($post['status'])?intval($post['status']):null;
-
-            $data = [];
+            $data = $this->buildSearchWhere('id|name');
 
             if(!empty($tid)){
                 $data[] = ['tid', '=', $tid];
-            }
-
-            if($text !== null) {
-                $data[] = ['id|name', 'like', '%'.$text.'%'];
-            }
-
-            if($status !== null){
-                $data[] = ['status', '=', $status];
             }
 
             $list = self::order('sort' ,'asc')->where($data)->paginate([

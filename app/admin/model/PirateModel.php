@@ -48,13 +48,7 @@ class PirateModel extends BaseModel
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
-            $text = isset($post['text'])?$post['text']:null;
-
-            $data = [];
-
-            if($text !== null) {
-                $data[] = ['id|pirate_info', 'like', '%' . $text . '%'];
-            }
+            $data = $this->buildSearchWhere('id|pirate_info', 'text', '');
 
             $list = self::order('addtime' ,'desc')->where($data)->paginate([
                 'list_rows'=> $limit,

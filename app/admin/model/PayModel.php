@@ -108,19 +108,9 @@ class PayModel extends BaseModel
             $limit = !empty($post['limit']) ? $post['limit'] : 10;
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
             $appid = !empty($post['appid']) ? $post['appid'] : null;
-            $text = isset($post['text']) ? $post['text'] : null;
-            $status = isset($post['status']) ? intval($post['status']) : null;
-            $data = [];
+            $data = $this->buildSearchWhere('id|username');
             if (!empty($appid)) {
                 $data[] = ['appid', '=', $appid];
-            }
-
-            if ($text !== null) {
-                $data[] = ['id|username', 'like', '%' . $text . '%'];
-            }
-
-            if ($status !== null) {
-                $data[] = ['status', '=', $status];
             }
 
             $list = self::order('id', 'asc')->where($data)->paginate([

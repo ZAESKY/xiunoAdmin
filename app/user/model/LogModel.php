@@ -60,14 +60,9 @@ class LogModel extends BaseModel
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
-            $text = isset($post['text'])?$post['text']:null;
-            $data = [];
+            $data = $this->buildSearchWhere('id|title|ip', 'text', '');
             $data[] = ['is_admin', '=', 0];
             $data[] = ['username', '=', $userInfo['id']];
-
-            if($text !== null){
-                $data[] = ['id|title|ip', 'like', '%'.$text.'%'];
-            }
             $data[] = ['username', '=', $userInfo['id']];
             $data[] = ['mark', '=', 1];
             try{

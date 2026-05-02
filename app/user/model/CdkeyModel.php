@@ -464,24 +464,13 @@ class CdkeyModel extends BaseModel
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
-            $text = !empty($post['text'])?$post['text']:'';
-            $status = isset($post['status'])?intval($post['status']):null;
-            $data = [];
-
             if(!empty($appid)){
-                $data[] = ['appid', '=', $appid];
                 $order = 'id';
             }else{
                 throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
-
-            if(!empty($text)){
-                $data[] = ['id|cdkey', 'like', '%'.$text.'%'];
-            }
-
-            if($status !== null){
-                $data[] = ['status', '=', $status];
-            }
+            $data = $this->buildSearchWhere('id|cdkey');
+            $data[] = ['appid', '=', $appid];
 
             $data[] = ['userid', '=', $userInfo['id']];
             try{

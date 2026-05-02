@@ -18,7 +18,7 @@
 </head>
 <body class="page-no-scroll">
 
-<div class="layui-layout layui-layout-admin">
+<div class="layui-layout layui-layout-admin sf-admin-shell" data-role="user">
     <!-- 头部 -->
     <div class="layui-header">
         <div class="layui-logo">
@@ -35,9 +35,9 @@
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item" lay-unselect>
-                <a ew-event="message" title="{:t('layout.messages')}">
+                <a class="sf-header-message" ew-event="message" title="{:t('layout.messages')}">
                     <i class="layui-icon layui-icon-notice"></i>
-                    <span class="layui-badge-dot"></span><!--小红点-->
+                    <span class="sf-notify-badge"></span>
                 </a>
             </li>
             <li class="layui-nav-item" lay-unselect>
@@ -128,7 +128,7 @@
 </div>
 
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script type="text/javascript" src="{__JS__}common.js?v=321"></script>
+<script type="text/javascript" src="{__JS__}common.js?v=325"></script>
 <script>
     layui.use(['index', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;
@@ -169,5 +169,71 @@
 
     });
 </script>
+<script>
+(function(){
+    var notiUrl = '{:url("/Feedback/notificationCount")}';
+    function setBadge(count) {
+        var badges = document.querySelectorAll('.sf-notify-badge');
+        badges.forEach(function(badge) {
+            badge.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
+            badge.style.display = count > 0 ? 'inline-block' : 'none';
+        });
+    }
+    function updateBadge() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', notiUrl, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                var count = res.data && res.data.count ? parseInt(res.data.count, 10) : 0;
+                setBadge(isNaN(count) ? 0 : count);
+            } catch(e) {}
+        };
+        xhr.send();
+    }
+    window.SF_updateNotifyBadge = updateBadge;
+    updateBadge();
+    window.addEventListener('load', updateBadge);
+    window.addEventListener('focus', updateBadge);
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            updateBadge();
+        }
+    });
+    setTimeout(updateBadge, 500);
+    setTimeout(updateBadge, 1500);
+    setInterval(updateBadge, 60000);
+})();
+</script>
+<style>
+    .sf-admin-shell .layui-header .layui-layout-right .sf-header-message {
+        position: relative;
+        min-width: 46px;
+        text-align: center;
+    }
+    .sf-admin-shell .layui-header .layui-layout-right .sf-header-message .layui-icon {
+        font-size: 18px;
+    }
+    .sf-admin-shell .layui-header .sf-notify-badge {
+        position: absolute;
+        top: 13px;
+        right: 8px;
+        height: 16px;
+        line-height: 16px;
+        min-width: 16px;
+        box-sizing: border-box;
+        padding: 0 4px;
+        text-align: center;
+        border-radius: 10px;
+        background: #ff5722;
+        color: #fff;
+        font-size: 10px;
+        font-style: normal;
+        display: none;
+        pointer-events: none;
+    }
+</style>
 </body>
 </html>

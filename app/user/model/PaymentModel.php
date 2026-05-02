@@ -552,20 +552,12 @@ class PaymentModel extends BaseModel
             $post = request()->post();
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
-            $text = isset($post['text'])?$post['text']:null;
-            $status = isset($post['status'])?intval($post['status']):null;
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
-            $data = [];
+            $data = $this->buildSearchWhere('id|url|qq');
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
             }else{
                 throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
-            }
-            if($text !== null){
-                $data[] = ['id|url|qq', 'like', '%'.$text.'%'];
-            }
-            if($status !== null){
-                $data[] = ['status', '=', $status];
             }
             $data[] = ['bindingid', '=', $userInfo['id']];
             try{
@@ -610,21 +602,12 @@ class PaymentModel extends BaseModel
             $post = request()->post();
             $limit = !empty($post['limit']) ? $post['limit'] : 10;
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
-            $text = isset($post['text']) ? $post['text'] : null;
-            $status = isset($post['status']) ? intval($post['status']) : null;
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
-            $data = [];
+            $data = $this->buildSearchWhere('id|url|qq');
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
             }else{
                 throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
-            }
-
-            if($text !== null){
-                $data[] = ['id|url|qq', 'like', '%'.$text.'%'];
-            }
-            if($status !== null){
-                $data[] = ['status', '=', $status];
             }
             $data[] = ['userid', '=', $userInfo['id']];
             try {

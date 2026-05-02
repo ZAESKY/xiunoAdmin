@@ -515,3 +515,37 @@ INSERT INTO `SF_check_type`(`id`, `name`, `type`, `addtime`, `status`) VALUES
 (1, '域名规则', 'domain', NOW(), 1),
 (2, 'QQ规则', 'qq', NOW(), 1),
 (3, '机器码规则', 'machineCode', NOW(), 1);
+
+-- ==================== 功能反馈 / feedback ====================
+DROP TABLE IF EXISTS `SF_feedback`;
+CREATE TABLE `SF_feedback` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
+  `title` varchar(255) NOT NULL COMMENT '反馈标题',
+  `content` text NOT NULL COMMENT '反馈内容',
+  `reply` text COMMENT '管理员回复',
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0待处理 1已受理 2已驳回',
+  `created_at` datetime NOT NULL COMMENT '提交时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '处理时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_status` (`user_id`, `status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `SF_notification`;
+CREATE TABLE `SF_notification` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '接收用户ID，0=管理员',
+  `title` varchar(255) NOT NULL COMMENT '通知标题',
+  `content` text COMMENT '通知内容',
+  `type` varchar(50) DEFAULT 'feedback' COMMENT '通知类型',
+  `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0未读 1已读',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_read` (`user_id`, `is_read`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+('功能反馈', 'Feedback/index', 'layui-icon-dialogue', 0, NOW(), 2, 1);
+
+INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+('反馈管理', 'Feedback/list', 'layui-icon-dialogue', 0, NOW(), 1, 1);

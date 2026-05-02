@@ -319,20 +319,10 @@ class PowerPriceModel extends BaseModel
         try{
             $post = request()->post();
             $tid = !empty($post['tid'])?$post['tid']:null;
-            $text = isset($post['text'])?$post['text']:null;
-            $status = isset($post['status'])?intval($post['status']):null;
-            $data = [];
+            $data = $this->buildSearchWhere('id|name');
 
             if(!empty($tid)){
                 $data[] = ['tid', '=', $tid];
-            }
-
-            if($text !== null) {
-                $data[] = ['id|name', 'like', '%'.$text.'%'];
-            }
-
-            if($status !== null){
-                $data[] = ['status', '=', $status];
             }
 
             $list = self::order('id' ,'asc')->where($data)->select();

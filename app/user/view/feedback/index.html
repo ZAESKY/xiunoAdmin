@@ -1,0 +1,178 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md8">
+            <div class="layui-card">
+                <div class="layui-card-header">{:t('feedback.submit_title')}</div>
+                <div class="layui-card-body">
+                    <form id="SF_FeedbackForm" class="layui-form" lay-filter="SF_FeedbackForm">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-form-required">{:t('feedback.title')}</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="title" class="layui-input"
+                                       placeholder="{:t('feedback.title_placeholder')}"
+                                       lay-verify="required" lay-verType="tips"
+                                       autocomplete="off"/>
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label layui-form-required">{:t('feedback.content')}</label>
+                            <div class="layui-input-block">
+                                <textarea name="content" class="layui-textarea" style="height:200px"
+                                          placeholder="{:t('feedback.content_placeholder')}"
+                                          lay-verify="required" lay-verType="tips"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-filter="SF_FeedbackSubmit" lay-submit id="SF_SubmitBtn">
+                                    <i class="layui-icon">&#xe605;</i>{:t('common.submit')}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">{:t('feedback.tips_title')}</div>
+                <div class="layui-card-body">
+                    <ul>
+                        <li style="line-height: 28px;"><i class="layui-icon layui-icon-about" style="color:#2d8cf0"></i> {:t('feedback.tip_1')}</li>
+                        <li style="line-height: 28px;"><i class="layui-icon layui-icon-about" style="color:#2d8cf0"></i> {:t('feedback.tip_2')}</li>
+                        <li style="line-height: 28px;"><i class="layui-icon layui-icon-about" style="color:#2d8cf0"></i> {:t('feedback.tip_3')}</li>
+                        <li style="line-height: 28px;"><i class="layui-icon layui-icon-about" style="color:#ff5722"></i> {:t('feedback.tip_4')}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="layui-card">
+                <div class="layui-card-header">{:t('feedback.my_history')}</div>
+                <div class="layui-card-body" style="padding: 0;">
+                    <table id="SF_MyFeedbackTable" lay-filter="SF_MyFeedbackTable" style="margin: 0;"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="SF_MyStatus">
+    {{# if(d.status == 0) { }}
+    <span class="layui-badge layui-badge-orange">{:t('feedback.status_pending')}</span>
+    {{# } else if(d.status == 1) { }}
+    <span class="layui-badge layui-badge-green">{:t('feedback.status_accepted')}</span>
+    {{# } else if(d.status == 2) { }}
+    <span class="layui-badge layui-badge-red">{:t('feedback.status_rejected')}</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="SF_MyReply">
+    {{# if(d.reply) { }}
+    <span style="color:#666;">{{ d.reply.length > 30 ? d.reply.substring(0,30)+'...' : d.reply }}</span>
+    {{# } else { }}
+    <span style="color:#999;">-</span>
+    {{# } }}
+</script>
+
+{include file="/public/footer"}
+<script>
+    layui.use(['layer', 'form', 'table', 'notice'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var notice = layui.notice;
+        var submitLocked = false;
+
+        // Check for existing pending feedback on page load
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Feedback/checkPending")}',
+            dataType: "json",
+            success: function(res) {
+                if (res.code == 0 && res.data && res.data.has_pending) {
+                    submitLocked = true;
+                    $('#SF_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
+                    notice.msg('{:t("feedback.has_pending")}', {icon: 3, audio:'1'});
+                }
+            }
+        });
+
+        // My feedback history table
+        var myFeedbackTable = table.render({
+            elem: '#SF_MyFeedbackTable',
+            url: '{:url("/Feedback/myList")}',
+            method: 'post',
+            page: false,
+            skin: 'line',
+            size: 'sm',
+            limit: 10,
+            request: {
+                pageName: 'current_page',
+                limitName: 'limit'
+            },
+            parseData: function(res){
+                var pageData = res.data && res.data.data ? res.data.data : {total: 0, data: []};
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": pageData.total || 0,
+                    "data": pageData.data || []
+                };
+            },
+            cols: [[
+                {field: 'title', title: '{:t("feedback.title")}', minWidth: 120, templet: function(d){
+                    return (d.title || '').length > 15 ? d.title.substring(0,15) + '...' : (d.title || '');
+                }},
+                {field: 'status', title: '{:t("common.status")}', templet: '#SF_MyStatus', width: 80},
+                {field: 'reply', title: '{:t("feedback.reply")}', templet: '#SF_MyReply', width: 100}
+            ]]
+        });
+
+        window.refreshTab = function () {
+            myFeedbackTable.reload();
+        };
+
+        form.on('submit(SF_FeedbackSubmit)', function (data) {
+            if (submitLocked) {
+                notice.msg('{:t("feedback.has_pending")}', {icon: 3, audio:'1'});
+                return false;
+            }
+            if (!data.field.title || !data.field.title.trim()) {
+                notice.msg('{:t("feedback.title_required")}', {icon: 3});
+                return false;
+            }
+            if (!data.field.content || !data.field.content.trim()) {
+                notice.msg('{:t("feedback.content_required")}', {icon: 3});
+                return false;
+            }
+            notice.msg('{:t("feedback.submitting")}', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url: '{:url("/Feedback/index")}',
+                data: data.field,
+                dataType: "json",
+                success: function(res) {
+                    notice.destroy();
+                    if (res.code == 0) {
+                        notice.msg(res.msg, {icon: 1, audio:'1'});
+                        $('#SF_FeedbackForm')[0].reset();
+                        submitLocked = true;
+                        $('#SF_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
+                        table.reload('SF_MyFeedbackTable');
+                        if (parent && parent.SF_updateNotifyBadge) {
+                            parent.SF_updateNotifyBadge();
+                        }
+                    } else {
+                        notice.msg(res.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
+                }
+            });
+            return false;
+        });
+    });
+</script>

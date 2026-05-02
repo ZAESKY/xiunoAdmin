@@ -66,6 +66,7 @@
             'common.search_by_id_or_order_no': '输入 ID 或订单号',
             'common.search_by_id_or_version': '输入 ID、版本或版本号',
             'common.search_by_id_or_name': '输入 ID 或名称',
+            'common.search_by_id_or_username_or_qq': '输入 ID、用户名或 QQ',
             'common.search_by_id_or_pirate_content': '输入 ID 或盗版内容',
             'common.search_by_power_name': '输入权限名称',
             'common.enter_auth_holder_qq': '请输入授权持有者 QQ',
@@ -222,6 +223,7 @@
             'common.search_by_id_or_order_no': 'Enter ID or order number',
             'common.search_by_id_or_version': 'Enter ID, version, or version number',
             'common.search_by_id_or_name': 'Enter ID or name',
+            'common.search_by_id_or_username_or_qq': 'Enter ID, username or QQ',
             'common.search_by_id_or_pirate_content': 'Enter ID or pirate content',
             'common.search_by_power_name': 'Enter permission name',
             'common.enter_auth_holder_qq': 'Enter authorization holder QQ',
@@ -363,7 +365,7 @@
 })(window);
 
 layui.config({  // common.js是配置layui扩展模块的目录，每个页面都需要引入
-    version: '320',   // 更新组件缓存，设为true不缓存，也可以设一个固定值
+    version: '325',   // 更新组件缓存，设为true不缓存，也可以设一个固定值
     base: getProjectUrl() + 'Assets/module/',
     defaultTheme: 'theme-sf',
     closeFooter: true,

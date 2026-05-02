@@ -9,7 +9,7 @@
                     <div class="layui-inline">
                         <label class="layui-form-label">内&emsp;容</label>
                         <div class="layui-input-inline">
-                            <input name="name" class="layui-input" placeholder="{:t('common.search_by_power_name')}"/>
+                            <input name="text" class="layui-input" placeholder="{:t('common.search_by_power_name')}"/>
                         </div>
                     </div>
 <!--                    <div class="layui-inline">-->
@@ -199,8 +199,6 @@
         var notice = layui.notice;
         var treeTable = layui.treeTable;
         var util = layui.util;
-        var tbDataList = [];
-
         var insTb = treeTable.render({
             elem: '#SF_Table',
             url: '{:url("/PowerPrice/list")}',
@@ -279,10 +277,7 @@
                 {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
                 {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
                 {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 200, minWidth: 200}
-            ]],
-            done: function (data) {
-                tbDataList = data;
-            }
+            ]]
         });
 
         notice.msg('正在获取列表中..', {icon: 4, close: true});
@@ -353,31 +348,9 @@
 
         /* 表格搜索 */
         form.on('submit(SF_TbSearch)', function (data) {
-            doTbSearch(data.field, 'id');
+            insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
-
-        function doTbSearch(field, idName) {
-            var ids = [], isClear = true;
-            for (var i = 0; i < tbDataList.length; i++) {
-                var item = tbDataList[i], flag = true;
-                for (var f in field) {
-                    if (!field.hasOwnProperty(f)) continue;
-                    if (!field[f]) continue;
-                    isClear = false;
-                    if (!item[f] || item[f].indexOf(field[f]) === -1) {
-                        flag = false;
-                        break;
-                    }
-                }
-                if (flag) ids.push(item[idName]);
-            }
-            if (isClear) {
-                insTb.clearFilter();
-            } else {
-                insTb.filterData(ids);
-            }
-        }
 
         form.on('select(template)', function (data) {
             if(data.value == ''){

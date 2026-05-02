@@ -116,7 +116,6 @@ class PirateModel extends BaseModel
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
-            $text = isset($post['text'])?$post['text']:null;
 
             $data = [];
             if(!empty($appid)){
@@ -124,9 +123,7 @@ class PirateModel extends BaseModel
             }else{
                 throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
-            if($text !== null){
-                $data[] = ['id|pirate_info', 'like', '%'.$text.'%'];
-            }
+            $data = array_merge($data, $this->buildSearchWhere('id|pirate_info', 'text', ''));
             try{
                 $list = self::order('addtime' ,'desc')
                     ->where($data)

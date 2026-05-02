@@ -1,141 +1,212 @@
-<div class="layui-card" style="box-shadow: none;border: none;">
+<div class="layui-card sf-message-card">
     <div class="layui-tab layui-tab-brief">
-        <ul class="layui-tab-title" style="text-align: center;">
-            <li class="layui-this">通知(5)</li>
-            <li>私信(12)</li>
-            <li>待办(3)</li>
+        <ul class="layui-tab-title">
+            <li class="layui-this"><span data-i18n="feedback.notifications">Notifications</span> (<span id="SF_NotifyCount">0</span>)</li>
         </ul>
-        <div class="layui-tab-content" style="padding: 0;">
-            <!-- tab1 -->
+        <div class="layui-tab-content">
             <div class="layui-tab-item layui-show">
-                <div class="message-list">
-                    <!-- 实际项目请使用后台数据循环出来 -->
-                    <a class="message-list-item" href="javascript:;">
-                        <i class="layui-icon layui-icon-speaker message-item-icon"></i>
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">你收到了14份新周报</h2>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a class="message-list-item" href="javascript:;">
-                        <i class="layui-icon layui-icon-speaker message-item-icon"></i>
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">你收到了14份新周报</h2>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a class="message-list-item" href="javascript:;">
-                        <i class="layui-icon layui-icon-speaker message-item-icon"></i>
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">你收到了14份新周报</h2>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                </div>
-                <!-- 列表为空 -->
-                <div class="message-list-empty">
+                <div class="message-list" id="SF_NotifyList"></div>
+                <div class="message-list-empty" id="SF_NotifyEmpty">
                     <i class="layui-icon layui-icon-notice"></i>
-                    <div>没有通知</div>
+                    <div data-i18n="feedback.no_notifications">No notifications</div>
                 </div>
-                <a id="messageClearBtn1" class="message-btn-clear">全部标记已读</a>
-            </div>
-            <!-- tab2 -->
-            <div class="layui-tab-item">
-                <div class="message-list">
-                    <a class="message-list-item" href="javascript:;">
-                        <img class="message-item-icon" src="assets/images/head.jpg" alt="">
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">xx评论了你</h2>
-                            <p class="message-item-text">哈哈哈哈哈哈</p>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a class="message-list-item" href="javascript:;">
-                        <img class="message-item-icon" src="assets/images/head.jpg" alt="">
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">xx评论了你</h2>
-                            <p class="message-item-text">哈哈哈哈哈哈</p>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a class="message-list-item" href="javascript:;">
-                        <img class="message-item-icon" src="assets/images/head.jpg" alt="">
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">xx评论了你</h2>
-                            <p class="message-item-text">哈哈哈哈哈哈</p>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a id="messageMoreBtn2" class="message-btn-more">加载更多</a>
-                </div>
-                <!-- 列表为空 -->
-                <div class="message-list-empty">
-                    <i class="layui-icon layui-icon-dialogue"></i>
-                    <div>没有消息</div>
-                </div>
-                <a id="messageClearBtn2" class="message-btn-clear">清空消息</a>
-            </div>
-            <!-- tab3 -->
-            <div class="layui-tab-item">
-                <div class="message-list">
-                    <a class="message-list-item" href="javascript:;">
-                        <span class="layui-badge layui-badge-yellow">待完成</span>
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">你收到了14份新周报</h2>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a class="message-list-item" href="javascript:;">
-                        <span class="layui-badge layui-badge-green">已完成</span>
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">你收到了14份新周报</h2>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                    <a class="message-list-item" href="javascript:;">
-                        <span class="layui-badge layui-badge-red">未完成</span>
-                        <div class="message-item-right">
-                            <h2 class="message-item-title">你收到了14份新周报</h2>
-                            <p class="message-item-text">10个月前</p>
-                        </div>
-                    </a>
-                </div>
-                <!-- 列表为空 -->
-                <div class="message-list-empty">
-                    <i class="layui-icon layui-icon-flag"></i>
-                    <div>没有待办</div>
-                </div>
-                <a id="messageClearBtn3" class="message-btn-clear">清空待办</a>
+                <a id="messageClearBtn1" class="message-btn-clear" onclick="SF_Notification.markAllRead()" data-i18n="feedback.mark_all_read">Mark All Read</a>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    layui.use(['element', 'admin'], function () {
-        var $ = layui.jquery;
-        var admin = layui.admin;
+(function(){
+    var parentDoc = window.parent && window.parent.document ? window.parent.document : document;
+    var roleEl = parentDoc.querySelector('[data-role]');
+    var role = roleEl ? roleEl.getAttribute('data-role') : 'user';
+    var appPrefix = role === 'admin' ? '/admin.php' : '/user.php';
+    var fallbackMessages = {
+        'zh-cn': {
+            'feedback.notifications': '\u901a\u77e5',
+            'feedback.no_notifications': '\u6682\u65e0\u901a\u77e5',
+            'feedback.mark_all_read': '\u5168\u90e8\u6807\u8bb0\u5df2\u8bfb',
+            'feedback.submit_title': '\u529f\u80fd\u53cd\u9988',
+            'feedback.manage_title': '\u53cd\u9988\u7ba1\u7406'
+        },
+        'en-us': {
+            'feedback.notifications': 'Notifications',
+            'feedback.no_notifications': 'No notifications',
+            'feedback.mark_all_read': 'Mark All Read',
+            'feedback.submit_title': 'Feedback',
+            'feedback.manage_title': 'Feedback Management'
+        }
+    };
+    var translate = (window.parent && window.parent.t) ? window.parent.t : (window.t || function(key){ return key; });
 
-        /* 加载更多按钮点击事件 */
-        $('#messageMoreBtn2').click(function () {
-            var $that = $(this);
-            admin.btnLoading($that);
-            setTimeout(function () {
-                admin.btnLoading($that, false);
-                $that.before($that.prev()[0].outerHTML);
-            }, 300);
+    function text(key) {
+        var translated = translate(key);
+        if (translated !== key) {
+            return translated;
+        }
+        var match = parentDoc.cookie.match(/(?:^|;\s*)think_lang=([^;]+)/);
+        var lang = match ? decodeURIComponent(match[1]).toLowerCase() : '';
+        lang = lang.indexOf('zh') === 0 ? 'zh-cn' : 'en-us';
+        return fallbackMessages[lang][key] || key;
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatContent(value) {
+        return escapeHtml(value).replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+    }
+
+    function request(url, body, done) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', appPrefix + url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+            var res = null;
+            try {
+                res = JSON.parse(xhr.responseText || '{}');
+            } catch(e) {}
+            done(res || {code: -1, data: {}});
+        };
+        xhr.onerror = function() {
+            done({code: -1, data: {}});
+        };
+        xhr.send(body || '');
+    }
+
+    function setBadge(count) {
+        var dots = parentDoc.querySelectorAll('.sf-notify-badge');
+        dots.forEach(function(dot) {
+            dot.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
+            dot.style.display = count > 0 ? 'inline-block' : 'none';
         });
+    }
 
-        /* 清空消息点击事件 */
-        $('#messageClearBtn1,#messageClearBtn2,#messageClearBtn3').click(function () {
-            $(this).parents('.layui-tab-item').addClass('show-empty');
-        });
+    function closeMessagePanel() {
+        var layerBox = parentDoc.querySelector('.layui-layer-adminRight');
+        var parentLayer = window.parent && window.parent.layui ? window.parent.layui.layer : null;
+        if (layerBox && parentLayer) {
+            var layerIndex = parseInt(layerBox.id.replace('layui-layer', ''), 10);
+            if (!isNaN(layerIndex)) {
+                parentLayer.close(layerIndex);
+            }
+        }
+    }
 
+    function getFeedbackTarget() {
+        if (role === 'admin') {
+            return {
+                url: appPrefix + '/Feedback/list.html',
+                title: text('feedback.manage_title')
+            };
+        }
+        return {
+            url: appPrefix + '/Feedback/index.html',
+            title: text('feedback.submit_title')
+        };
+    }
+
+    function openFeedbackPage() {
+        var parentWin = window.parent || window;
+        var target = getFeedbackTarget();
+        if (parentWin.layui && parentWin.layui.index && parentWin.layui.index.openTab) {
+            parentWin.layui.index.openTab({
+                title: target.title,
+                url: target.url
+            });
+            setTimeout(function() {
+                if (parentWin.layui.admin && parentWin.layui.admin.refresh) {
+                    parentWin.layui.admin.refresh(target.url, true);
+                }
+            }, 350);
+        } else {
+            parentWin.location.href = target.url;
+        }
+        closeMessagePanel();
+    }
+
+    document.querySelectorAll('[data-i18n]').forEach(function(node) {
+        node.textContent = text(node.getAttribute('data-i18n'));
     });
+
+    window.SF_Notification = {
+        loadList: function() {
+            var listEl = document.getElementById('SF_NotifyList');
+            var emptyEl = document.getElementById('SF_NotifyEmpty');
+            var countEl = document.getElementById('SF_NotifyCount');
+
+            request('/Feedback/notificationList.html', '', function(res) {
+                var items = (res.code === 0 && res.data && Array.isArray(res.data.data)) ? res.data.data : [];
+                if (items.length > 0) {
+                    var html = '';
+                    items.forEach(function(item) {
+                        html += '<a class="message-list-item" href="javascript:;" data-id="' + encodeURIComponent(item.id) + '" onclick="SF_Notification.markRead(' + parseInt(item.id, 10) + ', true)">';
+                        html += '<i class="layui-icon layui-icon-speaker message-item-icon"></i>';
+                        html += '<div class="message-item-right">';
+                        html += '<h2 class="message-item-title">' + escapeHtml(item.title) + '</h2>';
+                        html += '<p class="message-item-text message-item-content">' + formatContent(item.content) + '</p>';
+                        html += '<p class="message-item-time">' + escapeHtml(item.created_at) + '</p>';
+                        html += '</div></a>';
+                    });
+                    listEl.innerHTML = html;
+                    listEl.style.display = '';
+                    emptyEl.style.display = 'none';
+                } else {
+                    listEl.innerHTML = '';
+                    listEl.style.display = 'none';
+                    emptyEl.style.display = '';
+                }
+                countEl.textContent = items.length;
+            });
+        },
+        markRead: function(id, openAfterRead) {
+            request('/Feedback/notificationRead.html', 'id=' + encodeURIComponent(id), function() {
+                SF_Notification.loadList();
+                SF_Notification.updateBadge();
+                if (openAfterRead) {
+                    openFeedbackPage();
+                }
+            });
+        },
+        markAllRead: function() {
+            request('/Feedback/notificationReadAll.html', '', function() {
+                SF_Notification.loadList();
+                SF_Notification.updateBadge();
+            });
+        },
+        updateBadge: function() {
+            request('/Feedback/notificationCount.html', '', function(res) {
+                var count = res.data && res.data.count ? parseInt(res.data.count, 10) : 0;
+                setBadge(isNaN(count) ? 0 : count);
+            });
+        }
+    };
+
+    SF_Notification.loadList();
+    SF_Notification.updateBadge();
+})();
 </script>
 
 <style>
-    /** 消息列表样式 */
+    .sf-message-card {
+        box-shadow: none;
+        border: none;
+        height: 100%;
+    }
+    .sf-message-card .layui-tab-title {
+        text-align: center;
+    }
+    .sf-message-card .layui-tab-content {
+        padding: 0;
+    }
     .message-list {
         position: absolute;
         top: 48px;
@@ -145,108 +216,77 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-
     .message-list-item {
         display: block;
-        padding: 10px 20px;
-        line-height: 24px;
+        padding: 12px 18px;
+        line-height: 22px;
         position: relative;
         border-bottom: 1px solid #e8e8e8;
+        text-decoration: none;
+        color: inherit;
     }
-
-    .message-list-item:hover, .message-btn-clear:hover, .message-btn-more:hover {
-        background: #F2F2F2;
+    .message-list-item:hover, .message-btn-clear:hover {
+        background: #f7f8fa;
     }
-
     .message-list-item .message-item-icon {
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
-        margin-top: -20px;
+        width: 38px;
+        height: 38px;
+        line-height: 38px;
+        margin-top: -19px;
         border-radius: 50%;
         position: absolute;
-        left: 20px;
+        left: 18px;
         top: 50%;
     }
-
     .message-list-item .message-item-icon.layui-icon {
         color: #fff;
-        font-size: 22px;
+        font-size: 20px;
         text-align: center;
-        background-color: #FE5D58;
+        background-color: #2d8cf0;
     }
-
     .message-list-item .message-item-icon + .message-item-right {
-        margin-left: 55px;
+        margin-left: 54px;
     }
-
     .message-list-item .message-item-title {
-        color: #666;
+        color: #333;
         font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 4px;
     }
-
     .message-list-item .message-item-text {
+        color: #666;
+        font-size: 12px;
+        margin: 0 0 4px;
+        word-break: break-word;
+    }
+    .message-list-item .message-item-time {
         color: #999;
         font-size: 12px;
+        margin: 0;
     }
-
-    .message-list-item > .layui-badge {
-        position: absolute;
-        right: 20px;
-        top: 12px;
-    }
-
-    .message-list-item > .layui-badge + .message-item-right {
-        margin-right: 50px;
-    }
-
-    .message-btn-clear, .message-btn-more {
+    .message-btn-clear {
         color: #666;
         display: block;
         padding: 10px 5px;
         line-height: 24px;
         text-align: center;
         cursor: pointer;
-    }
-
-    .message-btn-clear {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
         border-top: 1px solid #e8e8e8;
     }
-
-    .message-btn-more {
-        color: #666;
-        font-size: 13px;
-    }
-
-    .message-btn-more.ew-btn-loading > .ew-btn-loading-text {
-        font-size: 13px !important;
-    }
-
     .message-list-empty {
         color: #999;
         padding: 100px 0;
         text-align: center;
         display: none;
     }
-
     .message-list-empty > .layui-icon {
         color: #ccc;
         display: block;
         font-size: 45px;
         margin-bottom: 15px;
     }
-
-    .show-empty .message-list-empty {
-        display: block;
-    }
-
-    .show-empty .message-btn-clear, .show-empty .message-list {
-        display: none;
-    }
-
-    /** //消息列表样式结束 */
 </style>

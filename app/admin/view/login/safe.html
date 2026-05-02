@@ -127,7 +127,7 @@
             var SF_LOGIN_KEY = $("input[name='SF_LOGIN_KEY']").val();
             if (SF_LOGIN_KEY == "") {
                 notice.warning({
-                    title: 'SF提示您',
+                    title: '温馨提示',
                     message: '请填写登录口令！',
                     animateInside:true,
                     position:'topCenter',
@@ -148,7 +148,7 @@
                 success: function(data) {
                     if (data.code == 0) {
                         notice.success({
-                            title: 'SF提示您',
+                            title: '温馨提示',
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -165,7 +165,7 @@
                         }, 1500);
                     } else {
                         notice.error({
-                            title: 'SF提示您',
+                            title: '温馨提示',
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -179,7 +179,7 @@
                     admin.removeLoading('#loading', true, true);
                 }, error: function () {
                     notice.error({
-                        title: 'SF提示您',
+                        title: '温馨提示',
                         message: '服务器错误，请稍后重试~',
                         animateInside:true,
                         position:'topCenter',

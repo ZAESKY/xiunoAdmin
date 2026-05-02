@@ -145,7 +145,7 @@
                     <label class="layui-form-label layui-form-required">余额:</label>
                     <div class="layui-input-block">
                         <input type="number" name="balance" placeholder="请输入该卡密增加的余额" class="layui-input"
-                               lay-verType="tips" />
+                               lay-verType="tips" step="0.01" min="0" max="999999"/>
                     </div>
                 </div>
             </div>
@@ -238,8 +238,24 @@
                         }
                     },
                 },
-                {field: 'cdkey', title: '卡密', minWidth: 310},
-                {field: 'use_content', title: '使用内容', sort: true, minWidth: 120},
+                {field: 'cdkey', title: '卡密', minWidth: 240},
+                {field: 'info', title: '详情', sort: true, minWidth: 150, templet: function (d) {
+                    if (!d.info) return '-';
+                    try {
+                        var info = typeof d.info === 'string' ? JSON.parse(d.info) : d.info;
+                        if (d.cdkey_type === 'balance') {
+                            return '<span class="layui-badge layui-badge-green">余额 +' + (info.balance || 0) + ' 元</span>';
+                        } else if (d.cdkey_type === 'integral') {
+                            return '<span class="layui-badge layui-badge-yellow">积分 +' + (info.integral || 0) + '</span>';
+                        } else if (d.cdkey_type === 'user') {
+                            return '<span class="layui-badge layui-badge-blue">' + (info.power_name || ('权限ID:' + info.power) || '?') + '</span>';
+                        } else if (d.cdkey_type === 'auth') {
+                            var p = info.permanent_switch == 1 ? '永久' : (info.endtime || '?');
+                            return '<span class="layui-badge layui-badge-red">' + p + '</span>';
+                        }
+                    } catch(e) {}
+                    return d.info;
+                }},
                 {field: 'userid', title: '上级ID', sort: true, minWidth: 100, templet: function (d) {
                         if(d.userid == 0){
                             return '<span class="layui-badge layui-badge-green">站长</span>';

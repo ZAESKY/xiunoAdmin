@@ -104,19 +104,31 @@
             <div class="layui-form-item">
                 <label class="layui-form-label layui-form-required">授权折扣:</label>
                 <div class="layui-input-block">
-                    <input type="number" name="addauth_discount" placeholder="购买授权折扣百分比，0元为免费" class="layui-input"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">认证折扣:</label>
-                <div class="layui-input-block">
-                    <input type="number" name="addpay_discount" placeholder="认证易支付折扣百分比，0元为免费" class="layui-input"/>
+                    <input type="number" name="addauth_discount" placeholder="购买授权折扣百分比，0元为免费" class="layui-input" step="0.01" min="0" max="100"/>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label layui-form-required">代理折扣:</label>
                 <div class="layui-input-block">
-                    <input type="number" name="adduser_discount" placeholder="添加代理折扣百分比，0元为免费" class="layui-input"/>
+                    <input type="number" name="adduser_discount" placeholder="添加代理折扣百分比，0元为免费" class="layui-input" step="0.01" min="0" max="100"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">启用折扣码:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="discount_code_enabled" value="1" lay-skin="switch" title="允许用户生成专属折扣码"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">启用返利:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="rebate_enabled" value="1" lay-skin="switch" title="他人使用折扣码付款时按比例返利"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-form-required">返利比例(%):</label>
+                <div class="layui-input-block">
+                    <input type="number" name="rebate_rate" placeholder="例如5.0表示5%，支持小数" class="layui-input" step="0.01" min="0" max="100"/>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -130,7 +142,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label layui-form-required">权限价格:</label>
                 <div class="layui-input-block">
-                    <input type="number" name="money" placeholder="请输入售卖价格，留空为0元" class="layui-input"/>
+                    <input type="number" name="money" placeholder="请输入售卖价格，留空为0元" class="layui-input" step="0.01" min="0" max="999999"/>
                 </div>
             </div>
             <div class="layui-form-item layui-form-text">
@@ -225,6 +237,16 @@
                 },
                 {field: 'addauth_power', title: '添加授权', templet: '#SF_TbAddAuthPower', sort: true, minWidth: 110},
                 {field: 'adduser_power', title: '添加下级', templet: '#SF_TbAddUserPower', sort: true, minWidth: 110},
+                {field: 'discount_code_enabled', title: '折扣码', templet: function(d){
+                    return d.discount_code_enabled==1
+                        ? '<span class="layui-badge layui-badge-green">开启</span>'
+                        : '<span class="layui-badge layui-badge-gray">关闭</span>';
+                }, sort: true, minWidth: 90},
+                {field: 'rebate_enabled', title: '返利', templet: function(d){
+                    return d.rebate_enabled==1
+                        ? '<span class="layui-badge layui-badge-blue">开启('+d.rebate_rate+'%)</span>'
+                        : '<span class="layui-badge layui-badge-gray">关闭</span>';
+                }, sort: true, minWidth: 130},
                 {field: 'introduce', title: '权限介绍', sort: true, minWidth: 120},
                 {field: 'money', title: '权限价格', sort: true, minWidth: 100},
                 {field: 'default_power', title: '默认权限', templet: '#SF_TbDefaultPower', sort: true, minWidth: 100},

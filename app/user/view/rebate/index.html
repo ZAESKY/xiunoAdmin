@@ -1,0 +1,211 @@
+{include file="/public/header"}
+<style>
+    .code-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        color: #fff;
+    }
+    .code-text {
+        font-size: 32px;
+        font-weight: bold;
+        letter-spacing: 4px;
+        font-family: 'Courier New', monospace;
+        background: rgba(255,255,255,0.2);
+        border-radius: 6px;
+        padding: 12px 24px;
+        display: inline-block;
+        margin: 12px 0;
+        word-break: break-all;
+    }
+    .rebate-tip {
+        margin-top: 16px;
+        padding: 12px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 6px;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-sm12 layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <i class="layui-icon layui-icon-auz"></i> 我的专属折扣码
+                </div>
+                <div class="layui-card-body">
+                    <div id="codeSection">
+                        <div class="text-center" style="padding: 40px 0; color: #999;">
+                            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 24px;"></i>
+                            <p style="margin-top: 12px;">加载中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-sm12 layui-col-md8">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <i class="layui-icon layui-icon-rmb"></i> 返利记录
+                </div>
+                <div class="layui-card-body">
+                    <table id="SF_RebateTable" lay-filter="SF_RebateTable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="SF_RebateStatus">
+    {{# if(d.status == 'settled'){ }}
+    <span class="layui-badge layui-badge-green">已到账</span>
+    {{# } else if(d.status == 'canceled'){ }}
+    <span class="layui-badge layui-badge-red">已取消</span>
+    {{# } else { }}
+    <span class="layui-badge">{{d.status}}</span>
+    {{# } }}
+</script>
+
+{include file="/public/footer"}
+<script>
+layui.use(['table', 'layer', 'notice', 'admin'], function(){
+    var $ = layui.jquery;
+    var table = layui.table;
+    var layer = layui.layer;
+    var notice = layui.notice;
+
+    // 加载折扣码
+    function loadCode(){
+        $.ajax({
+            type: 'POST',
+            url: '{:url("/Rebate/myCode")}',
+            dataType: 'json',
+            success: function(res){
+                if(res.code == 0 && res.data){
+                    var code = res.data.code;
+                    var status = res.data.status;
+                    var html = '<div class="code-box">';
+                    if(status == 1){
+                        html += '<div style="font-size:14px;opacity:0.85;">你的专属折扣码</div>';
+                        html += '<div class="code-text" id="myCode">'+code+'</div>';
+                        html += '<div><button class="layui-btn layui-btn-sm" id="btnCopy"><i class="layui-icon layui-icon-upload-circle"></i> 复制折扣码</button></div>';
+                        html += '<div class="rebate-tip">';
+                        html += '<p><i class="layui-icon layui-icon-about"></i> 分享此折扣码给其他用户，他们在充值时输入该码</p>';
+                        html += '<p><i class="layui-icon layui-icon-rmb"></i> 付款成功后，你将获得 <b>'+{$userInfo['rebate_rate']}+'%</b> 的返利</p>';
+                        html += '<p><i class="layui-icon layui-icon-notice"></i> 返利金额将直接到账你的余额</p>';
+                        html += '</div>';
+                    } else {
+                        html += '<div style="font-size:14px;opacity:0.85;">折扣码已停用</div>';
+                        html += '<div class="code-text" style="text-decoration:line-through;opacity:0.6;">'+code+'</div>';
+                        html += '<div class="rebate-tip">该折扣码已被管理员停用，请联系管理员</div>';
+                    }
+                    html += '</div>';
+                    $('#codeSection').html(html);
+
+                    $('#btnCopy').on('click', function(){
+                        var text = $('#myCode').text();
+                        var $btn = $(this);
+                        var $code = $('#myCode');
+                        var done = function(){
+                            $code.css({transition:'all .2s',background:'rgba(92,184,92,0.5)'});
+                            setTimeout(function(){ $code.css({background:'rgba(255,255,255,0.2)'}); }, 300);
+                            $btn.html('<i class="layui-icon layui-icon-ok-circle"></i> 已复制');
+                            $btn.addClass('layui-btn-disabled');
+                            setTimeout(function(){
+                                $btn.html('<i class="layui-icon layui-icon-upload-circle"></i> 复制折扣码');
+                                $btn.removeClass('layui-btn-disabled');
+                            }, 2000);
+                        };
+                        if(navigator.clipboard){
+                            navigator.clipboard.writeText(text).then(done);
+                        } else {
+                            var input = $('<input>').val(text).appendTo('body').select();
+                            document.execCommand('copy');
+                            input.remove();
+                            done();
+                        }
+                    });
+                } else {
+                    var html = '<div class="code-box">';
+                    html += '<div style="font-size:15px;">你还没有专属折扣码</div>';
+                    html += '<div style="margin-top:16px;"><button class="layui-btn" id="btnGenerate"><i class="layui-icon layui-icon-add-circle"></i> 生成专属折扣码</button></div>';
+                    if(res.msg && res.msg != 'ok'){
+                        html += '<div class="rebate-tip">'+res.msg+'</div>';
+                    }
+                    html += '</div>';
+                    $('#codeSection').html(html);
+
+                    $('#btnGenerate').on('click', function(){
+                        notice.msg('正在生成...', {icon: 4, close: true});
+                        $.ajax({
+                            type: 'POST',
+                            url: '{:url("/Rebate/generate")}',
+                            dataType: 'json',
+                            success: function(r){
+                                notice.destroy();
+                                if(r.code == 0){
+                                    notice.msg('生成成功！', {icon: 1});
+                                    loadCode();
+                                    insTb.reload();
+                                } else {
+                                    notice.msg(r.msg, {icon: 2});
+                                }
+                            },
+                            error: function(){
+                                notice.destroy();
+                                notice.msg('服务器错误！', {icon: 2});
+                            }
+                        });
+                    });
+                }
+            },
+            error: function(){
+                $('#codeSection').html('<div class="text-center" style="padding:40px;color:#999;">加载失败</div>');
+            }
+        });
+    }
+    loadCode();
+
+    // 返利记录表格
+    var insTb = table.render({
+        elem: '#SF_RebateTable',
+        url: '{:url("/Rebate/myRebateList")}',
+        method: 'post',
+        page: true,
+        limit: 10,
+        request: {
+            pageName: 'current_page',
+            limitName: 'limit'
+        },
+        parseData: function(res){
+            return {
+                "code": res.code,
+                "msg": res.msg,
+                "count": res.data.data.total || 0,
+                "data": res.data.data.data || res.data.data || []
+            };
+        },
+        cols: [[
+            {field: 'id', title: 'ID', width: 70, sort: true},
+            {field: 'pay_trade_no', title: '订单号', minWidth: 200},
+            {field: 'discount_code', title: '折扣码', minWidth: 140},
+            {field: 'paid_amount', title: '支付金额', width: 110, templet: function(d){
+                return d.paid_amount + ' 元';
+            }},
+            {field: 'rebate_rate', title: '返利比例', width: 100, templet: function(d){
+                return d.rebate_rate + '%';
+            }},
+            {field: 'rebate_amount', title: '返利金额', width: 110, templet: function(d){
+                return '<span style="color:#5cb85c;font-weight:bold;">+'+d.rebate_amount+' 元</span>';
+            }},
+            {field: 'status', title: '状态', width: 100, templet: '#SF_RebateStatus'},
+            {field: 'created_at', title: '到账时间', minWidth: 170}
+        ]]
+    });
+});
+</script>
+</body>
+</html>

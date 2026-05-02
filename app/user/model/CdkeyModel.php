@@ -220,6 +220,7 @@ class CdkeyModel extends BaseModel
                                 ->where('id', $userInfo['id'])
                                 ->inc('balance', $info['balance'])
                                 ->update();
+                            \app\common\model\BalanceLogModel::add($userInfo['id'], 'cdkey_exchange', floatval($info['balance']), '卡密兑换余额 +'.$info['balance'].' 元');
                             Db::name('cdkey')
                                 ->where('cdkey', $cdkey)
                                 ->data([
@@ -369,7 +370,7 @@ class CdkeyModel extends BaseModel
         }
         $remainderBalance = $userInfo['balance'] - $allmoney;
         try{
-            $result = parent::updateUserInfo(['balance' => $remainderBalance]);
+            $result = parent::updateUserInfo(['balance' => $remainderBalance], '生成卡密扣款 -'.$allmoney.' 元');
             if(!$result){
                 return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
             }

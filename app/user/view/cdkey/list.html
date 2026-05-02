@@ -181,8 +181,24 @@
                         }
                     },
                 },
-                {field: 'cdkey', title: '卡密', minWidth: 310},
-                {field: 'use_content', title: '使用内容', sort: true, minWidth: 120},
+                {field: 'cdkey', title: '卡密', minWidth: 240},
+                {field: 'info', title: '详情', sort: true, minWidth: 150, templet: function (d) {
+                    if (!d.info) return '-';
+                    try {
+                        var info = typeof d.info === 'string' ? JSON.parse(d.info) : d.info;
+                        if (d.cdkey_type === 'balance') {
+                            return '<span class="layui-badge layui-badge-green">余额 +' + (info.balance || 0) + ' 元</span>';
+                        } else if (d.cdkey_type === 'integral') {
+                            return '<span class="layui-badge layui-badge-yellow">积分 +' + (info.integral || 0) + '</span>';
+                        } else if (d.cdkey_type === 'user') {
+                            return '<span class="layui-badge layui-badge-blue">' + (info.power_name || ('权限ID:' + info.power) || '?') + '</span>';
+                        } else if (d.cdkey_type === 'auth') {
+                            var p = info.permanent_switch == 1 ? '永久' : (info.endtime || '?');
+                            return '<span class="layui-badge layui-badge-red">' + p + '</span>';
+                        }
+                    } catch(e) {}
+                    return d.info;
+                }},
                 {field: 'addtime', title: '添加时间/使用时间', sort: true, minWidth: 290, templet: function (d) {
                         if(d.usetime == null){
                             return '<span class="layui-badge layui-badge-blue">'+d.addtime+'</span> <span class="layui-badge layui-badge-green">未使用</span>';

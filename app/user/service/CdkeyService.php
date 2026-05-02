@@ -26,7 +26,12 @@ class CdkeyService extends UserBaseService
             foreach($result as $res){
                 $appInfo = $this->appModel->getInfo($res['appid']);
                 $res['appName'] = $appInfo['name'];
-                $res['info'] = json_decode($res['info'],true);
+                $infoArr = json_decode($res['info'], true) ?: [];
+                if ($res['cdkey_type'] === 'user' && !empty($infoArr['power'])) {
+                    $powerInfo = parent::getPowerPriceInfo(intval($infoArr['power']));
+                    $infoArr['power_name'] = $powerInfo ? $powerInfo['name'] : '';
+                }
+                $res['info'] = $infoArr;
             }
             return $result;
         }catch (\Exception $e){

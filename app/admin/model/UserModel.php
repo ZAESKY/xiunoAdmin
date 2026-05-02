@@ -4,6 +4,7 @@ namespace app\admin\model;
 
 use app\admin\validate\User;
 use app\common\model\BaseModel;
+use app\common\model\BalanceLogModel;
 use think\Exception;
 use think\exception\ValidateException;
 use think\facade\Cache;
@@ -81,10 +82,15 @@ class UserModel extends BaseModel
                 'appid' => $appid,
                 'userid' => $userid
             ];
+            $oldBalance = floatval($row['balance']);
             try{
                 self::where('id', $id)
                     ->data($data)
                     ->update();
+                if ($balance != $oldBalance) {
+                    $diff = round($balance - $oldBalance, 2);
+                    BalanceLogModel::add($id, 'admin_edit', $diff, '管理员修改余额 '.($diff >= 0 ? '+' : '').$diff.' 元');
+                }
                 Cache::delete('SF_UserMenu'.$id);
                 return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
@@ -111,7 +117,10 @@ class UserModel extends BaseModel
                 'userid' => $userid
             ];
             try{
-                self::insert($data);
+                $newId = self::insertGetId($data);
+                if ($balance > 0) {
+                    BalanceLogModel::add($newId, 'admin_edit', $balance, '新用户初始余额 +'.$balance.' 元');
+                }
                 return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
                 return message(t('user.add_failed').$e->getMessage() ,false);
@@ -173,9 +182,13 @@ class UserModel extends BaseModel
             $limit = !empty($post['limit'])?$post['limit']:10;
             $current_page = !empty($post['current_page'])?$post['current_page']:1;
             $appid = !empty($post['appid'])?$post['appid']:null;
+            $power = isset($post['power']) && $post['power'] !== '' ? intval($post['power']) : null;
             $data = $this->buildSearchWhere('id|username|qq');
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
+            }
+            if($power !== null){
+                $data[] = ['power', '=', $power];
             }
 
             $list = self::order('id' ,'desc')->where($data)->paginate([

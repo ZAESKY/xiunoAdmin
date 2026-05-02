@@ -4,11 +4,13 @@
     <div class="layui-card">
         <div class="layui-card-body">
             <!-- 表格工具栏 -->
+            {notempty name="replace_notice"}
             <div class="layui-form-item formBasForm">
                 <div class="sf-tag layui-badge-blue">
-                    {$replace_notice|raw|default='暂无公告'}
+                    {$replace_notice|raw}
                 </div>
             </div>
+            {/notempty}
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">

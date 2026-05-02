@@ -174,7 +174,7 @@ class AuthModel extends BaseModel
         }
         $remainderBalance = $userInfo['balance'] - $allmoney;
         try{
-            $result = parent::updateUserInfo(['balance' => $remainderBalance]);
+            $result = parent::updateUserInfo(['balance' => $remainderBalance], '授权操作 -'.$allmoney.' 元');
             if(!$result){
                 return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
             }
@@ -315,7 +315,7 @@ class AuthModel extends BaseModel
                 }
                 $remainderBalance = $userInfo['balance'] - $allmoney;
                 try{
-                    $result = parent::updateUserInfo(['balance' => $remainderBalance]);
+                    $result = parent::updateUserInfo(['balance' => $remainderBalance], '授权操作 -'.$allmoney.' 元');
                     if(!$result){
                         return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                     }
@@ -422,7 +422,7 @@ class AuthModel extends BaseModel
             }
             $remainderBalance = $userInfo['balance'] - $allmoney;
             try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance]);
+                $result = parent::updateUserInfo(['balance' => $remainderBalance], '授权操作 -'.$allmoney.' 元');
                 if(!$result){
                     return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }

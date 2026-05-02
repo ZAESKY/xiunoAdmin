@@ -1,15 +1,4 @@
 <?php
-/*
-* +----------------------------------------------------------------------
-* | SF 综合验证授权系统
-* +----------------------------------------------------------------------
-* | Quotes [ 花开的再灿烂，也有凋谢的一天，致我们过去的青春 ]
-* +----------------------------------------------------------------------
-* | Author: 陌上花开 <2129876388@qq.com>
-* +----------------------------------------------------------------------
-* | Date: 2022年1月19日 18:48:32
-* +----------------------------------------------------------------------
-*/
 namespace app\common\controller;
 
 use think\App;
@@ -103,9 +92,10 @@ class UserBackend extends CommonBase
             $this->userInfo['app_name'] = $this->myAppInfo['name'];
             $this->userInfo['power_name'] = $this->myPowerInfo['name'];
             $this->userInfo['addauth_discount'] = floatval($this->myPowerInfo['addauth_discount'] / 100);
-            $this->userInfo['addpay_discount'] = floatval($this->myPowerInfo['addpay_discount'] / 100);
-            $this->userInfo['pirate_discount'] = floatval($this->myPowerInfo['pirate_discount'] / 100);
             $this->userInfo['adduser_discount'] = floatval($this->myPowerInfo['adduser_discount'] / 100);
+            $this->userInfo['rebate_enabled'] = intval($this->myPowerInfo['rebate_enabled'] ?? 0);
+            $this->userInfo['rebate_rate'] = floatval($this->myPowerInfo['rebate_rate'] ?? 0);
+            $this->userInfo['discount_code_enabled'] = intval($this->myPowerInfo['discount_code_enabled'] ?? 0);
             View::assign('userId', $this->userId);
             View::assign('userInfo', $this->userInfo);
         }catch (\Exception $e){

@@ -52,6 +52,7 @@ class PayModel extends BaseModel
             'addtime' => datetime(),
             'status' => 0,
             'userid' => $userId,
+            'discount_code' => $wap['discount_code'] ?? null,
         ];
         try {
             self::insert($data);

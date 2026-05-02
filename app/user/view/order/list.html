@@ -110,9 +110,14 @@
                 {field: 'input', title: '订单信息', sort: true, minWidth: 120, templet: function (d) {
                         if(d.input == '' || d.input == null){
                             return '无信息';
-                        }else{
-                            return d.input;
                         }
+                        try {
+                            var info = typeof d.input === 'string' ? JSON.parse(d.input) : d.input;
+                            if (info.original_money) {
+                                return '原价 '+info.original_money+' 元（折扣后实付 '+d.money+' 元）';
+                            }
+                        } catch(e) {}
+                        return d.input;
                     }
                 },
                 {field: 'num', title: '数量', sort: true, minWidth: 80},

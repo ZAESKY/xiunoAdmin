@@ -22,6 +22,17 @@
                             </select>
                         </div>
                     </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">权&emsp;限</label>
+                        <div class="layui-input-inline">
+                            <select name="power" class="ew-select-fixed">
+                                <option value="">全部权限</option>
+                                {volist name="power_list" id="res"}
+                                <option value="{$res.id}">{$res.name}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
@@ -125,7 +136,7 @@
                 <label class="layui-form-label">余额:</label>
                 <div class="layui-input-block">
                     <input type="number" name="balance" placeholder="留空则为0元" class="layui-input"
-                           lay-verType="tips"/>
+                           lay-verType="tips" step="0.01" min="0" max="999999"/>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -232,6 +243,24 @@
                             return '<span class="layui-badge layui-badge-blue">UID:'+d.userid+'</span>';
                         }
                     }, minWidth: 110},
+                {field: 'authCount', title: '授权数', align: 'center', width: 90, sort: true, templet: function(d){
+                    return d.authCount > 0
+                        ? '<a class="layui-badge layui-badge-blue" style="cursor:pointer" lay-event="viewAuth">'+d.authCount+'</a>'
+                        : '<span class="layui-badge layui-badge-gray">0</span>';
+                }},
+                {field: 'cdkeyCount', title: '卡密数', align: 'center', width: 90, sort: true, templet: function(d){
+                    return d.cdkeyCount > 0
+                        ? '<a class="layui-badge layui-badge-orange" style="cursor:pointer" lay-event="viewCdkey">'+d.cdkeyCount+'</a>'
+                        : '<span class="layui-badge layui-badge-gray">0</span>';
+                }},
+                {field: 'userCount', title: '下级数', align: 'center', width: 90, sort: true, templet: function(d){
+                    return d.userCount > 0
+                        ? '<a class="layui-badge layui-badge-green" style="cursor:pointer" lay-event="viewSubUser">'+d.userCount+'</a>'
+                        : '<span class="layui-badge layui-badge-gray">0</span>';
+                }},
+                {field: 'balanceLog', title: '动账', align: 'center', width: 80, templet: function(d){
+                    return '<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="viewBalanceLog">明细</a>';
+                }},
                 {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
                 {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
                 {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
@@ -326,6 +355,14 @@
                     showEditModel(obj.data);
                 } else if (obj.event === 'del') { // 删除
                     doDel(obj);
+                } else if (obj.event === 'viewAuth') {
+                    window.open('{:url("/Auth/list")}?userid='+obj.data.id);
+                } else if (obj.event === 'viewCdkey') {
+                    window.open('{:url("/Cdkey/list")}?userid='+obj.data.id);
+                } else if (obj.event === 'viewSubUser') {
+                    window.open('{:url("/User/list")}?userid='+obj.data.id);
+                } else if (obj.event === 'viewBalanceLog') {
+                    showBalanceLog(obj.data);
                 } else if (obj.event === 'seePassword') {
                     admin.open({
                         title: '查看用户 '+obj.data.username+' 密码',
@@ -454,6 +491,42 @@
                         });
                         // 禁止弹窗出现滚动条
                         $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                    }
+                });
+            }
+
+            /* 查看动账明细 */
+            function showBalanceLog(mData){
+                admin.popupRight({
+                    type: 1,
+                    title: mData.username + ' - 余额明细',
+                    content: '<table id="SF_BalanceLogTable" lay-filter="SF_BalanceLogTable"></table>',
+                    area: ['800px', '600px'],
+                    success: function(layero, dIndex){
+                        table.render({
+                            elem: '#SF_BalanceLogTable',
+                            url: '{:url("/User/balanceLog")}',
+                            method: 'post',
+                            where: {user_id: mData.id},
+                            page: true,
+                            limit: 12,
+                            request: {pageName: 'current_page', limitName: 'limit'},
+                            parseData: function(res){
+                                return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
+                            },
+                            cols: [[
+                                {field: 'type', title: '类型', width: 100, templet: function(d){
+                                    var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款'};
+                                    return '<span class="layui-badge">'+(m[d.type]||d.type)+'</span>';
+                                }},
+                                {field: 'amount', title: '金额', width: 100, templet: function(d){
+                                    return d.amount > 0 ? '<span style="color:#5cb85c">+'+d.amount+'</span>' : '<span style="color:#d9534f">'+d.amount+'</span>';
+                                }},
+                                {field: 'balance_after', title: '余额', width: 100},
+                                {field: 'description', title: '说明', minWidth: 180},
+                                {field: 'created_at', title: '时间', width: 170}
+                            ]]
+                        });
                     }
                 });
             }

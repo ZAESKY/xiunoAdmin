@@ -1,16 +1,4 @@
 <?php
-/*
-* +----------------------------------------------------------------------
-* | SF 综合验证授权系统
-* +----------------------------------------------------------------------
-* | Quotes [ 花开的再灿烂，也有凋谢的一天，致我们过去的青春 ]
-* +----------------------------------------------------------------------
-* | Author: 陌上花开 <2129876388@qq.com>
-* +----------------------------------------------------------------------
-* | Date: 2022年1月19日 18:48:32
-* +----------------------------------------------------------------------
-*/
-
 namespace app\user\model;
 
 use app\common\model\BaseModel;
@@ -142,7 +130,7 @@ class User extends BaseModel
             if($allmoney > $userInfo['balance']) return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
             $remainderBalance = $userInfo['balance'] - $allmoney;
             try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance]);
+                $result = parent::updateUserInfo(['balance' => $remainderBalance], '升级权限 -'.$allmoney.' 元');
                 if(!$result){
                     return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }

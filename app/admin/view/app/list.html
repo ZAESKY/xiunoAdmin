@@ -891,19 +891,19 @@ if(Object.keys(session).length > 0){
                             <div class="layui-form-item">
                                 <label class="layui-form-label">查看盗版</label>
                                 <div class="layui-input-block">
-                                    <input type="number" name="pirate_money" class="layui-input" placeholder="代理查看盗版站点信息时扣除的价格"/>
+                                    <input type="number" name="pirate_money" class="layui-input" placeholder="代理查看盗版站点信息时扣除的价格" step="0.01" min="0" max="999999"/>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <label class="layui-form-label">赠送余额</label>
                                 <div class="layui-input-block">
-                                    <input type="number" name="give_money" class="layui-input" placeholder="该应用的代理添加下级代理时,下级代理初始的余额"/>
+                                    <input type="number" name="give_money" class="layui-input" placeholder="该应用的代理添加下级代理时,下级代理初始的余额" step="0.01" min="0" max="999999"/>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <label class="layui-form-label">更换价格</label>
                                 <div class="layui-input-block">
-                                    <input type="number" name="replace_money" class="layui-input" placeholder="免费更换次数用完的更换价格"/>
+                                    <input type="number" name="replace_money" class="layui-input" placeholder="免费更换次数用完的更换价格" step="0.01" min="0" max="999999"/>
                                 </div>
                             </div>
                         </div>

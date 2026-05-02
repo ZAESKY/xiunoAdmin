@@ -60,6 +60,8 @@ class MenuService extends UserBaseService
                 '安装管理' => 'menu.install',
                 '反馈管理' => 'menu.feedback',
                 '功能反馈' => 'menu.feedback',
+                '返利中心' => 'menu.rebate',
+                '余额明细' => 'menu.balance_log',
             ];
             array_walk_recursive($list, function (&$item, $key) use ($titleMap) {
                 if ($key === 'title' && is_string($item) && isset($titleMap[$item])) {

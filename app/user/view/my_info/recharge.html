@@ -52,17 +52,17 @@
                         <div class="layui-tab-item layui-show">
                             <form class="layui-form formBasForm" id="userInfoForm" lay-filter="userInfoForm"
                                   style="max-width: 600px;">
+                                {notempty name="pay_notice"}
                                 <div class="layui-form-item">
                                     <div class="sf-tag layui-badge-blue">
-                                        {$pay_notice|raw|default='暂无公告'}
+                                        {$pay_notice|raw}
                                     </div>
                                 </div>
+                                {/notempty}
                                 <div class="layui-form-item">
                                     <label class="layui-form-label layui-form-required">充值余额:</label>
                                     <div class="layui-input-block">
-                                        <input type="radio" name="money" value="1" title="1元" lay-verify="required" lay-filter="money" checked/>
-                                        <input type="radio" name="money" value="5" title="5元" lay-verify="required" lay-filter="money"/>
-                                        <input type="radio" name="money" value="10" title="10元" lay-verify="required" lay-filter="money"/>
+                                        <input type="radio" name="money" value="10" title="10元" lay-verify="required" lay-filter="money" checked/>
                                         <input type="radio" name="money" value="50" title="50元" lay-verify="required" lay-filter="money"/>
                                         <input type="radio" name="money" value="100" title="100元" lay-verify="required" lay-filter="money"/>
                                         <input type="radio" name="money" value="diy" title="自定义" lay-verify="required" lay-filter="money"/>
@@ -72,9 +72,17 @@
                                     <div class="layui-form-item">
                                         <label class="layui-form-label layui-form-required">充值余额:</label>
                                         <div class="layui-input-block">
-                                            <input type="text" name="diy" value="" class="layui-input"
-                                                   placeholder="不能低于0.01元" required/>
+                                            <input type="number" name="diy" value="" class="layui-input"
+                                                   placeholder="最低充值10元" step="0.01" min="0" max="999999" required/>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">折扣码</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="discount_code" id="discount_code" class="layui-input"
+                                               placeholder="输入折扣码（选填）" autocomplete="off"/>
+                                        <div id="codePreview" style="margin-top:8px;display:none;"></div>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
@@ -108,10 +116,85 @@
             }else{
                 $("#diy").css("display", "none");
             }
+            updatePreview();
+        });
+        $('input[name=diy]').on('blur input', function(){
+            updatePreview();
         });
 
+        var checkTimer;
+        $('#discount_code').on('input', function(){
+            clearTimeout(checkTimer);
+            var code = $(this).val().trim();
+            if(!code){ $('#codePreview').hide().html(''); return; }
+            checkTimer = setTimeout(function(){
+                $.ajax({
+                    type: 'POST',
+                    url: '{:url("/Rebate/checkCode")}',
+                    data: {code: code},
+                    dataType: 'json',
+                    success: function(res){
+                        if(res.code == 0){
+                            var rate = res.data.rate;
+                            var owner = res.data.owner;
+                            $('#codePreview').show().html(
+                                '<span class="layui-badge layui-badge-green">有效</span> '+
+                                '折扣 '+rate+'%，来自 <b>'+owner+'</b>'+
+                                '<span id="savePreview" style="color:#5cb85c;margin-left:8px;"></span>'
+                            );
+                            updatePreview();
+                        } else {
+                            $('#codePreview').show().html('<span class="layui-badge layui-badge-red">无效</span> '+res.msg);
+                            $('#savePreview').text('');
+                        }
+                    }
+                });
+            }, 500);
+        });
+
+        // 限制自定义金额：输入时只过滤非法字符和限制小数位，失焦时校验范围
+        $('input[name=diy]').on('input', function(){
+            var el = this;
+            var v = el.value;
+            if(v === '') return;
+            // 过滤非数字字符（保留小数点和数字）
+            var cleaned = v.replace(/[^\d.]/g, '');
+            // 只保留第一个小数点
+            var parts = cleaned.split('.');
+            if(parts.length > 2) cleaned = parts[0] + '.' + parts.slice(1).join('');
+            // 限制小数点后两位
+            if(cleaned.indexOf('.') > -1 && cleaned.split('.')[1].length > 2) {
+                cleaned = cleaned.split('.')[0] + '.' + cleaned.split('.')[1].substring(0, 2);
+            }
+            if(el.value !== cleaned) el.value = cleaned;
+            updatePreview();
+        }).on('blur', function(){
+            var el = $(this);
+            var v = parseFloat(el.val());
+            if(isNaN(v) || v < 10){ el.val(''); return; }
+            if(v > 999999){ el.val('999999.00'); return; }
+            el.val(v.toFixed(2));
+            updatePreview();
+        });
+
+        function updatePreview(){
+            var rateText = $('#codePreview').text();
+            var match = rateText.match(/折扣\s*([\d.]+)%/);
+            if(!match){ return; }
+            var rate = parseFloat(match[1]);
+            var moneyVal = $('input[name=money]:checked').val();
+            if(moneyVal == 'diy') moneyVal = $('input[name=diy]').val();
+            moneyVal = Math.min(parseFloat(parseFloat(moneyVal).toFixed(2)) || 0, 999999);
+            if(moneyVal >= 10 && rate > 0){
+                var save = (moneyVal * rate / 100).toFixed(2);
+                var pay = (moneyVal - save).toFixed(2);
+                $('#savePreview').text('选'+moneyVal+'元 → 实付 '+pay+' 元，省 '+save+' 元');
+            } else if (moneyVal > 0 && moneyVal < 10) {
+                $('#savePreview').text('最低充值10元');
+            }
+        }
+
         form.on('submit(submit)', function (data) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
             if(data.field.money == ''){
                 notice.msg('请选择需要充值的余额！', {icon: 2, audio:'1'});
                 return false;
@@ -122,6 +205,7 @@
                     return false;
                 }
             }
+            notice.msg('正在执行中..', {icon: 4, close: true});
             data.field.type = 'recharge';
             $.ajax({
                 type: "POST",

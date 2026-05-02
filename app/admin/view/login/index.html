@@ -324,7 +324,7 @@
 
         $("#wechat_login").click(function(){
             notice.error({
-                title: 'SF提示您',
+                title: '温馨提示',
                 message: '暂不支持',
                 animateInside:true,
                 position:'topCenter',
@@ -363,7 +363,7 @@
                     },1000)
                 } else {
                     notice.error({
-                        title: 'SF提示您',
+                        title: '温馨提示',
                         message: data.msg,
                         animateInside:true,
                         position:'topCenter',
@@ -377,7 +377,7 @@
                 admin.btnLoading('#login', false);
             }, error: function () {
                 notice.error({
-                    title: 'SF提示您',
+                    title: '温馨提示',
                     message: '服务器错误，请稍后重试~',
                     animateInside:true,
                     position:'topCenter',
@@ -412,7 +412,7 @@
                         },1000)
                     } else {
                         notice.error({
-                            title: 'SF提示您',
+                            title: '温馨提示',
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -426,7 +426,7 @@
                     admin.btnLoading('#login', false);
                 }, error: function () {
                     notice.error({
-                        title: 'SF提示您',
+                        title: '温馨提示',
                         message: '服务器错误，请稍后重试~',
                         animateInside:true,
                         position:'topCenter',
@@ -454,7 +454,7 @@
                     var pass = $("input[name='pass']").val();
                     if (!result) {
                         notice.warning({
-                            title: 'SF提示您',
+                            title: '温馨提示',
                             message: '请完成验证！',
                             animateInside:true,
                             position:'topCenter',
@@ -481,7 +481,7 @@
                         success: function(data) {
                             if (data.code == 0) {
                                 notice.success({
-                                    title: 'SF提示您',
+                                    title: '温馨提示',
                                     message: data.msg,
                                     animateInside:true,
                                     position:'topCenter',
@@ -495,7 +495,7 @@
                                 },2000)
                             } else {
                                 notice.error({
-                                    title: 'SF提示您',
+                                    title: '温馨提示',
                                     message: data.msg,
                                     animateInside:true,
                                     position:'topCenter',
@@ -509,7 +509,7 @@
                             admin.btnLoading('#login', false);
                         }, error: function () {
                             notice.error({
-                                title: 'SF提示您',
+                                title: '温馨提示',
                                 message: '服务器错误，请稍后重试~',
                                 animateInside:true,
                                 position:'topCenter',
@@ -531,7 +531,7 @@
                     var pass = $("input[name='pass']").val();
                     if(!user){
                         notice.warning({
-                            title: 'SF提示您',
+                            title: '温馨提示',
                             message: '请填写用户名！',
                             animateInside:true,
                             position:'topCenter',
@@ -544,7 +544,7 @@
                     }
                     if(!pass){
                         notice.warning({
-                            title: 'SF提示您',
+                            title: '温馨提示',
                             message: '请填写密码！',
                             animateInside:true,
                             position:'topCenter',

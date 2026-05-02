@@ -15,6 +15,23 @@ class User extends Backend
         $this->service = new UserService();
     }
 
+    public function balanceLog(){
+        try{
+            if(IS_POST){
+                $userId = request()->post('user_id/d');
+                $limit = request()->post('limit/d', 15);
+                $page = request()->post('current_page/d', 1);
+                if(empty($userId)) return message('缺少用户ID', false);
+                $list = \app\common\model\BalanceLogModel::where('user_id', $userId)
+                    ->order('id', 'desc')
+                    ->paginate(['list_rows' => $limit, 'page' => $page]);
+                return message('ok', true, ['data' => $list]);
+            }
+        }catch (\Exception $e){
+            return message($e->getMessage(), false);
+        }
+    }
+
     public function getAppUserList(){
         try{
             if(IS_POST){
@@ -39,6 +56,7 @@ class User extends Backend
         try{
             View::assign('appid', $appid);
             View::assign('app_list', parent::getAppList());
+            View::assign('power_list', (new \app\admin\model\PowerPriceModel())->field('id,name')->select()->toArray());
             return $this->render();
         }catch (\Exception $e){
             return $this->render('/public/error', ['msg' => $e->getMessage()]);

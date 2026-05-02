@@ -59,6 +59,9 @@ class Menu extends BaseModel
         if ($powerPriceInfo['pirate_power'] != 1) {
             $hiddenUrls[] = 'Pirate/list';
         }
+        if ($powerPriceInfo['discount_code_enabled'] != 1) {
+            $hiddenUrls[] = 'Rebate/index';
+        }
 
         foreach ($data as $key => $value) {
             if (in_array($value['url'], $hiddenUrls)) {

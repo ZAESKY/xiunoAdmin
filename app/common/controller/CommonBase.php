@@ -1,15 +1,4 @@
 <?php
-/*
-* +----------------------------------------------------------------------
-* | SF 综合验证授权系统
-* +----------------------------------------------------------------------
-* | Quotes [ 花开的再灿烂，也有凋谢的一天，致我们过去的青春 ]
-* +----------------------------------------------------------------------
-* | Author: 陌上花开 <2129876388@qq.com>
-* +----------------------------------------------------------------------
-* | Date: 2022年1月19日 18:48:32
-* +----------------------------------------------------------------------
-*/
 namespace app\common\controller;
 
 use app\BaseController;
@@ -185,19 +174,67 @@ class CommonBase extends BaseController
                         $money = !empty($post['diy'])?$post['diy']:null;
                         if(empty($money)) return message(t('order.recharge_money_error'), false);
                     }
-                    if (!is_numeric($money) || $money <= 0) {
-                        return message('order.recharge_money_error', false);
+                    if (!is_numeric($money) || $money < 10) {
+                        return message('最低充值金额为10元', false);
+                    }
+                    if ($money > 999999) {
+                        return message('充值金额不能超过999999元', false);
                     }
                     $money = round((float)$money, 2);
 
-                    $name = '充值余额 - '. $money .'元';
+                    // 折扣码验证
+                    $discountCode = !empty($post['discount_code']) ? trim($post['discount_code']) : null;
+                    $discountRate = 0;
+                    $originalMoney = $money;
+                    if (!empty($discountCode)) {
+                        $codeRow = \think\facade\Db::name('discount_code')->where('code', $discountCode)->find();
+                        if (!$codeRow) {
+                            return message('折扣码不存在', false);
+                        }
+                        if ($codeRow['status'] != 1) {
+                            return message('折扣码已停用', false);
+                        }
+                        if ($codeRow['user_id'] == cookie('userId')) {
+                            return message('不能使用自己的折扣码', false);
+                        }
+                        $ownerUser = \think\facade\Db::name('user')->where('id', $codeRow['user_id'])->find();
+                        if (!$ownerUser) {
+                            return message('折扣码无效', false);
+                        }
+                        $ownerPower = \think\facade\Db::name('power_price')->where('id', $ownerUser['power'])->find();
+                        if (!$ownerPower || $ownerPower['rebate_enabled'] != 1) {
+                            return message('该折扣码所属用户未开启返利', false);
+                        }
+                        // 应用折扣：付款方享受返利比例的折扣
+                        $discountRate = floatval($ownerPower['rebate_rate']);
+                        if ($discountRate > 0) {
+                            $money = round($money * (1 - $discountRate / 100), 2);
+                            if ($money <= 0) {
+                                $money = 0.01;
+                            }
+                        }
+                    }
+
+                    $name = $discountRate > 0
+                        ? '充值余额 - '.$originalMoney.'元 (折扣码优惠'.$discountRate.'%)'
+                        : '充值余额 - '. $money .'元';
+                    // 将原始金额存入 input 字段，支付回调时用于正确到账
+                    $input = $discountRate > 0 ? json_encode(['original_money' => $originalMoney]) : '';
                     $data = [
                         'buy_type' => 'recharge',
                         'name' => $name,
                         'userid' => cookie('userId'),
                         'money' => $money,
+                        'input' => $input,
+                        'discount_code' => $discountCode,
                     ];
-                    return $payModel->edit($data);
+                    $result = $payModel->edit($data);
+                    if ($discountRate > 0) {
+                        $result['data']['original_money'] = $originalMoney;
+                        $result['data']['discount_rate'] = $discountRate;
+                        $result['data']['discounted_money'] = $money;
+                    }
+                    return $result;
                 default:
                     return message(t('order.create_type_error'), false);
             }

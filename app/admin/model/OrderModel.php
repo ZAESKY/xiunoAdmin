@@ -115,6 +115,7 @@ class OrderModel extends BaseModel
                         ->where('id', $row['userid'])
                         ->inc('balance', $row['money'])
                         ->update();
+                    \app\common\model\BalanceLogModel::add($row['userid'], 'refund', floatval($row['money']), '订单退款 +'.$row['money'].' 元', intval($id));
                 }catch (\Exception $e){
                     throw new Exception($e->getMessage());
                 }

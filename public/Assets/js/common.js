@@ -108,24 +108,24 @@
             'install.retry': '重试',
             'validation.required': '请填写必填项！',
             'validation.not_empty': '请勿留空！',
-            'validation.phone': 'SF提示您：请输入正确的手机号',
-            'validation.email': 'SF提示您：邮箱格式不正确',
-            'validation.url': 'SF提示您：链接格式不正确',
-            'validation.number': 'SF提示您：只能填写数字',
-            'validation.date': 'SF提示您：日期格式不正确',
-            'validation.identity': 'SF提示您：请输入正确的身份证号',
-            'validation.password': 'SF提示您：密码必须5到12位，且不能出现空格',
-            'validation.equal_to': 'SF提示您：两次输入不一致',
-            'validation.digits': 'SF提示您：只能输入整数',
-            'validation.digits_positive': 'SF提示您：只能输入正整数',
-            'validation.digits_negative': 'SF提示您：只能输入负整数',
-            'validation.digits_positive_zero': 'SF提示您：只能输入正整数和0',
-            'validation.digits_negative_zero': 'SF提示您：只能输入负整数和0',
-            'validation.minlength': 'SF提示您：最少输入{minlength}个字符',
-            'validation.maxlength': 'SF提示您：最多输入{maxlength}个字符',
-            'validation.min': 'SF提示您：值不能小于{min}',
-            'validation.max': 'SF提示您：值不能大于{max}',
-            'validation.max_tabs': 'SF提示您：最多打开{maxTabNum}个选项卡',
+            'validation.phone': '请输入正确的手机号',
+            'validation.email': '邮箱格式不正确',
+            'validation.url': '链接格式不正确',
+            'validation.number': '只能填写数字',
+            'validation.date': '日期格式不正确',
+            'validation.identity': '请输入正确的身份证号',
+            'validation.password': '密码必须5到12位，且不能出现空格',
+            'validation.equal_to': '两次输入不一致',
+            'validation.digits': '只能输入整数',
+            'validation.digits_positive': '只能输入正整数',
+            'validation.digits_negative': '只能输入负整数',
+            'validation.digits_positive_zero': '只能输入正整数和0',
+            'validation.digits_negative_zero': '只能输入负整数和0',
+            'validation.minlength': '最少输入{minlength}个字符',
+            'validation.maxlength': '最多输入{maxlength}个字符',
+            'validation.min': '值不能小于{min}',
+            'validation.max': '值不能大于{max}',
+            'validation.max_tabs': '最多打开{maxTabNum}个选项卡',
             'validation.params_missing': '参数不能为空！',
             'login.logout_confirm': '确定要退出登录吗？',
             'login.logout_success': '退出登录成功！',
@@ -364,8 +364,23 @@
     window.t = window.SF_I18N.t;
 })(window);
 
+// 全局金额输入校验：限制最大值和两位小数（原生JS，jQuery 加载前即生效）
+document.addEventListener('blur', function(e){
+    var el = e.target;
+    if(el.type !== 'number') return;
+    var max = parseFloat(el.getAttribute('max'));
+    var min = parseFloat(el.getAttribute('min'));
+    var step = el.getAttribute('step');
+    var val = parseFloat(el.value);
+    if(isNaN(val)) return;
+    if(!isNaN(max) && val > max) val = max;
+    if(!isNaN(min) && val < min) val = min;
+    if(step === '0.01') val = Math.round(val * 100) / 100;
+    if(!isNaN(val)) el.value = val;
+}, true);
+
 layui.config({  // common.js是配置layui扩展模块的目录，每个页面都需要引入
-    version: '325',   // 更新组件缓存，设为true不缓存，也可以设一个固定值
+    version: '328',   // 更新组件缓存，设为true不缓存，也可以设一个固定值
     base: getProjectUrl() + 'Assets/module/',
     defaultTheme: 'theme-sf',
     closeFooter: true,

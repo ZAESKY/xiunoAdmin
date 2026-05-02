@@ -1,21 +1,10 @@
 <?php
-/*
-* +----------------------------------------------------------------------
-* | SF 综合验证授权系统
-* +----------------------------------------------------------------------
-* | Quotes [ 花开的再灿烂，也有凋谢的一天，致我们过去的青春 ]
-* +----------------------------------------------------------------------
-* | Author: 陌上花开 <2129876388@qq.com>
-* +----------------------------------------------------------------------
-* | Date: 2022年1月19日 18:48:32
-* +----------------------------------------------------------------------
-*/
-
 namespace app\admin\service;
 
 use app\admin\model\UserModel;
 use app\common\service\BaseService;
 use think\Exception;
+use think\facade\Db;
 
 /**
  * 用户管理-服务类
@@ -71,6 +60,9 @@ class UserService extends BaseService
                 if(!empty($res['ip'])){
                     $res['ip'] = implode('|', unserialize($res['ip']));
                 }
+                $res['cdkeyCount'] = Db::name('cdkey')->where('userid', $res['id'])->count();
+                $res['userCount'] = Db::name('user')->where('userid', $res['id'])->count();
+                $res['authCount'] = Db::name('auth')->where('userid', $res['id'])->count();
             }
             return $result;
         }catch (\Exception $e){

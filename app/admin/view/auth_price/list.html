@@ -99,7 +99,7 @@
             <label class="layui-form-label layui-form-required">价格:</label>
             <div class="layui-input-block">
                 <input type="number" name="money" placeholder="请输入售卖价格，留空为0元" class="layui-input"
-                       lay-verType="tips"/>
+                       lay-verType="tips" step="0.01" min="0" max="999999"/>
             </div>
         </div>
         <div id="all" style="display: none">
@@ -107,7 +107,7 @@
                 <label class="layui-form-label layui-form-required">泛域名价格:</label>
                 <div class="layui-input-block">
                     <input type="number" name="all_money" placeholder="请输入泛域名价格，留空为0元" class="layui-input"
-                           lay-verType="tips"/>
+                           lay-verType="tips" step="0.01" min="0" max="999999"/>
                 </div>
             </div>
         </div>

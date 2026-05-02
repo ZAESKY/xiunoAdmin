@@ -172,21 +172,6 @@
                                 <span class="layui-badge layui-badge-orange">{:t('common.add')}{:t('common_ui.user_label')}{$userInfo['adduser_discount'] * 10} 折</span>
                                 {/if}
 
-                                {if $userInfo['addpay_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">{:t('common.add')}认证：免费 </span>
-                                {elseif $userInfo['addpay_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">{:t('common.add')}认证：原价</span>
-                                {else}
-                                <span class="layui-badge layui-badge-orange">{:t('common.add')}认证：{$userInfo['addpay_discount'] * 10} 折</span>
-                                {/if}
-
-                                {if $userInfo['pirate_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">{:t('app_ui.view_pirate')}：免费</span>
-                                {elseif $userInfo['pirate_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">{:t('app_ui.view_pirate')}：原价</span>
-                                {else}
-                                <span class="layui-badge layui-badge-orange">{:t('app_ui.view_pirate')}：{$userInfo['pirate_discount'] * 10} 折</span>
-                                {/if}
                             </p>
                         </div>
                         <div class="user-info-list-item">
@@ -219,6 +204,7 @@
                     <ul class="layui-tab-title">
                         <li class="layui-this">账号{:t('install_ui.binding_title')}</li>
                         <li>{:t('common_ui.power_type')}升级</li>
+                        <li>余额明细</li>
                     </ul>
                     <div class="layui-tab-content">
                         <!-- tab1 -->
@@ -287,6 +273,9 @@
                                 <div id="introduce"></div>
                             </form>
                         </div>
+                        <div class="layui-tab-item" style="padding-bottom: 20px;">
+                            <table id="SF_BalanceTable" lay-filter="SF_BalanceTable" style="margin: 0;"></table>
+                        </div>
                     </div>
                 </div>
                 <!-- //选项卡结束 -->
@@ -324,9 +313,21 @@
         </div>
     </form>
 </script>
+<script type="text/html" id="SF_BL_Amount">
+    {{# if(d.amount > 0){ }}
+    <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}}</span>
+    {{# } else { }}
+    <span style="color:#d9534f;">{{d.amount}}</span>
+    {{# } }}
+</script>
+<script type="text/html" id="SF_BL_Type">
+    {{# var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款'}; }}
+    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : ''}}">{{m[d.type] || d.type}}</span>
+</script>
 {include file="/public/footer"}
 <script>
-    layui.use(['layer', 'form', 'element', 'admin', 'notice', 'jQueryCookie'], function () {
+    layui.use(['layer', 'form', 'element', 'admin', 'notice', 'jQueryCookie', 'table'], function () {
+        var table = layui.table;
         var $ = layui.jquery;
         var layer = layui.layer;
         var form = layui.form;
@@ -497,6 +498,32 @@
 
             return false;
         });
+
+
+    // 余额明细
+    table.render({
+        elem: '#SF_BalanceTable',
+        url: '{:url("/BalanceLog/index")}',
+        method: 'post',
+        page: true,
+        limit: 10,
+        request: { pageName: 'current_page', limitName: 'limit' },
+        parseData: function(res){
+            return {
+                "code": res.code,
+                "msg": res.msg,
+                "count": res.data.data.total || 0,
+                "data": res.data.data.data || []
+            };
+        },
+        cols: [[
+            {field: 'type', title: '类型', width: 100, templet: '#SF_BL_Type'},
+            {field: 'amount', title: '金额', width: 100, templet: '#SF_BL_Amount'},
+            {field: 'balance_after', title: '余额', width: 100},
+            {field: 'description', title: '说明', minWidth: 160},
+            {field: 'created_at', title: '时间', width: 160}
+        ]]
+    });
     });
 </script>
 </body>

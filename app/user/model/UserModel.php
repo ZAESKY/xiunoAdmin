@@ -137,7 +137,7 @@ class UserModel extends BaseModel
             $remainderBalance = $userInfo['balance'] - $allmoney;
             $remainderIntegral = $userInfo['integral'] - $integral;
             try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral]);
+                $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral], '代理操作 -'.$allmoney.' 元');
                 if(!$result){
                     return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }
@@ -161,6 +161,9 @@ class UserModel extends BaseModel
                     ->inc('balance', $balance)
                     ->inc('integral', $integral)
                     ->update();
+                if ($balance > 0) {
+                    \app\common\model\BalanceLogModel::add($id, 'admin_edit', $balance, '管理员赠送余额 +'.$balance.' 元');
+                }
                 $content = [
                     'Title' => '编辑用户',
                     '操作' => '编辑用户',
@@ -223,7 +226,7 @@ class UserModel extends BaseModel
             $remainderBalance = $userInfo['balance'] - $allmoney;
             $remainderIntegral = $userInfo['integral'] - $integral;
             try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral]);
+                $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral], '代理操作 -'.$allmoney.' 元');
                 if(!$result){
                     return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
                 }
@@ -247,7 +250,11 @@ class UserModel extends BaseModel
                 "userid" => $userInfo['id'],
             ];
             try{
-                self::insert($data);
+                $newUserId = self::insertGetId($data);
+                if ($balance > 0 || $appInfo['give_money'] > 0) {
+                    $giftAmount = round($balance + $appInfo['give_money'], 2);
+                    \app\common\model\BalanceLogModel::add($newUserId, 'admin_edit', $giftAmount, '新用户初始余额 +'.$giftAmount.' 元');
+                }
                 $content = [
                     'Title' => '添加用户',
                     '操作' => '添加用户',

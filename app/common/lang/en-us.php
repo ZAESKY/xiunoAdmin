@@ -1318,7 +1318,7 @@ return [
     'feedback.notify_title_new' => 'New Feedback Submitted',
     'feedback.notify_content_new' => 'User {:username} submitted: {:title}',
     'feedback.notify_title_handled' => 'Feedback Result',
-    'feedback.notify_content_handled' => 'Your feedback "{:title}" has been processed.\nStatus: {:status}\nReply: {:reply}',
+    'feedback.notify_content_handled' => 'Your feedback "{:title}" \nstatus updated to: {:status}',
     'feedback.notify_title_replied' => 'New Feedback Reply',
     'feedback.notify_content_replied' => 'Your feedback "{:title}" has a new admin reply. Please view details.',
     'feedback.notify_title_user_replied' => 'User Replied to Feedback',

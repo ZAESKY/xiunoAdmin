@@ -1318,7 +1318,7 @@ return [
     'feedback.notify_title_new' => '新的反馈提交',
     'feedback.notify_content_new' => '用户 {:username} 提交了反馈：{:title}',
     'feedback.notify_title_handled' => '反馈处理结果',
-    'feedback.notify_content_handled' => '您的反馈「{:title}」已处理\n处理状态：{:status}\n回复内容：{:reply}',
+    'feedback.notify_content_handled' => '您的反馈「{:title}」\n处理状态已更新为：{:status}',
     'feedback.notify_title_replied' => '反馈有新回复',
     'feedback.notify_content_replied' => '您的反馈「{:title}」有新的管理员回复，请查看详情。',
     'feedback.notify_title_user_replied' => '反馈有用户跟帖',

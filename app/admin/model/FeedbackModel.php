@@ -93,7 +93,6 @@ class FeedbackModel extends BaseModel
                 'content'    => t('feedback.notify_content_handled', [
                     'title'  => $row['title'],
                     'status' => $statusLabel,
-                    'reply'  => $reply ?: t('feedback.no_reply'),
                 ]),
                 'type'       => 'feedback_handled',
                 'is_read'    => 0,

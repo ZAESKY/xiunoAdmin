@@ -553,8 +553,83 @@ CREATE TABLE `SF_notification` (
   KEY `idx_user_read` (`user_id`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `SF_point_log`;
+CREATE TABLE `SF_point_log` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
+  `type` varchar(30) NOT NULL COMMENT 'recharge/exchange/refund',
+  `amount` int(11) NOT NULL DEFAULT 0 COMMENT '积分变化，正数增加，负数扣除',
+  `integral_after` int(11) NOT NULL DEFAULT 0 COMMENT '变动后积分',
+  `description` varchar(255) DEFAULT NULL COMMENT '描述',
+  `source_type` varchar(50) DEFAULT '' COMMENT '来源类型',
+  `source_no` varchar(64) DEFAULT '' COMMENT '来源编号',
+  `related_id` int(11) unsigned DEFAULT NULL COMMENT '关联ID',
+  `status` varchar(20) NOT NULL DEFAULT 'valid' COMMENT 'valid/invalid',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_source` (`source_type`,`source_no`),
+  KEY `idx_user_time` (`user_id`,`created_at`),
+  KEY `idx_related` (`related_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `SF_point_product`;
+CREATE TABLE `SF_point_product` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL COMMENT '商品名称',
+  `image` varchar(255) DEFAULT '' COMMENT '商品图片',
+  `description` text COMMENT '商品描述',
+  `type` varchar(30) NOT NULL DEFAULT 'virtual_goods' COMMENT 'auth_code/virtual_goods',
+  `stock` int(11) NOT NULL DEFAULT 0 COMMENT '库存',
+  `required_points` int(11) NOT NULL DEFAULT 0 COMMENT '兑换所需积分',
+  `exchange_limit` int(11) NOT NULL DEFAULT 0 COMMENT '每个用户兑换上限，0不限制',
+  `reward_info` text COMMENT '虚拟商品奖品信息',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1上架 0下架',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_type` (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `SF_point_exchange_record`;
+CREATE TABLE `SF_point_exchange_record` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
+  `product_id` int(11) unsigned NOT NULL COMMENT '商品ID',
+  `product_name` varchar(150) NOT NULL COMMENT '商品名称快照',
+  `cost_points` int(11) NOT NULL DEFAULT 0 COMMENT '消耗积分',
+  `reward_info` text COMMENT '奖品信息',
+  `status` varchar(20) NOT NULL DEFAULT 'success' COMMENT 'success/canceled',
+  `created_at` datetime NOT NULL COMMENT '兑换时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_time` (`user_id`,`created_at`),
+  KEY `idx_product` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `SF_point_product_reward`;
+CREATE TABLE `SF_point_product_reward` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) unsigned NOT NULL COMMENT '商品ID',
+  `reward_content` text NOT NULL COMMENT '奖品内容',
+  `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT 'pending/issued',
+  `user_id` int(11) unsigned DEFAULT NULL COMMENT '领取用户ID',
+  `record_id` int(11) unsigned DEFAULT NULL COMMENT '兑换记录ID',
+  `issued_at` datetime DEFAULT NULL COMMENT '发放时间',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_product_status` (`product_id`,`status`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_record` (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
 ('功能反馈', 'Feedback/index', 'layui-icon-dialogue', 0, NOW(), 2, 1);
 
 INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
 ('反馈管理', 'Feedback/list', 'layui-icon-dialogue', 0, NOW(), 1, 1);
+
+INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+('积分兑换', 'PointExchange/list', 'layui-icon-gift', 0, NOW(), 2, 1),
+('积分商品', 'PointProduct/list', 'layui-icon-gift', 0, NOW(), 1, 1),
+('兑换记录', 'PointProduct/records', 'layui-icon-list', 0, NOW(), 1, 1);

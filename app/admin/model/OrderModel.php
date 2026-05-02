@@ -3,6 +3,7 @@
 namespace app\admin\model;
 
 use app\common\model\BaseModel;
+use app\common\model\PointLogModel;
 use think\Exception;
 use think\facade\Db;
 
@@ -108,21 +109,64 @@ class OrderModel extends BaseModel
                 throw new Exception(t('order.not_exist'));
             }
 
-            if($status == 5){
-                $status = 4;
-                try{
-                    Db::name('user')
-                        ->where('id', $row['userid'])
-                        ->inc('balance', $row['money'])
-                        ->update();
-                    \app\common\model\BalanceLogModel::add($row['userid'], 'refund', floatval($row['money']), '订单退款 +'.$row['money'].' 元', intval($id));
-                }catch (\Exception $e){
-                    throw new Exception($e->getMessage());
+            Db::startTrans();
+            try{
+                if($status == 5 || $status == 4){
+                    $isRefundAction = $status == 5;
+                    $status = 4;
+                    if ($isRefundAction) {
+                        Db::name('user')
+                            ->where('id', $row['userid'])
+                            ->inc('balance', $row['money'])
+                            ->update();
+                        \app\common\model\BalanceLogModel::add(
+                            intval($row['userid']),
+                            'refund',
+                            floatval($row['money']),
+                            '订单退款 +' . $row['money'] . ' 元',
+                            intval($id)
+                        );
+                    }
+                    $pointLog = Db::name('point_log')
+                        ->where('source_type', 'pay_recharge')
+                        ->where('source_no', $row['trade_no'])
+                        ->where('status', 'valid')
+                        ->lock(true)
+                        ->find();
+                    if ($pointLog) {
+                        $points = intval($pointLog['amount']);
+                        $deductPoints = 0;
+                        if ($points > 0) {
+                            $currentIntegral = (int) Db::name('user')->where('id', $row['userid'])->lock(true)->value('integral');
+                            $deductPoints = min($currentIntegral, $points);
+                        }
+                        if ($deductPoints > 0) {
+                            Db::name('user')
+                                ->where('id', $row['userid'])
+                                ->dec('integral', $deductPoints)
+                                ->update();
+                        }
+                        Db::name('point_log')->where('id', $pointLog['id'])->update(['status' => 'invalid']);
+                        PointLogModel::add(
+                            intval($row['userid']),
+                            $isRefundAction ? 'refund' : 'cancel',
+                            -$deductPoints,
+                            $deductPoints >= $points ? '订单退款/取消扣回积分 -' . $deductPoints : '订单退款/取消扣回当前可扣积分 -' . $deductPoints . '，剩余不足',
+                            $isRefundAction ? 'order_refund' : 'order_cancel',
+                            (string)$id,
+                            intval($id),
+                            'valid'
+                        );
+                    }
                 }
+                self::where('id', $id)
+                    ->data(['status' => $status])
+                    ->update();
+                Db::commit();
+            }catch (\Exception $e){
+                Db::rollback();
+                throw new Exception($e->getMessage());
             }
-            self::where('id', $id)
-                ->data(['status' => $status])
-                ->update();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

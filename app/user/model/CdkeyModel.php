@@ -242,6 +242,14 @@ class CdkeyModel extends BaseModel
                             ->where('id', $userInfo['id'])
                             ->inc('integral', $info['integral'])
                             ->update();
+                        \app\common\model\PointLogModel::add(
+                            intval($userInfo['id']),
+                            'cdkey_exchange',
+                            intval($info['integral']),
+                            '卡密兑换积分 +' . intval($info['integral']),
+                            'cdkey_exchange',
+                            $cdkey
+                        );
                         Db::name('cdkey')
                             ->where('cdkey', $cdkey)
                             ->data([

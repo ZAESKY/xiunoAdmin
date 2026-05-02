@@ -174,7 +174,7 @@ class CommonBase extends BaseController
                         $money = !empty($post['diy'])?$post['diy']:null;
                         if(empty($money)) return message(t('order.recharge_money_error'), false);
                     }
-                    if (!is_numeric($money) || $money < 10) {
+                    if (!is_numeric($money) || !preg_match('/^\d+(\.\d{1,2})?$/', (string)$money) || $money < 10) {
                         return message('最低充值金额为10元', false);
                     }
                     if ($money > 999999) {

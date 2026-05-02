@@ -1,0 +1,143 @@
+{include file="/public/header"}
+<style>
+    .point-summary {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .point-value {font-size:24px;font-weight:700;color:#ff6a00;}
+    .product-img {width:48px;height:48px;object-fit:cover;border-radius:4px;background:#f5f5f5;}
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body point-summary">
+            <div>当前积分：<span class="point-value">{$userInfo.integral|default=0}</span></div>
+            <button class="layui-btn layui-btn-primary" id="SF_MyRecords"><i class="layui-icon layui-icon-list"></i> 我的兑换</button>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">商品</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="搜索商品名称"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-sm" lay-event="exchange">兑换</a>
+</script>
+
+{include file="/public/footer"}
+<script>
+layui.use(['table', 'form', 'layer', 'notice'], function(){
+    var $ = layui.jquery;
+    var table = layui.table;
+    var form = layui.form;
+    var layer = layui.layer;
+    var notice = layui.notice;
+
+    var insTb = table.render({
+        elem: '#SF_Table',
+        url: '{:url("/PointExchange/list")}',
+        method: 'post',
+        page: true,
+        skin: 'line',
+        size: 'lg',
+        request: {pageName:'current_page', limitName:'limit'},
+        parseData: function(res){
+            return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
+        },
+        cols: [[
+            {field:'image', title:'图片', width:80, templet:function(d){
+                return d.image ? '<img class="product-img" src="'+d.image+'">' : '<div class="product-img"></div>';
+            }},
+            {field:'name', title:'商品名称', minWidth:170},
+            {field:'description', title:'描述', minWidth:180, templet:function(d){
+                return d.description || '-';
+            }},
+            {field:'required_points', title:'所需积分', width:110, sort:true, templet:function(d){
+                return '<span style="color:#ff6a00;font-weight:bold;">'+d.required_points+'</span>';
+            }},
+            {field:'stock', title:'剩余库存', width:100, sort:true},
+            {field:'exchange_limit', title:'兑换上限', width:100, templet:function(d){return d.exchange_limit > 0 ? d.exchange_limit : '不限';}},
+            {title:'操作', toolbar:'#SF_TbBar', width:100, align:'center'}
+        ]]
+    });
+
+    form.on('submit(SF_TbSearch)', function(data){
+        insTb.reload({where:data.field, page:{curr:1}});
+        return false;
+    });
+
+    table.on('tool(SF_Table)', function(obj){
+        if(obj.event === 'exchange'){
+            layer.confirm('确定消耗 '+obj.data.required_points+' 积分兑换「'+obj.data.name+'」吗？', {icon:3, shade:.1}, function(i){
+                layer.close(i);
+                notice.msg('正在兑换...', {icon:4, close:true});
+                $.post('{:url("/PointExchange/exchange")}', {id: obj.data.id}, function(res){
+                    notice.destroy();
+                    notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2, audio:'1'});
+                    if(res.code == 0){
+                        insTb.reload();
+                        setTimeout(function(){ location.reload(); }, 900);
+                    }
+                }, 'json').fail(function(){
+                    notice.destroy();
+                    notice.msg('服务器错误', {icon:2});
+                });
+            });
+        }
+    });
+
+    $('#SF_MyRecords').on('click', function(){
+        layer.open({
+            type: 1,
+            title: '我的兑换',
+            area: ['860px', '620px'],
+            content: '<div style="padding:12px;"><table id="SF_RecordTable" lay-filter="SF_RecordTable"></table></div>',
+            success: function(){
+                table.render({
+                    elem: '#SF_RecordTable',
+                    url: '{:url("/PointExchange/myRecords")}',
+                    method: 'post',
+                    page: true,
+                    request: {pageName:'current_page', limitName:'limit'},
+                    parseData: function(res){
+                        return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
+                    },
+                    cols: [[
+                        {field:'id', title:'ID', width:70},
+                        {field:'product_name', title:'商品', minWidth:160},
+                        {field:'cost_points', title:'消耗积分', width:100},
+                        {field:'created_at', title:'兑换时间', minWidth:170},
+                        {title:'奖品详情', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>';}}
+                    ]]
+                });
+            }
+        });
+    });
+
+    table.on('tool(SF_RecordTable)', function(obj){
+        if(obj.event === 'detail'){
+            layer.open({
+                title: '奖品详情',
+                area: ['640px', '420px'],
+                content: '<pre style="padding:15px;white-space:pre-wrap;word-break:break-all;">'+escapeHtml(obj.data.reward_info || '-')+'</pre>'
+            });
+        }
+    });
+    function escapeHtml(value){
+        return String(value).replace(/[&<>"']/g, function(s){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];});
+    }
+});
+</script>

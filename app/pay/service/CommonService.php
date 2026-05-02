@@ -7,8 +7,10 @@ use app\common\service\BaseService;
 use app\admin\model\OrderModel;
 use app\common\model\NotificationModel;
 use app\common\model\BalanceLogModel;
+use app\common\model\PointLogModel;
 use think\Exception;
 use think\facade\Db;
+use Throwable;
 
 class CommonService extends BaseService
 {
@@ -50,6 +52,7 @@ class CommonService extends BaseService
                                 ->inc('balance', $rechargeAmount)
                                 ->update();
                             BalanceLogModel::add($srow['userid'], 'recharge', $rechargeAmount, '余额充值 +'.$rechargeAmount.' 元');
+                            $this->grantRechargePoints((int)$srow['userid'], (string)$srow['trade_no'], (int)floor(floatval($srow['money'])));
                             $srow['status'] = 1;
                         }catch (\Exception $e){
                             $srow['status'] = 3;
@@ -70,6 +73,42 @@ class CommonService extends BaseService
             }
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
+        }
+    }
+
+    private function grantRechargePoints(int $userId, string $tradeNo, int $points): void
+    {
+        Db::startTrans();
+        try {
+            $exists = Db::name('point_log')
+                ->where('source_type', 'pay_recharge')
+                ->where('source_no', $tradeNo)
+                ->lock(true)
+                ->find();
+            if ($exists) {
+                Db::commit();
+                return;
+            }
+
+            if ($points > 0) {
+                Db::name('user')
+                    ->where('id', $userId)
+                    ->inc('integral', $points)
+                    ->update();
+            }
+
+            PointLogModel::add(
+                $userId,
+                'recharge',
+                $points,
+                $points > 0 ? '在线充值获得积分 +' . $points : '在线充值金额不足1元，获得0积分',
+                'pay_recharge',
+                $tradeNo
+            );
+            Db::commit();
+        } catch (Throwable $e) {
+            Db::rollback();
+            throw $e;
         }
     }
 

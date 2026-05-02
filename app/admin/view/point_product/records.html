@@ -1,0 +1,68 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="输入ID、商品或用户名"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">&emsp;&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+{include file="/public/footer"}
+<script>
+layui.use(['table', 'form', 'layer'], function(){
+    var table = layui.table;
+    var form = layui.form;
+    var layer = layui.layer;
+    var insTb = table.render({
+        elem: '#SF_Table',
+        url: '{:url("/PointProduct/records")}',
+        method: 'post',
+        page: true,
+        skin: 'line',
+        size: 'lg',
+        request: {pageName:'current_page', limitName:'limit'},
+        parseData: function(res){
+            return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
+        },
+        cols: [[
+            {field:'id', title:'ID', width:70, sort:true},
+            {field:'username', title:'用户', width:130},
+            {field:'product_name', title:'商品', minWidth:160},
+            {field:'cost_points', title:'消耗积分', width:110},
+            {field:'status', title:'状态', width:100, templet:function(d){return '<span class="layui-badge layui-badge-green">'+d.status+'</span>';}},
+            {field:'created_at', title:'兑换时间', minWidth:170},
+            {title:'奖品详情', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>';}}
+        ]]
+    });
+    form.on('submit(SF_TbSearch)', function(data){
+        insTb.reload({where:data.field, page:{curr:1}});
+        return false;
+    });
+    table.on('tool(SF_Table)', function(obj){
+        if(obj.event === 'detail'){
+            layer.open({
+                title: '奖品详情',
+                area: ['640px', '420px'],
+        content: '<pre style="padding:15px;white-space:pre-wrap;word-break:break-all;">'+escapeHtml(obj.data.reward_info || '-')+'</pre>'
+            });
+        }
+    });
+    function escapeHtml(value){
+        return String(value).replace(/[&<>"']/g, function(s){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];});
+    }
+});
+</script>

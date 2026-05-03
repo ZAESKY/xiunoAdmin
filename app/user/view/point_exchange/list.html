@@ -1,5 +1,8 @@
 {include file="/public/header"}
 <link rel="stylesheet" href="{__CSS__}point-exchange.css"/>
+<style>
+    .point-detail-desc-body img, #SF_CardGrid img, .layui-layer-content img { max-width: 100% !important; height: auto !important; }
+</style>
 
 <div class="layui-fluid">
     <div class="layui-card">
@@ -25,9 +28,15 @@ layui.use(['layer', 'notice', 'laypage'], function(){
     var notice = layui.notice;
     var laypage = layui.laypage;
     var myPoints = {$userInfo.integral|default=0};
+    function decodeHtml(v) {
+        var t = document.createElement('textarea');
+        t.innerHTML = v || '';
+        return t.value;
+    }
+
     var currentPage = 1;
     var pageLimit = 12;
-    var productCache = {}; // id → item 缓存
+    var productCache = {};
 
     function loadData(page, keyword){
         notice.msg('加载中...', {icon: 4, close: true});
@@ -166,7 +175,7 @@ layui.use(['layer', 'notice', 'laypage'], function(){
             // 礼品说明
             '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:12px;">'+
             '<div style="font-size:13px;color:#909399;margin-bottom:8px;font-weight:600;">礼品说明</div>'+
-            '<div style="font-size:14px;color:#606266;line-height:1.8;">'+(d.description ? escapeHtml(d.description) : '暂无说明')+'</div>'+
+            '<div style="font-size:14px;color:#606266;line-height:1.8;">'+(d.description ? decodeHtml(d.description) : '暂无说明')+'</div>'+
             '</div>'+
             '</div>';
         var popW = $(window).width() < 700 ? '95%' : '680px';
@@ -239,7 +248,19 @@ layui.use(['layer', 'notice', 'laypage'], function(){
         var time = d.created_at || '';
         var isCard = /^(SF_|[A-Z0-9]{12,})/.test(info);
         var html = '<div style="padding:12px 16px 8px;">'+
-            // 顶部礼品信息区
+            // 1. 礼品内容
+            '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:16px;">'+
+            '<div style="font-size:13px;color:#909399;margin-bottom:10px;"><i class="layui-icon layui-icon-tips"></i> 礼品/卡密内容</div>'+
+            '<div style="background:#fff;border:1px solid #e4e7ed;border-radius:8px;padding:14px;font-family:'+(isCard?"'SF Mono','Consolas','Courier New',":'')+'monospace;font-size:14px;line-height:1.8;word-break:break-all;color:#303133;">'+escapeHtml(info)+'</div>';
+        if (info && info.length > 1) {
+            html += '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm layui-btn-primary" onclick="copyReward(this)" data-text="'+escapeHtml(info)+'"><i class="layui-icon layui-icon-upload-circle"></i> 一键复制</button></div>';
+        }
+        html += '</div>'+
+            // 2. 礼品描述
+            (d.description ? '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:16px;">'+
+            '<div style="font-size:13px;color:#909399;margin-bottom:8px;font-weight:600;">礼品描述</div>'+
+            '<div style="font-size:14px;color:#606266;line-height:1.8;">'+decodeHtml(d.description||'')+'</div></div>' : '')+
+            // 3. 礼品信息
             '<div style="background:linear-gradient(135deg,#f8f9fc,#eef1f8);border-radius:12px;padding:20px;margin-bottom:16px;">'+
             '<div style="display:flex;align-items:center;gap:16px;">'+
             '<div style="width:72px;height:72px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;">'+
@@ -251,14 +272,7 @@ layui.use(['layer', 'notice', 'laypage'], function(){
             '<span style="background:#fff3e6;color:#ff6a00;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:500;">'+points+' 积分</span>'+
             '<span style="background:#f0f2f5;color:#909399;padding:3px 10px;border-radius:6px;font-size:12px;">'+escapeHtml(time)+'</span>'+
             '</div></div></div></div>'+
-            // 礼品信息区
-            '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:16px;">'+
-            '<div style="font-size:13px;color:#909399;margin-bottom:10px;"><i class="layui-icon layui-icon-tips"></i> 礼品/卡密内容</div>'+
-            '<div style="background:#fff;border:1px solid #e4e7ed;border-radius:8px;padding:14px;font-family:'+(isCard?"'SF Mono','Consolas','Courier New',":'')+'monospace;font-size:14px;line-height:1.8;word-break:break-all;color:#303133;">'+escapeHtml(info)+'</div>';
-        if (info && info.length > 1) {
-            html += '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm layui-btn-primary" onclick="copyReward(this)" data-text="'+escapeHtml(info)+'"><i class="layui-icon layui-icon-upload-circle"></i> 一键复制</button></div>';
-        }
-        html += '</div></div>';
+            '</div>';
         layer.open({
             type: 1,
             title: '礼品详情',

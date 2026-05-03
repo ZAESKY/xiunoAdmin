@@ -148,7 +148,7 @@ class PointExchangeModel extends BaseModel
 
         return Db::name('point_exchange_record')->alias('r')
             ->join('point_product p', 'r.product_id = p.id', 'LEFT')
-            ->field('r.*, p.image')
+            ->field('r.*, p.image, p.description')
             ->where('r.user_id', $userId)
             ->order('r.id', 'desc')
             ->paginate([

@@ -86,7 +86,7 @@
         <div class="layui-form-item layui-form-text">
             <label class="layui-form-label">商品描述</label>
             <div class="layui-input-block">
-                <textarea name="description" class="layui-textarea" placeholder="展示给用户的说明"></textarea>
+                <textarea name="description" class="sf-product-desc" style="display:none;"></textarea>
             </div>
         </div>
         <div class="layui-form-item layui-form-text">
@@ -110,13 +110,15 @@
 
 {include file="/public/footer"}
 <script>
-layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
+layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], function () {
     var $ = layui.jquery;
     var form = layui.form;
     var table = layui.table;
     var admin = layui.admin;
     var notice = layui.notice;
     var upload = layui.upload;
+    var layedit = layui.layedit;
+    var descLayeditIndex;
 
     var insTb = table.render({
         elem: '#SF_Table',
@@ -177,6 +179,35 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                 }
                 form.render();
 
+                // 初始化富文本编辑器（使用唯一ID避免DOM冲突）
+                var descId = 'SF_ProductDesc_' + Date.now();
+                $(layero).find('.sf-product-desc').attr('id', descId);
+                descLayeditIndex = layedit.build(descId, {
+                    height: 200,
+                    uploadImage: { url: '{:url("/Feedback/uploadImage")}', type: 'post' }
+                });
+                if (descLayeditIndex >= 0) {
+                    var desc = initData.description || '';
+                    if (desc.length > 0) {
+                        // 解码 XSS 中间件转义的 HTML 实体
+                        var t = document.createElement('textarea');
+                        t.innerHTML = desc;
+                        desc = t.value;
+                        try { layedit.setContent(descLayeditIndex, desc); } catch(e) {}
+                    }
+                }
+
+                // 限制编辑器内图片宽度
+                setTimeout(function(){
+                    var ifr = $('#LAY_layedit_' + descLayeditIndex)[0];
+                    if (ifr && ifr.contentWindow) {
+                        var doc = ifr.contentWindow.document;
+                        var s = doc.createElement('style');
+                        s.innerHTML = 'img{max-width:60%!important;height:auto!important;}';
+                        doc.head.appendChild(s);
+                    }
+                }, 500);
+
                 upload.render({
                     elem: $(layero).find('#SF_UploadImage')[0],
                     url: '{:url("/Upload/image")}',
@@ -203,6 +234,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                 });
 
                 form.on('submit(SF_EditSubmit)', function(fd){
+                    fd.field.description = layedit.getContent(descLayeditIndex);
                     $.post('{:url("/PointProduct/edit")}', fd.field, function(res){
                         notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2});
                         if (res.code == 0) { layer.close(index); insTb.reload(); }

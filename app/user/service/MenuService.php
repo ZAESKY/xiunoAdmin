@@ -62,6 +62,11 @@ class MenuService extends UserBaseService
                 '功能反馈' => 'menu.feedback',
                 '返利中心' => 'menu.rebate',
                 '余额明细' => 'menu.balance_log',
+                '插件中心' => 'menu.plugin_center',
+                '插件市场' => 'menu.plugin_market',
+                '我的插件' => 'menu.my_plugin',
+                '评论管理' => 'menu.plugin_comments',
+                '我的购买' => 'menu.my_purchase',
             ];
             array_walk_recursive($list, function (&$item, $key) use ($titleMap) {
                 if ($key === 'title' && is_string($item) && isset($titleMap[$item])) {

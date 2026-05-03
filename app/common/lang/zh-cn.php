@@ -27,6 +27,13 @@ return [
     'menu.feedback' => '功能反馈',
     'menu.rebate' => '返利中心',
     'menu.balance_log' => '余额明细',
+    'menu.plugin_center' => '插件中心',
+    'menu.plugin_market' => '插件市场',
+    'menu.my_plugin' => '我的插件',
+    'menu.my_purchase' => '我的购买',
+    'menu.plugin_list' => '插件列表',
+    'menu.plugin_order' => '插件订单',
+    'menu.plugin_comments' => '评论管理',
 
     // ==================== 通用 / common ====================
     'common.save' => '保存',

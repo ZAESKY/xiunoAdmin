@@ -1589,6 +1589,13 @@ if (!function_exists('message')) {
     }
 }
 
+if (!function_exists('plugin_category_label')) {
+    function plugin_category_label($key) {
+        $map = ['feature'=>'功能增强','security'=>'安全防护','content'=>'内容管理','ui'=>'界面美化','payment'=>'支付集成','dev'=>'开发工具','analytics'=>'数据分析','social'=>'社交互动','other'=>'其他'];
+        return $map[$key] ?? '其他';
+    }
+}
+
 if (!function_exists('format_num')) {
 
     /**

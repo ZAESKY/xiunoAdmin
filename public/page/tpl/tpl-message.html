@@ -90,6 +90,33 @@
         });
     }
 
+    function getTargetByType(type) {
+        var url = appPrefix + '/Feedback/index.html';
+        var title = text('feedback.submit_title');
+        var typeRouteMap = {
+            'plugin_new':      { admin: '/Plugin/list.html',        adminTitle: '插件管理',   user: '/UserPlugin/market.html',   userTitle: '插件市场' },
+            'plugin_audit':    { admin: '/Plugin/list.html',        adminTitle: '插件管理',   user: '/UserPlugin/list.html',     userTitle: '我的插件' },
+            'plugin_comment':  { admin: '/PluginComment/list.html', adminTitle: '评论管理',   user: '/UserPlugin/comments.html', userTitle: '评论管理' },
+            'plugin_purchase': { admin: '/PluginOrder/list.html',   adminTitle: '插件订单',   user: '/UserPlugin/list.html',     userTitle: '我的插件' },
+            'comment_audit':   { admin: '/PluginComment/list.html', adminTitle: '评论管理',   user: '/UserPlugin/comments.html', userTitle: '评论管理' },
+            'comment_reply':   { admin: '/PluginComment/list.html', adminTitle: '评论管理',   user: '/UserPlugin/comments.html', userTitle: '评论管理' },
+            'feedback_new':    { admin: '/Feedback/list.html',      adminTitle: '反馈管理',   user: '/Feedback/index.html',      userTitle: '功能反馈' },
+            'feedback_handled':{ admin: '/Feedback/list.html',      adminTitle: '反馈管理',   user: '/Feedback/index.html',      userTitle: '功能反馈' },
+            'rebate':          { admin: '/Feedback/list.html',      adminTitle: '反馈管理',   user: '/Feedback/index.html',      userTitle: '功能反馈' }
+        };
+        var route = typeRouteMap[type];
+        if (route) {
+            if (role === 'admin') {
+                url = appPrefix + (route.admin || '/Feedback/list.html');
+                title = route.adminTitle || text('feedback.manage_title');
+            } else {
+                url = appPrefix + (route.user || '/Feedback/index.html');
+                title = route.userTitle || text('feedback.submit_title');
+            }
+        }
+        return { url: url, title: title };
+    }
+
     function closeMessagePanel() {
         var layerBox = parentDoc.querySelector('.layui-layer-adminRight');
         var parentLayer = window.parent && window.parent.layui ? window.parent.layui.layer : null;
@@ -114,9 +141,31 @@
         };
     }
 
-    function openFeedbackPage() {
+    function openFeedbackPage(link, type) {
         var parentWin = window.parent || window;
-        var target = getFeedbackTarget();
+        var target;
+        if (link) {
+            var url = link.indexOf('/') === 0 ? appPrefix + link : link;
+            var titleMap = {
+                'Plugin/list': '插件管理',
+                'PluginComment/list': '评论管理',
+                'UserPlugin/market': '插件市场',
+                'UserPlugin/detail': '插件详情',
+                'UserPlugin/comments': '评论管理',
+                'UserPlugin/list': '我的插件',
+                'Feedback/index': '功能反馈',
+                'Feedback/list': '反馈管理'
+            };
+            var title = '通知';
+            for (var key in titleMap) {
+                if (url.indexOf(key) !== -1) { title = titleMap[key]; break; }
+            }
+            target = { url: url, title: title };
+        } else if (type) {
+            target = getTargetByType(type);
+        } else {
+            target = getFeedbackTarget();
+        }
         if (parentWin.layui && parentWin.layui.index && parentWin.layui.index.openTab) {
             parentWin.layui.index.openTab({
                 title: target.title,
@@ -148,8 +197,21 @@
                 if (items.length > 0) {
                     var html = '';
                     items.forEach(function(item) {
-                        html += '<a class="message-list-item" href="javascript:;" data-id="' + encodeURIComponent(item.id) + '" onclick="SF_Notification.markRead(' + parseInt(item.id, 10) + ', true)">';
-                        html += '<i class="layui-icon layui-icon-speaker message-item-icon"></i>';
+                        var link = item.link || '';
+                        var type = item.type || '';
+                        html += '<a class="message-list-item" href="javascript:;" data-id="' + encodeURIComponent(item.id) + '" data-link="' + escapeHtml(link) + '" data-type="' + escapeHtml(type) + '" onclick="SF_Notification.markRead(' + parseInt(item.id, 10) + ', true, this.getAttribute(\'data-link\'), this.getAttribute(\'data-type\'))">';
+                        var iconClass = 'layui-icon-speaker';
+                        var iconColor = '#2d8cf0';
+                        switch(item.type) {
+                            case 'plugin_audit': iconClass = 'layui-icon-template'; iconColor = '#ff9800'; break;
+                            case 'plugin_new': iconClass = 'layui-icon-addition'; iconColor = '#5fb878'; break;
+                            case 'plugin_comment': iconClass = 'layui-icon-dialogue'; iconColor = '#1890ff'; break;
+                            case 'plugin_purchase': iconClass = 'layui-icon-diamond'; iconColor = '#ff5722'; break;
+                            case 'comment_audit': iconClass = 'layui-icon-dialogue'; iconColor = '#ff9800'; break;
+                            case 'comment_reply': iconClass = 'layui-icon-reply-fill'; iconColor = '#7c4dff'; break;
+                            case 'feedback_new': case 'feedback_handled': iconClass = 'layui-icon-flag'; iconColor = '#2d8cf0'; break;
+                        }
+                        html += '<i class="layui-icon ' + iconClass + ' message-item-icon" style="background-color:' + iconColor + ';"></i>';
                         html += '<div class="message-item-right">';
                         html += '<h2 class="message-item-title">' + escapeHtml(item.title) + '</h2>';
                         html += '<p class="message-item-text message-item-content">' + formatContent(item.content) + '</p>';
@@ -167,12 +229,12 @@
                 countEl.textContent = items.length;
             });
         },
-        markRead: function(id, openAfterRead) {
+        markRead: function(id, openAfterRead, link, type) {
             request('/Feedback/notificationRead.html', 'id=' + encodeURIComponent(id), function() {
                 SF_Notification.loadList();
                 SF_Notification.updateBadge();
                 if (openAfterRead) {
-                    openFeedbackPage();
+                    openFeedbackPage(link, type);
                 }
             });
         },

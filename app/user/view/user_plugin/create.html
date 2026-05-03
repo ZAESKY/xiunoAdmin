@@ -1,0 +1,358 @@
+{include file="/public/header"}
+<style>
+.plugin-form { padding: 10px 20px; }
+.plugin-form .layui-card { box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.plugin-form .layui-card-header { font-weight: bold; border-left: 3px solid #1890ff; }
+.plugin-icon-preview { width: 100px; height: 100px; object-fit: cover; border: 1px solid #e6e6e6; border-radius: 6px; display: block; }
+.plugin-form .layui-form-label { width: 90px; }
+.plugin-form .layui-input-block { margin-left: 120px; }
+.plugin-form .section-desc { color: #999; font-size: 12px; margin-bottom: 10px; }
+</style>
+
+<div class="layui-fluid plugin-form">
+    <form class="layui-form" lay-filter="pluginForm">
+        <input type="hidden" name="id" value="{$plugin.id|default=''}">
+        <input type="hidden" name="file_path" id="file_path" value="{$plugin.file_path|default=''}">
+        <input type="hidden" name="file_hash" id="file_hash" value="{$plugin.file_hash|default=''}">
+        <input type="hidden" name="file_size" id="file_size" value="{$plugin.file_size|default='0'}">
+
+        <!-- 文件上传 -->
+        <div class="layui-card" style="border:1px solid #d0e8ff;">
+            <div class="layui-card-header" style="background:#f0f9ff;border-left-color:#1890ff;"><i class="layui-icon layui-icon-upload-drag"></i> 上传插件包 — 上传后自动解析填充</div>
+            <div class="layui-card-body">
+                <p class="section-desc"><i class="layui-icon layui-icon-tips"></i> ZIP 内包含 <code>conf.json</code> 和 <code>icon.png</code> 即可自动填充名称、简介、版本和图标，无需手动填写</p>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">插件文件 <span style="color:red">*</span></label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn layui-btn-warm" id="uploadPlugin"><i class="layui-icon">&#xe681;</i>上传插件包 (ZIP)</button>
+                        <span id="fileInfo" style="margin-left:12px;color:{if condition='!empty($plugin.file_path)'}#5FB878{else/}#ff5722{/if};font-size:13px;">
+                            {if condition="!empty($plugin.file_path)"}<i class="layui-icon layui-icon-ok-circle"></i> 已上传{else/}<i class="layui-icon layui-icon-close-fill"></i> 请上传插件文件 (*.zip){/if}
+                        </span>
+                        <p style="color:#999;font-size:12px;margin-top:8px;"><i class="layui-icon layui-icon-tips"></i> 压缩包名称即为插件标识，上传后发布需管理员审核才能上架</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="layui-card">
+            <div class="layui-card-header"><i class="layui-icon layui-icon-about"></i> 基本信息</div>
+            <div class="layui-card-body">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md6">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">插件名称 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="name" value="{$plugin.name|default=''}" class="layui-input" placeholder="请输入插件名称" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md6">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">插件标识 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="slug" id="slugInput" value="{$plugin.slug|default=''}" class="layui-input" placeholder="上传ZIP后自动填充" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md3">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">版本号 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="version" value="{$plugin.version|default='1.0.0'}" class="layui-input" placeholder="1.0.0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">分类 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <select name="category">
+                                    <option value="">请选择分类</option>
+                                    <option value="feature" {if condition="($plugin.category??'')=='feature'"}selected{/if}>功能增强</option>
+                                    <option value="security" {if condition="($plugin.category??'')=='security'"}selected{/if}>安全防护</option>
+                                    <option value="content" {if condition="($plugin.category??'')=='content'"}selected{/if}>内容管理</option>
+                                    <option value="ui" {if condition="($plugin.category??'')=='ui'"}selected{/if}>界面美化</option>
+                                    <option value="payment" {if condition="($plugin.category??'')=='payment'"}selected{/if}>支付集成</option>
+                                    <option value="dev" {if condition="($plugin.category??'')=='dev'"}selected{/if}>开发工具</option>
+                                    <option value="analytics" {if condition="($plugin.category??'')=='analytics'"}selected{/if}>数据分析</option>
+                                    <option value="social" {if condition="($plugin.category??'')=='social'"}selected{/if}>社交互动</option>
+                                    <option value="other" {if condition="($plugin.category??'')=='other'"}selected{/if}>其他</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">来源类型 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <select name="origin_type" lay-filter="originType">
+                                    <option value="1" {if condition="($plugin.origin_type ?? 1) == 1"}selected{/if}>原创</option>
+                                    <option value="2" {if condition="($plugin.origin_type ?? 1) == 2"}selected{/if}>转载</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-form-item" id="priceItem">
+                            <label class="layui-form-label">价格</label>
+                            <div class="layui-input-block">
+                                <input type="number" name="price" id="priceInput" value="{$plugin.price|default='0'}" class="layui-input" placeholder="0为免费" step="0.01" min="0" {if condition="($plugin.origin_type ?? 1) == 2"}disabled{/if}>
+                                <span id="priceTip" style="color:#FF5722;font-size:12px;{if condition="($plugin.origin_type ?? 1) != 2"}display:none;{/if}">转载不能付费</span>
+                                                                <span id="commissionHint" style="color:#999;font-size:12px;display:block;margin-top:4px;">余额支付平台抽成 {$commissionRate|default='10'}%，积分支付不抽成</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="layui-form-item" id="payTypeItem">
+                            <label class="layui-form-label">支付方式</label>
+                            <div class="layui-input-block">
+                                <select name="pay_type" id="payTypeSelect" lay-filter="payType">
+                                    <option value="balance" {if condition="($plugin.pay_type??'balance')=='balance'"}selected{/if}>余额支付</option>
+                                    <option value="points" {if condition="($plugin.pay_type??'balance')=='points'"}selected{/if}>积分支付</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 转载信息 -->
+        <div class="layui-card" id="originBlock" style="{if condition="($plugin.origin_type ?? 1) != 2"}display:none;{/if}">
+            <div class="layui-card-header" style="border-left-color:#FF9800;"><i class="layui-icon layui-icon-tips"></i> 转载信息</div>
+            <div class="layui-card-body">
+                <p class="section-desc"><i class="layui-icon layui-icon-about"></i> 转载插件不能设置为付费，平台不承担转载内容的侵权责任</p>
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md6">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">来源地址 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="origin_url" value="{$plugin.origin_url|default=''}" class="layui-input" placeholder="https://原始发布地址">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md6">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">原作者 <span style="color:red">*</span></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="origin_author" value="{$plugin.origin_author|default=''}" class="layui-input" placeholder="原始作者名称">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">转载声明</label>
+                    <div class="layui-input-block">
+                        <textarea name="origin_note" class="layui-textarea" rows="2" placeholder="转载授权说明，如：已获得原作者授权转载 / 原作品基于MIT协议开源">{$plugin.origin_note|default=''}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 描述与介绍 -->
+        <div class="layui-card">
+            <div class="layui-card-header"><i class="layui-icon layui-icon-read"></i> 描述与介绍</div>
+            <div class="layui-card-body">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">插件图标 <span style="color:red">*</span></label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn layui-btn-sm" id="uploadIcon"><i class="layui-icon">&#xe67c;</i>上传图标</button>
+                        <input type="hidden" name="icon" id="iconInput" value="{$plugin.icon|default=''}">
+                        <div style="margin-top:10px;">
+                            <img id="iconPreview" src="{$plugin.icon|default=''}" class="plugin-icon-preview" style="{if condition='empty($plugin.icon)'}display:none;{/if}">
+                            <span id="iconEmpty" style="{if condition='!empty($plugin.icon)'}display:none;{/if}color:#ff5722;font-size:13px;">请上传图标</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">简介 <span style="color:red">*</span></label>
+                    <div class="layui-input-block">
+                        <textarea name="description" class="layui-textarea" rows="2" placeholder="插件简介（纯文本）">{$plugin.description|default=''}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">详细介绍</label>
+                    <div class="layui-input-block">
+                        <textarea name="content" id="pluginContent">{$plugin.content|default=''}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item" style="text-align:center;padding-top:20px;">
+            <button class="layui-btn layui-btn-lg" lay-submit lay-filter="submitPlugin"><i class="layui-icon layui-icon-ok"></i> 提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary layui-btn-lg" id="btnReset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
+        </div>
+    </form>
+</div>
+
+{include file="/public/footer"}
+<script src="{__LIBS__}tinymce/tinymce.min.js"></script>
+<script>
+layui.use(['layer', 'form', 'upload', 'notice'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var upload = layui.upload;
+    var notice = layui.notice;
+
+    // 支付方式切换：积分则整数输入
+    form.on('select(payType)', function(data) {
+        var isPoints = data.value === 'points';
+        $('#priceInput').attr('step', isPoints ? '1' : '0.01').attr('placeholder', isPoints ? '整数积分' : '0为免费');
+        if (isPoints) {
+            var v = parseInt($('#priceInput').val()) || 0;
+            $('#priceInput').val(v);
+        }
+    });
+
+    // 来源类型切换
+    form.on('select(originType)', function(data) {
+        if (data.value == '2') {
+            $('#originBlock').slideDown();
+            $('#priceInput').val(0).prop('disabled', true);
+            $('#priceTip').show();
+        } else {
+            $('#originBlock').slideUp();
+            $('#priceInput').prop('disabled', false);
+            $('#priceTip').hide();
+        }
+    });
+
+    tinymce.init({
+        selector: '#pluginContent',
+        language: 'zh_CN',
+        height: 400,
+        plugins: 'image code table link lists',
+        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | image link | code',
+        images_upload_handler: function (blobInfo, success, failure) {
+            var formData = new FormData();
+            formData.append('file', blobInfo.blob(), blobInfo.filename());
+            $.ajax({
+                url: '{:url("/UserPlugin/uploadImage")}',
+                type: 'POST', data: formData, processData: false, contentType: false,
+                success: function(res) {
+                    if (res.code == 0) { success(res.data.path); } else { failure(res.msg); }
+                },
+                error: function() { failure('上传失败'); }
+            });
+        }
+    });
+
+    upload.render({
+        elem: '#uploadIcon',
+        url: '{:url("/UserPlugin/uploadImage")}',
+        accept: 'images',
+        done: function(res) {
+            if (res.code == 0) {
+                $('#iconInput').val(res.data.path);
+                $('#iconPreview').attr('src', res.data.path).show();
+                $('#iconEmpty').hide();
+                notice.msg('图标上传成功', {icon: 1});
+            } else { notice.msg(res.msg, {icon: 2}); }
+        }
+    });
+
+    upload.render({
+        elem: '#uploadPlugin',
+        url: '{:url("/UserPlugin/uploadFile")}',
+        accept: 'file', exts: 'zip',
+        done: function(res) {
+            if (res.code == 0 && res.data.status == 1) {
+                $('#file_path').val(res.data.file_path);
+                $('#file_hash').val(res.data.file_hash);
+                $('#file_size').val(res.data.file_size);
+                $('#fileInfo').html('<i class="layui-icon layui-icon-ok-circle"></i> 已上传 (' + (res.data.file_size / 1024).toFixed(1) + ' KB)');
+
+                // 自动填充标识：取原始文件名（不含.zip）
+                var slugInput = $('#slugInput');
+                var fileName = (res.data.original_name || res.data.file_path.split(/[\\/]/).pop()).replace(/\.zip$/i, '');
+                var slug = fileName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                slugInput.val(slug);
+
+                // 自动填充 conf.json 解析数据
+                var auto = res.data.auto;
+                if (auto) {
+                    var filled = [];
+                    if (auto.name) {
+                        $('input[name=name]').val(auto.name); filled.push('名称');
+                    }
+                    if (auto.description) {
+                        $('textarea[name=description]').val(auto.description); filled.push('简介');
+                    }
+                    if (auto.version) {
+                        $('input[name=version]').val(auto.version); filled.push('版本');
+                    }
+                    if (auto.icon) {
+                        $('#iconInput').val(auto.icon);
+                        $('#iconPreview').attr('src', auto.icon).show();
+                        $('#iconEmpty').hide();
+                        filled.push('图标');
+                    }
+                    if (filled.length) {
+                        notice.msg('已自动填充：' + filled.join('、'), {icon: 1});
+                    }
+                }
+
+                notice.msg('插件文件上传成功', {icon: 1});
+            } else { notice.msg(res.msg || '上传失败', {icon: 2}); }
+        }
+    });
+
+    // 表单重置按钮
+    $('#btnReset').click(function() {
+        setTimeout(function() {
+            $('#iconInput').val('');
+            $('#iconPreview').attr('src', '').hide();
+            $('#iconEmpty').show();
+            $('#file_path').val('');
+            $('#file_hash').val('');
+            $('#file_size').val('');
+            $('#fileInfo').html('<i class="layui-icon layui-icon-close-fill"></i> 请上传插件文件 (*.zip)').css('color', '#ff5722');
+            $('#slugInput').val('');
+        }, 50);
+    });
+
+    form.on('submit(submitPlugin)', function(data) {
+        var isEdit = !!data.field.id;
+        // 文件必传
+        if (!isEdit && !$('#file_path').val()) {
+            notice.msg('请先上传插件文件', {icon: 2}); return false;
+        }
+        // 简介必填
+        if (!$.trim(data.field.description)) {
+            notice.msg('请填写插件简介', {icon: 2}); return false;
+        }
+        // 图标必填
+        if (!$('#iconInput').val()) {
+            notice.msg('请上传插件图标', {icon: 2}); return false;
+        }
+        if (!data.field.category) {
+            notice.msg('请选择插件分类', {icon: 2}); return false;
+        }
+        data.field.content = tinymce.get('pluginContent').getContent();
+        if (data.field.origin_type == '2') {
+            data.field.price = '0';
+        }
+        if (!data.field.price) {
+            data.field.price = '0';
+        }
+        notice.msg('正在提交...', {icon: 4, close: true});
+        $.ajax({
+            type: "POST", url: '{:url("/UserPlugin/create")}', data: data.field, dataType: "json",
+            success: function(res) {
+                notice.destroy();
+                if (res.code == 0) {
+                    notice.msg(res.msg, {icon: 1, audio:'1'});
+                    var index = parent.layer.getFrameIndex(window.name);
+                    if (index) { parent.layer.close(index); }
+                } else { notice.msg(res.msg, {icon: 2, audio:'1'}); }
+            },
+            error: function() { notice.destroy(); notice.msg("服务器错误！", {icon: 2}); }
+        });
+        return false;
+    });
+});
+</script>

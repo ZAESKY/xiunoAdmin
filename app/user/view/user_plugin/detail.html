@@ -1,0 +1,357 @@
+{include file="/public/header"}
+<style>
+.detail-wrap { max-width: 1100px; margin: 0 auto; padding: 16px 16px; }
+
+/* ====== Hero ====== */
+.detail-hero { display: flex; gap: 20px; align-items: center; padding: 24px; background: #fff; border-radius: 8px; border: 1px solid #e6e6e6; margin-bottom: 16px; }
+.detail-hero .hero-icon { width: 88px; height: 88px; flex-shrink: 0; border-radius: 16px; object-fit: cover; background: #f7f8fa; border: 1px solid #eee; }
+.detail-hero .hero-body { flex: 1; min-width: 0; }
+.detail-hero .hero-title { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.detail-hero .hero-name { font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.3; }
+.detail-hero .hero-version { font-size: 13px; color: #9e9e9e; font-weight: 700; white-space: nowrap; }
+.detail-hero .hero-badges { display: inline-flex; gap: 5px; align-items: center; }
+.detail-hero .hero-badges .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 3px; }
+.detail-hero .hero-badges .badge.origin { background: #e8f4ff; color: #1890ff; }
+.detail-hero .hero-badges .badge.repost { background: #fff3e0; color: #ff9800; }
+.detail-hero .hero-sub { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.detail-hero .hero-author { font-size: 13px; color: #6e6e73; }
+.detail-hero .hero-cat { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 11px; background: #f5f5f5; color: #8e8e93; }
+.detail-hero .hero-rating { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #6e6e73; }
+.detail-hero .hero-rating .stars { color: #f5a623; font-size: 12px; }
+.detail-hero .hero-rating strong { color: #1d1d1f; font-weight: 600; }
+.detail-hero .hero-desc { color: #6e6e73; font-size: 13px; line-height: 1.5; }
+
+.detail-hero .hero-actions { flex-shrink: 0; text-align: center; min-width: 130px; }
+.detail-hero .hero-actions .price { font-size: 28px; font-weight: 700; color: #ff5722; margin-bottom: 10px; }
+.detail-hero .hero-actions .price.free { color: #34c759; }
+.detail-hero .hero-actions .price small { font-size: 14px; color: #8e8e93; font-weight: 400; }
+.detail-hero .hero-actions .btn-dl { width: 130px; height: 40px; line-height: 40px; font-size: 14px; border-radius: 20px; }
+.detail-hero .hero-actions .bal-hint { font-size: 12px; color: #8e8e93; margin-top: 8px; }
+
+/* ====== Screenshots ====== */
+.screenshots { margin-bottom: 16px; }
+.screenshots h3 { font-size: 16px; font-weight: 600; color: #1d1d1f; margin: 0 0 10px; }
+.screenshots .shot-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+.screenshots .shot-scroll::-webkit-scrollbar { height: 5px; }
+.screenshots .shot-scroll::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
+.screenshots .shot-scroll img { height: 280px; border-radius: 8px; scroll-snap-align: start; box-shadow: 0 2px 12px rgba(0,0,0,0.06); cursor: pointer; transition: transform .2s; }
+.screenshots .shot-scroll img:hover { transform: scale(1.02); }
+
+/* ====== Two-column ====== */
+.detail-main { display: flex; gap: 16px; align-items: flex-start; }
+.detail-main .main-left { flex: 1; min-width: 0; }
+.detail-main .main-right { width: 270px; flex-shrink: 0; }
+
+/* ====== Content card ====== */
+.content-card { background: #fff; border-radius: 8px; border: 1px solid #e6e6e6; padding: 20px 24px; margin-bottom: 16px; }
+.content-card h3 { font-size: 16px; font-weight: 600; color: #1d1d1f; margin: 0 0 14px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+.detail-content { font-size: 14px; line-height: 1.8; color: #333; }
+.detail-content img { max-width: 100%; border-radius: 6px; }
+
+/* ====== Sidebar ====== */
+.info-card { background: #fff; border-radius: 8px; border: 1px solid #e6e6e6; padding: 18px 20px; margin-bottom: 12px; }
+.info-card h4 { font-size: 13px; font-weight: 600; color: #1d1d1f; margin: 0 0 10px; }
+.info-card .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px; }
+.info-card .info-row:last-child { border-bottom: none; }
+.info-card .info-row .label { color: #8e8e93; }
+.info-card .info-row .value { color: #1d1d1f; font-weight: 500; text-align: right; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.info-card .info-row .value a { color: #1890ff; }
+.info-card .btn-feedback { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee; font-size: 12px; color: #8e8e93; cursor: pointer; transition: color .2s; }
+.info-card .btn-feedback:hover { color: #2f54eb; }
+.info-card .btn-feedback i { font-size: 14px; }
+
+/* ====== Comments card ====== */
+.comments-card { background: #fff; border-radius: 8px; border: 1px solid #e6e6e6; padding: 20px 24px; }
+.comments-card h3 { font-size: 16px; font-weight: 600; color: #1d1d1f; margin: 0 0 14px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+.comment-item { padding: 16px 0; border-bottom: 1px solid #f5f5f5; }
+.comment-item:last-child { border-bottom: none; }
+.comment-item .cmt-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.comment-item .cmt-user { font-weight: 600; color: #1d1d1f; font-size: 13px; }
+.comment-item .cmt-time { font-size: 12px; color: #bbb; margin-left: 10px; }
+.comment-item .cmt-body { font-size: 13px; color: #555; line-height: 1.7; }
+.comment-item .cmt-reply { margin-top: 10px; padding: 10px 14px; background: #f6f9ff; border-left: 3px solid #1890ff; border-radius: 4px; font-size: 12px; }
+.comment-item .cmt-reply .rp-label { font-size: 11px; color: #1890ff; margin-bottom: 3px; }
+.comment-form-wrap { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f5f5f5; }
+.comment-form-wrap h4 { font-size: 14px; font-weight: 600; color: #1d1d1f; margin-bottom: 12px; }
+
+/* ====== Repost Notice ====== */
+.repost-notice { margin-top: 20px; padding: 16px 20px; background: #fffbf0; border: 1px solid #ffe58f; border-left: 4px solid #faad14; border-radius: 6px; }
+.repost-notice h4 { margin: 0 0 10px; font-size: 13px; color: #d48806; }
+.repost-notice .row { font-size: 12px; color: #8c8c8c; line-height: 2; }
+.repost-notice .row a { color: #1890ff; }
+.repost-notice .row b { color: #595959; font-weight: 500; }
+.repost-notice .disclaimer { margin-top: 8px; font-size: 12px; color: #d48806; line-height: 1.8; }
+
+@media (max-width: 900px) {
+    .detail-hero { flex-direction: column; align-items: center; text-align: center; }
+    .detail-hero .hero-actions { width: 100%; }
+    .detail-hero .hero-sub { justify-content: center; }
+    .detail-hero .hero-title { justify-content: center; }
+    .detail-main { flex-direction: column; }
+    .detail-main .main-right { width: 100%; }
+    .screenshots .shot-scroll img { height: 200px; }
+}
+@media (max-width: 500px) {
+    .detail-hero { padding: 16px; }
+    .detail-hero .hero-icon { width: 70px; height: 70px; border-radius: 14px; }
+    .detail-hero .hero-name { font-size: 18px; }
+}
+</style>
+
+<div class="layui-fluid detail-wrap">
+    <div class="detail-hero">
+        <img src="{$plugin.icon|default=''}" class="hero-icon" onerror="this.style.display='none'" id="heroIcon">
+        <div class="hero-body">
+            <div class="hero-title">
+                <span class="hero-name">{$plugin.name}</span>
+                <span class="hero-version">v{$plugin.version}</span>
+                <span class="hero-badges">
+                    {if condition="isset($plugin.origin_type) && $plugin.origin_type == 2"}
+                    <span class="badge repost">转载</span>
+                    {else/}
+                    <span class="badge origin">原创</span>
+                    {/if}
+                </span>
+            </div>
+            <div class="hero-sub">
+                <span class="hero-author">{$plugin.author}</span>
+                <span class="hero-cat">{:plugin_category_label($plugin.category)}</span>
+                <span class="hero-rating">
+                    <span class="stars" id="heroStars"></span>
+                    <strong>{$plugin.rating_avg}</strong>
+                    <span>({$plugin.rating_count})</span>
+                </span>
+            </div>
+            {if condition="!empty($plugin.description)"}
+            <div class="hero-desc">{$plugin.description}</div>
+            {/if}
+        </div>
+        <div class="hero-actions">
+            {if condition="$plugin.price == 0"}
+            <div class="price free">免费</div>
+            {elseif condition="($plugin.pay_type ?? 'balance') == 'points'"}
+            <div class="price">{$plugin.price|intval} <small>积分</small></div>
+            {else/}
+            <div class="price">¥{$plugin.price}</div>
+            {/if}
+            {if condition="$isPurchased"}
+            <button class="layui-btn layui-btn-normal btn-dl" id="btnDownload"><i class="layui-icon layui-icon-download-circle"></i> 获取</button>
+            {if condition="$isOwner"}
+            <div class="bal-hint">我发布的插件</div>
+            {/if}
+            {else/}
+            <button class="layui-btn layui-btn-warm btn-dl" id="btnPurchase"><i class="layui-icon layui-icon-diamond"></i> {if condition="($plugin.pay_type ?? 'balance') == 'points'"}积分购买{else/}购买{/if}</button>
+            {/if}
+        </div>
+    </div>
+
+    {if condition="!empty($plugin.images)"}
+    <div class="screenshots">
+        <h3>预览</h3>
+        <div class="shot-scroll">
+            {foreach $plugin.images as $img}
+            <img src="{$img}" onclick="previewImage('{$img}')">
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <div class="detail-main">
+        <div class="main-left">
+            <div class="content-card">
+                <h3>介绍</h3>
+                <div class="detail-content">{$plugin.content|raw}</div>
+                {if condition="isset($plugin.origin_type) && $plugin.origin_type == 2"}
+                <div class="repost-notice">
+                    <h4><i class="layui-icon layui-icon-tips"></i> 转载声明</h4>
+                    {if condition="!empty($plugin.origin_author)"}
+                    <div class="row"><b>原作者：</b>{$plugin.origin_author}</div>
+                    {/if}
+                    {if condition="!empty($plugin.origin_url)"}
+                    <div class="row"><b>来源：</b><a href="{$plugin.origin_url}" target="_blank">{$plugin.origin_url}</a></div>
+                    {/if}
+                    <div class="disclaimer">
+                        {if condition="!empty($plugin.origin_note)"}
+                        {$plugin.origin_note}
+                        {else/}
+                        本插件为转载资源，版权归原作者所有。平台仅提供展示与下载，不承担因转载产生的任何版权纠纷与法律责任。如涉及侵权请联系平台下架处理。
+                        {/if}
+                    </div>
+                </div>
+                {/if}
+            </div>
+
+            <div class="comments-card">
+                <h3>评分与评论</h3>
+                <div id="commentList"></div>
+                <div id="commentPagination"></div>
+                {if condition="!$isOwner"}
+                <div class="comment-form-wrap">
+                    {if condition="$hasCommented"}
+                    <h4>我的评论</h4>
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+                        <i class="layui-icon layui-icon-ok-circle" style="font-size:32px;color:#52c41a;"></i>
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#333;">您已评论过此插件</div>
+                            <div style="font-size:12px;color:#999;">状态：
+                                {if condition="$myComment.status == 0"}<span class="layui-badge layui-badge-orange">待审核</span>
+                                {elseif condition="$myComment.status == 1"}<span class="layui-badge layui-badge-green">已通过</span>
+                                {else/}<span class="layui-badge layui-badge-red">已拒绝</span>{/if}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background:#f9f9fb;border-radius:6px;padding:16px;">
+                        <div style="color:#8c8c8c;font-size:12px;margin-bottom:6px;">我的评分：<b style="color:#f5a623;font-size:15px;">{$myComment.rating} 星</b></div>
+                        <div style="font-size:13px;color:#555;line-height:1.7;">{$myComment.content}</div>
+                    </div>
+                    {else/}
+                    <h4>发表评论</h4>
+                    <form class="layui-form" lay-filter="commentForm" style="max-width:560px;">
+                        <input type="hidden" name="plugin_id" value="{$plugin.id}">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width:70px;">评分</label>
+                            <div class="layui-input-block" style="margin-left:100px;">
+                                <div id="submitRating"></div>
+                                <input type="hidden" name="rating" id="ratingValue" value="5">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width:70px;">评论</label>
+                            <div class="layui-input-block" style="margin-left:100px;">
+                                <textarea name="content" class="layui-textarea" placeholder="请输入评论内容（10-500字）" style="min-height:100px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block" style="margin-left:100px;">
+                                <button class="layui-btn" lay-submit lay-filter="submitComment"><i class="layui-icon layui-icon-ok"></i> 提交</button>
+                            </div>
+                        </div>
+                    </form>
+                    {/if}
+                </div>
+                {/if}
+            </div>
+        </div>
+
+        <div class="main-right">
+            <div class="info-card">
+                <h4>信息</h4>
+                <div class="info-row"><span class="label">开发者</span><span class="value">{$plugin.author}</span></div>
+                {if condition="!empty($plugin.author_url)"}
+                <div class="info-row"><span class="label">作者主页</span><span class="value"><a href="{$plugin.author_url}" target="_blank">访问 <i class="layui-icon layui-icon-link" style="font-size:10px;"></i></a></span></div>
+                {/if}
+                <div class="info-row"><span class="label">分类</span><span class="value">{:plugin_category_label($plugin.category)}</span></div>
+                <div class="info-row"><span class="label">版本</span><span class="value">v{$plugin.version}</span></div>
+                <div class="info-row"><span class="label">下载</span><span class="value">{$plugin.download_count}</span></div>
+                {if condition="!empty($plugin.published_at)"}
+                <div class="info-row"><span class="label">发布时间</span><span class="value">{$plugin.published_at|date='Y-m-d'}</span></div>
+                {/if}
+                {if condition="!empty($plugin.updated_at)"}
+                <div class="info-row"><span class="label">更新时间</span><span class="value">{$plugin.updated_at|date='Y-m-d'}</span></div>
+                {/if}
+                <div class="info-row"><span class="label">标识</span><span class="value" title="{$plugin.slug}">{$plugin.slug}</span></div>
+                <div class="btn-feedback" id="btnFeedback"><i class="layui-icon layui-icon-survey"></i> 反馈</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="/public/footer"}
+<script>
+layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var rate = layui.rate;
+    var laypage = layui.laypage;
+    var notice = layui.notice;
+    var element = layui.element;
+    var pluginId = {$plugin.id};
+    var currentPage = 1;
+
+    if (!$('#heroIcon').attr('src')) $('#heroIcon').hide();
+
+    function renderStars(rating) {
+        var r = Math.round(rating), s = '';
+        for (var i = 1; i <= 5; i++) s += i <= r ? '★' : '☆';
+        return s;
+    }
+    $('#heroStars').text(renderStars({$plugin.rating_avg}));
+
+    {if condition="!$hasCommented"}
+    rate.render({ elem: '#submitRating', value: 5, setText: function(v) { $('#ratingValue').val(v); return v+' 星'; } });
+    {/if}
+
+    form.on('submit(submitComment)', function(data) {
+        var c = data.field.content.trim();
+        if (c.length < 10) { notice.msg('评论内容至少10个字', {icon:2}); return false; }
+        if (c.length > 500) { notice.msg('评论内容不能超过500字', {icon:2}); return false; }
+        notice.msg('正在提交...', {icon:4, close:true});
+        $.ajax({
+            type:'POST', url:'{:url("/UserPlugin/submitComment")}', data:data.field, dataType:'json',
+            success:function(r){ notice.destroy(); if(r.code==0){ notice.msg(r.msg,{icon:1}); setTimeout(function(){location.reload();},1500); } else { notice.msg(r.msg,{icon:2}); } },
+            error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
+        });
+        return false;
+    });
+
+    function loadComments(p){ p=p||1;
+        $.ajax({ type:'POST', url:'{:url("/UserPlugin/getComments")}', data:{plugin_id:pluginId,current_page:p,limit:10}, dataType:'json',
+            success:function(r){ if(r.code==0){ renderComments(r.data.data.data); renderPagination(r.data.data.total,p); } }
+        });
+    }
+    function renderComments(list){
+        if(list.length===0){ $('#commentList').html('<div style="text-align:center;padding:40px 0;color:#bbb;">暂无评论，快来发表第一条评论吧</div>'); return; }
+        var h='';
+        list.forEach(function(c){
+            h+='<div class="comment-item"><div class="cmt-head"><div><span class="cmt-user">'+esc(c.username||'匿名')+'</span><span class="cmt-time">'+esc(c.created_at)+'</span></div><div id="r-'+c.id+'"></div></div>';
+            h+='<div class="cmt-body">'+esc(c.content)+'</div>';
+            if(c.reply_content) h+='<div class="cmt-reply"><div class="rp-label"><i class="layui-icon layui-icon-username"></i> 开发者回复 '+esc(c.reply_at)+'</div>'+esc(c.reply_content)+'</div>';
+            h+='</div>';
+        });
+        $('#commentList').html(h);
+        list.forEach(function(c){ rate.render({elem:'#r-'+c.id,value:c.rating,readonly:true}); });
+    }
+    function renderPagination(t,c){ if(t<=10){ $('#commentPagination').html(''); return; }
+        laypage.render({ elem:'commentPagination', count:t, curr:c, limit:10, layout:['prev','page','next'],
+            jump:function(o,f){ if(!f){ currentPage=o.curr; loadComments(o.curr); } } });
+    }
+    function esc(s){ var m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(s||'').replace(/[&<>"']/g,function(c){return m[c];}); }
+
+    $('#btnFeedback').click(function(){
+        var p = parent.layui ? parent.layui.layer : layer;
+        p.open({
+            type: 1, title: '功能反馈', area: ['460px', '210px'],
+            content: '<div style="padding:20px 24px;text-align:center;"><div style="font-size:15px;color:#333;line-height:1.8;margin-bottom:20px;">如果您对此插件有任何意见、建议或BUG反馈，<br>欢迎前往功能反馈页面提交，我们会尽快处理。</div></div>'
+        });
+    });
+
+    $('#btnPurchase').click(function(){
+        layer.confirm('确定花费 <b>¥{$plugin.price}</b> 购买「{$plugin.name}」吗？<br><span style="color:#999;font-size:12px;">将从余额扣除</span>',{icon:3,shade:.1,title:'确认购买'},function(i){ layer.close(i);
+            notice.msg('处理中...',{icon:4,close:true});
+            $.ajax({type:'POST',url:'{:url("/UserPlugin/purchase")}',data:{plugin_id:pluginId},dataType:'json',
+                success:function(r){ notice.destroy(); if(r.code==0){ notice.msg(r.msg,{icon:1}); setTimeout(function(){location.reload();},1500); } else notice.msg(r.msg,{icon:2}); },
+                error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
+            });
+        });
+    });
+    $('#btnDownload').click(function(){
+        notice.msg('获取下载凭证...',{icon:4,close:true});
+        $.ajax({type:'POST',url:'{:url("/UserPlugin/getDownloadToken")}',data:{plugin_id:pluginId},dataType:'json',
+            success:function(r){ notice.destroy(); if(r.code==0){ notice.msg('开始下载',{icon:1}); window.location.href='{:url("/UserPlugin/download")}?token='+r.data.token; } else notice.msg(r.msg,{icon:2}); },
+            error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
+        });
+    });
+
+    loadComments(1);
+});
+
+function previewImage(src) {
+    var L = (parent && parent.layui) ? parent.layui.layer : null;
+    if (L) {
+        L.photos({ photos: {data: [{src: src}]}, anim: 5 });
+    } else {
+        window.open(src);
+    }
+}
+</script>

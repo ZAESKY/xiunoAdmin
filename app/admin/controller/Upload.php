@@ -31,7 +31,7 @@ class Upload extends Backend
             return message('success' ,true ,['path' => '/upload/'. $saveName]);
         } catch (\Exception $e) {
             // 验证失败 输出错误信息
-            return $this->exceptionHandle($e,t('upload.upload_failed') . $e->getMessage(),'json','');
+            return message(t('upload.upload_failed') . $e->getMessage(), false);
         }
     }
     /**应用上传**/

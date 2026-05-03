@@ -547,6 +547,7 @@ CREATE TABLE `SF_notification` (
   `title` varchar(255) NOT NULL COMMENT '通知标题',
   `content` text COMMENT '通知内容',
   `type` varchar(50) DEFAULT 'feedback' COMMENT '通知类型',
+  `link` varchar(255) DEFAULT '' COMMENT '跳转链接',
   `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0未读 1已读',
   `created_at` datetime NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),

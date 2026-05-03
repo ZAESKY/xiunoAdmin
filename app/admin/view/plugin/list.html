@@ -1,0 +1,272 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="搜索插件名称/标识/作者"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">全部状态</option>
+                                <option value="0">待审核</option>
+                                <option value="1">已上架</option>
+                                <option value="2">已下架</option>
+                                <option value="3">审核拒绝</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-normal" onclick="showEditDialog(0)">
+                            <i class="layui-icon">&#xe654;</i>添加插件
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+
+<!-- 表格操作列 -->
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
+    <a class="layui-btn layui-btn-sm" lay-event="status"><i class="layui-icon">&#xe605;</i>状态</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>删除</a>
+</script>
+
+<!-- 状态模板 -->
+<script type="text/html" id="SF_TbStatus">
+    {{# if(d.status == 0){ }}
+        <span class="layui-badge layui-badge-orange">待审核</span>
+    {{# } else if(d.status == 1){ }}
+        <span class="layui-badge layui-badge-green">已上架</span>
+    {{# } else if(d.status == 2){ }}
+        <span class="layui-badge layui-badge-gray">已下架</span>
+    {{# } else if(d.status == 3){ }}
+        <span class="layui-badge layui-badge-red">审核拒绝</span>
+    {{# } }}
+</script>
+
+<!-- 价格模板 -->
+<script type="text/html" id="SF_TbPrice">
+    {{# if(d.price == 0){ }}
+        <span class="layui-badge layui-badge-green">免费</span>
+    {{# } else { }}
+        <span class="layui-badge layui-badge-orange">¥{{d.price}}</span>
+    {{# } }}
+</script>
+
+{include file="/public/footer"}
+<script>
+layui.use(['layer', 'form', 'table', 'notice'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var table = layui.table;
+    var notice = layui.notice;
+
+    /* 渲染表格 */
+    var insTb = table.render({
+        elem: '#SF_Table',
+        url: '{:url("/Plugin/list")}',
+        method: 'post',
+        page: true,
+        skin: 'line',
+        size: 'lg',
+        toolbar: ['<p>',
+            '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>批量删除</button>',
+            '</p>'].join(''),
+        cellMinWidth: 100,
+        request: {
+            pageName: 'current_page',
+            limitName: 'limit'
+        },
+        parseData: function(res){
+            return {
+                "code": res.code,
+                "msg": res.msg,
+                "count": res.data.data.total,
+                "data": res.data.data.data
+            };
+        },
+        cols: [[
+            {type: 'checkbox', fixed: true},
+            {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
+            {field: 'icon', title: '图标', width: 80, templet: function(d){
+                return '<img src="'+(d.icon || '/Assets/img/default-plugin.png')+'" style="width:50px;height:50px;object-fit:cover;">';
+            }},
+            {field: 'name', title: '插件名称', minWidth: 150},
+            {field: 'slug', title: '插件标识', minWidth: 120},
+            {field: 'version', title: '版本', width: 100},
+            {field: 'author', title: '作者', width: 120},
+            {field: 'origin_type', title: '来源', width: 80, templet: function(d){
+                return d.origin_type == 2 ? '<span class="layui-badge layui-badge-orange">转载</span>' : '<span class="layui-badge layui-badge-green">原创</span>';
+            }},
+            {field: 'user_id', title: '发布者', width: 80, templet: function(d){
+                return d.user_id == 0 ? '管理员' : 'UID:'+d.user_id;
+            }},
+            {field: 'price', title: '价格', width: 100, templet: '#SF_TbPrice'},
+            {field: 'download_count', title: '下载次数', width: 100, sort: true},
+            {field: 'rating_avg', title: '评分', width: 100, sort: true, templet: function(d){
+                return d.rating_avg + ' (' + d.rating_count + '人)';
+            }},
+            {field: 'comment_count', title: '评论数', width: 100},
+            {field: 'status', title: '状态', width: 100, templet: '#SF_TbStatus'},
+            {field: 'sort', title: '排序', width: 80, sort: true},
+            {field: 'created_at', title: '创建时间', minWidth: 160},
+            {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 200, fixed: 'right'}
+        ]]
+    });
+
+    /* 表格搜索 */
+    form.on('submit(SF_TbSearch)', function (data) {
+        insTb.reload({where: data.field, page: {curr: 1}});
+        return false;
+    });
+
+    /* 表格工具条点击事件 */
+    table.on('tool(SF_Table)', function (obj) {
+        if (obj.event === 'edit') {
+            showEditDialog(obj.data.id);
+        } else if (obj.event === 'status') {
+            showStatusDialog(obj.data);
+        } else if (obj.event === 'del') {
+            doDel(obj);
+        }
+    });
+
+    /* 表格头工具栏点击事件 */
+    table.on('toolbar(SF_Table)', function (obj) {
+        if (obj.event === 'del') {
+            var checkRows = table.checkStatus('SF_Table');
+            if (checkRows.data.length === 0) {
+                notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                return;
+            }
+            var ids = checkRows.data.map(function (d) {
+                return d.id;
+            });
+            doDel({ids: ids});
+        }
+    });
+
+    /* 删除 */
+    function doDel(obj) {
+        layer.confirm('确定要删除选中数据吗？', {
+            skin: 'layui-layer-admin',
+            icon: 3,
+            shade: .1
+        }, function (i) {
+            layer.close(i);
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url: obj.data ? '{:url("/Plugin/drop")}' : '{:url("/Plugin/batchDrop")}',
+                data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        table.reload('SF_Table');
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    }else{
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+    }
+
+    /* 显示编辑对话框 */
+    window.showEditDialog = function(id) {
+        layer.open({
+            type: 2,
+            title: id > 0 ? '编辑插件' : '添加插件',
+            content: '{:url("/Plugin/edit")}?id=' + id,
+            area: ['90%', '90%'],
+            maxmin: true,
+            end: function() {
+                table.reload('SF_Table');
+            }
+        });
+    };
+
+    /* 显示状态对话框 */
+    function showStatusDialog(data) {
+        var statusOptions = [
+            {value: 0, text: '待审核'},
+            {value: 1, text: '已上架'},
+            {value: 2, text: '已下架'},
+            {value: 3, text: '审核拒绝'}
+        ];
+
+        var html = '<div style="padding:20px;">';
+        html += '<div class="layui-form-item">';
+        html += '<label class="layui-form-label">状态</label>';
+        html += '<div class="layui-input-block">';
+        html += '<select id="plugin_status">';
+        statusOptions.forEach(function(opt) {
+            html += '<option value="'+opt.value+'" '+(data.status == opt.value ? 'selected' : '')+'>'+opt.text+'</option>';
+        });
+        html += '</select>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div class="layui-form-item">';
+        html += '<label class="layui-form-label">审核备注</label>';
+        html += '<div class="layui-input-block">';
+        html += '<textarea id="audit_note" class="layui-textarea" placeholder="审核备注（可选）">'+(data.audit_note || '')+'</textarea>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        layer.open({
+            type: 1,
+            title: '修改状态',
+            content: html,
+            area: ['500px', '300px'],
+            btn: ['确定', '取消'],
+            yes: function(index) {
+                var status = $('#plugin_status').val();
+                var audit_note = $('#audit_note').val();
+
+                $.ajax({
+                    type: "POST",
+                    url: '{:url("/Plugin/setStatus")}',
+                    data: {id: data.id, status: status, audit_note: audit_note},
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.code == 0) {
+                            notice.msg(res.msg, {icon: 1, audio:'1'});
+                            table.reload('SF_Table');
+                            layer.close(index);
+                        } else {
+                            notice.msg(res.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function() {
+                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    }
+                });
+            }
+        });
+
+        form.render('select');
+    }
+});
+</script>

@@ -19,7 +19,7 @@
 </script>
 
 <script type="text/html" id="SF_TypeTpl">
-    {{# var types = {recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款'}; }}
+    {{# var types = {recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入'}; }}
     <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">
         {{types[d.type] || d.type}}
     </span>

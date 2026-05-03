@@ -71,6 +71,10 @@ class MenuService extends BaseService
                 '安装管理' => 'menu.install',
                 '反馈管理' => 'menu.feedback',
                 '功能反馈' => 'menu.feedback',
+                '插件中心' => 'menu.plugin_center',
+                '插件列表' => 'menu.plugin_list',
+                '插件订单' => 'menu.plugin_order',
+                '插件评论' => 'menu.plugin_comments',
             ];
             array_walk_recursive($list, function (&$item, $key) use ($titleMap) {
                 if ($key === 'title' && is_string($item) && isset($titleMap[$item])) {

@@ -27,6 +27,13 @@ return [
     'menu.feedback' => 'Feedback',
     'menu.rebate' => 'Rebate Center',
     'menu.balance_log' => 'Balance History',
+    'menu.plugin_center' => 'Plugin Center',
+    'menu.plugin_market' => 'Plugin Market',
+    'menu.my_plugin' => 'My Plugins',
+    'menu.my_purchase' => 'My Purchases',
+    'menu.plugin_list' => 'Plugin List',
+    'menu.plugin_order' => 'Plugin Orders',
+    'menu.plugin_comments' => 'Comments',
 
     // ==================== Common ====================
     'common.save' => 'Save',

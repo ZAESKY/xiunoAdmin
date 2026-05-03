@@ -1,0 +1,175 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">内容</label>
+                        <div class="layui-input-inline">
+                            <input name="text" class="layui-input" placeholder="搜索评论内容"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-inline">
+                            <select name="status" class="ew-select-fixed">
+                                <option value="">全部状态</option>
+                                <option value="0">待审核</option>
+                                <option value="1">已通过</option>
+                                <option value="2">已拒绝</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline layui-btn-container">
+                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="SF_TbBar">
+    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="approve"><i class="layui-icon">&#xe605;</i>通过</a>
+    <a class="layui-btn layui-btn-sm layui-btn-warm" lay-event="reject"><i class="layui-icon">&#x1006;</i>拒绝</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>删除</a>
+</script>
+
+{include file="/public/footer"}
+<script>
+layui.use(['layer', 'form', 'table', 'notice'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var table = layui.table;
+    var notice = layui.notice;
+
+    var insTb = table.render({
+        elem: '#SF_Table',
+        url: '{:url("/PluginComment/list")}',
+        method: 'post',
+        page: true,
+        skin: 'line',
+        size: 'lg',
+        toolbar: ['<p>',
+            '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>批量删除</button>',
+            '</p>'].join(''),
+        cellMinWidth: 100,
+        request: {
+            pageName: 'current_page',
+            limitName: 'limit'
+        },
+        parseData: function(res){
+            return {
+                "code": res.code,
+                "msg": res.msg,
+                "count": res.data.data.total,
+                "data": res.data.data.data
+            };
+        },
+        cols: [[
+            {type: 'checkbox', fixed: true},
+            {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
+            {field: 'plugin_id', title: '插件ID', width: 100},
+            {field: 'plugin_name', title: '插件名称', minWidth: 150},
+            {field: 'user_id', title: '用户ID', width: 100},
+            {field: 'username', title: '用户名', width: 120},
+            {field: 'app_id', title: '应用ID', width: 100},
+            {field: 'content', title: '评论内容', minWidth: 250},
+            {field: 'rating', title: '评分', width: 80, templet: function(d){
+                return d.rating + '星';
+            }},
+            {field: 'status', title: '状态', width: 100, templet: function(d){
+                switch(d.status){
+                    case 0: return '<span class="layui-badge layui-badge-orange">待审核</span>';
+                    case 1: return '<span class="layui-badge layui-badge-green">已通过</span>';
+                    case 2: return '<span class="layui-badge layui-badge-red">已拒绝</span>';
+                    default: return '-';
+                }
+            }},
+            {field: 'ip', title: 'IP', width: 120},
+            {field: 'created_at', title: '评论时间', minWidth: 160},
+            {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 220, fixed: 'right'}
+        ]]
+    });
+
+    form.on('submit(SF_TbSearch)', function (data) {
+        insTb.reload({where: data.field, page: {curr: 1}});
+        return false;
+    });
+
+    table.on('tool(SF_Table)', function (obj) {
+        if (obj.event === 'approve') {
+            doSetStatus(obj.data.id, 1);
+        } else if (obj.event === 'reject') {
+            doSetStatus(obj.data.id, 2);
+        } else if (obj.event === 'del') {
+            doDel(obj);
+        }
+    });
+
+    table.on('toolbar(SF_Table)', function (obj) {
+        if (obj.event === 'del') {
+            var checkRows = table.checkStatus('SF_Table');
+            if (checkRows.data.length === 0) { notice.msg('请选择要删除的数据！', {icon:3}); return; }
+            var ids = checkRows.data.map(function(d){ return d.id; });
+            doDel({ids: ids});
+        }
+    });
+
+    function doSetStatus(id, status) {
+        notice.msg('正在执行中..', {icon: 4, close: true});
+        $.ajax({
+            type: "POST",
+            url: '{:url("/PluginComment/setStatus")}',
+            data: {id: id, status: status},
+            dataType: "json",
+            success: function(data) {
+                notice.destroy();
+                if (data.code == 0) {
+                    table.reload('SF_Table');
+                    notice.msg(data.msg, {icon: 1, audio:'1'});
+                } else {
+                    notice.msg(data.msg, {icon: 2, audio:'1'});
+                }
+            },
+            error: function() {
+                notice.destroy();
+                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+            }
+        });
+    }
+
+    function doDel(obj) {
+        layer.confirm('确定要删除选中数据吗？', {
+            skin: 'layui-layer-admin', icon: 3, shade: .1
+        }, function (i) {
+            layer.close(i);
+            notice.msg('正在执行中..', {icon: 4, close: true});
+            $.ajax({
+                type: "POST",
+                url: obj.data ? '{:url("/PluginComment/drop")}' : '{:url("/PluginComment/batchDrop")}',
+                data: {id: obj.data ? obj.data.id : obj.ids.join(',')},
+                dataType: "json",
+                success: function(data) {
+                    notice.destroy();
+                    if (data.code == 0) {
+                        table.reload('SF_Table');
+                        notice.msg(data.msg, {icon: 1, audio:'1'});
+                    } else {
+                        notice.msg(data.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                }
+            });
+        });
+    }
+});
+</script>

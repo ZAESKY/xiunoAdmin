@@ -98,7 +98,7 @@ class LoginService extends UserBaseService
             event('UserLogin', $content);
             return message(t('login.account_disabled'), false);
         }
-        if(!empty($userInfo['ip'])) {
+        if(!empty($info['ip'])) {
             if (!in_array(get_client_ip(), unserialize($info['ip']))) {
                 $content = [
                     'Title' => '登录后台',

@@ -1,15 +1,7 @@
 <?php
 
 return array (
-  'home' => 
-  array (
-    'name' => 'SF3.0',
-    'view_base' => '../public/template/modules/home/SF3.0/',
-    'config' => 
-    array (
-    ),
-  ),
-  'login' => 
+  'login' =>
   array (
     'name' => 'default',
     'view_base' => '../public/template/modules/login/default/',
@@ -26,5 +18,4 @@ return array (
     ),
   ),
   'notice' => 'default',
-  'preview' => 1,
 );

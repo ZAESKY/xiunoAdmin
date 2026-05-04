@@ -1,0 +1,222 @@
+{include file="index/header"}
+<style>
+    .pm-hero {
+        background: linear-gradient(180deg, #f8fafc 0%, #e8f2fd 50%, #f8fafc 100%);
+        padding: 48px 24px 40px;
+        text-align: center;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .pm-hero h1 { font-size: 28px; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
+    .pm-hero p { font-size: 15px; color: #64748b; margin: 0; }
+    .pm-search { max-width: 480px; margin: 20px auto 0; }
+    .pm-search input {
+        width: 100%; height: 44px; border-radius: 8px; border: 1.5px solid #e2e8f0;
+        padding: 0 16px; font-size: 14px; background: #fff; outline: none; transition: border-color .2s;
+    }
+    .pm-search input:focus { border-color: #2d8cf0; box-shadow: 0 0 0 3px rgba(45,140,240,.08); }
+    .pm-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        padding: 32px 0 48px;
+    }
+    .pm-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+        padding: 24px;
+        cursor: pointer;
+        transition: all .3s;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    .pm-card:hover { border-color: #c8daf8; box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .pm-card-icon { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #e8f2fd; }
+    .pm-card-body { flex: 1; min-width: 0; }
+    .pm-card-body h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: #1e293b; }
+    .pm-card-body .pm-desc {
+        font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 10px;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .pm-card-meta { display: flex; align-items: center; gap: 14px; font-size: 12px; color: #94a3b8; }
+    .pm-card-meta span { display: flex; align-items: center; gap: 3px; }
+    .pm-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .pm-tag-free { background: #e8f5e9; color: #2e7d32; }
+    .pm-tag-paid { background: #fff3e0; color: #e65100; }
+    .pm-tag-hot { background: #fce4ec; color: #c62828; }
+    .pm-empty { text-align: center; padding: 80px 24px; color: #94a3b8; }
+    @media (max-width: 900px) {
+        .pm-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+        .pm-card { padding: 20px; }
+    }
+    @media (max-width: 640px) {
+        .pm-grid { grid-template-columns: 1fr; gap: 12px; padding: 24px 0 36px; }
+        .pm-hero { padding: 36px 16px 32px; }
+        .pm-hero h1 { font-size: 22px; }
+        .pm-hero p { font-size: 14px; }
+        .pm-search { margin-top: 16px; }
+        .pm-card { padding: 16px; border-radius: 10px; }
+        .pm-card-icon { width: 44px; height: 44px; border-radius: 10px; }
+        .pm-card-body h3 { font-size: 15px; }
+        .pm-card-body .pm-desc { font-size: 12px; -webkit-line-clamp: 2; }
+    }
+    @media (max-width: 480px) {
+        .pm-hero { padding: 28px 12px 24px; }
+        .pm-hero h1 { font-size: 20px; }
+        .pm-hero p { font-size: 13px; }
+        .pm-search input { height: 40px; font-size: 13px; padding: 0 12px; }
+        .pm-grid { padding: 16px 0 28px; gap: 10px; }
+        .pm-card { padding: 14px; gap: 12px; }
+        .pm-card-icon { width: 38px; height: 38px; border-radius: 8px; }
+        .pm-card-body h3 { font-size: 14px; }
+        .pm-empty { padding: 40px 16px; font-size: 14px; }
+    }
+</style>
+{$background_image|raw}
+<header class="vp-nav" id="topNav">
+    <div class="vp-nav-inner">
+        <a href="/" class="vp-nav-logo">
+            <img src="{__IMG__}logo.png" alt="{$title}">
+            <span>{$title}</span>
+        </a>
+        <ul class="vp-nav-links" id="navLinks">
+            <li><a href="/">首页</a></li>
+            <li><a href="{:url('/Index/pluginMarket')}">插件市场</a></li>
+            <li><a href="/user.php/Index/index" class="vp-nav-login">登录后台</a></li>
+        </ul>
+        <button class="vp-nav-toggle" id="navToggle" aria-label="菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+    </div>
+</header>
+<div class="vp-nav-spacer"></div>
+<div class="pm-hero">
+    <h1>插件市场</h1>
+    <p>浏览丰富插件，扩展您的系统功能</p>
+    <div class="pm-search">
+        <input type="text" id="pmKeyword" placeholder="搜索插件名称、作者...">
+    </div>
+</div>
+<div class="vp-container">
+    <div class="pm-grid" id="pmGrid">
+        <div class="pm-empty">加载中...</div>
+    </div>
+    <div id="pmPager" style="text-align:center;padding-bottom:40px;"></div>
+</div>
+<div class="vp-page-footer">
+    <p>{:conf('foot')}</p>
+    <p>{:conf('ICP')}</p>
+</div>
+{include file="index/footer"}
+{$background_notice|raw}
+{$background_music|raw}
+<script>
+document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('#navLinks a').forEach(function (link) {
+    link.addEventListener('click', function () {
+        document.getElementById('navLinks').classList.remove('open');
+    });
+});
+
+layui.use(['layer', 'notice'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var notice = layui.notice;
+    var currentPage = 1;
+    var keyword = '';
+
+    function loadPlugins(page, kw) {
+        $('#pmGrid').html('<div class="pm-empty">加载中...</div>');
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Ajax/pluginMarket")}',
+            data: { current_page: page, limit: 12, text: kw },
+            dataType: "json",
+            success: function (res) {
+                if (res.code == 0 && res.data && res.data.data) {
+                    renderPlugins(res.data.data);
+                    renderPager(res.data.total, res.data.current_page, res.data.limit);
+                } else {
+                    $('#pmGrid').html('<div class="pm-empty">暂无插件</div>');
+                    $('#pmPager').html('');
+                }
+            },
+            error: function () {
+                $('#pmGrid').html('<div class="pm-empty">加载失败，请重试</div>');
+            }
+        });
+    }
+
+    function renderPlugins(list) {
+        if (!list.length) { $('#pmGrid').html('<div class="pm-empty">暂无插件</div>'); return; }
+        var html = '';
+        $.each(list, function (i, item) {
+            var hotTag = item.is_hot == 1 ? '<span class="pm-tag pm-tag-hot">热门</span>' : '';
+            html += '<div class="pm-card" data-id="' + item.id + '" data-name="' + (item.name || '') + '">';
+            html += '<img class="pm-card-icon" src="' + (item.icon || '{__IMG__}logo.png') + '" alt="' + item.name + '" onerror="this.src=\'{__IMG__}logo.png\'">';
+            html += '<div class="pm-card-body">';
+            html += '<h3>' + item.name + '</h3>';
+            html += '<p class="pm-desc">' + (item.description || '暂无描述') + '</p>';
+            html += '<div class="pm-card-meta">';
+            html += '<span><i class="layui-icon layui-icon-user"></i> ' + (item.author || '未知') + '</span>';
+            html += hotTag;
+            html += '</div></div></div>';
+        });
+        $('#pmGrid').html(html);
+    }
+
+    function renderPager(total, page, limit) {
+        var totalPages = Math.ceil(total / limit);
+        if (totalPages <= 1) { $('#pmPager').html(''); return; }
+        var html = '<div style="display:inline-flex;gap:6px;align-items:center;">';
+        html += '<button class="vp-btn vp-btn-ghost" ' + (page <= 1 ? 'disabled' : '') + ' data-page="' + (page - 1) + '">上一页</button>';
+        html += '<span style="font-size:14px;color:#64748b;padding:0 8px;">' + page + ' / ' + totalPages + '</span>';
+        html += '<button class="vp-btn vp-btn-ghost" ' + (page >= totalPages ? 'disabled' : '') + ' data-page="' + (page + 1) + '">下一页</button>';
+        html += '</div>';
+        $('#pmPager').html(html);
+    }
+
+    /* ---- Card click: prompt login ---- */
+    $(document).on('click', '.pm-card', function () {
+        var name = $(this).data('name');
+        layer.open({
+            type: 1,
+            title: name || '插件详情',
+            shade: .4,
+            area: ['420px', 'auto'],
+            content: '<div style="text-align:center;padding:32px 24px;">' +
+                '<i class="layui-icon layui-icon-lock" style="font-size:48px;color:#f59e0b;"></i>' +
+                '<p style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#1e293b;">此操作需要登录</p>' +
+                '<p style="margin:0 0 20px;font-size:14px;color:#64748b;">登录后即可查看插件详情、下载和使用</p>' +
+                '<div style="display:flex;gap:10px;justify-content:center;">' +
+                '<a href="/user.php/login/index" class="vp-btn vp-btn-brand">立即登录</a>' +
+                '<a href="/user.php/login/reg" class="vp-btn vp-btn-outline">注册账号</a>' +
+                '</div></div>'
+        });
+    });
+
+    /* ---- Page button click ---- */
+    $(document).on('click', '#pmPager button', function () {
+        var p = parseInt($(this).data('page'));
+        if (p > 0) { currentPage = p; loadPlugins(currentPage, keyword); }
+    });
+
+    /* ---- Search ---- */
+    var searchTimer;
+    $('#pmKeyword').on('input', function () {
+        clearTimeout(searchTimer);
+        var kw = $(this).val().trim();
+        searchTimer = setTimeout(function () {
+            keyword = kw; currentPage = 1; loadPlugins(currentPage, keyword);
+        }, 400);
+    });
+
+    /* ---- Init ---- */
+    loadPlugins(1, '');
+});
+</script>
+</body>
+</html>

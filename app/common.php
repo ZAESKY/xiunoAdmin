@@ -10,30 +10,6 @@ if (!function_exists('sf_password_hash')) {
         return 'SF*(!@#%!s!0+-*~_-2129876388';
     }
 }
-if (!function_exists('getTemplateConfig')) {
-    function getTemplateConfig($name, $type = 'home', $all = false)
-    {
-        $config = \think\facade\Cache::get('Template'.$type.$name.(int)$all);
-        if ($config) {
-            return $config;
-        }
-        $config_file = PUBLIC_PATH . DS . 'template' . DS . 'modules' . DS . $type . DS . $name . DS .'config.ini';
-        if (!is_file($config_file)) {
-            return [];
-        }
-        $temp_arr = (array)include $config_file;
-        if ($all) {
-            return $temp_arr;
-        }
-        foreach ($temp_arr as $key => $value) {
-            $config[$value['name']] = $value['value'];
-        }
-        unset($temp_arr);
-        \think\facade\Cache::tag('SF_Template')->set('Template'.$type.$name.(int)$all, $config);
-        return $config;
-    }
-}
-
 if (!function_exists('addNoticeGroupList')) {
     /**
      * 添加新标签到系统设置标签组里

@@ -43,35 +43,6 @@ class Upload extends Backend
         }
     }
 
-    public function template()
-    {
-        if(IS_POST){
-            $post = $this->request->post();
-            $fileName = !empty($post['fileName'])?$post['fileName']:null;
-            $fileExt = !empty($post['fileExt'])?$post['fileExt']:null;
-            $totalPage = !empty($post['totalPage'])?intval($post['totalPage']):0;
-            $page = !empty($post['page'])?intval($post['page']):0;
-            $file = $this->request->file('file');
-            if(empty($fileName)){
-                return message(t('validation.missing_filename'),false, ['status' => 0, 'downUrl' => '']);
-            }
-            if(empty($fileExt)){
-                return message(t('validation.missing_fileext'),false, ['status' => 0, 'downUrl' => '']);
-            }
-            try {
-                validate([
-                    'File' => [
-                        'fileSize' => 410241024,
-                        'fileMime' => 'zip,application/zip,application/x-gzip,application/x-rar,application/x-7z-compressed,application/octet-stream',
-                    ]
-                ])->check(['File' => $file]);
-            } catch (\Exception $e) {
-                return message($e->getMessage(),false, ['status' => 0, 'downUrl' => '']);
-            }
-            return $this->service->template($fileName, $fileExt, $file, $totalPage, $page);
-        }
-    }
-
     public function temp()
     {
         if(IS_POST){

@@ -9,12 +9,12 @@ return [
     'path'      => '/',
     // cookie 有效域名
     'domain'    => '',
-    //  cookie 启用安全传输
-    'secure'    => false,
-    // httponly设置
-    'httponly'  => false,
+    //  cookie 启用安全传输（线上请配合 HTTPS 设为 true）
+    'secure'    => env('cookie.secure', false),
+    // httponly设置（防止 JS 读取 cookie，降低 XSS 风险）
+    'httponly'  => env('cookie.httponly', true),
     // 是否使用 setcookie
     'setcookie' => true,
     // samesite 设置，支持 'strict' 'lax'
-    'samesite'  => '',
+    'samesite'  => env('cookie.samesite', 'Lax'),
 ];

@@ -50,7 +50,8 @@ class Menu extends BaseModel
             }
             $parent_id = [];
             // Role-based menu control: admin sees shared + admin menu entries.
-            $data = self::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('admin')]])->select();
+            // 排除已废弃的模板配置菜单
+            $data = self::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('admin')], ['url', '<>', 'Set/template']])->select();
             foreach ($data as $key => $value) {
                 if ($value['parentid'] === 0) {
                     $parent_id[$key] = $value;

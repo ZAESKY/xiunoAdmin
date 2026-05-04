@@ -12,37 +12,7 @@ class Index extends Frontend
     {
         parent::initialize();
         $this->background = new Background();
-        if(config('self_template.preview') == 1){
-            $preview = $this->request->get('preview');
-            $type = $this->request->get('type');
-            switch ($type){
-                case 1:
-                    $type = 'login';
-                    break;
-                case 2:
-                    $type = 'maintain';
-                    break;
-                default:
-                    $type = 'home';
-                    break;
-            }
-            if(empty($preview)){
-                $config = config('self_template');
-                View::config(['view_path' => $config['home']['view_base']]);
-                View::assign('SF_Config', getTemplateConfig($config['home']['name']));
-            }else{
-                $path = PUBLIC_PATH . DS . 'template' . DS . 'modules' . DS . $type . DS . $preview . DS;
-                if (!is_file($path. 'info.ini')) {
-                    exit($this->render('/public/error', ['msg' => '模板配置文件不存在']));
-                }
-                View::config(['view_path' => '../public/template/modules/'.$type.'/'.$preview.'/']);
-                View::assign('SF_Config', getTemplateConfig($preview, $type));
-            }
-        }else{
-            $config = config('self_template');
-            View::config(['view_path' => $config['home']['view_base']]);
-            View::assign('SF_Config', getTemplateConfig($config['home']['name']));
-        }
+        View::config(['view_path' => '../public/template/modules/home/SF3.0/']);
         View::assign('user_login', parent::isUserLogin());
         View::assign('app_list', parent::getAppList());
         View::assign('background_image',$this->background->image());
@@ -81,5 +51,10 @@ class Index extends Frontend
 
     public function login(){
         return $this->render('index/login');
+    }
+
+    public function pluginMarket(){
+        View::assign('app_list', parent::getAppList());
+        return $this->render('index/plugin_market');
     }
 }

@@ -27,6 +27,37 @@ class Ajax extends Frontend
         }
     }
 
+    public function pluginMarket(){
+        if(IS_POST){
+            $post = $this->request->post();
+            $limit = !empty($post['limit']) ? intval($post['limit']) : 12;
+            $current_page = !empty($post['current_page']) ? intval($post['current_page']) : 1;
+            $keyword = !empty($post['text']) ? trim($post['text']) : '';
+
+            $where = [['status', '=', 1]];
+            if (!empty($keyword)) {
+                $where[] = ['name|description|author', 'like', '%' . $keyword . '%'];
+            }
+
+            $total = Db::name('plugin')->where($where)->count();
+            $list = Db::name('plugin')
+                ->where($where)
+                ->field('id,name,slug,category,version,author,icon,description,rating_count,rating_avg,is_hot,is_recommend,published_at')
+                ->order('is_recommend', 'desc')
+                ->order('download_count', 'desc')
+                ->page($current_page, $limit)
+                ->select()
+                ->toArray();
+
+            return message('success', true, [
+                'data' => $list,
+                'total' => $total,
+                'current_page' => $current_page,
+                'limit' => $limit,
+            ]);
+        }
+    }
+
     public function register(){
         if(IS_POST){
             $post = $this->request->post();

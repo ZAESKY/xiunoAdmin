@@ -1,10 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{include file="index/header"}
+{$background_image|raw}
+<div class="vp-card" style="max-width:520px;margin:0 auto;">
+    <h2 class="vp-card-title">用户注册</h2>
+    <form class="layui-form" id="registerForm">
+        <div class="layui-form-item">
+            <label class="vp-label">选择应用</label>
+            <select name="appid" lay-filter="register_app" lay-search lay-verify="required">
+                <option value="">请选择应用</option>
+                {volist name="app_list.data.data" id="res"}
+                <option value="{$res.id}">{$res.name}</option>
+                {/volist}
+            </select>
+        </div>
+        <div class="layui-form-item">
+            <label class="vp-label">用户名</label>
+            <input type="text" name="username" placeholder="请输入用户名" class="layui-input" lay-verify="required"/>
+        </div>
+        <div class="vp-form-row vp-register-grid">
+            <div class="layui-form-item">
+                <label class="vp-label">密码</label>
+                <input type="password" name="password" placeholder="请输入密码" class="layui-input" lay-verify="required"/>
+            </div>
+            <div class="layui-form-item">
+                <label class="vp-label">确认密码</label>
+                <input type="password" name="confirmPassword" placeholder="请确认密码" class="layui-input" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="vp-form-row vp-register-grid">
+            <div class="layui-form-item">
+                <label class="vp-label">QQ</label>
+                <input type="number" name="qq" placeholder="请输入要绑定的QQ" class="layui-input" lay-verify="required"/>
+            </div>
+            <div class="layui-form-item">
+                <label class="vp-label">邮箱</label>
+                <input type="text" name="email" placeholder="请输入要绑定的邮箱" class="layui-input" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="vp-form-actions">
+            <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_RegisterSubmit" lay-submit>注册</button>
+            <button type="button" class="vp-btn vp-btn-ghost" id="SF_Register_Reset">重置</button>
+        </div>
+    </form>
+</div>
+</div></div>
+<div class="vp-page-footer">
+    <p>{:conf('foot')}</p>
+    <p>{:conf('ICP')}</p>
+</div>
+<div id="myAudio1"></div>
+{include file="index/footer"}
+{$background_notice|raw}
+{$background_music|raw}
+<script>
+layui.use(['form', 'admin', 'notice'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var admin = layui.admin;
+    var notice = layui.notice;
 
+    $("#SF_Register_Reset").click(function(){
+        document.getElementById("registerForm").reset();
+        form.render('select');
+        notice.msg('已重置表单', {icon: 1, audio:'1'});
+    });
+
+    form.on('select(register_app)', function (data) {
+        if (!data.value) return;
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Ajax/appInfo")}',
+            data: {appid:data.value},
+            dataType: "json",
+            success: function(res) {
+                if (res.code == 0 && res.data.register_notice) {
+                    admin.open({
+                        type: 1,
+                        title: '注册公告',
+                        shade: .1,
+                        content: '<div style="padding:20px;line-height:1.8;">'+res.data.register_notice+'</div>'
+                    });
+                }
+            }
+        });
+    });
+
+    form.on('submit(SF_RegisterSubmit)', function (data) {
+        notice.msg('正在提交...', {icon: 4, close: true});
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Ajax/register")}',
+            data: data.field,
+            dataType: "json",
+            success: function(res) {
+                notice.destroy();
+                if (res.code == 0) {
+                    notice.success({
+                        title: '注册通知', message: res.msg,
+                        animateInside:true, position:'topCenter',
+                        transitionOut:'flipOutX', displayMode:'2', audio:'1'
+                    });
+                } else {
+                    notice.error({
+                        title: '注册通知', message: res.msg,
+                        animateInside:true, position:'topCenter',
+                        transitionOut:'flipOutX', displayMode:'2', audio:'1'
+                    });
+                }
+            },
+            error: function() {
+                notice.destroy();
+                notice.error({
+                    title: '注册通知', message: '服务器错误',
+                    animateInside:true, position:'topCenter',
+                    transitionOut:'flipOutX', displayMode:'2', audio:'1'
+                });
+            }
+        });
+        return false;
+    });
+});
+</script>
 </body>
 </html>

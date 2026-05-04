@@ -8,6 +8,16 @@ use think\facade\Db;
 class AjaxService extends BaseService
 {
 
+    private function maskQQ($qq)
+    {
+        $qq = (string)$qq;
+        $len = strlen($qq);
+        if ($len <= 4) {
+            return substr($qq, 0, 1) . str_repeat('*', $len - 1);
+        }
+        return substr($qq, 0, 3) . str_repeat('*', $len - 6) . substr($qq, -3);
+    }
+
     public function appInfo()
     {
         $appid = intval(input('post.appid'));
@@ -75,15 +85,15 @@ class AjaxService extends BaseService
                     return message('不存在此授权！' ,false ,['status' => 0]);
                 }
                 if($authInfo['status'] == 0){
-                    return message('该授权以封禁！<br>持有者QQ:'.$authInfo['qq'] ,true ,['status' => 1]);
+                    return message('该授权以封禁！<br>持有者QQ:'.$this->maskQQ($authInfo['qq']) ,true ,['status' => 1]);
                 }
                 if($authInfo['permanent_switch'] == 1){
-                    return message('正版授权！<br>持有者QQ:'.$authInfo['qq'].'<br>到期时间:永久授权' ,true ,['status' => 2]);
+                    return message('正版授权！<br>持有者QQ:'.$this->maskQQ($authInfo['qq']).'<br>到期时间:永久授权' ,true ,['status' => 2]);
                 }else{
                     if($authInfo['endtime']>datetime()){
-                        return message('正版授权！<br>持有者QQ:'.$authInfo['qq'].'<br>到期时间:'.$authInfo['endtime'] ,true ,['status' => 2]);
+                        return message('正版授权！<br>持有者QQ:'.$this->maskQQ($authInfo['qq']).'<br>到期时间:'.$authInfo['endtime'] ,true ,['status' => 2]);
                     }else{
-                        return message('授权已到期！<br>持有者QQ:'.$authInfo['qq'].'<br>到期时间:'.$authInfo['endtime'] ,true ,['status' => 1]);
+                        return message('授权已到期！<br>持有者QQ:'.$this->maskQQ($authInfo['qq']).'<br>到期时间:'.$authInfo['endtime'] ,true ,['status' => 1]);
                     }
                 }
             case 'user':
@@ -98,7 +108,7 @@ class AjaxService extends BaseService
                     return message('不存在此用户！' ,false ,['status' => 0]);
                 }
                 if($authInfo['status'] == 0){
-                    return message('该用户以封禁！<br>用户QQ:'.$authInfo['qq'] ,true ,['status' => 1]);
+                    return message('该用户以封禁！<br>用户QQ:'.$this->maskQQ($authInfo['qq']) ,true ,['status' => 1]);
                 }
                 $powerPriceInfo = Db::name('power_price')
                     ->where([
@@ -106,7 +116,7 @@ class AjaxService extends BaseService
                     ])
                     ->field('name')
                     ->find();
-                return message('权限名称:'.$powerPriceInfo['name'].'！<br>用户QQ:'.$authInfo['qq'] ,true ,['status' => 2]);
+                return message('权限名称:'.$powerPriceInfo['name'].'！<br>用户QQ:'.$this->maskQQ($authInfo['qq']) ,true ,['status' => 2]);
 
         }
 

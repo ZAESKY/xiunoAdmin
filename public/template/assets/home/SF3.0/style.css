@@ -1,0 +1,489 @@
+/* ========== SF3.0 VitePress-inspired Theme ========== */
+:root {
+    --vp-c-brand: #2d8cf0;
+    --vp-c-brand-light: #57a3f3;
+    --vp-c-brand-lighter: #e8f2fd;
+    --vp-c-brand-dark: #1b7ad8;
+    --vp-c-text: #1e293b;
+    --vp-c-text-soft: #475569;
+    --vp-c-text-light: #94a3b8;
+    --vp-c-bg: #ffffff;
+    --vp-c-bg-soft: #f8fafc;
+    --vp-c-bg-alt: #f1f5f9;
+    --vp-c-border: #e2e8f0;
+    --vp-c-border-light: #f1f5f9;
+    --vp-radius: 12px;
+    --vp-radius-sm: 8px;
+    --vp-shadow: 0 1px 3px rgba(0,0,0,.06);
+    --vp-shadow-md: 0 4px 16px rgba(0,0,0,.08);
+    --vp-shadow-lg: 0 12px 32px rgba(0,0,0,.1);
+    --vp-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC",sans-serif;
+    --vp-max-w: 1152px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--vp-font);
+    font-size: 16px;
+    color: var(--vp-c-text);
+    background: var(--vp-c-bg-soft);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== NAV ========== */
+.vp-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--vp-c-border);
+    transition: background .3s;
+}
+.vp-nav-inner {
+    max-width: var(--vp-max-w);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+}
+.vp-nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--vp-c-text);
+    text-decoration: none;
+}
+.vp-nav-logo img { height: 36px; width: auto; }
+.vp-nav-logo:hover { color: var(--vp-c-brand); }
+.vp-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.vp-nav-links a {
+    padding: 8px 16px;
+    border-radius: var(--vp-radius-sm);
+    color: var(--vp-c-text-soft);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color .2s, background .2s;
+    display: block;
+    white-space: nowrap;
+}
+.vp-nav-links a:hover { color: var(--vp-c-brand); background: var(--vp-c-brand-lighter); }
+.vp-nav-login {
+    background: var(--vp-c-brand) !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+.vp-nav-login:hover { background: var(--vp-c-brand-dark) !important; color: #fff !important; }
+.vp-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--vp-c-text);
+}
+.vp-nav-toggle svg { width: 24px; height: 24px; display: block; }
+.vp-nav-spacer { height: 64px; }
+
+/* ========== HERO ========== */
+.vp-hero {
+    padding: 120px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #f8fafc 0%, #e8f2fd 50%, #f8fafc 100%);
+}
+.vp-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(45,140,240,.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 60%, rgba(45,140,240,.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+.vp-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin: 0 auto;
+}
+.vp-hero-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    object-fit: contain;
+    box-shadow: 0 4px 20px rgba(45,140,240,.15);
+}
+.vp-hero-title {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1.2;
+    margin: 0 0 16px;
+    background: linear-gradient(135deg, var(--vp-c-text) 0%, var(--vp-c-brand) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.vp-hero-desc {
+    font-size: 17px;
+    color: var(--vp-c-text-soft);
+    margin: 0 0 36px;
+    line-height: 1.7;
+}
+.vp-hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ========== BUTTONS ========== */
+.vp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 28px;
+    border-radius: var(--vp-radius-sm);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all .25s;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.vp-btn-brand {
+    background: var(--vp-c-brand);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(45,140,240,.25);
+}
+.vp-btn-brand:hover { background: var(--vp-c-brand-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(45,140,240,.35); color: #fff; }
+.vp-btn-outline {
+    background: transparent;
+    color: var(--vp-c-text);
+    border: 1.5px solid var(--vp-c-border);
+}
+.vp-btn-outline:hover { border-color: var(--vp-c-brand); color: var(--vp-c-brand); background: var(--vp-c-brand-lighter); }
+.vp-btn-ghost {
+    background: transparent;
+    color: var(--vp-c-text-soft);
+    border: 1.5px solid transparent;
+}
+.vp-btn-ghost:hover { color: var(--vp-c-text); background: var(--vp-c-bg-alt); }
+
+/* ========== SECTIONS ========== */
+.vp-container { max-width: var(--vp-max-w); margin: 0 auto; padding: 0 24px; }
+.vp-section { padding: 64px 0; }
+.vp-section-alt { background: var(--vp-c-bg); }
+.vp-section-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 48px;
+    letter-spacing: -.02em;
+    color: var(--vp-c-text);
+}
+
+/* ========== FEATURE CARDS ========== */
+.vp-features { padding: 80px 0; }
+.vp-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.vp-feature-card {
+    display: block;
+    padding: 28px 24px;
+    border-radius: var(--vp-radius);
+    background: var(--vp-c-bg);
+    border: 1px solid var(--vp-c-border-light);
+    text-decoration: none;
+    transition: all .3s;
+    cursor: pointer;
+}
+.vp-feature-card:hover {
+    border-color: var(--vp-c-brand-lighter);
+    box-shadow: var(--vp-shadow-md);
+    transform: translateY(-2px);
+}
+.vp-feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+    background: var(--vp-c-brand-lighter);
+}
+.vp-feature-card h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--vp-c-text);
+}
+.vp-feature-card p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--vp-c-text-soft);
+    line-height: 1.6;
+}
+
+/* ========== CARD ========== */
+.vp-card {
+    background: var(--vp-c-bg);
+    border-radius: var(--vp-radius);
+    border: 1px solid var(--vp-c-border);
+    padding: 36px 40px;
+}
+.vp-card-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 28px;
+    color: var(--vp-c-text);
+    letter-spacing: -.01em;
+}
+
+/* ========== FORM OVERRIDES ========== */
+.vp-card .layui-form-item { margin-bottom: 20px; }
+.vp-card .layui-form-item:last-child { margin-bottom: 0; }
+.vp-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vp-c-text);
+    margin-bottom: 8px;
+}
+
+/* Override LayUI inputs for cleaner look */
+.vp-card .layui-input,
+.vp-card select.layui-input {
+    height: 44px;
+    line-height: 44px;
+    border-radius: var(--vp-radius-sm);
+    border: 1.5px solid var(--vp-c-border);
+    padding: 0 14px;
+    font-size: 15px;
+    color: var(--vp-c-text);
+    background: var(--vp-c-bg-soft);
+    transition: all .2s;
+    width: 100%;
+    box-shadow: none;
+    text-align: left;
+    margin-top: 0;
+}
+.vp-card .layui-input:focus,
+.vp-card select.layui-input:focus {
+    border-color: var(--vp-c-brand);
+    background: var(--vp-c-bg);
+    box-shadow: 0 0 0 3px rgba(45,140,240,.08);
+    outline: none;
+}
+.vp-card .layui-input:hover { border-color: #cbd5e1; }
+
+/* Override LayUI select */
+.vp-card .layui-form-select .layui-edge { right: 14px; }
+
+/* Radio buttons as segmented control */
+.vp-query-types {
+    display: inline-flex;
+    background: var(--vp-c-bg-alt);
+    border-radius: var(--vp-radius-sm);
+    padding: 4px;
+    gap: 2px;
+}
+.vp-query-types .layui-form-radio {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 20px;
+    margin: 0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--vp-c-text-soft);
+    cursor: pointer;
+    transition: all .2s;
+}
+.vp-query-types .layui-form-radio:hover { color: var(--vp-c-text); }
+.vp-query-types .layui-form-radioed {
+    background: var(--vp-c-bg);
+    color: var(--vp-c-brand);
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.vp-query-types .layui-form-radio i { display: none; }
+
+/* Introduce block */
+.vp-introduce {
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: #f0f5ff;
+    border-radius: var(--vp-radius-sm);
+    border-left: 3px solid var(--vp-c-brand);
+    font-size: 14px;
+    color: var(--vp-c-text-soft);
+    line-height: 1.6;
+}
+
+/* Form actions */
+.vp-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+/* ========== REGISTER SECTION ========== */
+.vp-register-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* ========== FOOTER ========== */
+.vp-footer {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--vp-c-text-light);
+    font-size: 13px;
+    line-height: 1.8;
+    border-top: 1px solid var(--vp-c-border);
+    background: var(--vp-c-bg);
+}
+.vp-footer p { margin: 2px 0; }
+
+/* ========== RESPONSIVE ========== */
+
+/* Tablet landscape (≤1024px) */
+@media (max-width: 1024px) {
+    .vp-container { padding: 0 20px; }
+    .vp-nav-inner { padding: 0 20px; }
+    .vp-hero-title { font-size: 36px; }
+    .vp-hero { padding: 100px 20px 70px; }
+    .vp-section { padding: 48px 0; }
+    .vp-features { padding: 56px 0; }
+}
+
+/* Tablet portrait / large phones (≤768px) */
+@media (max-width: 768px) {
+    .vp-nav-links {
+        display: none;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: var(--vp-c-bg);
+        flex-direction: column;
+        padding: 12px;
+        border-bottom: 1px solid var(--vp-c-border);
+        box-shadow: 0 10px 30px rgba(0,0,0,.1);
+    }
+    .vp-nav-links.open { display: flex; }
+    .vp-nav-links a { padding: 14px 16px; width: 100%; }
+    .vp-nav-toggle { display: block; }
+    .vp-nav-login { text-align: center; }
+
+    .vp-features-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .vp-feature-card { padding: 22px 18px; }
+    .vp-register-grid { grid-template-columns: 1fr; gap: 0; }
+
+    .vp-hero { padding: 88px 16px 56px; }
+    .vp-hero-title { font-size: 30px; }
+    .vp-hero-desc { font-size: 15px; margin-bottom: 28px; }
+    .vp-hero-logo { width: 64px; height: 64px; border-radius: 16px; }
+    .vp-hero-actions { flex-direction: column; align-items: center; }
+    .vp-hero-actions .vp-btn { width: 100%; max-width: 280px; }
+
+    .vp-section { padding: 40px 0; }
+    .vp-section-title { font-size: 24px; margin-bottom: 32px; }
+    .vp-features { padding: 48px 0; }
+    .vp-card { padding: 24px 18px; }
+    .vp-card-title { font-size: 20px; margin-bottom: 20px; }
+
+    .vp-container { padding: 0 16px; }
+    .vp-btn { padding: 10px 22px; font-size: 14px; }
+    .vp-footer { padding: 24px 16px; }
+}
+
+/* Small phones (≤480px) */
+@media (max-width: 480px) {
+    .vp-nav-logo { font-size: 16px; }
+    .vp-nav-logo img { height: 28px; }
+    .vp-nav-inner { padding: 0 14px; height: 56px; }
+    .vp-nav-spacer { height: 56px; }
+    .vp-nav-links { top: 56px; }
+
+    .vp-hero { padding: 72px 12px 44px; }
+    .vp-hero-title { font-size: 24px; }
+    .vp-hero-desc { font-size: 14px; margin-bottom: 24px; }
+    .vp-hero-logo { width: 56px; height: 56px; border-radius: 14px; margin-bottom: 16px; }
+    .vp-hero-actions .vp-btn { max-width: 100%; }
+
+    .vp-features-grid { grid-template-columns: 1fr; gap: 12px; }
+    .vp-feature-card { padding: 18px 16px; }
+    .vp-feature-card h3 { font-size: 15px; }
+    .vp-feature-card p { font-size: 13px; }
+    .vp-feature-icon { width: 36px; height: 36px; border-radius: 8px; margin-bottom: 10px; }
+
+    .vp-section { padding: 32px 0; }
+    .vp-section-title { font-size: 21px; margin-bottom: 24px; }
+    .vp-features { padding: 36px 0; }
+    .vp-card { padding: 18px 14px; border-radius: 10px; }
+    .vp-card-title { font-size: 18px; margin-bottom: 16px; }
+
+    .vp-container { padding: 0 12px; }
+    .vp-btn { padding: 12px 18px; font-size: 14px; width: 100%; }
+    .vp-form-actions { flex-direction: column; }
+    .vp-form-actions .vp-btn { width: 100%; }
+
+    .vp-query-types { width: 100%; }
+    .vp-query-types .layui-form-radio { flex: 1; justify-content: center; padding: 8px 12px; font-size: 13px; }
+
+    .vp-card .layui-input,
+    .vp-card select.layui-input { height: 42px; font-size: 14px; padding: 0 12px; }
+    .vp-label { font-size: 13px; margin-bottom: 6px; }
+    .vp-footer { font-size: 12px; padding: 20px 12px; }
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes vp-fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.vp-feature-card { animation: vp-fade-up .5s ease both; }
+.vp-feature-card:nth-child(1) { animation-delay: .05s; }
+.vp-feature-card:nth-child(2) { animation-delay: .1s; }
+.vp-feature-card:nth-child(3) { animation-delay: .15s; }
+.vp-feature-card:nth-child(4) { animation-delay: .2s; }
+.vp-feature-card:nth-child(5) { animation-delay: .25s; }
+
+/* ========== LayUI override: hide radio icons in segmented control ========== */
+.vp-query-types .layui-form-radio > i.layui-anim { display: none !important; }
+
+/* ========== Fix LayUI select inside vp-card ========== */
+.vp-card .layui-form-select .layui-input { padding-right: 30px; }
+.vp-card .layui-input-block { margin-left: 0; }
+.vp-card .layui-form-pane .layui-form-label {
+    /* Keep pane form labels clean */
+    border-radius: var(--vp-radius-sm);
+}

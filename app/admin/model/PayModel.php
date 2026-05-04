@@ -12,11 +12,10 @@ class PayModel extends BaseModel
     {
         try{
             $result = self::where('trade_no', $trade_no)->find();
-            if ($result) {
-                return $result;
-            } else {
+            if (!$result) {
                 return false;
             }
+            return $result;
         }catch (\Exception $e){
             return false;
         }
@@ -63,16 +62,16 @@ class PayModel extends BaseModel
 
     }
 
-    public function drop($id){
+    public function drop($trade_no){
         try{
-            if(empty($id)){
+            if(empty($trade_no)){
                 throw new Exception(t('order.missing_id'));
             }
-            $row = $this->getInfo($id);
+            $row = $this->getInfo($trade_no);
             if(!$row){
                 throw new Exception(t('common.no_data'));
             }
-            self::where('id', $id)->delete();
+            self::where('trade_no', $trade_no)->delete();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -82,18 +81,18 @@ class PayModel extends BaseModel
     public function setStatus(){
         try{
             $post = request()->post();
-            $id = !empty($post['id'])?intval($post['id']):null;
+            $trade_no = !empty($post['trade_no'])?$post['trade_no']:null;
             $status = !empty($post['status'])?1:0;
 
-            if(empty($id)){
+            if(empty($trade_no)){
                 throw new Exception(t('order.missing_id'));
             }
-            $row = $this->getInfo($id);
+            $row = $this->getInfo($trade_no);
             if(!$row){
                 throw new Exception(t('common.no_data'));
             }
 
-            self::where('id', $id)
+            self::where('trade_no', $trade_no)
                 ->data(['status' => $status])
                 ->update();
             return true;
@@ -108,11 +107,7 @@ class PayModel extends BaseModel
             $post = request()->post();
             $limit = !empty($post['limit']) ? $post['limit'] : 10;
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
-            $appid = !empty($post['appid']) ? $post['appid'] : null;
-            $data = $this->buildSearchWhere('id|username');
-            if (!empty($appid)) {
-                $data[] = ['appid', '=', $appid];
-            }
+            $data = $this->buildSearchWhere('trade_no|name');
 
             $list = self::order('id', 'asc')->where($data)->paginate([
                 'list_rows' => $limit,

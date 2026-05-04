@@ -321,8 +321,7 @@ INSERT INTO `SF_menu`(`id`,`name`, `url`, `icon`, `parentid`, `addtime`, `power`
 (26, '盗版管理', 'Pirate/list', 'layui-icon-website', 0, NOW(), 1, 1),
 (27, '系统设置', '#', 'layui-icon-set', 0, NOW(), 1, 1),
 (28, '系统配置', 'Set/index', '', 27, NOW(), 1, 1),
-(29, '模板配置', 'Set/template', '', 27, NOW(), 1, 1),
-(30, '软件更新', 'Set/update', '', 27, NOW(), 1, 1),
+(29, '软件更新', 'Set/update', '', 27, NOW(), 1, 1),
 (31, '插件管理', 'Addon/list', 'layui-icon-component', 0, NOW(), 1, 1),
 (32, '系统日志', 'Log/list', 'layui-icon-log', 0, NOW(), 1, 1);
 

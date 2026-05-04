@@ -18,7 +18,6 @@ class Query extends Frontend
     }
 
     public function index(){
-        //return download(public_path().'upload/MyQQ.zip', 'my.zip');
-        return print_r(scan_dir(public_path()));
+        return json(['msg' => 'Query API'])->send();
     }
 }

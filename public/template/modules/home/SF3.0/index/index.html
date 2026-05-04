@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -6,450 +5,325 @@
     <title>{$title}</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="keywords" content="{$keywords}">
     <meta name="description" content="{$description}">
     <link href="/favicon.ico" rel="icon">
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
     <link rel="stylesheet" href="{__CSS__}sf-style.css"/>
-<!--    <link rel="stylesheet" href="{__TEMPLATE_HOME_ASSETS__}SF3.0/login.css">-->
-
+    <link rel="stylesheet" href="{__TEMPLATE_HOME_ASSETS__}SF3.0/style.css"/>
     <!--[if lt IE 9]>
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
     <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
-    <style>
-        body {
-            font-family: '微软雅黑';
-            font-weight: 400
-        }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-        .layui-input {
-            border: none;
-            box-shadow: 2px 2px 12px 0px whitesmoke;
-            border-bottom: solid 1px whitesmoke;
-            text-align: center;
-            border-radius: 0.2rem;
-            margin-top: 1rem;
-        }
-        .qint_color {
-            background: linear-gradient(to left, #FF8A80, #FF5252);
-            border-radius: 0.3rem;
-            box-shadow: 1px 1px 9px 1px #eee;
-        }
-
-        .qint_color2 {
-            background: linear-gradient(to left, #0091EA, #4FC3F7);
-            border-radius: 0.3rem;
-            box-shadow: 1px 1px 9px 1px #eee;
-        }
-
-        .qint_color3 {
-            background: linear-gradient(to left, #5E35B1, #651FFF);
-            border-radius: 0.3rem;
-            box-shadow: 1px 1px 9px 1px #eee;
-        }
-
-        .misett {
-            transition: all 0.4s;
-        }
-
-        @keyframes gradientBackground {
-            0% {
-                background-position: 0 0
-            }
-            50% {
-                background-position: 50% 100%
-            }
-            100% {
-                background-position: 100% 0
-            }
-        }
-        .img{
-            width: 7em;
-            height: 7em;
-            margin:auto;
-            display: block;
-            border-radius: 10em;
-            box-shadow: 3px 3px 8px 1px silver;
-            margin-bottom: 1em;
-            object-fit: contain;
-        }
-    </style>
     {$background_image|raw}
 </head>
-<div class="layui-fluid layadmin-homepage-fluid" >
-    <div class="layui-row layui-col-space8">
-        <div class="layui-col-xs12 layui-col-sm8 layui-col-sm-offset2 layui-col-md6 layui-col-md-offset3 misett">
-            <div class="layui-card" id="divLoading">
-                <div class="layui-card-header" style="font-size: 1.5rem;text-align: center;height: 3rem;line-height: 3rem;">
-                    {$title}
-                </div>
-                <div class="layui-card-body">
-                    <img id="logo" class="img" onclick="layer.tips('应用LOGO', this, {tips: 1});"  src="{__IMG__}logo.png"/>
-                    <!-- 表格工具栏 -->
-                    <form class="layui-form">
-                        <div class="layui-form-item">
-                            <select name="appid" class="layui-input ew-select-fixed" lay-filter="app" lay-search lay-verify="required">
-                                <option value="">请选择应用</option>
-                                {volist name="app_list.data.data" id="res"}
-                                <option value="{$res.id}">{$res.name}</option>
-                                {/volist}
-                            </select>
-                        </div>
-                        <div class="layui-form-item">
-                            <input type="text" name="auth_info" placeholder="请填写需要查询的内容" lay-tips="请输入您要查询的内容!" lay-verType="tips" class="layui-input" lay-verify="required" style="width: 100%;"/>
-                        </div>
-                        <div class="layui-form-item">
-                            <div class="layui-row layui-col-space12">
-                                <div class="layui-col-xs4">
-                                    <button type="button" class="layui-btn layui-btn-fluid qint_color" lay-filter="submit_url" lay-submit>查询授权
-                                    </button>
-                                </div>
-                                <div class="layui-col-xs4">
-                                    <button type="button" class="layui-btn layui-btn-fluid qint_color2" lay-filter="submit_user" lay-submit>权限查询
-                                    </button>
-                                </div>
-                                <div class="layui-col-xs4">
-                                    <button type="button" class="layui-btn layui-btn-fluid qint_color3" lay-filter="submit_blacklist" lay-submit>认证查询
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <div id="introduce" class="layui-form-item" style="display: none">
-                                <div class="sf-tips">
-                                    <div id="introduceContent"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="layui-col-xs12 layui-col-sm8 layui-col-sm-offset2 layui-col-md6 layui-col-md-offset3 misett"
-             style="margin-top: 0.5rem;">
-            <div class="layui-card">
-                <div class="layui-card-header"
-                     style="font-size: 1.5rem;text-align: center;height: 3rem;line-height: 3rem;transition: all 0.5s;"
-                     id="text_renqi">
-                    更多功能
-                </div>
-                <div class="layui-card-body">
-                    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
-                        <ul class="layui-tab-title" style="text-align: center;margin-bottom: 1rem;">
-                            <li class="layui-this" onclick="window.open('/user.php/Index/index')">登陆后台</li>
-                            <li lay-filter="download" lay-submit>源码下载</li>
-                            <li>注册用户</li>
-                        </ul>
-                        <div class="layui-tab-content">
-                            <div class="layui-tab-item layui-show">
-                            </div>
-                            <div class="layui-tab-item">
-                            </div>
-                            <div class="layui-tab-item">
-                                <form class="layui-card-body layui-form layui-form-pane formBasForm" id="registerForm">
-                                    <div class="layui-form-item">
-                                        <select name="appid" class="layui-input ew-select-fixed" lay-filter="register_app" lay-search lay-verify="required">
-                                            <option value="">请选择应用</option>
-                                            {volist name="app_list.data.data" id="res"}
-                                            <option value="{$res.id}">{$res.name}</option>
-                                            {/volist}
-                                        </select>
-                                    </div>
-                                    <div class="layui-form-item">
-                                        <input type="text" name="username" placeholder="请输入用户名" class="layui-input" lay-verType="tips" lay-verify="required" required/>
-                                    </div>
-                                    <div class="layui-form-item">
-                                        <input type="password" name="password" placeholder="请输入密码" class="layui-input" lay-verType="tips" lay-verify="required" required/>
+<body>
 
-                                    </div>
-                                    <div class="layui-form-item">
-                                        <input type="password" name="confirmPassword" placeholder="请确认密码" class="layui-input" lay-verType="tips" lay-verify="required" required/>
-                                    </div>
-                                    <div class="layui-form-item">
-                                        <input type="number" name="qq" placeholder="请输入要绑定的QQ" class="layui-input" lay-verType="tips" lay-verify="required" required/>
-                                    </div>
-                                    <div class="layui-form-item">
-                                        <input type="text" name="email" placeholder="请输入要绑定的邮箱" class="layui-input" lay-verType="tips" lay-verify="required" required/>
-                                    </div>
-                                    <div class="layui-row layui-col-space12">
-                                        <div class="layui-col-xs6">
-                                            <button type="button" class="layui-btn layui-btn-fluid" lay-filter="SF_RegisterSubmit" lay-submit>
-                                                注册
-                                            </button>
-                                        </div>
-                                        <div class="layui-col-xs6">
-                                            <button type="button" class="layui-btn layui-btn-fluid layui-btn-primary" id="SF_Register_Reset">
-                                                重置
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="layui-text text-center" style="margin-top: 2.5rem;color: darkgrey;">
-                                因排版原因只展示如上内容! <a href="/user.php/Index/index">体验</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ====== NAV ====== -->
+<header class="vp-nav" id="topNav">
+    <div class="vp-nav-inner">
+        <a href="/" class="vp-nav-logo">
+            <img src="{__IMG__}logo.png" alt="{$title}">
+            <span>{$title}</span>
+        </a>
+        <ul class="vp-nav-links" id="navLinks">
+            <li><a href="/">首页</a></li>
+            <li><a href="#query">授权查询</a></li>
+            <li><a href="javascript:;" id="btn-download">源码下载</a></li>
+            <li><a href="{:url('/Index/pluginMarket')}">插件市场</a></li>
+            <li><a href="/user.php/Index/index" class="vp-nav-login">登录后台</a></li>
+        </ul>
+        <button class="vp-nav-toggle" id="navToggle" aria-label="菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+    </div>
+</header>
+<div class="vp-nav-spacer"></div>
+
+<!-- ====== HERO ====== -->
+<section class="vp-hero">
+    <div class="vp-hero-inner">
+        <img id="logo" class="vp-hero-logo" src="{__IMG__}logo.png" alt="{$title}"/>
+        <h1 class="vp-hero-title">{$title}</h1>
+        <p class="vp-hero-desc">{$description}</p>
+        <div class="vp-hero-actions">
+            <a href="#query" class="vp-btn vp-btn-brand">开始查询</a>
+            <a href="{:url('/Index/pluginMarket')}" class="vp-btn vp-btn-outline">插件市场</a>
+            <a href="/user.php/Index/index" class="vp-btn vp-btn-outline">登录后台</a>
         </div>
     </div>
-</div>
+</section>
 
-<div style="color: white;width: 100%;text-align: center;margin-bottom: 2rem;">
+<!-- ====== FEATURES ====== -->
+<section class="vp-features">
+    <div class="vp-container">
+        <h2 class="vp-section-title">核心功能</h2>
+        <div class="vp-features-grid">
+            <a href="#query" class="vp-feature-card" data-type="auth">
+                <div class="vp-feature-icon">
+                    <i class="layui-icon layui-icon-vercode" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                </div>
+                <h3>授权查询</h3>
+                <p>快速查询软件授权状态与有效期限</p>
+            </a>
+            <a href="#query" class="vp-feature-card" data-type="user">
+                <div class="vp-feature-icon">
+                    <i class="layui-icon layui-icon-user" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                </div>
+                <h3>代理查询</h3>
+                <p>查询代理身份信息与权限范围</p>
+            </a>
+            <a href="javascript:;" class="vp-feature-card" id="card-download">
+                <div class="vp-feature-icon">
+                    <i class="layui-icon layui-icon-download-circle" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                </div>
+                <h3>源码下载</h3>
+                <p>获取最新版本程序源代码</p>
+            </a>
+            <a href="/user.php/UserPlugin/market" class="vp-feature-card">
+                <div class="vp-feature-icon">
+                    <i class="layui-icon layui-icon-template-1" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                </div>
+                <h3>插件下载</h3>
+                <p>丰富的插件市场，扩展更多功能</p>
+            </a>
+            <a href="/user.php/Index/index" class="vp-feature-card">
+                <div class="vp-feature-icon">
+                    <i class="layui-icon layui-icon-set" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                </div>
+                <h3>后台管理</h3>
+                <p>进入系统后台进行综合管理</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ====== QUERY SECTION ====== -->
+<section id="query" class="vp-section">
+    <div class="vp-container">
+        <div class="vp-card" id="divLoading">
+            <h2 class="vp-card-title">授权查询</h2>
+            <form class="layui-form">
+                <div class="layui-form-item">
+                    <label class="vp-label">选择应用</label>
+                    <select name="appid" lay-filter="app" lay-search lay-verify="required">
+                        <option value="">请选择应用</option>
+                        {volist name="app_list.data.data" id="res"}
+                        <option value="{$res.id}">{$res.name}</option>
+                        {/volist}
+                    </select>
+                </div>
+                <div class="layui-form-item">
+                    <label class="vp-label">查询内容</label>
+                    <input type="text" name="auth_info" placeholder="请输入需要查询的内容" class="layui-input" lay-verify="required"/>
+                </div>
+                <div class="layui-form-item">
+                    <label class="vp-label">查询类型</label>
+                    <div class="vp-query-types">
+                        <input type="radio" name="query_type" value="auth" title="授权" checked>
+                        <input type="radio" name="query_type" value="user" title="代理">
+                    </div>
+                </div>
+                <div id="introduce" class="vp-introduce" style="display:none">
+                    <div id="introduceContent"></div>
+                </div>
+                <div class="vp-form-actions">
+                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_Query" lay-submit>查询</button>
+                    <button type="button" class="vp-btn vp-btn-ghost" id="SF_Query_Reset">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer class="vp-footer">
     <p>{:conf('foot')}</p>
     <p>{:conf('ICP')}</p>
-</div>
+</footer>
+
 <div id="myAudio1"></div>
 {$background_notice|raw}
 {$background_music|raw}
+
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
 <script type="text/javascript" src="{__JS__}common.js?v=318"></script>
 
 <script type="text/javascript">
-    layui.use(['form', 'admin', 'notice','layer', 'element'], function () {
-        var $ = layui.jquery;
-        var form = layui.form;
-        var notice = layui.notice;
-        var admin = layui.admin;
-        var layer = layui.layer;
+/* ---- Mobile nav toggle ---- */
+document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('#navLinks a').forEach(function (link) {
+    link.addEventListener('click', function () {
+        document.getElementById('navLinks').classList.remove('open');
+    });
+});
 
-        form.on('submit(submit_url)', function (data) {
-            ajax_msg(data.field, 'auth');
-            return false;
+layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var notice = layui.notice;
+    var admin = layui.admin;
+    var layer = layui.layer;
+
+    /* ---- Query submit ---- */
+    form.on('submit(SF_Query)', function (data) {
+        ajax_msg(data.field, data.field.query_type || 'auth');
+        return false;
+    });
+
+    /* ---- Feature card click: set query type ---- */
+    $('.vp-feature-card[data-type]').on('click', function () {
+        var type = $(this).data('type');
+        $('input[name="query_type"][value="' + type + '"]').prop('checked', true);
+        form.render('radio');
+    });
+
+    /* ---- Reset query form ---- */
+    $('#SF_Query_Reset').click(function () {
+        document.getElementById('divLoading').querySelector('form').reset();
+        $('#introduce').hide();
+        form.render('select');
+        form.render('radio');
+        notice.msg('已重置查询表单', {icon: 1, audio:'1'});
+    });
+
+    /* ---- Download ---- */
+    $('#btn-download, #card-download').click(function () {
+        admin.open({
+            type: 2,
+            title: '源码下载',
+            shade: .1,
+            area: ['600px', '460px'],
+            content: '{:url("/Index/download")}'
         });
+    });
 
-        form.on('submit(submit_user)', function (data) {
-            ajax_msg(data.field, 'user');
-            return false;
-        });
-
-        form.on('submit(submit_blacklist)', function (data) {
-            ajax_msg(data.field, 'pay');
-            return false;
-        });
-
-        form.on('submit(download)', function (data) {
-            parent.layui.admin.open({
-                type: 2,
-                title: '源码下载',
-                shade: .1,
-                area: ['600px','460px'],
-                content: '{:url("/Index/download")}'
-            });
-            return false;
-        });
-
-        $("#SF_Register_Reset").click(function(){
-            document.getElementById("registerForm").reset();
-            notice.msg('重置表单成功！', {icon: 1, audio:'1'});
-            return false;
-        });
-
-        form.on('submit(SF_RegisterSubmit)', function (data) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
-            $.ajax({
-                type: "POST",
-                url: '{:url("/Ajax/register")}',
-                data: data.field,
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        notice.success({
-                            title: '注册通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
-                    } else {
-                        notice.error({
-                            title: '注册通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
+    /* ---- App select: load app info ---- */
+    form.on('select(app)', function (data) {
+        if (data.value == '') {
+            $('#logo').attr('src', '{__IMG__}logo.png');
+            $('#introduce').hide();
+            return;
+        }
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Ajax/appInfo")}',
+            data: {appid: data.value},
+            dataType: "json",
+            success: function (res) {
+                if (res.code == 0) {
+                    notice.msg("获取信息成功", {icon: 1, audio:'1'});
+                    $('#introduceContent').html(res.data.introduce || '暂无介绍');
+                    $('#introduce').show();
+                    if (res.data.app_notice) {
+                        admin.open({
+                            type: 1,
+                            title: '应用公告',
+                            shade: .1,
+                            content: '<div style="padding:20px;line-height:1.8;">' + res.data.app_notice + '</div>'
                         });
                     }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.error({
-                        title: '注册通知',
-                        message: '服务器错误',
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        displayMode:'2',
-                        audio:'1'
-                    });
+                    $('#logo').attr('src', res.data.logo);
+                } else {
+                    notice.msg(res.msg, {icon: 2, audio:'1'});
                 }
+            },
+            error: function () {
+                notice.msg("服务器错误", {icon: 2, audio:'1'});
+            }
+        });
+    });
+
+    /* ---- AJAX query helper ---- */
+    function ajax_msg(data, type) {
+        admin.showLoading('#divLoading', 3, '.8');
+        if (data.appid == '') {
+            notice.error({
+                title: '消息通知',
+                message: '请选择需要查询的应用',
+                animateInside: true,
+                position: 'topCenter',
+                transitionOut: 'flipOutX',
+                displayMode: '2',
+                audio: '1'
             });
+            admin.removeLoading('#divLoading', true, true);
             return false;
-        });
-
-        form.on('select(app)', function (data) {
-            if(data.value == ''){
-                $("#logo").attr('src','{__IMG__}logo.png');
-            }else{
-                $.ajax({
-                    type: "POST",
-                    url: '{:url("/Ajax/appInfo")}',
-                    data: {appid:data.value},
-                    dataType: "json",
-                    success: function(data) {
-                        notice.destroy();
-                        if (data.code == 0) {
-                            notice.msg("获取信息成功！", {icon: 1, audio:'1'});
-                            $("#introduceContent").html(data.data.introduce?data.data.introduce:'暂无介绍');
-                            $("#introduce").css('display','inherit');
-                            if(data.data.app_notice){
-                                admin.open({
-                                    type: 1,
-                                    title: '应用公告',
-                                    shade: .1,
-                                    content: '<div class="layui-card layui-card-body">'+data.data.app_notice+'</div>'
-                                });
-                            }
-                            $("#logo").attr('src',data.data.logo);
-                        } else {
-                            notice.msg(data.msg, {icon: 2, audio:'1'});
-                        }
-                    },
-                    error: function() {
-                        notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
-                    }
-                });
-            }
+        }
+        if (data.auth_info == '') {
+            notice.error({
+                title: '消息通知',
+                message: '请输入需要查询的内容',
+                animateInside: true,
+                position: 'topCenter',
+                transitionOut: 'flipOutX',
+                displayMode: '2',
+                audio: '1'
+            });
+            admin.removeLoading('#divLoading', true, true);
             return false;
-        });
-
-        function ajax_msg(data, type) {
-            admin.showLoading('#divLoading', 3, '.8');
-            if(data.appid == ''){
-                notice.error({
-                    title: '消息通知',
-                    message: '请选择需要查询的应用！',
-                    animateInside:true,
-                    position:'topCenter',
-                    transitionOut:'flipOutX',
-                    transitionOutMobile: 'flipOutX',
-                    displayMode:'2',
-                    audio:'1'
-                });
+        }
+        data.query_type = type;
+        $.ajax({
+            type: "POST",
+            url: '{:url("/Ajax/queryAuth")}',
+            data: data,
+            dataType: "json",
+            success: function (res) {
                 admin.removeLoading('#divLoading', true, true);
-                return false;
-            }
-            if(data.auth_info == ''){
-                notice.error({
-                    title: '消息通知',
-                    message: '请输入需要查询的内容！',
-                    animateInside:true,
-                    position:'topCenter',
-                    transitionOut:'flipOutX',
-                    transitionOutMobile: 'flipOutX',
-                    displayMode:'2',
-                    audio:'1'
-                });
-                admin.removeLoading('#divLoading', true, true);
-                return false;
-            }
-            data.query_type = type;
-            $.ajax({
-                type: "POST",
-                url: '{:url("/Ajax/queryAuth")}',
-                data: data,
-                dataType: "json",
-                success: function(data) {
-                    admin.removeLoading('#divLoading', true, true);
-                    if (data.code == 0) {
-                        if(data.data.status == 1){
-                            notice.warning({
-                                title: '查询通知',
-                                message: data.msg,
-                                animateInside:true,
-                                position:'topCenter',
-                                transitionOut:'flipOutX',
-                                transitionOutMobile: 'flipOutX',
-                                displayMode:'2',
-                                audio:'1'
-                            });
-                        }else{
-                            notice.success({
-                                title: '查询通知',
-                                message: data.msg,
-                                animateInside:true,
-                                position:'topCenter',
-                                transitionOut:'flipOutX',
-                                transitionOutMobile: 'flipOutX',
-                                displayMode:'2',
-                                audio:'1'
-                            });
-                        }
-                    } else {
-                        notice.error({
+                if (res.code == 0) {
+                    if (res.data.status == 1) {
+                        notice.warning({
                             title: '查询通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
+                            message: res.msg,
+                            animateInside: true,
+                            position: 'topCenter',
+                            transitionOut: 'flipOutX',
+                            displayMode: '2',
+                            audio: '1'
+                        });
+                    } else {
+                        notice.success({
+                            title: '查询通知',
+                            message: res.msg,
+                            animateInside: true,
+                            position: 'topCenter',
+                            transitionOut: 'flipOutX',
+                            displayMode: '2',
+                            audio: '1'
                         });
                     }
-                },
-                error: function() {
-                    admin.removeLoading('#divLoading', true, true);
+                } else {
                     notice.error({
                         title: '查询通知',
-                        message: '服务器错误',
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        displayMode:'2',
-                        audio:'1'
+                        message: res.msg,
+                        animateInside: true,
+                        position: 'topCenter',
+                        transitionOut: 'flipOutX',
+                        displayMode: '2',
+                        audio: '1'
                     });
                 }
-            });
-        }
-
-        window.changeColor = function () {
-            var color = "#EF5350|#FF8A80|#FF4081|#EC407A|#F44336|#E91E63|#00E676|#FF8F00|#F4511E|#FF3D00";
-            color = color.split("|");
-            document.getElementById("text_renqi").style.color = color[parseInt(Math.random() * color.length)];
-        }
-
-        setTimeout("changeColor();", 1000);
-        setTimeout("changeColor();", 2000);
-        setTimeout("changeColor();", 3000);
-        setTimeout("changeColor();", 4000);
-    });
+            },
+            error: function () {
+                admin.removeLoading('#divLoading', true, true);
+                notice.error({
+                    title: '查询通知',
+                    message: '服务器错误',
+                    animateInside: true,
+                    position: 'topCenter',
+                    transitionOut: 'flipOutX',
+                    displayMode: '2',
+                    audio: '1'
+                });
+            }
+        });
+    }
+});
 </script>
 
 </body>

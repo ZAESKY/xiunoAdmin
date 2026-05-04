@@ -127,13 +127,6 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">手机号:</label>
-                <div class="layui-input-block">
-                    <input type="number" name="phone" placeholder="请输入手机号" class="layui-input"
-                           lay-verType="tips"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
                 <label class="layui-form-label">余额:</label>
                 <div class="layui-input-block">
                     <input type="number" name="balance" placeholder="留空则为0元" class="layui-input"
@@ -227,7 +220,6 @@
                     }},
                 {field: 'qq', title: 'QQ', align: 'right', sort: true, minWidth: 108},
                 {field: 'email', title: '邮箱', align: 'right', sort: true, minWidth: 170},
-                {field: 'phone', title: '手机号', align: 'right', sort: true, minWidth: 118},
                 {field: 'balance', title: '财产', align: 'right', templet: function (d) {
                         return '<span class="layui-badge layui-badge-green">余额：'+d.balance+'</span> <span class="layui-badge layui-badge-yellow">积分：'+d.integral+'</span>';
                     }, sort: true, minWidth: 171},
@@ -493,21 +485,20 @@
                             url: '{:url("/User/balanceLog")}',
                             method: 'post',
                             where: {user_id: mData.id},
-                            page: true,
-                            limit: 12,
+                            page: true, limit: 12,
                             request: {pageName: 'current_page', limitName: 'limit'},
                             parseData: function(res){
                                 return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
                             },
                             cols: [[
                                 {field: 'type', title: '类型', width: 100, templet: function(d){
-                                    var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款'};
-                                    return '<span class="layui-badge">'+(m[d.type]||d.type)+'</span>';
+                                    var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入',withdraw_apply:'提现申请',withdraw_cancel:'提现撤回',withdraw_reject:'提现驳回',withdraw_reject_refund:'提现驳回返还'};
+                                    return '<span class="layui-badge '+(d.amount>0?'layui-badge-green':'layui-badge-blue')+'">'+(m[d.type]||d.type)+'</span>';
                                 }},
                                 {field: 'amount', title: '金额', width: 100, templet: function(d){
-                                    return d.amount > 0 ? '<span style="color:#5cb85c">+'+d.amount+'</span>' : '<span style="color:#d9534f">'+d.amount+'</span>';
+                                    return d.amount > 0 ? '<span style="color:#5cb85c">+'+d.amount+' 元</span>' : '<span style="color:#d9534f">'+d.amount+' 元</span>';
                                 }},
-                                {field: 'balance_after', title: '余额', width: 100},
+                                {field: 'balance_after', title: '余额', width: 100, templet: function(d){ return (d.balance_after||'0.00')+' 元'; }},
                                 {field: 'description', title: '说明', minWidth: 180},
                                 {field: 'created_at', title: '时间', width: 170}
                             ]]

@@ -10,7 +10,6 @@ class Notice {
     public function subscribe(Event $event){
         $event->listen('UserLoginNotice',[$this,'onUserLogin']);
         $event->listen('UserRegisterNotice',[$this,'onUserRegister']);
-        $event->listen('ChangeBindingPhoneNotice',[$this,'onChangeBindingPhone']);
         $event->listen('ChangeBindingMailNotice',[$this,'onChangeBindingMail']);
         $event->listen('DownloadMailNotice',[$this,'onDownloadMailNotice']);
     }
@@ -24,12 +23,6 @@ class Notice {
     public function onUserRegister(array $param){
         $hook = conf('user_register_message');
         if(empty($hook)) return message('站点未开启用户注册验证发送！', false);
-        return json_decode(hook($hook, $param), true);
-    }
-
-    public function onChangeBindingPhone(array $param){
-        $hook = conf('change_binding_phone_message');
-        if(empty($hook)) return message('站点未开启换绑手机验证发送！', false);
         return json_decode(hook($hook, $param), true);
     }
 

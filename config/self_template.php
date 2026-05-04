@@ -3,8 +3,8 @@
 return array (
   'home' => 
   array (
-    'name' => 'default',
-    'view_base' => '../public/template/modules/home/default/',
+    'name' => 'SF3.0',
+    'view_base' => '../public/template/modules/home/SF3.0/',
     'config' => 
     array (
     ),

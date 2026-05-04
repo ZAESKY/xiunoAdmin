@@ -90,13 +90,6 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">手机号:</label>
-            <div class="layui-input-block">
-                <input type="number" name="phone" placeholder="请输入QQ" class="layui-input"
-                       lay-verType="tips"/>
-            </div>
-        </div>
-        <div class="layui-form-item">
             <label class="layui-form-label">余额:</label>
             <div class="layui-input-block">
                 <input type="number" name="balance" placeholder="填写的余额将从您账户扣除，留空则为0元" class="layui-input"
@@ -181,7 +174,6 @@
                     }},
                 {field: 'qq', title: 'QQ', align: 'right', sort: true, minWidth: 108},
                 {field: 'email', title: '邮箱', align: 'right', sort: true, minWidth: 170},
-                {field: 'phone', title: '手机号', align: 'right', sort: true, minWidth: 118},
                 {field: 'balance', title: '财产', align: 'right', templet: function (d) {
                         return '<span class="layui-badge layui-badge-green">余额：'+d.balance+'</span> <span class="layui-badge layui-badge-yellow">积分：'+d.integral+'</span>';
                     }, sort: true, minWidth: 171},

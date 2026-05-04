@@ -22,8 +22,6 @@ define('MESSAGE_NO_DEVICEID', 'validation.missing_id');
 define('MESSAGE_NO_DEVICE', 'validation.param_error');
 define('MESSAGE_NO_APPVERSION', 'version.version_empty');
 
-define('MESSAGE_NO_MOBILE', 'validation.phone');
-define('MESSAGE_MOBILE_INVALID', 'validation.phone');
 define('MESSAGE_NO_PASSWORD', 'login.password_empty');
 define('MESSAGE_NO_USER_INFO', 'user.info_error');
 define('MESSAGE_PASSWORD_ERROR', 'login.password_incorrect');

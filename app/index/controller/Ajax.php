@@ -33,7 +33,6 @@ class Ajax extends Frontend
             $appid = !empty($post['appid'])?intval($post['appid']):null;
             $username = !empty($post['username'])?$post['username']:null;
             $qq = !empty($post['qq'])?intval($post['qq']):null;
-            $phone = !empty($post['phone'])?intval($post['phone']):null;
             $email = !empty($post['email'])?$post['email']:null;
             $password = !empty($post['password'])?$post['password']:null;
             try {
@@ -75,9 +74,9 @@ class Ajax extends Frontend
                 $data = [
                     'username' => $username,
                     'password' => get_password($password),
+                    'phone' => '',
                     'qq' => $qq,
                     'email' => $email,
-                    'phone' => $phone,
                     'appid' => $appid,
                     'status' => 1,
                     'balance' => 0,

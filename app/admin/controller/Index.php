@@ -87,6 +87,48 @@ class Index extends Backend
             'page' => 1,
         ]);
 
+        // Pending items
+        $pendingPlugins = Db::name('plugin')->where('status', 0)->count('id');
+        $pendingFeedback = Db::name('feedback')->where('status', 0)->count('id');
+        $pendingOrders = Db::name('order')->where('status', 0)->count('id');
+
+        // Latest plugins & orders
+        $latestPlugins = Db::name('plugin')->order('id', 'desc')->limit(5)->field('id,name,icon,author,version,status,created_at')->select()->toArray();
+        $recentOrders = Db::name('order')
+            ->alias('o')
+            ->join('user u', 'o.userid = u.id', 'left')
+            ->order('o.id', 'desc')
+            ->limit(5)
+            ->field('o.id, o.trade_no, o.name, o.money, o.status, o.addtime, u.username')
+            ->select()
+            ->toArray();
+
+        // Today stats
+        $todayAuths = Db::name('auth')->whereTime('addtime', 'today')->count('id');
+        $todayOrders = Db::name('order')->whereTime('addtime', 'today')->count('id');
+        $todayDownloads = Db::name('plugin_download')->whereTime('created_at', 'today')->count('id');
+        $weekTrend = [];
+        $weekAuthMax = 1;
+        $weekUserMax = 1;
+        for ($i = 6; $i >= 0; $i--) {
+            $start = date('Y-m-d 00:00:00', strtotime('-' . $i . ' days'));
+            $end = date('Y-m-d 23:59:59', strtotime('-' . $i . ' days'));
+            $authNum = Db::name('auth')->whereTime('addtime', 'between', [$start, $end])->count('id');
+            $userNum = Db::name('user')->whereTime('addtime', 'between', [$start, $end])->count('id');
+            $weekAuthMax = max($weekAuthMax, $authNum);
+            $weekUserMax = max($weekUserMax, $userNum);
+            $weekTrend[] = [
+                'day' => date('m-d', strtotime($start)),
+                'auth' => $authNum,
+                'user' => $userNum,
+            ];
+        }
+        foreach ($weekTrend as &$trendItem) {
+            $trendItem['auth_rate'] = max(6, round($trendItem['auth'] / $weekAuthMax * 100));
+            $trendItem['user_rate'] = max(6, round($trendItem['user'] / $weekUserMax * 100));
+        }
+        unset($trendItem);
+
         View::assign([
             'log_list' => $logList,
             'balance_ranking' => $balanceRanking,
@@ -97,7 +139,18 @@ class Index extends Backend
             'pirate_count' => $pirateCount,
             'pirate_increase' => $pirateIncrease,
             'user_count' => $userCount,
-            'user_increase' => $userIncrease
+            'user_increase' => $userIncrease,
+            'pending_plugins' => $pendingPlugins,
+            'pending_feedback' => $pendingFeedback,
+            'pending_orders' => $pendingOrders,
+            'latest_plugins' => $latestPlugins,
+            'recent_orders' => $recentOrders,
+            'today_auths' => $todayAuths,
+            'today_orders' => $todayOrders,
+            'today_downloads' => $todayDownloads,
+            'week_trend' => $weekTrend,
+            'week_auth_max' => $weekAuthMax,
+            'week_user_max' => $weekUserMax,
         ]);
         return $this->render();
     }

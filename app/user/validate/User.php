@@ -15,7 +15,6 @@ class User extends Validate
         'password|密码' => 'require',
         'qq|QQ' => 'require|integer|max:12',
         'email|邮箱' => 'email',
-        'phone|手机号' => 'integer|max:11',
     ];
     /**
      * 提示消息.
@@ -31,8 +30,6 @@ class User extends Validate
         'qq.integer'     => 'QQ号只能填写数字',
         'qq.max'         => 'QQ号不能超过12位',
         'email.email'    => '邮箱格式不正确',
-        'phone.integer'  => '手机号只能填写数字',
-        'phone.max'      => '手机号不能超过11位',
     ];
     /**
      * 验证场景.

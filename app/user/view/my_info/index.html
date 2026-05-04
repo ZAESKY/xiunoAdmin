@@ -1,198 +1,155 @@
 {include file="/public/header"}
 <style>
-    /* 用户信息 */
-    .user-info-head {
-        width: 110px;
-        height: 110px;
-        line-height: 110px;
-        position: relative;
-        display: inline-block;
-        border: 2px solid #eee;
-        border-radius: 50%;
-        overflow: hidden;
-        cursor: pointer;
-        margin: 0 auto;
+    .profile-card { border-radius: 10px; overflow: hidden; background: #fff; border: 1px solid #f0f0f0; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    /* cover */
+    .profile-cover {
+        height: 118px; position: relative; overflow: hidden;
+        background: linear-gradient(135deg, #1a3a5c 0%, #26547c 40%, #3a7ca5 100%);
     }
+    .profile-cover::before {
+        content: ''; position: absolute; inset: 0; opacity: .1;
+        background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,.3) 8px, rgba(255,255,255,.3) 10px),
+                    radial-gradient(circle at 75% 25%, rgba(255,255,255,.25) 0%, transparent 45%),
+                    radial-gradient(circle at 15% 70%, rgba(120,200,255,.15) 0%, transparent 40%);
+    }
+    .profile-cover::after {
+        content: ''; position: absolute; right: -25px; bottom: -35px;
+        width: 130px; height: 130px; border-radius: 50%;
+        border: 24px solid rgba(255,255,255,.06);
+    }
+    /* power glow badge over cover */
+    .power-badge-overlay {
+        position: absolute; right: 18px; top: 16px; z-index: 2;
+        padding: 4px 14px; border-radius: 12px; font-size: 11px; font-weight: 700;
+        background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+        color: #fff; letter-spacing: .5px; backdrop-filter: blur(4px);
+        animation: badgeShine 3s ease-in-out infinite;
+    }
+    @keyframes badgeShine {
+        0%, 100% { box-shadow: 0 0 6px rgba(255,255,255,.1); }
+        50% { box-shadow: 0 0 16px rgba(255,255,255,.25), 0 0 30px rgba(255,255,255,.08); }
+    }
+    /* avatar + name group */
+    .profile-top { position: relative; padding: 0 20px 16px; margin-top: -36px; z-index: 2; }
+    .profile-avatar-wrap { display: flex; align-items: flex-end; gap: 14px; }
+    .profile-avatar {
+        width: 76px; height: 76px; border-radius: 50%; object-fit: cover;
+        border: 4px solid #fff; box-shadow: 0 4px 18px rgba(0,0,0,.12), 0 0 0 4px rgba(58,124,165,.15);
+        flex-shrink: 0; cursor: pointer; transition: .25s;
+    }
+    .profile-avatar:hover { transform: scale(1.06); box-shadow: 0 8px 24px rgba(0,0,0,.18), 0 0 0 8px rgba(58,124,165,.1); }
+    .profile-name-badge { flex: 1; min-width: 0; }
+    .profile-name-badge h3 { margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+    .profile-name-badge .greet { font-size: 12px; color: #8c8c8c; margin-top: 3px; }
 
-    .user-info-head:hover:after {
-        content: '\e681';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        color: #fff;
-        background-color: rgba(0, 0, 0, 0.3);
-        font-size: 28px;
-        padding-top: 2px;
-        font-style: normal;
-        font-family: layui-icon;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+    /* stat cards - 2x2 grid */
+    .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px 14px; }
+    .ps-card {
+        background: #f9fafb; border-radius: 8px; padding: 12px 14px; text-align: center;
+        border: 1px solid #f0f0f0; transition: .2s;
     }
+    .ps-card:hover { background: #f3f6fc; border-color: #d0ddf5; }
+    .ps-card .ps-num { font-size: 22px; font-weight: 700; line-height: 1.1; }
+    .ps-card .ps-num.bal { color: #ff5722; }
+    .ps-card .ps-num.pts { color: #faad14; }
+    .ps-card .ps-label { font-size: 11px; color: #8c8c8c; margin-top: 3px; }
+    .ps-card .ps-links { margin-top: 8px; display: flex; gap: 6px; justify-content: center; }
+    .ps-card .ps-btn { padding: 3px 10px; border-radius: 4px; font-size: 11px; border: 1px solid #d0ddf5; color: #3a6fd8; text-decoration: none; transition: .2s; display: inline-block; }
+    .ps-card .ps-btn:hover { background: #eaf2ff; border-color: #3a6fd8; }
 
-    .user-info-head img {
-        width: 110px;
-        height: 110px;
-    }
+    /* info list */
+    .profile-detail { padding: 0 18px; }
+    .pd-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #f5f5f5; }
+    .pd-row:last-child { border-bottom: 0; }
+    .pd-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .pd-icon.c1 { background: #f3eeff; color: #7c5ce7; }
+    .pd-icon.c2 { background: #ffeaea; color: #e8553d; }
+    .pd-icon.c3 { background: #eaf2ff; color: #3492ed; }
+    .pd-body { flex: 1; min-width: 0; }
+    .pd-body .pd-title { font-size: 12px; color: #8c8c8c; }
+    .pd-body .pd-val { font-size: 13px; color: #1a1a1a; font-weight: 500; margin-top: 1px; }
 
-    .user-info-list-item {
-        position: relative;
-        padding-bottom: 8px;
-        height: 50px;
-        line-height:50px;
-    }
+    /* discount tags */
+    .discount-strip { display: flex; gap: 8px; padding: 10px 18px 4px; flex-wrap: wrap; }
+    .d-tag { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+    .d-tag.free { background: #e6f9f0; color: #34a853; border: 1px solid #b7ebd0; }
+    .d-tag.discount { background: #fff8e6; color: #d48806; border: 1px solid #ffe8a1; }
+    .d-tag.normal { background: #f5f5f5; color: #8c8c8c; border: 1px solid #e8e8e8; }
 
-    .user-info-list-item > img {
-        position: absolute;
-        height: 34px;
-        padding-top: 8px;
-        vertical-align: middle;
-    }
+    /* footer */
+    .profile-foot { padding: 14px 18px; border-top: 1px solid #f0f0f0; margin-top: 8px; }
+    .profile-foot .pf-row { font-size: 11px; color: #bbb; padding: 2px 0; display: flex; justify-content: space-between; }
+    .profile-foot .pf-row span { color: #8c8c8c; }
+    .point-preview { padding: 10px 12px; border-radius: 4px; background: #f7fbff; color: #1e9fff; line-height: 1.8; font-size: 13px; }
+    .point-preview.warn { background: #fff7e6; color: #ff8c00; }
 
-    .discount-list {
-        height: 100px;
-        line-height:50px;
-    }
-
-    .discount-list > img {
-        position: absolute;
-        height: 34px;
-        padding-top: 32px;
-        vertical-align: middle;
-    }
-
-    .user-info-list-item > p {
-        padding-left: 60px;
-        font-size: 15px;
-    }
-
-    .layui-line-dash {
-        border-bottom: 1px dashed #ccc;
-        margin: 15px 0;
-    }
-
-    /* 基本信息 */
-    #userInfoForm .layui-form-item {
-        margin-bottom: 25px;
-    }
-
-    /* 账号绑定 */
-    .user-bd-list-item {
-        padding: 14px 60px 14px 10px;
-        border-bottom: 1px solid #e8e8e8;
-        position: relative;
-    }
-
-    .user-bd-list-item .user-bd-list-lable {
-        color: #333;
-        margin-bottom: 4px;
-    }
-
-    .user-bd-list-item .user-bd-list-oper {
-        position: absolute;
-        top: 50%;
-        right: 10px;
-        margin-top: -8px;
-        cursor: pointer;
-    }
-
-    .user-bd-list-item .user-bd-list-img {
-        width: 48px;
-        height: 48px;
-        line-height: 48px;
-        position: absolute;
-        top: 50%;
-        left: 10px;
-        margin-top: -24px;
-    }
-
-    .user-bd-list-item .user-bd-list-img + .user-bd-list-content {
-        margin-left: 68px;
-    }
-    .bgimg{
-        background-image: url('{__IMG__}bg1.png');
-        border-radius: 4px 4px 0px 0px;
-        background-size:100% 100%;
-        background-repeat:no-repeat;
-        height: 96px;
-        padding: 15px;
-    }
-    .img{
-        width: 96px;
-        height: 96px;
-        margin:auto;
-        display: block;
-        border-radius: 50%;
-        border: 3px solid #fff;
-        position: relative;
-        margin-top: -80px;
+    @media (max-width: 768px) {
+        .profile-stats { grid-template-columns: 1fr 1fr; }
     }
 </style>
-<!-- 正文开始 -->
 <div class="layui-fluid">
     <div class="layui-row layui-col-space15">
-        <!-- 左 -->
         <div class="layui-col-sm12 layui-col-md3">
-            <div class="layui-card">
-                <div class="bgimg"></div>
-                <div class="layui-card-body" style="padding: 25px;background-image: url('{__IMG__}background.svg');background-size: cover;">
-                    <div class="text-center layui-text">
-                        <div class="img user-info-head" id="userInfoHead">
-                            <img src="{$userInfo['img']}" alt=""/>
-                        </div>
-                        <h2 style="padding-top: 20px;">{$userInfo['username']}</h2>
-                        <p style="padding-top: 8px;">{:hello_user($userInfo['username'])}</p>
-                    </div>
-                    <div class="layui-text" style="padding-top: 30px;">
-                        <div class="user-info-list-item">
-                            <img src="{__IMG__}app.png">
-                            <p><span class="layui-badge layui-badge-purple">应用：{$userInfo['app_name']}</span></p>
-                        </div>
-                        <div class="user-info-list-item">
-                            <img src="{__IMG__}power2.png">
-                            <p><span class="layui-badge layui-badge-red">{:t('common_ui.power_label')}{$userInfo['power_name']}</span></p>
-                        </div>
-                        <div class="user-info-list-item discount-list">
-                            <img src="{__IMG__}discount.png">
-                            <p>
-                                {if $userInfo['addauth_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">{:t('common.add')}{:t('common_ui.auth_type')}：免费</span>
-                                {elseif $userInfo['addauth_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">{:t('common.add')}{:t('common_ui.auth_type')}：原价</span>
-                                {else}
-                                <span class="layui-badge layui-badge-orange">{:t('common.add')}{:t('common_ui.auth_type')}：{$userInfo['addauth_discount'] * 10} 折</span>
-                                {/if}
-
-                                {if $userInfo['adduser_discount'] <= 0}
-                                <span class="layui-badge layui-badge-green">{:t('common.add')}{:t('common_ui.user_label')}免费 </span>
-                                {elseif $userInfo['adduser_discount'] >= 1}
-                                <span class="layui-badge layui-badge-gray">{:t('common.add')}{:t('common_ui.user_label')}原价</span>
-                                {else}
-                                <span class="layui-badge layui-badge-orange">{:t('common.add')}{:t('common_ui.user_label')}{$userInfo['adduser_discount'] * 10} 折</span>
-                                {/if}
-
-                            </p>
-                        </div>
-                        <div class="user-info-list-item">
-                            <img src="{__IMG__}qqicon.png">
-                            <p><span class="layui-badge layui-badge-blue">{:t('common_ui.qq_field')}{$userInfo['qq']}</span></p>
-                        </div>
-                        <div class="user-info-list-item">
-                            <img src="{__IMG__}moneypay.png"/>
-                            <p><span class="layui-badge layui-badge-green">{:t('common_ui.balance_field')}{$userInfo['balance']} 元</span><a ew-href="{:url('/MyInfo/recharge')}" class="pull-right">{:t('common_ui.recharge')}</a></p>
-                        </div>
-                        <div class="user-info-list-item">
-                            <img src="{__IMG__}total.png"/>
-                            <p><span class="layui-badge layui-badge-yellow">{:t('common_ui.integral_field')}{$userInfo['integral']} 个</span><a ew-href="{:url('/Integral/market')}" class="pull-right">兑换</a></p>
+            <div class="profile-card">
+                <div class="profile-cover">
+                    <div class="power-badge-overlay">✦ {$userInfo['power_name']} ✦</div>
+                </div>
+                <div class="profile-top">
+                    <div class="profile-avatar-wrap">
+                        <img src="{$userInfo['img']}" class="profile-avatar" id="userInfoHead">
+                        <div class="profile-name-badge">
+                            <h3>{$userInfo['username']}</h3>
+                            <div class="greet">{:hello_user($userInfo['username'])}</div>
                         </div>
                     </div>
-                    <div class="layui-line-dash"></div>
-                    <h3>{:t('common.more')}信息</h3>
-                    <div class="layui-badge-list" style="padding-top: 6px;">
-                        <span class="layui-badge layui-bg-gray">注册时间：{$userInfo['addtime']}</span>
-                        <span class="layui-badge layui-bg-gray">最后登陆时间：{$userInfo['lasttime']}</span>
+                </div>
+                <!-- 余额 + 积分 卡片 -->
+                <div class="profile-stats">
+                    <div class="ps-card">
+                        <div class="ps-num bal">¥{$userInfo['balance']}</div>
+                        <div class="ps-label">可用余额</div>
                     </div>
+                    <div class="ps-card">
+                        <div class="ps-num pts">{$userInfo['integral']}</div>
+                        <div class="ps-label">可用积分</div>
+                    </div>
+                </div>
+                <!-- 折扣 -->
+                <div class="discount-strip">
+                    {if $userInfo['addauth_discount'] <= 0}
+                    <span class="d-tag free">加授权 免费</span>
+                    {elseif $userInfo['addauth_discount'] >= 1}
+                    <span class="d-tag normal">加授权 原价</span>
+                    {else}
+                    <span class="d-tag discount">加授权 {$userInfo['addauth_discount']*10}折</span>
+                    {/if}
+                    {if $userInfo['adduser_discount'] <= 0}
+                    <span class="d-tag free">加用户 免费</span>
+                    {elseif $userInfo['adduser_discount'] >= 1}
+                    <span class="d-tag normal">加用户 原价</span>
+                    {else}
+                    <span class="d-tag discount">加用户 {$userInfo['adduser_discount']*10}折</span>
+                    {/if}
+                </div>
+                <!-- 详细信息 -->
+                <div class="profile-detail" style="margin-top:4px;">
+                    <div class="pd-row">
+                        <div class="pd-icon c1"><i class="layui-icon layui-icon-app"></i></div>
+                        <div class="pd-body"><div class="pd-title">所属应用</div><div class="pd-val">{$userInfo['app_name']}</div></div>
+                    </div>
+                    <div class="pd-row">
+                        <div class="pd-icon c2"><i class="layui-icon layui-icon-diamond"></i></div>
+                        <div class="pd-body"><div class="pd-title">当前权限</div><div class="pd-val" style="font-weight:700;background:linear-gradient(135deg,#26547c,#3a7ca5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{$userInfo['power_name']}</div></div>
+                    </div>
+                    <div class="pd-row">
+                        <div class="pd-icon c3"><i class="layui-icon layui-icon-login-qq"></i></div>
+                        <div class="pd-body"><div class="pd-title">绑定QQ</div><div class="pd-val">{$userInfo['qq']}</div></div>
+                    </div>
+                </div>
+                <!-- 底部 -->
+                <div class="profile-foot">
+                    <div class="pf-row"><span>注册时间</span> {$userInfo['addtime']|date='Y-m-d'}</div>
+                    <div class="pf-row"><span>最近登录</span> {$userInfo['lasttime']}</div>
                 </div>
             </div>
         </div>
@@ -203,29 +160,15 @@
                 <div class="layui-tab layui-tab-brief" lay-filter="userInfoTab">
                     <ul class="layui-tab-title">
                         <li class="layui-this">账号{:t('install_ui.binding_title')}</li>
+                        <li>余额充值</li>
                         <li>{:t('common_ui.power_type')}升级</li>
                         <li>余额明细</li>
+                        <li>积分明细</li>
                     </ul>
                     <div class="layui-tab-content">
                         <!-- tab1 -->
                         <div class="layui-tab-item layui-show" style="padding-bottom: 20px;">
                             <div class="user-bd-list layui-text">
-                                <div class="user-bd-list-item">
-                                    <div class="user-bd-list-img">
-                                        <i class="layui-icon layui-icon-cellphone"
-                                           style="color: #52c41a;font-size: 48px;"></i>
-                                    </div>
-                                    <div class="user-bd-list-content">
-                                        <div class="user-bd-list-lable">密保手机</div>
-                                        {if $userInfo['phone'] == ''}
-                                        <div class="user-bd-list-text">未{:t('install_ui.binding_title')}</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>{:t('install_ui.binding_title')}</a>
-                                        {else}
-                                        <div class="user-bd-list-text">{:t('install_bind.bound')}手机：{:substr_replace($userInfo['phone'],'****',3,4)}</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>{:t('common_ui.repair')}</a>
-                                        {/if}
-                                    </div>
-                                </div>
                                 <div class="user-bd-list-item">
                                     <div class="user-bd-list-img">
                                         <i class="layui-icon layui-icon-email"
@@ -249,16 +192,59 @@
                                     </div>
                                     <div class="user-bd-list-content">
                                         <div class="user-bd-list-lable">{:t('install_ui.binding_title')}QQ</div>
-                                        {if $userInfo['access_token'] == ''}
-                                        <div class="user-bd-list-text">当前未{:t('install_ui.binding_title')}QQ账号</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>{:t('install_ui.binding_title')}</a>
+                                        {if !empty($userInfo['qq'])}
+                                        <div class="user-bd-list-text">已绑定 QQ：{$userInfo['qq']}</div>
+                                        <a class="user-bd-list-oper" lay-filter="unbindingQQ" lay-submit>解绑</a>
                                         {else}
-                                        <div class="user-bd-list-text">{:substr_replace($userInfo['access_token'],'********',3,8)}</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingQq" lay-submit>解绑</a>
+                                        <div class="user-bd-list-text">当前未{:t('install_ui.binding_title')}QQ账号</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingQQ" lay-submit>绑定</a>
                                         {/if}
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <!-- 余额充值 tab -->
+                        <div class="layui-tab-item" style="padding-bottom: 20px;">
+                            <form class="layui-form formBasForm" id="rechargeForm" lay-filter="rechargeForm" style="max-width:500px;">
+                                {notempty name="pay_notice"}
+                                <div class="layui-form-item"><div class="sf-tag layui-badge-blue">{$pay_notice|raw}</div></div>
+                                {/notempty}
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label layui-form-required">充值金额</label>
+                                    <div class="layui-input-block">
+                                        <input type="radio" name="money" value="10" title="10元" lay-verify="required" lay-filter="rechargeMoney" checked/>
+                                        <input type="radio" name="money" value="50" title="50元" lay-filter="rechargeMoney"/>
+                                        <input type="radio" name="money" value="100" title="100元" lay-filter="rechargeMoney"/>
+                                        <input type="radio" name="money" value="diy" title="自定义" lay-filter="rechargeMoney"/>
+                                    </div>
+                                </div>
+                                <div id="rechargeDiy" style="display:none;">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label layui-form-required">自定义金额</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="diy" id="rechargeDiyInput" class="layui-input" placeholder="最低充值10元，最多两位小数"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">预计积分</label>
+                                    <div class="layui-input-block">
+                                        <div id="pointPreview" class="point-preview"></div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">折扣码</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="discount_code" id="rechargeDiscountCode" class="layui-input" placeholder="输入折扣码（选填）"/>
+                                        <div id="codePreview" style="margin-top:8px;display:none;"></div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-filter="rechargeSubmit" lay-submit>充值</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form formBasForm">
@@ -275,6 +261,9 @@
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <table id="SF_BalanceTable" lay-filter="SF_BalanceTable" style="margin: 0;"></table>
+                        </div>
+                        <div class="layui-tab-item" style="padding-bottom: 20px;">
+                            <table id="SF_PointTable" lay-filter="SF_PointTable" style="margin: 0;"></table>
                         </div>
                     </div>
                 </div>
@@ -315,14 +304,25 @@
 </script>
 <script type="text/html" id="SF_BL_Amount">
     {{# if(d.amount > 0){ }}
+    <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}} 元</span>
+    {{# } else { }}
+    <span style="color:#d9534f;">{{d.amount}} 元</span>
+    {{# } }}
+</script>
+<script type="text/html" id="SF_BL_Type">
+    {{# var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入',withdraw_apply:'提现申请',withdraw_cancel:'提现撤回',withdraw_reject:'提现驳回',withdraw_reject_refund:'提现驳回返还'}; }}
+    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
+</script>
+<script type="text/html" id="SF_PtAmount">
+    {{# if(d.amount > 0){ }}
     <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}}</span>
     {{# } else { }}
     <span style="color:#d9534f;">{{d.amount}}</span>
     {{# } }}
 </script>
-<script type="text/html" id="SF_BL_Type">
-    {{# var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入'}; }}
-    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : ''}}">{{m[d.type] || d.type}}</span>
+<script type="text/html" id="SF_PtType">
+    {{# var m={recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
+    <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
 </script>
 {include file="/public/footer"}
 <script>
@@ -438,6 +438,106 @@
             a(val);
         }
 
+        // Recharge form
+        var rcCheckTimer, rcDiscountRate = 0;
+        form.on('radio(rechargeMoney)', function(data) {
+            $('#rechargeDiy').toggle(data.value === 'diy');
+            rcUpdatePreview();
+        });
+        $('#rechargeDiyInput').on('input', function(){
+            var v = this.value.replace(/[^\d.]/g, '');
+            var parts = v.split('.');
+            if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+            if (v.indexOf('.') > -1) { var s = v.split('.'); v = s[0] + '.' + s[1].substring(0,2); }
+            if (this.value !== v) this.value = v;
+            rcUpdatePreview();
+        }).on('blur', function(){
+            var v = parseFloat(this.value);
+            if (isNaN(v)) { this.value = ''; rcUpdatePreview(); return; }
+            if (v < 10) { this.value = ''; rcUpdatePreview(); return; }
+            if (v > 999999) v = 999999;
+            this.value = v.toFixed(2);
+            rcUpdatePreview();
+        });
+        $('#rechargeDiscountCode').on('input', function(){
+            clearTimeout(rcCheckTimer);
+            var code = $(this).val().trim();
+            rcDiscountRate = 0;
+            if (!code) { $('#codePreview').hide().html(''); rcUpdatePreview(); return; }
+            rcCheckTimer = setTimeout(function(){
+                $.ajax({ type:'POST', url:'{:url("/Rebate/checkCode")}', data:{code:code}, dataType:'json',
+                    success: function(res){
+                        if (res.code == 0) {
+                            rcDiscountRate = parseFloat(res.data.rate) || 0;
+                            $('#codePreview').show().html('<span class="layui-badge layui-badge-green">有效</span> 折扣 '+rcDiscountRate+'%，来自 <b>'+res.data.owner+'</b><span id="savePreview" style="color:#5cb85c;margin-left:8px;"></span>');
+                        } else { rcDiscountRate = 0; $('#codePreview').show().html('<span class="layui-badge layui-badge-red">无效</span> '+res.msg); }
+                        rcUpdatePreview();
+                    }
+                });
+            }, 500);
+        });
+        function rcSelectedMoney() {
+            var mv = $('input[name=money]:checked').val();
+            if (mv === 'diy') mv = $('#rechargeDiyInput').val();
+            var m = parseFloat(mv);
+            return isNaN(m) ? 0 : Math.min(Math.max(m, 0), 999999);
+        }
+        function rcUpdatePreview() {
+            var money = rcSelectedMoney();
+            var actualPay = rcDiscountRate > 0 ? Math.max(money * (1 - rcDiscountRate / 100), 0.01) : money;
+            actualPay = Math.round(actualPay * 100) / 100;
+            var points = Math.floor(actualPay);
+            var $p = $('#pointPreview');
+            if (money <= 0) {
+                $p.addClass('warn').html('请选择或输入充值金额');
+            } else if (money < 10) {
+                $p.addClass('warn').html('充值金额：'+money.toFixed(2)+' 元，最低需充值 10 元');
+            } else {
+                $p.removeClass('warn').html('充值金额：'+money.toFixed(2)+' 元，预计实付：'+actualPay.toFixed(2)+' 元，可获得：<b>'+points+'</b> 积分');
+            }
+            if (rcDiscountRate > 0 && money >= 10) { $('#savePreview').text('预计实付 '+actualPay.toFixed(2)+' 元，节省 '+(money - actualPay).toFixed(2)+' 元'); }
+        }
+        rcUpdatePreview();
+        form.on('submit(rechargeSubmit)', function(data) {
+            var money = rcSelectedMoney();
+            if (data.field.money === '') { notice.msg('请选择需要充值的金额', {icon:2}); return false; }
+            if (data.field.money === 'diy' && data.field.diy === '') { notice.msg('请输入需要充值的金额', {icon:2}); return false; }
+            if (money < 10) { notice.msg('最低充值金额为10元', {icon:2}); return false; }
+            notice.msg('正在执行中...', {icon:4, close:true});
+            data.field.type = 'recharge';
+            $.ajax({ type:'POST', url:'{:url("/MyInfo/createOrder")}', data:data.field, dataType:'json',
+                success: function(res) {
+                    notice.destroy();
+                    if (res.code == 0) {
+                        var payUrl = '/pay.php/Index?trade_no='+res.data.trade_no;
+                        var isMobile = $(window).width() < 768;
+                        var pollTimer = null;
+                        var payIndex = layer.open({
+                            type: 2, title: '付款界面',
+                            area: [isMobile ? '100%' : '800px', isMobile ? '100%' : '600px'],
+                            content: payUrl, maxmin: true,
+                            cancel: function() { clearInterval(pollTimer); layer.closeAll(); },
+                            end: function() { clearInterval(pollTimer); }
+                        });
+                        // Poll for payment completion every 2 seconds
+                        pollTimer = setInterval(function(){
+                            $.ajax({ type:'POST', url:'{:url("/Order/checkPay")}', data:{trade_no:res.data.trade_no}, dataType:'json',
+                                success: function(r) {
+                                    if (r.code === 0 && r.data && r.data.paid) {
+                                        clearInterval(pollTimer);
+                                        layer.close(payIndex);
+                                        notice.msg('支付成功！', {icon:1});
+                                        setTimeout(function(){ location.reload(); }, 1500);
+                                    }
+                                }
+                            });
+                        }, 2000);
+                    } else { notice.msg(res.msg, {icon:2}); }
+                }
+            });
+            return false;
+        });
+
         form.on('submit(bindingEmail)', function (data) {
             admin.ajax({
                 url: '{:url("/MyInfo/checkBinding")}',
@@ -499,27 +599,67 @@
             return false;
         });
 
+        form.on('submit(unbindingQQ)', function (data) {
+            layer.confirm('确定要解除QQ绑定吗？解绑后该账号将不再出现在QQ扫码登录的账户列表中。', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在解绑...', {icon: 4, close: true});
+                admin.ajax({
+                    url: '{:url("/MyInfo/editUserInfo")}',
+                    data: {type:'changeBindingQQ', code:'unbind'},
+                    headers: {},
+                    type: 'post',
+                    dataType: 'json',
+                    success: function(r){
+                        notice.destroy();
+                        if (r.code == 0) {
+                            notice.msg('QQ解绑成功！', {icon: 1});
+                            setTimeout(function(){ location.reload(); }, 1200);
+                        } else {
+                            notice.msg(r.msg, {icon: 2});
+                        }
+                    }
+                });
+            });
+            return false;
+        });
+
+        form.on('submit(bindingQQ)', function (data) {
+            admin.open({
+                type: 2,
+                title: '扫码绑定QQ',
+                content: '/qrlogin/qrlogin.html',
+                area: ['400px', '300px'],
+                data: {type:'bindQQ'}
+            });
+            return false;
+        });
 
     // 余额明细
     table.render({
-        elem: '#SF_BalanceTable',
-        url: '{:url("/BalanceLog/index")}',
-        method: 'post',
-        page: true,
-        limit: 10,
+        elem: '#SF_BalanceTable', url: '{:url("/BalanceLog/index")}', method: 'post', page: true, limit: 10,
         request: { pageName: 'current_page', limitName: 'limit' },
-        parseData: function(res){
-            return {
-                "code": res.code,
-                "msg": res.msg,
-                "count": res.data.data.total || 0,
-                "data": res.data.data.data || []
-            };
-        },
+        parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'type', title: '类型', width: 100, templet: '#SF_BL_Type'},
-            {field: 'amount', title: '金额', width: 100, templet: '#SF_BL_Amount'},
-            {field: 'balance_after', title: '余额', width: 100},
+            {field: 'amount', title: '金额', width: 120, templet: '#SF_BL_Amount'},
+            {field: 'balance_after', title: '余额', width: 100, templet: function(d){ return (d.balance_after||'0.00')+' 元'; }},
+            {field: 'description', title: '说明', minWidth: 160},
+            {field: 'created_at', title: '时间', width: 160}
+        ]]
+    });
+    // 积分明细
+    table.render({
+        elem: '#SF_PointTable', url: '{:url("/PointLog/index")}', method: 'post', page: true, limit: 10,
+        request: { pageName: 'current_page', limitName: 'limit' },
+        parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
+        cols: [[
+            {field: 'type', title: '类型', width: 100, templet: '#SF_PtType'},
+            {field: 'amount', title: '积分变动', width: 120, templet: '#SF_PtAmount'},
+            {field: 'integral_after', title: '剩余积分', width: 120, templet: function(d){ return (d.integral_after||0)+' 积分'; }},
             {field: 'description', title: '说明', minWidth: 160},
             {field: 'created_at', title: '时间', width: 160}
         ]]

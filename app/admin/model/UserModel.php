@@ -41,7 +41,6 @@ class UserModel extends BaseModel
         $power = !empty($post['power'])?$post['power']:null;
         $qq = !empty($post['qq'])?intval($post['qq']):null;
         $email = !empty($post['email'])?$post['email']:'';
-        $phone = !empty($post['phone'])?intval($post['phone']):'';
         $balance = !empty($post['balance'])?floatval($post['balance']):0;
         $integral = !empty($post['integral'])?intval($post['integral']):0;
         $ip = !empty($post['ip'])?serialize(explode('|',$post['ip'])):'';
@@ -75,7 +74,6 @@ class UserModel extends BaseModel
                 'password' => !empty($password) ? get_password($password) : $row['password'],
                 'qq' => $qq,
                 'email' => $email,
-                'phone' => $phone,
                 'balance' => $balance,
                 'integral' => $integral,
                 'ip' => $ip,
@@ -111,7 +109,6 @@ class UserModel extends BaseModel
                 'password' => get_password($password),
                 'qq' => $qq,
                 'email' => $email,
-                'phone' => $phone,
                 'balance' => $balance,
                 'integral' => $integral,
                 'ip' => $ip,

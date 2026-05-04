@@ -228,6 +228,56 @@
                                         }
                                     });
                                     break;
+                                case 'bindQQ':
+                                    parent.layui.notice.msg('正在执行中..', {icon: 4, close: true});
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '/api.php/Qrlogin/bindQQ',
+                                        data: layerData,
+                                        dataType: "json",
+                                        success: function(data) {
+                                            parent.layui.notice.destroy();
+                                            if (data.code == 0) {
+                                                var index = parent.layer.getFrameIndex(window.name);
+                                                parent.layer.close(index);
+                                                parent.layui.notice.msg('QQ绑定成功！', {icon: 1});
+                                                setTimeout(function(){ parent.location.reload(); }, 1500);
+                                            } else {
+                                                cleartime();
+                                                $('#login').show();
+                                                $('#login').attr("data-lock", "false");
+                                                getqrpic();
+                                                parent.layui.notice.error({
+                                                    title: '绑定通知',
+                                                    message: data.msg,
+                                                    animateInside:true,
+                                                    position:'topCenter',
+                                                    transitionOut:'flipOutX',
+                                                    transitionOutMobile: 'flipOutX',
+                                                    displayMode:'2',
+                                                    audio:'1'
+                                                });
+                                            }
+                                        },
+                                        error: function() {
+                                            parent.layui.notice.destroy();
+                                            cleartime();
+                                            $('#login').show();
+                                            $('#login').attr("data-lock", "false");
+                                            getqrpic();
+                                            parent.layui.notice.error({
+                                                title: '绑定通知',
+                                                message: '服务器错误',
+                                                animateInside:true,
+                                                position:'topCenter',
+                                                transitionOut:'flipOutX',
+                                                transitionOutMobile: 'flipOutX',
+                                                displayMode:'2',
+                                                audio:'1'
+                                            });
+                                        }
+                                    });
+                                    break;
                                 case 'binding':
                                     parent.layui.notice.msg('正在执行中..', {icon: 4, close: true});
                                     $.ajax({

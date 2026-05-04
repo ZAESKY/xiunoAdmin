@@ -292,9 +292,6 @@
                                     <input type="text" name="email" class="sf-input" placeholder="请输入要绑定的邮箱">
                                 </div>
                                 <div class="form-group" style="margin: 1rem">
-                                    <input type="number" name="phone" class="sf-input" placeholder="请输入要绑定的手机号">
-                                </div>
-                                <div class="form-group" style="margin: 1rem">
                                     <a href="#" id="register">
                                         <div class="link-card cards">
                                             <span class="link-name">注册</span>
@@ -550,8 +547,6 @@
             var confirmPassword = $("input[name='confirmPassword']").val();
             var qq = $("input[name='qq']").val();
             var email = $("input[name='email']").val();
-            var phone = $("input[name='phone']").val();
-
             if(appid == ''){
                 iziToast.show({
                     timeout: 2500,
@@ -606,20 +601,11 @@
                 });
                 return false;
             }
-            if(phone == ''){
-                iziToast.show({
-                    timeout: 2500,
-                    iconUrl: '{__TEMPLATE_HOME_ASSETS__}SFnew/img/icon/warn.png',
-                    title: '注册通知',
-                    message: '请输入要绑定的手机号！'
-                });
-                return false;
-            }
             SF_Loading(true);
             $.ajax({
                 type: "POST",
                 url: '{:url("/Ajax/register")}',
-                data: {'username':username,'appid':appid,'password':password,'confirmPassword':confirmPassword,'qq':qq,'email':email,'phone':phone},
+                data: {'username':username,'appid':appid,'password':password,'confirmPassword':confirmPassword,'qq':qq,'email':email},
                 dataType: "json",
                 success: function(data) {
                     SF_Loading();

@@ -1,237 +1,516 @@
 {include file="/public/header"}
+<style>
+/* ═══════════════════════════════════════════════════════
+   User Dashboard
+   ═══════════════════════════════════════════════════════ */
+:root { --gap: 14px; }
+.d-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); }
+.d-3 { grid-column: span 3; }
+.d-5 { grid-column: span 5; }
+.d-6 { grid-column: span 6; }
+.d-7 { grid-column: span 7; }
+.d-12 { grid-column: span 12; }
 
-<div class="layui-fluid ew-console-wrapper">
-    <div class="layui-row layui-col-space15">
-        <div class="layui-col-sm12 layui-col-space15">
-            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
-                <div class="console-app-group" ew-href="{:url('/Auth/list')}" ew-title="授权列表">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-green layui-icon layui-icon-auz"
-                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
-                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$auth_count} 个</span></div>
-                    <div class="dashboard-monitor-base-info-desc">
-                        授权总数
-                    </div>
-                    {lt name="auth_increase" value="0"}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
-                        <i class="layui-icon layui-icon-down"></i>
-                    {else/}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
-                        <i class="layui-icon layui-icon-up"></i>
-                    {/lt}
-                        <span>{$auth_increase|abs} 个</span>
-                    </div>
-                </div>
-            </div>
-            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
-                <div class="console-app-group" ew-href="{:url('/Cdkey/list')}" ew-title="卡密列表">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-purple layui-icon layui-icon-cols"
-                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
-                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$cdkey_count} 个</span></div>
-                    <div class="dashboard-monitor-base-info-desc">
-                        卡密总数
-                    </div>
-                </div>
-            </div>
-            <div class="layui-col-xs6 layui-col-sm6 layui-col-md3">
-                <div class="console-app-group" ew-href="{:url('/User/list')}" ew-title="用户列表">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-blue layui-icon layui-icon-group"
-                       style="margin-top: -5px;margin-right: 6px;margin-bottom: 10px"></i>
-                    <div class="dashboard-monitor-base-info-number"><span class="ivu-numeral">{$user_count} 个</span></div>
-                    <div class="dashboard-monitor-base-info-desc">
-                        用户总数
-                    </div>
-                    {lt name="user_increase" value="0"}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-down">
-                        <i class="layui-icon layui-icon-down"></i>
-                    {else/}
-                    <div class="dashboard-monitor-base-info-extra dashboard-monitor-base-info-extra-up">
-                        <i class="layui-icon layui-icon-up"></i>
-                    {/lt}
-                        <span>{$user_increase|abs} 个</span>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">
-            <div class="layui-card">
-                <div class="layui-card-header">官方公告
-                    <span class="pull-right">
-                        <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-green layui-icon layui-icon-notice"></i>
-                    </span>
-                </div>
-                <div class="layui-card-body">
-                    {notempty name="notice"}{$notice|raw}{else/}暂无公告{/notempty}
-                </div>
-            </div>
-            <div class="layui-card">
-                <div class="layui-card-header">应用公告
-                    <span class="pull-right">
-                        <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-purple layui-icon layui-icon-notice"></i>
-                    </span>
-                </div>
-                <div class="layui-card-body">
-                    {notempty name="app_notice"}{$app_notice|raw}{else/}暂无公告{/notempty}
-                </div>
-            </div>
-        </div>
-        <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">
-            <div class="layui-card">
-                <div class="layui-card-header">
-                    排行榜
-                    <span class="pull-right">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-pink layui-icon layui-icon-fire"></i>
-                </span>
-                </div>
-                <div class="layui-card-body">
-                    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
-                        <ul class="layui-tab-title">
-                            <li class="layui-this">余额排行</li>
-                            <li>积分排行</li>
-                        </ul>
-                        <div class="layui-tab-content">
-                            <div class="layui-tab-item layui-show">
-                                <table class="layui-table" lay-skin="line">
-                                    <colgroup>
-                                        <col style="width:80px"/>
-                                        <col/>
-                                        <col style="width:80px"/>
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <td style="text-align: center">排名</td>
-                                        <td>用户名</td>
-                                        <td style="text-align: center">余额</td>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {php}$i = 1;{/php}
-                                    {foreach $balance_ranking as $res}
-                                    {php}
-                                        switch($i){
-                                            case 1:
-                                                $color = 'red';
-                                                break;
-                                            case 2:
-                                                $color = 'blue';
-                                                break;
-                                            case 3:
-                                                $color = 'green';
-                                                break;
-                                            default:
-                                                $color = 'gray';
-                                                break;
-                                        }
-                                    {/php}
-                                    <tr>
-                                        <td style="text-align: center">
-                                            <span class="layui-badge layui-badge-{$color} layui-badge-priority">{$i}</span>
-                                        </td>
-                                        <td><span class="layui-text"><a>{$res.username}</a></span></td>
-                                        <td style="text-align: center"><span class="text-warning">{$res.balance}</span></td>
-                                    </tr>
-                                    {php}$i++;{/php}
-                                    {/foreach}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="layui-tab-item">
-                                <table class="layui-table" lay-skin="line">
-                                    <colgroup>
-                                        <col style="width:80px"/>
-                                        <col/>
-                                        <col style="width:80px"/>
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <td style="text-align: center">排名</td>
-                                        <td>用户名</td>
-                                        <td style="text-align: center">积分</td>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {php}$i = 1;{/php}
-                                    {foreach $integral_ranking as $res}
-                                    {php}
-                                        switch($i){
-                                            case 1:
-                                                $color = 'red';
-                                                break;
-                                            case 2:
-                                                $color = 'blue';
-                                                break;
-                                            case 3:
-                                                $color = 'green';
-                                                break;
-                                            default:
-                                                $color = 'gray';
-                                                break;
-                                        }
-                                    {/php}
-                                    <tr>
-                                        <td style="text-align: center">
-                                            <span class="layui-badge layui-badge-{$color} layui-badge-priority">{$i}</span>
-                                        </td>
-                                        <td><span class="layui-text"><a>{$res.username}</a></span></td>
-                                        <td style="text-align: center"><span class="text-warning">{$res.integral}</span></td>
-                                    </tr>
-                                    {php}$i++;{/php}
-                                    {/foreach}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="layui-col-xs12 layui-col-sm6 layui-col-md4">
-            <div class="layui-card">
-                <div class="layui-card-header">最新日志
-                    <span class="pull-right">
-                        <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-orange layui-icon layui-icon-log"></i>
-                    </span>
-                </div>
-                <div class="layui-card-body dynamic-card-body mini-bar" style="height: 265px;">
-                    <ul class="layui-timeline layui-timeline-dynamic">
-                        {empty name="log_list"}
-                        <li class="layui-timeline-item">
-                            <i class="layui-icon layui-timeline-axis {if $i % 2 == 0}active{/if}"></i>
-                            <div class="layui-timeline-content layui-text">
-                                <div class="layui-timeline-title">暂未日志
-                                    <span class="pull-right">{:date('Y-m-d H:i:s')}</span>
-                                </div>
-                            </div>
-                        </li>
-                        {else/}
-                        {php}$i = 1;{/php}
-                        {foreach $log_list as $res}
-                        <li class="layui-timeline-item">
-                            <i class="layui-icon layui-timeline-axis {if $i % 2 == 0}active{/if}"></i>
-                            <div class="layui-timeline-content layui-text">
-                                <div class="layui-timeline-title">{$res.title}
-                                    <span class="pull-right">{$res.create_time}</span>
-                                </div>
-                            </div>
-                        </li>
-                        {php}$i++;{/php}
-                        {/foreach}
-                        {/empty}
-                    </ul>
-                </div>
-            </div>
-        </div>
+/* ── Theme Colors ── */
+.legend { --c1: #1a0040; --c2: #5b0e8a; --c3: #b44ce0; --glow: rgba(180,76,224,.5); }
+.diamond { --c1: #001a3a; --c2: #0a5eb0; --c3: #4dc9f6; --glow: rgba(77,201,246,.5); }
+.gold { --c1: #2e1a00; --c2: #b87a14; --c3: #f5d060; --glow: rgba(245,208,96,.5); }
+.silver { --c1: #1a1a2e; --c2: #4a5078; --c3: #a0b4c8; --glow: rgba(160,180,200,.4); }
+.bronze { --c1: #2e1e0f; --c2: #8b5a2b; --c3: #d4956b; --glow: rgba(212,149,107,.4); }
+.standard { --c1: #1f2937; --c2: #3b4f6b; --c3: #7b8ea8; --glow: rgba(123,142,168,.3); }
+
+/* ── Hero ── */
+.hero-card {
+  display: flex; align-items: center; gap: 24px;
+  padding: 28px 30px; border-radius: 14px; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 60%, var(--c3) 100%);
+  color: #fff;
+}
+.hero-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 80%, var(--glow) 0%, transparent 50%);
+}
+.hero-card::after {
+  content: ''; position: absolute; right: -60px; bottom: -80px;
+  width: 220px; height: 220px; border-radius: 50%;
+  border: 40px solid rgba(255,255,255,.04);
+}
+.hero-avatar-wrap { position: relative; z-index: 1; flex-shrink: 0; }
+.hero-avatar {
+  width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+  border: 3px solid rgba(255,255,255,.4);
+  box-shadow: 0 0 30px var(--glow);
+}
+.hero-badge {
+  position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+  padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 700;
+  background: linear-gradient(135deg, var(--c2), var(--c3)); white-space: nowrap;
+  z-index: 2; letter-spacing: .5px;
+  animation: badgePulse 2.5s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 8px var(--glow); }
+  50% { box-shadow: 0 0 20px var(--glow), 0 0 40px var(--glow); }
+}
+.hero-body { flex: 1; min-width: 0; position: relative; z-index: 1; align-self: stretch; display: flex; flex-direction: column; justify-content: space-evenly; }
+.hero-body .greeting { font-size: 14px; opacity: .75; }
+.hero-body h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+.hero-body .subtitle { font-size: 13px; opacity: .7; line-height: 1.5; }
+.hero-extra { flex-shrink: 0; text-align: right; position: relative; z-index: 1; }
+.hero-extra .bal { font-size: 32px; font-weight: 700; text-shadow: 0 0 20px rgba(255,255,255,.3); }
+.hero-extra .pts { font-size: 18px; font-weight: 600; opacity: .9; margin-top: 4px; }
+.hero-extra a { display: inline-block; padding: 4px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.35); color: #fff; font-size: 12px; text-decoration: none; transition: .2s; white-space: nowrap; }
+.hero-extra a:hover { background: rgba(255,255,255,.12); }
+.hero-metrics { display: flex; align-items: center; gap: 16px; justify-content: flex-end; }
+.hero-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* ── Stat Card ── */
+.stat-card {
+  background: #fff; border-radius: 10px; padding: 14px 18px; height: 98px;
+  border: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px;
+  transition: .2s; cursor: pointer; overflow: hidden;
+}
+.stat-card:hover { border-color: #d0d8e8; box-shadow: 0 4px 12px rgba(0,0,0,.05); }
+.st-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.st-icon.c1 { background: #eaf2ff; color: #3a6fd8; }
+.st-icon.c2 { background: #e6f7ed; color: #34a853; }
+.st-icon.c3 { background: #f3eeff; color: #7c5ce7; }
+.st-icon.c4 { background: #fff3e0; color: #f09d3c; }
+.st-body { flex: 1; min-width: 0; }
+.st-num { font-size: 24px; font-weight: 700; color: #1a1a1a; line-height: 1.1; }
+.st-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
+.st-sub { font-size: 11px; margin-top: 3px; }
+.st-sub.up { color: #34a853; }
+.st-sub.down { color: #e8553d; }
+
+/* ── Progress bar ── */
+.prog-wrap { margin-top: 8px; }
+.prog-bar { height: 5px; border-radius: 3px; background: #f0f0f0; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; transition: .6s; }
+.prog-fill.blue { background: linear-gradient(90deg, #3a6fd8, #5b9cf5); }
+.prog-fill.green { background: linear-gradient(90deg, #34a853, #5dce78); }
+.prog-fill.purple { background: linear-gradient(90deg, #7c5ce7, #a78bfa); }
+
+/* ── Card header ── */
+.card-header { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #f2f2f2; padding: 14px 18px; }
+.card-header a { color: #3a6fd8; font-size: 12px; font-weight: 400; }
+/* fixed heights for row consistency */
+.d-row-equal { align-items: stretch; }
+.d-row-equal > * { height: 100%; }
+
+/* ── Tabs ── */
+.n-tabs { display: flex; border-bottom: 1px solid #f0f0f0; }
+.n-tab { padding: 10px 16px; font-size: 13px; color: #8c8c8c; cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; }
+.n-tab.on { color: #3a6fd8; border-bottom-color: #3a6fd8; font-weight: 500; }
+
+/* ── List Row ── */
+.l-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.l-row:last-child { border-bottom: 0; }
+.l-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
+.l-body { flex: 1; min-width: 0; }
+.l-title { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-meta { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
+.l-extra { flex-shrink: 0; text-align: right; }
+.rk { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.rk-1 { background: #e8553d; } .rk-2 { background: #f09d3c; } .rk-3 { background: #3a6fd8; } .rk-n { background: #bbb; }
+.empty { text-align: center; color: #bbb; padding: 28px 0; font-size: 13px; }
+
+/* ── Plugin Card (market style) ── */
+.plug-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.plug-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.plug-card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 18px 16px; cursor: pointer; transition: all .25s; }
+.plug-card:hover { border-color: #d0d5dd; box-shadow: 0 6px 24px rgba(0,0,0,0.07); transform: translateY(-2px); }
+.plug-card .pc-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.plug-card .pc-icon { width: 52px; height: 52px; flex-shrink: 0; border-radius: 12px; object-fit: cover; background: #f7f8fa; border: 1px solid #f0f0f0; }
+.plug-card .pc-info { flex: 1; min-width: 0; }
+.plug-card .pc-name { font-size: 14px; font-weight: 600; color: #1d1d1f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plug-card .pc-meta { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+.plug-card .pc-desc { font-size: 12px; color: #6e6e73; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
+.plug-card .pc-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f5f5f5; }
+.plug-card .pc-price { font-size: 15px; font-weight: 700; }
+.plug-card .pc-price.free { color: #34c759; }
+.plug-card .pc-price.paid { color: #ff5722; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .plug-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1024px) {
+  .d-3, .d-5, .d-6, .d-7, .d-8 { grid-column: span 12; }
+  .plug-grid { grid-template-columns: repeat(2, 1fr); }
+  .plug-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .hero-card { padding: 20px 22px; flex-wrap: wrap; }
+  .hero-extra { width: 100%; text-align: center; }
+  .hero-extra .hero-metrics { justify-content: center; }
+  .hero-extra .hero-actions { justify-content: center; }
+  .hero-extra .hero-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .hero-extra .bal { font-size: 24px; }
+  .hero-extra .pts { margin-top: 0; font-size: 14px; }
+  .hero-extra a { margin-top: 0; }
+  .hero-body h2 { font-size: 20px; }
+  .hero-avatar { width: 60px; height: 60px; }
+  .layui-card[style*="height:430.8px"] { height: auto !important; min-height: 280px; }
+  .layui-card[style*="height:280px"] { height: auto !important; min-height: 200px; }
+  .stat-card { height: auto !important; min-height: 70px; padding: 12px 14px; }
+  .layui-fluid { padding: 10px 10px !important; }
+  .d-row { gap: 10px; }
+}
+@media (max-width: 640px) {
+  .plug-grid, .plug-grid-2 { grid-template-columns: 1fr; }
+  .hero-card { flex-direction: column; text-align: center; padding: 16px; }
+  .hero-avatar-wrap { margin: 0 auto; }
+  .hero-body { align-items: center; text-align: center; }
+  .hero-body h2 { font-size: 18px; }
+  .hero-avatar { width: 56px; height: 56px; }
+  .hero-badge { font-size: 9px; padding: 1px 7px; }
+  .stat-card { padding: 10px 12px; }
+  .st-num { font-size: 20px; }
+  .st-icon { width: 36px; height: 36px; font-size: 16px; }
+  .d-row { gap: 8px; }
+  .info-bar { gap: 4px; }
+  .info-chip { font-size: 10px; padding: 3px 8px; }
+  .layui-fluid { padding: 8px 6px !important; }
+}
+</style>
+
+<div class="layui-fluid" style="padding:14px 16px;">
+
+  <!-- ══ Hero ══ -->
+  <div class="hero-card {$power_theme}" style="margin-bottom:14px;">
+    <div class="hero-avatar-wrap">
+      <img src="{$userInfo['img']}" class="hero-avatar" onerror="this.style.opacity='0.3'">
+      <div class="hero-badge">✦ {$userInfo['power_name']} ✦</div>
     </div>
+    <div class="hero-body">
+      <div class="greeting">{$greeting_emoji} {$greeting}</div>
+      <h2>{$userInfo['username']|default='用户'}</h2>
+      <div class="subtitle">已陪伴 <b>{$app_name|default='平台'}</b> · 第 <b>{$member_days}</b> 天</div>
+    </div>
+    <div class="hero-extra">
+      <div class="hero-metrics">
+        <div><div class="bal">¥{$userInfo['balance']}</div><div style="font-size:12px;opacity:.7;">可用余额</div></div>
+      </div>
+      <div class="hero-actions">
+        <a ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i> 充值</a>
+        <a href="javascript:;" id="btnWithdraw"><i class="layui-icon layui-icon-export"></i> 提现</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Stats ══ -->
+  <div class="d-row" style="margin-bottom:14px;">
+    <div class="d-3">
+      <div class="stat-card" ew-href="{:url('/Auth/list')}">
+        <div class="st-icon c1"><i class="layui-icon layui-icon-auz"></i></div>
+        <div class="st-body">
+          <div class="st-num">{$auth_count}</div>
+          <div class="st-label">累计授权</div>
+          <div class="st-sub {if $auth_increase >= 0}up{else}down{/if}">今日 {if $auth_increase>=0}+{/if}{php}echo abs($auth_increase);{/php}</div>
+          <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill blue" style="width:{if $auth_count>0}{:min(100,round($auth_count/100*100))}{else}0{/if}%;"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="d-3">
+      <div class="stat-card" ew-href="{:url('/Cdkey/list')}">
+        <div class="st-icon c2"><i class="layui-icon layui-icon-cols"></i></div>
+        <div class="st-body">
+          <div class="st-num">{$cdkey_count}</div>
+          <div class="st-label">卡密资产</div>
+          <div class="st-sub" style="color:#34a853;">未使用 {$cdkey_unused|default=0} 张</div>
+          <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill green" style="width:{if $cdkey_count>0}{:min(100,round($cdkey_count/100*100))}{else}0{/if}%;"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="d-3">
+      <div class="stat-card" ew-href="{:url('/User/list')}">
+        <div class="st-icon c3"><i class="layui-icon layui-icon-group"></i></div>
+        <div class="st-body">
+          <div class="st-num">{$user_count}</div>
+          <div class="st-label">下级用户</div>
+          <div class="st-sub {if $user_increase >= 0}up{else}down{/if}">今日 {if $user_increase>=0}+{/if}{php}echo abs($user_increase);{/php}</div>
+          <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill purple" style="width:{if $user_count>0}{:min(100,round($user_count/100*100))}{else}0{/if}%;"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="d-3">
+      <div class="stat-card" ew-href="{:url('/UserPlugin/market')}">
+        <div class="st-icon c4"><i class="layui-icon layui-icon-component"></i></div>
+        <div class="st-body"><div class="st-num" style="font-size:18px;">插件市场</div><div class="st-label">发现更多工具</div><div class="st-sub up"><i class="layui-icon layui-icon-right"></i> 前往浏览</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Notice Tabs (6) + Carousel (6) — both 340px fixed ══ -->
+  <div class="d-row" style="margin-bottom:14px;">
+    <div class="d-6">
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:340px;">
+        <div class="n-tabs"><span class="n-tab on">📢 官方公告</span></div>
+        <div style="padding:8px 18px;height:300px;overflow-y:auto;">
+          {empty name="notice_list"}
+          <div class="empty">暂无公告</div>
+          {else/}
+          {foreach $notice_list as $ni}
+          <div class="l-row notice-item" data-id="{$ni.id}" data-title="{$ni.title}" data-content="{:htmlspecialchars($ni.content)}" style="cursor:pointer;">
+            <span style="width:28px;height:28px;border-radius:6px;background:#fff3e0;color:#f09d3c;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="layui-icon layui-icon-notice"></i></span>
+            <div class="l-body">
+              <div class="l-title">{$ni.title}</div>
+              <div class="l-meta">{$ni.created_at|date='m-d H:i'}</div>
+            </div>
+            <i class="layui-icon layui-icon-right" style="color:#ccc;font-size:12px;"></i>
+          </div>
+          {/foreach}
+          {/empty}
+        </div>
+      </div>
+    </div>
+    <div class="d-6">
+      {notempty name="carousel_list"}
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;aspect-ratio:16/9;">
+        <div style="position:relative;width:100%;height:100%;" id="carouselWrap">
+          <div id="carouselTrack" style="display:flex;width:100%;height:100%;transition:transform .5s ease;">
+            {foreach $carousel_list as $c}
+            <div class="carousel-slide" style="min-width:100%;position:relative;">
+              <a href="{if !empty($c.url)}{$c.url}{else}javascript:;{/if}" target="{if !empty($c.url)}_blank{/if}">
+                <img src="{$c.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                {if !empty($c.title)}<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 20px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:14px;font-weight:600;">{$c.title}</div>{/if}
+              </a>
+            </div>
+            {/foreach}
+          </div>
+          {if count($carousel_list) > 1}
+          <button id="caroPrev" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:0;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;z-index:2;">‹</button>
+          <button id="caroNext" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:0;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;z-index:2;">›</button>
+          <div style="position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;" id="caroDots"></div>
+          {/if}
+        </div>
+      </div>
+      {else/}
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
+        <div class="empty">暂无轮播图</div>
+      </div>
+      {/notempty}
+    </div>
+  </div>
+
+  <!-- ══ 我的插件 (6) + 最新上架 (6) ══ -->
+  <div class="d-row" style="margin-bottom:14px;">
+    <div class="d-6">
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:430.8px;">
+        <div class="card-header">我的插件 <span style="font-weight:400;font-size:12px;color:#8c8c8c;">已发布 {$my_plugin_count|default=0} 个 · 已上架 {$my_online_plugin_count|default=0} 个</span></div>
+        <div style="padding:10px 18px;height:380px;overflow-y:auto;">
+          {empty name="my_plugins"}
+          <div class="empty">还没有发布插件 · <a ew-href="{:url('/UserPlugin/create')}" style="color:#3a6fd8;">去发布</a></div>
+          {else/}
+          {foreach $my_plugins as $mp}
+          <a class="l-row" ew-href="{:url('/UserPlugin/detail', ['id' => $mp.id])}" style="text-decoration:none;color:inherit;">
+            <img src="{$mp.icon}" class="l-icon" onerror="this.style.display='none'">
+            <div class="l-body">
+              <div class="l-title">{$mp.name}</div>
+              <div class="l-meta">{if !empty($mp.description)}{$mp.description|mb_substr=0,20}{else/}暂无简介{/if}</div>
+            </div>
+            <span class="layui-badge {if $mp.status==1}layui-badge-green{elseif $mp.status==0}layui-bg-orange{else}layui-bg-gray{/if}" style="font-size:10px;">{if $mp.status==1}已上架{elseif $mp.status==0}待审核{else}已下架{/if}</span>
+          </a>
+          {/foreach}
+          {/empty}
+        </div>
+      </div>
+    </div>
+    <div class="d-6">
+      {notempty name="latest_plugins"}
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:430.8px;">
+        <div class="card-header">🆕 最新上架 <a ew-href="{:url('/UserPlugin/market')}">更多 <i class="layui-icon layui-icon-right"></i></a></div>
+        <div style="padding:12px 14px;height:380px;overflow-y:auto;">
+          <div class="plug-grid-2">
+            {foreach $latest_plugins as $lp}
+            <div class="plug-card" ew-href="{:url('/UserPlugin/detail', ['id' => $lp.id])}">
+              <div class="pc-top">
+                <img src="{$lp.icon}" class="pc-icon" onerror="this.style.display='none'">
+                <div class="pc-info">
+                  <div class="pc-name">{$lp.name}</div>
+                  <div class="pc-meta">{$lp.author}</div>
+                </div>
+              </div>
+              <div class="pc-desc">{if !empty($lp.description)}{$lp.description}{else/}暂无简介{/if}</div>
+              <div class="pc-foot">
+                {if $lp.price == 0}<span class="pc-price free">免费</span>{else/}<span class="pc-price paid">¥{$lp.price}</span>{/if}
+                <span class="layui-badge layui-bg-gray" style="font-size:10px;">新上架</span>
+              </div>
+            </div>
+            {/foreach}
+          </div>
+        </div>
+      </div>
+      {else/}
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:430.8px;">
+        <div class="card-header">🆕 最新上架</div>
+        <div style="display:flex;align-items:center;justify-content:center;height:380px;"><div class="empty">暂无插件</div></div>
+      </div>
+      {/notempty}
+    </div>
+  </div>
+
+  <!-- ══ Purchases (6) + Rankings (6) ══ -->
+  <div class="d-row" style="margin-bottom:14px;">
+    <div class="d-6">
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;">
+        <div class="card-header">📥 我的购买 {notempty name="my_purchases"}<a ew-href="{:url('/UserPlugin/purchases')}">全部 <i class="layui-icon layui-icon-right"></i></a>{/notempty}</div>
+        <div style="padding:10px 18px;max-height:300px;overflow:auto;">
+          {empty name="my_purchases"}<div class="empty">还没有购买记录 · 去 <a ew-href="{:url('/UserPlugin/market')}" style="color:#3a6fd8;">插件市场</a> 看看吧</div>{else/}
+          {foreach $my_purchases as $mp}
+          <div class="l-row">
+            <img src="{$mp.icon}" class="l-icon" onerror="this.style.display='none'">
+            <div class="l-body"><div class="l-title">{$mp.name}</div><div class="l-meta">{$mp.created_at|date='m-d H:i'}</div></div>
+            <div class="l-extra" style="font-weight:600;font-size:13px;">{if $mp.price==0}<span style="color:#34a853;">免费</span>{else/}<span style="color:#e8553d;">¥{$mp.price}</span>{/if}</div>
+          </div>
+          {/foreach}
+          {/empty}
+        </div>
+      </div>
+    </div>
+    <div class="d-6">
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;">
+        <div class="card-header">🏆 积分排行</div>
+        <div style="padding:0 18px 8px;max-height:340px;overflow:auto;">
+          {empty name="integral_ranking"}<div class="empty">暂无数据</div>{else/}
+          {php}$i=1;{/php}
+          {foreach $integral_ranking as $r}
+          <div class="l-row">
+            <span class="rk {if $i==1}rk-1{elseif $i==2}rk-2{elseif $i==3}rk-3{else}rk-n{/if}">{$i}</span>
+            <div class="l-body"><div class="l-title">{$r.username}</div></div>
+            <span style="font-weight:600;">{$r.integral} 积分</span>
+          </div>
+          {php}$i++;{/php}
+          {/foreach}
+          {/empty}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ App Notice (6) + Logs (6) ══ -->
+  <div class="d-row">
+    <div class="d-6">
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:280px;">
+        <div class="n-tabs"><span class="n-tab on">应用公告</span></div>
+        <div style="padding:8px 18px;height:240px;overflow-y:auto;">
+          {notempty name="app_notice"}{$app_notice|raw}{else/}<div class="empty">暂无公告</div>{/notempty}
+        </div>
+      </div>
+    </div>
+    <div class="d-6">
+      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:280px;">
+        <div class="card-header">📝 最近日志</div>
+        <div style="height:240px;overflow:auto;padding:8px 18px;">
+          {empty name="log_list"}<div class="empty">暂未日志</div>{else/}
+          {foreach $log_list as $r}
+          <div class="l-row" style="padding:8px 0;">
+            <span style="width:28px;height:28px;border-radius:6px;background:#f0f4ff;color:#3a6fd8;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="layui-icon layui-icon-log"></i></span>
+            <div class="l-body"><div class="l-title" style="font-weight:400;">{$r.title}</div></div>
+            <span style="font-size:11px;color:#bbb;">{$r.create_time|date='m-d H:i'}</span>
+          </div>
+          {/foreach}
+          {/empty}
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 {include file="/public/footer"}
 <script>
-    layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
-        var $ = layui.jquery;
-        var layer = layui.layer;
-        var form = layui.form;
-        var admin = layui.admin;
-        var notice = layui.notice;
-
+layui.use(['layer', 'form', 'admin', 'element', 'notice', 'upload'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var notice = layui.notice;
+    var upload = layui.upload;
+    // Notice popup
+    $('.notice-item').click(function(){
+        var title = $(this).data('title');
+        var content = $(this).attr('data-content');
+        var h = '<div style="padding:10px 0;line-height:1.8;font-size:14px;color:#333;">' + content + '</div>';
+        layer.open({
+            type: 1, title: title, area: ['620px', '420px'],
+            content: h,
+            maxmin: false, scrollbar: false
+        });
     });
+
+    // Ranking tabs
+    $('#rankTabs .n-tab').click(function(){
+        var t = $(this).data('t');
+        $('#rankTabs .n-tab').removeClass('on');
+        $(this).addClass('on');
+        $('#tabBalance, #tabIntegral').hide();
+        t === 'balance' ? $('#tabBalance').show() : $('#tabIntegral').show();
+    });
+
+    // Withdraw
+    var wdLayer;
+    $('#btnWithdraw').click(function(){
+        notice.msg('检测中...', {icon:4, close:true});
+        $.ajax({ type:'POST', url:'{:url("/Withdraw/check")}', dataType:'json',
+            success: function(r) {
+                notice.destroy();
+                if (r.code == 0) {
+                    var bal = r.data.balance, min = r.data.min;
+                    var h = '<div style="padding:20px 24px;">' +
+                        '<div style="text-align:center;margin-bottom:16px;font-size:15px;">可提现余额 <b style="color:#ff5722;font-size:24px;">¥'+bal.toFixed(2)+'</b></div>' +
+                        '<div style="font-size:12px;color:#8c8c8c;text-align:center;margin-bottom:18px;">最低提现 ¥'+min+' 元</div>' +
+                        '<div class="layui-form-item"><label class="layui-form-label">金额</label><div class="layui-input-block"><input type="number" id="wdAmount" class="layui-input" placeholder="请输入提现金额" value="'+bal.toFixed(2)+'" max="'+bal.toFixed(2)+'" min="'+min+'"/></div></div>' +
+                        '<div class="layui-form-item"><label class="layui-form-label">收款方式</label><div class="layui-input-block"><select id="wdPayMethod" class="layui-input"><option value="">请选择</option><option value="alipay">支付宝</option><option value="wechat">微信</option><option value="bank">银行卡</option></select></div></div>' +
+                        '<div class="layui-form-item"><label class="layui-form-label">手机号</label><div class="layui-input-block"><input type="text" id="wdPhone" class="layui-input" placeholder="请输入手机号"/></div></div>' +
+                        '<div class="layui-form-item"><label class="layui-form-label">姓名</label><div class="layui-input-block"><input type="text" id="wdName" class="layui-input" placeholder="请输入真实姓名"/></div></div>' +
+                        '<div class="layui-form-item"><label class="layui-form-label">收款码</label><div class="layui-input-block"><input type="text" id="wdQrImage" class="layui-input" placeholder="请上传收款码图片"/><button type="button" class="layui-btn layui-btn-normal" id="wdUploadBtn" style="margin-top:6px;"><i class="layui-icon layui-icon-upload"></i> 上传</button><div id="wdQrPreview" style="margin-top:6px;display:none;"><img src="" style="max-width:200px;border-radius:6px;border:1px solid #eee;"></div></div></div>' +
+                        '<div class="layui-form-item"><label class="layui-form-label">备注</label><div class="layui-input-block"><textarea id="wdRemark" class="layui-textarea" placeholder="选填" style="height:60px;"></textarea></div></div>' +
+                        '<div class="layui-form-item text-right"><button class="layui-btn" id="wdSubmit">提交申请</button><button class="layui-btn layui-btn-primary" onclick="layer.close(wdLayer)">取消</button></div>' +
+                        '</div>';
+                    wdLayer = layer.open({ type:1, title:'余额提现', area:['500px','560px'], content:h });
+                    upload.render({ elem: '#wdUploadBtn', url: '{:url("/Upload/image")}',
+                        before: function() { notice.msg('上传中...', {icon:4, close:true}); },
+                        done: function(res) { notice.destroy(); if (res.code == 0) { $('#wdQrImage').val(res.data.path); $('#wdQrPreview').show().find('img').attr('src', res.data.path); notice.msg('上传成功', {icon:1}); } }
+                    });
+                    $('#wdSubmit').click(function(){
+                        var amt = parseFloat($('#wdAmount').val()), pm = $('#wdPayMethod').val(), ph = $('#wdPhone').val().trim(), nm = $('#wdName').val().trim(), qr = $('#wdQrImage').val().trim(), rm = $('#wdRemark').val().trim();
+                        if (!amt || amt < min) { notice.msg('提现金额不能低于'+min+'元', {icon:2}); return; }
+                        if (amt > bal) { notice.msg('提现金额不能超过余额', {icon:2}); return; }
+                        if (!pm) { notice.msg('请选择收款方式', {icon:2}); return; }
+                        if (!ph || ph.length<11) { notice.msg('请填写正确的手机号', {icon:2}); return; }
+                        if (!nm) { notice.msg('请填写姓名', {icon:2}); return; }
+                        if (!qr) { notice.msg('请上传收款码图片', {icon:2}); return; }
+                        notice.msg('提交中...', {icon:4, close:true});
+                        $.ajax({ type:'POST', url:'{:url("/Withdraw/apply")}', data:{amount:amt, pay_method:pm, phone:ph, real_name:nm, qr_image:qr, remark:rm}, dataType:'json',
+                            success: function(r) { notice.destroy(); layer.close(wdLayer); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
+                    });
+                } else {
+                    notice.msg(r.msg, {icon:2, time: 5000});
+                }
+            }
+        });
+    });
+
+    // Carousel
+    var caroSlides = $('#carouselTrack .carousel-slide');
+    if (caroSlides.length > 1) {
+        var caroIdx = 0;
+        var caroTimer;
+        function goCaro(i) {
+            caroIdx = (i + caroSlides.length) % caroSlides.length;
+            $('#carouselTrack').css('transform', 'translateX(-' + (caroIdx * 100) + '%)');
+            $('#caroDots').html('');
+            for (var j = 0; j < caroSlides.length; j++) {
+                $('#caroDots').append('<span style="width:8px;height:8px;border-radius:50%;background:'+(j===caroIdx?'#fff':'rgba(255,255,255,.5)')+';cursor:pointer;" data-i="'+j+'"></span>');
+            }
+        }
+        function autoPlay() { caroTimer = setInterval(function(){ goCaro(caroIdx + 1); }, 4000); }
+        goCaro(0); autoPlay();
+        $('#caroPrev').click(function(){ goCaro(caroIdx - 1); clearInterval(caroTimer); autoPlay(); });
+        $('#caroNext').click(function(){ goCaro(caroIdx + 1); clearInterval(caroTimer); autoPlay(); });
+        $('#caroDots').on('click', 'span', function(){ var i = parseInt($(this).data('i')); goCaro(i); clearInterval(caroTimer); autoPlay(); });
+    }
+});
 </script>

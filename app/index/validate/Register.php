@@ -13,7 +13,6 @@ class Register extends Validate
         'username|用户名'   => 'require|min:6|alphaNum',
         'qq|QQ' => 'require|integer|min:5|max:12',
         'email|邮箱' => 'require|email',
-        'phone|手机号' => 'require|integer|max:11',
         'password|密码'  => 'require|min:6|alphaNum|confirm:confirmPassword',
         'confirmPassword|确认密码' => 'require|min:6|alphaNum',
     ];

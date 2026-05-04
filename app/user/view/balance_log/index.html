@@ -10,6 +10,12 @@
     </div>
 </div>
 
+<script type="text/html" id="SF_TypeTpl">
+    {{# var types = {recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入',withdraw_apply:'提现申请',withdraw_cancel:'提现撤回',withdraw_reject:'提现驳回',withdraw_reject_refund:'提现驳回返还'}; }}
+    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">
+        {{types[d.type] || d.type}}
+    </span>
+</script>
 <script type="text/html" id="SF_AmountTpl">
     {{# if(d.amount > 0){ }}
     <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}} 元</span>
@@ -18,44 +24,19 @@
     {{# } }}
 </script>
 
-<script type="text/html" id="SF_TypeTpl">
-    {{# var types = {recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入'}; }}
-    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">
-        {{types[d.type] || d.type}}
-    </span>
-</script>
-
 {include file="/public/footer"}
 <script>
-layui.use(['table', 'notice'], function(){
+layui.use(['table'], function(){
     var table = layui.table;
-    var notice = layui.notice;
-
-    var insTb = table.render({
-        elem: '#SF_BalanceTable',
-        url: '{:url("/BalanceLog/index")}',
-        method: 'post',
-        page: true,
-        limit: 15,
-        request: {
-            pageName: 'current_page',
-            limitName: 'limit'
-        },
-        parseData: function(res){
-            return {
-                "code": res.code,
-                "msg": res.msg,
-                "count": res.data.data.total || 0,
-                "data": res.data.data.data || []
-            };
-        },
+    table.render({
+        elem: '#SF_BalanceTable', url: '{:url("/BalanceLog/index")}', method: 'post', page: true, limit: 15,
+        request: { pageName: 'current_page', limitName: 'limit' },
+        parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 70},
             {field: 'type', title: '类型', width: 100, templet: '#SF_TypeTpl'},
             {field: 'amount', title: '金额', width: 120, templet: '#SF_AmountTpl'},
-            {field: 'balance_after', title: '余额', width: 120, templet: function(d){
-                return d.balance_after + ' 元';
-            }},
+            {field: 'balance_after', title: '余额', width: 120, templet: function(d){ return d.balance_after + ' 元'; }},
             {field: 'description', title: '说明', minWidth: 200},
             {field: 'created_at', title: '时间', width: 170}
         ]]

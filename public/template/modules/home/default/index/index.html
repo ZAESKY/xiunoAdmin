@@ -78,7 +78,7 @@
             <ul class="layui-nav layui-nav-tree arrow2" lay-filter="admin-side-nav" lay-accordion="true"
                 lay-shrink="_all">
                 <li class="layui-nav-item">
-                    <a lay-href="{:url('/Index/main')}"><i class="layui-icon layui-icon-home"></i>&emsp;<cite>平台首页</cite></a>
+                    <a lay-href="{:url('/Index/dashboard')}"><i class="layui-icon layui-icon-home"></i>&emsp;<cite>平台首页</cite></a>
                 </li>
                 <li class="layui-nav-item">
                     <a lay-filter="SF_DownloadSubmit" lay-submit><i class="layui-icon layui-icon-download-circle"></i>&emsp;<cite>源码下载</cite></a>
@@ -121,7 +121,7 @@
 
         // 默认加载主页
         index.loadHome({
-            menuPath: '{:url("/Index/main")}',
+            menuPath: '{:url("/Index/dashboard")}',
             menuName: '<i class="layui-icon layui-icon-home"></i>'
         });
 

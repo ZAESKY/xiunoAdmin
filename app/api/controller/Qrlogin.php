@@ -7,6 +7,7 @@ use think\Exception;
 use app\common\extend\CheckInfo;
 use think\facade\Cache;
 use think\facade\Session;
+use think\facade\Cookie;
 use think\facade\Db;
 class Qrlogin extends ApiBackend
 {
@@ -46,6 +47,8 @@ class Qrlogin extends ApiBackend
             switch ($type){
                 case 'userLogin':
                     if(!in_array('qrcode',conf('login_switch'))) return message(t('auth.site_scan_disabled') ,false ,['code' => 6]);
+                    break;
+                case 'bindQQ':
                     break;
                 case 'binding':
                     try{
@@ -122,8 +125,8 @@ class Qrlogin extends ApiBackend
         if(!empty($username) && !empty($appid)){
             $row = Db::name('user')->where(['username' => $username, 'appid' => $appid, 'status' => 1])->find();
             if(empty($row))return message(t('user.not_exist') ,false);
-            Session::set('userId', $row['id']);
-            Session::set('userSign',data_auth_sign($row['username'].'SF'.$row['password']));
+            cookie('userId', $row['id']);
+            cookie('userSign', data_auth_sign($row['appid'].$row['username'].$row['password'].sf_password_hash()));
             Session::delete('get_token');
             Session::delete('get_qq');
             Session::save();
@@ -142,6 +145,17 @@ class Qrlogin extends ApiBackend
                 case 0:
                     return message(t('user.not_exist') ,false);
                 case 1:
+                    $user = $row->first();
+                    cookie('userId', $user['id']);
+                    cookie('userSign', data_auth_sign($user['appid'].$user['username'].$user['password'].sf_password_hash()));
+                    Session::delete('get_token');
+                    Session::delete('get_qq');
+                    Session::save();
+                    $content = [
+                        'Title' => '登录后台',
+                        'Result' => 'success'
+                    ];
+                    event('UserLogin', $content);
                     return message(t('login.success') ,true);
                 default:
                     foreach ($row as $res){
@@ -163,6 +177,32 @@ class Qrlogin extends ApiBackend
                     return message(t('login.select_account') ,true, $data);
             }
         }
+    }
+
+    public function bindQQ(){
+        $get_token = !empty(session('get_token'))?session('get_token'):null;
+        $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
+        if(empty($get_token) || empty($get_qq)){
+            return message(t('auth.token_expired') ,false);
+        }
+        try{
+            parent::userLogin();
+        }catch (\Exception $e){
+            return message($e->getMessage() ,false);
+        }
+        $userId = cookie('userId');
+        if(empty($userId)){
+            return message(t('common.need_login') ,false);
+        }
+        try{
+            Db::name('user')->where('id', $userId)->data(['qq' => $get_qq])->update();
+        }catch (\Exception $e){
+            return message('QQ绑定失败' ,false);
+        }
+        Session::delete('get_token');
+        Session::delete('get_qq');
+        Session::save();
+        return message('QQ绑定成功' ,true);
     }
 
     public function binding(){

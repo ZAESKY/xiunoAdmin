@@ -208,12 +208,27 @@ class UserPlugin extends UserBackend
             }
         }
 
+        // 该作者的其他插件（最新3个）
+        $authorPlugins = [];
+        if (!empty($plugin['user_id'])) {
+            $authorPlugins = \think\facade\Db::name('plugin')
+                ->where('user_id', intval($plugin['user_id']))
+                ->where('id', '<>', $id)
+                ->where('status', 1)
+                ->order('id', 'desc')
+                ->limit(3)
+                ->field('id, name, icon, price')
+                ->select()
+                ->toArray();
+        }
+
         View::assign('plugin', $plugin);
         View::assign('hasCommented', $hasCommented);
         View::assign('myComment', $myComment);
         View::assign('isPurchased', $isPurchased);
         View::assign('isOwner', $isOwner);
         View::assign('userBalance', $userBalance);
+        View::assign('authorPlugins', $authorPlugins);
         return $this->render();
     }
 

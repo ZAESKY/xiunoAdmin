@@ -394,7 +394,8 @@
                                     </script>
                                     {/case}
                                     {case bool}
-                                    <input type="checkbox" name="row[{$item.name}]" value="1" lay-skin="switch" {$item.value?'checked':''} {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty}/>
+                                    <input type="radio" name="row[{$item.name}]" value="1" title="开启" {if $item.value==1}checked{/if}/>
+                                    <input type="radio" name="row[{$item.name}]" value="0" title="关闭" {if $item.value!=1}checked{/if}/>
                                     {/case}
                                     {case custom}
                                     {$item.extend_html}
@@ -478,8 +479,94 @@
             </form>
         </div>
     </div>
+
 </div>
 </div>
+
+
+<script type="text/html" id="noticeBar">
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+<script type="text/html" id="noticeState">
+    <input type="checkbox" lay-filter="noticeStateCk" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" {{d.status==1?'checked':''}}>
+</script>
+<script type="text/html" id="noticeDialog">
+    <form id="noticeForm" lay-filter="noticeForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+        <input name="action" type="hidden" value="edit"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" placeholder="公告标题" class="layui-input" lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">内容</label>
+            <div class="layui-input-block">
+                <textarea id="noticeContentEditor" name="content" class="layui-textarea" style="min-height:220px;resize:vertical;"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-block">
+                <input type="number" name="sort" value="0" placeholder="数字越小越靠前" class="layui-input" style="width:120px;"/>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="noticeSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+<script type="text/html" id="carouselBar">
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+</script>
+
+<script type="text/html" id="carouselState">
+    <input type="checkbox" lay-filter="carouselStateCk" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" {{d.status==1?'checked':''}}>
+</script>
+
+<script type="text/html" id="carouselDialog">
+    <form id="carouselForm" lay-filter="carouselForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+        <input name="action" type="hidden" value="edit"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" placeholder="轮播图标题" class="layui-input" lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">图片</label>
+            <div class="layui-input-block">
+                <input type="text" name="image" id="carouselImageInput" placeholder="请上传图片" class="layui-input" lay-verType="tips" lay-verify="required"/>
+                <button type="button" class="layui-btn layui-btn-normal" id="carouselUploadBtn" style="margin-top:8px;"><i class="layui-icon layui-icon-upload"></i> 上传图片</button>
+                <div id="carouselImgPreview" style="margin-top:8px;display:none;">
+                    <img src="" style="max-width:260px;border-radius:6px;border:1px solid #eee;">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">跳转地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="url" placeholder="点击跳转的URL地址，留空不跳转" class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-block">
+                <input type="number" name="sort" value="0" placeholder="数字越小越靠前" class="layui-input" style="width:120px;"/>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="carouselSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
 
 <script>
     layui.use(['element', 'form', 'notice', 'layedit'], function () {
@@ -489,7 +576,7 @@
         var layedit = layui.layedit;
         var richEditors = [];
 
-        $('.sf-rich-editor, textarea[name="row[notice_home]"], textarea[name="row[notice_user]"]').each(function () {
+        $('.sf-rich-editor, textarea[name="row[notice_home]"]').each(function () {
             var id = $(this).attr('id');
             if (!id) {
                 id = 'rich_' + $(this).attr('name').replace(/[^a-zA-Z0-9_]/g, '_');
@@ -536,4 +623,205 @@
         });
         form.render();
     });
+</script>
+
+<script>
+// 轮播图管理
+layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var admin = layui.admin;
+    var notice = layui.notice;
+    var upload = layui.upload;
+
+    var carouselTb = table.render({
+        elem: '#carouselTable',
+        url: '{:url("/Set/carousel")}',
+        method: 'post',
+        page: false,
+        skin: 'line',
+        size: 'lg',
+        parseData: function(res) { return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
+        cols: [[
+            {field: 'id', title: 'ID', width: 60},
+            {field: 'image', title: '图片', width: 100, templet: function(d) {
+                return '<img src="'+d.image+'" style="width:60px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #eee;" onerror="this.style.display=\'none\'">';
+            }},
+            {field: 'title', title: '标题', minWidth: 140},
+            {field: 'url', title: '跳转地址', minWidth: 180, templet: function(d) {
+                return d.url ? '<span style="color:#3a6fd8;">'+d.url+'</span>' : '<span style="color:#bbb;">-</span>';
+            }},
+            {field: 'sort', title: '排序', width: 70},
+            {field: 'status', title: '状态', templet: '#carouselState', width: 90},
+            {title: '操作', toolbar: '#carouselBar', width: 160}
+        ]]
+    });
+
+    function reloadCarousel() { carouselTb.reload(); }
+
+    $('#carouselAdd').click(function(){ showCarouselEdit(); });
+
+    table.on('tool(carouselTable)', function(obj) {
+        if (obj.event === 'edit') showCarouselEdit(obj.data);
+        else if (obj.event === 'del') {
+            layer.confirm('确定删除该轮播图吗？', {icon:3, shade:.1}, function(i) {
+                layer.close(i);
+                notice.msg('删除中...', {icon:4, close:true});
+                $.ajax({
+                    type:'POST', url:'{:url("/Set/carousel")}',
+                    data:{action:'drop', id:obj.data.id}, dataType:'json',
+                    success:function(r){ notice.destroy(); reloadCarousel(); notice.msg(r.msg, {icon: r.code==0?1:2}); }
+                });
+            });
+        }
+    });
+
+    form.on('switch(carouselStateCk)', function(obj) {
+        $.ajax({
+            type:'POST', url:'{:url("/Set/carousel")}',
+            data:{action:'setStatus', id:obj.value, status:obj.elem.checked?1:0}, dataType:'json',
+            success:function(r){ reloadCarousel(); notice.msg(r.msg, {icon: r.code==0?1:2}); }
+        });
+    });
+
+    function showCarouselEdit(mData) {
+        admin.open({
+            type: 1, area: ['600px', '420px'],
+            title: (mData ? '修改' : '添加') + '轮播图',
+            content: $('#carouselDialog').html(),
+            success: function(layero, dIndex) {
+                form.render();
+                if (mData) {
+                    form.val('carouselForm', mData);
+                    if (mData.image) { $('#carouselImgPreview').show().find('img').attr('src', mData.image); }
+                }
+                upload.render({
+                    elem: '#carouselUploadBtn',
+                    url: '{:url("/Upload/image")}',
+                    before: function() { notice.msg('上传中...', {icon:4, close:true}); },
+                    done: function(res) {
+                        notice.destroy();
+                        if (res.code == 0) {
+                            $('#carouselImageInput').val(res.data.path);
+                            $('#carouselImgPreview').show().find('img').attr('src', res.data.path);
+                            notice.msg('上传成功', {icon:1});
+                        } else { notice.msg(res.msg || '上传失败', {icon:2}); }
+                    }
+                });
+                $('#carouselImageInput').on('input', function() {
+                    var v = $(this).val();
+                    v ? $('#carouselImgPreview').show().find('img').attr('src', v) : $('#carouselImgPreview').hide();
+                });
+                form.on('submit(carouselSubmit)', function(data) {
+                    notice.msg('保存中...', {icon:4, close:true});
+                    $.ajax({
+                        type:'POST', url:'{:url("/Set/carousel")}',
+                        data: data.field, dataType:'json',
+                        success: function(r) {
+                            notice.destroy();
+                            if (r.code == 0) { reloadCarousel(); admin.closeDialog(dIndex); notice.msg(r.msg, {icon:1}); }
+                            else { notice.msg(r.msg, {icon:2}); }
+                        }
+                    });
+                    return false;
+                });
+                $(layero).children('.layui-layer-content').css('overflow', 'visible');
+            }
+        });
+    }
+});
+</script>
+
+<script>
+// 用户公告管理
+layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var admin = layui.admin;
+    var notice = layui.notice;
+    var layedit = layui.layedit;
+    var editIndex;
+
+    var noticeTb = table.render({
+        elem: '#noticeTable',
+        url: '{:url("/Set/userNotice")}',
+        method: 'post',
+        page: false,
+        skin: 'line',
+        size: 'lg',
+        parseData: function(res) { return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
+        cols: [[
+            {field: 'id', title: 'ID', width: 60},
+            {field: 'title', title: '标题', minWidth: 200},
+            {field: 'sort', title: '排序', width: 70},
+            {field: 'status', title: '状态', templet: '#noticeState', width: 90},
+            {field: 'created_at', title: '创建时间', width: 160},
+            {title: '操作', toolbar: '#noticeBar', width: 160}
+        ]]
+    });
+
+    function reloadNotice() { noticeTb.reload(); }
+
+    $('#noticeAdd').click(function(){ showNoticeEdit(); });
+
+    table.on('tool(noticeTable)', function(obj) {
+        if (obj.event === 'edit') showNoticeEdit(obj.data);
+        else if (obj.event === 'del') {
+            layer.confirm('确定删除该公告吗？', {icon:3, shade:.1}, function(i) {
+                layer.close(i);
+                admin.msg('删除中...', {icon:4, close:true});
+                $.ajax({
+                    type:'POST', url:'{:url("/Set/userNotice")}',
+                    data:{action:'drop', id:obj.data.id}, dataType:'json',
+                    success:function(r){ notice.destroy(); reloadNotice(); notice.msg(r.msg, {icon: r.code==0?1:2}); }
+                });
+            });
+        }
+    });
+
+    form.on('switch(noticeStateCk)', function(obj) {
+        $.ajax({
+            type:'POST', url:'{:url("/Set/userNotice")}',
+            data:{action:'setStatus', id:obj.value, status:obj.elem.checked?1:0}, dataType:'json',
+            success:function(r){ reloadNotice(); notice.msg(r.msg, {icon: r.code==0?1:2}); }
+        });
+    });
+
+    function showNoticeEdit(mData) {
+        admin.open({
+            type: 1, area: ['700px', '520px'], maxmin: true,
+            title: (mData ? '修改' : '新增') + '公告',
+            content: $('#noticeDialog').html(),
+            success: function(layero, dIndex) {
+                form.render();
+                editIndex = layedit.build('noticeContentEditor', {
+                    height: 240,
+                    tool: ['strong', 'italic', 'underline', 'del', '|', 'left', 'center', 'right', '|', 'link', 'unlink', 'image', 'face', 'code']
+                });
+                if (mData) {
+                    form.val('noticeForm', mData);
+                    layedit.setContent(editIndex, mData.content || '');
+                }
+                form.on('submit(noticeSubmit)', function(data) {
+                    layedit.sync(editIndex);
+                    data.field.content = $('#noticeContentEditor').val();
+                    notice.msg('保存中...', {icon:4, close:true});
+                    $.ajax({
+                        type:'POST', url:'{:url("/Set/userNotice")}',
+                        data: data.field, dataType:'json',
+                        success: function(r) {
+                            notice.destroy();
+                            if (r.code == 0) { reloadNotice(); admin.closeDialog(dIndex); notice.msg(r.msg, {icon:1}); }
+                            else { notice.msg(r.msg, {icon:2}); }
+                        }
+                    });
+                    return false;
+                });
+                $(layero).children('.layui-layer-content').css('overflow', 'visible');
+            }
+        });
+    }
+});
 </script>

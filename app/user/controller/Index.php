@@ -79,18 +79,106 @@ class Index extends UserBackend
             'page' => 1,
         ]);
 
+        // Hot & latest plugins
+        $hotPlugins = Db::name('plugin')->where('status', 1)->where('is_hot', 1)->order('sort', 'desc')->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
+        $latestPlugins = Db::name('plugin')->where('status', 1)->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
+
+        // My recent purchases
+        $myPurchases = [];
+        if (!empty($this->userId)) {
+            $myPurchases = Db::name('plugin_purchase')
+                ->alias('p')
+                ->join('plugin pl', 'p.plugin_id = pl.id')
+                ->where('p.user_id', intval($this->userId))
+                ->order('p.id', 'desc')
+                ->limit(4)
+                ->field('pl.id, pl.name, pl.icon, pl.price, p.created_at')
+                ->select()
+                ->toArray();
+        }
+        $myPluginCount = Db::name('plugin')->where('user_id', intval($this->userId))->count('id');
+        $myOnlinePluginCount = Db::name('plugin')->where('user_id', intval($this->userId))->where('status', 1)->count('id');
+        $myPlugins = Db::name('plugin')
+            ->where('user_id', intval($this->userId))
+            ->order('id', 'desc')
+            ->limit(4)
+            ->field('id, name, icon, status, description')
+            ->select()
+            ->toArray();
+        $weekTrend = [];
+        $weekAuthMax = 1;
+        $weekUserMax = 1;
+        for ($i = 6; $i >= 0; $i--) {
+            $start = date('Y-m-d 00:00:00', strtotime('-' . $i . ' days'));
+            $end = date('Y-m-d 23:59:59', strtotime('-' . $i . ' days'));
+            $authNum = Db::name('auth')->where(['userid' => $this->userId])->whereTime('addtime', 'between', [$start, $end])->count('id');
+            $userNum = Db::name('user')->where(['userid' => $this->userId])->whereTime('addtime', 'between', [$start, $end])->count('id');
+            $weekAuthMax = max($weekAuthMax, $authNum);
+            $weekUserMax = max($weekUserMax, $userNum);
+            $weekTrend[] = [
+                'day' => date('m-d', strtotime($start)),
+                'auth' => $authNum,
+                'user' => $userNum,
+            ];
+        }
+        foreach ($weekTrend as &$trendItem) {
+            $trendItem['auth_rate'] = max(6, round($trendItem['auth'] / $weekAuthMax * 100));
+            $trendItem['user_rate'] = max(6, round($trendItem['user'] / $weekUserMax * 100));
+        }
+        unset($trendItem);
+
+        // Emotional value data
+        $hour = (int)date('H');
+        $greeting = $hour < 6 ? '夜深了' : ($hour < 9 ? '早上好' : ($hour < 12 ? '上午好' : ($hour < 14 ? '中午好' : ($hour < 18 ? '下午好' : '晚上好'))));
+        $greetingEmoji = $hour < 6 ? '🌙' : ($hour < 9 ? '☀️' : ($hour < 12 ? '🌤' : ($hour < 14 ? '🌞' : ($hour < 18 ? '🌈' : '🌆'))));
+        $memberDays = max(1, (int)((time() - strtotime($this->userInfo['addtime'])) / 86400));
+
+        // Power color theme: higher discount = higher tier → more premium colors
+        $discountRate = floatval($this->userInfo['addauth_discount']);
+        if ($discountRate <= 0) {
+            $powerTheme = 'legend'; // 免费 = 传说级
+        } elseif ($discountRate <= 0.3) {
+            $powerTheme = 'diamond';
+        } elseif ($discountRate <= 0.5) {
+            $powerTheme = 'gold';
+        } elseif ($discountRate <= 0.7) {
+            $powerTheme = 'silver';
+        } elseif ($discountRate < 1) {
+            $powerTheme = 'bronze';
+        } else {
+            $powerTheme = 'standard';
+        }
+
         View::assign([
             'notice' => conf('notice_user'),
+            'notice_list' => Db::name('user_notice')->where('status', 1)->order('sort', 'asc')->order('id', 'desc')->select()->toArray(),
             'app_notice' => $this->myAppInfo['app_notice'],
             'app_name' => $this->myAppInfo['name'],
+            'app_id' => intval($this->myAppInfo['id']),
             'log_list' => $logList,
+            'greeting' => $greeting,
+            'greeting_emoji' => $greetingEmoji,
+            'member_days' => $memberDays,
+            'power_theme' => $powerTheme,
             'balance_ranking' => $balanceRanking,
             'integral_ranking' => $integralRanking,
             'auth_count' => $authCount,
             'auth_increase' => $authIncrease,
+            'today_auths' => $authToday,
             'cdkey_count' => $cdkeyCount,
+            'cdkey_unused' => Db::name('cdkey')->where(['userid' => $this->userId, 'status' => 0])->count('id'),
             'user_count' => $userCount,
-            'user_increase' => $userIncrease
+            'user_increase' => $userIncrease,
+            'hot_plugins' => $hotPlugins,
+            'latest_plugins' => $latestPlugins,
+            'my_purchases' => $myPurchases,
+            'my_plugin_count' => $myPluginCount,
+            'my_online_plugin_count' => $myOnlinePluginCount,
+            'my_plugins' => $myPlugins,
+            'carousel_list' => Db::name('carousel')->where('status', 1)->order('sort', 'asc')->order('id', 'desc')->select()->toArray(),
+            'week_trend' => $weekTrend,
+            'week_auth_max' => $weekAuthMax,
+            'week_user_max' => $weekUserMax,
         ]);
         return $this->render();
     }

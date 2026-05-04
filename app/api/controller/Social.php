@@ -16,6 +16,9 @@ class Social extends Backend
         if(empty($userType)){
             return message(t("validation.missing_user_type") ,false);
         }
+        if(!in_array('qq', conf('login_switch'))){
+            return message(t('auth.site_scan_disabled') ,false);
+        }
         $Oauth = new Oauth($callback);
         if (!empty($code)) {
             if(empty($state)){
@@ -72,6 +75,9 @@ class Social extends Backend
         $callback = ($userType=='admin')?'admin.php/index/index.html':'user.php/index/index.html';
         if(empty($userType)){
             return message(t("validation.missing_user_type") ,false);
+        }
+        if(!in_array('qq', conf('login_switch'))){
+            return message(t('auth.site_scan_disabled') ,false);
         }
         if($userType=='admin'){
             if(!session('adminId')){

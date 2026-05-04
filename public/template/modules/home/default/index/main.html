@@ -1,331 +1,159 @@
 {include file="index/header"}
 {$background_image|raw}
-<div class="layui-fluid ew-console-wrapper">
-    <div class="layui-row layui-col-space15">
-        <div class="layui-col-sm6 layui-col-md4">
-            <div class="layui-card">
 
-                <div class="layui-card-body" style="padding: 0;">
-                    <div class="bgimg"></div>
-                    <!-- 表格工具栏 -->
-                    <img id="logo" class="img" onclick="layer.tips('应用LOGO', this, {tips: 1});"  src="{__IMG__}logo.png" width="100" height="100"/>
-                    <form class="layui-card-body layui-form layui-form-pane formBasForm" id="queryAuthForm">
-                        <div id="introduce" class="layui-form-item" style="display: none">
-                            <div class="sf-tips">
-                                <div id="introduceContent"></div>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label" style="height: 32px;border-radius: 4px;">应用名称</label>
-                            <div class="layui-input-block">
-                                <select name="appid" class="layui-input ew-select-fixed" lay-filter="app" lay-search lay-verify="required">
-                                    <option value="">请选择应用</option>
-                                    {volist name="app_list.data.data" id="res"}
-                                    <option value="{$res.id}">{$res.name}</option>
-                                    {/volist}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">查询内容</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="auth_info" placeholder="请输入要查询的内容" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item" pane>
-                            <label class="layui-form-label">查询类型</label>
-                            <div class="layui-input-block">
-                                <input type="radio" name="query_type" value="auth" title="授权"checked>
-                                <input type="radio" name="query_type" value="user" title="代理">
-                                <input type="radio" name="query_type" value="pay" title="认证">
-                            </div>
-                        </div>
-                        <div class="layui-form-item text-right">
-                            <button class="layui-btn" lay-filter="SF_QueryAuth" lay-submit>查询</button>
-                            <button class="layui-btn layui-btn-primary" type="button" id="SF_QueryAuth_Reset">重置</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<!-- Hero Section -->
+<section class="hero" style="padding:80px 0 60px; text-align:center; position:relative; overflow:hidden;">
+    <div style="position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 50% 0%, rgba(79,70,229,.08) 0%, transparent 60%);pointer-events:none;"></div>
+    <div class="container" style="position:relative;z-index:2;">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:var(--primary-light);color:var(--primary);font-size:13px;font-weight:600;margin-bottom:24px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite;"></span>
+            新一代企业级授权管理系统
+            <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
         </div>
-        <div class="layui-col-sm6 layui-col-md4">
-            <div class="layui-card">
-                <div class="layui-card-header">
-                    注册用户
-                    <span class="pull-right">
-                    <i class="sf-avatar sf-avatar-icon sf-avatar-small sf-avatar-purple layui-icon layui-icon-user"></i>
-                </span>
+        <h1 style="font-size:clamp(32px,5vw,56px);font-weight:800;line-height:1.15;letter-spacing:-1px;margin-bottom:20px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            高效管理您的<br>软件授权与用户生态
+        </h1>
+        <p style="font-size:18px;color:var(--text-secondary);max-width:600px;margin:0 auto 36px;line-height:1.7;">
+            为软件开发者提供一站式授权管理、用户运营、支付集成的 SaaS 解决方案，助您专注产品，轻松变现。
+        </p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+            {if $user_login}
+            <a href="/user.php" class="btn btn-primary btn-lg">进入控制台</a>
+            <a href="#features" class="btn btn-outline btn-lg">了解更多</a>
+            {else}
+            <a href="/user.php/login/reg" class="btn btn-primary btn-lg">免费注册</a>
+            <a href="#features" class="btn btn-outline btn-lg">了解更多</a>
+            {/if}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" style="padding:80px 0; background:var(--bg-secondary);">
+    <div class="container">
+        <div style="text-align:center;margin-bottom:56px;">
+            <h2 style="font-size:32px;font-weight:700;margin-bottom:12px;">核心功能</h2>
+            <p style="color:var(--text-secondary);font-size:16px;max-width:500px;margin:0 auto;">全方位覆盖软件授权管理场景，让您的业务运转更高效</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;">
+            <div class="feature-card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .2s,box-shadow .2s;box-shadow:var(--card-shadow);">
+                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
-                <div class="layui-card-body">
-                    <form class="layui-card-body layui-form layui-form-pane formBasForm" id="registerForm">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label" style="height: 32px;border-radius: 4px;">应用名称</label>
-                            <div class="layui-input-block">
-                                <select name="appid" class="layui-input ew-select-fixed" lay-filter="register_app" lay-search lay-verify="required">
-                                    <option value="">请选择应用</option>
-                                    {volist name="app_list.data.data" id="res"}
-                                    <option value="{$res.id}">{$res.name}</option>
-                                    {/volist}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">用户名</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="username" placeholder="请输入用户名" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">密码</label>
-                            <div class="layui-input-block">
-                                <input type="password" name="password" placeholder="请输入密码" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">确认密码</label>
-                            <div class="layui-input-block">
-                                <input type="password" name="confirmPassword" placeholder="请确认密码" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">QQ</label>
-                            <div class="layui-input-block">
-                                <input type="number" name="qq" placeholder="请输入要绑定的QQ" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">邮箱</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="email" placeholder="请输入要绑定的邮箱" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">手机号</label>
-                            <div class="layui-input-block">
-                                <input type="number" name="phone" placeholder="请输入要绑定的手机号" class="layui-input"
-                                       lay-verType="tips" lay-verify="required" required/>
-                            </div>
-                        </div>
-                        <div class="layui-form-item text-right">
-                            <button class="layui-btn" lay-filter="SF_RegisterSubmit" lay-submit>注册</button>
-                            <button class="layui-btn layui-btn-primary" type="button" id="SF_Register_Reset">重置</button>
-                        </div>
-                    </form>
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">安全授权管控</h3>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;">多维度授权验证，支持单码、账号、设备绑定等多种模式，有效防止软件盗版与滥用。</p>
+            </div>
+            <div class="feature-card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .2s,box-shadow .2s;box-shadow:var(--card-shadow);">
+                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#db2777,#ec4899);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">多级代理体系</h3>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;">灵活的下级用户与代理管理，支持自定义权限模板、折扣策略，轻松构建分销网络。</p>
+            </div>
+            <div class="feature-card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .2s,box-shadow .2s;box-shadow:var(--card-shadow);">
+                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0891b2,#06b6d4);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">多渠道支付集成</h3>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;">内置支付宝、微信支付、QQ 钱包等主流支付渠道，支持自助充值、卡密兑换与余额消费。</p>
+            </div>
+            <div class="feature-card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .2s,box-shadow .2s;box-shadow:var(--card-shadow);">
+                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#ea580c,#f97316);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">数据统计分析</h3>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;">实时掌握授权数量、用户增长、营收变化等关键指标，数据驱动业务决策。</p>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Stats Section -->
+<section style="padding:60px 0;">
+    <div class="container">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;text-align:center;">
+            <div><div style="font-size:40px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">99.9%</div><div style="color:var(--text-secondary);font-size:14px;margin-top:4px;">系统可用性</div></div>
+            <div><div style="font-size:40px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">10W+</div><div style="color:var(--text-secondary);font-size:14px;margin-top:4px;">授权管理数量</div></div>
+            <div><div style="font-size:40px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">24/7</div><div style="color:var(--text-secondary);font-size:14px;margin-top:4px;">技术支持保障</div></div>
+            <div><div style="font-size:40px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">3+</div><div style="color:var(--text-secondary);font-size:14px;margin-top:4px;">支付渠道接入</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="padding:80px 0; background:var(--bg-secondary);">
+    <div class="container" style="text-align:center;">
+        <h2 style="font-size:28px;font-weight:700;margin-bottom:12px;">准备好开始了吗？</h2>
+        <p style="color:var(--text-secondary);font-size:16px;margin-bottom:32px;">注册即可免费体验，快速搭建您的软件授权体系</p>
+        {if $user_login}
+        <a href="/user.php" class="btn btn-primary btn-lg">进入控制台</a>
+        {else}
+        <a href="/user.php/login/reg.html" class="btn btn-primary btn-lg">立即注册</a>
+        {/if}
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="border-top:1px solid var(--border);padding:40px 0; background:var(--bg);">
+    <div class="container">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;">
+            <div>
+                <div style="font-weight:700;font-size:16px;margin-bottom:4px;">{$title}</div>
+                <div style="color:var(--text-secondary);font-size:13px;">{:conf('foot')}&emsp;{:conf('ICP')}</div>
+            </div>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                <a href="{:url('/Index/main')}" style="color:var(--text-secondary);font-size:13px;">首页</a>
+                <a href="#features" style="color:var(--text-secondary);font-size:13px;">产品功能</a>
+                <a href="/user.php/login/index" style="color:var(--text-secondary);font-size:13px;">登录</a>
+                <a href="/user.php/login/reg" style="color:var(--text-secondary);font-size:13px;">注册</a>
+                {php}$kfqq = conf('kfqq'); if(!empty($kfqq)): $qq = explode("\n",$kfqq)[0];{/php}
+                <a href="http://wpa.qq.com/msgrd?v=3&uin={$qq}&site=qq&menu=yes" target="_blank" style="color:var(--text-secondary);font-size:13px;">联系客服</a>
+                {php}endif;{/php}
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:24px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:12px;">
+            &copy; {$year} {$title}. All rights reserved.
+        </div>
+    </div>
+</footer>
+
 <div id="myAudio1"></div>
 {include file="index/footer"}
 {$background_notice|raw}
 {$background_music|raw}
+
 <script>
-    layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
-        var $ = layui.jquery;
-        var layer = layui.layer;
-        var form = layui.form;
-        var admin = layui.admin;
-        var notice = layui.notice;
+layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var notice = layui.notice;
 
-        $("#SF_QueryAuth_Reset").click(function(){
-            document.getElementById("queryAuthForm").reset();
-            notice.msg('重置表单成功！', {icon: 1, audio:'1'});
-            return false;
-        });
-        $("#SF_Download_Reset").click(function(){
-            document.getElementById("downloadForm").reset();
-            notice.msg('重置表单成功！', {icon: 1, audio:'1'});
-            return false;
-        });
-        $("#SF_Register_Reset").click(function(){
-            document.getElementById("registerForm").reset();
-            notice.msg('重置表单成功！', {icon: 1, audio:'1'});
-            return false;
-        });
-        form.on('select(app)', function (data) {
-            if(data.value == ''){
-                $("#logo").attr('src','{__IMG__}logo.png');
-            }else{
-                $.ajax({
-                    type: "POST",
-                    url: '{:url("/Ajax/appInfo")}',
-                    data: {appid:data.value},
-                    dataType: "json",
-                    success: function(data) {
-                        notice.destroy();
-                        if (data.code == 0) {
-                            notice.msg("获取信息成功！", {icon: 1, audio:'1'});
-                            $("#introduceContent").html(data.data.introduce?data.data.introduce:'暂无介绍');
-                            $("#introduce").css('display','inherit');
-                            if(data.data.app_notice){
-                                admin.open({
-                                    type: 1,
-                                    title: '应用公告',
-                                    shade: .1,
-                                    content: '<div class="layui-card layui-card-body">'+data.data.app_notice+'</div>'
-                                });
-                            }
-                            $("#logo").attr('src',data.data.logo);
-                        } else {
-                            notice.msg(data.msg, {icon: 2, audio:'1'});
-                        }
-                    },
-                    error: function() {
-                        notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
-                    }
-                });
-            }
-            return false;
-        });
+    // Mobile nav toggle
+    $('#navToggle').click(function(){ $('#navLinks').toggleClass('open'); });
+    $('#navLinks a').click(function(){ $('#navLinks').removeClass('open'); });
 
-        form.on('select(register_app)', function (data) {
-            $.ajax({
-                type: "POST",
-                url: '{:url("/Ajax/appInfo")}',
-                data: {appid:data.value},
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        notice.msg("获取信息成功！", {icon: 1, audio:'1'});
-                        if(data.data.register_notice){
-                            admin.open({
-                                type: 1,
-                                title: '注册公告',
-                                shade: .1,
-                                content: '<div class="layui-card layui-card-body">'+data.data.register_notice+'</div>'
-                            });
-                        }
-                    } else {
-                        notice.msg(data.msg, {icon: 2, audio:'1'});
-                    }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
-                }
-            });
-            return false;
-        });
-
-        form.on('submit(SF_QueryAuth)', function (data) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
-            $.ajax({
-                type: "POST",
-                url: '{:url("/Ajax/queryAuth")}',
-                data: data.field,
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        if(data.data.status == 1){
-                            notice.warning({
-                                title: '查询通知',
-                                message: data.msg,
-                                animateInside:true,
-                                position:'topCenter',
-                                transitionOut:'flipOutX',
-                                transitionOutMobile: 'flipOutX',
-                                displayMode:'2',
-                                audio:'1'
-                            });
-                        }else{
-                            notice.success({
-                                title: '查询通知',
-                                message: data.msg,
-                                animateInside:true,
-                                position:'topCenter',
-                                transitionOut:'flipOutX',
-                                transitionOutMobile: 'flipOutX',
-                                displayMode:'2',
-                                audio:'1'
-                            });
-                        }
-                    } else {
-                        notice.error({
-                            title: '查询通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
-                    }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.error({
-                        title: '查询通知',
-                        message: '服务器错误',
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        displayMode:'2',
-                        audio:'1'
-                    });
-                }
-            });
-            return false;
-        });
-        form.on('submit(SF_RegisterSubmit)', function (data) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
-            $.ajax({
-                type: "POST",
-                url: '{:url("/Ajax/register")}',
-                data: data.field,
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        notice.success({
-                            title: '注册通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
-                    } else {
-                        notice.error({
-                            title: '注册通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
-                    }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.error({
-                        title: '注册通知',
-                        message: '服务器错误',
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        displayMode:'2',
-                        audio:'1'
-                    });
-                }
-            });
-            return false;
-        });
+    // Smooth scroll
+    $('a[href^="#"]').click(function(e){
+        var target = $(this.getAttribute('href'));
+        if(target.length){ e.preventDefault(); $('html,body').animate({scrollTop:target.offset().top-80},400); }
     });
+
+    // Feature cards hover
+    $('.feature-card').hover(
+        function(){ $(this).css({transform:'translateY(-4px)',boxShadow:'0 12px 40px rgba(0,0,0,.1)'}); },
+        function(){ $(this).css({transform:'',boxShadow:''}); }
+    );
+
+    // Query form (kept available if needed)
+    window.SF_Home_Query = function(appid, authInfo) {
+        notice.msg('查询中...', {icon:4, close:true});
+        $.ajax({
+            type:'POST', url:'{:url("/Ajax/queryAuth")}',
+            data:{appid:appid, auth_info:authInfo, query_type:'auth'},
+            dataType:'json',
+            success:function(r){ notice.destroy(); notice[r.code==0?'success':'error']({title:'查询结果',message:r.msg,position:'topCenter',displayMode:'2'}); },
+            error:function(){ notice.destroy(); notice.error({title:'查询通知',message:'服务器错误',position:'topCenter',displayMode:'2'}); }
+        });
+    };
+});
 </script>

@@ -10,14 +10,6 @@
         <div class="layui-row layui-col-space8">
             <div class="layui-col-sm12" style="padding: 0em;">
                 <div class="layui-card" style="border-radius: 0.5em">
-                    <div class="layui-card-header">
-                        <a title="{:t('order_ui.close_window')}" onclick="custom_close();">
-                            <p style="margin-top: 0.5em;font-size: 1.2em">
-                                <span class="layui-icon layui-icon-close"></span>
-                                {:t('order_ui.close_window')}
-                            </p>
-                        </a>
-                    </div>
                     <div class="layui-row layui-col-space8">
                         <div class="layui-col-xs2">
                             <div style="border-radius: 0.5em;width: 3em;text-align: center;height: 3em;line-height: 3em;color:white;margin: 0.8em;box-shadow: 3px 3px 16px #eee">
@@ -64,12 +56,6 @@
                                     <p>
                                         <span onclick="layer.msg('份数×{:t('common_ui.quantity_field')}={:t('order_ui.quantity')}')">{:t('order_ui.quantity')}</span>
                                         <span style="float: right;">1个</span>
-                                    </p>
-                                    <p>
-                                        {:t('order_ui.user_power')}
-                                        <span style="float: right;">
-                                            <a id="level"> {$userInfo['power_name']}</a>
-                                        </span>
                                     </p>
                                     <p>
                                         {:t('order_ui.product_price')}
@@ -173,6 +159,12 @@
                 }
             });
         });
+    // Auto-select first payment method
+    var firstPay = $('input[name=pay]').first();
+    if (firstPay.length && !$('input[name=pay]:checked').length) {
+        firstPay.prop('checked', true);
+        form.render('radio');
+    }
     });
 </script>
 </body>

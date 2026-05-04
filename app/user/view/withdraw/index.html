@@ -1,0 +1,59 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-header">提现记录</div>
+        <div class="layui-card-body">
+            <table id="SF_Table" lay-filter="SF_Table"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="SF_TbBar">
+    {{# if(d.status === 'pending'){ }}
+    <a class="layui-btn layui-btn-warm layui-btn-sm" lay-event="cancel"><i class="layui-icon layui-icon-close"></i>撤回</a>
+    {{# } }}
+</script>
+<script type="text/html" id="SF_TbStatus">
+    {{# var m = {pending:'<span class="layui-badge layui-bg-orange">待处理</span>', approved:'<span class="layui-badge layui-badge-green">已处理</span>', rejected:'<span class="layui-badge layui-badge-red">已驳回</span>', withdrawn:'<span class="layui-badge layui-bg-gray">已撤回</span>'}; }}
+    {{# return m[d.status] || d.status; }}
+</script>
+
+{include file="/public/footer"}
+<script>
+layui.use(['layer', 'form', 'table', 'admin', 'notice'], function () {
+    var $ = layui.jquery, layer = layui.layer, form = layui.form, table = layui.table, admin = layui.admin, notice = layui.notice;
+
+    var insTb = table.render({
+        elem: '#SF_Table', url: '{:url("/Withdraw/index")}', method: 'post', page: true, skin: 'line', size: 'lg',
+        request: { pageName: 'current_page', limitName: 'limit' },
+        parseData: function(res) { return { code: res.code, msg: res.msg, count: res.data.total, data: res.data.data }; },
+        cols: [[
+            {field: 'id', title: 'ID', width: 70, sort: true},
+            {field: 'amount', title: '提现金额', width: 110, templet: '<span style="color:#ff5722;font-weight:700;">¥{{d.amount}}</span>'},
+            {field: 'pay_method', title: '收款方式', width: 90, templet: function(d) { var m={alipay:'支付宝',wechat:'微信',bank:'银行卡'}; return m[d.pay_method]||d.pay_method||'-'; }},
+            {field: 'qr_image', title: '收款码', width: 80, templet: function(d) { return d.qr_image ? '<a href="'+d.qr_image+'" target="_blank"><span class="layui-badge layui-badge-blue">查看</span></a>' : '-'; }},
+            {field: 'phone', title: '手机号', width: 120},
+            {field: 'real_name', title: '姓名', width: 90},
+            {field: 'user_remark', title: '备注', minWidth: 120},
+            {field: 'status', title: '状态', width: 100, templet: '#SF_TbStatus'},
+            {field: 'applied_at', title: '申请时间', width: 160},
+            {field: 'admin_remark', title: '管理员备注', minWidth: 150, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
+            {field: 'transfer_image', title: '转账凭证', width: 100, templet: function(d) {
+                return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">查看</span></a>' : '<span style="color:#bbb;">-</span>';
+            }},
+            {title: '操作', toolbar: '#SF_TbBar', width: 80}
+        ]]
+    });
+
+    table.on('tool(SF_Table)', function(obj) {
+        if (obj.event === 'cancel') {
+            layer.confirm('确定撤回该提现申请吗？撤回后金额将返还余额', {icon:3, shade:.1}, function(i) {
+                layer.close(i);
+                notice.msg('撤回中...', {icon:4, close:true});
+                $.ajax({ type:'POST', url:'{:url("/Withdraw/cancel")}', data:{id:obj.data.id}, dataType:'json',
+                    success:function(r) { notice.destroy(); insTb.reload(); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
+            });
+        }
+    });
+});
+</script>

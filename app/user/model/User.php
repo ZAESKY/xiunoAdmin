@@ -57,6 +57,13 @@ class User extends BaseModel
                 }else{
                     return message(t('notify.captcha_expired') ,false);
                 }
+            case 'changeBindingQQ':
+                $result = $this->setOne(['qq' => '']);
+                if($result){
+                    return message('QQ解绑成功' ,true);
+                }else{
+                    return message('QQ解绑失败' ,false);
+                }
             default:
                 return message(t('common_ui.type_error') ,false);
         }

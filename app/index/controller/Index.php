@@ -63,6 +63,10 @@ class Index extends Frontend
         return $this->render('index/main');
     }
 
+    public function dashboard(){
+        return $this->render('index/dashboard');
+    }
+
     public function download(){
         View::config(['view_path' => '']);
         if(conf('download') == '0'){

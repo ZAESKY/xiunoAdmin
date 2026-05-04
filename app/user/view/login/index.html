@@ -298,14 +298,15 @@
         </div>
         <div class="layui-form-item">
             <input type="checkbox" name="remember" title="{:t('login.remember_me')}" lay-skin="primary" checked>
-            <a href="reg.html" class="layui-link pull-right">{:t('login.register_user')}</a>
+            <a href="{:url('/login/forgot')}" class="layui-link pull-right">忘记密码</a>
+            <a href="{:url('/login/reg')}" class="layui-link">{:t('login.register_user')}</a>
         </div>
         <div class="layui-form-item">
             <button type="button" class="layui-btn layui-btn-fluid sf" id="loginBtn">{:t('login.login_user')}</button>
         </div>
         <div class="layui-form-item page-account-other" style="font-size: 14px;">
             <span>{:t('login.other_login')}</span>
-            <a id="wechat_login"><img src="{__IMG__}wechat.svg" alt="{:t('common_ui.wechat')}"></a><a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a><a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>&emsp;
+            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}&emsp;
         </div>
     </form>
 </div>
@@ -323,19 +324,6 @@
         var admin = layui.admin;
         var notice = layui.notice;
         $('.login-wrapper').removeClass('layui-hide');
-
-        $("#wechat_login").click(function(){
-            notice.error({
-                title: '温馨提示',
-                message: '暂不支持',
-                animateInside:true,
-                position:'topCenter',
-                transitionOut:'flipOutX',
-                transitionOutMobile: 'flipOutX',
-                displayMode:'2',
-                audio:'1'
-            });
-        });
 
         window.qrcodeLogin = function(username, appid){
             notice.msg('正在执行中..', {icon: 4, close: true});

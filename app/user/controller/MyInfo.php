@@ -14,6 +14,7 @@ class MyInfo extends UserBackend
     }
 
     public function index(){
+        View::assign('pay_notice', $this->myAppInfo['pay_notice']);
         return $this->render();
     }
 
@@ -21,8 +22,7 @@ class MyInfo extends UserBackend
         if(IS_POST){
             return $this->service->recharge();
         }
-        View::assign('pay_notice', $this->myAppInfo['pay_notice']);
-        return $this->render();
+        return redirect((string)url('/MyInfo/index'));
     }
 
     public function checkBinding(){
@@ -35,14 +35,8 @@ class MyInfo extends UserBackend
                     } else {
                         return message('error', false);
                     }
-                case 'phone':
-                    if(!empty($this->userInfo['phone'])){
-                        return message('success', true);
-                    } else {
-                        return message('error', false);
-                    }
                 case 'qq':
-                    if(!empty($this->userInfo['access_token'])){
+                    if(!empty($this->userInfo['qq'])){
                         return message('success', true);
                     } else {
                         return message('error', false);

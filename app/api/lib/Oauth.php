@@ -1,84 +1,87 @@
 <?php
 /**
- * SF聚合登录SDK
- * 1.0
- * 陌上花开QQ2129876388
- * QQ群：363306078
- * 有任何问题可以加QQ群进行反馈，欢迎进群咨询
- **/
+ * QQ互联 OAuth2.0 直接对接
+ */
 namespace app\api\lib;
 
 class Oauth{
-    private $apiurl;
     private $appid;
     private $appkey;
     private $callback;
 
     function __construct($callback){
         $siteurl = ($_SERVER['SERVER_PORT'] == '443' ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].'/';
-        $this->apiurl = 'http://api.sf-team.cn/connect.php';
-        $this->appid = 1000;
-        $this->appkey = 'b2a445fd479dd5918c8b353fa8dcd65f';
+        $this->appid = '101849630';
+        $this->appkey = '8e9f043c7955f1f63909c0ef5a90db66';
         $this->callback = $siteurl.$callback;
     }
 
-    //获取登录跳转url
+    // 获取QQ互联授权登录跳转url
     public function login($type){
-
-        //-------生成唯一随机串防CSRF攻击
         $state = md5(uniqid(rand(), TRUE));
         session('Oauth_state', $state);
 
-        //-------构造请求参数列表
         $keysArr = array(
-            "act" => "login",
-            "appid" => $this->appid,
-            "appkey" => $this->appkey,
-            "type" => $type,
+            "response_type" => "code",
+            "client_id" => $this->appid,
             "redirect_uri" => $this->callback,
             "state" => $state
         );
-        $login_url = $this->apiurl.'?'.http_build_query($keysArr);
-        $response = self::get_curl($login_url);
-        $arr = json_decode($response,true);
-        return $arr;
+        $login_url = 'https://graph.qq.com/oauth2.0/authorize?'.http_build_query($keysArr);
+        return ['code' => 0, 'url' => $login_url];
     }
 
-    //登录成功返回网站
+    // 登录回调：用code换取access_token和openid
     public function callback($code){
-        //-------请求参数列表
+        // Step 1: 用code换取access_token
         $keysArr = array(
-            "act" => "callback",
-            "appid" => $this->appid,
-            "appkey" => $this->appkey,
-            "code" => $code
+            "grant_type" => "authorization_code",
+            "client_id" => $this->appid,
+            "client_secret" => $this->appkey,
+            "code" => $code,
+            "redirect_uri" => $this->callback
         );
-
-        //------构造请求access_token的url
-        $token_url = $this->apiurl.'?'.http_build_query($keysArr);
+        $token_url = 'https://graph.qq.com/oauth2.0/token?'.http_build_query($keysArr);
         $response = self::get_curl($token_url);
 
-        $arr = json_decode($response,true);
-        return $arr;
+        // QQ互联token接口返回的是 query string 格式: access_token=xxx&expires_in=xxx
+        parse_str($response, $tokenData);
+
+        if(isset($tokenData['error'])){
+            return ['code' => -1, 'msg' => $tokenData['error_description'] ?? '获取token失败'];
+        }
+        if(empty($tokenData['access_token'])){
+            return ['code' => -1, 'msg' => '获取access_token失败: '.$response];
+        }
+
+        $access_token = $tokenData['access_token'];
+
+        // Step 2: 用access_token换取openid
+        $openid_url = 'https://graph.qq.com/oauth2.0/me?access_token='.$access_token;
+        $response = self::get_curl($openid_url);
+
+        // QQ互联me接口返回: callback( {...} ); 去掉外层包裹
+        if(strpos($response, 'callback(') !== false){
+            $lpos = strpos($response, '(');
+            $rpos = strrpos($response, ')');
+            $response = substr($response, $lpos + 1, $rpos - $lpos - 1);
+        }
+
+        $arr = json_decode($response, true);
+        if(isset($arr['error'])){
+            return ['code' => -1, 'msg' => $arr['error_description'] ?? '获取openid失败'];
+        }
+        if(empty($arr['openid'])){
+            return ['code' => -1, 'msg' => '获取openid为空: '.$response];
+        }
+
+        // 用openid作为唯一标识（存入原access_token字段，保持兼容）
+        return ['code' => 0, 'access_token' => $arr['openid'], 'social_uid' => $arr['openid']];
     }
 
-    //查询用户信息
+    // 查询用户信息（保留接口兼容性）
     public function query($type, $social_uid){
-        //-------请求参数列表
-        $keysArr = array(
-            "act" => "query",
-            "appid" => $this->appid,
-            "appkey" => $this->appkey,
-            "type" => $type,
-            "social_uid" => $social_uid
-        );
-
-        //------构造请求access_token的url
-        $token_url = $this->apiurl.'?'.http_build_query($keysArr);
-        $response = self::get_curl($token_url);
-
-        $arr = json_decode($response,true);
-        return $arr;
+        return ['code' => 0];
     }
 
     private function get_curl($url){

@@ -1,0 +1,118 @@
+<div class="layui-fluid" style="padding:20px;">
+    <div class="layui-row layui-col-space15">
+        <!-- 欢迎卡片 -->
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">平台首页</div>
+                <div class="layui-card-body">
+                    <div style="text-align:center;padding:40px 20px;">
+                        <img src="{__IMG__}logo.png" style="width:64px;height:64px;border-radius:50%;margin-bottom:16px;" onerror="this.src='{__IMG__}logo.png'">
+                        <h2 style="margin:0;font-size:22px;color:#333;">欢迎使用 {$title}</h2>
+                        <p style="color:#999;margin-top:8px;">企业级软件授权管理系统</p>
+                        <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            <a href="/user.php" class="layui-btn layui-btn-normal">进入用户后台</a>
+                            <a href="{:url('/Index/download')}" class="layui-btn layui-btn-primary">源码下载</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="layui-icon layui-icon-search"></i> 授权查询</div>
+                <div class="layui-card-body">
+                    <form class="layui-form" lay-filter="queryForm">
+                        <div class="layui-form-item">
+                            <select name="appid" lay-search lay-verify="required">
+                                <option value="">请选择应用</option>
+                                {volist name="app_list.data.data" id="res"}
+                                <option value="{$res.id}">{$res.name}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="text" name="auth_info" placeholder="请输入查询内容" class="layui-input" lay-verify="required">
+                        </div>
+                        <div class="layui-form-item">
+                            <button class="layui-btn layui-btn-fluid" lay-filter="doQuery" lay-submit>查询</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="layui-icon layui-icon-user"></i> 注册用户</div>
+                <div class="layui-card-body">
+                    <form class="layui-form" lay-filter="registerForm">
+                        <div class="layui-form-item">
+                            <select name="appid" lay-search lay-verify="required">
+                                <option value="">请选择应用</option>
+                                {volist name="app_list.data.data" id="res"}
+                                <option value="{$res.id}">{$res.name}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="text" name="username" placeholder="用户名" class="layui-input" lay-verify="required">
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="password" name="password" placeholder="密码" class="layui-input" lay-verify="required">
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="password" name="confirmPassword" placeholder="确认密码" class="layui-input" lay-verify="required">
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="text" name="email" placeholder="邮箱" class="layui-input" lay-verify="required|email">
+                        </div>
+                        <div class="layui-form-item">
+                            <button class="layui-btn layui-btn-fluid" lay-filter="doRegister" lay-submit>注册</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md4">
+            <div class="layui-card">
+                <div class="layui-card-header"><i class="layui-icon layui-icon-link"></i> 快速链接</div>
+                <div class="layui-card-body">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <a href="{:url('/Index/main')}" target="_blank" class="layui-btn layui-btn-primary layui-btn-fluid">查看对外落地页</a>
+                        <a href="/user.php" class="layui-btn layui-btn-normal layui-btn-fluid">进入用户后台</a>
+                        <a href="/admin.php" class="layui-btn layui-btn-warm layui-btn-fluid">进入管理后台</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+layui.use(['layer','form','notice'], function(){
+    var $ = layui.jquery, form = layui.form, notice = layui.notice;
+
+    form.on('submit(doQuery)', function(d){
+        notice.msg('查询中...', {icon:4, close:true});
+        $.ajax({
+            type:'POST', url:'{:url("/Ajax/queryAuth")}', data:d.field, dataType:'json',
+            success:function(r){ notice.destroy(); notice[r.code==0?'success':'error']({title:'查询结果',message:r.msg,position:'topCenter',displayMode:'2'}); },
+            error:function(){ notice.destroy(); notice.error({title:'查询通知',message:'服务器错误',position:'topCenter',displayMode:'2'}); }
+        });
+        return false;
+    });
+
+    form.on('submit(doRegister)', function(d){
+        notice.msg('注册中...', {icon:4, close:true});
+        $.ajax({
+            type:'POST', url:'{:url("/Ajax/register")}', data:d.field, dataType:'json',
+            success:function(r){ notice.destroy(); notice[r.code==0?'success':'error']({title:'注册通知',message:r.msg,position:'topCenter',displayMode:'2'}); },
+            error:function(){ notice.destroy(); notice.error({title:'注册通知',message:'服务器错误',position:'topCenter',displayMode:'2'}); }
+        });
+        return false;
+    });
+});
+</script>

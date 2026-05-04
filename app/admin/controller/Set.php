@@ -45,7 +45,7 @@ class Set extends Backend
                 if($res['type'] != 'config'){
                     $res['content'] = json_decode($res['content'], true);
                 }
-                if (in_array($res['name'], ['notice_home', 'notice_user'], true)) {
+                if (in_array($res['name'], ['notice_home'], true)) {
                     $res['type'] = 'ueditor';
                 }
                 $res['tip'] = $res['tip'];
@@ -72,7 +72,7 @@ class Set extends Backend
                 $configList = [];
                 foreach ($this->service->all() as $v) {
                     if($v['type'] == 'bool'){
-                        $value = isset($row[$v['name']])?1:0;
+                        $value = isset($row[$v['name']]) ? intval($row[$v['name']]) : 0;
                         $v['value'] = $value;
                         $configList[] = $v->toArray();
                     }else{
@@ -83,7 +83,7 @@ class Set extends Backend
                             } else {
                                 $value = is_array($value) ? implode(',', array_values(array_filter($value))) : $value;
                             }
-                            if (in_array($v['name'], ['notice_home', 'notice_user'], true)) {
+                            if (in_array($v['name'], ['notice_home'], true)) {
                                 $value = clean_rich_text($value);
                             }
                             $v['value'] = $value;
@@ -555,5 +555,110 @@ class Set extends Backend
     public function update(){
         View::assign('edition', config('sf.edition'));
         return $this->render();
+    }
+
+    public function carousel()
+    {
+        if (!IS_POST) return $this->render();
+        $post = $this->request->post();
+        $action = $post['action'] ?? 'list';
+
+        if ($action === 'edit') {
+            $id = !empty($post['id']) ? intval($post['id']) : null;
+            $title = !empty($post['title']) ? trim($post['title']) : '';
+            $image = !empty($post['image']) ? trim($post['image']) : '';
+            $url = !empty($post['url']) ? trim($post['url']) : '';
+            $sort = isset($post['sort']) ? intval($post['sort']) : 0;
+            if (empty($title)) return json(message('标题不能为空', false));
+            if (empty($image)) return json(message('请上传图片', false));
+            if ($id) {
+                \think\facade\Db::name('carousel')->where('id', $id)->data([
+                    'title' => $title, 'image' => $image, 'url' => $url,
+                    'sort' => $sort, 'updated_at' => datetime(),
+                ])->update();
+                return json(message('修改成功', true));
+            } else {
+                \think\facade\Db::name('carousel')->insert([
+                    'title' => $title, 'image' => $image, 'url' => $url,
+                    'sort' => $sort, 'status' => 1,
+                    'created_at' => datetime(), 'updated_at' => datetime(),
+                ]);
+                return json(message('添加成功', true));
+            }
+        }
+        if ($action === 'drop') {
+            $id = intval($post['id'] ?? 0);
+            if ($id > 0) {
+                \think\facade\Db::name('carousel')->where('id', $id)->delete();
+                return json(message('删除成功', true));
+            }
+            return json(message('ID无效', false));
+        }
+        if ($action === 'setStatus') {
+            $id = intval($post['id'] ?? 0);
+            $status = intval($post['status'] ?? 0);
+            if ($id > 0) {
+                \think\facade\Db::name('carousel')->where('id', $id)->data(['status' => $status])->update();
+                return json(message('操作成功', true));
+            }
+            return json(message('ID无效', false));
+        }
+
+        $list = \think\facade\Db::name('carousel')->order('sort', 'asc')->order('id', 'desc')->select()->toArray();
+        return json([
+            'code' => 0, 'msg' => '', 'count' => count($list), 'data' => $list,
+        ]);
+    }
+
+    public function userNotice()
+    {
+        if (!IS_POST) return $this->render();
+        $post = $this->request->post();
+        $action = $post['action'] ?? 'list';
+
+        if ($action === 'edit') {
+            $id = !empty($post['id']) ? intval($post['id']) : null;
+            $title = !empty($post['title']) ? trim($post['title']) : '';
+            $content = $post['content'] ?? '';
+            $sort = isset($post['sort']) ? intval($post['sort']) : 0;
+            if (empty($title)) return json(message('标题不能为空', false));
+            if (empty($content)) return json(message('内容不能为空', false));
+            if ($id) {
+                \think\facade\Db::name('user_notice')->where('id', $id)->data([
+                    'title' => $title, 'content' => $content,
+                    'sort' => $sort, 'updated_at' => datetime(),
+                ])->update();
+                return json(message('修改成功', true));
+            } else {
+                \think\facade\Db::name('user_notice')->insert([
+                    'title' => $title, 'content' => $content,
+                    'sort' => $sort, 'status' => 1,
+                    'created_at' => datetime(), 'updated_at' => datetime(),
+                ]);
+                return json(message('添加成功', true));
+            }
+        }
+        if ($action === 'drop') {
+            $id = intval($post['id'] ?? 0);
+            if ($id > 0) {
+                \think\facade\Db::name('user_notice')->where('id', $id)->delete();
+                return json(message('删除成功', true));
+            }
+            return json(message('ID无效', false));
+        }
+        if ($action === 'setStatus') {
+            $id = intval($post['id'] ?? 0);
+            $status = intval($post['status'] ?? 0);
+            if ($id > 0) {
+                \think\facade\Db::name('user_notice')->where('id', $id)->data(['status' => $status])->update();
+                return json(message('操作成功', true));
+            }
+            return json(message('ID无效', false));
+        }
+
+        $list = \think\facade\Db::name('user_notice')->order('sort', 'asc')->order('id', 'desc')->select()->toArray();
+        return json([
+            'code' => 0, 'msg' => '', 'count' => count($list), 'data' => $list,
+        ]);
     }
 }

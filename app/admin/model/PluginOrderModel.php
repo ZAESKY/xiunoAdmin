@@ -86,6 +86,9 @@ class PluginOrderModel extends BaseModel
             $limit = !empty($post['limit']) ? $post['limit'] : 10;
             $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
             $data = $this->buildSearchWhere('id|order_no|plugin_name');
+            if (!empty($post['plugin_id'])) {
+                $data[] = ['plugin_id', '=', intval($post['plugin_id'])];
+            }
 
             $list = self::order('id', 'desc')
                 ->where($data)

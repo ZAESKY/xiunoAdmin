@@ -250,6 +250,9 @@
                 {field: 'balanceLog', title: '动账', align: 'center', width: 80, templet: function(d){
                     return '<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="viewBalanceLog">明细</a>';
                 }},
+                {field: 'pointLog', title: '积分动账', align: 'center', width: 100, templet: function(d){
+                    return '<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="viewPointLog">明细</a>';
+                }},
                 {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
                 {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
                 {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
@@ -352,6 +355,8 @@
                     window.open('{:url("/User/list")}?userid='+obj.data.id);
                 } else if (obj.event === 'viewBalanceLog') {
                     showBalanceLog(obj.data);
+                } else if (obj.event === 'viewPointLog') {
+                    showPointLog(obj.data);
                 }
             });
 
@@ -500,6 +505,42 @@
                                 }},
                                 {field: 'balance_after', title: '余额', width: 100, templet: function(d){ return (d.balance_after||'0.00')+' 元'; }},
                                 {field: 'description', title: '说明', minWidth: 180},
+                                {field: 'created_at', title: '时间', width: 170}
+                            ]]
+                        });
+                    }
+                });
+            }
+
+            /* 查看积分动账明细 */
+            function showPointLog(mData){
+                admin.popupRight({
+                    type: 1,
+                    title: mData.username + ' - 积分明细',
+                    content: '<table id="SF_PointLogTable" lay-filter="SF_PointLogTable"></table>',
+                    area: ['800px', '600px'],
+                    success: function(layero, dIndex){
+                        table.render({
+                            elem: '#SF_PointLogTable',
+                            url: '{:url("/User/pointLog")}',
+                            method: 'post',
+                            where: {user_id: mData.id},
+                            page: true, limit: 12,
+                            request: {pageName: 'current_page', limitName: 'limit'},
+                            parseData: function(res){
+                                return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
+                            },
+                            cols: [[
+                                {field: 'type', title: '类型', width: 110, templet: function(d){
+                                    var m={recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'};
+                                    return '<span class="layui-badge '+(d.amount>0?'layui-badge-green':'layui-badge-blue')+'">'+(m[d.type]||d.type)+'</span>';
+                                }},
+                                {field: 'amount', title: '积分变动', width: 110, templet: function(d){
+                                    return d.amount > 0 ? '<span style="color:#5cb85c">+'+d.amount+'</span>' : '<span style="color:#d9534f">'+d.amount+'</span>';
+                                }},
+                                {field: 'integral_after', title: '剩余积分', width: 110, templet: function(d){ return (d.integral_after||0)+' 积分'; }},
+                                {field: 'description', title: '说明', minWidth: 180},
+                                {field: 'source_type', title: '来源', width: 120},
                                 {field: 'created_at', title: '时间', width: 170}
                             ]]
                         });

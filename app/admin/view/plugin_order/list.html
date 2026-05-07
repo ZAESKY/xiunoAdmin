@@ -80,6 +80,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             {field: 'user_id', title: '用户ID', width: 100},
             {field: 'app_id', title: '应用ID', width: 100},
             {field: 'price', title: '金额', width: 100, templet: function(d){
+                if (d.pay_type === 'points') return '<span class="layui-badge layui-badge-orange">'+parseInt(d.price)+' 积分</span>';
                 return '<span class="layui-badge layui-badge-orange">¥'+d.price+'</span>';
             }},
             {field: 'pay_type', title: '支付方式', width: 100, templet: function(d){
@@ -88,6 +89,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                     case 'wxpay': return '<span class="layui-badge layui-badge-green">微信</span>';
                     case 'qqpay': return '<span class="layui-badge layui-badge-red">QQ</span>';
                     case 'balance': return '<span class="layui-badge layui-badge-purple">余额</span>';
+                    case 'points': return '<span class="layui-badge layui-badge-orange">积分</span>';
                     default: return '-';
                 }
             }},

@@ -125,6 +125,20 @@ class UserPlugin extends UserBackend
         }
     }
 
+    public function searchRelatedPlugins()
+    {
+        if (IS_POST) {
+            try {
+                $keyword = input('post.keyword', '', 'trim');
+                $excludeId = input('post.exclude_id', 0, 'intval');
+                $pluginModel = new PluginModel();
+                return json(message('ok', true, ['list' => $pluginModel->searchRelatedOptions($keyword, $excludeId)]));
+            } catch (\Exception $e) {
+                return json(message($e->getMessage(), false, ['list' => []]));
+            }
+        }
+    }
+
     /**
      * 删除自己的插件
      */
@@ -222,6 +236,17 @@ class UserPlugin extends UserBackend
                 ->toArray();
         }
 
+        // 哪些插件关联了当前插件
+        $referencingPlugins = \think\facade\Db::name('plugin')
+            ->where('related_plugin_id', $id)
+            ->where('status', 1)
+            ->order('sort', 'desc')
+            ->order('id', 'desc')
+            ->limit(6)
+            ->field('id, name, icon, price, pay_type')
+            ->select()
+            ->toArray();
+
         View::assign('plugin', $plugin);
         View::assign('hasCommented', $hasCommented);
         View::assign('myComment', $myComment);
@@ -229,6 +254,7 @@ class UserPlugin extends UserBackend
         View::assign('isOwner', $isOwner);
         View::assign('userBalance', $userBalance);
         View::assign('authorPlugins', $authorPlugins);
+        View::assign('referencingPlugins', $referencingPlugins);
         return $this->render();
     }
 

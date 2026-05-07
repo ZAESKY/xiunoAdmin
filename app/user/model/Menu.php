@@ -31,9 +31,10 @@ class Menu extends BaseModel
     }
 
     public function getList(){
+        $alwaysHiddenUrls = ['PointLog/index'];
         $cache = Cache::get('SF_UserMenu'.cookie('userId'));
         if(!empty($cache)){
-            return $cache;
+            return $this->filterHiddenMenuUrls($cache, $alwaysHiddenUrls);
         }
         try{
             $userInfo = parent::getUserInfo();
@@ -49,7 +50,7 @@ class Menu extends BaseModel
         $data = Menu::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('user')]])->select()->toArray();
 
         $parent_id = [];
-        $hiddenUrls = [];
+        $hiddenUrls = $alwaysHiddenUrls;
         if ($powerPriceInfo['addauth_power'] != 1) {
             $hiddenUrls[] = 'Auth/list';
         }
@@ -64,7 +65,7 @@ class Menu extends BaseModel
         }
 
         foreach ($data as $key => $value) {
-            if (in_array($value['url'], $hiddenUrls)) {
+            if (in_array($value['url'], $hiddenUrls, true)) {
                 unset($data[$key]);
                 continue;
             }
@@ -76,6 +77,21 @@ class Menu extends BaseModel
         $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
         Cache::tag('SF_Menu')->set('SF_UserMenu'.cookie('userId'), $all_node_lists);
         return $all_node_lists;
+    }
+
+    private function filterHiddenMenuUrls(array $menus, array $hiddenUrls): array
+    {
+        $filtered = [];
+        foreach ($menus as $menu) {
+            if (isset($menu['url']) && in_array($menu['url'], $hiddenUrls, true)) {
+                continue;
+            }
+            if (!empty($menu['children']) && is_array($menu['children'])) {
+                $menu['children'] = $this->filterHiddenMenuUrls($menu['children'], $hiddenUrls);
+            }
+            $filtered[] = $menu;
+        }
+        return array_values($filtered);
     }
 
     private function setMenuTree($data = [], $all_data = []){

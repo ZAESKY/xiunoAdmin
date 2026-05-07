@@ -42,6 +42,8 @@
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
     <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
+    <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="purchases"><i class="layui-icon layui-icon-rmb"></i>购买</a>
+    <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="downloads"><i class="layui-icon layui-icon-download-circle"></i>下载</a>
     <a class="layui-btn layui-btn-sm" lay-event="status"><i class="layui-icon">&#xe605;</i>状态</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>删除</a>
 </script>
@@ -63,8 +65,18 @@
 <script type="text/html" id="SF_TbPrice">
     {{# if(d.price == 0){ }}
         <span class="layui-badge layui-badge-green">免费</span>
+    {{# } else if(d.pay_type == 'points') { }}
+        <span class="layui-badge layui-badge-orange">{{parseInt(d.price)}} 积分</span>
     {{# } else { }}
         <span class="layui-badge layui-badge-orange">¥{{d.price}}</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="SF_TbPublish">
+    {{# if(d.publish_type == 1){ }}
+        <span class="layui-badge layui-badge-blue">定时发布</span>
+    {{# } else { }}
+        <span class="layui-badge layui-bg-gray">立即发布</span>
     {{# } }}
 </script>
 
@@ -118,7 +130,17 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 return d.user_id == 0 ? '管理员' : 'UID:'+d.user_id;
             }},
             {field: 'price', title: '价格', width: 100, templet: '#SF_TbPrice'},
+            {field: 'publish_type', title: '发布方式', width: 105, templet: '#SF_TbPublish'},
+            {field: 'publish_time', title: '发布时间', minWidth: 160, templet: function(d){
+                return d.publish_type == 1 ? (d.publish_time || '-') : (d.published_at || '-');
+            }},
             {field: 'download_count', title: '下载次数', width: 100, sort: true},
+            {field: 'download_record_count', title: '下载记录', width: 100, templet: function(d){
+                return '<a lay-event="downloads" style="color:#2d8cf0;">'+(d.download_record_count || 0)+'</a>';
+            }},
+            {field: 'purchase_count', title: '购买记录', width: 100, templet: function(d){
+                return '<a lay-event="purchases" style="color:#2d8cf0;">'+(d.purchase_count || 0)+'</a>';
+            }},
             {field: 'rating_avg', title: '评分', width: 100, sort: true, templet: function(d){
                 return d.rating_avg + ' (' + d.rating_count + '人)';
             }},
@@ -126,7 +148,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             {field: 'status', title: '状态', width: 100, templet: '#SF_TbStatus'},
             {field: 'sort', title: '排序', width: 80, sort: true},
             {field: 'created_at', title: '创建时间', minWidth: 160},
-            {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 200, fixed: 'right'}
+            {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 330, fixed: 'right'}
         ]]
     });
 
@@ -140,6 +162,10 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     table.on('tool(SF_Table)', function (obj) {
         if (obj.event === 'edit') {
             showEditDialog(obj.data.id);
+        } else if (obj.event === 'purchases') {
+            showRecordDialog('purchase', obj.data);
+        } else if (obj.event === 'downloads') {
+            showRecordDialog('download', obj.data);
         } else if (obj.event === 'status') {
             showStatusDialog(obj.data);
         } else if (obj.event === 'del') {
@@ -206,6 +232,77 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             }
         });
     };
+
+    function showRecordDialog(type, data) {
+        var tableId = 'plugin_record_table_' + type + '_' + data.id;
+        layer.open({
+            type: 1,
+            title: (type === 'purchase' ? '购买记录 - ' : '下载记录 - ') + data.name,
+            area: ['90%', '78%'],
+            maxmin: true,
+            content: '<div style="padding:15px;"><table id="'+tableId+'" lay-filter="'+tableId+'"></table></div>',
+            success: function() {
+                if (type === 'purchase') {
+                    table.render({
+                        elem: '#' + tableId,
+                        url: '{:url("/PluginOrder/list")}',
+                        method: 'post',
+                        page: true,
+                        skin: 'line',
+                        size: 'lg',
+                        where: {plugin_id: data.id},
+                        request: {pageName: 'current_page', limitName: 'limit'},
+                        parseData: function(res){
+                            return {code: res.code, msg: res.msg, count: res.data.data.total, data: res.data.data.data};
+                        },
+                        cols: [[
+                            {field:'order_no', title:'订单号', minWidth:190},
+                            {field:'user_id', title:'用户ID', width:90},
+                            {field:'app_id', title:'应用ID', width:90},
+                            {field:'price', title:'金额', width:100, templet:function(d){
+                                return d.pay_type === 'points' ? parseInt(d.price) + ' 积分' : '¥' + d.price;
+                            }},
+                            {field:'pay_type', title:'支付方式', width:100},
+                            {field:'status', title:'状态', width:100, templet:function(d){
+                                if (d.status == 1) return '<span class="layui-badge layui-badge-green">已支付</span>';
+                                if (d.status == 0) return '<span class="layui-badge layui-badge-orange">待支付</span>';
+                                if (d.status == 2) return '<span class="layui-badge layui-bg-gray">已取消</span>';
+                                if (d.status == 3) return '<span class="layui-badge layui-badge-red">已退款</span>';
+                                return '-';
+                            }},
+                            {field:'paid_at', title:'支付时间', minWidth:160},
+                            {field:'created_at', title:'创建时间', minWidth:160}
+                        ]]
+                    });
+                } else {
+                    table.render({
+                        elem: '#' + tableId,
+                        url: '{:url("/Plugin/downloadRecords")}',
+                        method: 'post',
+                        page: true,
+                        skin: 'line',
+                        size: 'lg',
+                        where: {plugin_id: data.id},
+                        request: {pageName: 'current_page', limitName: 'limit'},
+                        parseData: function(res){
+                            return {code: res.code, msg: res.msg, count: res.data.data.total, data: res.data.data.data};
+                        },
+                        cols: [[
+                            {field:'id', title:'ID', width:80},
+                            {field:'username', title:'用户', minWidth:120, templet:function(d){
+                                return d.username || ('UID:' + d.user_id);
+                            }},
+                            {field:'app_id', title:'应用ID', width:90},
+                            {field:'plugin_version', title:'版本', width:100},
+                            {field:'order_id', title:'订单ID', width:100},
+                            {field:'ip', title:'IP', width:140},
+                            {field:'created_at', title:'下载时间', minWidth:160}
+                        ]]
+                    });
+                }
+            }
+        });
+    }
 
     /* 显示状态对话框 */
     function showStatusDialog(data) {

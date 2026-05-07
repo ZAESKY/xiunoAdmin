@@ -273,8 +273,53 @@
                 <div class="info-row"><span class="label">更新时间</span><span class="value">{$plugin.updated_at|date='Y-m-d'}</span></div>
                 {/if}
                 <div class="info-row"><span class="label">标识</span><span class="value" title="{$plugin.slug}">{$plugin.slug}</span></div>
+                {if condition="!empty($plugin.related_plugin)"}
+                <div class="info-row"><span class="label">关联插件</span><span class="value"><a href="{:url('/UserPlugin/detail', ['id' => $plugin.related_plugin.id])}">{$plugin.related_plugin.name}</a></span></div>
+                {/if}
                 <div class="btn-feedback" id="btnFeedback"><i class="layui-icon layui-icon-survey"></i> 反馈</div>
             </div>
+            {if condition="!empty($plugin.related_plugin)"}
+            <div class="info-card">
+                <h4>关联插件</h4>
+                <a class="ap-item" href="{:url('/UserPlugin/detail', ['id' => $plugin.related_plugin.id])}">
+                    <img src="{$plugin.related_plugin.icon}" class="ap-icon" onerror="this.style.display='none'">
+                    <div class="ap-body">
+                        <div class="ap-name">{$plugin.related_plugin.name}</div>
+                        <div class="ap-price">
+                            {if condition="$plugin.related_plugin.price == 0"}
+                            <span style="color:#34c759;">免费</span>
+                            {elseif condition="($plugin.related_plugin.pay_type ?? 'balance') == 'points'"}
+                            {$plugin.related_plugin.price|intval} 积分
+                            {else/}
+                            ¥{$plugin.related_plugin.price}
+                            {/if}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {/if}
+            {if condition="!empty($referencingPlugins)"}
+            <div class="info-card">
+                <h4>被这些插件关联</h4>
+                {foreach $referencingPlugins as $rp}
+                <a class="ap-item" href="{:url('/UserPlugin/detail', ['id' => $rp.id])}">
+                    <img src="{$rp.icon}" class="ap-icon" onerror="this.style.display='none'">
+                    <div class="ap-body">
+                        <div class="ap-name">{$rp.name}</div>
+                        <div class="ap-price">
+                            {if condition="$rp.price == 0"}
+                            <span style="color:#34c759;">免费</span>
+                            {elseif condition="($rp.pay_type ?? 'balance') == 'points'"}
+                            {$rp.price|intval} 积分
+                            {else/}
+                            ¥{$rp.price}
+                            {/if}
+                        </div>
+                    </div>
+                </a>
+                {/foreach}
+            </div>
+            {/if}
             {if condition="!empty($authorPlugins)"}
             <div class="info-card">
                 <h4>作者其他插件</h4>
@@ -387,7 +432,20 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
     $('#btnDownload').click(function(){
         notice.msg('获取下载凭证...',{icon:4,close:true});
         $.ajax({type:'POST',url:'{:url("/UserPlugin/getDownloadToken")}',data:{plugin_id:pluginId},dataType:'json',
-            success:function(r){ notice.destroy(); if(r.code==0){ notice.msg('开始下载',{icon:1}); window.location.href='{:url("/UserPlugin/download")}?token='+r.data.token; } else notice.msg(r.msg,{icon:2}); },
+            success:function(r){
+                notice.destroy();
+                if(r.code==0){
+                    var startDownload = function(){ notice.msg('开始下载',{icon:1}); window.location.href='{:url("/UserPlugin/download")}?token='+r.data.token; };
+                    if (r.data && r.data.related_notice) {
+                        layer.alert(r.data.related_notice, {icon: 0, title: '关联插件提示'}, function(index){
+                            layer.close(index);
+                            startDownload();
+                        });
+                    } else {
+                        startDownload();
+                    }
+                } else notice.msg(r.msg,{icon:2});
+            },
             error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
         });
     });

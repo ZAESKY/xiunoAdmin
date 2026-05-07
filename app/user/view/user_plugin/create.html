@@ -7,6 +7,15 @@
 .plugin-form .layui-form-label { width: 90px; }
 .plugin-form .layui-input-block { margin-left: 120px; }
 .plugin-form .section-desc { color: #999; font-size: 12px; margin-bottom: 10px; }
+.related-search { position: relative; max-width: 420px; }
+.related-search-list { display:none; position:absolute; left:0; right:0; top:40px; z-index:999; background:#fff; border:1px solid #e6e6e6; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,.08); max-height:240px; overflow:auto; }
+.related-search-item { padding:9px 12px; cursor:pointer; border-bottom:1px solid #f5f5f5; }
+.related-search-item:last-child { border-bottom:none; }
+.related-search-item:hover { background:#f6f8fb; }
+.related-search-item .name { font-size:13px; color:#333; }
+.related-search-item .meta { margin-top:3px; font-size:12px; color:#999; }
+.related-clear { margin-left:8px; color:#999; cursor:pointer; }
+.related-clear:hover { color:#ff5722; }
 </style>
 
 <div class="layui-fluid plugin-form">
@@ -31,6 +40,18 @@
                         <p style="color:#999;font-size:12px;margin-top:8px;"><i class="layui-icon layui-icon-tips"></i> 压缩包名称即为插件标识，上传后发布需管理员审核才能上架</p>
                     </div>
                 </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">关联插件</label>
+                    <div class="layui-input-block">
+                        <input type="hidden" name="related_plugin_id" id="relatedPluginId" value="{$plugin.related_plugin_id|default='0'}">
+                        <div class="related-search">
+                            <input type="text" id="relatedPluginSearch" class="layui-input" autocomplete="off" placeholder="输入插件名实时搜索，可不选" value="{if condition='!empty($plugin.related_plugin)'}{$plugin.related_plugin.name}{/if}">
+                            <div class="related-search-list" id="relatedPluginList"></div>
+                        </div>
+                        <span class="related-clear" id="relatedPluginClear">清空关联</span>
+                        <div style="font-size:12px;color:#999;margin-top:6px;">用户下载时会看到关联提示；关联插件为付费时，需先购买关联插件。</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -51,7 +72,8 @@
                         <div class="layui-form-item">
                             <label class="layui-form-label">插件标识 <span style="color:red">*</span></label>
                             <div class="layui-input-block">
-                                <input type="text" name="slug" id="slugInput" value="{$plugin.slug|default=''}" class="layui-input" placeholder="上传ZIP后自动填充" required>
+                                <input type="text" name="slug" id="slugInput" value="{$plugin.slug|default=''}" class="layui-input" placeholder="上传ZIP后自动填充" {if condition="!empty($plugin.id)"}readonly{/if} required>
+                                {if condition="!empty($plugin.id)"}<div style="font-size:12px;color:#999;margin-top:6px;">插件发布后标识不可修改</div>{/if}
                             </div>
                         </div>
                     </div>
@@ -189,15 +211,20 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">发布方式</label>
                     <div class="layui-input-block">
-                        <input type="radio" name="publish_type" value="0" title="立即发布" {if condition="!isset($plugin.publish_type) || $plugin.publish_type==0"}checked{/if}>
-                        <input type="radio" name="publish_type" value="1" title="定时发布" {if condition="isset($plugin.publish_type) && $plugin.publish_type==1"}checked{/if}>
+                        {if condition="!empty($plugin.id)"}
+                        <input type="hidden" name="publish_type" value="0">
+                        <span class="layui-badge layui-bg-gray">立即发布</span>
+                        <div style="font-size:12px;color:#999;margin-top:6px;">插件发布后再次编辑不能设置定时发布</div>
+                        {else/}
+                        <input type="radio" name="publish_type" value="0" title="立即发布" lay-filter="publish_type" {if condition="isset($plugin.publish_type) && $plugin.publish_type==0"}checked{/if}>
+                        <input type="radio" name="publish_type" value="1" title="定时发布" lay-filter="publish_type" {if condition="isset($plugin.publish_type) && $plugin.publish_type==1"}checked{/if}>
+                        {/if}
                     </div>
                 </div>
-                <div class="layui-form-item" id="publishTimeRow">
+                <div class="layui-form-item" id="publishTimeRow" style="display:{if condition='empty($plugin.id) && isset($plugin.publish_type) && $plugin.publish_type==1'}block{else/}none{/if};">
                     <label class="layui-form-label">发布时间</label>
                     <div class="layui-input-block">
-                        <input type="datetime-local" name="publish_time_display" id="publish_time_display" value="{if condition='!empty($plugin.publish_time)'}{$plugin.publish_time|date='Y-m-d\TH:i'}{/if}" class="layui-input" style="max-width:260px;">
-                        <input type="hidden" name="publish_time" id="publish_time" value="{$plugin.publish_time|default=''}">
+                        <input type="text" name="publish_time" id="publish_time" value="{$plugin.publish_time|default=''}" class="layui-input" placeholder="点击选择定时发布时间" readonly autocomplete="off" style="max-width:260px;cursor:pointer;background:#fff;">
                         <div style="font-size:12px;color:#999;margin-top:6px;" id="publishTimeHint">{if condition='!empty($plugin.publish_time)'}将于 {$plugin.publish_time} 开放下载{else/}审核通过后立即开放下载{/if}</div>
                     </div>
                 </div>
@@ -206,6 +233,7 @@
 
         <div class="layui-form-item" style="text-align:center;padding-top:20px;">
             <button class="layui-btn layui-btn-lg" lay-submit lay-filter="submitPlugin"><i class="layui-icon layui-icon-ok"></i> 提交</button>
+            {if condition="empty($plugin.id)"}<button type="button" class="layui-btn layui-btn-warm layui-btn-lg" id="btnSaveDraft"><i class="layui-icon layui-icon-file-b"></i> 存草稿</button>{/if}
             <button type="reset" class="layui-btn layui-btn-primary layui-btn-lg" id="btnReset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
         </div>
     </form>
@@ -214,19 +242,236 @@
 {include file="/public/footer"}
 <script src="{__LIBS__}tinymce/tinymce.min.js"></script>
 <script>
-layui.use(['layer', 'form', 'upload', 'notice'], function () {
+layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
     var $ = layui.jquery;
     var form = layui.form;
     var upload = layui.upload;
     var notice = layui.notice;
+    var laydate = layui.laydate;
+    var isEdit = parseInt('{$plugin.id|default=0}', 10) > 0;
+    var pluginId = parseInt('{$plugin.id|default=0}', 10) || 0;
+    var draftKey = 'sf_plugin_create_draft_v1';
 
     // 发布方式切换：显示/隐藏时间选择器
+    var laydateIns = null;
+    var minPublishDate = new Date(Date.now() + 10 * 60 * 1000);
+    var maxPublishDate = new Date();
+    maxPublishDate.setMonth(maxPublishDate.getMonth() + 6);
+
+    function padDate(n) {
+        return n < 10 ? '0' + n : String(n);
+    }
+
+    function formatDate(date) {
+        return date.getFullYear() + '-' + padDate(date.getMonth() + 1) + '-' + padDate(date.getDate()) + ' ' +
+            padDate(date.getHours()) + ':' + padDate(date.getMinutes()) + ':' + padDate(date.getSeconds());
+    }
+
+    function parseDateTime(value) {
+        if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value || '')) return null;
+        var parts = value.match(/\d+/g).map(function(v) { return parseInt(v, 10); });
+        return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
+    }
+
+    function updatePublishTimeHint() {
+        $('#publishTimeHint').text('请选择 ' + formatDate(minPublishDate) + ' 至 ' + formatDate(maxPublishDate) + ' 之间的时间');
+    }
+
+    function validatePublishDate(value, showMsg) {
+        var publishDate = parseDateTime(value);
+        if (!publishDate) {
+            if (showMsg) notice.msg('发布时间格式不正确，请使用时间选择器选择', {icon: 2});
+            return false;
+        }
+        if (publishDate.getTime() < minPublishDate.getTime()) {
+            if (showMsg) notice.msg('发布时间必须选择当前时间的10分钟后', {icon: 2});
+            return false;
+        }
+        if (publishDate.getTime() > maxPublishDate.getTime()) {
+            if (showMsg) notice.msg('发布时间不得大于6个月', {icon: 2});
+            return false;
+        }
+        return true;
+    }
+
+    function initPublishDatePicker() {
+        if (laydateIns) return;
+        laydateIns = laydate.render({
+            elem: '#publish_time',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss',
+            min: formatDate(minPublishDate),
+            max: formatDate(maxPublishDate),
+            trigger: 'click',
+            done: function(value) {
+                if (!value) return;
+                if (validatePublishDate(value, true)) {
+                    $('#publishTimeHint').text('将于 ' + value + ' 开放下载');
+                } else {
+                    $('#publish_time').val('');
+                    updatePublishTimeHint();
+                }
+            }
+        });
+    }
+
+    $('#publish_time').on('keydown keypress keyup paste cut drop input contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
     form.on('radio(publish_type)', function(data) {
         if (data.value == '1') {
-            $('#publishTimeRow').slideDown(200);
+            updatePublishTimeHint();
+            $('#publishTimeRow').slideDown(200, function() {
+                initPublishDatePicker();
+            });
         } else {
+            $('#publish_time').val('');
+            $('#publishTimeHint').text('审核通过后立即开放下载');
             $('#publishTimeRow').slideUp(200);
         }
+    });
+
+    // 编辑时如果已选定时发布，初始化
+    if ($('input[name="publish_type"]:checked').val() == '1') {
+        initPublishDatePicker();
+    }
+
+    var relatedTimer = null;
+    function priceText(item) {
+        var price = parseFloat(item.price || 0);
+        if (price <= 0) return '免费';
+        return item.pay_type === 'points' ? parseInt(price, 10) + ' 积分' : '¥' + price.toFixed(2);
+    }
+    function renderRelatedList(list) {
+        if (!list || !list.length) {
+            $('#relatedPluginList').html('<div class="related-search-item"><div class="meta">暂无匹配插件</div></div>').show();
+            return;
+        }
+        var html = '';
+        list.forEach(function(item) {
+            html += '<div class="related-search-item" data-id="'+item.id+'" data-name="'+escHtml(item.name)+'">' +
+                '<div class="name">'+escHtml(item.name)+' <span class="meta">v'+escHtml(item.version || '')+'</span></div>' +
+                '<div class="meta">'+escHtml(item.slug || '')+' · '+priceText(item)+'</div>' +
+                '</div>';
+        });
+        $('#relatedPluginList').html(html).show();
+    }
+    function searchRelatedPlugins(keyword) {
+        $.ajax({
+            type: 'POST',
+            url: '{:url("/UserPlugin/searchRelatedPlugins")}',
+            data: {keyword: keyword || '', exclude_id: pluginId},
+            dataType: 'json',
+            success: function(res) {
+                if (res.code == 0) renderRelatedList(res.data.list || []);
+            }
+        });
+    }
+    function escHtml(s) {
+        var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+        return String(s || '').replace(/[&<>"']/g, function(c){ return map[c]; });
+    }
+    $('#relatedPluginSearch').on('focus input', function(e) {
+        if (e.type === 'input') $('#relatedPluginId').val('');
+        clearTimeout(relatedTimer);
+        var keyword = $(this).val();
+        relatedTimer = setTimeout(function() { searchRelatedPlugins(keyword); }, 250);
+    });
+    $('#relatedPluginList').on('click', '.related-search-item[data-id]', function() {
+        $('#relatedPluginId').val($(this).data('id'));
+        $('#relatedPluginSearch').val($(this).data('name'));
+        $('#relatedPluginList').hide();
+    });
+    $('#relatedPluginClear').click(function() {
+        $('#relatedPluginId').val('0');
+        $('#relatedPluginSearch').val('');
+        $('#relatedPluginList').hide();
+    });
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.related-search, #relatedPluginClear').length) {
+            $('#relatedPluginList').hide();
+        }
+    });
+
+    function collectDraft() {
+        return {
+            name: $('input[name=name]').val(),
+            slug: $('#slugInput').val(),
+            version: $('input[name=version]').val(),
+            category: $('select[name=category]').val(),
+            origin_type: $('select[name=origin_type]').val(),
+            price: $('#priceInput').val(),
+            pay_type: $('select[name=pay_type]').val(),
+            origin_url: $('input[name=origin_url]').val(),
+            origin_author: $('input[name=origin_author]').val(),
+            origin_note: $('textarea[name=origin_note]').val(),
+            related_plugin_id: $('#relatedPluginId').val(),
+            related_plugin_name: $('#relatedPluginSearch').val(),
+            icon: $('#iconInput').val(),
+            file_path: $('#file_path').val(),
+            file_hash: $('#file_hash').val(),
+            file_size: $('#file_size').val(),
+            file_info: $('#fileInfo').html(),
+            description: $('textarea[name=description]').val(),
+            content: tinymce.get('pluginContent') ? tinymce.get('pluginContent').getContent() : $('#pluginContent').val(),
+            publish_type: $('input[name=publish_type]:checked').val() || '',
+            publish_time: $('#publish_time').val()
+        };
+    }
+
+    function applyDraft(draft) {
+        if (!draft) return;
+        $('input[name=name]').val(draft.name || '');
+        $('#slugInput').val(draft.slug || '');
+        $('input[name=version]').val(draft.version || '1.0.0');
+        $('select[name=category]').val(draft.category || '');
+        $('select[name=origin_type]').val(draft.origin_type || '1');
+        $('#priceInput').val(draft.price || '0');
+        $('select[name=pay_type]').val(draft.pay_type || 'balance');
+        $('input[name=origin_url]').val(draft.origin_url || '');
+        $('input[name=origin_author]').val(draft.origin_author || '');
+        $('textarea[name=origin_note]').val(draft.origin_note || '');
+        $('#relatedPluginId').val(draft.related_plugin_id || '0');
+        $('#relatedPluginSearch').val(draft.related_plugin_name || '');
+        $('#iconInput').val(draft.icon || '');
+        $('#file_path').val(draft.file_path || '');
+        $('#file_hash').val(draft.file_hash || '');
+        $('#file_size').val(draft.file_size || '0');
+        if (draft.file_path && draft.file_info) {
+            $('#fileInfo').html(draft.file_info).css('color', '#5FB878');
+        }
+        if (draft.icon) {
+            $('#iconPreview').attr('src', draft.icon).show();
+            $('#iconEmpty').hide();
+        }
+        $('textarea[name=description]').val(draft.description || '');
+        if (tinymce.get('pluginContent')) {
+            tinymce.get('pluginContent').setContent(draft.content || '');
+        } else {
+            $('#pluginContent').val(draft.content || '');
+        }
+        if (draft.publish_type) {
+            $('input[name=publish_type][value="'+draft.publish_type+'"]').prop('checked', true);
+            if (draft.publish_type == '1') {
+                $('#publish_time').val(draft.publish_time || '');
+                $('#publishTimeRow').show();
+                initPublishDatePicker();
+            } else {
+                $('#publish_time').val('');
+                $('#publishTimeRow').hide();
+            }
+        }
+        form.render();
+        form.render('select');
+        form.render('radio');
+    }
+
+    $('#btnSaveDraft').click(function() {
+        if (isEdit) return;
+        localStorage.setItem(draftKey, JSON.stringify(collectDraft()));
+        notice.msg('草稿已保存', {icon: 1});
     });
 
     // 支付方式切换：积分则整数输入
@@ -272,6 +517,22 @@ layui.use(['layer', 'form', 'upload', 'notice'], function () {
         }
     });
 
+    if (!isEdit) {
+        setTimeout(function() {
+            var raw = localStorage.getItem(draftKey);
+            if (!raw) return;
+            layer.confirm('检测到上次保存的插件草稿，是否读取？', {icon: 3, title: '读取草稿'}, function(index) {
+                layer.close(index);
+                try {
+                    applyDraft(JSON.parse(raw));
+                    notice.msg('草稿已读取', {icon: 1});
+                } catch (e) {
+                    notice.msg('草稿读取失败', {icon: 2});
+                }
+            });
+        }, 500);
+    }
+
     upload.render({
         elem: '#uploadIcon',
         url: '{:url("/UserPlugin/uploadImage")}',
@@ -299,9 +560,11 @@ layui.use(['layer', 'form', 'upload', 'notice'], function () {
 
                 // 自动填充标识：取原始文件名（不含.zip）
                 var slugInput = $('#slugInput');
-                var fileName = (res.data.original_name || res.data.file_path.split(/[\\/]/).pop()).replace(/\.zip$/i, '');
-                var slug = fileName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-                slugInput.val(slug);
+                if (!isEdit) {
+                    var fileName = (res.data.original_name || res.data.file_path.split(/[\\/]/).pop()).replace(/\.zip$/i, '');
+                    var slug = fileName.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                    slugInput.val(slug);
+                }
 
                 // 自动填充 conf.json 解析数据
                 var auto = res.data.auto;
@@ -342,7 +605,7 @@ layui.use(['layer', 'form', 'upload', 'notice'], function () {
             $('#file_hash').val('');
             $('#file_size').val('');
             $('#fileInfo').html('<i class="layui-icon layui-icon-close-fill"></i> 请上传插件文件 (*.zip)').css('color', '#ff5722');
-            $('#slugInput').val('');
+            if (!isEdit) $('#slugInput').val('');
         }, 50);
     });
 
@@ -363,6 +626,20 @@ layui.use(['layer', 'form', 'upload', 'notice'], function () {
         if (!data.field.category) {
             notice.msg('请选择插件分类', {icon: 2}); return false;
         }
+        if (typeof data.field.publish_type === 'undefined') {
+            notice.msg('请选择发布方式', {icon: 2}); return false;
+        }
+        if (data.field.publish_type == '1' && !data.field.publish_time) {
+            notice.msg('请选择定时发布时间', {icon: 2}); return false;
+        }
+        if (data.field.publish_type == '1') {
+            if (!validatePublishDate(data.field.publish_time, true)) {
+                return false;
+            }
+        }
+        if (data.field.publish_type != '1') {
+            data.field.publish_time = '';
+        }
         data.field.content = tinymce.get('pluginContent').getContent();
         if (data.field.origin_type == '2') {
             data.field.price = '0';
@@ -376,6 +653,7 @@ layui.use(['layer', 'form', 'upload', 'notice'], function () {
             success: function(res) {
                 notice.destroy();
                 if (res.code == 0) {
+                    if (!isEdit) localStorage.removeItem(draftKey);
                     notice.msg(res.msg, {icon: 1, audio:'1'});
                     var index = parent.layer.getFrameIndex(window.name);
                     if (index) { parent.layer.close(index); }

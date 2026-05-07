@@ -134,6 +134,7 @@ class UserPluginService extends BaseService
         $origin_url = !empty($post['origin_url']) ? trim($post['origin_url']) : '';
         $origin_author = !empty($post['origin_author']) ? trim($post['origin_author']) : '';
         $origin_note = !empty($post['origin_note']) ? trim($post['origin_note']) : '';
+        $related_plugin_id = !empty($post['related_plugin_id']) ? intval($post['related_plugin_id']) : 0;
 
         if (empty($name)) {
             return message('插件名称不能为空', false);
@@ -178,11 +179,41 @@ class UserPluginService extends BaseService
             }
         }
 
-        // 发布类型：有发布时间=定时发布，否则=立即发布
+        // 发布类型：必填；立即发布不保存时间；定时发布必须提交完整时间。
+        if (!isset($post['publish_type']) || !in_array((string)$post['publish_type'], ['0', '1'], true)) {
+            return message('请选择发布方式', false);
+        }
+        $publish_type = intval($post['publish_type']);
         $publish_time = !empty($post['publish_time']) ? trim($post['publish_time']) : null;
-        $publish_type = !empty($publish_time) ? 1 : (isset($post['publish_type']) ? intval($post['publish_type']) : 0);
+        if ($publish_type === 0) {
+            $publish_time = null;
+        } else {
+            if (empty($publish_time)) {
+                return message('请选择定时发布时间', false);
+            }
+            if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $publish_time) || strtotime($publish_time) === false) {
+                return message('发布时间格式不正确，请使用时间选择器选择', false);
+            }
+            $publishTimestamp = strtotime($publish_time);
+            if ($publishTimestamp < time() + 10 * 60) {
+                return message('发布时间必须选择当前时间的10分钟后', false);
+            }
+            if ($publishTimestamp > strtotime('+6 months')) {
+                return message('发布时间不得大于6个月', false);
+            }
+        }
 
         // XSS过滤转载声明
+        if ($related_plugin_id > 0) {
+            $relatedPlugin = \think\facade\Db::name('plugin')->where('id', $related_plugin_id)->where('status', 1)->find();
+            if (!$relatedPlugin) {
+                return message('关联插件不存在或未上架', false);
+            }
+            if (!empty($id) && $related_plugin_id == intval($id)) {
+                return message('关联插件不能选择当前插件', false);
+            }
+        }
+
         $origin_note = htmlspecialchars($origin_note, ENT_QUOTES, 'UTF-8');
 
         if (is_array($images)) {
@@ -202,6 +233,12 @@ class UserPluginService extends BaseService
             }
             if ($row['user_id'] != $userId) {
                 return message('无权编辑此插件', false);
+            }
+            if ($slug !== $row['slug']) {
+                return message('插件发布后标识不能修改', false);
+            }
+            if ($publish_type == 1) {
+                return message('插件发布后再次编辑不能设置定时发布', false);
             }
             // 已上架的插件编辑后需要重新审核
             $newStatus = ($row['status'] == 1) ? 0 : $row['status'];
@@ -232,6 +269,7 @@ class UserPluginService extends BaseService
                 'origin_url' => $origin_url,
                 'origin_author' => $origin_author,
                 'origin_note' => $origin_note,
+                'related_plugin_id' => $related_plugin_id,
                 'publish_type' => $publish_type,
                 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $newStatus,
@@ -273,6 +311,7 @@ class UserPluginService extends BaseService
                 'origin_url' => $origin_url,
                 'origin_author' => $origin_author,
                 'origin_note' => $origin_note,
+                'related_plugin_id' => $related_plugin_id,
                 'name' => $name,
                 'slug' => $slug,
                 'category' => $category,
@@ -923,6 +962,33 @@ class UserPluginService extends BaseService
         }
         $app_id = intval($user['appid']);
         $orderId = 0;
+        $relatedNotice = '';
+
+        if (!empty($plugin['related_plugin_id'])) {
+            $relatedPlugin = \think\facade\Db::name('plugin')
+                ->where('id', intval($plugin['related_plugin_id']))
+                ->where('status', 1)
+                ->find();
+            if (!$relatedPlugin) {
+                return message('关联插件不存在或已下架，暂时无法下载', false);
+            }
+
+            $relatedNotice = '该插件关联「' . $relatedPlugin['name'] . '」插件';
+            $isRelatedOwner = !empty($relatedPlugin['user_id']) && intval($relatedPlugin['user_id']) == intval($userId);
+            if (floatval($relatedPlugin['price']) > 0 && !$isRelatedOwner) {
+                $relatedPurchase = \think\facade\Db::name('plugin_purchase')
+                    ->where('plugin_id', intval($relatedPlugin['id']))
+                    ->where('user_id', intval($userId))
+                    ->where('app_id', $app_id)
+                    ->find();
+                if (!$relatedPurchase) {
+                    return message('你需要先购买关联的「' . $relatedPlugin['name'] . '」插件，才能使用此插件', false, [
+                        'related_plugin_id' => intval($relatedPlugin['id']),
+                        'related_plugin_name' => $relatedPlugin['name'],
+                    ]);
+                }
+            }
+        }
 
         // 付费插件检查购买记录（自己发布的插件可以直接下载）
         if ($plugin['price'] > 0 && (!isset($plugin['user_id']) || $plugin['user_id'] != intval($userId))) {
@@ -953,7 +1019,7 @@ class UserPluginService extends BaseService
             'created_at' => datetime(),
         ]);
 
-        return message('获取成功', true, ['token' => $token]);
+        return message('获取成功', true, ['token' => $token, 'related_notice' => $relatedNotice]);
     }
 
     /**
@@ -1091,4 +1157,3 @@ class UserPluginService extends BaseService
         exit;
     }
 }
-

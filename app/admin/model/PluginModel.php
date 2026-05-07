@@ -26,6 +26,7 @@ class PluginModel extends BaseModel
                 if (!empty($result['images'])) {
                     $result['images'] = json_decode($result['images'], true);
                 }
+                $this->attachRelatedPlugin($result);
                 return $result;
             }
             return false;
@@ -42,6 +43,7 @@ class PluginModel extends BaseModel
                 if (!empty($result['images'])) {
                     $result['images'] = json_decode($result['images'], true);
                 }
+                $this->attachRelatedPlugin($result);
                 return $result;
             }
             return false;
@@ -70,10 +72,14 @@ class PluginModel extends BaseModel
         $origin_url = !empty($post['origin_url']) ? trim($post['origin_url']) : '';
         $origin_author = !empty($post['origin_author']) ? trim($post['origin_author']) : '';
         $origin_note = !empty($post['origin_note']) ? trim($post['origin_note']) : '';
+        $related_plugin_id = !empty($post['related_plugin_id']) ? intval($post['related_plugin_id']) : 0;
         $sort = !empty($post['sort']) ? intval($post['sort']) : 0;
         $is_hot = !empty($post['is_hot']) ? 1 : 0;
         $is_recommend = !empty($post['is_recommend']) ? 1 : 0;
-        $publish_type = isset($post['publish_type']) ? intval($post['publish_type']) : 0;
+        if (!isset($post['publish_type']) || !in_array((string)$post['publish_type'], ['0', '1'], true)) {
+            return message('请选择发布方式', false);
+        }
+        $publish_type = intval($post['publish_type']);
         $publish_time = !empty($post['publish_time']) ? trim($post['publish_time']) : null;
         $status = isset($post['status']) ? intval($post['status']) : 0;
         $audit_note = !empty($post['audit_note']) ? trim($post['audit_note']) : '';
@@ -105,6 +111,32 @@ class PluginModel extends BaseModel
             }
             $price = 0.00;
         }
+        if ($publish_type == 1) {
+            if (empty($publish_time)) {
+                return message('请选择定时发布时间', false);
+            }
+            if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $publish_time) || strtotime($publish_time) === false) {
+                return message('发布时间格式不正确，请使用时间选择器选择', false);
+            }
+            $publishTimestamp = strtotime($publish_time);
+            if ($publishTimestamp < time() + 10 * 60) {
+                return message('发布时间必须选择当前时间的10分钟后', false);
+            }
+            if ($publishTimestamp > strtotime('+6 months')) {
+                return message('发布时间不得大于6个月', false);
+            }
+        } else {
+            $publish_time = null;
+        }
+        if ($related_plugin_id > 0) {
+            $relatedPlugin = self::where('id', $related_plugin_id)->where('status', 1)->find();
+            if (!$relatedPlugin) {
+                return message('关联插件不存在或未上架', false);
+            }
+            if (!empty($id) && $related_plugin_id == intval($id)) {
+                return message('关联插件不能选择当前插件', false);
+            }
+        }
 
         if (is_array($images)) {
             $images = json_encode($images, JSON_UNESCAPED_UNICODE);
@@ -132,6 +164,7 @@ class PluginModel extends BaseModel
                 'icon' => $icon, 'images' => $images, 'price' => $price, 'pay_type' => $pay_type,
                 'origin_type' => $origin_type, 'origin_url' => $origin_url,
                 'origin_author' => $origin_author, 'origin_note' => $origin_note,
+                'related_plugin_id' => $related_plugin_id,
                 'sort' => $sort, 'is_hot' => $is_hot, 'is_recommend' => $is_recommend,
                 'publish_type' => $publish_type, 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $status, 'audit_note' => $audit_note,
@@ -166,6 +199,7 @@ class PluginModel extends BaseModel
                 'icon' => $icon, 'images' => $images, 'price' => $price, 'pay_type' => $pay_type,
                 'origin_type' => $origin_type, 'origin_url' => $origin_url,
                 'origin_author' => $origin_author, 'origin_note' => $origin_note,
+                'related_plugin_id' => $related_plugin_id,
                 'sort' => $sort, 'is_hot' => $is_hot, 'is_recommend' => $is_recommend,
                 'publish_type' => $publish_type, 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $status, 'audit_note' => $audit_note,
@@ -286,10 +320,43 @@ class PluginModel extends BaseModel
                     'list_rows' => $limit,
                     'page' => $current_page,
                 ]);
+            foreach ($list as $item) {
+                $pluginId = intval($item['id']);
+                $item['purchase_count'] = Db::name('plugin_purchase')->where('plugin_id', $pluginId)->count('id');
+                $item['download_record_count'] = Db::name('plugin_download')->where('plugin_id', $pluginId)->count('id');
+            }
             return $list;
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }
+    }
+
+    public function searchRelatedOptions($keyword = '', $excludeId = 0, $limit = 20)
+    {
+        $query = self::where('status', 1)
+            ->field('id,name,slug,version,icon,price,pay_type');
+        if ($excludeId > 0) {
+            $query->where('id', '<>', intval($excludeId));
+        }
+        $keyword = trim((string)$keyword);
+        if ($keyword !== '') {
+            $keyword = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $keyword);
+            $query->where('name|slug|author', 'like', '%' . $keyword . '%');
+        }
+        return $query->order('sort', 'desc')->order('id', 'desc')->limit($limit)->select()->toArray();
+    }
+
+    private function attachRelatedPlugin(&$plugin)
+    {
+        $relatedId = !empty($plugin['related_plugin_id']) ? intval($plugin['related_plugin_id']) : 0;
+        if ($relatedId <= 0) {
+            $plugin['related_plugin'] = null;
+            return;
+        }
+        $related = self::where('id', $relatedId)
+            ->field('id,name,slug,version,icon,price,pay_type,status')
+            ->find();
+        $plugin['related_plugin'] = $related ? $related->toArray() : null;
     }
 
     /**

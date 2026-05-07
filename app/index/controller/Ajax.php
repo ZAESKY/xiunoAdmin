@@ -42,7 +42,7 @@ class Ajax extends Frontend
             $total = Db::name('plugin')->where($where)->count();
             $list = Db::name('plugin')
                 ->where($where)
-                ->field('id,name,slug,category,version,author,icon,description,rating_count,rating_avg,is_hot,is_recommend,published_at')
+                ->field('id,name,slug,category,version,author,icon,description,rating_count,rating_avg,is_hot,is_recommend,published_at,publish_type,publish_time')
                 ->order('is_recommend', 'desc')
                 ->order('download_count', 'desc')
                 ->page($current_page, $limit)

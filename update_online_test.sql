@@ -137,6 +137,36 @@ INSERT IGNORE INTO `SF_check_type` (`name`, `type`, `addtime`, `status`) VALUES
 -- 注意：如果使用文件缓存，请手动删除 runtime/cache/ 目录
 -- 如果使用 Redis，请执行 FLUSHALL
 
+-- ================================================================
+-- 第八部分：插件发布类型字段
+-- ================================================================
+
+DROP PROCEDURE IF EXISTS `sf_add_plugin_publish`;
+DELIMITER $$
+CREATE PROCEDURE `sf_add_plugin_publish`()
+BEGIN
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
+
+  -- SF_plugin.publish_type (0=立即发布, 1=定时发布)
+  IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SF_plugin' AND COLUMN_NAME = 'publish_type') THEN
+    ALTER TABLE `SF_plugin` ADD COLUMN `publish_type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '发布类型:0=立即发布,1=定时发布' AFTER `published_at`;
+  END IF;
+
+  -- SF_plugin.publish_time (定时发布时间)
+  IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SF_plugin' AND COLUMN_NAME = 'publish_time') THEN
+    ALTER TABLE `SF_plugin` ADD COLUMN `publish_time` datetime DEFAULT NULL COMMENT '定时发布时间' AFTER `publish_type`;
+  END IF;
+
+END$$
+DELIMITER ;
+CALL `sf_add_plugin_publish`();
+DROP PROCEDURE IF EXISTS `sf_add_plugin_publish`;
+
+-- 已上架的旧数据默认设为立即发布
+UPDATE `SF_plugin` SET `publish_type` = 0 WHERE `publish_type` IS NULL AND `status` = 1;
+
 COMMIT;
 
 -- ================================================================

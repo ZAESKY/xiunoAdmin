@@ -53,7 +53,7 @@ class UserPluginService extends BaseService
 
         $query = \think\facade\Db::name('plugin')
             ->where($where)
-            ->field('id,name,slug,category,version,author,icon,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at');
+            ->field('id,name,slug,category,version,author,icon,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time');
 
         if ($sort === 'downloads') {
             $query->order('download_count', 'desc');
@@ -178,6 +178,10 @@ class UserPluginService extends BaseService
             }
         }
 
+        // 发布类型：有发布时间=定时发布，否则=立即发布
+        $publish_time = !empty($post['publish_time']) ? trim($post['publish_time']) : null;
+        $publish_type = !empty($publish_time) ? 1 : (isset($post['publish_type']) ? intval($post['publish_type']) : 0);
+
         // XSS过滤转载声明
         $origin_note = htmlspecialchars($origin_note, ENT_QUOTES, 'UTF-8');
 
@@ -228,6 +232,8 @@ class UserPluginService extends BaseService
                 'origin_url' => $origin_url,
                 'origin_author' => $origin_author,
                 'origin_note' => $origin_note,
+                'publish_type' => $publish_type,
+                'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $newStatus,
                 'audit_note' => $newStatus == 0 ? '用户修改后等待重新审核' : $row['audit_note'],
                 'updated_at' => datetime(),
@@ -282,7 +288,9 @@ class UserPluginService extends BaseService
                 'file_path' => $file_path,
                 'file_hash' => $file_hash,
                 'file_size' => $file_size,
-                'status' => 0, // 新发布的插件默认待审核
+                'publish_type' => $publish_type,
+                'publish_time' => ($publish_type == 1 ? $publish_time : null),
+                'status' => 0,
                 'audit_note' => '',
                 'created_at' => datetime(),
                 'updated_at' => datetime(),

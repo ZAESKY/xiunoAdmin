@@ -143,6 +143,12 @@
             {/if}
         </div>
         <div class="hero-actions">
+            {php}$isScheduled = !empty($plugin['published_at']) && strtotime($plugin['published_at']) > time();{/php}
+            {if condition="$isScheduled"}
+            <div class="price" style="color:#2d8cf0;">即将上线</div>
+            <button class="layui-btn layui-btn-disabled btn-dl" id="btnComingSoon"><i class="layui-icon layui-icon-log"></i> 发布日期</button>
+            <div class="bal-hint">{$plugin.publish_time|date='Y-m-d H:i'} 开放</div>
+            {else/}
             {if condition="$plugin.price == 0"}
             <div class="price free">免费</div>
             {elseif condition="($plugin.pay_type ?? 'balance') == 'points'"}
@@ -157,6 +163,7 @@
             {/if}
             {else/}
             <button class="layui-btn layui-btn-warm btn-dl" id="btnPurchase"><i class="layui-icon layui-icon-diamond"></i> {if condition="($plugin.pay_type ?? 'balance') == 'points'"}积分购买{else/}购买{/if}</button>
+            {/if}
             {/if}
         </div>
     </div>
@@ -363,6 +370,18 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
                 success:function(r){ notice.destroy(); if(r.code==0){ notice.msg(r.msg,{icon:1}); setTimeout(function(){location.reload();},1500); } else notice.msg(r.msg,{icon:2}); },
                 error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
             });
+        });
+    });
+    $('#btnComingSoon').click(function(){
+        layer.open({
+            type: 1, title: '插件发布时间', shade: .4, area: ['420px', 'auto'],
+            content: '<div style="text-align:center;padding:32px 24px;">' +
+                '<i class="layui-icon layui-icon-log" style="font-size:48px;color:#2d8cf0;"></i>' +
+                '<p style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#1e293b;">{$plugin.name}</p>' +
+                '<p style="margin:0 0 8px;font-size:14px;color:#64748b;">预计发布于</p>' +
+                '<p style="margin:0 0 20px;font-size:22px;font-weight:700;color:#2d8cf0;">{$plugin.publish_time|date="Y年m月d日 H:i"}</p>' +
+                '<p style="margin:0;font-size:13px;color:#94a3b8;">开放后可下载使用，敬请期待</p>' +
+                '</div>'
         });
     });
     $('#btnDownload').click(function(){

@@ -30,7 +30,19 @@
         display: flex;
         gap: 16px;
         align-items: flex-start;
+        position: relative;
+        overflow: hidden;
     }
+    .pm-card-badge {
+        position: absolute;
+        top: 0; right: 0;
+        font-size: 11px; font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 0 12px 0 10px;
+        color: #fff;
+    }
+    .pm-card-badge.soon { background: linear-gradient(135deg, #4facfe, #2d8cf0); }
+    .pm-card-badge.hot { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
     .pm-card:hover { border-color: #c8daf8; box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-2px); }
     .pm-card-icon { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #e8f2fd; }
     .pm-card-body { flex: 1; min-width: 0; }
@@ -45,6 +57,7 @@
     .pm-tag-free { background: #e8f5e9; color: #2e7d32; }
     .pm-tag-paid { background: #fff3e0; color: #e65100; }
     .pm-tag-hot { background: #fce4ec; color: #c62828; }
+    .pm-tag-soon { background: #e8f2fd; color: #2d8cf0; }
     .pm-empty { text-align: center; padding: 80px 24px; color: #94a3b8; }
     @media (max-width: 900px) {
         .pm-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
@@ -154,15 +167,20 @@ layui.use(['layer', 'notice'], function () {
         if (!list.length) { $('#pmGrid').html('<div class="pm-empty">暂无插件</div>'); return; }
         var html = '';
         $.each(list, function (i, item) {
-            var hotTag = item.is_hot == 1 ? '<span class="pm-tag pm-tag-hot">热门</span>' : '';
+            var badges = '';
+            if (item.published_at && new Date(item.published_at.replace(/-/g, '/')).getTime() > Date.now()) {
+                badges = '<span class="pm-card-badge soon">即将上线</span>';
+            } else if (item.is_hot == 1) {
+                badges = '<span class="pm-card-badge hot">热门</span>';
+            }
             html += '<div class="pm-card" data-id="' + item.id + '" data-name="' + (item.name || '') + '">';
+            html += badges;
             html += '<img class="pm-card-icon" src="' + (item.icon || '{__IMG__}logo.png') + '" alt="' + item.name + '" onerror="this.src=\'{__IMG__}logo.png\'">';
             html += '<div class="pm-card-body">';
             html += '<h3>' + item.name + '</h3>';
             html += '<p class="pm-desc">' + (item.description || '暂无描述') + '</p>';
             html += '<div class="pm-card-meta">';
             html += '<span><i class="layui-icon layui-icon-user"></i> ' + (item.author || '未知') + '</span>';
-            html += hotTag;
             html += '</div></div></div>';
         });
         $('#pmGrid').html(html);

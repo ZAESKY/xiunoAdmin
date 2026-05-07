@@ -9,10 +9,10 @@ return [
     'connections' => [
         'mysql' => [
             'type' => 'mysql',
-            'hostname' => env('database.hostname', '127.0.0.1'),
-            'database' => env('database.database', 'sf_auth'),
-            'username' => env('database.username', 'root'),
-            'password' => env('database.password', ''),
+            'hostname' => env('database.hostname', 'localhost'),
+            'database' => env('database.database', 'www_admindev_com'),
+            'username' => env('database.username', 'admin'),
+            'password' => env('database.password', '123456'),
             'hostport' => env('database.hostport', 3306),
             'params' => [],
             'charset' => 'utf8',

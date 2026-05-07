@@ -14,6 +14,7 @@
 .plugin-card .card-badge { position: absolute; top: 0; right: 0; font-size: 11px; padding: 2px 10px; border-radius: 0 10px 0 8px; font-weight: 500; }
 .plugin-card .card-badge.hot { background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: #fff; }
 .plugin-card .card-badge.rec { background: linear-gradient(135deg, #a29bfe, #6c5ce7); color: #fff; }
+.plugin-card .card-badge.soon { background: linear-gradient(135deg, #4facfe, #2d8cf0); color: #fff; }
 
 /* 图标 + 信息 */
 .plugin-card .card-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
@@ -146,8 +147,13 @@ layui.use(['layer', 'form', 'laypage'], function () {
                 var icon = p.icon || '/Assets/img/default-plugin.png';
                 var desc = p.description || '暂无简介';
                 var badge = '';
-                if (p.is_hot == 1) badge = '<span class="card-badge hot">热门</span>';
-                else if (p.is_recommend == 1) badge = '<span class="card-badge rec">推荐</span>';
+                if (p.published_at && new Date(p.published_at.replace(/-/g, '/')).getTime() > Date.now()) {
+                    badge = '<span class="card-badge soon">即将上线</span>';
+                } else if (p.is_hot == 1) {
+                    badge = '<span class="card-badge hot">热门</span>';
+                } else if (p.is_recommend == 1) {
+                    badge = '<span class="card-badge rec">推荐</span>';
+                }
 
                 html += '<div class="plugin-card" data-id="'+p.id+'">';
                 html +=   badge;

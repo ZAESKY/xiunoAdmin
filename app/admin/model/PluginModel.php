@@ -73,6 +73,8 @@ class PluginModel extends BaseModel
         $sort = !empty($post['sort']) ? intval($post['sort']) : 0;
         $is_hot = !empty($post['is_hot']) ? 1 : 0;
         $is_recommend = !empty($post['is_recommend']) ? 1 : 0;
+        $publish_type = isset($post['publish_type']) ? intval($post['publish_type']) : 0;
+        $publish_time = !empty($post['publish_time']) ? trim($post['publish_time']) : null;
         $status = isset($post['status']) ? intval($post['status']) : 0;
         $audit_note = !empty($post['audit_note']) ? trim($post['audit_note']) : '';
 
@@ -131,12 +133,13 @@ class PluginModel extends BaseModel
                 'origin_type' => $origin_type, 'origin_url' => $origin_url,
                 'origin_author' => $origin_author, 'origin_note' => $origin_note,
                 'sort' => $sort, 'is_hot' => $is_hot, 'is_recommend' => $is_recommend,
+                'publish_type' => $publish_type, 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $status, 'audit_note' => $audit_note,
                 'updated_at' => datetime(),
             ];
 
             if ($status == 1 && $row['status'] != 1) {
-                $data['published_at'] = datetime();
+                $data['published_at'] = ($publish_type == 1 && !empty($publish_time)) ? $publish_time : datetime();
             }
 
             try {
@@ -164,12 +167,13 @@ class PluginModel extends BaseModel
                 'origin_type' => $origin_type, 'origin_url' => $origin_url,
                 'origin_author' => $origin_author, 'origin_note' => $origin_note,
                 'sort' => $sort, 'is_hot' => $is_hot, 'is_recommend' => $is_recommend,
+                'publish_type' => $publish_type, 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $status, 'audit_note' => $audit_note,
                 'created_at' => datetime(), 'updated_at' => datetime(),
             ];
 
             if ($status == 1) {
-                $data['published_at'] = datetime();
+                $data['published_at'] = ($publish_type == 1 && !empty($publish_time)) ? $publish_time : datetime();
             }
 
             try {
@@ -231,9 +235,13 @@ class PluginModel extends BaseModel
 
             $data = ['status' => $status, 'audit_note' => $audit_note];
 
-            // 如果状态改为已上架，记录上架时间
+            // 如果状态改为已上架，记录上架时间（定时发布使用预选时间）
             if ($status == 1 && $row['status'] != 1) {
-                $data['published_at'] = datetime();
+                if (($row['publish_type'] ?? 0) == 1 && !empty($row['publish_time'])) {
+                    $data['published_at'] = $row['publish_time'];
+                } else {
+                    $data['published_at'] = datetime();
+                }
             }
 
             self::where('id', $id)->data($data)->update();

@@ -50,7 +50,14 @@ INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `cont
 ('api_key', 'function', 'API密钥', '用于操作敏感API验证', 'string', 'sf-2129876388', '', '', '', NULL),
 ('create_cdkey_max_number', 'function', '卡密生成数量', '用户一次性最多生成卡密数量', 'string', '20', '', '', '', NULL),
 ('have_cdkey_max_number', 'function', '卡密拥有数量', '用户最多拥有未使用卡密数量', 'string', '999', '', '', '', NULL),
-('login_switch', 'function', '登录方式', '', 'checkbox', '', '{"qq":"<img src=\'/Assets/img/qq.png\' width=\'15\'>","qrcode":"<img src=\'/Assets/img/pays.png\' width=\'15\'>"}', '', '', NULL),
+('login_switch', 'function', '登录方式', '', 'checkbox', '', '{"qq":"<img src=\'/Assets/img/qq.png\' width=\'15\'> QQ Login","qrcode":"<img src=\'/Assets/img/pays.png\' width=\'15\'> QQ QR Login","wechat_mp":"<img src=\'/Assets/img/wechat.svg\' width=\'15\'> WeChat MP Login"}', '', '', NULL),
+('wechat_mp_appid', 'function', 'WeChat MP AppID', 'WeChat Official Account AppID', 'string', '', '', '', '', NULL),
+('wechat_mp_appsecret', 'function', 'WeChat MP AppSecret', 'WeChat Official Account AppSecret', 'string', '', '', '', '', NULL),
+('wechat_mp_token', 'function', 'WeChat MP Token', 'WeChat Official Account server Token. Callback URL: http://your-domain/api.php/WechatMp/callback', 'string', '', '', '', '', NULL),
+('feature_point_exchange_enabled', 'feature_access', '积分兑换', '关闭后用户端积分兑换、管理员端积分商品/兑换记录均不可访问', 'bool', '1', '', '', '', NULL),
+('feature_user_plugin_enabled', 'feature_access', '用户插件中心', '关闭后用户端插件市场、发布插件、我的插件、我的购买等页面均不可访问', 'bool', '1', '', '', '', NULL),
+('feature_admin_plugin_enabled', 'feature_access', '管理员插件管理', '关闭后管理员端插件列表、插件订单、插件评论等页面均不可访问', 'bool', '1', '', '', '', NULL),
+('feature_withdraw_enabled', 'feature_access', '提现功能', '关闭后用户端提现记录/申请、管理员端提现管理均不可访问', 'bool', '1', '', '', '', NULL),
 ('alipay_api', 'pay', '支付宝', '', 'radio', '0', '{"0":"关闭","1":"电脑+手机网站支付","2":"易支付免签约接口","3":"当面付扫码支付","5":"码支付免签约接口","7":"卡易信笔笔清接口"}', '', '', NULL),
 ('alipay_config', 'pay', '支付宝官方配置', '', 'array', '{"appid":"应用APPID","publickey":"支付宝公钥(RSA2)","privatekey":"应用私钥(RSA2)"}', '', '', '', NULL),
 ('alipay_epay_config', 'pay', '支付宝易支付配置', '', 'array', '{"url":"易支付接口网址","pid":"易支付商户ID","key":"易支付商户密钥"}', '', '', '', NULL),
@@ -245,6 +252,7 @@ CREATE TABLE `SF_admin` (
   `username` varchar(150) NOT NULL,
   `password` varchar(150) NOT NULL,
   `qq` varchar(10) NOT NULL,
+  `wechat_openid` varchar(64) NOT NULL DEFAULT '' COMMENT '微信公众号openid',
   `email` varchar(255) DEFAULT NULL,
   `phone` varchar(11) DEFAULT NULL COMMENT '手机号',
   `lasttime` datetime DEFAULT NULL,
@@ -265,6 +273,7 @@ CREATE TABLE `SF_user` (
   `username` varchar(150) NOT NULL COMMENT '用户名',
   `password` varchar(150) NOT NULL COMMENT '密码',
   `qq` varchar(10) DEFAULT NULL COMMENT 'QQ',
+  `wechat_openid` varchar(64) NOT NULL DEFAULT '' COMMENT '微信公众号openid',
   `email` varchar(255) NOT NULL COMMENT '邮箱',
   `phone` varchar(11) NOT NULL COMMENT '手机号',
   `balance` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '余额',
@@ -571,6 +580,25 @@ CREATE TABLE `SF_point_log` (
   KEY `idx_user_time` (`user_id`,`created_at`),
   KEY `idx_related` (`related_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `SF_wechat_mp_login`;
+CREATE TABLE `SF_wechat_mp_login` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `token` varchar(64) NOT NULL COMMENT '本地登录token',
+  `scene` varchar(80) NOT NULL DEFAULT '' COMMENT '微信二维码场景值',
+  `type` varchar(20) NOT NULL DEFAULT '' COMMENT 'userLogin/adminLogin/bindUser/bindAdmin',
+  `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT 'pending/scanned/confirmed',
+  `openid` varchar(64) NOT NULL DEFAULT '' COMMENT '微信openid',
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '绑定用户ID',
+  `admin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '绑定管理员ID',
+  `expires_at` datetime NOT NULL COMMENT '过期时间',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_token` (`token`),
+  KEY `idx_scene` (`scene`),
+  KEY `idx_status_expire` (`status`, `expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='微信公众号扫码登录状态表';
 
 DROP TABLE IF EXISTS `SF_point_product`;
 CREATE TABLE `SF_point_product` (

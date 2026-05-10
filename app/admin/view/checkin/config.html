@@ -1,0 +1,59 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-card-header">打卡配置</div>
+    <div class="layui-card-body">
+      <form class="layui-form" lay-filter="checkinForm">
+        {foreach $configList as $item}
+        <div class="layui-form-item">
+          <label class="layui-form-label">{$item.title}</label>
+          <div class="layui-input-block">
+            {switch $item.type}
+            {case bool}
+            <input type="radio" name="row[{$item.name}]" value="1" title="开启" {if $item.value==1}checked{/if}>
+            <input type="radio" name="row[{$item.name}]" value="0" title="关闭" {if $item.value==0}checked{/if}>
+            {/case}
+            {case number}
+            <input type="number" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="layui-input" lay-verify="required" lay-tips="{$item.tip}">
+            {/case}
+            {case text}
+            <textarea name="row[{$item.name}]" class="layui-textarea" lay-tips="{$item.tip}">{$item.value|htmlentities}</textarea>
+            {/case}
+            {default}
+            <input type="text" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="layui-input" lay-tips="{$item.tip}">
+            {/switch}
+          </div>
+        </div>
+        {/foreach}
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button type="button" class="layui-btn" lay-submit lay-filter="saveCheckin">保存设置</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{include file="/public/footer"}
+<script>
+layui.use(['form', 'layer'], function(){
+  var $ = layui.jquery;
+  var form = layui.form;
+  form.on('submit(saveCheckin)', function(data){
+    $.ajax({
+      type: 'POST',
+      url: '',
+      data: data.field,
+      dataType: 'json',
+      success: function(r){
+        if(r.code === 0){
+          layer.msg(r.msg, {icon:1});
+        }else{
+          layer.msg(r.msg, {icon:2});
+        }
+      }
+    });
+    return false;
+  });
+});
+</script>

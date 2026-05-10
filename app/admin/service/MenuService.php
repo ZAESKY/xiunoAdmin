@@ -45,6 +45,7 @@ class MenuService extends BaseService
     {
         try{
             $list = $this->model->getList();
+            $list = feature_filter_menus($list);
             // Menu title i18n mapping (Chinese DB values → i18n keys)
             $titleMap = [
                 '系统管理' => 'menu.system',

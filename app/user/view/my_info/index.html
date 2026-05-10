@@ -164,6 +164,7 @@
                         <li>{:t('common_ui.power_type')}升级</li>
                         <li>余额明细</li>
                         <li>积分明细</li>
+                        <li>打卡记录</li>
                     </ul>
                     <div class="layui-tab-content">
                         <!-- tab1 -->
@@ -198,6 +199,22 @@
                                         {else}
                                         <div class="user-bd-list-text">当前未{:t('install_ui.binding_title')}QQ账号</div>
                                         <a class="user-bd-list-oper" lay-filter="bindingQQ" lay-submit>绑定</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <div class="user-bd-list-item">
+                                    <div class="user-bd-list-img">
+                                        <i class="layui-icon layui-icon-login-wechat"
+                                           style="color: #1AAD19;font-size: 48px;"></i>
+                                    </div>
+                                    <div class="user-bd-list-content">
+                                        <div class="user-bd-list-lable">绑定微信公众号</div>
+                                        {if !empty($userInfo['wechat_openid'])}
+                                        <div class="user-bd-list-text">已绑定微信公众号</div>
+                                        <a class="user-bd-list-oper" lay-filter="unbindingWechatMp" lay-submit>解绑</a>
+                                        {else}
+                                        <div class="user-bd-list-text">当前未绑定微信公众号</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingWechatMp" lay-submit>绑定</a>
                                         {/if}
                                     </div>
                                 </div>
@@ -264,6 +281,9 @@
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <table id="SF_PointTable" lay-filter="SF_PointTable" style="margin: 0;"></table>
+                        </div>
+                        <div class="layui-tab-item" style="padding-bottom: 20px;">
+                            <table id="SF_CheckinTable" lay-filter="SF_CheckinTable" style="margin: 0;"></table>
                         </div>
                     </div>
                 </div>
@@ -631,9 +651,48 @@
             admin.open({
                 type: 2,
                 title: '扫码绑定QQ',
-                content: '/qrlogin/qrlogin.html',
+                content: '/qrlogin/qrlogin.html?v=' + Date.now(),
                 area: ['400px', '300px'],
                 data: {type:'bindQQ'}
+            });
+            return false;
+        });
+
+        form.on('submit(unbindingWechatMp)', function (data) {
+            layer.confirm('确定要解除微信公众号绑定吗？解绑后将不能使用微信公众号扫码登录。', {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg('正在解绑...', {icon: 4, close: true});
+                admin.ajax({
+                    url: '{:url("/MyInfo/editUserInfo")}',
+                    data: {type:'changeBindingWechatMp', code:'unbind'},
+                    headers: {},
+                    type: 'post',
+                    dataType: 'json',
+                    success: function(r){
+                        notice.destroy();
+                        if (r.code == 0) {
+                            notice.msg('微信公众号解绑成功！', {icon: 1});
+                            setTimeout(function(){ location.reload(); }, 1200);
+                        } else {
+                            notice.msg(r.msg, {icon: 2});
+                        }
+                    }
+                });
+            });
+            return false;
+        });
+
+        form.on('submit(bindingWechatMp)', function (data) {
+            admin.open({
+                type: 2,
+                title: '扫码绑定微信公众号',
+                content: '/wechat_mp_login.html?v=' + Date.now(),
+                area: ['360px', '330px'],
+                data: {type:'bindUser'}
             });
             return false;
         });
@@ -662,6 +721,18 @@
             {field: 'integral_after', title: '剩余积分', width: 120, templet: function(d){ return (d.integral_after||0)+' 积分'; }},
             {field: 'description', title: '说明', minWidth: 160},
             {field: 'created_at', title: '时间', width: 160}
+        ]]
+    });
+    // 打卡记录
+    table.render({
+        elem: '#SF_CheckinTable', url: '{:url("/Checkin/myRecords")}', method: 'post', page: true, limit: 10,
+        request: { pageName: 'current_page', limitName: 'limit' },
+        parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
+        cols: [[
+            {field: 'checkin_date', title: '打卡日期', width: 120, sort: true},
+            {field: 'consecutive_days', title: '连续天数', width: 100},
+            {field: 'points_earned', title: '获得积分', width: 110},
+            {field: 'created_at', title: '打卡时间', width: 170, sort: true}
         ]]
     });
     });

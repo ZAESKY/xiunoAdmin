@@ -51,6 +51,11 @@
                         <a ew-href="{:url('/MyInfo/index')}">{:t('layout.personal_center')}</a>
                     </dd>
                     {/eq}
+                    {eq name="layoutRole" value="admin"}
+                    <dd lay-unselect>
+                        <a href="javascript:;" id="btnBindQQ" lay-filter="bindQQ" lay-submit>{if !empty($layoutAdminQQ)}<i class="layui-icon layui-icon-login-qq"></i> 已绑定QQ:{$layoutAdminQQ}{else}绑定QQ{/if}</a>
+                    </dd>
+                    {/eq}
                     <dd lay-unselect>
                         <a ew-href="{:url('/Index/editPassword')}">{:t('layout.modify_password')}</a>
                     </dd>
@@ -122,6 +127,46 @@
         index.loadHome({
             menuPath: '{:url("/Index/main")}',
             menuName: '<i class="layui-icon layui-icon-home"></i>'
+        });
+        // QQ绑定（管理员）
+        var layoutRole = '{$layoutRole}';
+        var layoutAdminQQ = '{$layoutAdminQQ|default=""}';
+        form.on('submit(bindQQ)', function () {
+            if (layoutRole !== 'admin') return;
+            if (layoutAdminQQ) {
+                // 已绑定：解除绑定
+                parent.layui.admin.confirm('确定要解除QQ绑定吗？', function (index) {
+                    notice.msg('正在解绑..', {icon: 4, close: true});
+                    $.ajax({
+                        type: "POST",
+                        url: '/api.php/Qrlogin/adminUnbindQQ',
+                        dataType: "json",
+                        success: function(data) {
+                            notice.destroy();
+                            if (data.code == 0) {
+                                notice.msg('QQ解绑成功！', {icon: 1});
+                                setTimeout(function(){ location.reload(); }, 1200);
+                            } else {
+                                notice.msg(data.msg, {icon: 2, audio:'1'});
+                            }
+                        },
+                        error: function() {
+                            notice.destroy();
+                            notice.msg('服务器错误', {icon: 2, audio:'1'});
+                        }
+                    });
+                    parent.layer.close(index);
+                });
+            } else {
+                // 未绑定：打开扫码
+                parent.layui.admin.open({
+                    type: 2,
+                    title: '管理员扫码绑定QQ',
+                    content: '/qrlogin/qrlogin.html',
+                    area: ['400px', '300px'],
+                    data: {type:'adminBindQQ'}
+                });
+            }
         });
         form.on('submit(logout)', function () {
             parent.layui.admin.confirm('{:t("confirm.logout")}', function (index) {

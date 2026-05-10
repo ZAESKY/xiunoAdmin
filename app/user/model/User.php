@@ -64,6 +64,13 @@ class User extends BaseModel
                 }else{
                     return message('QQ解绑失败' ,false);
                 }
+            case 'changeBindingWechatMp':
+                $result = $this->setOne(['wechat_openid' => '']);
+                if($result){
+                    return message('微信公众号解绑成功' ,true);
+                }else{
+                    return message('微信公众号解绑失败' ,false);
+                }
             default:
                 return message(t('common_ui.type_error') ,false);
         }

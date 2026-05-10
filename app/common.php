@@ -269,6 +269,84 @@ if (!function_exists('conf')) {
     }
 
 }
+if (!function_exists('feature_enabled')) {
+
+    /**
+     * 功能访问开关，配置值为 0 时关闭。
+     */
+    function feature_enabled($name)
+    {
+        $value = conf($name);
+        return (string)$value !== '0';
+    }
+
+}
+if (!function_exists('feature_filter_menus')) {
+
+    /**
+     * 根据功能访问开关过滤左侧菜单。
+     */
+    function feature_filter_menus(array $menus)
+    {
+        $filtered = [];
+        foreach ($menus as $menu) {
+            $name = (string)($menu['name'] ?? '');
+            $url = (string)($menu['url'] ?? '');
+
+            if (!feature_enabled('feature_point_exchange_enabled') && feature_menu_matches($name, $url, 'point_exchange')) {
+                continue;
+            }
+            if (!feature_enabled('feature_admin_plugin_enabled') && feature_menu_matches($name, $url, 'admin_plugin')) {
+                continue;
+            }
+            if (!feature_enabled('feature_user_plugin_enabled') && feature_menu_matches($name, $url, 'user_plugin')) {
+                continue;
+            }
+            if (!feature_enabled('feature_withdraw_enabled') && feature_menu_matches($name, $url, 'withdraw')) {
+                continue;
+            }
+
+            if (!empty($menu['children']) && is_array($menu['children'])) {
+                $menu['children'] = feature_filter_menus($menu['children']);
+                if (empty($menu['children']) && in_array($url, ['', '#'], true)) {
+                    continue;
+                }
+            }
+            $filtered[] = $menu;
+        }
+
+        return array_values($filtered);
+    }
+
+}
+if (!function_exists('feature_menu_matches')) {
+
+    function feature_menu_matches(string $name, string $url, string $type)
+    {
+        switch ($type) {
+            case 'point_exchange':
+                return strpos($url, 'PointExchange/') !== false
+                    || strpos($url, 'PointProduct/') !== false
+                    || in_array($name, ['积分兑换', '积分商品', '兑换记录'], true);
+            case 'admin_plugin':
+                return strpos($url, 'Plugin/') !== false
+                    || strpos($url, 'PluginOrder/') !== false
+                    || strpos($url, 'PluginComment/') !== false
+                    || in_array($name, ['插件列表', '插件订单', '插件评论'], true);
+            case 'user_plugin':
+                return strpos($url, 'UserPlugin/') !== false
+                    || strpos($url, '/UserPlugin/') !== false
+                    || in_array($name, ['发布插件', '插件市场', '我的插件', '评论管理', '我的购买'], true);
+            case 'withdraw':
+                return strpos($url, 'Withdraw/') !== false
+                    || strpos($url, 'Order/withdraw') !== false
+                    || in_array($name, ['提现记录', '提现管理'], true);
+            default:
+                return false;
+        }
+    }
+
+}
 if (!function_exists('__')) {
 
     /**

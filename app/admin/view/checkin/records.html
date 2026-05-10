@@ -1,0 +1,46 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-card-header">打卡记录</div>
+    <div class="layui-card-body">
+      <div class="layui-form">
+        <div class="layui-form-item" style="display:inline-block;margin-bottom:6px;">
+          <input type="text" id="searchUsername" placeholder="搜索用户" class="layui-input" style="width:200px;">
+        </div>
+        <button class="layui-btn" id="btnSearch" style="margin-bottom:6px;"><i class="layui-icon layui-icon-search"></i> 搜索</button>
+      </div>
+      <table id="recordsTable" lay-filter="recordsTable"></table>
+    </div>
+  </div>
+</div>
+{include file="/public/footer"}
+<script>
+layui.use(['table'], function(){
+  var $ = layui.jquery;
+  var table = layui.table;
+  table.render({
+    elem: '#recordsTable',
+    url: '{:url("/Checkin/records")}',
+    method: 'POST',
+    where: {username: ''},
+    cols: [[
+      {field: 'id', title: 'ID', width: 70, sort: true},
+      {field: 'username', title: '用户', width: 130},
+      {field: 'checkin_date', title: '打卡日期', width: 120, sort: true},
+      {field: 'consecutive_days', title: '连续天数', width: 100, sort: true},
+      {field: 'points_earned', title: '获得积分', width: 110, sort: true},
+      {field: 'ip', title: 'IP地址', width: 150},
+      {field: 'created_at', title: '打卡时间', width: 170, sort: true}
+    ]],
+    page: true,
+    limit: 15,
+    limits: [10, 15, 20, 50],
+    request: {pageName: 'page', limitName: 'limit'},
+    parseData: function(res){ return {code: res.code, msg: res.msg, count: res.count, data: res.data}; }
+  });
+
+  $('#btnSearch').click(function(){
+    table.reload('recordsTable', {where: {username: $('#searchUsername').val()}});
+  });
+});
+</script>

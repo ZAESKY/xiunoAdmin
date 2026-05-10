@@ -35,6 +35,7 @@ class MenuService extends UserBaseService
     {
         try{
             $list = $this->model->getList();
+            $list = feature_filter_menus($list);
             $titleMap = [
                 '系统管理' => 'menu.system',
                 '用户管理' => 'menu.user',

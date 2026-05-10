@@ -297,15 +297,16 @@
         <div class="layui-form-item">
             <input type="checkbox" name="remember" title="{:t('login.remember_me')}" lay-skin="primary" checked>
             <a href="{:url('/login/forgot')}" class="layui-link pull-right">忘记密码</a>
-            <a href="{:url('/login/reg')}" class="layui-link">{:t('login.register_user')}</a>
         </div>
         <div class="layui-form-item">
             <button type="button" class="layui-btn layui-btn-fluid sf" id="login">{:t('login.login_backend')}</button>
         </div>
+        {if condition="!empty($login_switch)"}
         <div class="layui-form-item page-account-other" style="font-size: 14px;">
             <span>{:t('login.other_login')}</span>
-            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}&emsp;
+            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}{if in_array('wechat_mp', $login_switch)}<a id="wechat_mp_login"><img src="{__IMG__}wechat.svg" alt="微信公众号"></a>{/if}&emsp;
         </div>
+        {/if}
     </form>
 </div>
 
@@ -323,14 +324,28 @@
         var notice = layui.notice;
         $('.login-wrapper').removeClass('layui-hide');
 
+        {if in_array('qrcode', $login_switch)}
         $("#code").click(function(){
             admin.open({
-                type: 1,
-                area:['300px',''],
-                title:'SF-扫码登录',
-                content: '<div class="form-group" style="text-align: center;"><div style="margin-top:1rem;margin-bottom:1rem;color:#666" id="login"><span id="loginmsg">请使用QQ手机版扫描二维码</span><span id="loginload" style="color: #790909;">.</span></div><div id="qrimg"></div><button type="button" id="mlogin" onclick="mloginurl()" class="layui-btn layui-btn-fluid layui-btn-normal">跳转QQ快捷登录</button></div>'
+                type: 2,
+                title: '管理员扫码登录',
+                content: '/qrlogin/qrlogin.html?v=' + Date.now(),
+                area: ['400px', '300px'],
+                data: {type:'adminLogin'}
             });
         });
+        {/if}
+        {if in_array('wechat_mp', $login_switch)}
+        $("#wechat_mp_login").click(function(){
+            admin.open({
+                type: 2,
+                title: '微信公众号登录',
+                content: '/wechat_mp_login.html?v=' + Date.now(),
+                area: ['360px', '330px'],
+                data: {type:'adminLogin'}
+            });
+        });
+        {/if}
         {if $code != ''}
         admin.btnLoading('#login');
         admin.showLoading('#divLoading', 2, '.8');
@@ -382,6 +397,7 @@
             }
         });
         {/if}
+        {if in_array('qq', $login_switch)}
         $("#qq_login").click(function(){
             admin.btnLoading('#login');
             admin.showLoading('#divLoading', 2, '.8');
@@ -431,6 +447,7 @@
                 }
             });
         });
+        {/if}
 
         {if $captcha_open == '1'}
             var handlerEmbed = function(captchaObj) {

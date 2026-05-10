@@ -228,6 +228,54 @@
                                         }
                                     });
                                     break;
+                                case 'adminLogin':
+                                    parent.layui.notice.msg('正在验证管理员身份..', {icon: 4, close: true});
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '/api.php/Qrlogin/adminLogin',
+                                        data: layerData,
+                                        dataType: "json",
+                                        success: function(data) {
+                                            parent.layui.notice.destroy();
+                                            if (data.code == 0) {
+                                                var redirectUrl = (data.data && data.data.url) ? data.data.url : '/admin.php/Index/index.html';
+                                                parent.layui.notice.msg('登录成功，正在进入后台...', {icon: 1});
+                                                try {
+                                                    (parent.top || parent).location.replace(redirectUrl);
+                                                } catch (e) {
+                                                    parent.location.href = redirectUrl;
+                                                }
+                                                return;
+                                            } else {
+                                                cleartime();
+                                                $('#login').show();
+                                                $('#login').attr("data-lock", "false");
+                                                getqrpic();
+                                                parent.layui.notice.error({
+                                                    title: '登录通知',
+                                                    message: data.msg,
+                                                    animateInside:true, position:'topCenter',
+                                                    transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
+                                                    displayMode:'2', audio:'1'
+                                                });
+                                            }
+                                        },
+                                        error: function() {
+                                            parent.layui.notice.destroy();
+                                            cleartime();
+                                            $('#login').show();
+                                            $('#login').attr("data-lock", "false");
+                                            getqrpic();
+                                            parent.layui.notice.error({
+                                                title: '登录通知',
+                                                message: '服务器错误',
+                                                animateInside:true, position:'topCenter',
+                                                transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
+                                                displayMode:'2', audio:'1'
+                                            });
+                                        }
+                                    });
+                                    break;
                                 case 'bindQQ':
                                     parent.layui.notice.msg('正在执行中..', {icon: 4, close: true});
                                     $.ajax({
@@ -274,6 +322,50 @@
                                                 transitionOutMobile: 'flipOutX',
                                                 displayMode:'2',
                                                 audio:'1'
+                                            });
+                                        }
+                                    });
+                                    break;
+                                case 'adminBindQQ':
+                                    parent.layui.notice.msg('正在绑定管理员QQ..', {icon: 4, close: true});
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '/api.php/Qrlogin/adminBindQQ',
+                                        data: layerData,
+                                        dataType: "json",
+                                        success: function(data) {
+                                            parent.layui.notice.destroy();
+                                            if (data.code == 0) {
+                                                var index = parent.layer.getFrameIndex(window.name);
+                                                parent.layer.close(index);
+                                                parent.layui.notice.msg('QQ绑定成功！', {icon: 1});
+                                                setTimeout(function(){ parent.location.reload(); }, 1500);
+                                            } else {
+                                                cleartime();
+                                                $('#login').show();
+                                                $('#login').attr("data-lock", "false");
+                                                getqrpic();
+                                                parent.layui.notice.error({
+                                                    title: '绑定通知',
+                                                    message: data.msg,
+                                                    animateInside:true, position:'topCenter',
+                                                    transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
+                                                    displayMode:'2', audio:'1'
+                                                });
+                                            }
+                                        },
+                                        error: function() {
+                                            parent.layui.notice.destroy();
+                                            cleartime();
+                                            $('#login').show();
+                                            $('#login').attr("data-lock", "false");
+                                            getqrpic();
+                                            parent.layui.notice.error({
+                                                title: '绑定通知',
+                                                message: '服务器错误',
+                                                animateInside:true, position:'topCenter',
+                                                transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
+                                                displayMode:'2', audio:'1'
                                             });
                                         }
                                     });

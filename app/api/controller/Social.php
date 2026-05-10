@@ -16,7 +16,11 @@ class Social extends Backend
         if(empty($userType)){
             return message(t("validation.missing_user_type") ,false);
         }
-        if(!in_array('qq', conf('login_switch'))){
+        $loginSwitch = conf('login_switch');
+        if (!is_array($loginSwitch)) {
+            $loginSwitch = array_filter(explode(',', (string)$loginSwitch));
+        }
+        if(!in_array('qq', $loginSwitch)){
             return message(t('auth.site_scan_disabled') ,false);
         }
         $Oauth = new Oauth($callback);
@@ -76,7 +80,11 @@ class Social extends Backend
         if(empty($userType)){
             return message(t("validation.missing_user_type") ,false);
         }
-        if(!in_array('qq', conf('login_switch'))){
+        $loginSwitch = conf('login_switch');
+        if (!is_array($loginSwitch)) {
+            $loginSwitch = array_filter(explode(',', (string)$loginSwitch));
+        }
+        if(!in_array('qq', $loginSwitch)){
             return message(t('auth.site_scan_disabled') ,false);
         }
         if($userType=='admin'){

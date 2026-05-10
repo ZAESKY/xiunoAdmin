@@ -17,7 +17,18 @@ class UserPlugin extends UserBackend
     public function initialize()
     {
         parent::initialize();
+        $this->denyIfClosed();
         $this->service = new UserPluginService();
+    }
+
+    private function denyIfClosed()
+    {
+        if (!feature_enabled('feature_user_plugin_enabled')) {
+            if (IS_POST) {
+                exit(json_encode(message('插件中心功能已关闭', false), JSON_UNESCAPED_UNICODE));
+            }
+            exit($this->render('/public/error', ['msg' => '插件中心功能已关闭']));
+        }
     }
 
     /**

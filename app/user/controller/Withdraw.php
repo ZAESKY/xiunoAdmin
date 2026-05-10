@@ -11,6 +11,22 @@ use think\facade\View;
 
 class Withdraw extends UserBackend
 {
+    public function initialize()
+    {
+        parent::initialize();
+        $this->denyIfClosed();
+    }
+
+    private function denyIfClosed()
+    {
+        if (!feature_enabled('feature_withdraw_enabled')) {
+            if (IS_POST) {
+                exit(json_encode(message('提现功能已关闭', false), JSON_UNESCAPED_UNICODE));
+            }
+            exit($this->render('/public/error', ['msg' => '提现功能已关闭']));
+        }
+    }
+
     public function index()
     {
         if (IS_POST) {

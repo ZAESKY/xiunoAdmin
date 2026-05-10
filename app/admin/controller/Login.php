@@ -50,10 +50,16 @@ class Login extends Backend
             session('SF_LOGIN_KEY',conf('SF_LOGIN_KEY'));
         }
         $this->app->view->layout(false);
+        $loginSwitch = conf('login_switch');
+        if (!is_array($loginSwitch)) {
+            $loginSwitch = array_filter(explode(',', (string)$loginSwitch));
+        }
+        $loginSwitch = array_values(array_intersect($loginSwitch, ['qq', 'qrcode', 'wechat_mp']));
+
         View::assign(array(
             'captcha_open' => conf('captcha_open'),
             'captcha_id' => conf('captcha_id'),
-            'login_switch' => conf('login_switch'),
+            'login_switch' => $loginSwitch,
         ));
         if(session('SF_LOGIN_KEY') != conf('SF_LOGIN_KEY')){
             return $this->render('safe');

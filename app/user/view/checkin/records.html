@@ -1,0 +1,71 @@
+{include file="/public/header"}
+<style>
+.ci-stat-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 24px; border-radius: 10px; background: #fff;
+  border: 1px solid #f0f0f0; margin-bottom: 14px;
+}
+.ci-stat-card .ci-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.ci-icon.c1 { background: #fff3e0; color: #f09d3c; }
+.ci-icon.c2 { background: #e6f7ed; color: #34a853; }
+.ci-icon.c3 { background: #eaf2ff; color: #3a6fd8; }
+.ci-info {}
+.ci-val { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+.ci-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
+</style>
+<div class="layui-fluid" style="padding:14px 16px;">
+  <div style="display:flex;gap:14px;margin-bottom:14px;">
+    <div class="ci-stat-card" style="flex:1;">
+      <div class="ci-icon c1"><i class="layui-icon layui-icon-fire"></i></div>
+      <div class="ci-info"><div class="ci-val" id="statTotal">0</div><div class="ci-label">累计打卡天数</div></div>
+    </div>
+    <div class="ci-stat-card" style="flex:1;">
+      <div class="ci-icon c2"><i class="layui-icon layui-icon-star"></i></div>
+      <div class="ci-info"><div class="ci-val" id="statPoints">0</div><div class="ci-label">累计获得积分</div></div>
+    </div>
+    <div class="ci-stat-card" style="flex:1;">
+      <div class="ci-icon c3"><i class="layui-icon layui-icon-tree"></i></div>
+      <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">最长连续打卡</div></div>
+    </div>
+  </div>
+  <div class="layui-card">
+    <div class="layui-card-header">打卡记录</div>
+    <div class="layui-card-body">
+      <table id="recordsTable" lay-filter="recordsTable"></table>
+    </div>
+  </div>
+</div>
+{include file="/public/footer"}
+<script>
+layui.use(['table'], function(){
+  var $ = layui.jquery;
+  var table = layui.table;
+  $.get('{:url("/Checkin/stats")}', function(r){
+    if(r.code === 0 && r.data){
+      $('#statTotal').text(r.data.total_days || 0);
+      $('#statPoints').text(r.data.total_points || 0);
+      $('#statMaxConsecutive').text(r.data.max_consecutive || 0);
+    }
+  }, 'json');
+  table.render({
+    elem: '#recordsTable',
+    url: '{:url("/Checkin/myRecords")}',
+    method: 'POST',
+    cols: [[
+      {field: 'checkin_date', title: '打卡日期', width: 130, sort: true},
+      {field: 'consecutive_days', title: '连续天数', width: 100},
+      {field: 'points_earned', title: '获得积分', width: 110},
+      {field: 'created_at', title: '打卡时间', width: 170, sort: true}
+    ]],
+    page: true,
+    limit: 15,
+    limits: [10,15,20,50],
+    request: {pageName: 'page', limitName: 'limit'},
+    parseData: function(res){ return {code: res.code, msg: res.msg, count: res.count, data: res.data}; }
+  });
+});
+</script>

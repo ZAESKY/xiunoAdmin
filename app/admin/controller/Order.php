@@ -15,6 +15,13 @@ class Order extends Backend
 
     public function withdraw()
     {
+        if (!feature_enabled('feature_withdraw_enabled')) {
+            if (IS_POST) {
+                return json(message('提现功能已关闭', false));
+            }
+            return $this->render('/public/error', ['msg' => '提现功能已关闭']);
+        }
+
         if (IS_POST) {
             $post = $this->request->post();
             $action = $post['action'] ?? 'list';

@@ -304,10 +304,12 @@
         <div class="layui-form-item">
             <button type="button" class="layui-btn layui-btn-fluid sf" id="loginBtn">{:t('login.login_user')}</button>
         </div>
+        {if condition="!empty($login_switch)"}
         <div class="layui-form-item page-account-other" style="font-size: 14px;">
             <span>{:t('login.other_login')}</span>
-            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}&emsp;
+            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}{if in_array('wechat_mp', $login_switch)}<a id="wechat_mp_login"><img src="{__IMG__}wechat.svg" alt="微信公众号"></a>{/if}&emsp;
         </div>
+        {/if}
     </form>
 </div>
 
@@ -375,15 +377,28 @@
                 }
             });
         }
+        {if in_array('qrcode', $login_switch)}
         $("#code").click(function(){
             admin.open({
                 type: 2,
                 title: '扫码登录',
-                content: '/qrlogin/qrlogin.html',
+                content: '/qrlogin/qrlogin.html?v=' + Date.now(),
                 area: ['400px', '300px'],
                 data: {type:'userLogin'}
             });
         });
+        {/if}
+        {if in_array('wechat_mp', $login_switch)}
+        $("#wechat_mp_login").click(function(){
+            admin.open({
+                type: 2,
+                title: '微信公众号登录',
+                content: '/wechat_mp_login.html?v=' + Date.now(),
+                area: ['360px', '330px'],
+                data: {type:'userLogin'}
+            });
+        });
+        {/if}
         {notempty name="code"}
         admin.btnLoading(' #loginBtn');
         admin.showLoading('#divLoading', 2, '.8');
@@ -393,7 +408,7 @@
             data: {
                 "code": "{$code}",
                 "state": "{$state}",
-                "userType": "admin",
+                "userType": "user",
             },
             dataType: "json",
             success: function(data) {
@@ -435,6 +450,7 @@
             }
         });
         {/notempty}
+        {if in_array('qq', $login_switch)}
         $("#qq_login").click(function(){
             admin.btnLoading(' #loginBtn');
             admin.showLoading('#divLoading', 2, '.8');
@@ -442,7 +458,7 @@
                 type: "post",
                 url: "/api.php/Social/login",
                 data: {
-                    "userType": "admin",
+                    "userType": "user",
                 },
                 dataType: "json",
                 success: function(data) {
@@ -484,6 +500,7 @@
                 }
             });
         });
+        {/if}
 
         {eq name="captcha_open" value="1"}
             initGeetest4({

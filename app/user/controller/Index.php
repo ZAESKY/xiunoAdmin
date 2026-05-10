@@ -3,6 +3,7 @@ declare (strict_types = 1);
 
 namespace app\user\controller;
 
+use app\user\service\CheckinService;
 use app\user\service\IndexService;
 use app\user\service\MenuService;
 use app\common\controller\UserBackend;
@@ -149,7 +150,17 @@ class Index extends UserBackend
             $powerTheme = 'standard';
         }
 
+        try {
+            $checkinService = new CheckinService(intval($this->userId), $this->userInfo['username']);
+            $checkinStatus = $checkinService->getStatus();
+        } catch (\Exception $e) {
+            $checkinStatus = ['checked_today' => false, 'consecutive_days' => 0, 'today_points' => 0, 'checkin_time' => null, 'error' => true];
+        }
+
         View::assign([
+            'checkin_status' => $checkinStatus,
+            'checkin_enabled' => empty($checkinStatus['error']) && conf('checkin_enabled') !== '0',
+            'checkin_base_points' => (int)(conf('checkin_base_points') ?: 5),
             'notice' => conf('notice_user'),
             'notice_list' => Db::name('user_notice')->where('status', 1)->order('sort', 'asc')->order('id', 'desc')->select()->toArray(),
             'app_notice' => $this->myAppInfo['app_notice'],

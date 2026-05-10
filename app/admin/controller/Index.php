@@ -44,6 +44,7 @@ class Index extends Backend
                 'layoutRole' => 'admin',
                 'layoutAvatar' => '//q4.qlogo.cn/headimg_dl?dst_uin='.$this->adminInfo['qq'].'&spec=100',
                 'layoutUsername' => t('common_ui.admin_label'),
+                'layoutAdminQQ' => $this->adminInfo['qq'] ?: '',
                 'menuList' => $menuList,
             ]);
             return View::fetch(APP_PATH . DS . 'common' . DS . 'view' . DS . 'layout' . DS . 'main_layout.html');
@@ -217,5 +218,18 @@ class Index extends Backend
             }
         }
         return $this->render();
+    }
+
+    public function unbindWechatMp()
+    {
+        if (!IS_POST) {
+            return message('非法请求', false);
+        }
+        try {
+            Db::name('admin')->where('id', $this->adminId)->data(['wechat_openid' => ''])->update();
+            return message('微信公众号解绑成功', true);
+        } catch (\Exception $e) {
+            return message('微信公众号解绑失败', false);
+        }
     }
 }

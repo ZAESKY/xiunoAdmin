@@ -237,10 +237,26 @@
       </div>
     </div>
     <div class="d-3">
-      <div class="stat-card" ew-href="{:url('/UserPlugin/market')}">
-        <div class="st-icon c4"><i class="layui-icon layui-icon-component"></i></div>
-        <div class="st-body"><div class="st-num" style="font-size:18px;">插件市场</div><div class="st-label">发现更多工具</div><div class="st-sub up"><i class="layui-icon layui-icon-right"></i> 前往浏览</div></div>
+      {if $checkin_status.checked_today}
+      <div class="stat-card checkin-card checked">
+        <div class="st-icon c4"><i class="layui-icon layui-icon-ok-circle" style="font-size:26px;"></i></div>
+        <div class="st-body">
+          <div class="st-num" style="font-size:18px;color:#34a853;">已打卡</div>
+          <div class="st-label">连续 {$checkin_status.consecutive_days} 天 · +{$checkin_status.today_points}积分</div>
+          <div class="st-sub up"><i class="layui-icon layui-icon-time"></i> 明日再来</div>
+        </div>
       </div>
+      {else/}
+      <div class="stat-card checkin-card" id="checkinCard" style="position:relative;">
+        <div class="st-icon c4"><i class="layui-icon layui-icon-praise"></i></div>
+        <div class="st-body">
+          <div class="st-num" style="font-size:18px;">每日打卡</div>
+          <div class="st-label">打卡 +{$checkin_base_points} 积分</div>
+          <div class="st-sub up" id="checkinLabel"><i class="layui-icon layui-icon-right"></i> 点击打卡</div>
+        </div>
+        <div id="checkinLoading" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.8);border-radius:10px;display:none;align-items:center;justify-content:center;font-size:13px;color:#3a6fd8;"><i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 打卡中...</div>
+      </div>
+      {/if}
     </div>
   </div>
 
@@ -489,6 +505,45 @@ layui.use(['layer', 'form', 'admin', 'element', 'notice', 'upload'], function ()
                 } else {
                     notice.msg(r.msg, {icon:2, time: 5000});
                 }
+            }
+        });
+    });
+
+    // Check-in
+    var checkinLocked = false;
+    $('#checkinCard').click(function(){
+        if (checkinLocked) return;
+        checkinLocked = true;
+        var $card = $(this);
+        var $loading = $('#checkinLoading');
+        $loading.css('display', 'flex');
+        $.ajax({
+            type: 'POST',
+            url: '{:url("/Checkin/doCheckin")}',
+            dataType: 'json',
+            success: function(r) {
+                $loading.hide();
+                if (r.code === 0) {
+                    var d = r.data || {};
+                    var consecutiveMsg = d.consecutive_days ? '连续 '+d.consecutive_days+' 天' : '';
+                    var bonusTip = d.bonus_points > 0 ? '（含连续奖励+'+d.bonus_points+'）' : '';
+                    $card.removeClass().addClass('stat-card checkin-card checked');
+                    $card.find('.st-icon').html('<i class="layui-icon layui-icon-ok-circle" style="font-size:26px;"></i>');
+                    $card.find('.st-num').css('color','#34a853').text('已打卡');
+                    $card.find('.st-label').text(consecutiveMsg + ' · +'+d.total_points+'积分' + bonusTip);
+                    $card.find('.st-sub').html('<i class="layui-icon layui-icon-time"></i> 明日再来');
+                    $card.off('click');
+                    $loading.remove();
+                    notice.msg(r.msg, {icon: 1});
+                } else {
+                    checkinLocked = false;
+                    notice.msg(r.msg, {icon: 2, time: 4000});
+                }
+            },
+            error: function() {
+                $loading.hide();
+                checkinLocked = false;
+                notice.msg('打卡失败，请稍后重试', {icon: 2});
             }
         });
     });

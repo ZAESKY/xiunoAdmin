@@ -46,9 +46,21 @@ class Qrlogin extends ApiBackend
 
             switch ($type){
                 case 'userLogin':
-                    if(!in_array('qrcode',conf('login_switch'))) return message(t('auth.site_scan_disabled') ,false ,['code' => 6]);
+                    $loginSwitch = conf('login_switch');
+                    if (!is_array($loginSwitch)) {
+                        $loginSwitch = array_filter(explode(',', (string)$loginSwitch));
+                    }
+                    if(!in_array('qrcode', $loginSwitch)) return message(t('auth.site_scan_disabled') ,false ,['code' => 6]);
+                    break;
+                case 'adminLogin':
+                    $loginSwitch = conf('login_switch');
+                    if (!is_array($loginSwitch)) {
+                        $loginSwitch = array_filter(explode(',', (string)$loginSwitch));
+                    }
+                    if(!in_array('qrcode', $loginSwitch)) return message(t('auth.site_scan_disabled') ,false ,['code' => 6]);
                     break;
                 case 'bindQQ':
+                case 'adminBindQQ':
                     break;
                 case 'binding':
                     try{
@@ -203,6 +215,73 @@ class Qrlogin extends ApiBackend
         Session::delete('get_qq');
         Session::save();
         return message('QQ绑定成功' ,true);
+    }
+
+    /**
+     * 管理员QQ扫码登录
+     */
+    public function adminLogin(){
+        if (!IS_POST) {
+            return message('非法请求', false);
+        }
+        $get_token = !empty(session('get_token'))?session('get_token'):null;
+        $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
+        if(empty($get_token) || empty($get_qq)){
+            return message(t('auth.token_expired') ,false);
+        }
+        $admin = Db::name('admin')->where(['qq' => $get_qq, 'status' => 1])->find();
+        if(empty($admin)){
+            return message('该QQ未绑定管理员账号，请先在后台个人中心绑定QQ' ,false);
+        }
+        session('adminId', $admin['id'], 86400);
+        session('adminSign', data_auth_sign($admin['username'].$admin['password'].sf_password_hash()), 86400);
+        Session::delete('get_token');
+        Session::delete('get_qq');
+        Session::save();
+        return message('登录成功' ,true, ['url' => '/admin.php/Index/index.html']);
+    }
+
+    /**
+     * 管理员QQ扫码绑定
+     */
+    public function adminBindQQ(){
+        $get_token = !empty(session('get_token'))?session('get_token'):null;
+        $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
+        if(empty($get_token) || empty($get_qq)){
+            return message(t('auth.token_expired') ,false);
+        }
+        $adminId = session('adminId');
+        if(empty($adminId)){
+            return message(t('common.need_login') ,false);
+        }
+        try{
+            Db::name('admin')->where('id', $adminId)->data(['qq' => $get_qq])->update();
+        }catch (\Exception $e){
+            return message('QQ绑定失败' ,false);
+        }
+        Session::delete('get_token');
+        Session::delete('get_qq');
+        Session::save();
+        return message('QQ绑定成功' ,true);
+    }
+
+    /**
+     * 管理员解除QQ绑定
+     */
+    public function adminUnbindQQ(){
+        if (!IS_POST) {
+            return message('非法请求', false);
+        }
+        $adminId = session('adminId');
+        if(empty($adminId)){
+            return message(t('common.need_login') ,false);
+        }
+        try{
+            Db::name('admin')->where('id', $adminId)->data(['qq' => ''])->update();
+        }catch (\Exception $e){
+            return message('QQ解绑失败' ,false);
+        }
+        return message('QQ解绑成功' ,true);
     }
 
     public function binding(){

@@ -278,17 +278,20 @@
         </div>
         <div class="layui-form-item">
             <input type="checkbox" name="remember" title="记住密码" lay-skin="primary" checked>
-            <a href="reg.html" class="layui-link pull-right">注册用户</a>
         </div>
         <div class="layui-form-item">
             <div id="captcha">
                 <button type="button" class="layui-btn layui-btn-fluid sf" id="loginBtn">登录</button>
             </div>
         </div>
+        {if condition="!empty($login_switch)"}
         <div class="layui-form-item page-account-other" style="font-size: 14px;">
             <span>其他登录方式</span>
-            <a id="wechat_login"><img src="{__IMG__}wechat.svg" alt="微信"></a><a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a><a id="code"><img src="{__IMG__}code.svg" alt="扫码"></a>&emsp;
+            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}
+            {if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="扫码"></a>{/if}&emsp;
+            {if in_array('wechat_mp', $login_switch)}<a id="wechat_mp_login"><img src="{__IMG__}wechat.svg" alt="微信公众号"></a>{/if}
         </div>
+        {/if}
     </form>
 </div>
 
@@ -303,27 +306,28 @@
         var admin = layui.admin;
         var notice = layui.notice;
         $('.login-wrapper').removeClass('layui-hide');
-
-        $("#wechat_login").click(function(){
-            notice.error({
-                title: '温馨提示',
-                message: '暂不支持',
-                animateInside:true,
-                position:'topCenter',
-                transitionOut:'flipOutX',
-                transitionOutMobile: 'flipOutX',
-                displayMode:'2',
-                audio:'1'
-            });
-        });
+        {if in_array('qrcode', $login_switch)}
         $("#code").click(function(){
             admin.open({
-                type: 1,
-                area:['300px',''],
-                title:'SF-扫码登录',
-                content: '<div class="form-group" style="text-align: center;"><div style="margin-top:1rem;margin-bottom:1rem;color:#666" id="login"><span id="loginmsg">请使用QQ手机版扫描二维码</span><span id="loginload" style="color: #790909;">.</span></div><div id="qrimg"></div><button type="button" id="mlogin" onclick="mloginurl()" class="layui-btn layui-btn-fluid layui-btn-normal">跳转QQ快捷登录</button></div>'
+                type: 2,
+                title: '管理员扫码登录',
+                content: '/qrlogin/qrlogin.html?v=' + Date.now(),
+                area: ['400px', '300px'],
+                data: {type:'adminLogin'}
             });
         });
+        {/if}
+        {if in_array('wechat_mp', $login_switch)}
+        $("#wechat_mp_login").click(function(){
+            admin.open({
+                type: 2,
+                title: '微信公众号登录',
+                content: '/wechat_mp_login.html?v=' + Date.now(),
+                area: ['360px', '330px'],
+                data: {type:'adminLogin'}
+            });
+        });
+        {/if}
         {notempty name="code"}
         admin.btnLoading(' #loginBtn');
         admin.showLoading('#divLoading', 2, '.8');
@@ -375,6 +379,7 @@
             }
         });
         {/notempty}
+        {if in_array('qq', $login_switch)}
         $("#qq_login").click(function(){
             admin.btnLoading(' #loginBtn');
             admin.showLoading('#divLoading', 2, '.8');
@@ -424,6 +429,7 @@
                 }
             });
         });
+        {/if}
         {eq name="captcha_open" value="1"}
         initGeetest4({
             captchaId: '{$captcha_id}',
@@ -614,4 +620,4 @@
         });
         {/eq}
     });
-</script>
+</script>

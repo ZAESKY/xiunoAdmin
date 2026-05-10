@@ -18,7 +18,18 @@ class Plugin extends Backend
     public function initialize()
     {
         parent::initialize();
+        $this->denyIfClosed();
         $this->service = new PluginService();
+    }
+
+    private function denyIfClosed()
+    {
+        if (!feature_enabled('feature_admin_plugin_enabled')) {
+            if (IS_POST) {
+                exit(json_encode(message('插件管理功能已关闭', false), JSON_UNESCAPED_UNICODE));
+            }
+            exit($this->render('/public/error', ['msg' => '插件管理功能已关闭']));
+        }
     }
 
     /**

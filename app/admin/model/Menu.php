@@ -51,9 +51,13 @@ class Menu extends BaseModel
             $parent_id = [];
             // Role-based menu control: admin sees shared + admin menu entries.
             // 排除已废弃的模板配置菜单
-            $data = self::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('admin')], ['url', '<>', 'Set/template']])->select();
+            $data = self::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('admin')], ['url', '<>', 'Set/template']])
+                ->order('id', 'asc')
+                ->select()
+                ->toArray();
+            $data = $this->normalizeMenuRows($data, 'admin');
             foreach ($data as $key => $value) {
-                if ($value['parentid'] === 0) {
+                if ((int)$value['parentid'] === 0) {
                     $parent_id[$key] = $value;
                 }
             }
@@ -76,13 +80,37 @@ class Menu extends BaseModel
                     }
                 }
                 if (count($children) > 0) {
-                    $this->setMenuTree($children, $all_data);
-                    $data[$data_key]['children'] = $children;
+                    $data[$data_key]['children'] = $this->setMenuTree($children, $all_data);
                 }
             }
             return $data;
         }catch (\Exception $e){
             return [];
         }
+    }
+
+    private function normalizeMenuRows(array $rows, string $role): array
+    {
+        $rolePower = $role === 'admin' ? 1 : 2;
+        $normalized = [];
+        $rankMap = [];
+
+        foreach ($rows as $row) {
+            $row['url'] = ltrim((string)($row['url'] ?? ''), '/');
+            $isTopParent = (int)($row['parentid'] ?? 0) === 0;
+            $url = $row['url'];
+            $name = (string)($row['name'] ?? '');
+            $key = ($isTopParent && in_array($url, ['', '#'], true))
+                ? 'parent:' . $name
+                : 'url:' . $url;
+
+            $rank = ((int)($row['power'] ?? 0) === $rolePower ? 10 : 0) - ((int)($row['id'] ?? 0) / 1000000);
+            if (!isset($normalized[$key]) || $rank > $rankMap[$key]) {
+                $normalized[$key] = $row;
+                $rankMap[$key] = $rank;
+            }
+        }
+
+        return array_values($normalized);
     }
 }

@@ -47,7 +47,11 @@ class Menu extends BaseModel
             return message(t("user.power_info_error").'[errorCode:GetUserPowerInfoError]' ,false);
         }
         // select()->toArray() 转为普通数组，避免 ThinkPHP Collection 上 unset 不可靠
-        $data = Menu::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('user')]])->select()->toArray();
+        $data = Menu::where([['status', '=', 1], ['power', 'IN', MenuPermissionService::powersForRole('user')]])
+            ->order('id', 'asc')
+            ->select()
+            ->toArray();
+        $data = $this->normalizeMenuRows($data, 'user');
 
         $parent_id = [];
         $hiddenUrls = $alwaysHiddenUrls;
@@ -103,10 +107,34 @@ class Menu extends BaseModel
                }
             }
             if (count($children) > 0) {
-                $this->setMenuTree($children, $all_data);
-                $data[$data_key]['children'] = $children;
+                $data[$data_key]['children'] = $this->setMenuTree($children, $all_data);
             }
         }
         return $data;
+    }
+
+    private function normalizeMenuRows(array $rows, string $role): array
+    {
+        $rolePower = $role === 'admin' ? 1 : 2;
+        $normalized = [];
+        $rankMap = [];
+
+        foreach ($rows as $row) {
+            $row['url'] = ltrim((string)($row['url'] ?? ''), '/');
+            $isTopParent = (int)($row['parentid'] ?? 0) === 0;
+            $url = $row['url'];
+            $name = (string)($row['name'] ?? '');
+            $key = ($isTopParent && in_array($url, ['', '#'], true))
+                ? 'parent:' . $name
+                : 'url:' . $url;
+
+            $rank = ((int)($row['power'] ?? 0) === $rolePower ? 10 : 0) - ((int)($row['id'] ?? 0) / 1000000);
+            if (!isset($normalized[$key]) || $rank > $rankMap[$key]) {
+                $normalized[$key] = $row;
+                $rankMap[$key] = $rank;
+            }
+        }
+
+        return array_values($normalized);
     }
 }

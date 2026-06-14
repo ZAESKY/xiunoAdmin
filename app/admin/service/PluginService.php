@@ -4,8 +4,8 @@ namespace app\admin\service;
 
 use app\admin\model\PluginModel;
 use app\common\service\BaseService;
+use app\common\service\PluginStorageService;
 use think\Exception;
-use think\facade\Filesystem;
 
 class PluginService extends BaseService
 {
@@ -16,23 +16,13 @@ class PluginService extends BaseService
 
     /**
      * 上传插件文件
+     * @param mixed $file 上传的文件(若为空则从 request 中取)
      */
-    public function uploadFile()
+    public function uploadFile($file = null)
     {
         try {
-            $post = request()->post();
-            $fileName = !empty($post['fileName']) ? $post['fileName'] : null;
-            $fileExt = !empty($post['fileExt']) ? $post['fileExt'] : null;
-            $totalPage = !empty($post['totalPage']) ? intval($post['totalPage']) : 0;
-            $page = !empty($post['page']) ? intval($post['page']) : 0;
-            $file = request()->file('file');
-
-            if (empty($fileName)) {
-                return message('文件名不能为空', false, ['status' => 0]);
-            }
-            if (empty($fileExt)) {
-                return message('文件扩展名不能为空', false, ['status' => 0]);
-            }
+            if (!$file) $file = request()->file('file');
+            if (!$file) return message('请先选择插件文件', false, ['status' => 0]);
 
             // 验证文件
             try {
@@ -47,93 +37,92 @@ class PluginService extends BaseService
                 return message('文件验证失败: ' . $e->getMessage(), false, ['status' => 0]);
             }
 
-            // 创建私有存储目录
-            $uploadPath = app()->getRootPath() . 'storage' . DIRECTORY_SEPARATOR . 'plugins';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
+            $originalName = $file->getOriginalName();
+            if (preg_match('/[\x{4e00}-\x{9fff}]/u', $originalName)) {
+                return message('压缩包名称不能包含中文，请重命名后再上传', false, ['status' => 0]);
             }
 
-            // 分片上传处理
-            $tempPath = $uploadPath . DIRECTORY_SEPARATOR . 'temp';
-            if (!is_dir($tempPath)) {
-                mkdir($tempPath, 0755, true);
-            }
-
-            $chunkFile = $tempPath . DIRECTORY_SEPARATOR . $fileName . '.part' . $page;
-            $file->move($tempPath, $fileName . '.part' . $page);
-
-            // 如果是最后一片，合并文件
-            if ($page == $totalPage - 1) {
-                $finalFile = $uploadPath . DIRECTORY_SEPARATOR . date('Ymd') . '_' . uniqid() . '.' . $fileExt;
-                $fp = fopen($finalFile, 'wb');
-
-                for ($i = 0; $i < $totalPage; $i++) {
-                    $partFile = $tempPath . DIRECTORY_SEPARATOR . $fileName . '.part' . $i;
-                    if (!file_exists($partFile)) {
-                        fclose($fp);
-                        @unlink($finalFile);
-                        return message('分片文件缺失', false, ['status' => 0]);
+            // 尝试解析压缩包内的 conf.json 和 icon.png
+            $autoData = [];
+            try {
+                $zip = new \ZipArchive();
+                if ($zip->open($file->getPathname()) === true) {
+                    $confContent = false;
+                    $iconContent = false;
+                    $entries = [];
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $name = $zip->getNameIndex($i);
+                        if ($name !== false) $entries[] = rtrim($name, '/');
                     }
-                    $content = file_get_contents($partFile);
-                    fwrite($fp, $content);
-                    @unlink($partFile);
+                    foreach ($entries as $f) {
+                        if (strcasecmp(basename($f), 'conf.json') === 0) { $confContent = $zip->getFromName($f); break; }
+                    }
+                    foreach ($entries as $f) {
+                        if (strcasecmp(basename($f), 'icon.png') === 0) { $iconContent = $zip->getFromName($f); break; }
+                    }
+                    if ($confContent !== false) {
+                        $conf = json_decode($confContent, true);
+                        if (is_array($conf)) {
+                            if (!empty($conf['name']))    $autoData['name'] = trim($conf['name']);
+                            if (!empty($conf['brief']))   $autoData['description'] = trim($conf['brief']);
+                            if (!empty($conf['version'])) $autoData['version'] = trim($conf['version']);
+                        }
+                    }
+                    if ($iconContent !== false) {
+                        $iconMeta = (new PluginStorageService())->storeBytes($iconContent, 'icon', 'icon.png', 'image/png');
+                        $autoData['icon'] = $iconMeta['url'];
+                        $autoData['icon_object_key'] = $iconMeta['object_key'];
+                        $autoData['icon_storage_driver'] = $iconMeta['storage_driver'];
+                        $autoData['icon_file_name'] = $iconMeta['file_name'];
+                        $autoData['icon_file_size'] = $iconMeta['file_size'];
+                        $autoData['icon_mime_type'] = $iconMeta['mime_type'];
+                    }
+                    $zip->close();
                 }
+            } catch (\Throwable $e) {}
 
-                fclose($fp);
+            $stored = (new PluginStorageService())->storeUploadedFile($file, 'package', ['zip'], 410241024);
 
-                // 计算文件哈希和大小
-                $fileHash = md5_file($finalFile);
-                $fileSize = filesize($finalFile);
-
-                // 尝试解析压缩包内的 conf.json 和 icon.png
-                $autoData = [];
-                try {
-                    $zip = new \ZipArchive();
-                    if ($zip->open($finalFile) === true) {
-                        $confContent = false;
-                        $iconContent = false;
-                        $entries = [];
-                        for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $name = $zip->getNameIndex($i);
-                            if ($name !== false) $entries[] = rtrim($name, '/');
-                        }
-                        foreach ($entries as $f) {
-                            if (strcasecmp(basename($f), 'conf.json') === 0) { $confContent = $zip->getFromName($f); break; }
-                        }
-                        foreach ($entries as $f) {
-                            if (strcasecmp(basename($f), 'icon.png') === 0) { $iconContent = $zip->getFromName($f); break; }
-                        }
-                        if ($confContent !== false) {
-                            $conf = json_decode($confContent, true);
-                            if (is_array($conf)) {
-                                if (!empty($conf['name']))    $autoData['name'] = trim($conf['name']);
-                                if (!empty($conf['brief']))   $autoData['description'] = trim($conf['brief']);
-                                if (!empty($conf['version'])) $autoData['version'] = trim($conf['version']);
-                            }
-                        }
-                        if ($iconContent !== false) {
-                            $iconDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . date('Ymd');
-                            if (!is_dir($iconDir)) mkdir($iconDir, 0755, true);
-                            $iconName = 'plugin_icon_' . uniqid() . '.png';
-                            file_put_contents($iconDir . DIRECTORY_SEPARATOR . $iconName, $iconContent);
-                            $autoData['icon'] = '/upload/' . date('Ymd') . '/' . $iconName;
-                        }
-                        $zip->close();
-                    }
-                } catch (\Throwable $e) {}
-
-                return message('上传成功', true, [
-                    'status' => 1,
-                    'file_path' => $finalFile,
-                    'file_hash' => $fileHash,
-                    'file_size' => $fileSize,
-                    'original_name' => $fileName,
-                    'auto' => $autoData,
-                ]);
-            }
-
-            return message('分片上传成功', true, ['status' => 2]);
+            return message('上传成功', true, [
+                'status' => 1,
+                'file_path' => $stored['path'],
+                'file_hash' => $stored['file_hash'],
+                'file_size' => $stored['file_size'],
+                'original_name' => $originalName,
+                'storage_driver' => $stored['storage_driver'],
+                'package_object_key' => $stored['object_key'],
+                'package_file_name' => $stored['file_name'],
+                'package_mime_type' => $stored['mime_type'],
+                'auto' => $autoData,
+            ]);
         } catch (\Exception $e) {
+            return message('上传失败: ' . $e->getMessage(), false, ['status' => 0]);
+        }
+    }
+
+    /**
+     * 上传插件图标和封面
+     */
+    public function uploadResource($file = null)
+    {
+        $type = input('get.type', 'icon', 'trim');
+        $type = in_array($type, ['icon', 'cover'], true) ? $type : 'icon';
+        try {
+            if (!$file) $file = request()->file('file');
+            if (!$file) return message('请先选择资源文件', false, ['status' => 0]);
+            $stored = (new PluginStorageService())->storeUploadedFile($file, $type, ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
+            return message('上传成功', true, [
+                'status' => 1,
+                'path' => $stored['url'],
+                'url' => $stored['url'],
+                'src' => $stored['url'],
+                'storage_driver' => $stored['storage_driver'],
+                'object_key' => $stored['object_key'],
+                'file_name' => $stored['file_name'],
+                'file_size' => $stored['file_size'],
+                'mime_type' => $stored['mime_type'],
+            ]);
+        } catch (\Throwable $e) {
             return message('上传失败: ' . $e->getMessage(), false, ['status' => 0]);
         }
     }
@@ -141,10 +130,14 @@ class PluginService extends BaseService
     /**
      * 保存插件信息（包含文件信息）
      */
-    public function saveWithFile()
+    public function saveWithFile($file = null)
     {
         try {
             $post = request()->post();
+            // 文件可选,只在真正上传时校验
+            if ($file) {
+                $post['file_path'] = $file->getPathname();
+            }
             $file_path = !empty($post['file_path']) ? $post['file_path'] : '';
             $file_hash = !empty($post['file_hash']) ? $post['file_hash'] : '';
             $file_size = !empty($post['file_size']) ? intval($post['file_size']) : 0;

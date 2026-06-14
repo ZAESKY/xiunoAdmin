@@ -14,13 +14,17 @@ class MyInfo extends UserBackend
     }
 
     public function index(){
-        View::assign('pay_notice', $this->myAppInfo['pay_notice']);
-        return $this->render();
+        View::assign('pay_notice', $this->myAppInfo['pay_notice'] ?? '');
+        return $this->render('my_info/index');
     }
 
     public function recharge(){
         if(IS_POST){
-            return $this->service->recharge();
+            $result = $this->service->recharge();
+            if (is_array($result)) {
+                return json($result);
+            }
+            return $result;
         }
         return redirect((string)url('/MyInfo/index'));
     }
@@ -31,18 +35,18 @@ class MyInfo extends UserBackend
             switch ($type){
                 case 'email':
                     if(!empty($this->userInfo['email'])){
-                        return message('success', true);
+                        return json(message('success', true));
                     } else {
-                        return message('error', false);
+                        return json(message('error', false));
                     }
                 case 'qq':
                     if(!empty($this->userInfo['qq'])){
-                        return message('success', true);
+                        return json(message('success', true));
                     } else {
-                        return message('error', false);
+                        return json(message('error', false));
                     }
                 default:
-                    return message('error', false);
+                    return json(message('error', false));
             }
 
         }
@@ -63,9 +67,28 @@ class MyInfo extends UserBackend
     public function updatePower(){
         if(IS_POST){
             if($this->myPowerInfo['parentid'] == 0){
-                return message(t('user.highest_power'), false);
+                return json(message(t('user.highest_power'), false));
             }
-            return $this->service->updatePower();
+            $result = $this->service->updatePower();
+            if (is_array($result)) {
+                return json($result);
+            }
+            return $result;
+        }
+    }
+
+    /**
+     * 获取可升级的权限列表(个人中心卡片 UI 用)
+     */
+    public function getUserUpdatePowerList(){
+        if(IS_POST){
+            try{
+                $powerPriceModel = new \app\admin\model\PowerPriceModel();
+                $result = $powerPriceModel->getUserUpdatePowerList($this->userInfo['power']);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
+            } catch (\Exception $e) {
+                return json(message(t('power.get_list_failed').' [errorCode:GetUserUpdatePowerListError]', false));
+            }
         }
     }
 }

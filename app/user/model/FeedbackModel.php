@@ -5,6 +5,7 @@ namespace app\user\model;
 use app\common\model\BaseModel;
 use app\common\model\NotificationModel;
 use think\Exception;
+use think\facade\Db;
 
 class FeedbackModel extends BaseModel
 {
@@ -52,7 +53,7 @@ class FeedbackModel extends BaseModel
             throw new Exception(t('feedback.has_pending'));
         }
 
-        self::insert([
+        $feedbackId = Db::name('feedback')->insertGetId([
             'user_id'    => $userId,
             'title'      => $title,
             'content'    => $content,
@@ -60,6 +61,14 @@ class FeedbackModel extends BaseModel
             'status'     => self::STATUS_PENDING,
             'created_at' => datetime(),
         ]);
+
+        // 将反馈中的临时图片移动到正式目录
+        if (!empty($content)) {
+            $movedContent = move_temp_images_in_content($content);
+            if ($movedContent !== $content) {
+                Db::name('feedback')->where('id', $feedbackId)->update(['content' => $movedContent]);
+            }
+        }
 
         try {
             NotificationModel::add([

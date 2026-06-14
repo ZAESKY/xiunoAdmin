@@ -36,7 +36,7 @@ layui.use(['table'], function(){
             {field: 'id', title: 'ID', width: 70},
             {field: 'type', title: '类型', width: 100, templet: '#SF_TypeTpl'},
             {field: 'amount', title: '金额', width: 120, templet: '#SF_AmountTpl'},
-            {field: 'balance_after', title: '余额', width: 120, templet: function(d){ return d.balance_after + ' 元'; }},
+            {field: 'balance', title: '余额', width: 120, templet: function(d){ return (d.balance||'0.00') + ' 元'; }},
             {field: 'description', title: '说明', minWidth: 200},
             {field: 'created_at', title: '时间', width: 170}
         ]]

@@ -13,7 +13,3 @@ use think\facade\Route;
 Route::miss(function() {
     return '404 Not Found!';
 });
-Route::get('think', function () {
-    return 'hello,ThinkPHP6!';
-});
-Route::get('hello/:name', 'index/hello');

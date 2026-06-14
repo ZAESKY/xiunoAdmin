@@ -243,6 +243,10 @@ class PowerPriceModel extends BaseModel
             if(!$row){
                 throw new Exception(t('power.not_exist'));
             }
+            $allowedColumns = ['status', 'default_power', 'rebate_enabled'];
+            if (!in_array($type, $allowedColumns, true)) {
+                throw new Exception(t('validation.invalid_field'));
+            }
             self::where('id', $id)
                 ->data([$type => $status])
                 ->update();

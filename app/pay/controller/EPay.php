@@ -7,7 +7,6 @@ use think\facade\Db;
 use think\facade\Config;
 use app\pay\library\epay\EpayNotify;
 use app\pay\service\CommonService;
-use think\Exception;
 class EPay extends PayBackend
 {
     public function initialize()
@@ -16,112 +15,137 @@ class EPay extends PayBackend
         $this->service = new CommonService();
     }
 
-    public function return(){
-        //return $this->render('public/error', ['msg' => '111','time' => 5, 'url' => '/']);
+    public function return()
+    {
         $get = request()->get();
-        //订单号
         $out_trade_no = isset($get['out_trade_no'])?$get['out_trade_no']:null;
-        //交易号
         $trade_no = isset($get['trade_no'])?$get['trade_no']:null;
-        //交易状态
         $trade_status = isset($get['trade_status'])?$get['trade_status']:null;
-        //金额
         $money = isset($get['money'])?$get['money']:null;
-        if(empty($out_trade_no)) return $this->render('public/error', ['msg' => '订单号不能为空！[errorCode:PayOrderIdEmpty]','time' => 5, 'url' => '/']);
-        if(empty($trade_no)) return $this->render('public/error', ['msg' => '订单交易号不能为空！[errorCode:PayOrderApiIdEmpty]','time' => 5, 'url' => '/']);
-        if(empty($trade_status)) return $this->render('public/error', ['msg' => '订单交易状态不能为空！[errorCode:PayOrderStatusEmpty]','time' => 5, 'url' => '/']);
-        if(empty($money)) return $this->render('public/error', ['msg' => '订单交易金额不能为空！[errorCode:PayOrderMoneyEmpty]','time' => 5, 'url' => '/']);
-        $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
 
-        switch ($srow['channel']){
-            case 'zfb_epay':
-                $pay_config = Config::get('payconfig.zfb.epay_config');
-                break;
-            case 'wx_epay':
-                $pay_config = Config::get('payconfig.wx.epay_config');
-                break;
-            case 'qq_epay':
-                $pay_config = Config::get('payconfig.qq.epay_config');
-                break;
-            default:
-                return $this->render('public/error', ['msg' => '获取该订单支付类型错误，请联系站长处理！[errorCode:GetPayChannelError]','time' => 5, 'url' => '/']);
+        if (empty($out_trade_no)) return $this->renderPayResult(false, '订单号不能为空！[errorCode:PayOrderIdEmpty]');
+        if (empty($trade_no)) return $this->renderPayResult(false, '订单交易号不能为空！[errorCode:PayOrderApiIdEmpty]', $out_trade_no);
+        if (empty($trade_status)) return $this->renderPayResult(false, '订单交易状态不能为空！[errorCode:PayOrderStatusEmpty]', $out_trade_no);
+        if (empty($money)) return $this->renderPayResult(false, '订单交易金额不能为空！[errorCode:PayOrderMoneyEmpty]', $out_trade_no);
+
+        $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
+        if (!$srow) return $this->renderPayResult(false, '该订单号不存在，请返回来源地重新发起请求！', $out_trade_no);
+
+        $pay_config = $this->getEpayConfig($srow['channel']);
+        if (empty($pay_config)) {
+            return $this->renderPayResult(false, '获取该订单支付类型错误，请联系站长处理！[errorCode:GetPayChannelError]', $out_trade_no);
         }
-        //计算得出通知验证结果
+
         $epayNotify = new EpayNotify($pay_config);
         $verify_result = $epayNotify->verifyReturn();
-        if($verify_result && (conf('alipay_api') == 2 || conf('qqpay_api') == 2 || conf('wxpay_api') == 2) && !empty($pay_config['partner']) && !empty($pay_config['key']) && !empty($pay_config['apiurl'])) {
-            if ($trade_status == 'TRADE_FINISHED' || $trade_status == 'TRADE_SUCCESS') {
-                if ($srow['status'] == 0 && round($srow['money'], 2) == round($money, 2)) {
-                    try {
-                        Db::name('pay')
-                            ->where('trade_no', $out_trade_no)
-                            ->data(['status' => 1])
-                            ->update();
-                        Db::name('pay')
-                            ->where('trade_no', $out_trade_no)
-                            ->data(['endtime' => datetime(), 'api_trade_no' => $trade_no])
-                            ->update();
-                        $this->service->processOrder($srow);
-                        return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：' . $out_trade_no, 'time' => 5, 'url' => '/']);
-                    } catch (\Exception $e) {
-                        return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：' . $out_trade_no, 'time' => 5, 'url' => '/']);
-                    }
-                } else {
-                    return $this->render('public/error', ['msg' => '该订单未支付！[errorCode:PayOrderError] <br><br> 订单号：' . $out_trade_no, 'time' => 5, 'url' => '/']);
-                }
-            } else {
-                //验证失败
-                return $this->render('public/error', ['msg' => '验证订单交易状态失败！[errorCode:CheckPayStatusError]', 'time' => 5, 'url' => '/']);
-            }
+        if (!$this->isEpayEnabled($pay_config) || !$verify_result) {
+            return $this->renderPayResult(false, '验证订单签名失败！[errorCode:CheckPaySignError]', $out_trade_no);
         }
+        if (!$this->isPaidStatus($trade_status)) {
+            return $this->renderPayResult(false, '验证订单交易状态失败！[errorCode:CheckPayStatusError]', $out_trade_no);
+        }
+        if (intval($srow['status']) == 0 && round($srow['money'], 2) != round($money, 2)) {
+            return $this->renderPayResult(false, '订单金额不一致！[errorCode:PayOrderMoneyError]', $out_trade_no);
+        }
+
+        $ok = $this->completeOrder($srow, $trade_no);
+        return $this->renderPayResult($ok, $ok ? '您所购买的商品已付款成功，感谢购买！' : '订单处理失败，请联系管理员处理！', $out_trade_no);
     }
 
-    public function notify(){
+    public function notify()
+    {
         $get = request()->get();
-        //订单号
         $out_trade_no = isset($get['out_trade_no'])?$get['out_trade_no']:null;
-        //交易号
         $trade_no = isset($get['trade_no'])?$get['trade_no']:null;
-        //交易状态
         $trade_status = isset($get['trade_status'])?$get['trade_status']:null;
-        //金额
         $money = isset($get['money'])?$get['money']:null;
-        $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
-
-        switch ($srow['channel']){
-            case 'zfb_epay':
-                $pay_config = Config::get('payconfig.zfb.epay_config');
-                break;
-            case 'wx_epay':
-                $pay_config = Config::get('payconfig.wx.epay_config');
-                break;
-            case 'qq_epay':
-                $pay_config = Config::get('payconfig.qq.epay_config');
-                break;
-            default:
-                exit('error');
+        if (empty($out_trade_no) || empty($trade_no) || empty($trade_status) || empty($money)) {
+            exit('fail');
         }
 
-        //计算得出通知验证结果
+        $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
+        if (!$srow) exit('fail');
+
+        $pay_config = $this->getEpayConfig($srow['channel']);
+        if (empty($pay_config)) exit('fail');
+
         $epayNotify = new EpayNotify($pay_config);
         $verify_result = $epayNotify->verifyNotify();
 
-        if($verify_result && (conf('alipay_api') == 2 || conf('qqpay_api') == 2 || conf('wxpay_api') == 2) && !empty($pay_config['partner']) && !empty($pay_config['key']) && !empty($pay_config['apiurl'])) {
-
-            if($trade_status == 'TRADE_FINISHED' || $trade_status == 'TRADE_SUCCESS') {
-                if($srow['status']==0 && round($srow['money'],2) == round($money,2)){
-                    $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                    if($result) {
-                        Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                        $this->service->processOrder($srow);
-                    }
-                }
+        if ($verify_result && $this->isEpayEnabled($pay_config) && $this->isPaidStatus($trade_status)) {
+            if (intval($srow['status']) >= 1 || round($srow['money'], 2) == round($money, 2)) {
+                $this->completeOrder($srow, $trade_no);
+                echo "success";
+                return;
             }
-            echo "success";
-        } else {
-            //验证失败
-            echo "fail";
         }
+        echo "fail";
+    }
+
+    private function getEpayConfig($channel)
+    {
+        switch ($channel) {
+            case 'zfb_epay':
+                return Config::get('payconfig.zfb.epay_config');
+            case 'wx_epay':
+                return Config::get('payconfig.wx.epay_config');
+            case 'qq_epay':
+                return Config::get('payconfig.qq.epay_config');
+            default:
+                return null;
+        }
+    }
+
+    private function isEpayEnabled(array $pay_config)
+    {
+        return (conf('alipay_api') == 2 || conf('qqpay_api') == 2 || conf('wxpay_api') == 2)
+            && !empty($pay_config['partner'])
+            && !empty($pay_config['key'])
+            && !empty($pay_config['apiurl']);
+    }
+
+    private function isPaidStatus($trade_status)
+    {
+        return $trade_status == 'TRADE_FINISHED' || $trade_status == 'TRADE_SUCCESS';
+    }
+
+    private function completeOrder(array $srow, $apiTradeNo)
+    {
+        if (intval($srow['status']) >= 1) {
+            if (empty($srow['api_trade_no']) && !empty($apiTradeNo)) {
+                Db::name('pay')->where('trade_no', $srow['trade_no'])->update(['api_trade_no' => $apiTradeNo]);
+            }
+            return true;
+        }
+
+        $result = Db::name('pay')->where('trade_no', $srow['trade_no'])->where('status', 0)->update([
+            'status' => 1,
+            'endtime' => datetime(),
+            'api_trade_no' => $apiTradeNo,
+        ]);
+        if (!$result) {
+            return true;
+        }
+
+        try {
+            $this->service->processOrder($srow);
+            return true;
+        } catch (\Exception $e) {
+            Db::name('pay')->where('trade_no', $srow['trade_no'])->update(['status' => 3]);
+            return false;
+        }
+    }
+
+    private function renderPayResult($success, $msg, $tradeNo = '')
+    {
+        return $this->render('e_pay/return', [
+            'success' => $success ? 1 : 0,
+            'message_type' => $success ? 'sf-pay-success' : 'sf-pay-fail',
+            'msg' => $msg,
+            'trade_no' => $tradeNo,
+            'time' => $success ? 1 : 5,
+            'url' => '/',
+        ]);
     }
 
 }

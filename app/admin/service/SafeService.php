@@ -4,7 +4,6 @@ namespace app\admin\service;
 
 use app\common\service\BaseService;
 use app\admin\model\Admin;
-use think\facade\Db;
 /**
  * 安全中心-服务类
  * @author 陌上花开

@@ -18,16 +18,22 @@ class Upload extends Backend
     public function image()
     {
         $file = request()->file('file');
+        if (!$file) {
+            return message(t('upload.upload_failed') . '请选择要上传的文件', false);
+        }
         // 移动到框架应用根目录/uploads/ 目录下
         try{
-            // 验证
-            validate(['imgFile'=>[
-                'fileSize' => 410241024,
+            // 验证 — 表单字段名是 'file' 而不是 'imgFile'
+            validate(['file'=>[
+                'fileSize' => 10 * 1024 * 1024,
                 'fileExt' => 'jpg,jpeg,png,bmp,gif',
-                'fileMime' => 'image/jpeg,image/png,image/gif', //这个一定要加上，很重要我认为！
-            ]])->check(['imgFile' => $file]);
+                'fileMime' => 'image/jpeg,image/png,image/gif',
+            ]])->check(['file' => $file]);
             // 上传图片到本地服务器
-            $saveName = Filesystem::disk('public')->putFile('',$file);
+            $saveName = Filesystem::disk('public')->putFile('temp', $file);
+            if (!$saveName) {
+                return message(t('upload.upload_failed') . '保存到存储失败', false);
+            }
             return message('success' ,true ,['path' => '/upload/'. $saveName]);
         } catch (\Exception $e) {
             // 验证失败 输出错误信息
@@ -58,15 +64,19 @@ class Upload extends Backend
             if(empty($fileExt)){
                 return message(t('validation.missing_fileext'),false, ['status' => 0, 'downUrl' => '']);
             }
+            if (!$file) {
+                return message(t('upload.upload_failed') . '请上传分片文件',false, ['status' => 0, 'downUrl' => '']);
+            }
             try {
                 validate([
                     'File' => [
-                        'fileSize' => 410241024,
+                        'fileSize' => 200 * 1024 * 1024,
                         'fileMime' => 'zip,application/zip,application/x-gzip,application/x-rar,application/x-7z-compressed,application/octet-stream,application/x-dosexec',
                     ]
                 ])->check(['File' => $file]);
             } catch (\Exception $e) {
-                return message($e->getMessage().'|'.$file->getMime(),false, ['status' => 0, 'downUrl' => '']);
+                $mime = $file ? $file->getMime() : 'null';
+                return message($e->getMessage().'|'.$mime,false, ['status' => 0, 'downUrl' => '']);
             }
             return $this->service->temp($fileName, $fileExt, $file, $totalPage, $page);
         }

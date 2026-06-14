@@ -1,12 +1,82 @@
 {include file="/public/header"}
+<style>
+.wd-card-header { display: flex; justify-content: space-between; align-items: center; }
+.wd-card-header .wd-title { font-size: 15px; font-weight: 600; }
+.wd-balance-tip { padding: 12px 18px; margin-bottom: 14px; background: #f9fafb; border-radius: 8px; border: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
+.wd-balance-tip .wd-bal { font-size: 18px; font-weight: 700; color: #ff5722; }
+.wd-balance-tip .wd-label { font-size: 13px; color: #8c8c8c; }
+.wd-form-upload { display: flex; align-items: center; gap: 10px; }
+.wd-form-upload img { width: 120px; height: 120px; object-fit: contain; border-radius: 6px; border: 1px solid #e6e6e6; }
+</style>
 <div class="layui-fluid">
+    <div class="wd-balance-tip">
+        <span class="wd-label">可提现余额：</span>
+        <span class="wd-bal">¥<b id="wdBalance">{$userInfo['balance']}</b></span>
+        <span class="wd-label">| 最低提现：¥<b id="wdMin">--</b></span>
+    </div>
     <div class="layui-card">
-        <div class="layui-card-header">提现记录</div>
+        <div class="layui-card-header wd-card-header">
+            <span class="wd-title">提现记录</span>
+            <button class="layui-btn layui-btn-normal layui-btn-sm" id="btnApply"><i class="layui-icon layui-icon-export"></i> 申请提现</button>
+        </div>
         <div class="layui-card-body">
             <table id="SF_Table" lay-filter="SF_Table"></table>
         </div>
     </div>
 </div>
+
+<!-- 申请提现表单模板 -->
+<script type="text/html" id="applyFormTpl">
+<form class="layui-form model-form layui-row" lay-filter="applyForm" style="padding:10px;">
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">提现金额</label>
+        <div class="layui-input-block">
+            <input type="number" name="amount" placeholder="请输入提现金额" class="layui-input" lay-verify="required|number" lay-verType="tips" step="0.01" min="0" autocomplete="off"/>
+            <div class="sf-tips" id="amountTip" style="margin-top:4px;"></div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">收款方式</label>
+        <div class="layui-input-block">
+            <input type="radio" name="pay_method" value="alipay" title="支付宝" lay-verify="required" checked/>
+            <input type="radio" name="pay_method" value="wechat" title="微信"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">收款码</label>
+        <div class="layui-input-block">
+            <div class="wd-form-upload">
+                <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnUploadQr"><i class="layui-icon layui-icon-upload"></i> 上传收款码</button>
+                <img id="qrPreview" src="" style="display:none;" alt="收款码预览"/>
+            </div>
+            <input type="hidden" name="qr_image" id="qrImageVal" value="" lay-verify="required" lay-verType="tips"/>
+            <div class="sf-tips">支持 jpg/png/gif，建议上传清晰的收款码图片</div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">手机号</label>
+        <div class="layui-input-block">
+            <input type="text" name="phone" placeholder="请输入11位手机号" class="layui-input" lay-verify="required|phone" lay-verType="tips" autocomplete="off" maxlength="11"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">真实姓名</label>
+        <div class="layui-input-block">
+            <input type="text" name="real_name" placeholder="请输入真实姓名" class="layui-input" lay-verify="required" lay-verType="tips" autocomplete="off" maxlength="50"/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <textarea name="remark" placeholder="选填，如有特殊要求可在此说明" class="layui-textarea" maxlength="200"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item text-right">
+        <button type="button" class="layui-btn" lay-filter="submitApply" lay-submit>提交申请</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="btnCancelApply">取消</button>
+    </div>
+</form>
+</script>
 
 <script type="text/html" id="SF_TbBar">
     {{# if(d.status === 'pending'){ }}
@@ -20,9 +90,29 @@
 
 {include file="/public/footer"}
 <script>
-layui.use(['layer', 'form', 'table', 'admin', 'notice'], function () {
-    var $ = layui.jquery, layer = layui.layer, form = layui.form, table = layui.table, admin = layui.admin, notice = layui.notice;
+layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
+    var $ = layui.jquery, layer = layui.layer, form = layui.form, table = layui.table,
+        admin = layui.admin, notice = layui.notice, upload = layui.upload;
 
+    var BALANCE = parseFloat('{$userInfo["balance"]}') || 0;
+    var MIN_AMOUNT = 0;
+    var applyIndex = null;
+
+    // 加载提现条件
+    function loadCheckInfo() {
+        $.ajax({ type:'POST', url:'{:url("/Withdraw/check")}', dataType:'json',
+            success: function(res) {
+                if (res && res.code == 0 && res.data) {
+                    MIN_AMOUNT = parseFloat(res.data.min) || 10;
+                    $('#wdBalance').text(res.data.balance);
+                    $('#wdMin').text(MIN_AMOUNT.toFixed(2));
+                }
+            }
+        });
+    }
+    loadCheckInfo();
+
+    // 表格
     var insTb = table.render({
         elem: '#SF_Table', url: '{:url("/Withdraw/index")}', method: 'post', page: true, skin: 'line', size: 'lg',
         request: { pageName: 'current_page', limitName: 'limit' },
@@ -51,9 +141,147 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice'], function () {
                 layer.close(i);
                 notice.msg('撤回中...', {icon:4, close:true});
                 $.ajax({ type:'POST', url:'{:url("/Withdraw/cancel")}', data:{id:obj.data.id}, dataType:'json',
-                    success:function(r) { notice.destroy(); insTb.reload(); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
+                    success:function(r) { notice.destroy(); insTb.reload(); loadCheckInfo(); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
             });
         }
     });
+
+    // 上传收款码
+    upload.render({
+        elem: '#btnUploadQr',
+        url: '{:url("/Upload/image")}',
+        accept: 'images',
+        exts: 'jpg|jpeg|png|bmp|gif',
+        size: 5120,
+        done: function(res) {
+            if (res.code == 0 && res.data && res.data.path) {
+                $('#qrImageVal').val(res.data.path);
+                $('#qrPreview').attr('src', res.data.path).show();
+                notice.msg('收款码上传成功', {icon: 1});
+            } else {
+                notice.msg(res.msg || '上传失败', {icon: 2});
+            }
+        },
+        error: function() {
+            notice.msg('上传失败，请重试', {icon: 2});
+        }
+    });
+
+    // 打开申请弹窗
+    $('#btnApply').on('click', function() {
+        // 先检查条件
+        notice.msg('正在检查提现条件...', {icon: 4, close: true});
+        $.ajax({ type:'POST', url:'{:url("/Withdraw/check")}', dataType:'json',
+            success: function(res) {
+                notice.destroy();
+                if (res && res.code == 0) {
+                    MIN_AMOUNT = parseFloat(res.data.min) || 10;
+                    BALANCE = parseFloat(res.data.balance) || 0;
+                    $('#wdBalance').text(BALANCE.toFixed(2));
+                    $('#wdMin').text(MIN_AMOUNT.toFixed(2));
+                    openApplyForm();
+                } else {
+                    notice.msg((res && res.msg) || '暂不满足提现条件', {icon: 2, audio: '1'});
+                }
+            },
+            error: function() { notice.destroy(); notice.msg('检查失败，请稍后再试', {icon: 2}); }
+        });
+    });
+
+    function openApplyForm() {
+        applyIndex = layer.open({
+            type: 1,
+            title: '申请提现',
+            area: ['550px', '520px'],
+            content: $('#applyFormTpl').html(),
+            success: function(layero, dIndex) {
+                form.render(null, 'applyForm');
+                // 默认填写全部余额
+                $(layero).find('input[name="amount"]').val(BALANCE.toFixed(2));
+                $('#amountTip').html('<span style="color:#5cb85c;">可提现，当前余额 ¥' + BALANCE.toFixed(2) + '</span>');
+                // 金额提示
+                var $amount = $(layero).find('input[name="amount"]');
+                $amount.on('input', function() {
+                    var v = parseFloat(this.value);
+                    if (!isNaN(v) && v > 0) {
+                        if (v < MIN_AMOUNT) {
+                            $('#amountTip').html('<span style="color:#d9534f;">最低提现金额为 ¥' + MIN_AMOUNT.toFixed(2) + '</span>');
+                        } else if (v > BALANCE) {
+                            $('#amountTip').html('<span style="color:#d9534f;">提现金额不能超过账户余额 ¥' + BALANCE.toFixed(2) + '</span>');
+                        } else {
+                            $('#amountTip').html('<span style="color:#5cb85c;">可提现，当前余额 ¥' + BALANCE.toFixed(2) + '</span>');
+                        }
+                    } else {
+                        $('#amountTip').html('');
+                    }
+                });
+                // 上传按钮重新绑定
+                upload.render({
+                    elem: $(layero).find('#btnUploadQr'),
+                    url: '{:url("/Upload/image")}',
+                    accept: 'images',
+                    exts: 'jpg|jpeg|png|bmp|gif',
+                    size: 5120,
+                    done: function(res) {
+                        if (res.code == 0 && res.data && res.data.path) {
+                            $(layero).find('#qrImageVal').val(res.data.path);
+                            $(layero).find('#qrPreview').attr('src', res.data.path).show();
+                            notice.msg('收款码上传成功', {icon: 1});
+                        } else {
+                            notice.msg(res.msg || '上传失败', {icon: 2});
+                        }
+                    },
+                    error: function() {
+                        notice.msg('上传失败，请重试', {icon: 2});
+                    }
+                });
+                // 取消按钮
+                $(layero).find('#btnCancelApply').on('click', function() {
+                    layer.close(applyIndex);
+                });
+                // 表单提交
+                form.on('submit(submitApply)', function(data) {
+                    var amount = parseFloat(data.field.amount);
+                    if (isNaN(amount) || amount <= 0) {
+                        notice.msg('请输入有效的提现金额', {icon: 2}); return false;
+                    }
+                    if (amount < MIN_AMOUNT) {
+                        notice.msg('提现金额不能低于 ¥' + MIN_AMOUNT.toFixed(2), {icon: 2}); return false;
+                    }
+                    if (amount > BALANCE) {
+                        notice.msg('提现金额不能超过账户余额', {icon: 2}); return false;
+                    }
+                    if (!data.field.phone || data.field.phone.length < 11) {
+                        notice.msg('请填写正确的11位手机号', {icon: 2}); return false;
+                    }
+                    if (!data.field.real_name) {
+                        notice.msg('请填写真实姓名', {icon: 2}); return false;
+                    }
+                    if (!data.field.qr_image) {
+                        notice.msg('请上传收款码', {icon: 2}); return false;
+                    }
+                    notice.msg('正在提交...', {icon: 4, close: true});
+                    $.ajax({ type:'POST', url:'{:url("/Withdraw/apply")}', data:data.field, dataType:'json',
+                        success: function(r) {
+                            notice.destroy();
+                            if (r.code == 0) {
+                                layer.close(applyIndex);
+                                notice.msg(r.msg, {icon: 1});
+                                insTb.reload();
+                                loadCheckInfo();
+                            } else {
+                                notice.msg(r.msg, {icon: 2});
+                            }
+                        },
+                        error: function() {
+                            notice.destroy();
+                            notice.msg('提交失败，请稍后再试', {icon: 2});
+                        }
+                    });
+                    return false;
+                });
+            }
+        });
+    }
 });
 </script>

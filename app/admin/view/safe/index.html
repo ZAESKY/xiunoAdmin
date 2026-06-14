@@ -1,0 +1,39 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form" lay-filter="safe-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">二级密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" name="second_pwd" required lay-verify="required" placeholder="请输入二级密码" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">敏感操作时需输入的二级密码</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客服 QQ</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="kfqq" placeholder="请输入客服 QQ" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" lay-submit lay-filter="safe-submit">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+layui.use(['form'], function(){
+    var form = layui.form;
+    form.on('submit(safe-submit)', function(data){
+        $.post('/admin.php/Safe/check', data.field, function(res){
+            layer.msg(res.msg || '保存成功', {icon: res.code === 0 ? 1 : 2});
+        });
+        return false;
+    });
+});
+</script>
+{include file="/public/footer"}

@@ -1,61 +1,98 @@
 {include file="/public/header"}
 <style>
-    .code-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 8px;
-        padding: 24px;
-        text-align: center;
-        color: #fff;
+    body { background: #f7f8fb; }
+    .rebate-page { padding: 16px; }
+    .rebate-layout { display: grid; grid-template-columns: minmax(360px, 520px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .rebate-panel { background: #fff; border: 1px solid #e8ebf0; border-radius: 14px; box-shadow: 0 10px 28px rgba(30, 45, 70, .06); overflow: hidden; }
+    .rebate-left { min-height: 600px; padding: 12px; box-sizing: border-box; }
+    .reward-title { display: flex; align-items: center; gap: 12px; padding: 0 0 14px; }
+    .reward-icon { width: 32px; height: 32px; border-radius: 50%; background: #67cf79; color: #fff; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+    .reward-title b { display: block; color: #262d36; font-size: 15px; line-height: 1.2; }
+    .reward-title span { display: block; color: #7a8491; font-size: 12px; margin-top: 4px; }
+    .income-card { position: relative; overflow: hidden; border-radius: 8px; padding: 18px 16px 16px; color: #fff; background: linear-gradient(120deg, rgba(0,82,82,.98), rgba(0,106,105,.9)); }
+    .income-card:before { content: ""; position: absolute; inset: 0; background:
+        radial-gradient(circle at 22% 18%, rgba(70, 224, 187, .28), transparent 30%),
+        radial-gradient(circle at 70% 20%, rgba(17, 130, 150, .42), transparent 32%),
+        linear-gradient(135deg, rgba(5, 34, 49, .2), rgba(6, 53, 58, .88)); }
+    .income-card:after { content: ""; position: absolute; right: -80px; bottom: -80px; width: 280px; height: 210px; background: rgba(255,255,255,.08); transform: rotate(-22deg); border-radius: 42%; filter: blur(1px); }
+    .income-inner { position: relative; z-index: 1; }
+    .income-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .income-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+    .transfer-btn { height: 28px; border: 0; border-radius: 14px; padding: 0 14px; background: rgba(255,255,255,.9); color: #8a8f98; font-size: 12px; cursor: default; white-space: nowrap; }
+    .income-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .income-stat { min-height: 64px; padding: 0 14px; border-left: 1px solid rgba(255,255,255,.18); box-sizing: border-box; }
+    .income-stat:first-child { border-left: 0; padding-left: 0; }
+    .income-stat strong { display: block; font-size: 25px; line-height: 1.2; font-weight: 800; letter-spacing: 0; }
+    .income-stat span { display: flex; align-items: center; gap: 5px; margin-top: 9px; font-size: 12px; color: rgba(255,255,255,.78); }
+    .invite-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 9px 10px; background: #f5f5f6; border: 1px solid #eceef2; border-radius: 0 0 8px 8px; }
+    .invite-label { color: #8b8f98; font-size: 13px; white-space: nowrap; }
+    .invite-link { flex: 1; min-width: 0; color: #202733; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .copy-btn { height: 34px; min-width: 74px; border: 0; border-radius: 8px; background: #0b6cff; color: #fff; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .copy-btn.is-disabled { background: #cbd3df; cursor: not-allowed; }
+    .rule-card { margin-top: 10px; border: 1px solid #e9ecf1; border-radius: 12px; overflow: hidden; }
+    .rule-title { height: 40px; line-height: 40px; padding: 0 14px; border-bottom: 1px solid #edf0f4; color: #7b838f; font-size: 14px; }
+    .rule-list { padding: 13px 15px 14px; }
+    .rule-list p { margin: 0 0 12px; color: #7b838f; font-size: 13px; line-height: 1.7; display: flex; gap: 9px; }
+    .rule-list p:last-child { margin-bottom: 0; }
+    .rule-list i { width: 6px; height: 6px; border-radius: 50%; background: #4ac36a; margin-top: 8px; flex: 0 0 auto; }
+    .rebate-table-card { padding: 0; }
+    .rebate-table-head { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #eef1f5; }
+    .rebate-table-head h3 { margin: 0; color: #262d36; font-size: 16px; font-weight: 700; }
+    .rebate-table-head span { color: #8b94a1; font-size: 12px; }
+    .rebate-table-body { padding: 14px; }
+    .empty-code { padding: 24px 16px; text-align: center; color: #7b838f; }
+    .empty-code b { display: block; color: #262d36; font-size: 15px; margin-bottom: 12px; }
+    .generate-btn { height: 34px; border: 0; border-radius: 8px; padding: 0 16px; background: #0b6cff; color: #fff; cursor: pointer; }
+    @media (max-width: 980px) {
+        .rebate-layout { grid-template-columns: 1fr; }
+        .rebate-left { min-height: 0; }
     }
-    .code-text {
-        font-size: 32px;
-        font-weight: bold;
-        letter-spacing: 4px;
-        font-family: 'Courier New', monospace;
-        background: rgba(255,255,255,0.2);
-        border-radius: 6px;
-        padding: 12px 24px;
-        display: inline-block;
-        margin: 12px 0;
-        word-break: break-all;
-    }
-    .rebate-tip {
-        margin-top: 16px;
-        padding: 12px;
-        background: rgba(255,255,255,0.15);
-        border-radius: 6px;
-        font-size: 13px;
-        line-height: 1.8;
+    @media (max-width: 560px) {
+        .rebate-page { padding: 10px; }
+        .income-stats { grid-template-columns: 1fr; gap: 14px; }
+        .income-stat { border-left: 0; padding: 0; }
+        .invite-row { align-items: stretch; flex-wrap: wrap; }
+        .invite-link { flex-basis: 100%; }
+        .copy-btn { flex: 1; }
     }
 </style>
-<div class="layui-fluid">
-    <div class="layui-row layui-col-space15">
-        <div class="layui-col-sm12 layui-col-md4">
-            <div class="layui-card">
-                <div class="layui-card-header">
-                    <i class="layui-icon layui-icon-auz"></i> 我的专属折扣码
-                </div>
-                <div class="layui-card-body">
-                    <div id="codeSection">
-                        <div class="text-center" style="padding: 40px 0; color: #999;">
-                            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 24px;"></i>
-                            <p style="margin-top: 12px;">加载中...</p>
-                        </div>
-                    </div>
+<div class="layui-fluid rebate-page">
+    <div class="rebate-layout">
+        <section class="rebate-panel rebate-left">
+            <div class="reward-title">
+                <div class="reward-icon"><i class="layui-icon layui-icon-gift"></i></div>
+                <div>
+                    <b>邀请奖励</b>
+                    <span>邀请好友获得额外奖励</span>
                 </div>
             </div>
-        </div>
 
-        <div class="layui-col-sm12 layui-col-md8">
-            <div class="layui-card">
-                <div class="layui-card-header">
-                    <i class="layui-icon layui-icon-rmb"></i> 返利记录
-                </div>
-                <div class="layui-card-body">
-                    <table id="SF_RebateTable" lay-filter="SF_RebateTable"></table>
+            <div id="codeSection">
+                <div class="empty-code">
+                    <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop" style="font-size:24px;"></i>
+                    <p style="margin-top:12px;">加载中...</p>
                 </div>
             </div>
-        </div>
+
+            <div class="rule-card">
+                <div class="rule-title">奖励说明</div>
+                <div class="rule-list">
+                    <p><i></i><span>分享此折扣码给其他用户，他们在充值时输入该码</span></p>
+                    <p><i></i><span>付款成功后，你将获得 <b>{$userInfo['rebate_rate']}%</b> 的返利</span></p>
+                    <p><i></i><span>返利金额将直接到账你的余额</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="rebate-panel rebate-table-card">
+            <div class="rebate-table-head">
+                <h3><i class="layui-icon layui-icon-rmb" style="color:#0b6cff;margin-right:6px;"></i>返利记录</h3>
+                <span>按到账时间倒序</span>
+            </div>
+            <div class="rebate-table-body">
+                <table id="SF_RebateTable" lay-filter="SF_RebateTable"></table>
+            </div>
+        </section>
     </div>
 </div>
 
@@ -65,7 +102,7 @@
     {{# } else if(d.status == 'canceled'){ }}
     <span class="layui-badge layui-badge-red">已取消</span>
     {{# } else { }}
-    <span class="layui-badge">{{d.status}}</span>
+    <span class="layui-badge layui-bg-orange">待结算</span>
     {{# } }}
 </script>
 
@@ -74,102 +111,121 @@
 layui.use(['table', 'layer', 'notice', 'admin'], function(){
     var $ = layui.jquery;
     var table = layui.table;
-    var layer = layui.layer;
     var notice = layui.notice;
+    var summary = {total_amount: 0, usage_count: 0};
 
-    // 加载折扣码
-    function loadCode(){
+    function money(value) {
+        value = parseFloat(value || 0);
+        return '$' + value.toFixed(2);
+    }
+
+    function copyText(text, done) {
+        if (!text) return;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(done);
+            return;
+        }
+        var input = $('<input>').val(text).appendTo('body').select();
+        document.execCommand('copy');
+        input.remove();
+        done();
+    }
+
+    function renderRewardCard(code, status) {
+        var active = status == 1 && code;
+        var html = '';
+        html += '<div class="income-card"><div class="income-inner">';
+        html += '<div class="income-head"><h3>收益统计</h3><button class="transfer-btn" type="button"><i class="layui-icon layui-icon-release"></i> 已自动到账</button></div>';
+        html += '<div class="income-stats">';
+        html += '<div class="income-stat"><strong id="totalAmount">'+money(summary.total_amount)+'</strong><span><i class="layui-icon layui-icon-chart"></i> 总收益</span></div>';
+        html += '<div class="income-stat"><strong id="usageCount">'+(summary.usage_count || 0)+'</strong><span><i class="layui-icon layui-icon-list"></i> 使用次数</span></div>';
+        html += '</div></div></div>';
+        html += '<div class="invite-row">';
+        html += '<span class="invite-label">优惠码</span>';
+        html += '<span class="invite-link" id="discountCode">'+(active ? code : '请先生成可用折扣码')+'</span>';
+        html += '<button class="copy-btn '+(active ? '' : 'is-disabled')+'" id="btnCopyCode" type="button" '+(active ? '' : 'disabled')+'><i class="layui-icon layui-icon-file"></i>复制</button>';
+        html += '</div>';
+        if (!active) {
+            html += '<div class="empty-code"><b>'+(code ? '折扣码已停用' : '你还没有专属折扣码')+'</b>';
+            html += '<button class="generate-btn" id="btnGenerate" type="button"><i class="layui-icon layui-icon-add-circle"></i> 生成专属折扣码</button></div>';
+        }
+        $('#codeSection').html(html);
+    }
+
+    function loadSummary(done) {
         $.ajax({
             type: 'POST',
-            url: '{:url("/Rebate/myCode")}',
+            url: '{:url("/Rebate/mySummary")}',
             dataType: 'json',
             success: function(res){
-                if(res.code == 0 && res.data){
-                    var code = res.data.code;
-                    var status = res.data.status;
-                    var html = '<div class="code-box">';
-                    if(status == 1){
-                        html += '<div style="font-size:14px;opacity:0.85;">你的专属折扣码</div>';
-                        html += '<div class="code-text" id="myCode">'+code+'</div>';
-                        html += '<div><button class="layui-btn layui-btn-sm" id="btnCopy"><i class="layui-icon layui-icon-upload-circle"></i> 复制折扣码</button></div>';
-                        html += '<div class="rebate-tip">';
-                        html += '<p><i class="layui-icon layui-icon-about"></i> 分享此折扣码给其他用户，他们在充值时输入该码</p>';
-                        html += '<p><i class="layui-icon layui-icon-rmb"></i> 付款成功后，你将获得 <b>'+{$userInfo['rebate_rate']}+'%</b> 的返利</p>';
-                        html += '<p><i class="layui-icon layui-icon-notice"></i> 返利金额将直接到账你的余额</p>';
-                        html += '</div>';
-                    } else {
-                        html += '<div style="font-size:14px;opacity:0.85;">折扣码已停用</div>';
-                        html += '<div class="code-text" style="text-decoration:line-through;opacity:0.6;">'+code+'</div>';
-                        html += '<div class="rebate-tip">该折扣码已被管理员停用，请联系管理员</div>';
-                    }
-                    html += '</div>';
-                    $('#codeSection').html(html);
-
-                    $('#btnCopy').on('click', function(){
-                        var text = $('#myCode').text();
-                        var $btn = $(this);
-                        var $code = $('#myCode');
-                        var done = function(){
-                            $code.css({transition:'all .2s',background:'rgba(92,184,92,0.5)'});
-                            setTimeout(function(){ $code.css({background:'rgba(255,255,255,0.2)'}); }, 300);
-                            $btn.html('<i class="layui-icon layui-icon-ok-circle"></i> 已复制');
-                            $btn.addClass('layui-btn-disabled');
-                            setTimeout(function(){
-                                $btn.html('<i class="layui-icon layui-icon-upload-circle"></i> 复制折扣码');
-                                $btn.removeClass('layui-btn-disabled');
-                            }, 2000);
-                        };
-                        if(navigator.clipboard){
-                            navigator.clipboard.writeText(text).then(done);
-                        } else {
-                            var input = $('<input>').val(text).appendTo('body').select();
-                            document.execCommand('copy');
-                            input.remove();
-                            done();
-                        }
-                    });
-                } else {
-                    var html = '<div class="code-box">';
-                    html += '<div style="font-size:15px;">你还没有专属折扣码</div>';
-                    html += '<div style="margin-top:16px;"><button class="layui-btn" id="btnGenerate"><i class="layui-icon layui-icon-add-circle"></i> 生成专属折扣码</button></div>';
-                    if(res.msg && res.msg != 'ok'){
-                        html += '<div class="rebate-tip">'+res.msg+'</div>';
-                    }
-                    html += '</div>';
-                    $('#codeSection').html(html);
-
-                    $('#btnGenerate').on('click', function(){
-                        notice.msg('正在生成...', {icon: 4, close: true});
-                        $.ajax({
-                            type: 'POST',
-                            url: '{:url("/Rebate/generate")}',
-                            dataType: 'json',
-                            success: function(r){
-                                notice.destroy();
-                                if(r.code == 0){
-                                    notice.msg('生成成功！', {icon: 1});
-                                    loadCode();
-                                    insTb.reload();
-                                } else {
-                                    notice.msg(r.msg, {icon: 2});
-                                }
-                            },
-                            error: function(){
-                                notice.destroy();
-                                notice.msg('服务器错误！', {icon: 2});
-                            }
-                        });
-                    });
+                if (res.code == 0 && res.data) {
+                    summary = res.data;
                 }
+                if (typeof done === 'function') done();
             },
             error: function(){
-                $('#codeSection').html('<div class="text-center" style="padding:40px;color:#999;">加载失败</div>');
+                if (typeof done === 'function') done();
             }
         });
     }
+
+    function loadCode(){
+        loadSummary(function(){
+            $.ajax({
+                type: 'POST',
+                url: '{:url("/Rebate/myCode")}',
+                dataType: 'json',
+                success: function(res){
+                    if(res.code == 0 && res.data){
+                        renderRewardCard(res.data.code, res.data.status);
+                    } else {
+                        renderRewardCard('', 0);
+                    }
+                },
+                error: function(){
+                    $('#codeSection').html('<div class="empty-code">加载失败</div>');
+                }
+            });
+        });
+    }
+
+    $(document).on('click', '#btnCopyCode', function(){
+        var text = $('#discountCode').text();
+        var $btn = $(this);
+        copyText(text, function(){
+            $btn.html('<i class="layui-icon layui-icon-ok-circle"></i>已复制');
+            notice.msg('优惠码已复制', {icon: 1});
+            setTimeout(function(){
+                $btn.html('<i class="layui-icon layui-icon-file"></i>复制');
+            }, 1600);
+        });
+    });
+
+    $(document).on('click', '#btnGenerate', function(){
+        notice.msg('正在生成...', {icon: 4, close: true});
+        $.ajax({
+            type: 'POST',
+            url: '{:url("/Rebate/generate")}',
+            dataType: 'json',
+            success: function(r){
+                notice.destroy();
+                if(r.code == 0){
+                    notice.msg('生成成功！', {icon: 1});
+                    loadCode();
+                    insTb.reload();
+                } else {
+                    notice.msg(r.msg || '生成失败', {icon: 2});
+                }
+            },
+            error: function(){
+                notice.destroy();
+                notice.msg('服务器错误！', {icon: 2});
+            }
+        });
+    });
+
     loadCode();
 
-    // 返利记录表格
     var insTb = table.render({
         elem: '#SF_RebateTable',
         url: '{:url("/Rebate/myRebateList")}',
@@ -181,17 +237,17 @@ layui.use(['table', 'layer', 'notice', 'admin'], function(){
             limitName: 'limit'
         },
         parseData: function(res){
+            var pageData = res.data || {};
             return {
                 "code": res.code,
                 "msg": res.msg,
-                "count": res.data.data.total || 0,
-                "data": res.data.data.data || res.data.data || []
+                "count": pageData.total || 0,
+                "data": pageData.data || []
             };
         },
         cols: [[
-            {field: 'id', title: 'ID', width: 70, sort: true},
-            {field: 'pay_trade_no', title: '订单号', minWidth: 200},
-            {field: 'discount_code', title: '折扣码', minWidth: 140},
+            {field: 'pay_trade_no', title: '订单号', minWidth: 190},
+            {field: 'discount_code', title: '折扣码', minWidth: 120},
             {field: 'paid_amount', title: '支付金额', width: 110, templet: function(d){
                 return d.paid_amount + ' 元';
             }},
@@ -199,10 +255,10 @@ layui.use(['table', 'layer', 'notice', 'admin'], function(){
                 return d.rebate_rate + '%';
             }},
             {field: 'rebate_amount', title: '返利金额', width: 110, templet: function(d){
-                return '<span style="color:#5cb85c;font-weight:bold;">+'+d.rebate_amount+' 元</span>';
+                return '<span style="color:#36b368;font-weight:bold;">+'+d.rebate_amount+' 元</span>';
             }},
             {field: 'status', title: '状态', width: 100, templet: '#SF_RebateStatus'},
-            {field: 'created_at', title: '到账时间', minWidth: 170}
+            {field: 'created_at', title: '到账时间', minWidth: 160}
         ]]
     });
 });

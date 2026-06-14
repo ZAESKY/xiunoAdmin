@@ -42,6 +42,9 @@ class LoginService extends UserBaseService
             $captcha_output = $param['captcha_output']??null;
             $pass_token = $param['pass_token']??null;
             $gen_time = $param['gen_time']??null;
+            if (!$lot_number || !$captcha_output || !$pass_token || !$gen_time || !$captcha_key) {
+                return message(t('login.captcha_error'), false);
+            }
             $sign_token = hash_hmac('sha256', $lot_number, $captcha_key);
             $query = array(
                 'lot_number' => $lot_number,
@@ -63,12 +66,12 @@ class LoginService extends UserBaseService
             }
         }
         // 登录用户名
-        $username = $param['username'];
+        $username = $param['username'] ?? '';
         if (!$username) {
             return message(t('login.username_empty'), false, 'username');
         }
         // 登录密码
-        $password = $param['password'];
+        $password = $param['password'] ?? '';
         if (!$password) {
             return message(t('login.password_empty'), false, 'password');
         }

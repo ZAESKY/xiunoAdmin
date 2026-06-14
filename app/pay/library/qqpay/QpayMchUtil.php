@@ -83,8 +83,13 @@ class QpayMchUtil {
      * @return array|mixed|object
      */
     public static function xmlToArray($xml) {
-        $arr = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
-        return $arr;
+        if (!$xml) return [];
+        $prev = libxml_use_internal_errors(true);
+        $obj = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+        libxml_use_internal_errors($prev);
+        if ($obj === false) return [];
+        $arr = json_decode(json_encode($obj), true);
+        return is_array($arr) ? $arr : [];
     }
 
     /**

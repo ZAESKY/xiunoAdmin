@@ -83,8 +83,143 @@
     .point-preview { padding: 10px 12px; border-radius: 4px; background: #f7fbff; color: #1e9fff; line-height: 1.8; font-size: 13px; }
     .point-preview.warn { background: #fff7e6; color: #ff8c00; }
 
+    /* 打卡统计卡片 */
+    .ci-stat-cards { display: flex; gap: 14px; margin-bottom: 14px; }
+    .ci-stat-card { flex: 1; display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: 10px; background: #fff; border: 1px solid #f0f0f0; }
+    .ci-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .ci-icon.c1 { background: #fff3e0; color: #f09d3c; }
+    .ci-icon.c2 { background: #e6f7ed; color: #34a853; }
+    .ci-icon.c3 { background: #eaf2ff; color: #3a6fd8; }
+    .ci-val { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+    .ci-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
+    @media (max-width: 768px) { .ci-stat-cards { flex-direction: column; } }
+
     @media (max-width: 768px) {
         .profile-stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ===== 权限升级 卡片网格 ===== */
+    .sf-upgrade-header {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 20px 24px; margin-bottom: 22px;
+        background: linear-gradient(135deg, #1f2a44 0%, #2c3a64 50%, #3a4a85 100%);
+        border-radius: 14px; color: #fff; position: relative; overflow: hidden;
+        box-shadow: 0 8px 24px rgba(31,42,68,.18);
+    }
+    .sf-upgrade-header::before {
+        content: ''; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px;
+        background: radial-gradient(circle, rgba(255,255,255,.10) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .sf-upgrade-header::after {
+        content: ''; position: absolute; right: 60px; bottom: -60px; width: 160px; height: 160px;
+        background: radial-gradient(circle, rgba(124,92,231,.28) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .sf-uh-left { position: relative; z-index: 1; }
+    .sf-uh-eyebrow { font-size: 12px; color: rgba(255,255,255,.65); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .sf-uh-name { font-size: 26px; font-weight: 800; line-height: 1.1; display: flex; align-items: center; gap: 10px; }
+    .sf-uh-name i { font-size: 28px; color: #ffd66b; }
+    .sf-uh-sub { margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.72); }
+    .sf-uh-right { position: relative; z-index: 1; text-align: right; }
+    .sf-uh-balance-label { font-size: 12px; color: rgba(255,255,255,.65); margin-bottom: 4px; }
+    .sf-uh-balance { font-size: 30px; font-weight: 800; color: #ffd66b; line-height: 1; letter-spacing: -.5px; }
+    .sf-uh-balance .currency { font-size: 18px; font-weight: 600; margin-right: 2px; }
+
+    .sf-upgrade-grid {
+        display: grid; gap: 16px; padding: 4px 2px 4px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .sf-upgrade-card {
+        position: relative; background: #fff; border: 2px solid #ebeef5; border-radius: 14px;
+        padding: 20px 20px 18px; cursor: pointer;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+        display: flex; flex-direction: column;
+    }
+    .sf-upgrade-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(58,111,216,.12); border-color: #b6cdf3; }
+    .sf-upgrade-card .uc-name { font-size: 17px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+    .sf-upgrade-card .uc-price-row { margin-top: 14px; display: flex; align-items: baseline; gap: 4px; }
+    .sf-upgrade-card .uc-currency { font-size: 15px; color: #ff5722; font-weight: 600; }
+    .sf-upgrade-card .uc-price { font-size: 32px; font-weight: 800; color: #ff5722; line-height: 1; letter-spacing: -1px; }
+    .sf-upgrade-card .uc-price.free { color: #34a853; font-size: 24px; }
+
+    .sf-upgrade-card.selected {
+        border-color: #2563eb;
+        box-shadow: 0 12px 30px rgba(37,99,235,.20), 0 0 0 4px rgba(37,99,235,.10);
+        transform: translateY(-3px);
+    }
+    .sf-upgrade-card.selected::after {
+        content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
+        background: linear-gradient(180deg, rgba(37,99,235,.04) 0%, transparent 45%);
+    }
+    .sf-upgrade-card.selected .uc-check {
+        position: absolute; bottom: 14px; right: 14px; z-index: 3;
+        width: 24px; height: 24px; border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; box-shadow: 0 3px 8px rgba(37,99,235,.40);
+    }
+
+    /* ===== 权益详情面板 ===== */
+    .sf-upgrade-detail {
+        margin-top: 22px; padding: 20px 24px;
+        background: linear-gradient(135deg, #eff6ff 0%, #fff 70%);
+        border: 1px solid #bfdbfe; border-left: 4px solid #2563eb;
+        border-radius: 12px; min-height: 88px;
+    }
+    .sf-ud-title {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 10px;
+    }
+    .sf-ud-title i { font-size: 16px; }
+    .sf-ud-target { color: #0f172a; font-weight: 800; font-size: 16px; }
+    .sf-ud-text { font-size: 14px; line-height: 1.7; color: #475569; word-break: break-word; }
+    .sf-ud-text.empty { color: #b6b6b6; font-style: italic; }
+
+    /* ===== 底部升级按钮 ===== */
+    .sf-upgrade-action {
+        margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 18px 24px; background: #fafbfc; border-radius: 12px; border: 1px solid #ebeef5;
+    }
+    .sf-ua-info { font-size: 13px; color: #6b7280; }
+    .sf-ua-info b { color: #1a1a1a; font-weight: 700; }
+    .sf-ua-price { color: #2563eb; font-weight: 800; }
+    .sf-ua-btn {
+        min-width: 200px; height: 46px; border: 0; border-radius: 23px; cursor: pointer;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
+        color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 1px;
+        box-shadow: 0 6px 16px rgba(37,99,235,.32);
+        transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .sf-ua-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(37,99,235,.45); }
+    .sf-ua-btn:active { transform: translateY(0); }
+    .sf-ua-btn[disabled] { background: #c9d1d9; box-shadow: none; cursor: not-allowed; opacity: .85; }
+
+    .sf-upgrade-empty {
+        text-align: center; padding: 60px 20px; color: #8c8c8c; font-size: 14px;
+        background: #f9fafb; border-radius: 12px; border: 1px dashed #e0e0e0;
+    }
+    .sf-upgrade-empty .ue-icon {
+        display: inline-flex; width: 64px; height: 64px; border-radius: 50%;
+        background: #eaf2ff; color: #3a6fd8; align-items: center; justify-content: center;
+        font-size: 32px; margin-bottom: 12px;
+    }
+    .sf-upgrade-loading { padding: 40px; text-align: center; color: #8c8c8c; font-size: 13px; }
+    @media (max-width: 900px) {
+        .sf-upgrade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+        .sf-upgrade-header { padding: 16px 18px; flex-direction: column; align-items: flex-start; }
+        .sf-uh-right { text-align: left; }
+        .sf-upgrade-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sf-upgrade-card { padding: 16px 14px 14px; }
+        .sf-upgrade-card .uc-price { font-size: 26px; }
+        .sf-upgrade-action { flex-direction: column; align-items: stretch; }
+        .sf-ua-btn { width: 100%; }
+    }
+    @media (max-width: 420px) {
+        .sf-upgrade-grid { grid-template-columns: 1fr; }
     }
 </style>
 <div class="layui-fluid">
@@ -265,15 +400,48 @@
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form formBasForm">
-                                <div class="layui-form-item">
-                                    <label class="layui-form-label layui-form-required">升级{:t('common_ui.power_type')}:</label>
-                                    <div class="layui-input-block">
-                                        <select id="updatePower" name="power" class="layui-input ew-select-fixed" lay-filter="updatePower" lay-search>
-                                            <option value="">{:t('common.nothing_selected')}要升级的{:t('common_ui.power_type')}</option>
-                                        </select>
+                                <div id="introduce">
+                                    <!-- 顶部:当前等级 -->
+                                    <div class="sf-upgrade-header">
+                                        <div class="sf-uh-left">
+                                            <div class="sf-uh-eyebrow">当前等级</div>
+                                            <div class="sf-uh-name">
+                                                <i class="layui-icon layui-icon-diamond"></i>
+                                                {$userInfo['power_name']|default='普通用户'}
+                                            </div>
+                                            <div class="sf-uh-sub">选择下方卡片可升级到更高级别</div>
+                                        </div>
+                                        <div class="sf-uh-right">
+                                            <div class="sf-uh-balance-label">账户余额</div>
+                                            <div class="sf-uh-balance">
+                                                <span class="currency">¥</span>{$userInfo['balance']|default='0.00'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- 中部:卡片网格 -->
+                                    <div id="SF_UpgradeList" class="sf-upgrade-grid">
+                                        <div class="sf-upgrade-loading">
+                                            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 正在加载可升级的权限...
+                                        </div>
+                                    </div>
+                                    <!-- 权益详情 + 升级按钮 (由 JS 填充) -->
+                                    <div id="SF_UpgradeDetail" class="sf-upgrade-detail" style="display:none;">
+                                        <div class="sf-ud-title">
+                                            <i class="layui-icon layui-icon-gift"></i>
+                                            <span>所选等级权益</span>
+                                            <span class="sf-ud-target" id="SF_UDTarget"></span>
+                                        </div>
+                                        <div class="sf-ud-text" id="SF_UDText"></div>
+                                    </div>
+                                    <div id="SF_UpgradeAction" class="sf-upgrade-action" style="display:none;">
+                                        <div class="sf-ua-info">
+                                            您即将升级到 <b id="SF_UATarget"></b> · 所需费用 <span class="sf-ua-price" id="SF_UAPrice"></span>
+                                        </div>
+                                        <button type="button" id="SF_UABtn" class="sf-ua-btn">
+                                            立即升级 <i class="layui-icon layui-icon-right"></i>
+                                        </button>
                                     </div>
                                 </div>
-                                <div id="introduce"></div>
                             </form>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
@@ -283,6 +451,20 @@
                             <table id="SF_PointTable" lay-filter="SF_PointTable" style="margin: 0;"></table>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
+                            <div class="ci-stat-cards">
+                                <div class="ci-stat-card">
+                                    <div class="ci-icon c1"><i class="layui-icon layui-icon-fire"></i></div>
+                                    <div class="ci-info"><div class="ci-val" id="statTotal">0</div><div class="ci-label">累计打卡天数</div></div>
+                                </div>
+                                <div class="ci-stat-card">
+                                    <div class="ci-icon c2"><i class="layui-icon layui-icon-star"></i></div>
+                                    <div class="ci-info"><div class="ci-val" id="statPoints">0</div><div class="ci-label">累计获得积分</div></div>
+                                </div>
+                                <div class="ci-stat-card">
+                                    <div class="ci-icon c3"><i class="layui-icon layui-icon-tree"></i></div>
+                                    <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">最长连续打卡</div></div>
+                                </div>
+                            </div>
                             <table id="SF_CheckinTable" lay-filter="SF_CheckinTable" style="margin: 0;"></table>
                         </div>
                     </div>
@@ -341,7 +523,7 @@
     {{# } }}
 </script>
 <script type="text/html" id="SF_PtType">
-    {{# var m={recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
+    {{# var m={consume:'消费赠送',recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
     <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
 </script>
 {include file="/public/footer"}
@@ -368,49 +550,118 @@
                     notice.destroy();
                     if(res.code == 0){
                         notice.msg('获取列表成功！', {icon: 1});
-                        var content = '';
-                        if(res.data.data.length === 0){
-                            content += '<option value="">您当前已是最高权限</option>';
-                        }else{
-                            content += '<option value="">请选择要升级的权限</option>';
-                            $.each(res.data.data,function(index, value){
-                                content += '<option value="'+value.id+'" price="'+value.money+'" introduce="'+value.introduce+'">'+value.name+'</option>';
-                            });
-                        }
-                        $("#updatePower").html(content);
-                        form.render('select');
+                        renderUpgradeCards(res.data.data || []);
                     } else {
                         notice.msg(res.msg, {icon: 2, audio: '1'});
+                        $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">获取权限列表失败:'+ (res.msg || '') +'</div>');
                     }
+                },
+                error: function(){
+                    notice.destroy();
+                    notice.msg('服务器错误！', {icon: 2, audio: '1'});
+                    $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">服务器错误,请稍后再试</div>');
                 }
             });
 
         });
 
-        form.on('select(updatePower)', function (data) {
-            if(data.value == ''){
-                $("#introduce").css('display','none');
-            }else{
-                $("#introduce").css('display','inherit');
-                let introduce = $("#updatePower option:selected").attr('introduce');
-                let price = $("#updatePower option:selected").attr('price');
-                $("#introduce").html('<div class="layui-form-item"><div class="sf-tag">升级所需金额：'+price+' 元</div><div class="sf-tips">'+(introduce?introduce:'暂无介绍')+'</div></div><div class="layui-form-item"><button class="layui-btn" lay-filter="SF_UpdatePower" lay-submit>点击升级</button></div>');
+        // 渲染权限升级卡片
+        function renderUpgradeCards(list){
+            var $box = $('#SF_UpgradeList');
+            if (!list || list.length === 0) {
+                $box.html('<div class="sf-upgrade-empty">' +
+                    '<div class="ue-icon"><i class="layui-icon layui-icon-ok-circle"></i></div>' +
+                    '<div>您当前已是最高权限</div>' +
+                    '<div style="margin-top:6px;font-size:12px;color:#bbb;">如需调整请联系管理员</div>' +
+                    '</div>');
+                $('#SF_UpgradeDetail, #SF_UpgradeAction').hide();
+                return;
             }
-        });
+            var html = '';
+            $.each(list, function(index, value){
+                var price = parseFloat(value.money) || 0;
+                var isFree = price <= 0;
+                var name = (value.name || '').toString();
+                var introduce = (value.introduce || '').toString();
+                if (introduce) {
+                    introduce = introduce.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                }
+                html += '<div class="sf-upgrade-card"' +
+                    ' data-id="' + value.id + '"' +
+                    ' data-money="' + price + '"' +
+                    ' data-name="' + name.replace(/"/g, '&quot;') + '"' +
+                    ' data-introduce="' + introduce.replace(/"/g, '&quot;') + '">';
+                html += '<div class="uc-name">' + name + '</div>';
+                html += '<div class="uc-price-row">';
+                if (isFree) {
+                    html += '<span class="uc-price free">免费</span>';
+                } else {
+                    html += '<span class="uc-currency">¥</span><span class="uc-price">' + price + '</span>';
+                }
+                html += '</div>';
+                html += '</div>';
+            });
+            $box.html(html);
 
-        form.on('submit(SF_UpdatePower)', function (data) {
-            if(data.field.power == ''){
-                notice.msg('请选择要升级的权限！', {icon: 2, audio: '1'});
-                return false;
+            // 默认选中第一张
+            selectCard($box.find('.sf-upgrade-card').first());
+
+            // 卡片点击 → 选中状态切换
+            $box.off('click', '.sf-upgrade-card').on('click', '.sf-upgrade-card', function(){
+                selectCard($(this));
+            });
+
+            // 底部按钮 → 真正的升级流程
+            $('#SF_UABtn').off('click').on('click', function(){
+                var $sel = $box.find('.sf-upgrade-card.selected');
+                if ($sel.length === 0) {
+                    notice.msg('请先选择要升级的等级', {icon: 2, audio: '1'});
+                    return;
+                }
+                var id = $sel.data('id');
+                var price = $sel.data('money');
+                var name = $sel.data('name');
+                doUpgradePower(id, name, price);
+            });
+        }
+
+        // 选中指定卡片(同步详情面板 + 底部按钮)
+        function selectCard($card){
+            if (!$card || $card.length === 0) return;
+            $('#SF_UpgradeList .sf-upgrade-card').removeClass('selected').find('.uc-check').remove();
+            $card.addClass('selected').prepend('<div class="uc-check"><i class="layui-icon layui-icon-ok"></i></div>');
+
+            var name = $card.data('name');
+            var price = parseFloat($card.data('money')) || 0;
+            var introduce = ($card.data('introduce') || '').toString();
+
+            $('#SF_UDTarget').text('· ' + name);
+            if (introduce) {
+                $('#SF_UDText').removeClass('empty').text(introduce);
+            } else {
+                $('#SF_UDText').addClass('empty').text('该等级暂无详细介绍');
             }
 
-            if(data.field.power < 0){
-                notice.msg('不存在此权限！', {icon: 2, audio: '1'});
-                return false;
+            $('#SF_UATarget').text(name);
+            if (price > 0) {
+                $('#SF_UAPrice').html('<span style="font-size:12px;font-weight:600;">¥</span> ' + price);
+                $('#SF_UABtn').html('立即升级 ¥' + price + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
+            } else {
+                $('#SF_UAPrice').html('免费');
+                $('#SF_UABtn').html('立即升级 · 免费 <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
             }
-            let name = $("#updatePower option:selected").text();
-            let price = $("#updatePower option:selected").attr('price');
-            layer.confirm('确定要花费 <span class="layui-badge layui-badge-yellow">'+price+' 元</span> 升级成 <span class="layui-badge layui-badge-orange">'+name+'</span> 吗？', {
+
+            $('#SF_UpgradeDetail, #SF_UpgradeAction').show();
+        }
+
+        // 升级权限
+        function doUpgradePower(powerId, name, price){
+            if (!powerId) { notice.msg('请选择要升级的权限！', {icon: 2, audio: '1'}); return; }
+            if (powerId < 0) { notice.msg('不存在此权限！', {icon: 2, audio: '1'}); return; }
+            var priceText = parseFloat(price) > 0
+                ? '<span class="layui-badge layui-badge-yellow">' + price + ' 元</span>'
+                : '<span class="layui-badge layui-badge-green">免费</span>';
+            layer.confirm('确定要花费 ' + priceText + ' 升级成 <span class="layui-badge layui-badge-orange">' + name + '</span> 吗？', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
@@ -419,7 +670,7 @@
                 notice.msg('正在执行中..', {icon: 4, close: true});
                 admin.ajax({
                     url: '{:url("/MyInfo/updatePower")}',
-                    data: {power:data.field.power},
+                    data: {power: powerId},
                     headers: {},
                     type: 'post',
                     dataType: 'json',
@@ -427,14 +678,18 @@
                         notice.destroy();
                         if(res.code == 0){
                             notice.msg('升级权限成功！', {icon: 1, audio: '1'});
+                            setTimeout(function(){ location.reload(); }, 1000);
                         } else {
                             notice.msg(res.msg, {icon: 2, audio: '1'});
                         }
+                    },
+                    error: function(){
+                        notice.destroy();
+                        notice.msg('服务器错误！', {icon: 2, audio: '1'});
                     }
                 });
             });
-            return false;
-        });
+        }
 
         function setTime(val,time){
             var countdown = time;
@@ -513,7 +768,7 @@
             } else if (money < 10) {
                 $p.addClass('warn').html('充值金额：'+money.toFixed(2)+' 元，最低需充值 10 元');
             } else {
-                $p.removeClass('warn').html('充值金额：'+money.toFixed(2)+' 元，预计实付：'+actualPay.toFixed(2)+' 元，可获得：<b>'+points+'</b> 积分');
+                $p.removeClass('warn').html('充值金额：'+money.toFixed(2)+' 元，预计实付：'+actualPay.toFixed(2)+' 元，后续消费余额可按消费金额获得积分');
             }
             if (rcDiscountRate > 0 && money >= 10) { $('#savePreview').text('预计实付 '+actualPay.toFixed(2)+' 元，节省 '+(money - actualPay).toFixed(2)+' 元'); }
         }
@@ -532,22 +787,36 @@
                         var payUrl = '/pay.php/Index?trade_no='+res.data.trade_no;
                         var isMobile = $(window).width() < 768;
                         var pollTimer = null;
+                        var paidHandled = false;
+                        var finishPay = function() {
+                            if (paidHandled) return;
+                            paidHandled = true;
+                            clearInterval(pollTimer);
+                            window.removeEventListener('message', payMessageHandler);
+                            layer.close(payIndex);
+                            notice.msg('支付成功！', {icon:1});
+                            setTimeout(function(){ location.reload(); }, 1200);
+                        };
+                        var payMessageHandler = function(event) {
+                            if (event.origin !== window.location.origin) return;
+                            if (event.data && event.data.type === 'sf-pay-success' && event.data.trade_no === res.data.trade_no) {
+                                finishPay();
+                            }
+                        };
                         var payIndex = layer.open({
                             type: 2, title: '付款界面',
                             area: [isMobile ? '100%' : '800px', isMobile ? '100%' : '600px'],
                             content: payUrl, maxmin: true,
-                            cancel: function() { clearInterval(pollTimer); layer.closeAll(); },
-                            end: function() { clearInterval(pollTimer); }
+                            cancel: function() { clearInterval(pollTimer); window.removeEventListener('message', payMessageHandler); layer.closeAll(); },
+                            end: function() { clearInterval(pollTimer); window.removeEventListener('message', payMessageHandler); }
                         });
+                        window.addEventListener('message', payMessageHandler);
                         // Poll for payment completion every 2 seconds
                         pollTimer = setInterval(function(){
                             $.ajax({ type:'POST', url:'{:url("/Order/checkPay")}', data:{trade_no:res.data.trade_no}, dataType:'json',
                                 success: function(r) {
                                     if (r.code === 0 && r.data && r.data.paid) {
-                                        clearInterval(pollTimer);
-                                        layer.close(payIndex);
-                                        notice.msg('支付成功！', {icon:1});
-                                        setTimeout(function(){ location.reload(); }, 1500);
+                                        finishPay();
                                     }
                                 }
                             });
@@ -705,7 +974,7 @@
         cols: [[
             {field: 'type', title: '类型', width: 100, templet: '#SF_BL_Type'},
             {field: 'amount', title: '金额', width: 120, templet: '#SF_BL_Amount'},
-            {field: 'balance_after', title: '余额', width: 100, templet: function(d){ return (d.balance_after||'0.00')+' 元'; }},
+            {field: 'balance', title: '余额', width: 100, templet: function(d){ return (d.balance||'0.00')+' 元'; }},
             {field: 'description', title: '说明', minWidth: 160},
             {field: 'created_at', title: '时间', width: 160}
         ]]
@@ -723,6 +992,14 @@
             {field: 'created_at', title: '时间', width: 160}
         ]]
     });
+    // 打卡统计
+    $.get('{:url("/Checkin/stats")}', function(r){
+        if(r.code === 0 && r.data){
+            $('#statTotal').text(r.data.total_days || 0);
+            $('#statPoints').text(r.data.total_points || 0);
+            $('#statMaxConsecutive').text(r.data.max_consecutive || 0);
+        }
+    }, 'json');
     // 打卡记录
     table.render({
         elem: '#SF_CheckinTable', url: '{:url("/Checkin/myRecords")}', method: 'post', page: true, limit: 10,

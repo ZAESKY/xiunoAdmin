@@ -1,7 +1,11 @@
 <?php
 namespace app\pay\library\wxpay;
+
+// 必须先加载父类所在文件,避免继承时找不到 WxPayNotifyReply
+require_once __DIR__ . '/WxPayDataBase.php';
+
 /**
- * 
+ *
  * 回调基础类
  * @author widyhu
  *
@@ -72,7 +76,7 @@ class WxPayNotify extends WxPayNotifyReply
 	 * 回复通知
 	 * @param bool $needSign 是否需要签名输出
 	 */
-	final private function ReplyNotify($needSign = true)
+		private function ReplyNotify($needSign = true)
 	{
 		//如果需要签名
 		if($needSign == true && 

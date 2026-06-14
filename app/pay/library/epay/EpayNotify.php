@@ -7,8 +7,9 @@ class EpayNotify
     public $epay_config;
 
     function __construct($epay_config){
-        $this->epay_config = $epay_config;
-        $this->http_verify_url = $this->epay_config['apiurl'].'api.php?';
+        $this->epay_config = is_array($epay_config) ? $epay_config : [];
+        $apiurl = isset($this->epay_config['apiurl']) ? $this->epay_config['apiurl'] : '';
+        $this->http_verify_url = $apiurl . 'api.php?';
         $this->epayCommon = new EpayCommon();
     }
     function EpayNotify($epay_config) {
@@ -77,7 +78,7 @@ class EpayNotify
         //对待签名参数数组排序
         $para_sort = $this->epayCommon->argSort($para_filter);
 
-        //把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
+        //把数组所有元素，按照"参数=参数值"的模式用"&"字符拼接成字符串
         $prestr = $this->epayCommon->createLinkstring($para_sort);
 
         $isSgin = false;
@@ -91,7 +92,7 @@ class EpayNotify
      * @param $notify_id 通知校验ID
      * @return 服务器ATN结果
      * 验证结果集：
-     * invalid命令参数不对 出现这个错误，请检测返回处理中partner和key是否为空
+     * invalid命令参数不对 出现这个错误，请检查返回处理中partner和key是否为空
      * true 返回正确信息
      * false 请检查防火墙或者是服务器阻止端口问题以及验证时间是否超过一分钟
      */

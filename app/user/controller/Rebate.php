@@ -19,21 +19,21 @@ class Rebate extends UserBackend
         try {
             if (IS_POST) {
                 $code = trim(request()->post('code', ''));
-                if (empty($code)) return message('请输入折扣码', false);
+                if (empty($code)) return json(message('请输入折扣码', false));
                 $codeRow = \think\facade\Db::name('discount_code')->where('code', $code)->find();
-                if (!$codeRow || $codeRow['status'] != 1) return message('折扣码不存在或已停用', false);
-                if ($codeRow['user_id'] == $this->userId) return message('不能使用自己的折扣码', false);
+                if (!$codeRow || $codeRow['status'] != 1) return json(message('折扣码不存在或已停用', false));
+                if ($codeRow['user_id'] == $this->userId) return json(message('不能使用自己的折扣码', false));
                 $ownerUser = \think\facade\Db::name('user')->where('id', $codeRow['user_id'])->find();
-                if (!$ownerUser) return message('折扣码无效', false);
+                if (!$ownerUser) return json(message('折扣码无效', false));
                 $ownerPower = \think\facade\Db::name('power_price')->where('id', $ownerUser['power'])->find();
-                if (!$ownerPower || $ownerPower['rebate_enabled'] != 1) return message('折扣码所属用户未开启返利', false);
-                return message('ok', true, [
+                if (!$ownerPower || $ownerPower['rebate_enabled'] != 1) return json(message('折扣码所属用户未开启返利', false));
+                return json(message('ok', true, [
                     'rate' => floatval($ownerPower['rebate_rate']),
                     'owner' => $ownerUser['username'],
-                ]);
+                ]));
             }
         } catch (\Exception $e) {
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -41,7 +41,7 @@ class Rebate extends UserBackend
     {
         try {
             if (IS_POST) {
-                return message(t('common.system_busy'), false);
+                return json(message(t('common.system_busy'), false));
             }
             return $this->render();
         } catch (\Exception $e) {
@@ -54,10 +54,10 @@ class Rebate extends UserBackend
         try {
             if (IS_POST) {
                 $code = $this->service->generateCode();
-                return message('生成成功', true, $code);
+                return json(message('生成成功', true, $code));
             }
         } catch (\Exception $e) {
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -66,10 +66,22 @@ class Rebate extends UserBackend
         try {
             if (IS_POST) {
                 $code = $this->service->getMyCode();
-                return message('ok', true, $code);
+                return json(message('ok', true, $code));
             }
         } catch (\Exception $e) {
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
+        }
+    }
+
+    public function mySummary()
+    {
+        try {
+            if (IS_POST) {
+                return json(message('ok', true, $this->service->getMySummary()));
+            }
+            return json(message('非法请求', false));
+        } catch (\Exception $e) {
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -78,10 +90,11 @@ class Rebate extends UserBackend
         try {
             if (IS_POST) {
                 $list = $this->service->getMyRebateList();
-                return message('ok', true, $list);
+                return json(message('ok', true, $list));
             }
+            return $this->render('rebate/index');
         } catch (\Exception $e) {
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 }

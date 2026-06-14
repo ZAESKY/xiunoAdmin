@@ -17,7 +17,7 @@ class Order extends UserBackend
         if (!IS_POST) return json(['code' => -1, 'msg' => 'error']);
         $tradeNo = input('post.trade_no', '');
         if (empty($tradeNo)) return json(['code' => -1, 'msg' => '参数错误']);
-        $order = \think\facade\Db::name('order')->where('trade_no', $tradeNo)->where('userid', $this->userId)->find();
+        $order = \think\facade\Db::name('pay')->where('trade_no', $tradeNo)->where('userid', $this->userId)->find();
         if (!$order) return json(['code' => -1, 'msg' => '订单不存在']);
         return json(['code' => 0, 'data' => ['paid' => intval($order['status']) === 1]]);
     }

@@ -11,7 +11,7 @@
 </div>
 
 <script type="text/html" id="SF_PtType">
-    {{# var m={recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
+    {{# var m={consume:'消费赠送',recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
     <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
 </script>
 <script type="text/html" id="SF_PtAmount">

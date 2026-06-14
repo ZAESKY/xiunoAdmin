@@ -264,7 +264,7 @@ class Index extends PayBackend
                     return message(t('pay.type_error'), false);
             }
         }
-        return $this->render('/public/404.html');
+        return $this->render('public/error', ['msg' => '404 Not Found']);
     }
 
     public function getPayResult(){

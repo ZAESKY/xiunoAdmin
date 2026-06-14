@@ -8,7 +8,6 @@ use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Event;
 use think\facade\View;
-use think\exception\ValidateException;
 
 /**
  * 后台登陆控制器
@@ -68,9 +67,9 @@ class Login extends CommonBase
         if (IS_POST) {
             try{
                 $result = $this->service->login();
-                return $result;
-            }catch (\Exception $e){
-                return message(t('login.failed').$e->getMessage() ,false);
+                return json($result);
+            }catch (\Throwable $e){
+                return json(message(t('login.failed').$e->getMessage() ,false));
             }
         }
     }
@@ -84,7 +83,7 @@ class Login extends CommonBase
     {
         if (IS_POST) {
             $result = $this->service->checkLoginKey();
-            return $result;
+            return json($result);
         }
     }
 
@@ -98,7 +97,7 @@ class Login extends CommonBase
                 $post = request()->post();
                 $appid = !empty($post['appid']) ? intval($post['appid']) : 0;
                 $username = !empty($post['username']) ? trim($post['username']) : '';
-                $qq = !empty($post['qq']) ? intval($post['qq']) : 0;
+                $qq = !empty($post['qq']) ? trim($post['qq']) : '';
                 $email = !empty($post['email']) ? trim($post['email']) : '';
                 $password = !empty($post['password']) ? $post['password'] : '';
                 $confirmPassword = !empty($post['confirmPassword']) ? $post['confirmPassword'] : '';
@@ -124,6 +123,11 @@ class Login extends CommonBase
 
                 if (Db::name('user')->where(['username' => $username])->find()) {
                     return message('平台已存在该用户名！', false);
+                }
+                if (!empty($qq)) {
+                    if (Db::name('user')->where(['qq' => $qq, 'appid' => $appid])->find()) {
+                        return message('该QQ号在此应用下已被注册！', false);
+                    }
                 }
 
                 $powerPriceModel = new \app\admin\model\PowerPriceModel();

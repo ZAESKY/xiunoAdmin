@@ -85,6 +85,14 @@ class FeedbackModel extends BaseModel
             'updated_at' => datetime(),
         ])->update();
 
+        // 将回复中的临时图片移动到正式目录
+        if (!empty($reply)) {
+            $movedReply = move_temp_images_in_content($reply);
+            if ($movedReply !== $reply) {
+                self::where('id', $id)->update(['reply' => $movedReply]);
+            }
+        }
+
         try {
             $statusMap = [
                 self::STATUS_PENDING  => t('feedback.status_pending'),

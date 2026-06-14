@@ -38,7 +38,7 @@ class Plugin extends Backend
     public function edit()
     {
         if (IS_POST) {
-            return $this->service->edit();
+            return json($this->service->edit());
         }
         $id = input('get.id', 0, 'intval');
         $plugin = [];
@@ -60,7 +60,25 @@ class Plugin extends Backend
     public function uploadFile()
     {
         if (IS_POST) {
-            return $this->service->uploadFile();
+            $file = request()->file('file');
+            if (!$file) {
+                return json(message('请选择要上传的插件文件', false));
+            }
+            return json($this->service->uploadFile($file));
+        }
+    }
+
+    /**
+     * 上传插件图标、封面
+     */
+    public function uploadResource()
+    {
+        if (IS_POST) {
+            $file = request()->file('file');
+            if (!$file) {
+                return json(message('请选择要上传的资源文件', false));
+            }
+            return json($this->service->uploadResource($file));
         }
     }
 
@@ -70,7 +88,11 @@ class Plugin extends Backend
     public function saveWithFile()
     {
         if (IS_POST) {
-            return $this->service->saveWithFile();
+            $file = request()->file('file');
+            if (!$file) {
+                return json(message('请先上传插件文件', false));
+            }
+            return json($this->service->saveWithFile($file));
         }
     }
 
@@ -81,9 +103,9 @@ class Plugin extends Backend
                 $keyword = input('post.keyword', '', 'trim');
                 $excludeId = input('post.exclude_id', 0, 'intval');
                 $pluginModel = new PluginModel();
-                return message('ok', true, ['list' => $pluginModel->searchRelatedOptions($keyword, $excludeId)]);
+                return json(message('ok', true, ['list' => $pluginModel->searchRelatedOptions($keyword, $excludeId)]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['list' => []]);
+                return json(message($e->getMessage(), false, ['list' => []]));
             }
         }
     }
@@ -116,9 +138,9 @@ class Plugin extends Backend
                     'list_rows' => $limit,
                     'page' => $currentPage,
                 ]);
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
     }

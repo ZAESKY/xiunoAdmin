@@ -3,6 +3,7 @@
 namespace app\user\model;
 
 use app\common\model\BaseModel;
+use think\Exception;
 
 class OrderModel extends BaseModel
 {
@@ -23,12 +24,9 @@ class OrderModel extends BaseModel
 
     public function list(){
         try{
-            try{
-                $userInfo = parent::getUserInfo();
-                if(!$userInfo){
-                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
-                }
-            }catch (\Exception $e){
+            $userModel = new \app\user\model\User();
+            $userInfo = $userModel->getInfo();
+            if(!$userInfo){
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();

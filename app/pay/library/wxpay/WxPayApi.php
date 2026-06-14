@@ -1,5 +1,7 @@
 <?php
 namespace app\pay\library\wxpay;
+use think\Exception;
+
 
 /**
  * 
@@ -410,12 +412,20 @@ class WxPayApi
 		$xml = file_get_contents("php://input");
 		//如果返回成功则验证签名
 		try {
+			if (!$xml) {
+				$msg = "xml数据异常！";
+				if (is_callable($callback)) {
+					$ret = call_user_func($callback, ['return_code' => 'FAIL', 'return_msg' => $msg]);
+					return $ret === true || $ret === false ? $ret : false;
+				}
+				return false;
+			}
 			$result = WxPayResults::Init($xml);
-		} catch (WxPayException $e){
-			$msg = $e->errorMessage();
+		} catch (\Exception $e){
+			$msg = $e->getMessage();
 			return false;
 		}
-		
+
 		return call_user_func($callback, $result);
 	}
 	

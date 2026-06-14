@@ -38,12 +38,13 @@ class AuthService extends BaseService
             default:
                 break;
         }
-        if(Cache::has('queue_check'.$param['auth_info'])){
+        $authInfo = isset($param['auth_info']) ? $param['auth_info'] : '';
+        if(Cache::has('queue_check'.$authInfo)){
             return json(message(t('login.in_queue'),true, ['queue' => 1]));
         }else{
             $isPushed = Queue::push($jobHandlerClassName, $jobDataArr, $jobQueueName);
             if ($isPushed !== false) {
-                Cache::tag('SF_CheckAuth')->set('queue_check'.$param['auth_info'],json_encode(message(t('login.waiting'),true, ['queue' => 1])));
+                Cache::tag('SF_CheckAuth')->set('queue_check'.$authInfo,json_encode(message(t('login.waiting'),true, ['queue' => 1])));
                 return json(message(t('login.waiting_result'),true, ['queue' => 1]));
             }else{
                 return json(message('push a new '.$taskType.' of MultiTask Job Failed!',false, ['queue' => 1]));
@@ -53,11 +54,12 @@ class AuthService extends BaseService
 
     public function queueCheck(){
         $param = request()->param();
-        if(Cache::has('queue_check'.$param['auth_info'])){
-            $result = Cache::get('queue_check'.$param['auth_info']);
+        $authInfo = isset($param['auth_info']) ? $param['auth_info'] : '';
+        if(Cache::has('queue_check'.$authInfo)){
+            $result = Cache::get('queue_check'.$authInfo);
             $result = json_decode($result,true);
             if(!array_key_exists('queue',$result['data'])){
-                Cache::delete('queue_check'.$param['auth_info']);
+                Cache::delete('queue_check'.$authInfo);
             }
             return json($result);
         }else{
@@ -254,17 +256,18 @@ class AuthService extends BaseService
 
     public function checkUpdate(){
         if(conf('queue_query_switch') == 1){
-            if(!empty($result['data']['queue'])){
-                return $this->queueCheckAuth();
-            }else{
-                $result = $this->queueCheckAuth()->getData();
-                if($result['code'] != 0){
+            // 兼容历史命名:queueCheckAuth() → queueCheck()
+            $r = $this->queueCheck();
+            if($r) {
+                $result = is_array($r) ? $r : (method_exists($r, 'getData') ? $r->getData() : (is_object($r) && method_exists($r, 'toArray') ? $r->toArray() : []));
+                if(($result['code'] ?? 1) != 0){
                     return json($result);
                 }
             }
         }else{
-            $result = $this->checkAuth()->getData();
-            if($result['code'] != 0){
+            $r = $this->checkAuth();
+            $result = is_array($r) ? $r : (method_exists($r, 'getData') ? $r->getData() : (is_object($r) && method_exists($r, 'toArray') ? $r->toArray() : []));
+            if(($result['code'] ?? 0) != 0){
                 return json($result);
             }
         }

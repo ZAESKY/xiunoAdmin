@@ -2,7 +2,6 @@
 namespace app\common\service;
 
 
-use MongoDB\Driver\Exception\WriteConcernException;
 use think\Exception;
 
 /**

@@ -9,7 +9,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
 use PhpZip\Exception\ZipException;
 use PhpZip\ZipFile;
-use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Session;
 use think\facade\View;

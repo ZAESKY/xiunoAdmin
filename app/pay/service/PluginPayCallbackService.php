@@ -72,6 +72,17 @@ class PluginPayCallbackService
                     ]);
                 }
 
+                if ($price > 0 && $payType !== 'points') {
+                    \app\common\model\PointLogModel::grantConsumptionPoints(
+                        intval($order['user_id']),
+                        $price,
+                        'plugin_order_consume',
+                        intval($order['id']),
+                        '消费购买插件获得积分 +' . intval(floor($price)) . '：' . $order['plugin_name'],
+                        intval($order['id'])
+                    );
+                }
+
                 // 给插件开发者打款
                 $plugin = Db::name('plugin')->where('id', $order['plugin_id'])->find();
                 if ($developerIncome > 0 && $plugin && !empty($plugin['user_id'])) {

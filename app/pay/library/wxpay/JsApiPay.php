@@ -1,5 +1,7 @@
 <?php
 namespace app\pay\library\wxpay;
+use think\Exception;
+
 /**
  * 
  * JSAPI支付实现类

@@ -22,6 +22,8 @@
 .plugin-card .card-info { flex: 1; min-width: 0; }
 .plugin-card .card-name { font-size: 14px; font-weight: 600; color: #1d1d1f; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .plugin-card .card-version { font-size: 11px; color: #9e9e9e; font-weight: 700; margin-left: 4px; vertical-align: middle; }
+.plugin-card .card-version { cursor: pointer; }
+.official-badge { display:inline-flex; align-items:center; gap:2px; color:#1677ff; font-weight:600; }
 .plugin-card .card-meta { font-size: 12px; color: #8e8e93; margin-top: 4px; display: flex; align-items: center; gap: 8px; }
 .plugin-card .card-meta .meta-sep { width: 1px; height: 10px; background: #e0e0e0; display: inline-block; }
 .plugin-card .card-meta .meta-icon { font-size: 12px; color: #b0b0b0; }
@@ -160,8 +162,8 @@ layui.use(['layer', 'form', 'laypage'], function () {
                 html += '  <div class="card-top">';
                 html += '    <img src="'+icon+'" class="card-icon" onerror="this.src=\'/Assets/img/default-plugin.png\'">';
                 html += '    <div class="card-info">';
-                html += '      <div class="card-name" title="'+esc(p.name)+'">'+esc(p.name)+' <span class="card-version">v'+esc(p.version)+'</span></div>';
-                html += '      <div class="card-meta"><span class="card-cat-tag">'+(catMap[p.category]||'其他')+'</span> <span class="meta-sep"></span> <i class="layui-icon layui-icon-username meta-icon"></i> '+esc(p.author)+' <span class="meta-sep"></span> <i class="layui-icon layui-icon-download-circle meta-icon"></i> '+fmtCount(p.download_count)+'</div>';
+                html += '      <div class="card-name" title="'+esc(p.name)+'">'+esc(p.name)+' <span class="card-version" data-plugin-id="'+p.id+'">v'+esc(p.version)+'</span></div>';
+                html += '      <div class="card-meta"><span class="card-cat-tag">'+(catMap[p.category]||'其他')+'</span> <span class="meta-sep"></span> <i class="layui-icon layui-icon-username meta-icon"></i> '+authorHtml(p)+' <span class="meta-sep"></span> <i class="layui-icon layui-icon-download-circle meta-icon"></i> '+fmtCount(p.download_count)+'</div>';
                 html += '    </div>';
                 html += '  </div>';
                 html += '  <div class="card-desc">'+esc(desc)+'</div>';
@@ -180,6 +182,7 @@ layui.use(['layer', 'form', 'laypage'], function () {
         }
         $('#pluginGrid').html(html);
         $('.plugin-card').click(function() { showDetail($(this).data('id')); });
+        $('.card-version').click(function(e) { e.stopPropagation(); showVersions($(this).data('plugin-id')); });
     }
 
     function renderPagination(total, curr) {
@@ -197,6 +200,57 @@ layui.use(['layer', 'form', 'laypage'], function () {
             area: ['90%', '90%'], maxmin: true
         });
     }
+    function authorHtml(p) {
+        var name = p.authorDisplayName || p.author || '未知用户';
+        if (p.isOfficialAuthor) return '<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name)+'</span>';
+        return esc(name);
+    }
+    function showVersions(id) {
+        $.ajax({type:'GET',url:'{:url("/UserPlugin/versions")}',data:{plugin_id:id},dataType:'json',
+            success:function(r){
+                if(r.code!=0){ layer.msg(r.msg,{icon:2}); return; }
+                var list = (r.data && r.data.list) ? r.data.list : [];
+                var html = '<div style="padding:18px 22px;">';
+                if(!list.length) html += '<div style="text-align:center;color:#bbb;padding:40px 0;">暂无版本记录</div>';
+                list.forEach(function(v){
+                    html += '<div style="border-left:2px solid #e8eef7;padding:0 0 18px 18px;position:relative;">';
+                    html += '<div style="font-weight:600;">v'+esc(v.version)+(v.is_latest?' <span class="layui-badge layui-bg-blue">当前版本</span>':'')+'</div>';
+                    html += '<div style="font-size:12px;color:#999;margin-top:4px;">'+esc(v.created_at||'')+' · '+authorHtml({authorDisplayName:v.authorDisplayName,isOfficialAuthor:v.isOfficialAuthor})+'</div>';
+                    html += '<div style="font-size:13px;color:#555;line-height:1.7;margin-top:8px;white-space:pre-wrap;">'+esc(v.update_description||'暂无更新说明')+'</div>';
+                    if(v.can_download){
+                        html += '<button class="layui-btn layui-btn-xs layui-btn-normal market-version-download" data-plugin-id="'+id+'" data-version-id="'+v.id+'" style="margin-top:10px;">下载</button>';
+                    }
+                    html += '</div>';
+                });
+                html += '</div>';
+                layer.open({type:1,title:'版本历史',area:['560px','70%'],content:html});
+            }});
+    }
+    $(document).on('click', '.market-version-download', function(){
+        var pluginId = $(this).data('plugin-id');
+        var versionId = $(this).data('version-id');
+        var url = '{:url("/UserPlugin/downloadVersion")}?plugin_id=' + pluginId + '&version_id=' + versionId;
+        layer.msg('正在检查下载权限...', {icon: 16, shade: 0.01, time: 0});
+        $.ajax({
+            type:'GET',
+            url:'{:url("/UserPlugin/checkVersionDownload")}',
+            data:{plugin_id:pluginId, version_id:versionId},
+            dataType:'json',
+            success:function(r){
+                layer.closeAll('dialog');
+                if(r.code != 0){
+                    layer.msg(r.msg || '暂时无法下载该版本',{icon:2});
+                    return;
+                }
+                layer.msg('开始下载',{icon:1});
+                window.location.href = url;
+            },
+            error:function(){
+                layer.closeAll('dialog');
+                layer.msg('下载检查失败，请稍后重试',{icon:2});
+            }
+        });
+    });
 
     function esc(s) {
         var m = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};

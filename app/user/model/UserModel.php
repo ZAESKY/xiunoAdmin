@@ -99,17 +99,13 @@ class UserModel extends BaseModel
                     return message(t('user.username_exists') ,false);
                 }
             }
-            if($power != -1) {
+            if($power != intval($row['power'])) {
                 if(parent::getPowerPriceInfo($power) == false){
                     return message(t('power.not_exist') ,false);
                 }
                 $isSubordinatePower = parent::isSubordinatePower($power);
                 if(!$isSubordinatePower){
                     return message(t('user.not_your_subordinate_upgrade') ,false);
-                }
-                $isSubordinatePower = parent::isSubordinatePower($power, $row['power']);
-                if ($isSubordinatePower) {
-                    return message(t('user.cannot_downgrade'), false);
                 }
                 $nowPowerPriceInfo = parent::getPowerPriceInfo($row['power']);
                 if (!$nowPowerPriceInfo) {
@@ -119,7 +115,7 @@ class UserModel extends BaseModel
                 if (!$newPowerPriceInfo) {
                     return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]', false);
                 }
-                $price = round(($newPowerPriceInfo['money'] - $nowPowerPriceInfo['money']) * floatval($userPowerPriceInfo['adduser_discount'] / 100) ,2);
+                $price = round(max(floatval($newPowerPriceInfo['money']) - floatval($nowPowerPriceInfo['money']), 0) * floatval($userPowerPriceInfo['adduser_discount'] / 100) ,2);
             }else{
                 $price = 0;
             }
@@ -146,7 +142,7 @@ class UserModel extends BaseModel
             }
 
             $data = [
-                "power" => ($power == -1)?$row['power']:$power,
+                "power" => $power,
                 "username" => $username,
                 "password" => !empty($password) ? get_password($password) : $row['password'],
                 "qq" => $qq,
@@ -241,6 +237,8 @@ class UserModel extends BaseModel
                 "username" => $username,
                 "password" => get_password($password),
                 "qq" => $qq,
+                "phone" => '',
+                "wechat_openid" => '',
                 "email" => $email,
                 "balance" => $balance + $appInfo['give_money'],
                 "integral" => $integral,

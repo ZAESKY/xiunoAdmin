@@ -22,11 +22,15 @@ class PluginModel extends BaseModel
         try {
             $result = self::where('id', $id)->find();
             if ($result) {
+                $result = $result->toArray();
                 // 解析JSON字段
                 if (!empty($result['images'])) {
                     $result['images'] = json_decode($result['images'], true);
+                } else {
+                    $result['images'] = [];
                 }
                 $this->attachRelatedPlugin($result);
+                $this->attachPluginResources($result);
                 return $result;
             }
             return false;
@@ -40,10 +44,14 @@ class PluginModel extends BaseModel
         try {
             $result = self::where('slug', $slug)->find();
             if ($result) {
+                $result = $result->toArray();
                 if (!empty($result['images'])) {
                     $result['images'] = json_decode($result['images'], true);
+                } else {
+                    $result['images'] = [];
                 }
                 $this->attachRelatedPlugin($result);
+                $this->attachPluginResources($result);
                 return $result;
             }
             return false;
@@ -65,6 +73,7 @@ class PluginModel extends BaseModel
         $description = !empty($post['description']) ? trim($post['description']) : '';
         $content = !empty($post['content']) ? clean_rich_text($post['content']) : '';
         $icon = !empty($post['icon']) ? $post['icon'] : '';
+        $cover = !empty($post['cover']) ? $post['cover'] : '';
         $images = !empty($post['images']) ? $post['images'] : [];
         $price = !empty($post['price']) ? floatval($post['price']) : 0.00;
         $pay_type = !empty($post['pay_type']) ? trim($post['pay_type']) : 'balance';
@@ -83,6 +92,16 @@ class PluginModel extends BaseModel
         $publish_time = !empty($post['publish_time']) ? trim($post['publish_time']) : null;
         $status = isset($post['status']) ? intval($post['status']) : 0;
         $audit_note = !empty($post['audit_note']) ? trim($post['audit_note']) : '';
+        $file_path = !empty($post['file_path']) ? $post['file_path'] : '';
+        $file_hash = !empty($post['file_hash']) ? $post['file_hash'] : '';
+        $file_size = !empty($post['file_size']) ? intval($post['file_size']) : 0;
+        $storage_driver = !empty($post['storage_driver']) ? trim($post['storage_driver']) : 'local';
+        $package_object_key = !empty($post['package_object_key']) ? trim($post['package_object_key']) : '';
+        $package_file_name = !empty($post['package_file_name']) ? trim($post['package_file_name']) : '';
+        $package_mime_type = !empty($post['package_mime_type']) ? trim($post['package_mime_type']) : '';
+        $icon_object_key = !empty($post['icon_object_key']) ? trim($post['icon_object_key']) : '';
+        $cover_object_key = !empty($post['cover_object_key']) ? trim($post['cover_object_key']) : '';
+        $update_description = isset($post['update_description']) ? trim((string)$post['update_description']) : '';
 
         if (empty($name)) {
             return message('插件名称不能为空', false);
@@ -131,10 +150,10 @@ class PluginModel extends BaseModel
         if ($related_plugin_id > 0) {
             $relatedPlugin = self::where('id', $related_plugin_id)->where('status', 1)->find();
             if (!$relatedPlugin) {
-                return message('关联插件不存在或未上架', false);
+                $related_plugin_id = 0;
             }
             if (!empty($id) && $related_plugin_id == intval($id)) {
-                return message('关联插件不能选择当前插件', false);
+                $related_plugin_id = 0;
             }
         }
 
@@ -161,7 +180,9 @@ class PluginModel extends BaseModel
                 'name' => $name, 'slug' => $slug, 'category' => $category,
                 'version' => $version, 'author' => $author, 'author_url' => $author_url,
                 'description' => $description, 'content' => $content,
-                'icon' => $icon, 'images' => $images, 'price' => $price, 'pay_type' => $pay_type,
+                'icon' => $icon, 'images' => $images, 'cover' => $cover, 'price' => $price, 'pay_type' => $pay_type,
+                'storage_driver' => $storage_driver, 'update_description' => $update_description,
+                'icon_object_key' => $icon_object_key, 'cover_object_key' => $cover_object_key,
                 'origin_type' => $origin_type, 'origin_url' => $origin_url,
                 'origin_author' => $origin_author, 'origin_note' => $origin_note,
                 'related_plugin_id' => $related_plugin_id,
@@ -171,18 +192,51 @@ class PluginModel extends BaseModel
                 'updated_at' => datetime(),
             ];
 
+            if (!empty($file_path)) {
+                $data['file_path'] = $file_path;
+                $data['file_hash'] = $file_hash;
+                $data['file_size'] = $file_size;
+                $data['package_object_key'] = $package_object_key;
+                $data['package_file_name'] = $package_file_name;
+                $data['package_mime_type'] = $package_mime_type;
+            } elseif ($version !== ($row['version'] ?? '')) {
+                return message('发布新版本请先上传对应插件包', false);
+            }
+
             if ($status == 1 && $row['status'] != 1) {
                 $data['published_at'] = ($publish_type == 1 && !empty($publish_time)) ? $publish_time : datetime();
             }
 
             try {
+                Db::startTrans();
                 self::where('id', $id)->data($data)->update();
+                $versionId = $this->latestVersionId(intval($id));
+                if (!empty($file_path) && $file_path !== ($row['file_path'] ?? '')) {
+                    $versionId = $this->insertVersionRecord(intval($id), $version, [
+                        'storage_driver' => $storage_driver,
+                        'package_path' => $file_path,
+                        'package_object_key' => $package_object_key,
+                        'package_file_name' => $package_file_name,
+                        'package_file_size' => $file_size,
+                        'package_mime_type' => $package_mime_type,
+                        'package_hash' => $file_hash,
+                        'update_description' => $update_description,
+                        'created_by' => 0,
+                    ]);
+                }
+                $this->syncPluginResources(intval($id), $versionId, 0, $icon, $cover, $storage_driver, $post);
+                Db::commit();
                 Cache::tag('SF_Plugin')->clear();
                 return message(t('user.edit_success'), true);
             } catch (\Exception $e) {
+                Db::rollback();
                 return message(t('user.edit_failed') . $e->getMessage(), false);
             }
         } else {
+            if (empty($file_path)) {
+                return message('请先上传插件文件', false);
+            }
+
             $exists = self::where('slug', $slug)->find();
             if ($exists) {
                 return message('插件标识「' . $slug . '」已存在', false);
@@ -196,10 +250,18 @@ class PluginModel extends BaseModel
                 'name' => $name, 'slug' => $slug, 'category' => $category,
                 'version' => $version, 'author' => $author, 'author_url' => $author_url,
                 'description' => $description, 'content' => $content,
-                'icon' => $icon, 'images' => $images, 'price' => $price, 'pay_type' => $pay_type,
+                'icon' => $icon, 'images' => $images, 'cover' => $cover, 'price' => $price, 'pay_type' => $pay_type,
                 'origin_type' => $origin_type, 'origin_url' => $origin_url,
                 'origin_author' => $origin_author, 'origin_note' => $origin_note,
                 'related_plugin_id' => $related_plugin_id,
+                'file_path' => $file_path, 'file_hash' => $file_hash, 'file_size' => $file_size,
+                'storage_driver' => $storage_driver,
+                'package_object_key' => $package_object_key,
+                'package_file_name' => $package_file_name,
+                'package_mime_type' => $package_mime_type,
+                'icon_object_key' => $icon_object_key,
+                'cover_object_key' => $cover_object_key,
+                'update_description' => $update_description,
                 'sort' => $sort, 'is_hot' => $is_hot, 'is_recommend' => $is_recommend,
                 'publish_type' => $publish_type, 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => $status, 'audit_note' => $audit_note,
@@ -211,10 +273,25 @@ class PluginModel extends BaseModel
             }
 
             try {
-                self::insert($data);
+                Db::startTrans();
+                $pluginId = self::insertGetId($data);
+                $versionId = $this->insertVersionRecord($pluginId, $version, [
+                    'storage_driver' => $storage_driver,
+                    'package_path' => $file_path,
+                    'package_object_key' => $package_object_key,
+                    'package_file_name' => $package_file_name,
+                    'package_file_size' => $file_size,
+                    'package_mime_type' => $package_mime_type,
+                    'package_hash' => $file_hash,
+                    'update_description' => $update_description,
+                    'created_by' => 0,
+                ]);
+                $this->syncPluginResources($pluginId, $versionId, 0, $icon, $cover, $storage_driver, $post);
+                Db::commit();
                 Cache::tag('SF_Plugin')->clear();
                 return message(t('user.add_success'), true);
             } catch (\Exception $e) {
+                Db::rollback();
                 return message(t('user.add_failed') . $e->getMessage(), false);
             }
         }
@@ -251,6 +328,81 @@ class PluginModel extends BaseModel
         }
     }
 
+    private function insertVersionRecord(int $pluginId, string $version, array $data): int
+    {
+        $exists = Db::name('plugin_versions')
+            ->where('plugin_id', $pluginId)
+            ->where('version', $version)
+            ->find();
+        if ($exists) {
+            throw new Exception('当前插件下版本号「' . $version . '」已存在');
+        }
+        $data['plugin_id'] = $pluginId;
+        $data['version'] = $version;
+        $data['created_at'] = datetime();
+        $data['updated_at'] = datetime();
+        return Db::name('plugin_versions')->insertGetId($data);
+    }
+
+    private function latestVersionId(int $pluginId): int
+    {
+        $row = Db::name('plugin_versions')
+            ->where('plugin_id', $pluginId)
+            ->order('created_at', 'desc')
+            ->order('id', 'desc')
+            ->field('id')
+            ->find();
+        return $row ? intval($row['id']) : 0;
+    }
+
+    private function syncPluginResources(int $pluginId, int $versionId, int $userId, string $icon, string $cover, string $storageDriver, array $post): void
+    {
+        Db::name('plugin_resources')
+            ->where('plugin_id', $pluginId)
+            ->whereIn('resource_type', ['icon', 'cover'])
+            ->delete();
+
+        $now = datetime();
+        $rows = [];
+        if ($icon !== '') {
+            $rows[] = [
+                'plugin_id' => $pluginId,
+                'version_id' => $versionId,
+                'resource_type' => 'icon',
+                'storage_driver' => $post['icon_storage_driver'] ?? $storageDriver,
+                'url' => $icon,
+                'object_key' => $post['icon_object_key'] ?? '',
+                'file_name' => $post['icon_file_name'] ?? '',
+                'file_size' => intval($post['icon_file_size'] ?? 0),
+                'mime_type' => $post['icon_mime_type'] ?? '',
+                'sort_order' => 0,
+                'created_by' => $userId,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+        if ($cover !== '') {
+            $rows[] = [
+                'plugin_id' => $pluginId,
+                'version_id' => $versionId,
+                'resource_type' => 'cover',
+                'storage_driver' => $post['cover_storage_driver'] ?? $storageDriver,
+                'url' => $cover,
+                'object_key' => $post['cover_object_key'] ?? '',
+                'file_name' => $post['cover_file_name'] ?? '',
+                'file_size' => intval($post['cover_file_size'] ?? 0),
+                'mime_type' => $post['cover_mime_type'] ?? '',
+                'sort_order' => 0,
+                'created_by' => $userId,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+        if (!empty($rows)) {
+            Db::name('plugin_resources')->insertAll($rows);
+        }
+    }
+
     public function setStatus()
     {
         try {
@@ -280,6 +432,14 @@ class PluginModel extends BaseModel
 
             self::where('id', $id)->data($data)->update();
             Cache::tag('SF_Plugin')->clear();
+
+            // 审核通过时将临时图片移动到正式目录
+            if ($status == 1 && !empty($row['content'])) {
+                $movedContent = move_temp_images_in_content($row['content']);
+                if ($movedContent !== $row['content']) {
+                    self::where('id', $id)->update(['content' => $movedContent]);
+                }
+            }
 
             // 通知插件开发者审核结果
             try {
@@ -320,15 +480,43 @@ class PluginModel extends BaseModel
                     'list_rows' => $limit,
                     'page' => $current_page,
                 ]);
+            $pluginIds = [];
             foreach ($list as $item) {
-                $pluginId = intval($item['id']);
-                $item['purchase_count'] = Db::name('plugin_purchase')->where('plugin_id', $pluginId)->count('id');
-                $item['download_record_count'] = Db::name('plugin_download')->where('plugin_id', $pluginId)->count('id');
+                $pluginId = intval($item['id'] ?? 0);
+                if ($pluginId > 0) {
+                    $pluginIds[] = $pluginId;
+                }
+            }
+            $purchaseCounts = $this->countByPlugin('plugin_purchase', $pluginIds);
+            $downloadCounts = $this->countByPlugin('plugin_download', $pluginIds);
+            foreach ($list as $item) {
+                $pluginId = intval($item['id'] ?? 0);
+                $item['purchase_count'] = $purchaseCounts[$pluginId] ?? 0;
+                $item['download_record_count'] = $downloadCounts[$pluginId] ?? 0;
             }
             return $list;
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }
+    }
+
+    private function countByPlugin(string $table, array $pluginIds): array
+    {
+        $pluginIds = array_values(array_unique(array_filter(array_map('intval', $pluginIds))));
+        if (empty($pluginIds)) {
+            return [];
+        }
+        $rows = Db::name($table)
+            ->whereIn('plugin_id', $pluginIds)
+            ->field('plugin_id, COUNT(*) AS total')
+            ->group('plugin_id')
+            ->select()
+            ->toArray();
+        $map = [];
+        foreach ($rows as $row) {
+            $map[intval($row['plugin_id'])] = intval($row['total']);
+        }
+        return $map;
     }
 
     public function searchRelatedOptions($keyword = '', $excludeId = 0, $limit = 20)
@@ -357,6 +545,37 @@ class PluginModel extends BaseModel
             ->field('id,name,slug,version,icon,price,pay_type,status')
             ->find();
         $plugin['related_plugin'] = $related ? $related->toArray() : null;
+    }
+
+    private function attachPluginResources(&$plugin): void
+    {
+        $pluginId = intval($plugin['id'] ?? 0);
+        $plugin['iconUrl'] = $plugin['icon'] ?? '';
+        $plugin['coverUrl'] = $plugin['cover'] ?? '';
+        if ($pluginId <= 0) {
+            return;
+        }
+
+        $resources = Db::name('plugin_resources')
+            ->where('plugin_id', $pluginId)
+            ->whereIn('resource_type', ['icon', 'cover'])
+            ->order('sort_order', 'asc')
+            ->order('id', 'asc')
+            ->select()
+            ->toArray();
+
+        foreach ($resources as $resource) {
+            $url = $resource['url'] ?: ($resource['object_key'] ?? '');
+            if ($resource['resource_type'] === 'icon' && $url !== '') {
+                $plugin['icon'] = $url;
+                $plugin['iconUrl'] = $url;
+                $plugin['icon_object_key'] = $resource['object_key'] ?? ($plugin['icon_object_key'] ?? '');
+            } elseif ($resource['resource_type'] === 'cover' && $url !== '') {
+                $plugin['cover'] = $url;
+                $plugin['coverUrl'] = $url;
+                $plugin['cover_object_key'] = $resource['object_key'] ?? ($plugin['cover_object_key'] ?? '');
+            }
+        }
     }
 
     /**

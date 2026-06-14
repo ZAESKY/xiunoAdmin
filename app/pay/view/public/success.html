@@ -29,35 +29,29 @@
 <body>
 <div class="system-message success">
     <div class="image">
-        <img src="{__IMG__}success.svg" alt="" width="150" />
+        <img src="/Assets/img/success.svg" alt="" width="150" />
     </div>
     <h1>{$msg}</h1>
     {notempty name="url"}
     <p class="jump">
         页面将在 <span id="wait">{$time}</span> 秒后自动跳转</p>
     <p class="clearfix">
-        <a href="/" class="btn btn-grey">{:t('common.go_back')}</a>
-        <a id="href" href="{$url}" class="btn btn-primary">{:t('common.jump_now')}</a>
+        <a href="/" class="btn btn-grey">返回首页</a>
+        <a id="href" href="{$url}" class="btn btn-primary">立即跳转</a>
     </p>
-</div>
-{include file="/public/footer"}
-<script type="text/javascript">
-    layui.use(['admin'], function () {
-        var $ = layui.jquery;
-        var admin = layui.admin;
+    <script type="text/javascript">
         (function () {
             var wait = document.getElementById('wait');
             var interval = setInterval(function () {
                 var time = --wait.innerHTML;
                 if (time <= 0) {
-                    admin.closeThisDialog();
-                    location.href = "{$url}";
+                    location.href = document.getElementById('href').href;
                     clearInterval(interval);
                 }
             }, 1000);
         })();
-    });
-</script>
-{/notempty}
+    </script>
+    {/notempty}
+</div>
 </body>
 </html>

@@ -8,7 +8,6 @@ use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Event;
 use think\facade\View;
-use think\exception\ValidateException;
 /**
  * 后台登陆控制器
  *
@@ -46,7 +45,7 @@ class Login extends Backend
     public function index()
     {
         // 取消模板布局
-        if($_SERVER['QUERY_STRING'] == conf('SF_LOGIN_KEY')){
+        if(($this->request->server('QUERY_STRING', '') ?: '') == conf('SF_LOGIN_KEY')){
             session('SF_LOGIN_KEY',conf('SF_LOGIN_KEY'));
         }
         $this->app->view->layout(false);
@@ -85,9 +84,9 @@ class Login extends Backend
         if (IS_POST) {
             try{
                 $result = $this->service->login();
-                return $result;
-            }catch (\Exception $e){
-                return message(t('login.failed').$e->getMessage() ,false);
+                return json($result);
+            }catch (\Throwable $e){
+                return json(message(t('login.failed').$e->getMessage() ,false));
             }
         }
     }
@@ -101,7 +100,7 @@ class Login extends Backend
     {
         if (IS_POST) {
             $result = $this->service->checkLoginKey();
-            return $result;
+            return json($result);
         }
     }
 

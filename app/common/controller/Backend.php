@@ -253,11 +253,10 @@ class Backend extends CommonBase
     public function edit()
     {
         if (IS_POST) {
-            //try{
-                return $this->service->edit();
-            //}catch (\Exception $e){
-               // return message($e->getMessage() ,false);
-            //}
+            if (null === $this->service) {
+                return json(message(t('common.server_error'), false));
+            }
+            return json($this->service->edit());
         }
     }
 
@@ -270,16 +269,19 @@ class Backend extends CommonBase
     public function drop()
     {
         if (IS_POST) {
+            if (null === $this->service) {
+                return json(message(t('common.server_error'), false));
+            }
             $id = input('post.id');
             try{
                 $info = $this->service->getInfo($id);
                 if ($info) {
                     $this->service->drop($id);
-                    return message(t('user.delete_success'), true);
+                    return json(message(t('user.delete_success'), true));
                 }
-                return message(t('validation.invalid_id'), false);
+                return json(message(t('validation.invalid_id'), false));
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -293,11 +295,14 @@ class Backend extends CommonBase
     public function batchDrop()
     {
         if (IS_POST) {
+            if (null === $this->service) {
+                return json(message(t('common.server_error'), false));
+            }
             try{
                 // Normalize ids from request before passing them into service layer.
                 $ids = array_values(array_filter(array_unique(array_map('intval', explode(',', (string)input('post.id'))))));
                 if (empty($ids)) {
-                    return message(t('common.invalid_id'), false);
+                    return json(message(t('common.invalid_id'), false));
                 }
                 //批量删除
                 $num = 0;
@@ -307,9 +312,9 @@ class Backend extends CommonBase
                         $num++;
                     }
                 }
-                return message(t('batch.delete_count', ['total' => count($ids), 'count' => $num]));
+                return json(message(t('batch.delete_count', ['total' => count($ids), 'count' => $num])));
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -324,10 +329,13 @@ class Backend extends CommonBase
     {
         if (IS_POST) {
             try{
+                if (null === $this->service) {
+                    return json(message(t('common.server_error'), false, ['data' => []]));
+                }
                 $result = $this->service->list();
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             }catch (\Exception $e){
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
         try{
@@ -346,11 +354,14 @@ class Backend extends CommonBase
     public function setStatus()
     {
         if (IS_POST) {
+            if (null === $this->service) {
+                return json(message(t('common.server_error'), false));
+            }
             try{
                 $this->service->setStatus();
-                return message(t('user.status_change_success'), true);
+                return json(message(t('user.status_change_success'), true));
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }

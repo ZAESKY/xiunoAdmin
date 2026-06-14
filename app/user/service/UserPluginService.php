@@ -6,8 +6,8 @@ use app\admin\model\PluginModel;
 use app\common\model\NotificationModel;
 use app\common\model\PointLogModel;
 use app\common\service\BaseService;
+use app\common\service\PluginStorageService;
 use think\Exception;
-use think\facade\Filesystem;
 
 /**
  * 用户插件服务
@@ -53,7 +53,7 @@ class UserPluginService extends BaseService
 
         $query = \think\facade\Db::name('plugin')
             ->where($where)
-            ->field('id,name,slug,category,version,author,icon,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time');
+            ->field('id,user_id,name,slug,category,version,author,icon,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time,updated_at');
 
         if ($sort === 'downloads') {
             $query->order('download_count', 'desc');
@@ -67,10 +67,15 @@ class UserPluginService extends BaseService
             $query->order('sort', 'desc')->order('id', 'desc');
         }
 
-        return $query->paginate([
+        $list = $query->paginate([
             'list_rows' => $limit,
             'page' => $current_page,
         ]);
+        $list->each(function ($item) {
+            $this->decorateAuthor($item);
+            return $item;
+        });
+        return $list;
     }
 
     /**
@@ -125,7 +130,9 @@ class UserPluginService extends BaseService
         $description = !empty($post['description']) ? trim($post['description']) : '';
         $content = !empty($post['content']) ? clean_rich_text($post['content']) : '';
         $icon = !empty($post['icon']) ? $post['icon'] : '';
+        $cover = !empty($post['cover']) ? $post['cover'] : '';
         $images = !empty($post['images']) ? $post['images'] : [];
+        $updateDescription = isset($post['update_description']) ? trim((string)$post['update_description']) : trim((string)($post['updateDescription'] ?? ''));
         $price = !empty($post['price']) ? floatval($post['price']) : 0.00;
         $pay_type = !empty($post['pay_type']) ? trim($post['pay_type']) : 'balance';
 
@@ -224,6 +231,12 @@ class UserPluginService extends BaseService
         $file_path = !empty($post['file_path']) ? $post['file_path'] : '';
         $file_hash = !empty($post['file_hash']) ? $post['file_hash'] : '';
         $file_size = !empty($post['file_size']) ? intval($post['file_size']) : 0;
+        $storageDriver = !empty($post['storage_driver']) ? trim($post['storage_driver']) : 'local';
+        $packageObjectKey = !empty($post['package_object_key']) ? trim($post['package_object_key']) : '';
+        $packageFileName = !empty($post['package_file_name']) ? trim($post['package_file_name']) : '';
+        $packageMimeType = !empty($post['package_mime_type']) ? trim($post['package_mime_type']) : '';
+        $iconObjectKey = !empty($post['icon_object_key']) ? trim($post['icon_object_key']) : '';
+        $coverObjectKey = !empty($post['cover_object_key']) ? trim($post['cover_object_key']) : '';
 
         if (!empty($id)) {
             // 编辑 - 只能编辑自己的插件
@@ -262,9 +275,14 @@ class UserPluginService extends BaseService
                 'description' => $description,
                 'content' => $content,
                 'icon' => $icon,
+                'cover' => $cover,
                 'images' => $images,
                 'price' => $price,
                 'pay_type' => $pay_type,
+                'storage_driver' => $storageDriver,
+                'icon_object_key' => $iconObjectKey,
+                'cover_object_key' => $coverObjectKey,
+                'update_description' => $updateDescription,
                 'origin_type' => $origin_type,
                 'origin_url' => $origin_url,
                 'origin_author' => $origin_author,
@@ -278,17 +296,53 @@ class UserPluginService extends BaseService
             ];
 
             if (!empty($file_path)) {
+                $versionExists = \think\facade\Db::name('plugin_versions')
+                    ->where('plugin_id', intval($id))
+                    ->where('version', $version)
+                    ->find();
+                if ($versionExists && $file_path !== ($row['file_path'] ?? '')) {
+                    return message('当前插件下版本号「' . $version . '」已存在，请修改版本号后再发布新版本', false);
+                }
                 $data['file_path'] = $file_path;
                 $data['file_hash'] = $file_hash;
                 $data['file_size'] = $file_size;
+                $data['package_object_key'] = $packageObjectKey;
+                $data['package_file_name'] = $packageFileName;
+                $data['package_mime_type'] = $packageMimeType;
+            } elseif ($version !== ($row['version'] ?? '')) {
+                return message('发布新版本请先上传对应插件包，避免新版本覆盖旧版本文件', false);
             }
 
             try {
+                \think\facade\Db::startTrans();
                 \think\facade\Db::name('plugin')->where('id', $id)->update($data);
+                if (!empty($file_path) && $file_path !== ($row['file_path'] ?? '')) {
+                    $versionId = $this->writeVersionRecord(intval($id), $version, [
+                        'storage_driver' => $storageDriver,
+                        'package_path' => $file_path,
+                        'package_object_key' => $packageObjectKey,
+                        'package_file_name' => $packageFileName,
+                        'package_file_size' => $file_size,
+                        'package_mime_type' => $packageMimeType,
+                        'package_hash' => $file_hash,
+                        'update_description' => $updateDescription,
+                        'created_by' => intval($userId),
+                    ]);
+                    $this->syncPluginResources(intval($id), $versionId, $userId, $icon, $cover, $storageDriver, $post);
+                } else {
+                    $latestVersion = \think\facade\Db::name('plugin_versions')
+                        ->where('plugin_id', intval($id))
+                        ->where('version', $version)
+                        ->order('id', 'desc')
+                        ->find();
+                    $this->syncPluginResources(intval($id), $latestVersion ? intval($latestVersion['id']) : 0, $userId, $icon, $cover, $storageDriver, $post);
+                }
+                \think\facade\Db::commit();
                 \think\facade\Cache::tag('SF_Plugin')->clear();
                 $msg = ($newStatus == 0 && $row['status'] == 1) ? '修改成功，插件已重新提交审核' : '修改成功';
                 return message($msg, true);
             } catch (\Exception $e) {
+                \think\facade\Db::rollback();
                 return message('修改失败: ' . $e->getMessage(), false);
             }
         } else {
@@ -321,12 +375,20 @@ class UserPluginService extends BaseService
                 'description' => $description,
                 'content' => $content,
                 'icon' => $icon,
+                'cover' => $cover,
                 'images' => $images,
                 'price' => $price,
                 'pay_type' => $pay_type,
                 'file_path' => $file_path,
                 'file_hash' => $file_hash,
                 'file_size' => $file_size,
+                'storage_driver' => $storageDriver,
+                'package_object_key' => $packageObjectKey,
+                'package_file_name' => $packageFileName,
+                'package_mime_type' => $packageMimeType,
+                'icon_object_key' => $iconObjectKey,
+                'cover_object_key' => $coverObjectKey,
+                'update_description' => $updateDescription,
                 'publish_type' => $publish_type,
                 'publish_time' => ($publish_type == 1 ? $publish_time : null),
                 'status' => 0,
@@ -336,17 +398,34 @@ class UserPluginService extends BaseService
             ];
 
             try {
-                \think\facade\Db::name('plugin')->insert($data);
+                \think\facade\Db::startTrans();
+                $pluginId = \think\facade\Db::name('plugin')->insertGetId($data);
+                $versionId = $this->writeVersionRecord($pluginId, $version, [
+                    'storage_driver' => $storageDriver,
+                    'package_path' => $file_path,
+                    'package_object_key' => $packageObjectKey,
+                    'package_file_name' => $packageFileName,
+                    'package_file_size' => $file_size,
+                    'package_mime_type' => $packageMimeType,
+                    'package_hash' => $file_hash,
+                    'update_description' => $updateDescription,
+                    'created_by' => intval($userId),
+                ]);
+                $this->syncPluginResources($pluginId, $versionId, $userId, $icon, $cover, $storageDriver, $post);
+                \think\facade\Db::commit();
                 \think\facade\Cache::tag('SF_Plugin')->clear();
 
-                // 首次发布插件，标记为开发者
-                $user = \think\facade\Db::name('user')->where('id', intval($userId))->find();
-                if ($user && empty($user['is_developer'])) {
-                    \think\facade\Db::name('user')->where('id', intval($userId))->update(['is_developer' => 1]);
+                // 将临时图片移动到正式目录
+                if (!empty($content)) {
+                    $movedContent = move_temp_images_in_content($content);
+                    if ($movedContent !== $content) {
+                        \think\facade\Db::name('plugin')->where('id', $pluginId)->update(['content' => $movedContent]);
+                    }
                 }
 
                 // 通知管理员有新插件待审核
                 try {
+                    $user = \think\facade\Db::name('user')->where('id', intval($userId))->find();
                     $username = $user ? $user['username'] : '未知用户';
                     NotificationModel::add([
                         'user_id'    => 0,
@@ -361,6 +440,7 @@ class UserPluginService extends BaseService
 
                 return message('发布成功，等待管理员审核', true);
             } catch (\Exception $e) {
+                \think\facade\Db::rollback();
                 return message('发布失败: ' . $e->getMessage(), false);
             }
         }
@@ -377,7 +457,7 @@ class UserPluginService extends BaseService
             try {
                 validate([
                     'File' => [
-                        'fileSize' => 410241024,
+                        'fileSize' => 200 * 1024 * 1024,
                         'fileExt' => 'zip',
                         'fileMime' => 'application/zip,application/x-zip-compressed,application/octet-stream',
                     ]
@@ -392,23 +472,11 @@ class UserPluginService extends BaseService
                 return message('压缩包名称不能包含中文，请重命名后再上传', false, ['status' => 0]);
             }
 
-            $uploadPath = app()->getRootPath() . 'storage' . DIRECTORY_SEPARATOR . 'plugins';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
-            }
-
-            $finalName = date('Ymd') . '_' . uniqid() . '.zip';
-            $file->move($uploadPath, $finalName);
-            $finalFile = $uploadPath . DIRECTORY_SEPARATOR . $finalName;
-
-            $fileHash = md5_file($finalFile);
-            $fileSize = filesize($finalFile);
-
             // 尝试解析压缩包内的 conf.json 和 icon.png（支持根目录和单层子目录）
             $autoData = [];
             try {
                 $zip = new \ZipArchive();
-                if ($zip->open($finalFile) === true) {
+                if ($zip->open($file->getPathname()) === true) {
                     $confContent = false;
                     $iconContent = false;
 
@@ -450,11 +518,13 @@ class UserPluginService extends BaseService
                     }
                     // 提取 icon.png
                     if ($iconContent !== false) {
-                        $iconDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . date('Ymd');
-                        if (!is_dir($iconDir)) mkdir($iconDir, 0755, true);
-                        $iconName = 'plugin_icon_' . uniqid() . '.png';
-                        file_put_contents($iconDir . DIRECTORY_SEPARATOR . $iconName, $iconContent);
-                        $autoData['icon'] = '/upload/' . date('Ymd') . '/' . $iconName;
+                        $iconMeta = (new PluginStorageService())->storeBytes($iconContent, 'icon', 'icon.png', 'image/png');
+                        $autoData['icon'] = $iconMeta['url'];
+                        $autoData['icon_object_key'] = $iconMeta['object_key'];
+                        $autoData['icon_file_name'] = $iconMeta['file_name'];
+                        $autoData['icon_file_size'] = $iconMeta['file_size'];
+                        $autoData['icon_mime_type'] = $iconMeta['mime_type'];
+                        $autoData['icon_storage_driver'] = $iconMeta['storage_driver'];
                     }
                     $zip->close();
                 }
@@ -462,12 +532,18 @@ class UserPluginService extends BaseService
                 // 解析失败不报错，让用户手动填写
             }
 
+            $stored = (new PluginStorageService())->storeUploadedFile($file, 'package', ['zip'], 200 * 1024 * 1024);
+
             return message('上传成功', true, [
                 'status' => 1,
-                'file_path' => $finalFile,
-                'file_hash' => $fileHash,
-                'file_size' => $fileSize,
+                'file_path' => $stored['path'],
+                'file_hash' => $stored['file_hash'],
+                'file_size' => $stored['file_size'],
                 'original_name' => $originalName,
+                'storage_driver' => $stored['storage_driver'],
+                'package_object_key' => $stored['object_key'],
+                'package_file_name' => $stored['file_name'],
+                'package_mime_type' => $stored['mime_type'],
                 'auto' => $autoData,
             ]);
         } catch (\Exception $e) {
@@ -677,6 +753,9 @@ class UserPluginService extends BaseService
             return message('用户信息错误', false);
         }
         $app_id = intval($user['appid']);
+        if (!$this->hasPurchasedOrDownloaded($plugin_id, intval($userId), $app_id)) {
+            return message('购买或下载插件后才能评论', false);
+        }
 
         // 检查是否已评论
         $existing = \think\facade\Db::name('plugin_comment')
@@ -879,6 +958,14 @@ class UserPluginService extends BaseService
                     '购买插件：' . $plugin['name'],
                     $orderId
                 );
+                \app\common\model\PointLogModel::grantConsumptionPoints(
+                    intval($userId),
+                    $price,
+                    'plugin_order_consume',
+                    $orderId,
+                    '消费购买插件获得积分 +' . intval(floor($price)) . '：' . $plugin['name'],
+                    $orderId
+                );
             }
 
             // 给插件开发者打款
@@ -952,7 +1039,7 @@ class UserPluginService extends BaseService
             return message('插件不存在或未上架', false);
         }
 
-        if (empty($plugin['file_path']) || !file_exists($plugin['file_path'])) {
+        if (($plugin['storage_driver'] ?? 'local') !== 'oss' && (empty($plugin['file_path']) || !file_exists($plugin['file_path']))) {
             return message('插件文件不存在', false);
         }
 
@@ -1118,7 +1205,7 @@ class UserPluginService extends BaseService
         if (!$plugin) {
             throw new Exception('插件不存在或已下架');
         }
-        if (empty($plugin['file_path']) || !file_exists($plugin['file_path'])) {
+        if (($plugin['storage_driver'] ?? 'local') !== 'oss' && (empty($plugin['file_path']) || !file_exists($plugin['file_path']))) {
             throw new Exception('插件文件不存在');
         }
 
@@ -1143,8 +1230,13 @@ class UserPluginService extends BaseService
         \think\facade\Db::name('plugin')->where('id', $plugin['id'])->inc('download_count')->update();
 
         // 返回文件
-        $filePath = $plugin['file_path'];
+        $filePath = (new PluginStorageService())->getDownloadUrl($plugin);
         $fileName = $plugin['slug'] . '_v' . $plugin['version'] . '.zip';
+
+        if (preg_match('#^https?://#i', $filePath)) {
+            header('Location: ' . $filePath);
+            exit;
+        }
 
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -1155,5 +1247,300 @@ class UserPluginService extends BaseService
 
         readfile($filePath);
         exit;
+    }
+
+    public function uploadResource(string $type)
+    {
+        $type = in_array($type, ['icon', 'cover'], true) ? $type : 'icon';
+        try {
+            $file = request()->file('file');
+            $stored = (new PluginStorageService())->storeUploadedFile($file, $type, ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
+            return message('上传成功', true, [
+                'status' => 1,
+                'path' => $stored['url'],
+                'url' => $stored['url'],
+                'src' => $stored['url'],
+                'storage_driver' => $stored['storage_driver'],
+                'object_key' => $stored['object_key'],
+                'file_name' => $stored['file_name'],
+                'file_size' => $stored['file_size'],
+                'mime_type' => $stored['mime_type'],
+            ]);
+        } catch (\Throwable $e) {
+            return message('上传失败: ' . $e->getMessage(), false, ['status' => 0]);
+        }
+    }
+
+    public function getVersions(int $pluginId, int $userId = 0): array
+    {
+        if ($pluginId <= 0) {
+            throw new Exception('插件ID不能为空');
+        }
+        $plugin = \think\facade\Db::name('plugin')->where('id', $pluginId)->find();
+        if (!$plugin) {
+            throw new Exception('插件不存在');
+        }
+
+        $rows = \think\facade\Db::name('plugin_versions')
+            ->where('plugin_id', $pluginId)
+            ->order('created_at', 'desc')
+            ->order('id', 'desc')
+            ->select()
+            ->toArray();
+
+        foreach ($rows as &$row) {
+            $this->decorateVersionAuthor($row);
+            $row['is_latest'] = isset($plugin['version']) && $row['version'] === $plugin['version'];
+            $hasFile = !empty($row['package_object_key']) || (!empty($row['package_path']) && file_exists($row['package_path']));
+            $row['can_download'] = $hasFile && $this->canAccessPlugin($plugin, $userId);
+            $row['update_description'] = !empty($row['update_description']) ? $row['update_description'] : '暂无更新说明';
+        }
+        unset($row);
+
+        return $rows;
+    }
+
+    public function downloadVersion(int $userId)
+    {
+        $pluginId = input('get.plugin_id', 0, 'intval');
+        $versionId = input('get.version_id', 0, 'intval');
+        [$plugin, $version] = $this->getDownloadableVersion($pluginId, $versionId, $userId);
+
+        $downloadPath = (new PluginStorageService())->getDownloadUrl($version);
+        $user = \think\facade\Db::name('user')->where('id', intval($userId))->find();
+        $purchase = $user ? \think\facade\Db::name('plugin_purchase')
+            ->where('plugin_id', $pluginId)
+            ->where('user_id', intval($userId))
+            ->where('app_id', intval($user['appid']))
+            ->find() : null;
+        \think\facade\Db::name('plugin_download')->insert([
+            'plugin_id' => $pluginId,
+            'plugin_version' => $version['version'],
+            'user_id' => intval($userId),
+            'app_id' => $user ? intval($user['appid']) : 0,
+            'order_id' => $purchase['order_id'] ?? 0,
+            'ip' => get_client_ip(),
+            'created_at' => datetime(),
+        ]);
+        \think\facade\Db::name('plugin')->where('id', $pluginId)->inc('download_count')->update();
+
+        if (preg_match('#^https?://#i', $downloadPath)) {
+            header('Location: ' . $downloadPath);
+            exit;
+        }
+
+        $fileName = $plugin['slug'] . '_v' . $version['version'] . '.zip';
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Length: ' . filesize($downloadPath));
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        readfile($downloadPath);
+        exit;
+    }
+
+    public function checkVersionDownload(int $userId): array
+    {
+        $pluginId = input('get.plugin_id', input('post.plugin_id', 0, 'intval'), 'intval');
+        $versionId = input('get.version_id', input('post.version_id', 0, 'intval'), 'intval');
+        $this->getDownloadableVersion($pluginId, $versionId, $userId);
+        return message('可以下载', true);
+    }
+
+    private function getDownloadableVersion(int $pluginId, int $versionId, int $userId): array
+    {
+        if ($pluginId <= 0 || $versionId <= 0) {
+            throw new Exception('插件版本参数错误');
+        }
+
+        $plugin = \think\facade\Db::name('plugin')->where('id', $pluginId)->where('status', 1)->find();
+        if (!$plugin) {
+            throw new Exception('插件不存在或未上架');
+        }
+        $this->assertCanDownload($plugin, $userId);
+
+        $version = \think\facade\Db::name('plugin_versions')
+            ->where('id', $versionId)
+            ->where('plugin_id', $pluginId)
+            ->find();
+        if (!$version) {
+            throw new Exception('版本记录不存在');
+        }
+
+        (new PluginStorageService())->getDownloadUrl($version);
+        return [$plugin, $version];
+    }
+
+    public function enrichPluginDetail(&$plugin): void
+    {
+        if (!$plugin) {
+            return;
+        }
+        $this->decorateAuthor($plugin);
+        $plugin['iconUrl'] = $plugin['icon'] ?? '';
+        $plugin['coverUrl'] = $plugin['cover'] ?? '';
+        $plugin['latestUpdateDescription'] = !empty($plugin['update_description']) ? $plugin['update_description'] : '暂无更新说明';
+        $resources = \think\facade\Db::name('plugin_resources')
+            ->where('plugin_id', intval($plugin['id']))
+            ->whereIn('resource_type', ['icon', 'cover'])
+            ->order('sort_order', 'asc')
+            ->order('id', 'asc')
+            ->select()
+            ->toArray();
+        foreach ($resources as $item) {
+            $url = $item['url'] ?: ($item['object_key'] ?? '');
+            if ($url === '') {
+                continue;
+            }
+            if ($item['resource_type'] === 'icon') {
+                $plugin['icon'] = $url;
+                $plugin['iconUrl'] = $url;
+                $plugin['icon_object_key'] = $item['object_key'] ?? ($plugin['icon_object_key'] ?? '');
+            } elseif ($item['resource_type'] === 'cover') {
+                $plugin['cover'] = $url;
+                $plugin['coverUrl'] = $url;
+                $plugin['cover_object_key'] = $item['object_key'] ?? ($plugin['cover_object_key'] ?? '');
+            }
+        }
+    }
+
+    private function writeVersionRecord(int $pluginId, string $version, array $data): int
+    {
+        $exists = \think\facade\Db::name('plugin_versions')
+            ->where('plugin_id', $pluginId)
+            ->where('version', $version)
+            ->find();
+        if ($exists) {
+            throw new Exception('当前插件下版本号「' . $version . '」已存在');
+        }
+        $data['plugin_id'] = $pluginId;
+        $data['version'] = $version;
+        $data['created_at'] = datetime();
+        $data['updated_at'] = datetime();
+        return \think\facade\Db::name('plugin_versions')->insertGetId($data);
+    }
+
+    private function syncPluginResources(int $pluginId, int $versionId, int $userId, string $icon, string $cover, string $storageDriver, array $post): void
+    {
+        \think\facade\Db::name('plugin_resources')
+            ->where('plugin_id', $pluginId)
+            ->whereIn('resource_type', ['icon', 'cover'])
+            ->delete();
+
+        $now = datetime();
+        $rows = [];
+        if ($icon !== '') {
+            $rows[] = [
+                'plugin_id' => $pluginId, 'version_id' => $versionId, 'resource_type' => 'icon',
+                'storage_driver' => $post['icon_storage_driver'] ?? $storageDriver, 'url' => $icon,
+                'object_key' => $post['icon_object_key'] ?? '', 'file_name' => $post['icon_file_name'] ?? '',
+                'file_size' => intval($post['icon_file_size'] ?? 0), 'mime_type' => $post['icon_mime_type'] ?? '',
+                'sort_order' => 0, 'created_by' => $userId, 'created_at' => $now, 'updated_at' => $now,
+            ];
+        }
+        if ($cover !== '') {
+            $rows[] = [
+                'plugin_id' => $pluginId, 'version_id' => $versionId, 'resource_type' => 'cover',
+                'storage_driver' => $post['cover_storage_driver'] ?? $storageDriver, 'url' => $cover,
+                'object_key' => $post['cover_object_key'] ?? '', 'file_name' => $post['cover_file_name'] ?? '',
+                'file_size' => intval($post['cover_file_size'] ?? 0), 'mime_type' => $post['cover_mime_type'] ?? '',
+                'sort_order' => 0, 'created_by' => $userId, 'created_at' => $now, 'updated_at' => $now,
+            ];
+        }
+        if (!empty($rows)) {
+            \think\facade\Db::name('plugin_resources')->insertAll($rows);
+        }
+    }
+
+    private function decorateAuthor(&$plugin): void
+    {
+        $userId = intval($plugin['user_id'] ?? 0);
+        if ($userId <= 0) {
+            $plugin['authorDisplayName'] = '官方';
+            $plugin['isOfficialAuthor'] = true;
+            return;
+        }
+        $plugin['authorDisplayName'] = $this->getUserDisplayName($userId, $plugin['author'] ?: '未知用户');
+        $plugin['isOfficialAuthor'] = false;
+    }
+
+    private function decorateVersionAuthor(array &$version): void
+    {
+        $createdBy = intval($version['created_by'] ?? 0);
+        if ($createdBy <= 0) {
+            $version['authorDisplayName'] = '官方';
+            $version['isOfficialAuthor'] = true;
+            return;
+        }
+        $version['authorDisplayName'] = $this->getUserDisplayName($createdBy, '未知用户');
+        $version['isOfficialAuthor'] = false;
+    }
+
+    private function getUserDisplayName(int $userId, string $fallback): string
+    {
+        $user = \think\facade\Db::name('user')->where('id', $userId)->find();
+        if (!$user) {
+            return $fallback;
+        }
+        if (isset($user['nickname']) && $user['nickname'] !== '') {
+            return $user['nickname'];
+        }
+        return !empty($user['username']) ? $user['username'] : $fallback;
+    }
+
+    private function assertCanDownload(array $plugin, int $userId): void
+    {
+        if (floatval($plugin['price']) <= 0 || (!empty($plugin['user_id']) && intval($plugin['user_id']) === intval($userId))) {
+            return;
+        }
+        $user = \think\facade\Db::name('user')->where('id', intval($userId))->find();
+        if (!$user) {
+            throw new Exception('用户信息错误');
+        }
+        $purchase = \think\facade\Db::name('plugin_purchase')
+            ->where('plugin_id', intval($plugin['id']))
+            ->where('user_id', intval($userId))
+            ->where('app_id', intval($user['appid']))
+            ->find();
+        if (!$purchase) {
+            throw new Exception('您尚未购买此插件');
+        }
+    }
+
+    private function canAccessPlugin(array $plugin, int $userId): bool
+    {
+        if ($userId <= 0) {
+            return false;
+        }
+        if (floatval($plugin['price']) <= 0 || (!empty($plugin['user_id']) && intval($plugin['user_id']) === intval($userId))) {
+            return true;
+        }
+        $user = \think\facade\Db::name('user')->where('id', intval($userId))->find();
+        if (!$user) {
+            return false;
+        }
+        return (bool) \think\facade\Db::name('plugin_purchase')
+            ->where('plugin_id', intval($plugin['id']))
+            ->where('user_id', intval($userId))
+            ->where('app_id', intval($user['appid']))
+            ->find();
+    }
+
+    private function hasPurchasedOrDownloaded(int $pluginId, int $userId, int $appId): bool
+    {
+        $purchase = \think\facade\Db::name('plugin_purchase')
+            ->where('plugin_id', $pluginId)
+            ->where('user_id', $userId)
+            ->where('app_id', $appId)
+            ->find();
+        if ($purchase) {
+            return true;
+        }
+        return (bool) \think\facade\Db::name('plugin_download')
+            ->where('plugin_id', $pluginId)
+            ->where('user_id', $userId)
+            ->where('app_id', $appId)
+            ->find();
     }
 }

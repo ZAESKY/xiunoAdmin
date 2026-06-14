@@ -31,18 +31,23 @@ class Menu extends BaseModel
     }
 
     public function getList(){
-        $alwaysHiddenUrls = ['PointLog/index'];
+        $alwaysHiddenUrls = ['PointLog/index', 'Rebate/myRebateList', 'Checkin/records'];
         $cache = Cache::get('SF_UserMenu'.cookie('userId'));
         if(!empty($cache)){
             return $this->filterHiddenMenuUrls($cache, $alwaysHiddenUrls);
         }
         try{
-            $userInfo = parent::getUserInfo();
+            $userModel = new \app\user\model\User();
+            $userInfo = $userModel->getInfo();
+            if (!$userInfo) {
+                return message(t("user.info_error").'[errorCode:UserInfoError]', false);
+            }
         }catch (\Exception $e){
             return message(t("user.info_error").'[errorCode:UserInfoError]' ,false);
         }
 
-        $powerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
+        $powerPriceModel = new \app\admin\model\PowerPriceModel();
+        $powerPriceInfo = $powerPriceModel->getInfo($userInfo['power']);
         if(!$powerPriceInfo) {
             return message(t("user.power_info_error").'[errorCode:GetUserPowerInfoError]' ,false);
         }
@@ -124,9 +129,14 @@ class Menu extends BaseModel
             $isTopParent = (int)($row['parentid'] ?? 0) === 0;
             $url = $row['url'];
             $name = (string)($row['name'] ?? '');
-            $key = ($isTopParent && in_array($url, ['', '#'], true))
-                ? 'parent:' . $name
-                : 'url:' . $url;
+            $parentid = (int)($row['parentid'] ?? 0);
+            if ($isTopParent && in_array($url, ['', '#'], true)) {
+                $key = 'parent:' . $name;
+            } elseif (in_array($url, ['', '#'], true)) {
+                $key = 'parent:' . $parentid . ':' . $name;
+            } else {
+                $key = 'url:' . $url;
+            }
 
             $rank = ((int)($row['power'] ?? 0) === $rolePower ? 10 : 0) - ((int)($row['id'] ?? 0) / 1000000);
             if (!isset($normalized[$key]) || $rank > $rankMap[$key]) {

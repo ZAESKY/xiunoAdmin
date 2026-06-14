@@ -3,6 +3,7 @@
 namespace app\user\model;
 
 use app\common\extend\CheckInfo;
+use app\common\model\BalanceLogModel;
 use app\user\validate\Cdkey;
 use app\common\model\BaseModel;
 use think\Exception;
@@ -22,7 +23,8 @@ class CdkeyModel extends BaseModel
 
     public function getInfo($id){
         try{
-            $userInfo = parent::getUserInfo();
+            $userModel = new \app\user\model\User();
+            $userInfo = $userModel->getInfo();
             if(!$userInfo){
                 return false;
             }
@@ -53,7 +55,8 @@ class CdkeyModel extends BaseModel
 
     public function exchange(){
         try{
-            $userInfo = parent::getUserInfo();
+            $userModel = new \app\user\model\User();
+            $userInfo = $userModel->getInfo();
             if(!$userInfo){
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
@@ -96,7 +99,8 @@ class CdkeyModel extends BaseModel
                             return message(t('auth.already_exist'), false);
                         }
                         try{
-                            $appInfo = parent::getAppInfo($appid);
+                            $appModel = new \app\admin\model\AppModel();
+                            $appInfo = $appModel->getInfo($appid);
                             if($appInfo == false){
                                 return message(t('app.get_info_failed').'[errorCode:GetUserAppInfoError]',false);
                             }
@@ -266,11 +270,13 @@ class CdkeyModel extends BaseModel
     }
 
     public function edit(){
-        $userInfo = parent::getUserInfo();
+        $userModel = new \app\user\model\User();
+        $userInfo = $userModel->getInfo();
         if(!$userInfo){
             return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
         }
-        $powerPriceInfo = parent::getPowerPriceInfo($userInfo['power']);
+        $powerPriceModel = new \app\admin\model\PowerPriceModel();
+        $powerPriceInfo = $powerPriceModel->getInfo($userInfo['power']);
         if(!$powerPriceInfo) {
             return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]' ,false);
         }
@@ -311,7 +317,8 @@ class CdkeyModel extends BaseModel
                     return message(t('cdkey.select_time') ,false);
                 }
                 try{
-                    $authPriceInfo = parent::getAuthPriceInfo($type);
+                    $authPriceModel = new \app\admin\model\AuthPriceModel();
+                    $authPriceInfo = $authPriceModel->getInfo($type);
                     if($authPriceInfo == false){
                         return message(t('cdkey.get_price_failed').'[errorCode:GetAuthPriceInfoError]',false);
                     }
@@ -358,7 +365,7 @@ class CdkeyModel extends BaseModel
             case 'user':
                 $cdkey_type_name = t('common_ui.power_type');
                 try{
-                    $powerInfo = parent::getPowerPriceInfo($power);
+                    $powerInfo = $powerPriceModel->getInfo($power);
                     if($powerInfo == false){
                         return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]' ,false);
                     }
@@ -378,10 +385,11 @@ class CdkeyModel extends BaseModel
         }
         $remainderBalance = $userInfo['balance'] - $allmoney;
         try{
-            $result = parent::updateUserInfo(['balance' => $remainderBalance], '生成卡密扣款 -'.$allmoney.' 元');
-            if(!$result){
+            $result = \think\facade\Db::name('user')->where('id', $userInfo['id'])->update(['balance' => $remainderBalance]);
+            if($result === false){
                 return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
             }
+            BalanceLogModel::add($userInfo['id'], 'cdkey_create', -$allmoney, '生成卡密扣款 -'.$allmoney.' 元');
         } catch (\Exception $e) {
             return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
         }
@@ -461,12 +469,9 @@ class CdkeyModel extends BaseModel
 
     public function list(){
         try{
-            try{
-                $userInfo = parent::getUserInfo();
-                if(!$userInfo){
-                    throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
-                }
-            }catch (\Exception $e){
+            $userModel = new \app\user\model\User();
+            $userInfo = $userModel->getInfo();
+            if(!$userInfo){
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();

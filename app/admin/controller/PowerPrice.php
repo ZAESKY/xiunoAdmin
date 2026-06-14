@@ -18,10 +18,10 @@ class PowerPrice extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->list();
-                return message(t('common.list_success'), true, $result);
+                return json(message(t('common.list_success'), true, $result));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
         try{
             View::assign('tid', $tid);
@@ -36,10 +36,10 @@ class PowerPrice extends Backend
         try{
             if(IS_POST){
                 $this->service->setPower();
-                return message(t('power.change_success') ,true);
+                return json(message(t('power.change_success') ,true));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -47,10 +47,10 @@ class PowerPrice extends Backend
         try{
             if(IS_POST){
                 $this->service->setDefaultPower();
-                return message(t('power.set_default_success') ,true);
+                return json(message(t('power.set_default_success') ,true));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 

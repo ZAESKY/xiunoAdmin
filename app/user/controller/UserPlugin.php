@@ -39,9 +39,9 @@ class UserPlugin extends UserBackend
         if (IS_POST) {
             try {
                 $result = $this->service->marketList();
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
         return $this->render();
@@ -55,9 +55,9 @@ class UserPlugin extends UserBackend
         if (IS_POST) {
             try {
                 $result = $this->service->myList($this->userId);
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
         return $this->render();
@@ -70,9 +70,9 @@ class UserPlugin extends UserBackend
     {
         if (IS_POST) {
             try {
-                return $this->service->createOrEdit($this->userId);
+                return json($this->service->createOrEdit($this->userId));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
 
@@ -88,6 +88,7 @@ class UserPlugin extends UserBackend
             if ($plugin['user_id'] != $this->userId) {
                 return $this->render('public/error', ['msg' => '无权编辑此插件']);
             }
+            $this->service->enrichPluginDetail($plugin);
         }
         View::assign('plugin', $plugin);
         View::assign('commissionRate', conf('plugin_commission_rate') ?? 10);
@@ -104,22 +105,22 @@ class UserPlugin extends UserBackend
             if (!$file) {
                 return json(['code' => 1, 'msg' => '请选择图片']);
             }
-            $allowedExt = 'jpg,jpeg,png,gif,bmp';
+            $allowedExt = 'jpg,jpeg,png,gif,bmp,webp';
             $maxSize = 5 * 1024 * 1024;
             $ext = strtolower($file->getOriginalExtension());
             if (!in_array($ext, explode(',', $allowedExt))) {
-                return json(['code' => 1, 'msg' => '仅支持 jpg/jpeg/png/gif/bmp 图片']);
+                return json(['code' => 1, 'msg' => '仅支持 jpg/jpeg/png/gif/bmp/webp 图片']);
             }
             if ($file->getSize() > $maxSize) {
                 return json(['code' => 1, 'msg' => '图片不能超过5MB']);
             }
-            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . date('Ymd');
+            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR . date('Ymd');
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
             $fileName = md5(uniqid(mt_rand(), true)) . '.' . $ext;
             $file->move($uploadDir, $fileName);
-            $path = '/upload/' . date('Ymd') . '/' . $fileName;
+            $path = '/upload/temp/' . date('Ymd') . '/' . $fileName;
             return json(message('success', true, ['path' => $path]));
         } catch (\Throwable $e) {
             return json(['code' => 1, 'msg' => '上传失败: ' . $e->getMessage()]);
@@ -133,6 +134,14 @@ class UserPlugin extends UserBackend
     {
         if (IS_POST) {
             return json($this->service->uploadFile());
+        }
+    }
+
+    public function uploadResource()
+    {
+        if (IS_POST) {
+            $type = input('get.type', input('post.type', 'icon', 'trim'), 'trim');
+            return json($this->service->uploadResource($type));
         }
     }
 
@@ -161,20 +170,20 @@ class UserPlugin extends UserBackend
                 $pluginModel = new PluginModel();
                 $info = $pluginModel->getInfo($id);
                 if (!$info) {
-                    return message('插件不存在', false);
+                    return json(message('插件不存在', false));
                 }
                 // 只能删除自己的插件
                 if ($info['user_id'] != $this->userId) {
-                    return message('无权删除此插件', false);
+                    return json(message('无权删除此插件', false));
                 }
                 // 已上架的插件不能删除
                 if ($info['status'] == 1) {
-                    return message('已上架的插件不能删除，请联系管理员', false);
+                    return json(message('已上架的插件不能删除，请联系管理员', false));
                 }
                 $pluginModel->drop($id);
-                return message('删除成功', true);
+                return json(message('删除成功', true));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -194,6 +203,7 @@ class UserPlugin extends UserBackend
         if (!$plugin) {
             return $this->render('public/error', ['msg' => '插件不存在']);
         }
+        $this->service->enrichPluginDetail($plugin);
 
         // 检查用户是否已评论
         $hasCommented = false;
@@ -201,6 +211,7 @@ class UserPlugin extends UserBackend
         // 检查是否已购买
         $isPurchased = false;
         $isOwner = false;
+        $canComment = false;
         $userBalance = 0;
 
         if (!empty($this->userId)) {
@@ -218,8 +229,9 @@ class UserPlugin extends UserBackend
 
                 // 自己发布的插件
                 $isOwner = isset($plugin['user_id']) && $plugin['user_id'] == intval($this->userId);
+                $purchase = null;
 
-                // 免费或自己的插件视为已购买
+                // 免费或自己的插件视为已获取，可直接下载。
                 if ($plugin['price'] == 0 || $isOwner) {
                     $isPurchased = true;
                 } else {
@@ -229,6 +241,14 @@ class UserPlugin extends UserBackend
                         ->where('app_id', $app_id)
                         ->find();
                     $isPurchased = !empty($purchase);
+                }
+                if (!$isOwner) {
+                    $hasDownloaded = \think\facade\Db::name('plugin_download')
+                        ->where('plugin_id', $id)
+                        ->where('user_id', intval($this->userId))
+                        ->where('app_id', $app_id)
+                        ->find();
+                    $canComment = !empty($purchase) || !empty($hasDownloaded);
                 }
             }
         }
@@ -263,6 +283,7 @@ class UserPlugin extends UserBackend
         View::assign('myComment', $myComment);
         View::assign('isPurchased', $isPurchased);
         View::assign('isOwner', $isOwner);
+        View::assign('canComment', $canComment);
         View::assign('userBalance', $userBalance);
         View::assign('authorPlugins', $authorPlugins);
         View::assign('referencingPlugins', $referencingPlugins);
@@ -309,6 +330,34 @@ class UserPlugin extends UserBackend
         }
     }
 
+    public function versions()
+    {
+        try {
+            $pluginId = input('get.plugin_id', input('post.plugin_id', 0, 'intval'), 'intval');
+            return json(message('获取成功', true, ['list' => $this->service->getVersions($pluginId, $this->userId)]));
+        } catch (\Exception $e) {
+            return json(message($e->getMessage(), false, ['list' => []]));
+        }
+    }
+
+    public function downloadVersion()
+    {
+        try {
+            $this->service->downloadVersion($this->userId);
+        } catch (\Exception $e) {
+            return json(message($e->getMessage(), false));
+        }
+    }
+
+    public function checkVersionDownload()
+    {
+        try {
+            return json($this->service->checkVersionDownload($this->userId));
+        } catch (\Exception $e) {
+            return json(message($e->getMessage(), false));
+        }
+    }
+
     /**
      * 提交评论
      */
@@ -346,13 +395,9 @@ class UserPlugin extends UserBackend
     {
         if (IS_POST) {
             try {
-                // 检查是否为开发者
-                if (empty($this->userInfo['is_developer'])) {
-                    return message('只有开发者才能回复评论', false);
-                }
-                return $this->service->replyComment($this->userId);
+                return json($this->service->replyComment($this->userId));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -365,9 +410,9 @@ class UserPlugin extends UserBackend
         if (IS_POST) {
             try {
                 $result = $this->service->getPluginPurchases($this->userId);
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
     }
@@ -380,9 +425,9 @@ class UserPlugin extends UserBackend
         if (IS_POST) {
             try {
                 $result = $this->service->getMyPurchases($this->userId);
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
 
@@ -402,9 +447,9 @@ class UserPlugin extends UserBackend
                 } else {
                     $result = $this->service->getMyAllComments($this->userId);
                 }
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
 

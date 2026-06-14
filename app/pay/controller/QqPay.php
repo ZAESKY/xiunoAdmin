@@ -96,8 +96,13 @@ class QqPay extends PayBackend
     }
 
     public function notify(){
-        $qpayNotify = new QpayNotify();
-        $result = $qpayNotify->getParams();
+        try {
+            $qpayNotify = new QpayNotify();
+            $result = $qpayNotify->getParams();
+        } catch (\Throwable $e) {
+            echo "<xml><return_code>FAIL</return_code><return_msg>" . $e->getMessage() . "</return_msg></xml>";
+            return;
+        }
         //判断签名
         if($qpayNotify->verifySign() && conf('qqpay_api') == 1) {
             //判断签名及结果（即时到帐）

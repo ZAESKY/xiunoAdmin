@@ -1,5 +1,7 @@
 <?php
-namespace app\pay\library\alipay\model;
+namespace app\pay\library\alipay;
+use think\Exception;
+
 /**
  * Created by PhpStorm.
  * User: xudong.ding
@@ -57,15 +59,15 @@ class AlipayTradeService {
 
 
 	function __construct($alipay_config){
-		$this->gateway_url = $alipay_config['gatewayUrl'];
-		$this->appid = $alipay_config['app_id'];
-		$this->sign_type = $alipay_config['sign_type'];
-		$this->private_key = $alipay_config['merchant_private_key'];
-		$this->alipay_public_key = $alipay_config['alipay_public_key'];
-		$this->charset = $alipay_config['charset'];
-		$this->notify_url = $alipay_config['notify_url'];
-		$this->return_url = $alipay_config['return_url'];
-		$this->signtype = $alipay_config['sign_type'];
+		$this->gateway_url = $alipay_config['gatewayUrl'] ?? 'https://openapi.alipay.com/gateway.do';
+		$this->appid = $alipay_config['app_id'] ?? '';
+		$this->sign_type = $alipay_config['sign_type'] ?? 'RSA2';
+		$this->private_key = $alipay_config['merchant_private_key'] ?? '';
+		$this->alipay_public_key = $alipay_config['alipay_public_key'] ?? '';
+		$this->charset = $alipay_config['charset'] ?? 'UTF-8';
+		$this->notify_url = $alipay_config['notify_url'] ?? '';
+		$this->return_url = $alipay_config['return_url'] ?? '';
+		$this->signtype = $alipay_config['sign_type'] ?? 'RSA2';
 
 		if(empty($this->appid)||trim($this->appid)==""){
 			throw new Exception("appid should not be NULL!");

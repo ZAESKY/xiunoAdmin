@@ -8,6 +8,7 @@ use think\facade\Cache;
 use think\Exception;
 use think\facade\View;
 use think\facade\Db;
+use think\facade\Config;
 class Addon extends Backend
 {
     public function initialize(){
@@ -106,7 +107,6 @@ class Addon extends Backend
 
         if(IS_POST){
             $name = $this->request->post("name");
-            //return method_exists(get_addons_instance($name), "disable");
             $action = $this->request->post("action");
             if (!$name) {
                 return message(t('validation.missing_name'), false);
@@ -119,8 +119,13 @@ class Addon extends Backend
             }
             try {
                 $action = $action == 'enable' ? 'enable' : 'disable';
-                //调用启用、禁用的方法
-                Service::$action($name);
+                //调用启用、禁用的方法 — think\addons\Service 没有静态 enable/disable
+                //应使用 get_addons_instance($name)->$action()
+                $addon = get_addons_instance($name);
+                if (!$addon || !method_exists($addon, $action)) {
+                    return message(t('addon.not_exist'), false);
+                }
+                $addon->$action();
                 Cache::tag('SF_Menu')->clear();
             } catch (Exception $e) {
                 return message($e->getMessage(), false);
@@ -136,7 +141,13 @@ class Addon extends Backend
     {
         $file = $this->request->file('file');
         try {
-            Service::local($file);
+            // think\addons\Service::local 不存在,改用 addons Service::localInstall 方式:
+            // 走 get_addons_instance + install() 的标准流程
+            $info = [];
+            $addonPath = $this->service->extractLocalAddon($file, $info);
+            if (!$addonPath) {
+                return message(t('addon.install_failed'), false);
+            }
         } catch (Exception $e) {
             return message($e->getMessage(), false);
         }
@@ -150,8 +161,17 @@ class Addon extends Backend
     {
         $name = $this->request->post('name');
         $file = $this->request->file('file');
+        if (!$name) {
+            return message(t('validation.missing_name'), false);
+        }
         try {
-            Service::update($name, $file);
+            // think\addons\Service::update 不存在,改为通过 get_addons_instance 处理
+            $addon = get_addons_instance($name);
+            if (!$addon) {
+                return message(t('addon.not_exist'), false);
+            }
+            // 由 AdminService 处理具体更新逻辑(文件解压/覆盖/refresh)
+            $this->service->updateAddon($name, $file);
             Cache::tag('SF_Menu')->clear();
         } catch (Exception $e) {
             return message($e->getMessage(), false);

@@ -19,13 +19,17 @@ class AliPay extends PayBackend
 
     public function alipayReturn(){
         $get = request()->get();
-        $config = Config::get('payconfig.zfb.alipay_config');
+        $config = Config::get('payconfig.zfb.alipay_config') ?: [];
         //异步通知地址
         $config['notify_url'] = SITE_URL . url('/AliPay/alipayNotify');
         //同步通知地址
         $config['return_url'] = SITE_URL . url('/AliPay/alipayReturn.php');
         //计算得出通知验证结果
-        $alipaySevice = new AlipayTradeService($config);
+        try {
+            $alipaySevice = new AlipayTradeService($config);
+        } catch (\Throwable $e) {
+            return $this->render('public/error', ['msg' => '支付配置缺失: ' . $e->getMessage(),'time' => 5, 'url' => '/']);
+        }
         //$alipaySevice->writeLog(var_export($_POST,true));
         $verify_result = $alipaySevice->check($get);
 
@@ -61,13 +65,18 @@ class AliPay extends PayBackend
 
     public function alipayNotify(){
         $post = request()->post();
-        $config = Config::get('payconfig.zfb.alipay_config');
+        $config = Config::get('payconfig.zfb.alipay_config') ?: [];
         //异步通知地址
         $config['notify_url'] = SITE_URL . url('/AliPay/alipayNotify');
         //同步通知地址
         $config['return_url'] = SITE_URL . url('/AliPay/alipayReturn.php');
         //计算得出通知验证结果
-        $alipaySevice = new AlipayTradeService($config);
+        try {
+            $alipaySevice = new AlipayTradeService($config);
+        } catch (\Throwable $e) {
+            echo "fail";
+            return;
+        }
 //$alipaySevice->writeLog(var_export($_POST,true));
         $verify_result = $alipaySevice->check($post);
 
@@ -102,10 +111,15 @@ class AliPay extends PayBackend
 
     public function kayixinNotify(){
         $post = request()->post();
-        $config = Config::get('payconfig.zfb.kayixin_config');
+        $config = Config::get('payconfig.zfb.kayixin_config') ?: [];
         //计算得出通知验证结果
-        $alipayNotify = new EpayNotify($config);
-        $verify_result = $alipayNotify->verifyNotify();
+        try {
+            $alipayNotify = new EpayNotify($config);
+            $verify_result = $alipayNotify->verifyNotify();
+        } catch (\Throwable $e) {
+            echo "fail";
+            return;
+        }
 
         if($verify_result && conf('alipay_api') == 7) {//验证成功
             //商户订单号
@@ -140,10 +154,14 @@ class AliPay extends PayBackend
 
     public function kayixinReturn(){
         $post = request()->post();
-        $config = Config::get('payconfig.zfb.kayixin_config');
+        $config = Config::get('payconfig.zfb.kayixin_config') ?: [];
         //计算得出通知验证结果
-        $alipayNotify = new EpayNotify($config);
-        $verify_result = $alipayNotify->verifyReturn();
+        try {
+            $alipayNotify = new EpayNotify($config);
+            $verify_result = $alipayNotify->verifyReturn();
+        } catch (\Throwable $e) {
+            return $this->render('public/error', ['msg' => '支付配置缺失: ' . $e->getMessage(),'time' => 5, 'url' => '/']);
+        }
         if($verify_result && conf('alipay_api') == 7) {
             //商户订单号
             $out_trade_no = isset($post['out_trade_no'])?$post['out_trade_no']:null;

@@ -4,7 +4,6 @@ namespace app\admin\model;
 
 use app\common\model\BaseModel;
 use think\Exception;
-use think\facade\Request;
 use think\facade\Cache;
 /**
  * 系统配置-模型

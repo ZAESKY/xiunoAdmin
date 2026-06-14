@@ -39,7 +39,7 @@ class UserModel extends BaseModel
         $username = !empty($post['username'])?$post['username']:null;
         $password = !empty($post['password'])?$post['password']:null;
         $power = !empty($post['power'])?$post['power']:null;
-        $qq = !empty($post['qq'])?intval($post['qq']):null;
+        $qq = !empty($post['qq']) ? trim($post['qq']) : '';
         $email = !empty($post['email'])?$post['email']:'';
         $balance = !empty($post['balance'])?floatval($post['balance']):0;
         $integral = !empty($post['integral'])?intval($post['integral']):0;
@@ -54,7 +54,7 @@ class UserModel extends BaseModel
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
         }
-        if(parent::getPowerPriceInfo($power) == false){
+        if($this->getPowerPriceInfo($power) == false){
             return message(t('user.power_not_exist') ,false);
         }
         if(!empty($id)){
@@ -66,6 +66,12 @@ class UserModel extends BaseModel
                 $row2 = self::where(['username'=>$username, 'appid'=>$appid])->find();
                 if($row2){
                     return message(t('app.username_exists') ,false);
+                }
+            }
+            if (!empty($qq) && $qq != $row['qq']) {
+                $rowQq = self::where(['qq' => $qq, 'appid' => $appid])->find();
+                if ($rowQq) {
+                    return message('该QQ号在此应用下已被注册！', false);
                 }
             }
             $data = [
@@ -103,11 +109,19 @@ class UserModel extends BaseModel
             if($row){
                 return message(t('app.username_exists') ,false);
             }
+            if (!empty($qq)) {
+                $rowQq = self::where(['qq' => $qq, 'appid' => $appid])->find();
+                if ($rowQq) {
+                    return message('该QQ号在此应用下已被注册！', false);
+                }
+            }
             $data = [
                 'power' => $power,
                 'username' => $username,
                 'password' => get_password($password),
                 'qq' => $qq,
+                'phone' => '',
+                'wechat_openid' => '',
                 'email' => $email,
                 'balance' => $balance,
                 'integral' => $integral,
@@ -127,6 +141,14 @@ class UserModel extends BaseModel
                 return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
+    }
+
+    protected function getPowerPriceInfo($id)
+    {
+        if (empty($id)) {
+            return false;
+        }
+        return (new \app\admin\model\PowerPriceModel())->getInfo($id);
     }
 
     public function drop($id){

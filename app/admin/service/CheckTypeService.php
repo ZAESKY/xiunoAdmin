@@ -4,6 +4,7 @@ namespace app\admin\service;
 
 use app\admin\model\CheckTypeModel;
 use app\common\service\BaseService;
+use think\Exception;
 
 class CheckTypeService extends BaseService
 {

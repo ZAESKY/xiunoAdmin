@@ -102,10 +102,11 @@ class Qrlogin extends ApiBackend
                 switch ($r[0]){
                     case 0:
                         preg_match('/uin=(\d+)&/', $ret, $uin);
-                        $uin = $uin[1];
+                        $uin = $this->getuin($uin[1]);
                         $get_token = base64_encode(md5($uin . md5($uin . '*$$*') . '23132' . md5(date("Y-m-d-H"))));
                         session('get_token', $get_token);
                         session('get_qq', $uin);
+                        Session::save();
                         return message('success！' ,true ,['code' => 0, 'nick' => urlencode($r[5]), 'qq' => $uin]);
                     case 65:
                         return message(t('auth.qrcode_invalid') ,false ,['code' => 1]);
@@ -148,16 +149,19 @@ class Qrlogin extends ApiBackend
                 'Result' => 'success'
             ];
             event('UserLogin', $content);
-            return message(t('login.success') ,true);
+            return message(t('login.success'), true, null);
         }else{
             $row = Db::name('user')->where(['qq' => $get_qq, 'status' => 1])->select();
             $count = $row->count();
             $data = [];
             switch ($count){
                 case 0:
-                    return message(t('user.not_exist') ,false);
+                    return message(t('user.not_exist'), false);
                 case 1:
                     $user = $row->first();
+                    if (empty($user['appid']) || empty($user['username'])) {
+                        return message('用户数据异常: appid=' . ($user['appid'] ?? 'null') . ' username=' . ($user['username'] ?? 'null'), false);
+                    }
                     cookie('userId', $user['id']);
                     cookie('userSign', data_auth_sign($user['appid'].$user['username'].$user['password'].sf_password_hash()));
                     Session::delete('get_token');
@@ -168,13 +172,13 @@ class Qrlogin extends ApiBackend
                         'Result' => 'success'
                     ];
                     event('UserLogin', $content);
-                    return message(t('login.success') ,true);
+                    return message(t('login.success'), true, null);
                 default:
                     foreach ($row as $res){
-                        if(empty($res['appid'])){
+                        if(!isset($res['appid']) || $res['appid'] === '' || $res['appid'] === null){
                             continue;
                         }
-                        if(empty($res['username'])){
+                        if(!isset($res['username']) || $res['username'] === '' || $res['username'] === null){
                             continue;
                         }
                         $appInfo = $this->appModel->getInfo($res['appid']);
@@ -186,7 +190,7 @@ class Qrlogin extends ApiBackend
 
                         $data[] = ['username' => $res['username'], 'qq' => $res['qq'], 'appname' => $appName, 'appid' => $res['appid']];
                     }
-                    return message(t('login.select_account') ,true, $data);
+                    return message(t('login.select_account'), true, $data);
             }
         }
     }

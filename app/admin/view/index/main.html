@@ -1,383 +1,289 @@
 {include file="/public/header"}
 <style>
-/* ═══════════════════════════════════════════════════════
-   Admin Dashboard — Modern Responsive Grid
-   ═══════════════════════════════════════════════════════ */
-:root {
-  --dash-gap: 14px;
-  --dash-radius: 10px;
+:root{
+  --page:#eef6ff;
+  --card:#ffffff;
+  --line:#e9f0f7;
+  --text:#1f2a3d;
+  --muted:#7a8798;
+  --blue:#2f7df6;
+  --blue-soft:#e9f2ff;
+  --green:#19b47b;
+  --green-soft:#e8f8f1;
+  --orange:#f6a23a;
+  --orange-soft:#fff4e4;
+  --red:#ef5b5b;
+  --red-soft:#fff0f0;
+  --shadow:0 14px 36px rgba(38, 76, 120, .08);
 }
-
-/* ── Welcome Banner ── */
-.welcome-banner {
-  display: flex; align-items: center; justify-content: space-between; gap: 20px;
-  padding: 22px 26px; border-radius: var(--dash-radius);
-  background: linear-gradient(135deg, #2250a6 0%, #3a6fd8 50%, #4facb4 100%);
-  color: #fff; position: relative; overflow: hidden;
-}
-.welcome-banner::after {
-  content: ''; position: absolute; right: -40px; top: -60px;
-  width: 200px; height: 200px; border-radius: 50%;
-  background: rgba(255,255,255,.06); pointer-events: none;
-}
-.welcome-text h2 { margin: 0 0 4px; font-size: 22px; font-weight: 700; letter-spacing: -.2px; }
-.welcome-text span { font-size: 13px; opacity: .85; }
-.welcome-quick { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
-.welcome-quick a {
-  padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #fff;
-  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
-  text-decoration: none; transition: .2s; white-space: nowrap;
-}
-.welcome-quick a:hover { background: rgba(255,255,255,.25); }
-
-/* ── Grid System ── */
-.d-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--dash-gap); }
-.d-col-3 { grid-column: span 3; }
-.d-col-4 { grid-column: span 4; }
-.d-col-5 { grid-column: span 5; }
-.d-col-6 { grid-column: span 6; }
-.d-col-7 { grid-column: span 7; }
-.d-col-8 { grid-column: span 8; }
-.d-col-12 { grid-column: span 12; }
-
-/* ── Stat Card ── */
-.stat-card {
-  background: #fff; border-radius: var(--dash-radius);
-  padding: 18px 20px; border: 1px solid #f0f0f0;
-  display: flex; align-items: center; gap: 14px;
-  transition: .2s; cursor: pointer;
-}
-.stat-card:hover { border-color: #d0d8e8; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
-.stat-icon-wrap {
-  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 22px;
-}
-.stat-icon-wrap.c1 { background: #eaf2ff; color: #3a6fd8; }
-.stat-icon-wrap.c2 { background: #e6f7ed; color: #34a853; }
-.stat-icon-wrap.c3 { background: #f3eeff; color: #7c5ce7; }
-.stat-icon-wrap.c4 { background: #ffeaea; color: #e8553d; }
-.stat-info { flex: 1; min-width: 0; }
-.stat-num { font-size: 26px; font-weight: 700; color: #1a1a1a; line-height: 1.1; }
-.stat-label { font-size: 13px; color: #8c8c8c; margin-top: 2px; }
-.stat-change { font-size: 12px; margin-top: 4px; }
-.stat-change.up { color: #34a853; }
-.stat-change.down { color: #e8553d; }
-
-/* ── Panel Card (layui-card override) ── */
-.panel .layui-card-header {
-  display: flex; align-items: center; justify-content: space-between;
-  font-weight: 600; font-size: 14px; color: #1a1a1a;
-  border-bottom: 1px solid #f2f2f2;
-}
-.panel .layui-card-header a { color: #3a6fd8; font-size: 12px; font-weight: 400; }
-.panel .layui-card-body { padding: 12px 18px; }
-/* scrollable sections */
-.plugin-list-card { max-height: 340px; overflow: auto; }
-.log-list-card { max-height: 260px; overflow: auto; }
-
-/* ── Todo / List items ── */
-.t-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; text-decoration: none; color: inherit; }
-.t-row:last-child { border-bottom: 0; }
-.t-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-.t-icon.warn { background: #fff8e6; color: #e8a020; }
-.t-body { flex: 1; min-width: 0; }
-.t-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.t-meta { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
-.t-extra { flex-shrink: 0; text-align: right; }
-.t-num { font-size: 22px; font-weight: 700; color: #c07d10; }
-.t-img { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; }
-
-/* ── Trend Chart ── */
-.trend-box { height: 200px; display: flex; align-items: flex-end; gap: 12px; padding: 10px 4px 0; }
-.trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
-.trend-bars { display: flex; align-items: flex-end; gap: 3px; width: 100%; max-width: 36px; flex: 1; }
-.trend-bar { flex: 1; min-height: 6px; border-radius: 3px 3px 0 0; transition: .3s; }
-.trend-bar.a { background: #3a6fd8; }
-.trend-bar.b { background: #6bc7b4; }
-.trend-day { font-size: 11px; color: #8c8c8c; margin-top: 8px; }
-.trend-legend { display: flex; gap: 16px; font-size: 12px; color: #8c8c8c; }
-.trend-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
-
-/* ── Quick Links ── */
-.quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.quick-link {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 14px 8px; border-radius: 8px; border: 1px solid #f0f0f0;
-  text-decoration: none; color: #555; font-size: 12px; transition: .2s; text-align: center;
-}
-.quick-link i { font-size: 22px; color: #3a6fd8; }
-.quick-link:hover { border-color: #b8cdf0; color: #3a6fd8; background: #f9fbff; }
-
-/* ── Security ── */
-.sec-row { display: flex; align-items: center; gap: 20px; min-height: 150px; }
-.sec-left { flex: 0 0 100px; text-align: center; }
-.sec-right { flex: 1; min-width: 0; max-height: 170px; overflow: auto; }
-.sec-item { padding: 3px 0; font-size: 12px; color: #666; }
-
-/* ── Empty State ── */
-.empty { text-align: center; color: #bbb; padding: 30px 0; font-size: 13px; }
-
-/* ── Responsive ── */
-@media (max-width: 1024px) {
-  .d-col-3, .d-col-4 { grid-column: span 6; }
-  .d-col-5, .d-col-7, .d-col-8 { grid-column: span 12; }
-  .welcome-quick { display: none; }
-}
-@media (max-width: 640px) {
-  .d-col-3, .d-col-4, .d-col-5, .d-col-6, .d-col-7, .d-col-8 { grid-column: span 12; }
-  .welcome-banner { flex-direction: column; text-align: center; }
-  .trend-box { height: 160px; gap: 8px; }
-  .quick-grid { grid-template-columns: repeat(2, 1fr); }
-  .sec-row { flex-direction: column; align-items: stretch; text-align: center; }
-  .sec-left { flex: 0; }
-}
+body{background:var(--page);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+a{color:inherit;}
+.mp-page{min-height:100vh;padding:18px;background:linear-gradient(135deg,#e7f2ff 0%,#f7fbff 50%,#eef8f7 100%);box-sizing:border-box;}
+.mp-tabs{height:44px;display:flex;align-items:center;gap:8px;margin-bottom:12px;overflow-x:auto;}
+.mp-tab{height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(215,226,238,.9);border-radius:5px;background:rgba(255,255,255,.72);font-size:13px;color:#5c6878;white-space:nowrap;box-shadow:0 6px 16px rgba(60,93,130,.05);cursor:pointer;}
+.mp-tab.active{color:var(--blue);background:#fff;border-color:#cfe2ff;font-weight:600;}
+.mp-layout{display:grid;grid-template-columns:minmax(0,1.58fr) minmax(330px,.82fr);gap:14px;}
+.mp-main,.mp-side{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.mp-card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;}
+.mp-head{height:48px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;}
+.mp-head h3{margin:0;font-size:16px;font-weight:700;color:var(--text);}
+.mp-head a{font-size:12px;color:var(--blue);}
+.mp-body{padding:18px;}
+.mp-hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,.8fr);gap:14px;}
+.quick-banner{height:92px;border-radius:7px;background:linear-gradient(120deg,#2f7df6,#179ee8);color:#fff;padding:20px 26px;box-sizing:border-box;position:relative;overflow:hidden;}
+.quick-banner:after{content:"";position:absolute;right:-54px;top:-60px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.16);}
+.quick-banner h2{margin:0 0 9px;font-size:20px;font-weight:700;}
+.quick-banner p{margin:0;font-size:13px;opacity:.88;line-height:1.7;max-width:760px;}
+.hello-card{height:92px;padding:16px 18px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;}
+.hello-card strong{display:block;font-size:16px;margin-bottom:8px;}
+.hello-card span{font-size:12px;color:var(--muted);}
+.hello-card i{font-size:22px;color:#9aa9ba;}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:16px;align-items:stretch;}
+.workspace-title{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.workspace-logo{width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#e7f3ff,#f9fcff);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:28px;}
+.workspace-title h2{margin:0 0 5px;font-size:22px;font-weight:700;}
+.workspace-title p{margin:0;color:var(--muted);font-size:13px;}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px;}
+.metric{padding:14px;border:1px solid #eef3f8;border-radius:6px;background:#fbfdff;}
+.metric b{display:block;font-size:24px;line-height:1;margin-bottom:8px;color:var(--text);}
+.metric span{font-size:12px;color:var(--muted);}
+.metric small{display:block;margin-top:8px;color:#9aa7b6;font-size:11px;}
+.chip-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+.chip{height:38px;border:1px solid #edf2f7;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;gap:7px;color:#4e5d70;font-size:13px;cursor:pointer;transition:.18s;}
+.chip:hover{border-color:#bed8ff;color:var(--blue);box-shadow:0 8px 18px rgba(47,125,246,.08);}
+.add-panel{height:100%;min-height:190px;border:1px dashed #dce8f5;border-radius:6px;background:#fbfdff;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#8ea0b5;}
+.add-panel i{font-size:42px;color:var(--blue);margin-bottom:10px;}
+.todo-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.todo{display:flex;align-items:center;gap:13px;padding:14px;border-radius:7px;background:#fbfdff;border:1px solid #eef3f8;}
+.todo .icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.todo.red .icon{background:var(--red-soft);color:var(--red);}
+.todo.blue .icon{background:var(--blue-soft);color:var(--blue);}
+.todo.green .icon{background:var(--green-soft);color:var(--green);}
+.todo.orange .icon{background:var(--orange-soft);color:var(--orange);}
+.todo b{display:block;font-size:24px;line-height:1.1;}
+.todo span{font-size:12px;color:var(--muted);}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.rank-list,.line-list{display:flex;flex-direction:column;}
+.line{min-height:42px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f2f5f8;font-size:13px;}
+.line:last-child{border-bottom:0;}
+.line i{color:#a1adba;}
+.line .text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.line .time,.line .value{color:#9aa7b6;font-size:12px;white-space:nowrap;}
+.rank{min-height:40px;display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;border-bottom:1px solid #f2f5f8;font-size:13px;}
+.rank:last-child{border-bottom:0;}
+.rank em{font-style:normal;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#f0f4f9;color:#7b8796;font-size:12px;}
+.rank:nth-child(1) em{background:#fff1da;color:#e48b10;}
+.rank:nth-child(2) em{background:#eaf2ff;color:#2f7df6;}
+.rank:nth-child(3) em{background:#eaf8ef;color:#19a96f;}
+.trend{height:180px;display:flex;align-items:flex-end;gap:16px;padding-top:10px;}
+.bar{flex:1;min-width:22px;height:100%;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;gap:7px;color:#8a97a8;font-size:11px;}
+.bar-stack{height:126px;width:100%;display:flex;align-items:flex-end;gap:4px;}
+.bar-auth,.bar-user{flex:1;border-radius:6px 6px 2px 2px;min-height:8px;}
+.bar-auth{background:linear-gradient(180deg,#2f7df6,#75b2ff);}
+.bar-user{background:linear-gradient(180deg,#19b47b,#8ee0bd);}
+.notice-list .line{min-height:50px;}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.team{height:70px;border:1px solid #eef3f8;border-radius:7px;background:#fbfdff;display:flex;align-items:center;gap:13px;padding:0 16px;cursor:pointer;}
+.team i{font-size:28px;color:var(--blue);}
+.team b{display:block;font-size:14px;margin-bottom:4px;}
+.team span{font-size:12px;color:var(--muted);}
+.safe-score{display:flex;align-items:center;gap:16px;}
+.safe-ring{width:86px;height:86px;border-radius:50%;background:conic-gradient(var(--blue) 0deg,#edf3f9 0deg);display:flex;align-items:center;justify-content:center;transition:.3s;}
+.safe-ring span{width:62px;height:62px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue);}
+.safe-meta{font-size:13px;color:var(--muted);line-height:1.8;}
+.empty{padding:22px 0;text-align:center;color:#a8b3c0;font-size:13px;}
+@media(max-width:1280px){.mp-layout,.mp-hero{grid-template-columns:1fr}.metric-grid,.todo-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.mp-page{padding:10px}.workspace,.split{grid-template-columns:1fr}.chip-grid,.team-grid{grid-template-columns:1fr 1fr}.metric-grid,.todo-row{grid-template-columns:1fr}.mp-head{padding:0 14px}.mp-body{padding:14px}}
 </style>
 
-<div class="layui-fluid" style="padding:14px 16px;">
-
-  <!-- ══ Welcome Banner ══ -->
-  <div class="welcome-banner" style="margin-bottom:14px;">
-    <div class="welcome-text">
-      <h2>{:t('dashboard.welcome')}，{$adminInfo['username']|default='管理员'}</h2>
-      <span>{:conf('site_name')} 运营总览 · {:date('Y-m-d H:i')}</span>
+<div class="mp-page">
+  <div class="mp-hero">
+    <div class="quick-banner">
+      <h2>快速开始</h2>
+      <p>集中查看授权、用户、插件、订单与系统风险状态，按待处理优先级进入对应管理页面。</p>
     </div>
-    <div class="welcome-quick">
-      <a ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i> 插件审核</a>
-      <a ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i> 订单处理</a>
-      <a ew-href="{:url('/Feedback/list')}"><i class="layui-icon layui-icon-dialogue"></i> 反馈</a>
+    <div class="mp-card hello-card">
+      <div>
+        <strong>系统管理员，祝您开心每一天</strong>
+        <span>登录于：{:date('Y-m-d H:i:s')} · {:conf('site_name')}</span>
+      </div>
+      <i class="layui-icon layui-icon-set"></i>
     </div>
   </div>
 
-  <!-- ══ Row 1: Stats (4-col) ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-col-3">
-      <div class="stat-card" ew-href="{:url('/User/list')}">
-        <div class="stat-icon-wrap c1"><i class="layui-icon layui-icon-group"></i></div>
-        <div class="stat-info">
-          <div class="stat-num">{$user_count}</div>
-          <div class="stat-label">用户总数</div>
-          <div class="stat-change {if $user_increase >= 0}up{else}down{/if}">
-            <i class="layui-icon {if $user_increase >= 0}layui-icon-up{else}layui-icon-down{/if}"></i> 今日 {php}echo abs($user_increase);{/php}
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="d-col-3">
-      <div class="stat-card" ew-href="{:url('/Auth/list')}">
-        <div class="stat-icon-wrap c2"><i class="layui-icon layui-icon-auz"></i></div>
-        <div class="stat-info">
-          <div class="stat-num">{$auth_count}</div>
-          <div class="stat-label">授权总数</div>
-          <div class="stat-change up">今日 {$today_auths} 条</div>
-        </div>
-      </div>
-    </div>
-    <div class="d-col-3">
-      <div class="stat-card" ew-href="{:url('/App/list')}">
-        <div class="stat-icon-wrap c3"><i class="layui-icon layui-icon-app"></i></div>
-        <div class="stat-info">
-          <div class="stat-num">{$app_count}</div>
-          <div class="stat-label">应用总数</div>
-          <div class="stat-change" style="color:#8c8c8c;">已部署应用</div>
-        </div>
-      </div>
-    </div>
-    <div class="d-col-3">
-      <div class="stat-card" ew-href="{:url('/Pirate/list')}">
-        <div class="stat-icon-wrap c4"><i class="layui-icon layui-icon-website"></i></div>
-        <div class="stat-info">
-          <div class="stat-num">{$pirate_count}</div>
-          <div class="stat-label">盗版记录</div>
-          <div class="stat-change {if $pirate_increase >= 0}down{else}up{/if}">
-            <i class="layui-icon {if $pirate_increase >= 0}layui-icon-down{else}layui-icon-up{/if}"></i> {php}echo abs($pirate_increase);{/php}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Row 2: Trend (8-col) + Pending (4-col) — asymmetric ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-col-8">
-      <div class="layui-card panel">
-        <div class="layui-card-header">
-          <span>近 7 日业务趋势</span>
-          <span class="trend-legend">
-            <span><i style="background:#3a6fd8;"></i> 授权</span>
-            <span><i style="background:#6bc7b4;"></i> 用户</span>
-          </span>
-        </div>
-        <div class="layui-card-body" style="padding:8px 14px 4px;">
-          <div class="trend-box">
-            {foreach $week_trend as $item}
-            <div class="trend-col" title="{$item.day} · 授权{$item.auth} / 用户{$item.user}">
-              <div class="trend-bars">
-                <span class="trend-bar a" style="height:{$item.auth_rate}%"></span>
-                <span class="trend-bar b" style="height:{$item.user_rate}%"></span>
+  <div class="mp-layout" style="margin-top:14px;">
+    <main class="mp-main">
+      <section class="mp-card">
+        <div class="mp-head"><h3>工作空间</h3><a ew-href="{:url('/Set/index')}">更多</a></div>
+        <div class="mp-body workspace">
+          <div>
+            <div class="workspace-title">
+              <div class="workspace-logo"><i class="layui-icon layui-icon-template-1"></i></div>
+              <div>
+                <h2>系统运营工作台</h2>
+                <p>成员：管理员 · 角色：系统管理 · 应用：{$app_count}</p>
               </div>
-              <span class="trend-day">{$item.day}</span>
             </div>
-            {/foreach}
+            <div class="metric-grid">
+              <a class="metric" ew-href="{:url('/Auth/list')}"><b>{$auth_count}</b><span>授权总数</span><small>今日 {$today_auths}</small></a>
+              <a class="metric" ew-href="{:url('/User/list')}"><b>{$user_count}</b><span>用户总数</span><small>今日 {if $user_increase>=0}+{/if}{$user_increase}</small></a>
+              <a class="metric" ew-href="{:url('/App/list')}"><b>{$app_count}</b><span>应用总数</span><small>已接入应用</small></a>
+              <a class="metric" ew-href="{:url('/Pirate/list')}"><b>{$pirate_count}</b><span>风险记录</span><small>今日 {if $pirate_increase>=0}+{/if}{$pirate_increase}</small></a>
+            </div>
+            <div class="chip-grid">
+              <a class="chip" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i>授权管理</a>
+              <a class="chip" ew-href="{:url('/App/list')}"><i class="layui-icon layui-icon-app"></i>应用管理</a>
+              <a class="chip" ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i>插件中心</a>
+              <a class="chip" ew-href="{:url('/PointProduct/list')}"><i class="layui-icon layui-icon-cart-simple"></i>积分兑换</a>
+              <a class="chip" ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i>订单管理</a>
+              <a class="chip" ew-href="{:url('/Feedback/list')}"><i class="layui-icon layui-icon-dialogue"></i>反馈管理</a>
+              <a class="chip" ew-href="{:url('/Safe/index')}"><i class="layui-icon layui-icon-vercode"></i>安全检测</a>
+              <a class="chip" ew-href="{:url('/Set/index')}"><i class="layui-icon layui-icon-set"></i>系统配置</a>
+            </div>
+          </div>
+          <a class="add-panel" ew-href="{:url('/App/edit')}">
+            <i class="layui-icon layui-icon-add-1"></i>
+            <span>新增应用</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>待办事项</h3><a ew-href="{:url('/Plugin/list')}">更多</a></div>
+        <div class="mp-body todo-row">
+          <a class="todo red" ew-href="{:url('/Plugin/list')}"><div class="icon"><i class="layui-icon layui-icon-util"></i></div><div><b>{$pending_plugins}</b><span>待审核插件</span></div></a>
+          <a class="todo blue" ew-href="{:url('/Order/list')}"><div class="icon"><i class="layui-icon layui-icon-rmb"></i></div><div><b>{$pending_orders}</b><span>待处理订单</span></div></a>
+          <a class="todo green" ew-href="{:url('/Feedback/list')}"><div class="icon"><i class="layui-icon layui-icon-dialogue"></i></div><div><b>{$pending_feedback}</b><span>待回复反馈</span></div></a>
+          <a class="todo orange" ew-href="{:url('/Plugin/list')}"><div class="icon"><i class="layui-icon layui-icon-download-circle"></i></div><div><b>{$today_downloads}</b><span>今日下载</span></div></a>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="mp-card">
+          <div class="mp-head"><h3>七日趋势</h3><a ew-href="{:url('/Auth/list')}">详情</a></div>
+          <div class="mp-body">
+            <div class="trend">
+              {volist name="week_trend" id="trend"}
+              <div class="bar">
+                <div class="bar-stack">
+                  <div class="bar-auth" title="授权 {$trend.auth}" style="height:{$trend.auth_rate}%;"></div>
+                  <div class="bar-user" title="用户 {$trend.user}" style="height:{$trend.user_rate}%;"></div>
+                </div>
+                <span>{$trend.day}</span>
+              </div>
+              {/volist}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="d-col-4">
-      <div class="layui-card panel">
-        <div class="layui-card-header">待处理事项</div>
-        <div class="layui-card-body">
-          <a class="t-row" ew-href="{:url('/Plugin/list')}">
-            <span class="t-icon warn"><i class="layui-icon layui-icon-util"></i></span>
-            <span class="t-body"><span class="t-title">待审核插件</span><span class="t-meta">新提交内容审核</span></span>
-            <span class="t-extra"><span class="t-num">{$pending_plugins}</span></span>
-          </a>
-          <a class="t-row" ew-href="{:url('/Order/list')}">
-            <span class="t-icon warn"><i class="layui-icon layui-icon-rmb"></i></span>
-            <span class="t-body"><span class="t-title">待处理订单</span><span class="t-meta">充值及业务订单</span></span>
-            <span class="t-extra"><span class="t-num">{$pending_orders}</span></span>
-          </a>
-          <a class="t-row" ew-href="{:url('/Feedback/list')}">
-            <span class="t-icon warn"><i class="layui-icon layui-icon-dialogue"></i></span>
-            <span class="t-body"><span class="t-title">待回复反馈</span><span class="t-meta">用户问题与建议</span></span>
-            <span class="t-extra"><span class="t-num">{$pending_feedback}</span></span>
-          </a>
+        <div class="mp-card">
+          <div class="mp-head"><h3>操作日志</h3><a ew-href="{:url('/Log/list')}">更多</a></div>
+          <div class="mp-body line-list">
+            {empty name="log_list"}<div class="empty">暂无操作日志</div>{else/}
+            {volist name="log_list" id="vo" offset="0" length="5"}
+            <div class="line"><i class="layui-icon layui-icon-log"></i><span class="text">{$vo.title|default='系统操作'}</span><span class="time">{$vo.create_time|default=''}</span></div>
+            {/volist}
+            {/empty}
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
+      </section>
 
-  <!-- ══ Row 3: Plugins (4) + Orders (4) + Security (4) — equal 3-col ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-col-4">
-      <div class="layui-card panel">
-        <div class="layui-card-header">
-          最新插件
-          <a ew-href="{:url('/Plugin/list')}">全部 <i class="layui-icon layui-icon-right"></i></a>
+      <section class="split">
+        <div class="mp-card">
+          <div class="mp-head"><h3>余额排行</h3><a ew-href="{:url('/User/list')}">全部</a></div>
+          <div class="mp-body rank-list">
+            {empty name="balance_ranking"}<div class="empty">暂无排行数据</div>{else/}
+            {volist name="balance_ranking" id="vo" offset="0" length="5" key="k"}
+            <div class="rank"><em>{$k}</em><span class="text">{$vo.username|default='用户'}</span><span class="value">¥{$vo.balance|default=0}</span></div>
+            {/volist}
+            {/empty}
+          </div>
         </div>
-        <div class="layui-card-body">
+        <div class="mp-card">
+          <div class="mp-head"><h3>积分排行</h3><a ew-href="{:url('/User/list')}">全部</a></div>
+          <div class="mp-body rank-list">
+            {empty name="integral_ranking"}<div class="empty">暂无排行数据</div>{else/}
+            {volist name="integral_ranking" id="vo" offset="0" length="5" key="k"}
+            <div class="rank"><em>{$k}</em><span class="text">{$vo.username|default='用户'}</span><span class="value">{$vo.integral|default=0}</span></div>
+            {/volist}
+            {/empty}
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="mp-side">
+      <section class="mp-card notice-list">
+        <div class="mp-head"><h3>公告</h3><a ew-href="{:url('/Order/list')}">更多</a></div>
+        <div class="mp-body">
+          {empty name="recent_orders"}<div class="empty">暂无订单动态</div>{else/}
+          {volist name="recent_orders" id="order"}
+          <div class="line">
+            <i class="layui-icon layui-icon-notice"></i>
+            <span class="text">{$order.name|default='订单'} · {$order.username|default='未知用户'}</span>
+            <span class="time">{$order.addtime|default=''}</span>
+          </div>
+          {/volist}
+          {/empty}
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>业务模块</h3><a ew-href="{:url('/Set/index')}">更多</a></div>
+        <div class="mp-body team-grid">
+          <a class="team" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i><div><b>授权中心</b><span>授权与卡密</span></div></a>
+          <a class="team" ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i><div><b>插件服务</b><span>审核与市场</span></div></a>
+          <a class="team" ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i><div><b>交易管理</b><span>订单与流水</span></div></a>
+          <a class="team" ew-href="{:url('/Safe/index')}"><i class="layui-icon layui-icon-vercode"></i><div><b>系统巡检</b><span>安全检测</span></div></a>
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>系统安全</h3><a ew-href="{:url('/Safe/index')}">检测</a></div>
+        <div class="mp-body safe-score">
+          <div class="safe-ring" id="safeRing"><span id="safeScore">--</span></div>
+          <div class="safe-meta">
+            <div id="safeText">正在读取安全检测结果</div>
+            <div>建议定期检查目录权限、调试模式和默认入口。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>最新插件</h3><a ew-href="{:url('/Plugin/list')}">全部</a></div>
+        <div class="mp-body line-list">
           {empty name="latest_plugins"}<div class="empty">暂无插件</div>{else/}
-          {foreach $latest_plugins as $lp}
-          <div class="t-row">
-            <img src="{$lp.icon}" class="t-img" onerror="this.style.display='none'">
-            <div class="t-body">
-              <div class="t-title">{$lp.name} <span style="font-weight:400;color:#8c8c8c;">v{$lp.version}</span></div>
-              <div class="t-meta">{$lp.author} · {$lp.created_at|date='m-d'}</div>
-            </div>
-            <span class="layui-badge {if $lp.status==1}layui-badge-green{elseif $lp.status==0}layui-bg-orange{else}layui-bg-gray{/if}">
-              {if $lp.status==1}已上架{elseif $lp.status==0}待审核{else}已下架{/if}
-            </span>
-          </div>
-          {/foreach}
+          {volist name="latest_plugins" id="plugin"}
+          <div class="line"><i class="layui-icon layui-icon-component"></i><span class="text">{$plugin.name|default='插件'}</span><span class="value">v{$plugin.version|default='1.0'}</span></div>
+          {/volist}
           {/empty}
         </div>
-      </div>
-    </div>
-    <div class="d-col-4">
-      <div class="layui-card panel">
-        <div class="layui-card-header">
-          最近订单
-          <a ew-href="{:url('/Order/list')}">全部 <i class="layui-icon layui-icon-right"></i></a>
-        </div>
-        <div class="layui-card-body">
-          {empty name="recent_orders"}<div class="empty">暂无订单</div>{else/}
-          {foreach $recent_orders as $ro}
-          <div class="t-row">
-            <span class="t-icon" style="background:#f0f4ff;color:#3a6fd8;"><i class="layui-icon layui-icon-rmb"></i></span>
-            <div class="t-body">
-              <div class="t-title">{$ro.name|default='订单'}</div>
-              <div class="t-meta">{$ro.username|default=''} · {$ro.addtime|date='m-d H:i'}</div>
-            </div>
-            <div class="t-extra">
-              <div style="font-weight:700;font-size:14px;">¥{$ro.money}</div>
-              <div class="t-meta">{if $ro.status==1}已完成{elseif $ro.status==0}待处理{else}{$ro.status}{/if}</div>
-            </div>
-          </div>
-          {/foreach}
-          {/empty}
-        </div>
-      </div>
-    </div>
-    <div class="d-col-4">
-      <div class="layui-card panel">
-        <div class="layui-card-header">安全检测 <span style="font-weight:400;color:#8c8c8c;">{:date('H:i')}</span></div>
-        <div class="layui-card-body">
-          <div class="sec-row">
-            <div class="sec-left">
-              <div id="SF_Progress"></div>
-              <div id="loading" style="margin-top:8px;"></div>
-            </div>
-            <div class="sec-right" id="sfhtml"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </section>
+    </aside>
   </div>
-
-  <!-- ══ Row 4: Logs (full width) ══ -->
-  <div class="d-row">
-    <div class="d-col-12">
-      <div class="layui-card panel">
-        <div class="layui-card-header">操作日志</div>
-        <div class="layui-card-body" style="max-height:220px;overflow:auto;">
-          {empty name="log_list"}<div class="empty">暂无日志</div>{else/}
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;">
-            {foreach $log_list as $res}
-            <div class="t-row" style="padding:7px 0;">
-              <span class="t-icon" style="width:28px;height:28px;border-radius:6px;font-size:12px;background:#f0f4ff;color:#3a6fd8;"><i class="layui-icon layui-icon-log"></i></span>
-              <div class="t-body"><div class="t-title" style="font-weight:400;">{$res.title}</div></div>
-              <span style="font-size:11px;color:#bbb;">{$res.create_time|date='m-d H:i'}</span>
-            </div>
-            {/foreach}
-          </div>
-          {/empty}
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 {include file="/public/footer"}
 <script>
-layui.use(['layer', 'form', 'admin', 'element', 'notice', 'CircleProgress'], function () {
-    var $ = layui.jquery;
-    var notice = layui.notice;
-    var CircleProgress = layui.CircleProgress;
-
-    $('#loading').html('<span style="font-size:12px;color:#8c8c8c;">检测中<span id="loginload">.</span></span>');
-    var ln = 1;
-    setInterval(function(){ ln = ln === 3 ? 1 : ln + 1; $('#loginload').html(ln === 1 ? '.' : (ln === 2 ? '..' : '...')); },300);
-
-    $.ajax({
-        type: "POST", url: "{:url('/Safe/check')}", dataType: "json",
-        success: function(data) {
-            if (data.code == 0) {
-                var progress = new CircleProgress('#SF_Progress', {
-                    max: 100, value: 0,
-                    textFormat: function(v){ return v == 100 ? '{:t("dashboard.secure")}' : v + '{:t("common.score")}'; }
-                });
-                var h = ['<div>'];
-                $.each(data.data.check_msg.danger, function(){ h.push('<div class="sec-item"><span class="layui-badge layui-badge-red" style="min-width:18px;text-align:center;height:18px;line-height:18px;font-size:10px;">!</span> '+this+'</div>'); });
-                $.each(data.data.check_msg.warning, function(){ h.push('<div class="sec-item"><span class="layui-badge" style="min-width:18px;text-align:center;height:18px;line-height:18px;font-size:10px;background:#faad14;color:#fff;">!</span> '+this+'</div>'); });
-                $.each(data.data.check_msg.info, function(){ h.push('<div class="sec-item"><span class="layui-badge layui-badge-blue" style="min-width:18px;text-align:center;height:18px;line-height:18px;font-size:10px;">i</span> '+this+'</div>'); });
-                h.push('</div>');
-                var html = h.join("");
-                var timer = setInterval(function () {
-                    if(data.data.safe > progress.value){
-                        progress.value += 1;
-                    } else {
-                        if(data.data.safe >= 80) $('#SF_Progress').addClass('circle-progress-info');
-                        else if(data.data.safe >= 60) $('#SF_Progress').addClass('circle-progress-warning');
-                        else $('#SF_Progress').addClass('circle-progress-danger');
-                        var c = data.data.safe >= 80 ? '#34c759' : (data.data.safe >= 60 ? '#faad14' : '#e8553d');
-                        var t = data.data.safe >= 80 ? '{:t("dashboard.security_high")}' : (data.data.safe >= 60 ? '{:t("dashboard.security_medium")}' : '{:t("dashboard.security_low")}');
-                        $('#loading').html('<div style="font-size:26px;font-weight:700;color:'+c+';">'+data.data.safe+'</div><div style="font-size:11px;color:#8c8c8c;">'+t+'</div>');
-                        $('#sfhtml').html(html);
-                        clearInterval(timer);
-                    }
-                }, 30);
-            } else { notice.msg('{:t("common.server_error")}', {icon: 2}); }
-        }
-    });
+layui.use(['jquery'], function(){
+  var $ = layui.jquery;
+  if (window.SF_URL) {
+    SF_URL.normalizePageLinks(document);
+  }
+  $.ajax({
+    type: 'POST',
+    url: "{:url('/Safe/check')}",
+    dataType: 'json',
+    success: function(res){
+      var score = res && res.data && typeof res.data.score !== 'undefined' ? parseInt(res.data.score, 10) : 0;
+      score = Math.max(0, Math.min(100, score || 0));
+      $('#safeScore').text(score);
+      $('#safeRing').css('background', 'conic-gradient(var(--blue) ' + (score * 3.6) + 'deg,#edf3f9 0deg)');
+      $('#safeText').text(score >= 85 ? '系统状态良好' : (score >= 60 ? '存在可优化项目' : '建议尽快处理风险项'));
+    },
+    error: function(){
+      $('#safeScore').text('--');
+      $('#safeText').text('安全检测暂不可用');
+    }
+  });
 });
 </script>

@@ -21,14 +21,14 @@ class User extends Backend
                 $userId = request()->post('user_id/d');
                 $limit = request()->post('limit/d', 15);
                 $page = request()->post('current_page/d', 1);
-                if(empty($userId)) return message('缺少用户ID', false);
+                if(empty($userId)) return json(message('缺少用户ID', false));
                 $list = \app\common\model\BalanceLogModel::where('user_id', $userId)
                     ->order('id', 'desc')
                     ->paginate(['list_rows' => $limit, 'page' => $page]);
-                return message('ok', true, ['data' => $list]);
+                return json(message('ok', true, ['data' => $list]));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -38,14 +38,26 @@ class User extends Backend
                 $userId = request()->post('user_id/d');
                 $limit = request()->post('limit/d', 15);
                 $page = request()->post('current_page/d', 1);
-                if(empty($userId)) return message('缺少用户ID', false);
+                if(empty($userId)) return json(message('缺少用户ID', false));
                 $list = \app\common\model\PointLogModel::where('user_id', $userId)
                     ->order('id', 'desc')
                     ->paginate(['list_rows' => $limit, 'page' => $page]);
-                return message('ok', true, ['data' => $list]);
+                return json(message('ok', true, ['data' => $list]));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
+        }
+    }
+
+    public function edit()
+    {
+        try {
+            if (IS_POST) {
+                return json($this->service->edit());
+            }
+            return json(message('非法请求', false));
+        } catch (\Exception $e) {
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -54,10 +66,10 @@ class User extends Backend
             if(IS_POST){
                 $appid = $this->request->post('appid/d');
                 $result = $this->service->getAppUserList($appid);
-                return message(t('common.list_success') ,true, ['data' => $result]);
+                return json(message(t('common.list_success') ,true, ['data' => $result]));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
     }
 
@@ -65,13 +77,17 @@ class User extends Backend
         try{
             if(IS_POST){
                 $result = $this->service->list();
-                foreach ($result as $item) {
-                    unset($item['password']);
+                $data = method_exists($result, 'toArray') ? $result->toArray() : $result;
+                if (isset($data['data']) && is_array($data['data'])) {
+                    foreach ($data['data'] as &$item) {
+                        unset($item['password']);
+                    }
+                    unset($item);
                 }
-                return message(t('common.list_success') ,true, ['data' => $result]);
+                return json(message(t('common.list_success') ,true, ['data' => $data]));
             }
         }catch (\Exception $e){
-            return message($e->getMessage(), false);
+            return json(message($e->getMessage(), false));
         }
         try{
             View::assign('appid', $appid);

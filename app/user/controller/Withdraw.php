@@ -150,7 +150,7 @@ class Withdraw extends UserBackend
                 'created_at' => $now,
             ]);
 
-            return json(message('提现申请已提交，请等待审核', true));
+            return json(message('提交成功！将会在1-3个工作日完成提现', true));
         } catch (\Exception $e) {
             Db::rollback();
             return json(message('提交失败：' . $e->getMessage(), false));

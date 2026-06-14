@@ -1,5 +1,7 @@
 <?php
 namespace app\pay\library\wxpay;
+use think\Exception;
+
 /**
 * 2015-06-29 修复签名问题
 **/

@@ -598,7 +598,8 @@ class AuthModel extends BaseModel
 
     public function myList(){
         try{
-            $userInfo = parent::getUserInfo();
+            $userModel = new \app\user\model\User();
+            $userInfo = $userModel->getInfo();
             if(!$userInfo){
                 return message(t('user.info_error').'[errorCode:UserInfoError]' ,false);
             }

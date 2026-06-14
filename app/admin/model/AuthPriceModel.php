@@ -1,9 +1,9 @@
 <?php
 namespace app\admin\model;
 
-use addons\mail\library\PHPMailer\Exception;
 use app\admin\validate\AuthPrice;
 use app\common\model\BaseModel;
+use think\Exception;
 use think\exception\ValidateException;
 /**
  * 价格-模型
@@ -93,7 +93,7 @@ class AuthPriceModel extends BaseModel
                 "name" => $name,
                 "money" => $money,
                 "all_money" => $all_money,
-                "sort" => $result['sort']??0 + 1,
+                "sort" => ($result['sort'] ?? 0) + 1,
                 "day" => $day,
                 "diy_switch" => $diy_switch,
                 "permanent_switch" => $permanent_switch,

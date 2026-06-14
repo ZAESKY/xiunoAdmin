@@ -48,7 +48,7 @@ class Feedback extends Backend
             if ($file->getSize() > $maxSize) {
                 return json(['code' => 1, 'msg' => '图片不能超过5MB']);
             }
-            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . date('Ymd');
+            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR . date('Ymd');
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
@@ -57,7 +57,7 @@ class Feedback extends Backend
             if (!$info) {
                 return json(['code' => 1, 'msg' => $file->getError()]);
             }
-            $url = '/upload/' . date('Ymd') . '/' . $fileName;
+            $url = '/upload/temp/' . date('Ymd') . '/' . $fileName;
             return json(['code' => 0, 'msg' => 'ok', 'data' => ['src' => $url, 'title' => $file->getOriginalName()]]);
         } catch (\Throwable $e) {
             return json(['code' => 1, 'msg' => $e->getMessage()]);

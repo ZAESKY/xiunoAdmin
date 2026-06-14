@@ -184,7 +184,7 @@ class CodePay extends PayBackend
 
     private function codepayMsg($msg, $quit = true){
         $get = request()->get();
-        $js = $get['js'];
+        $js = isset($get['js']) ? $get['js'] : '';
         echo $js?"cron_back&&cron_back({$msg})":json_encode($msg);
         if($quit)exit(0);
     }
@@ -224,7 +224,8 @@ class CodePay extends PayBackend
         $order_status = 1;//状态0为全部 1为通知失败  2成功状态
         $limit = 5; //检测订单数量限制 防止数据库压力过大
 
-        if (preg_match('/Baiduspider/', $_SERVER['HTTP_USER_AGENT'])) return;
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        if ($ua && preg_match('/Baiduspider/', $ua)) return;
 
         if (function_exists("set_time_limit")) {
             @set_time_limit(0);
@@ -281,6 +282,8 @@ class CodePay extends PayBackend
             $api_data['trade_no'] = '';
             $api_data['count'] = 0;
             if (!$arr['nonce_str'] || md5($arr['nonce_str'] . $key) != $arr['sign']) $this->codepayMsg('{"error":"fail"}');
+            $sign = '';
+            $urls = '';
             foreach ($get AS $key => $val) {
                 if ($val == '') continue;
                 if ($key != 'sign') {
@@ -322,6 +325,7 @@ class CodePay extends PayBackend
         ksort($get); //排序get参数
         reset($get); //内部指针指向数组中的第一个元素
         $sign = '';
+        $urls = '';
         foreach ($get AS $key => $val) {
             if ($val == '') continue;
             if ($key != 'sign') {
@@ -365,6 +369,7 @@ class CodePay extends PayBackend
         ksort($post); //排序post参数
         reset($post); //内部指针指向数组中的第一个元素
         $sign = '';
+        $urls = '';
         foreach ($post AS $key => $val) {
             if ($val == '') continue;
             if ($key != 'sign') {

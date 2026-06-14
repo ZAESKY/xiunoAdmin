@@ -386,28 +386,28 @@ class UserBackend extends CommonBase
             try{
                 try{
                     if(!$this->myPowerInfo) {
-                        return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]', false);
+                        return json(message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]', false));
                     }
                     // 权限检测
                     if($this->service instanceof \app\user\service\AuthService){
                         if($this->myPowerInfo['addauth_power'] != 1){
-                            return message(t('login.no_access'), false);
+                            return json(message(t('login.no_access'), false));
                         }
                     } else if ($this->service instanceof \app\user\service\PirateService){
                         if($this->myPowerInfo['pirate_power'] != 1){
-                            return message(t('login.no_access'), false);
+                            return json(message(t('login.no_access'), false));
                         }
                     } else if ($this->service instanceof \app\user\service\UserService){
                         if($this->myPowerInfo['adduser_power'] != 1){
-                            return message(t('login.no_access'), false);
+                            return json(message(t('login.no_access'), false));
                         }
                     }
                 }catch (\Exception $e){
-                    return message(t('common.server_error').'[errorCode:GetAccessRightsError]', false);
+                    return json(message(t('common.server_error').'[errorCode:GetAccessRightsError]', false));
                 }
-                return $this->service->edit();
+                return json($this->service->edit());
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -426,11 +426,11 @@ class UserBackend extends CommonBase
                 $info = $this->service->getInfo($id);
                 if ($info) {
                     $this->service->drop($id);
-                    return message(t('user.delete_success'), true);
+                    return json(message(t('user.delete_success'), true));
                 }
-                return message(t('validation.invalid_id'), false);
+                return json(message(t('validation.invalid_id'), false));
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -448,7 +448,7 @@ class UserBackend extends CommonBase
                 // Normalize ids from request before passing them into service layer.
                 $ids = array_values(array_filter(array_unique(array_map('intval', explode(',', (string)input('post.id'))))));
                 if (empty($ids)) {
-                    return message('common.invalid_id', false);
+                    return json(message('common.invalid_id', false));
                 }
                 //批量删除
                 $num = 0;
@@ -458,9 +458,9 @@ class UserBackend extends CommonBase
                         $num++;
                     }
                 }
-                return message(t('batch.delete_count', ['total' => count($ids), 'count' => $num]));
+                return json(message(t('batch.delete_count', ['total' => count($ids), 'count' => $num])));
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -477,29 +477,29 @@ class UserBackend extends CommonBase
             try{
                 try{
                     if(!$this->myPowerInfo) {
-                        return message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]', false);
+                        return json(message(t('user.power_info_error').'[errorCode:GetUserPowerInfoError]', false));
                     }
                     // 权限检测
                     if($this->service instanceof \app\user\service\AuthService){
                         if($this->myPowerInfo['addauth_power'] != 1){
-                            return message(t('login.no_access'), false);
+                            return json(message(t('login.no_access'), false));
                         }
                     } else if ($this->service instanceof \app\user\service\PirateService){
                         if($this->myPowerInfo['pirate_power'] != 1){
-                            return message(t('login.no_access'), false);
+                            return json(message(t('login.no_access'), false));
                         }
                     } else if ($this->service instanceof \app\user\service\UserService){
                         if($this->myPowerInfo['adduser_power'] != 1){
-                            return message(t('login.no_access'), false);
+                            return json(message(t('login.no_access'), false));
                         }
                     }
                 }catch (\Exception $e){
-                    return message(t('common.server_error').'[errorCode:GetAccessRightsError]', false);
+                    return json(message(t('common.server_error').'[errorCode:GetAccessRightsError]', false));
                 }
                 $result = $this->service->list();
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             }catch (\Exception $e){
-                return message($e->getMessage(), false, ['data' => []]);
+                return json(message($e->getMessage(), false, ['data' => []]));
             }
         }
         try{
@@ -538,9 +538,9 @@ class UserBackend extends CommonBase
         if (IS_POST) {
             try{
                 $this->service->setStatus();
-                return message(t('user.status_change_success'), true);
+                return json(message(t('user.status_change_success'), true));
             }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message($e->getMessage(), false));
             }
         }
     }

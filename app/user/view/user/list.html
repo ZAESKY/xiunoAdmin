@@ -53,6 +53,7 @@
 <script type="text/html" id="SF_EditDialog">
     <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
+        <input name="form_mode" type="hidden" value=""/>
         <div class="layui-form-item">
             <label class="layui-form-label layui-form-required">权限:</label>
             <div class="layui-input-block">
@@ -236,18 +237,18 @@
                 content: $('#SF_EditDialog').html(),
                 success: function (layero, dIndex) {
                     // 回显表单数据
+                    $('input[name="form_mode"]').val(mData ? 'edit' : 'add');
                     notice.msg('正在获取列表中..', {icon: 4, close: true});
                     if(mData){
                         $.ajax({
                             type: "POST",
-                            url: '{:url("/User/getUpdatePowerList")}',
-                            data: {"power":mData.power},
+                            url: '{:url("/User/getPowerList")}',
                             dataType: "json",
                             success: function(data) {
                                 notice.destroy();
                                 if (data.code == 0) {
                                     notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                                    var content = '<option value="-1">不升级</option>';
+                                    var content = '<option value="">请选择权限</option>';
                                     $.each(data.data.data, function(index, value) {
                                         content +='<option value="'+value.id+'">'+value.name+'</option>';
                                     });
@@ -256,9 +257,9 @@
                                     notice.msg(data.msg, {icon: 2, audio:'1'});
                                 }
                                 form.render();
-                                mData.power = -1;
                                 mData.balance = 0;
                                 mData.integral = 0;
+                                mData.password = '';
                                 form.val('SF_EditForm', mData);
                             },
                             error: function() {

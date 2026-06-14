@@ -1,5 +1,7 @@
 <?php
 namespace app\pay\library\alipay\lib;
+use think\Exception;
+
 require_once 'AopEncrypt.php';
 
 class EncryptParseItem
@@ -692,10 +694,11 @@ class AopClient
      **/
     public function rsaCheckV1($params, $rsaPublicKeyFilePath, $signType = 'RSA')
     {
-        $sign = $params['sign'];
+        $sign = isset($params['sign']) ? $params['sign'] : '';
 
         unset($params['sign']);
         unset($params['sign_type']);
+        if ($sign === '' || empty($rsaPublicKeyFilePath)) return false;
         return $this->verify($this->getCheckSignContent($params), $sign, $rsaPublicKeyFilePath, $signType);
     }
 

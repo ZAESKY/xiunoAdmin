@@ -35,7 +35,7 @@ class UserService extends UserBaseService
                 $powerInfo = parent::getPowerPriceInfo($res['power']);
                 $appInfo = parent::getAppInfo($res['appid']);
                 if($powerInfo){
-                    if($powerInfo['default'] == 0){
+                    if($powerInfo['default_power'] == 0){
                         if($powerInfo['parentid'] == 0){
                             $res['powerSpan'] = 'red';
                         }else{

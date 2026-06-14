@@ -1,571 +1,499 @@
 {include file="/public/header"}
 <style>
-/* ═══════════════════════════════════════════════════════
-   User Dashboard
-   ═══════════════════════════════════════════════════════ */
-:root { --gap: 14px; }
-.d-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); }
-.d-3 { grid-column: span 3; }
-.d-5 { grid-column: span 5; }
-.d-6 { grid-column: span 6; }
-.d-7 { grid-column: span 7; }
-.d-12 { grid-column: span 12; }
-
-/* ── Theme Colors ── */
-.legend { --c1: #1a0040; --c2: #5b0e8a; --c3: #b44ce0; --glow: rgba(180,76,224,.5); }
-.diamond { --c1: #001a3a; --c2: #0a5eb0; --c3: #4dc9f6; --glow: rgba(77,201,246,.5); }
-.gold { --c1: #2e1a00; --c2: #b87a14; --c3: #f5d060; --glow: rgba(245,208,96,.5); }
-.silver { --c1: #1a1a2e; --c2: #4a5078; --c3: #a0b4c8; --glow: rgba(160,180,200,.4); }
-.bronze { --c1: #2e1e0f; --c2: #8b5a2b; --c3: #d4956b; --glow: rgba(212,149,107,.4); }
-.standard { --c1: #1f2937; --c2: #3b4f6b; --c3: #7b8ea8; --glow: rgba(123,142,168,.3); }
-
-/* ── Hero ── */
-.hero-card {
-  display: flex; align-items: center; gap: 24px;
-  padding: 28px 30px; border-radius: 14px; position: relative; overflow: hidden;
-  background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 60%, var(--c3) 100%);
-  color: #fff;
+:root{
+  --page:#eef6ff;
+  --card:#ffffff;
+  --line:#e9f0f7;
+  --text:#1f2a3d;
+  --muted:#7a8798;
+  --blue:#2f7df6;
+  --blue-soft:#e9f2ff;
+  --green:#19b47b;
+  --green-soft:#e8f8f1;
+  --orange:#f6a23a;
+  --orange-soft:#fff4e4;
+  --red:#ef5b5b;
+  --red-soft:#fff0f0;
+  --shadow:0 14px 36px rgba(38, 76, 120, .08);
 }
-.hero-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.08) 0%, transparent 60%),
-              radial-gradient(ellipse at 70% 80%, var(--glow) 0%, transparent 50%);
-}
-.hero-card::after {
-  content: ''; position: absolute; right: -60px; bottom: -80px;
-  width: 220px; height: 220px; border-radius: 50%;
-  border: 40px solid rgba(255,255,255,.04);
-}
-.hero-avatar-wrap { position: relative; z-index: 1; flex-shrink: 0; }
-.hero-avatar {
-  width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-  border: 3px solid rgba(255,255,255,.4);
-  box-shadow: 0 0 30px var(--glow);
-}
-.hero-badge {
-  position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
-  padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 700;
-  background: linear-gradient(135deg, var(--c2), var(--c3)); white-space: nowrap;
-  z-index: 2; letter-spacing: .5px;
-  animation: badgePulse 2.5s ease-in-out infinite;
-}
-@keyframes badgePulse {
-  0%, 100% { box-shadow: 0 0 8px var(--glow); }
-  50% { box-shadow: 0 0 20px var(--glow), 0 0 40px var(--glow); }
-}
-.hero-body { flex: 1; min-width: 0; position: relative; z-index: 1; align-self: stretch; display: flex; flex-direction: column; justify-content: space-evenly; }
-.hero-body .greeting { font-size: 14px; opacity: .75; }
-.hero-body h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
-.hero-body .subtitle { font-size: 13px; opacity: .7; line-height: 1.5; }
-.hero-extra { flex-shrink: 0; text-align: right; position: relative; z-index: 1; }
-.hero-extra .bal { font-size: 32px; font-weight: 700; text-shadow: 0 0 20px rgba(255,255,255,.3); }
-.hero-extra .pts { font-size: 18px; font-weight: 600; opacity: .9; margin-top: 4px; }
-.hero-extra a { display: inline-block; padding: 4px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.35); color: #fff; font-size: 12px; text-decoration: none; transition: .2s; white-space: nowrap; }
-.hero-extra a:hover { background: rgba(255,255,255,.12); }
-.hero-metrics { display: flex; align-items: center; gap: 16px; justify-content: flex-end; }
-.hero-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
-
-/* ── Stat Card ── */
-.stat-card {
-  background: #fff; border-radius: 10px; padding: 14px 18px; height: 98px;
-  border: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px;
-  transition: .2s; cursor: pointer; overflow: hidden;
-}
-.stat-card:hover { border-color: #d0d8e8; box-shadow: 0 4px 12px rgba(0,0,0,.05); }
-.st-icon {
-  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 20px;
-}
-.st-icon.c1 { background: #eaf2ff; color: #3a6fd8; }
-.st-icon.c2 { background: #e6f7ed; color: #34a853; }
-.st-icon.c3 { background: #f3eeff; color: #7c5ce7; }
-.st-icon.c4 { background: #fff3e0; color: #f09d3c; }
-.st-body { flex: 1; min-width: 0; }
-.st-num { font-size: 24px; font-weight: 700; color: #1a1a1a; line-height: 1.1; }
-.st-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
-.st-sub { font-size: 11px; margin-top: 3px; }
-.st-sub.up { color: #34a853; }
-.st-sub.down { color: #e8553d; }
-
-/* ── Progress bar ── */
-.prog-wrap { margin-top: 8px; }
-.prog-bar { height: 5px; border-radius: 3px; background: #f0f0f0; overflow: hidden; }
-.prog-fill { height: 100%; border-radius: 3px; transition: .6s; }
-.prog-fill.blue { background: linear-gradient(90deg, #3a6fd8, #5b9cf5); }
-.prog-fill.green { background: linear-gradient(90deg, #34a853, #5dce78); }
-.prog-fill.purple { background: linear-gradient(90deg, #7c5ce7, #a78bfa); }
-
-/* ── Card header ── */
-.card-header { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #f2f2f2; padding: 14px 18px; }
-.card-header a { color: #3a6fd8; font-size: 12px; font-weight: 400; }
-/* fixed heights for row consistency */
-.d-row-equal { align-items: stretch; }
-.d-row-equal > * { height: 100%; }
-
-/* ── Tabs ── */
-.n-tabs { display: flex; border-bottom: 1px solid #f0f0f0; }
-.n-tab { padding: 10px 16px; font-size: 13px; color: #8c8c8c; cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; }
-.n-tab.on { color: #3a6fd8; border-bottom-color: #3a6fd8; font-weight: 500; }
-
-/* ── List Row ── */
-.l-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
-.l-row:last-child { border-bottom: 0; }
-.l-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
-.l-body { flex: 1; min-width: 0; }
-.l-title { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.l-meta { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
-.l-extra { flex-shrink: 0; text-align: right; }
-.rk { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.rk-1 { background: #e8553d; } .rk-2 { background: #f09d3c; } .rk-3 { background: #3a6fd8; } .rk-n { background: #bbb; }
-.empty { text-align: center; color: #bbb; padding: 28px 0; font-size: 13px; }
-
-/* ── Plugin Card (market style) ── */
-.plug-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
-.plug-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.plug-card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 18px 16px; cursor: pointer; transition: all .25s; }
-.plug-card:hover { border-color: #d0d5dd; box-shadow: 0 6px 24px rgba(0,0,0,0.07); transform: translateY(-2px); }
-.plug-card .pc-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
-.plug-card .pc-icon { width: 52px; height: 52px; flex-shrink: 0; border-radius: 12px; object-fit: cover; background: #f7f8fa; border: 1px solid #f0f0f0; }
-.plug-card .pc-info { flex: 1; min-width: 0; }
-.plug-card .pc-name { font-size: 14px; font-weight: 600; color: #1d1d1f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.plug-card .pc-meta { font-size: 12px; color: #8e8e93; margin-top: 4px; }
-.plug-card .pc-desc { font-size: 12px; color: #6e6e73; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
-.plug-card .pc-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f5f5f5; }
-.plug-card .pc-price { font-size: 15px; font-weight: 700; }
-.plug-card .pc-price.free { color: #34c759; }
-.plug-card .pc-price.paid { color: #ff5722; }
-
-/* ── Responsive ── */
-@media (max-width: 1200px) {
-  .plug-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 1024px) {
-  .d-3, .d-5, .d-6, .d-7, .d-8 { grid-column: span 12; }
-  .plug-grid { grid-template-columns: repeat(2, 1fr); }
-  .plug-grid-2 { grid-template-columns: repeat(2, 1fr); }
-  .hero-card { padding: 20px 22px; flex-wrap: wrap; }
-  .hero-extra { width: 100%; text-align: center; }
-  .hero-extra .hero-metrics { justify-content: center; }
-  .hero-extra .hero-actions { justify-content: center; }
-  .hero-extra .hero-actions { display: flex; gap: 8px; margin-top: 8px; }
-  .hero-extra .bal { font-size: 24px; }
-  .hero-extra .pts { margin-top: 0; font-size: 14px; }
-  .hero-extra a { margin-top: 0; }
-  .hero-body h2 { font-size: 20px; }
-  .hero-avatar { width: 60px; height: 60px; }
-  .layui-card[style*="height:430.8px"] { height: auto !important; min-height: 280px; }
-  .layui-card[style*="height:280px"] { height: auto !important; min-height: 200px; }
-  .stat-card { height: auto !important; min-height: 70px; padding: 12px 14px; }
-  .layui-fluid { padding: 10px 10px !important; }
-  .d-row { gap: 10px; }
-}
-@media (max-width: 640px) {
-  .plug-grid, .plug-grid-2 { grid-template-columns: 1fr; }
-  .hero-card { flex-direction: column; text-align: center; padding: 16px; }
-  .hero-avatar-wrap { margin: 0 auto; }
-  .hero-body { align-items: center; text-align: center; }
-  .hero-body h2 { font-size: 18px; }
-  .hero-avatar { width: 56px; height: 56px; }
-  .hero-badge { font-size: 9px; padding: 1px 7px; }
-  .stat-card { padding: 10px 12px; }
-  .st-num { font-size: 20px; }
-  .st-icon { width: 36px; height: 36px; font-size: 16px; }
-  .d-row { gap: 8px; }
-  .info-bar { gap: 4px; }
-  .info-chip { font-size: 10px; padding: 3px 8px; }
-  .layui-fluid { padding: 8px 6px !important; }
-}
+body{background:var(--page);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+a{color:inherit;}
+.mp-page{min-height:100vh;padding:18px;background:linear-gradient(135deg,#e7f2ff 0%,#f7fbff 50%,#eef8f7 100%);box-sizing:border-box;}
+.mp-tabs{height:44px;display:flex;align-items:center;gap:8px;margin-bottom:12px;overflow-x:auto;}
+.mp-tab{height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(215,226,238,.9);border-radius:5px;background:rgba(255,255,255,.72);font-size:13px;color:#5c6878;white-space:nowrap;box-shadow:0 6px 16px rgba(60,93,130,.05);cursor:pointer;}
+.mp-tab.active{color:var(--blue);background:#fff;border-color:#cfe2ff;font-weight:600;}
+.mp-layout{display:grid;grid-template-columns:minmax(0,1.58fr) minmax(330px,.82fr);gap:14px;}
+.mp-main,.mp-side{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.mp-card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;}
+.mp-head{height:48px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;}
+.mp-head h3{margin:0;font-size:16px;font-weight:700;color:var(--text);}
+.mp-head a{font-size:12px;color:var(--blue);}
+.mp-body{padding:18px;}
+.mp-hero{display:grid;grid-template-columns:minmax(0,1.48fr) minmax(320px,.92fr);gap:14px;align-items:stretch;}
+.quick-banner{min-height:150px;border-radius:7px;background:linear-gradient(120deg,#2f7df6,#179ee8);color:#fff;padding:24px 28px;box-sizing:border-box;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;}
+.quick-banner:after{content:"";position:absolute;right:-54px;top:-60px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.16);}
+.quick-banner h2{margin:0 0 9px;font-size:20px;font-weight:700;}
+.quick-banner p{margin:0;font-size:13px;opacity:.88;line-height:1.7;max-width:760px;}
+.hello-card{padding:16px 18px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;}
+.user-card-top{display:flex;align-items:center;gap:13px;min-width:0;}
+.user-card-top img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#eef3f8;box-shadow:0 8px 18px rgba(47,125,246,.12);}
+.user-card-title{flex:1;min-width:0;}
+.user-card-title strong{display:block;font-size:16px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-card-title span{display:block;font-size:12px;color:var(--muted);line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-badge{height:26px;line-height:26px;padding:0 10px;border-radius:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;white-space:nowrap;}
+.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.asset{border:1px solid #eef3f8;border-radius:7px;background:#fbfdff;padding:12px 13px;}
+.asset span{display:block;color:var(--muted);font-size:12px;margin-bottom:7px;}
+.asset b{display:block;font-size:22px;line-height:1;color:var(--text);}
+.asset.balance b{color:var(--blue);}
+.asset.points b{color:var(--orange);}
+.user-note{border-radius:7px;background:linear-gradient(120deg,#f7fbff,#eef8f7);border:1px solid #e7f0f8;padding:10px 12px;color:#657487;font-size:12px;line-height:1.7;}
+.user-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.user-actions a{height:34px;border-radius:5px;border:1px solid #dfeaf6;background:#fff;color:#4e5d70;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;}
+.user-actions a.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+.workspace{display:block;}
+.workspace-title{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.workspace-logo{width:48px;height:48px;border-radius:6px;background:linear-gradient(135deg,#e7f3ff,#f9fcff);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:28px;}
+.workspace-title h2{margin:0 0 5px;font-size:22px;font-weight:700;}
+.workspace-title p{margin:0;color:var(--muted);font-size:13px;}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px;}
+.metric{padding:14px;border:1px solid #eef3f8;border-radius:6px;background:#fbfdff;}
+.metric b{display:block;font-size:24px;line-height:1;margin-bottom:8px;color:var(--text);}
+.metric span{font-size:12px;color:var(--muted);}
+.metric small{display:block;margin-top:8px;color:#9aa7b6;font-size:11px;}
+.chip-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+.chip{height:38px;border:1px solid #edf2f7;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;gap:7px;color:#4e5d70;font-size:13px;cursor:pointer;transition:.18s;}
+.chip:hover{border-color:#bed8ff;color:var(--blue);box-shadow:0 8px 18px rgba(47,125,246,.08);}
+.todo-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.todo{display:flex;align-items:center;gap:13px;padding:14px;border-radius:7px;background:#fbfdff;border:1px solid #eef3f8;cursor:pointer;}
+.todo .icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.todo.red .icon{background:var(--red-soft);color:var(--red);}
+.todo.blue .icon{background:var(--blue-soft);color:var(--blue);}
+.todo.green .icon{background:var(--green-soft);color:var(--green);}
+.todo.orange .icon{background:var(--orange-soft);color:var(--orange);}
+.todo b{display:block;font-size:24px;line-height:1.1;}
+.todo span{font-size:12px;color:var(--muted);}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.line-list{display:flex;flex-direction:column;}
+.line{min-height:42px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f2f5f8;font-size:13px;}
+.line:last-child{border-bottom:0;}
+.line i{color:#a1adba;}
+.line .text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.line .time,.line .value{color:#9aa7b6;font-size:12px;white-space:nowrap;}
+.rank{min-height:40px;display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;border-bottom:1px solid #f2f5f8;font-size:13px;}
+.rank:last-child{border-bottom:0;}
+.rank em{font-style:normal;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#f0f4f9;color:#7b8796;font-size:12px;}
+.rank:nth-child(1) em{background:#fff1da;color:#e48b10;}
+.rank:nth-child(2) em{background:#eaf2ff;color:#2f7df6;}
+.rank:nth-child(3) em{background:#eaf8ef;color:#19a96f;}
+.trend{height:180px;display:flex;align-items:flex-end;gap:16px;padding-top:10px;}
+.bar{flex:1;min-width:22px;height:100%;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;gap:7px;color:#8a97a8;font-size:11px;}
+.bar-stack{height:126px;width:100%;display:flex;align-items:flex-end;gap:4px;}
+.bar-auth,.bar-user{flex:1;border-radius:6px 6px 2px 2px;min-height:8px;}
+.bar-auth{background:linear-gradient(180deg,#2f7df6,#75b2ff);}
+.bar-user{background:linear-gradient(180deg,#19b47b,#8ee0bd);}
+.plugin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.plugin{border:1px solid #eef3f8;border-radius:7px;background:#fbfdff;padding:12px;min-width:0;}
+.plugin-title{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.plugin-title img{width:34px;height:34px;border-radius:6px;object-fit:cover;background:#eef3f8;}
+.plugin-title b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;}
+.plugin p{height:36px;line-height:18px;overflow:hidden;margin:0;color:var(--muted);font-size:12px;}
+.notice-list .line{min-height:50px;}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.team{height:70px;border:1px solid #eef3f8;border-radius:7px;background:#fbfdff;display:flex;align-items:center;gap:13px;padding:0 16px;cursor:pointer;}
+.team i{font-size:28px;color:var(--blue);}
+.team b{display:block;font-size:14px;margin-bottom:4px;}
+.team span{font-size:12px;color:var(--muted);}
+.checkin-card{display:flex;align-items:center;gap:16px;}
+.checkin-icon{width:66px;height:66px;border-radius:10px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:32px;}
+.checkin-info{flex:1;min-width:0;}
+.checkin-info b{display:block;font-size:18px;margin-bottom:5px;}
+.checkin-info span{display:block;color:var(--muted);font-size:12px;line-height:1.7;}
+.checkin-btn{height:34px;line-height:34px;padding:0 16px;border:0;border-radius:5px;background:var(--blue);color:#fff;cursor:pointer;}
+.checkin-btn.done{background:#d6dee8;color:#66758a;cursor:default;}
+.empty{padding:22px 0;text-align:center;color:#a8b3c0;font-size:13px;}
+/* 轮播图 */
+.carousel-card{padding:0;border:0;background:transparent;box-shadow:none;}
+.carousel-wrapper{position:relative;border-radius:10px;overflow:hidden;background:#fff;box-shadow:var(--shadow);}
+.carousel-track{display:flex;transition:transform .45s cubic-bezier(.25,.46,.45,.94);}
+.carousel-slide{flex:0 0 100%;min-width:0;}
+.carousel-slide a{display:block;width:100%;}
+.carousel-slide img{display:block;width:100%;height:180px;object-fit:cover;}
+.carousel-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2;}
+.carousel-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.55);cursor:pointer;transition:all .25s;}
+.carousel-dots span.active{background:#fff;width:22px;border-radius:4px;}
+/* 富文本公告 */
+.rt-content{line-height:1.9;font-size:14px;color:var(--text);word-break:break-word;}
+.rt-content img{max-width:100%;height:auto;border-radius:6px;}
+.rt-content p{margin:0 0 10px;}
+.rt-content a,.rt-content a:visited{color:var(--blue);}
+.rt-content ul,.rt-content ol{padding-left:20px;}
+.rt-content blockquote{margin:10px 0;padding:8px 16px;border-left:3px solid var(--blue);background:#f8faff;color:#5c6878;}
+.rt-content table{border-collapse:collapse;width:100%;}
+.rt-content td,.rt-content th{border:1px solid #e0e6ed;padding:8px 12px;}
+/* 可点击公告 */
+.notice-clickable{cursor:pointer;transition:background .15s;}
+.notice-clickable:hover{background:#f7faff;border-radius:4px;padding-left:6px;margin-left:-6px;padding-right:6px;margin-right:-6px;}
+@media(max-width:1280px){.mp-layout,.mp-hero{grid-template-columns:1fr}.metric-grid,.todo-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.mp-page{padding:10px}.split{grid-template-columns:1fr}.chip-grid,.team-grid,.plugin-grid{grid-template-columns:1fr 1fr}.metric-grid,.todo-row{grid-template-columns:1fr}.mp-head{padding:0 14px}.mp-body{padding:14px}.carousel-slide img{height:140px}}
+@media(max-width:520px){.chip-grid,.team-grid,.plugin-grid,.asset-grid{grid-template-columns:1fr}.quick-banner{min-height:0}.user-actions{grid-template-columns:1fr}.carousel-slide img{height:130px}}
 </style>
 
-<div class="layui-fluid" style="padding:14px 16px;">
-
-  <!-- ══ Hero ══ -->
-  <div class="hero-card {$power_theme}" style="margin-bottom:14px;">
-    <div class="hero-avatar-wrap">
-      <img src="{$userInfo['img']}" class="hero-avatar" onerror="this.style.opacity='0.3'">
-      <div class="hero-badge">✦ {$userInfo['power_name']} ✦</div>
-    </div>
-    <div class="hero-body">
-      <div class="greeting">{$greeting_emoji} {$greeting}</div>
-      <h2>{$userInfo['username']|default='用户'}</h2>
-      <div class="subtitle">已陪伴 <b>{$app_name|default='平台'}</b> · 第 <b>{$member_days}</b> 天</div>
-    </div>
-    <div class="hero-extra">
-      <div class="hero-metrics">
-        <div><div class="bal">¥{$userInfo['balance']}</div><div style="font-size:12px;opacity:.7;">可用余额</div></div>
-      </div>
-      <div class="hero-actions">
-        <a ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i> 充值</a>
-        <a href="javascript:;" id="btnWithdraw"><i class="layui-icon layui-icon-export"></i> 提现</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Stats ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-3">
-      <div class="stat-card" ew-href="{:url('/Auth/list')}">
-        <div class="st-icon c1"><i class="layui-icon layui-icon-auz"></i></div>
-        <div class="st-body">
-          <div class="st-num">{$auth_count}</div>
-          <div class="st-label">累计授权</div>
-          <div class="st-sub {if $auth_increase >= 0}up{else}down{/if}">今日 {if $auth_increase>=0}+{/if}{php}echo abs($auth_increase);{/php}</div>
-          <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill blue" style="width:{if $auth_count>0}{:min(100,round($auth_count/100*100))}{else}0{/if}%;"></div></div></div>
+<div class="mp-page">
+  <div class="mp-layout" style="margin-top:14px;">
+    <main class="mp-main">
+      <!-- 应用公告 -->
+      {notempty name="app_notice"}
+      <section class="mp-card">
+        <div class="mp-head"><h3><i class="layui-icon layui-icon-speaker" style="color:var(--blue);margin-right:6px;"></i>应用公告</h3></div>
+        <div class="mp-body">
+          <div class="rt-content">{$app_notice|raw}</div>
         </div>
-      </div>
-    </div>
-    <div class="d-3">
-      <div class="stat-card" ew-href="{:url('/Cdkey/list')}">
-        <div class="st-icon c2"><i class="layui-icon layui-icon-cols"></i></div>
-        <div class="st-body">
-          <div class="st-num">{$cdkey_count}</div>
-          <div class="st-label">卡密资产</div>
-          <div class="st-sub" style="color:#34a853;">未使用 {$cdkey_unused|default=0} 张</div>
-          <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill green" style="width:{if $cdkey_count>0}{:min(100,round($cdkey_count/100*100))}{else}0{/if}%;"></div></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="d-3">
-      <div class="stat-card" ew-href="{:url('/User/list')}">
-        <div class="st-icon c3"><i class="layui-icon layui-icon-group"></i></div>
-        <div class="st-body">
-          <div class="st-num">{$user_count}</div>
-          <div class="st-label">下级用户</div>
-          <div class="st-sub {if $user_increase >= 0}up{else}down{/if}">今日 {if $user_increase>=0}+{/if}{php}echo abs($user_increase);{/php}</div>
-          <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill purple" style="width:{if $user_count>0}{:min(100,round($user_count/100*100))}{else}0{/if}%;"></div></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="d-3">
-      {if $checkin_status.checked_today}
-      <div class="stat-card checkin-card checked">
-        <div class="st-icon c4"><i class="layui-icon layui-icon-ok-circle" style="font-size:26px;"></i></div>
-        <div class="st-body">
-          <div class="st-num" style="font-size:18px;color:#34a853;">已打卡</div>
-          <div class="st-label">连续 {$checkin_status.consecutive_days} 天 · +{$checkin_status.today_points}积分</div>
-          <div class="st-sub up"><i class="layui-icon layui-icon-time"></i> 明日再来</div>
-        </div>
-      </div>
-      {else/}
-      <div class="stat-card checkin-card" id="checkinCard" style="position:relative;">
-        <div class="st-icon c4"><i class="layui-icon layui-icon-praise"></i></div>
-        <div class="st-body">
-          <div class="st-num" style="font-size:18px;">每日打卡</div>
-          <div class="st-label">打卡 +{$checkin_base_points} 积分</div>
-          <div class="st-sub up" id="checkinLabel"><i class="layui-icon layui-icon-right"></i> 点击打卡</div>
-        </div>
-        <div id="checkinLoading" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.8);border-radius:10px;display:none;align-items:center;justify-content:center;font-size:13px;color:#3a6fd8;"><i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 打卡中...</div>
-      </div>
-      {/if}
-    </div>
-  </div>
-
-  <!-- ══ Notice Tabs (6) + Carousel (6) — both 340px fixed ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-6">
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:340px;">
-        <div class="n-tabs"><span class="n-tab on">📢 官方公告</span></div>
-        <div style="padding:8px 18px;height:300px;overflow-y:auto;">
-          {empty name="notice_list"}
-          <div class="empty">暂无公告</div>
-          {else/}
-          {foreach $notice_list as $ni}
-          <div class="l-row notice-item" data-id="{$ni.id}" data-title="{$ni.title}" data-content="{:htmlspecialchars($ni.content)}" style="cursor:pointer;">
-            <span style="width:28px;height:28px;border-radius:6px;background:#fff3e0;color:#f09d3c;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="layui-icon layui-icon-notice"></i></span>
-            <div class="l-body">
-              <div class="l-title">{$ni.title}</div>
-              <div class="l-meta">{$ni.created_at|date='m-d H:i'}</div>
-            </div>
-            <i class="layui-icon layui-icon-right" style="color:#ccc;font-size:12px;"></i>
-          </div>
-          {/foreach}
-          {/empty}
-        </div>
-      </div>
-    </div>
-    <div class="d-6">
-      {notempty name="carousel_list"}
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;aspect-ratio:16/9;">
-        <div style="position:relative;width:100%;height:100%;" id="carouselWrap">
-          <div id="carouselTrack" style="display:flex;width:100%;height:100%;transition:transform .5s ease;">
-            {foreach $carousel_list as $c}
-            <div class="carousel-slide" style="min-width:100%;position:relative;">
-              <a href="{if !empty($c.url)}{$c.url}{else}javascript:;{/if}" target="{if !empty($c.url)}_blank{/if}">
-                <img src="{$c.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-                {if !empty($c.title)}<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 20px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:14px;font-weight:600;">{$c.title}</div>{/if}
-              </a>
-            </div>
-            {/foreach}
-          </div>
-          {if count($carousel_list) > 1}
-          <button id="caroPrev" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:0;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;z-index:2;">‹</button>
-          <button id="caroNext" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);color:#fff;border:0;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;z-index:2;">›</button>
-          <div style="position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;" id="caroDots"></div>
-          {/if}
-        </div>
-      </div>
-      {else/}
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
-        <div class="empty">暂无轮播图</div>
-      </div>
+      </section>
       {/notempty}
-    </div>
-  </div>
-
-  <!-- ══ 我的插件 (6) + 最新上架 (6) ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-6">
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:430.8px;">
-        <div class="card-header">我的插件 <span style="font-weight:400;font-size:12px;color:#8c8c8c;">已发布 {$my_plugin_count|default=0} 个 · 已上架 {$my_online_plugin_count|default=0} 个</span></div>
-        <div style="padding:10px 18px;height:380px;overflow-y:auto;">
-          {empty name="my_plugins"}
-          <div class="empty">还没有发布插件 · <a ew-href="{:url('/UserPlugin/create')}" style="color:#3a6fd8;">去发布</a></div>
-          {else/}
-          {foreach $my_plugins as $mp}
-          <a class="l-row" ew-href="{:url('/UserPlugin/detail', ['id' => $mp.id])}" style="text-decoration:none;color:inherit;">
-            <img src="{$mp.icon}" class="l-icon" onerror="this.style.display='none'">
-            <div class="l-body">
-              <div class="l-title">{$mp.name}</div>
-              <div class="l-meta">{if !empty($mp.description)}{$mp.description|mb_substr=0,20}{else/}暂无简介{/if}</div>
-            </div>
-            <span class="layui-badge {if $mp.status==1}layui-badge-green{elseif $mp.status==0}layui-bg-orange{else}layui-bg-gray{/if}" style="font-size:10px;">{if $mp.status==1}已上架{elseif $mp.status==0}待审核{else}已下架{/if}</span>
-          </a>
-          {/foreach}
-          {/empty}
+      <!-- 系统公告 -->
+      {notempty name="notice"}
+      <section class="mp-card">
+        <div class="mp-head"><h3><i class="layui-icon layui-icon-notice" style="color:var(--orange);margin-right:6px;"></i>系统公告</h3></div>
+        <div class="mp-body">
+          <div class="rt-content">{$notice|raw}</div>
         </div>
-      </div>
-    </div>
-    <div class="d-6">
-      {notempty name="latest_plugins"}
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:430.8px;">
-        <div class="card-header">🆕 最新上架 <a ew-href="{:url('/UserPlugin/market')}">更多 <i class="layui-icon layui-icon-right"></i></a></div>
-        <div style="padding:12px 14px;height:380px;overflow-y:auto;">
-          <div class="plug-grid-2">
-            {foreach $latest_plugins as $lp}
-            <div class="plug-card" ew-href="{:url('/UserPlugin/detail', ['id' => $lp.id])}">
-              <div class="pc-top">
-                <img src="{$lp.icon}" class="pc-icon" onerror="this.style.display='none'">
-                <div class="pc-info">
-                  <div class="pc-name">{$lp.name}</div>
-                  <div class="pc-meta">{$lp.author}</div>
+      </section>
+      {/notempty}
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>工作空间</h3><a ew-href="{:url('/MyInfo/index')}">更多</a></div>
+        <div class="mp-body workspace">
+          <div>
+            <div class="workspace-title">
+              <div class="workspace-logo"><i class="layui-icon layui-icon-template-1"></i></div>
+              <div>
+                <h2>{$app_name|default='我的应用'}工作台</h2>
+                <p>成员：{$userInfo['username']|default='用户'} · 角色：{$userInfo['power_name']|default='普通用户'} · 应用ID：{$app_id}</p>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <a class="metric" ew-href="{:url('/Auth/list')}"><b>{$auth_count}</b><span>授权总数</span><small>今日 {$today_auths}</small></a>
+              <a class="metric" ew-href="{:url('/Cdkey/list')}"><b>{$cdkey_count}</b><span>卡密数量</span><small>未使用 {$cdkey_unused|default=0}</small></a>
+              <a class="metric" ew-href="{:url('/User/list')}"><b>{$user_count}</b><span>下级用户</span><small>今日 {if $user_increase>=0}+{/if}{$user_increase}</small></a>
+              <a class="metric" ew-href="{:url('/UserPlugin/list')}"><b>{$my_plugin_count|default=0}</b><span>我的插件</span><small>已上架 {$my_online_plugin_count|default=0}</small></a>
+            </div>
+            <div class="chip-grid">
+              <a class="chip" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i>我的授权</a>
+              <a class="chip" ew-href="{:url('/Cdkey/exchange')}"><i class="layui-icon layui-icon-cols"></i>卡密兑换</a>
+              <a class="chip" ew-href="{:url('/UserPlugin/market')}"><i class="layui-icon layui-icon-util"></i>插件市场</a>
+              <a class="chip" ew-href="{:url('/PointExchange/list')}"><i class="layui-icon layui-icon-cart-simple"></i>积分兑换</a>
+              <a class="chip" ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i>余额充值</a>
+              <a class="chip js-withdraw-entry" href="javascript:;" data-url="{:url('/Withdraw/index', [])}"><i class="layui-icon layui-icon-export"></i>申请提现</a>
+              <a class="chip" ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-date"></i>签到记录</a>
+              <a class="chip" ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-username"></i>个人资料</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>待办事项</h3><a ew-href="{:url('/MyInfo/index')}">更多</a></div>
+        <div class="mp-body todo-row">
+          <a class="todo blue" ew-href="{:url('/Auth/list')}"><div class="icon"><i class="layui-icon layui-icon-auz"></i></div><div><b>{$auth_count}</b><span>我的授权</span></div></a>
+          <a class="todo green" ew-href="{:url('/Cdkey/list')}"><div class="icon"><i class="layui-icon layui-icon-cols"></i></div><div><b>{$cdkey_unused|default=0}</b><span>未用卡密</span></div></a>
+          <a class="todo orange" ew-href="{:url('/UserPlugin/market')}"><div class="icon"><i class="layui-icon layui-icon-util"></i></div><div><b>{:count($latest_plugins)}</b><span>最新插件</span></div></a>
+          <a class="todo red" ew-href="{:url('/PointExchange/list')}"><div class="icon"><i class="layui-icon layui-icon-diamond"></i></div><div><b>{if isset($userInfo['integral'])}{$userInfo['integral']}{else/}0{/if}</b><span>可用积分</span></div></a>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="mp-card">
+          <div class="mp-head"><h3>七日统计</h3><a ew-href="{:url('/Auth/list')}">授权 / 用户</a></div>
+          <div class="mp-body">
+            <div class="trend">
+              {volist name="week_trend" id="trend"}
+              <div class="bar">
+                <div class="bar-stack">
+                  <div class="bar-auth" title="新增授权 {$trend.auth}" style="height:{$trend.auth_rate}%;"></div>
+                  <div class="bar-user" title="新增用户 {$trend.user}" style="height:{$trend.user_rate}%;"></div>
                 </div>
+                <span>{$trend.day}</span>
               </div>
-              <div class="pc-desc">{if !empty($lp.description)}{$lp.description}{else/}暂无简介{/if}</div>
-              <div class="pc-foot">
-                {if $lp.price == 0}<span class="pc-price free">免费</span>{else/}<span class="pc-price paid">¥{$lp.price}</span>{/if}
-                <span class="layui-badge layui-bg-gray" style="font-size:10px;">新上架</span>
-              </div>
+              {/volist}
             </div>
-            {/foreach}
           </div>
         </div>
+        <div class="mp-card">
+          <div class="mp-head"><h3>每日签到</h3><a ew-href="{:url('/MyInfo/index')}">记录</a></div>
+          <div class="mp-body checkin-card">
+            <div class="checkin-icon"><i class="layui-icon layui-icon-date"></i></div>
+            <div class="checkin-info">
+              <b>{if $checkin_status.checked_today}今日已签到{else/}今日待签到{/if}</b>
+              <span>连续 {$checkin_status.consecutive_days|default=0} 天 · 今日可得 {$checkin_base_points} 积分</span>
+            </div>
+            {if $checkin_enabled}
+            <button type="button" class="checkin-btn {if $checkin_status.checked_today}done{/if}" id="checkinBtn" {if $checkin_status.checked_today}disabled{/if}>{if $checkin_status.checked_today}已签到{else/}签到{/if}</button>
+            {else/}
+            <button type="button" class="checkin-btn done" disabled>未开启</button>
+            {/if}
+          </div>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="mp-card">
+          <div class="mp-head"><h3>我的插件</h3><a ew-href="{:url('/UserPlugin/list')}">全部</a></div>
+          <div class="mp-body plugin-grid">
+            {empty name="my_plugins"}<div class="empty">暂无发布插件</div>{else/}
+            {volist name="my_plugins" id="plugin"}
+            <a class="plugin" ew-href="{:url('/UserPlugin/detail', ['id' => $plugin.id])}">
+              <div class="plugin-title"><img src="{$plugin.icon|default=''}" onerror="this.style.opacity='0.2'"><b>{$plugin.name|default='插件'}</b></div>
+              <p>{$plugin.description|default='暂无描述'}</p>
+            </a>
+            {/volist}
+            {/empty}
+          </div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-head"><h3>最新上架</h3><a ew-href="{:url('/UserPlugin/market')}">更多</a></div>
+          <div class="mp-body plugin-grid">
+            {empty name="latest_plugins"}<div class="empty">暂无插件</div>{else/}
+            {volist name="latest_plugins" id="plugin"}
+            <a class="plugin" ew-href="{:url('/UserPlugin/detail', ['id' => $plugin.id])}">
+              <div class="plugin-title"><img src="{$plugin.icon|default=''}" onerror="this.style.opacity='0.2'"><b>{$plugin.name|default='插件'}</b></div>
+              <p>{$plugin.description|default='暂无描述'}</p>
+            </a>
+            {/volist}
+            {/empty}
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="mp-side">
+      <div class="mp-card hello-card">
+      <div class="user-card-top">
+        <img src="{$userInfo['img']}" onerror="this.style.opacity='0.25'">
+        <div class="user-card-title">
+          <strong>{$greeting}，{$userInfo['username']|default='用户'}</strong>
+          <span>{$app_name|default='系统'} · 已使用 {$member_days} 天 · {$userInfo['power_name']|default='默认权限'}</span>
+        </div>
       </div>
-      {else/}
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:430.8px;">
-        <div class="card-header">🆕 最新上架</div>
-        <div style="display:flex;align-items:center;justify-content:center;height:380px;"><div class="empty">暂无插件</div></div>
+      <div class="asset-grid">
+        <div class="asset balance">
+          <span>账户余额</span>
+          <b>¥{$userInfo['balance']|default=0}</b>
+        </div>
+        <div class="asset points">
+          <span>可用积分</span>
+          <b>{$userInfo['integral']|default=0}</b>
+        </div>
+      </div>
+      <div class="user-actions">
+        <a class="primary" ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i>充值</a>
+        <a href="javascript:;" class="js-withdraw-entry" data-url="{:url('/Withdraw/index', [])}"><i class="layui-icon layui-icon-export"></i>提现</a>
+        <a ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-username"></i>资料</a>
+      </div>
+    </div>
+
+      <!-- 轮播图 -->
+      {notempty name="carousel_list"}
+      <div class="carousel-card">
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="carouselTrack">
+            {volist name="carousel_list" id="item"}
+            <div class="carousel-slide">
+              {if !empty($item['url'])}<a href="{$item.url}" target="_blank">{/if}
+                <img src="{$item.image}" alt="{$item.title}">
+              {if !empty($item['url'])}</a>{/if}
+            </div>
+            {/volist}
+          </div>
+          <div class="carousel-dots" id="carouselDots"></div>
+        </div>
       </div>
       {/notempty}
-    </div>
-  </div>
 
-  <!-- ══ Purchases (6) + Rankings (6) ══ -->
-  <div class="d-row" style="margin-bottom:14px;">
-    <div class="d-6">
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;">
-        <div class="card-header">📥 我的购买 {notempty name="my_purchases"}<a ew-href="{:url('/UserPlugin/purchases')}">全部 <i class="layui-icon layui-icon-right"></i></a>{/notempty}</div>
-        <div style="padding:10px 18px;max-height:300px;overflow:auto;">
-          {empty name="my_purchases"}<div class="empty">还没有购买记录 · 去 <a ew-href="{:url('/UserPlugin/market')}" style="color:#3a6fd8;">插件市场</a> 看看吧</div>{else/}
-          {foreach $my_purchases as $mp}
-          <div class="l-row">
-            <img src="{$mp.icon}" class="l-icon" onerror="this.style.display='none'">
-            <div class="l-body"><div class="l-title">{$mp.name}</div><div class="l-meta">{$mp.created_at|date='m-d H:i'}</div></div>
-            <div class="l-extra" style="font-weight:600;font-size:13px;">{if $mp.price==0}<span style="color:#34a853;">免费</span>{else/}<span style="color:#e8553d;">¥{$mp.price}</span>{/if}</div>
-          </div>
-          {/foreach}
+      <!-- 公告列表（点击弹窗查看详情） -->
+      <section class="mp-card notice-list">
+        <div class="mp-head"><h3>公告</h3></div>
+        <div class="mp-body">
+          {empty name="notice_list"}
+            <div class="empty">暂无公告</div>
+          {else/}
+            {volist name="notice_list" id="vo" offset="0" length="5" key="k"}
+            <div class="line notice-clickable" data-notice-index="{$k-1}">
+              <i class="layui-icon layui-icon-notice"></i>
+              <span class="text">{$vo.title|default='公告'}</span>
+              <span class="time">{$vo.created_at|default=''}</span>
+            </div>
+            {/volist}
           {/empty}
         </div>
-      </div>
-    </div>
-    <div class="d-6">
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;">
-        <div class="card-header">🏆 积分排行</div>
-        <div style="padding:0 18px 8px;max-height:340px;overflow:auto;">
-          {empty name="integral_ranking"}<div class="empty">暂无数据</div>{else/}
-          {php}$i=1;{/php}
-          {foreach $integral_ranking as $r}
-          <div class="l-row">
-            <span class="rk {if $i==1}rk-1{elseif $i==2}rk-2{elseif $i==3}rk-3{else}rk-n{/if}">{$i}</span>
-            <div class="l-body"><div class="l-title">{$r.username}</div></div>
-            <span style="font-weight:600;">{$r.integral} 积分</span>
-          </div>
-          {php}$i++;{/php}
-          {/foreach}
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>常用功能</h3><a ew-href="{:url('/UserPlugin/market')}">更多</a></div>
+        <div class="mp-body team-grid">
+          <a class="team" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i><div><b>授权服务</b><span>授权与设备</span></div></a>
+          <a class="team" ew-href="{:url('/Cdkey/list')}"><i class="layui-icon layui-icon-cols"></i><div><b>卡密服务</b><span>卡密与兑换</span></div></a>
+          <a class="team" ew-href="{:url('/UserPlugin/market')}"><i class="layui-icon layui-icon-util"></i><div><b>插件服务</b><span>市场与购买</span></div></a>
+          <a class="team" ew-href="{:url('/PointExchange/list')}"><i class="layui-icon layui-icon-diamond"></i><div><b>积分服务</b><span>兑换与记录</span></div></a>
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>最近购买</h3><a ew-href="{:url('/UserPlugin/purchases')}">全部</a></div>
+        <div class="mp-body line-list">
+          {empty name="my_purchases"}<div class="empty">暂无购买记录</div>{else/}
+          {volist name="my_purchases" id="buy"}
+          <div class="line"><i class="layui-icon layui-icon-cart-simple"></i><span class="text">{$buy.name|default='插件'}</span><span class="value">¥{$buy.price|default=0}</span></div>
+          {/volist}
           {/empty}
         </div>
-      </div>
-    </div>
-  </div>
+      </section>
 
-  <!-- ══ App Notice (6) + Logs (6) ══ -->
-  <div class="d-row">
-    <div class="d-6">
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:280px;">
-        <div class="n-tabs"><span class="n-tab on">应用公告</span></div>
-        <div style="padding:8px 18px;height:240px;overflow-y:auto;">
-          {notempty name="app_notice"}{$app_notice|raw}{else/}<div class="empty">暂无公告</div>{/notempty}
-        </div>
-      </div>
-    </div>
-    <div class="d-6">
-      <div class="layui-card" style="border-radius:10px;overflow:hidden;height:280px;">
-        <div class="card-header">📝 最近日志</div>
-        <div style="height:240px;overflow:auto;padding:8px 18px;">
-          {empty name="log_list"}<div class="empty">暂未日志</div>{else/}
-          {foreach $log_list as $r}
-          <div class="l-row" style="padding:8px 0;">
-            <span style="width:28px;height:28px;border-radius:6px;background:#f0f4ff;color:#3a6fd8;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="layui-icon layui-icon-log"></i></span>
-            <div class="l-body"><div class="l-title" style="font-weight:400;">{$r.title}</div></div>
-            <span style="font-size:11px;color:#bbb;">{$r.create_time|date='m-d H:i'}</span>
-          </div>
-          {/foreach}
+      <section class="mp-card">
+        <div class="mp-head"><h3>积分排行</h3><a ew-href="{:url('/User/list')}">全部</a></div>
+        <div class="mp-body">
+          {empty name="integral_ranking"}<div class="empty">暂无排行数据</div>{else/}
+          {volist name="integral_ranking" id="vo" offset="0" length="5" key="k"}
+          <div class="rank"><em>{$k}</em><span class="text">{$vo.username|default='用户'}</span><span class="value">{$vo.integral|default=0}</span></div>
+          {/volist}
           {/empty}
         </div>
-      </div>
-    </div>
+      </section>
+    </aside>
   </div>
-
 </div>
+
+<!-- 公告内容数据（供JS弹窗使用） -->
+<script>
+var NOTICE_DATA = <?php
+$nc = [];
+if (!empty($notice_list)) {
+    foreach ($notice_list as $vo) {
+        $nc[] = $vo['content'] ?? '';
+    }
+}
+echo json_encode($nc, JSON_UNESCAPED_UNICODE);
+?>;
+</script>
 
 {include file="/public/footer"}
 <script>
-layui.use(['layer', 'form', 'admin', 'element', 'notice', 'upload'], function () {
-    var $ = layui.jquery;
-    var layer = layui.layer;
-    var notice = layui.notice;
-    var upload = layui.upload;
-    // Notice popup
-    $('.notice-item').click(function(){
-        var title = $(this).data('title');
-        var content = $(this).attr('data-content');
-        var h = '<div style="padding:10px 0;line-height:1.8;font-size:14px;color:#333;">' + content + '</div>';
-        layer.open({
-            type: 1, title: title, area: ['620px', '420px'],
-            content: h,
-            maxmin: false, scrollbar: false
-        });
-    });
+layui.use(['jquery', 'notice', 'layer'], function(){
+  var $ = layui.jquery;
+  var notice = layui.notice;
+  var layer = layui.layer;
 
-    // Ranking tabs
-    $('#rankTabs .n-tab').click(function(){
-        var t = $(this).data('t');
-        $('#rankTabs .n-tab').removeClass('on');
-        $(this).addClass('on');
-        $('#tabBalance, #tabIntegral').hide();
-        t === 'balance' ? $('#tabBalance').show() : $('#tabIntegral').show();
-    });
+  if (window.SF_URL) {
+    SF_URL.normalizePageLinks(document);
+  }
 
-    // Withdraw
-    var wdLayer;
-    $('#btnWithdraw').click(function(){
-        notice.msg('检测中...', {icon:4, close:true});
-        $.ajax({ type:'POST', url:'{:url("/Withdraw/check")}', dataType:'json',
-            success: function(r) {
-                notice.destroy();
-                if (r.code == 0) {
-                    var bal = r.data.balance, min = r.data.min;
-                    var h = '<div style="padding:20px 24px;">' +
-                        '<div style="text-align:center;margin-bottom:16px;font-size:15px;">可提现余额 <b style="color:#ff5722;font-size:24px;">¥'+bal.toFixed(2)+'</b></div>' +
-                        '<div style="font-size:12px;color:#8c8c8c;text-align:center;margin-bottom:18px;">最低提现 ¥'+min+' 元</div>' +
-                        '<div class="layui-form-item"><label class="layui-form-label">金额</label><div class="layui-input-block"><input type="number" id="wdAmount" class="layui-input" placeholder="请输入提现金额" value="'+bal.toFixed(2)+'" max="'+bal.toFixed(2)+'" min="'+min+'"/></div></div>' +
-                        '<div class="layui-form-item"><label class="layui-form-label">收款方式</label><div class="layui-input-block"><select id="wdPayMethod" class="layui-input"><option value="">请选择</option><option value="alipay">支付宝</option><option value="wechat">微信</option><option value="bank">银行卡</option></select></div></div>' +
-                        '<div class="layui-form-item"><label class="layui-form-label">手机号</label><div class="layui-input-block"><input type="text" id="wdPhone" class="layui-input" placeholder="请输入手机号"/></div></div>' +
-                        '<div class="layui-form-item"><label class="layui-form-label">姓名</label><div class="layui-input-block"><input type="text" id="wdName" class="layui-input" placeholder="请输入真实姓名"/></div></div>' +
-                        '<div class="layui-form-item"><label class="layui-form-label">收款码</label><div class="layui-input-block"><input type="text" id="wdQrImage" class="layui-input" placeholder="请上传收款码图片"/><button type="button" class="layui-btn layui-btn-normal" id="wdUploadBtn" style="margin-top:6px;"><i class="layui-icon layui-icon-upload"></i> 上传</button><div id="wdQrPreview" style="margin-top:6px;display:none;"><img src="" style="max-width:200px;border-radius:6px;border:1px solid #eee;"></div></div></div>' +
-                        '<div class="layui-form-item"><label class="layui-form-label">备注</label><div class="layui-input-block"><textarea id="wdRemark" class="layui-textarea" placeholder="选填" style="height:60px;"></textarea></div></div>' +
-                        '<div class="layui-form-item text-right"><button class="layui-btn" id="wdSubmit">提交申请</button><button class="layui-btn layui-btn-primary" onclick="layer.close(wdLayer)">取消</button></div>' +
-                        '</div>';
-                    wdLayer = layer.open({ type:1, title:'余额提现', area:['500px','560px'], content:h });
-                    upload.render({ elem: '#wdUploadBtn', url: '{:url("/Upload/image")}',
-                        before: function() { notice.msg('上传中...', {icon:4, close:true}); },
-                        done: function(res) { notice.destroy(); if (res.code == 0) { $('#wdQrImage').val(res.data.path); $('#wdQrPreview').show().find('img').attr('src', res.data.path); notice.msg('上传成功', {icon:1}); } }
-                    });
-                    $('#wdSubmit').click(function(){
-                        var amt = parseFloat($('#wdAmount').val()), pm = $('#wdPayMethod').val(), ph = $('#wdPhone').val().trim(), nm = $('#wdName').val().trim(), qr = $('#wdQrImage').val().trim(), rm = $('#wdRemark').val().trim();
-                        if (!amt || amt < min) { notice.msg('提现金额不能低于'+min+'元', {icon:2}); return; }
-                        if (amt > bal) { notice.msg('提现金额不能超过余额', {icon:2}); return; }
-                        if (!pm) { notice.msg('请选择收款方式', {icon:2}); return; }
-                        if (!ph || ph.length<11) { notice.msg('请填写正确的手机号', {icon:2}); return; }
-                        if (!nm) { notice.msg('请填写姓名', {icon:2}); return; }
-                        if (!qr) { notice.msg('请上传收款码图片', {icon:2}); return; }
-                        notice.msg('提交中...', {icon:4, close:true});
-                        $.ajax({ type:'POST', url:'{:url("/Withdraw/apply")}', data:{amount:amt, pay_method:pm, phone:ph, real_name:nm, qr_image:qr, remark:rm}, dataType:'json',
-                            success: function(r) { notice.destroy(); layer.close(wdLayer); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
-                    });
-                } else {
-                    notice.msg(r.msg, {icon:2, time: 5000});
-                }
-            }
-        });
-    });
-
-    // Check-in
-    var checkinLocked = false;
-    $('#checkinCard').click(function(){
-        if (checkinLocked) return;
-        checkinLocked = true;
-        var $card = $(this);
-        var $loading = $('#checkinLoading');
-        $loading.css('display', 'flex');
-        $.ajax({
-            type: 'POST',
-            url: '{:url("/Checkin/doCheckin")}',
-            dataType: 'json',
-            success: function(r) {
-                $loading.hide();
-                if (r.code === 0) {
-                    var d = r.data || {};
-                    var consecutiveMsg = d.consecutive_days ? '连续 '+d.consecutive_days+' 天' : '';
-                    var bonusTip = d.bonus_points > 0 ? '（含连续奖励+'+d.bonus_points+'）' : '';
-                    $card.removeClass().addClass('stat-card checkin-card checked');
-                    $card.find('.st-icon').html('<i class="layui-icon layui-icon-ok-circle" style="font-size:26px;"></i>');
-                    $card.find('.st-num').css('color','#34a853').text('已打卡');
-                    $card.find('.st-label').text(consecutiveMsg + ' · +'+d.total_points+'积分' + bonusTip);
-                    $card.find('.st-sub').html('<i class="layui-icon layui-icon-time"></i> 明日再来');
-                    $card.off('click');
-                    $loading.remove();
-                    notice.msg(r.msg, {icon: 1});
-                } else {
-                    checkinLocked = false;
-                    notice.msg(r.msg, {icon: 2, time: 4000});
-                }
-            },
-            error: function() {
-                $loading.hide();
-                checkinLocked = false;
-                notice.msg('打卡失败，请稍后重试', {icon: 2});
-            }
-        });
-    });
-
-    // Carousel
-    var caroSlides = $('#carouselTrack .carousel-slide');
-    if (caroSlides.length > 1) {
-        var caroIdx = 0;
-        var caroTimer;
-        function goCaro(i) {
-            caroIdx = (i + caroSlides.length) % caroSlides.length;
-            $('#carouselTrack').css('transform', 'translateX(-' + (caroIdx * 100) + '%)');
-            $('#caroDots').html('');
-            for (var j = 0; j < caroSlides.length; j++) {
-                $('#caroDots').append('<span style="width:8px;height:8px;border-radius:50%;background:'+(j===caroIdx?'#fff':'rgba(255,255,255,.5)')+';cursor:pointer;" data-i="'+j+'"></span>');
-            }
-        }
-        function autoPlay() { caroTimer = setInterval(function(){ goCaro(caroIdx + 1); }, 4000); }
-        goCaro(0); autoPlay();
-        $('#caroPrev').click(function(){ goCaro(caroIdx - 1); clearInterval(caroTimer); autoPlay(); });
-        $('#caroNext').click(function(){ goCaro(caroIdx + 1); clearInterval(caroTimer); autoPlay(); });
-        $('#caroDots').on('click', 'span', function(){ var i = parseInt($(this).data('i')); goCaro(i); clearInterval(caroTimer); autoPlay(); });
+  // ========== 轮播图 ==========
+  (function(){
+    var $track = $('#carouselTrack');
+    if (!$track.length) return;
+    var $slides = $track.find('.carousel-slide');
+    var total = $slides.length;
+    if (total <= 1) return;
+    var current = 0;
+    var $dots = $('#carouselDots');
+    // 生成指示点
+    for (var i = 0; i < total; i++) {
+      $dots.append('<span data-index="'+i+'"></span>');
     }
+    var $dotSpans = $dots.find('span');
+    $dotSpans.eq(0).addClass('active');
+    function goTo(idx){
+      current = ((idx % total) + total) % total;
+      $track.css('transform', 'translateX(-' + (current * 100) + '%)');
+      $dotSpans.removeClass('active').eq(current).addClass('active');
+    }
+    $dots.on('click', 'span', function(){
+      goTo(parseInt($(this).data('index')));
+    });
+    var timer = setInterval(function(){ goTo(current + 1); }, 4000);
+    $('.carousel-wrapper').on('mouseenter', function(){ clearInterval(timer); })
+      .on('mouseleave', function(){ timer = setInterval(function(){ goTo(current + 1); }, 4000); });
+  })();
+
+  // ========== 公告点击弹窗 ==========
+  $(document).on('click', '.notice-clickable', function(){
+    var idx = parseInt($(this).data('notice-index'));
+    var title = $(this).find('.text').text().trim() || '公告详情';
+    var content = NOTICE_DATA[idx] || '';
+    if (!content) {
+      notice.msg('暂无公告内容', {icon: 2});
+      return;
+    }
+    layer.open({
+      type: 1,
+      title: title,
+      area: ['650px', '420px'],
+      shadeClose: true,
+      content: '<div class="rt-content" style="padding:10px 16px;max-height:340px;overflow-y:auto;">' + content + '</div>'
+    });
+  });
+
+  // ========== 签到 ==========
+  $('#checkinBtn').on('click', function(){
+    var $btn = $(this);
+    if ($btn.prop('disabled')) return;
+    $btn.prop('disabled', true).text('签到中');
+    $.ajax({
+      type: 'POST',
+      url: "{:url('/Checkin/doCheckin')}",
+      dataType: 'json',
+      success: function(res){
+        if (res && res.code == 0) {
+          notice.msg(res.msg || '签到成功', {icon: 1, audio: '1'});
+          $btn.addClass('done').text('已签到');
+          setTimeout(function(){ window.location.reload(); }, 900);
+        } else {
+          notice.msg((res && res.msg) || '签到失败', {icon: 2, audio: '1'});
+          $btn.prop('disabled', false).text('签到');
+        }
+      },
+      error: function(){
+        notice.msg('签到请求失败', {icon: 2, audio: '1'});
+        $btn.prop('disabled', false).text('签到');
+      }
+    });
+  });
+
+  // ========== 提现入口 ==========
+  $('.js-withdraw-entry').on('click', function(){
+    var url = $(this).data('url') || "{:url('/Withdraw/index', [])}";
+    notice.msg('正在检查提现条件...', {icon: 4, close: true});
+    $.ajax({
+      type: 'POST',
+      url: "{:url('/Withdraw/check', [])}",
+      dataType: 'json',
+      success: function(res){
+        notice.destroy();
+        if (res && res.code == 0) {
+          var balance = res.data && res.data.balance !== undefined ? res.data.balance : '{$userInfo["balance"]|default=0}';
+          var min = res.data && res.data.min !== undefined ? res.data.min : 0;
+          layer.confirm('当前可提现余额 ¥' + balance + '，最低提现金额 ¥' + min + '。确认进入提现吗？', {icon: 3, shade: .1}, function(i){
+            layer.close(i);
+            var tab = {};
+            tab.url = url;
+            tab.title = '申请提现';
+            if (top.layui && top.layui.index) {
+              top.layui.index.openTab(tab);
+            } else if (layui.index) {
+              layui.index.openTab(tab);
+            } else {
+              window.location.href = url;
+            }
+          });
+        } else {
+          notice.msg((res && res.msg) || '暂不满足提现条件', {icon: 2, audio: '1'});
+        }
+      },
+      error: function(){
+        notice.destroy();
+        notice.msg('提现条件检查失败，请稍后再试', {icon: 2, audio: '1'});
+      }
+    });
+  });
 });
 </script>

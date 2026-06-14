@@ -66,4 +66,24 @@ class PowerPriceService extends BaseService
             throw new Exception($e->getMessage());
         }
     }
+
+    /**
+     * 测试权限价格(预览价格配置对当前请求的应用是否生效)
+     * @param int $pid
+     * @return array
+     */
+    public function test($pid = 0){
+        try{
+            if (empty($pid)) {
+                return ['msg' => 'Missing ID parameter.', 'data' => [], 'success' => false, 'code' => -1];
+            }
+            $info = $this->model->getInfo($pid);
+            if (!$info) {
+                return ['msg' => '权限价格不存在', 'data' => [], 'success' => false, 'code' => -1];
+            }
+            return ['msg' => '权限价格配置可用', 'data' => $info, 'success' => true, 'code' => 0];
+        }catch (\Exception $e){
+            return ['msg' => $e->getMessage(), 'data' => [], 'success' => false, 'code' => -1];
+        }
+    }
 }

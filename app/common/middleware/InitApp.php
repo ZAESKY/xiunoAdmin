@@ -28,6 +28,15 @@ class InitApp
 
         // 初始化数据库常量
         $this->initDbInfo();
+
+        // 定时清理临时上传图片（每小时一次）
+        if (!cache('?last_temp_cleanup')) {
+            cache('last_temp_cleanup', 1, 3600);
+            if (function_exists('clean_temp_uploads')) {
+                clean_temp_uploads(86400);
+            }
+        }
+
         return $next($request);
     }
 
@@ -60,14 +69,16 @@ class InitApp
         define('ATTACHMENT_PATH', $upload_parh);
         define('IMG_PATH', ATTACHMENT_PATH . DS . 'images');
         define('UPLOAD_TEMP_PATH', IMG_PATH . DS . '/temp');
+        define('PUBLIC_UPLOAD_PATH', PUBLIC_PATH . DS . 'upload');
+        define('PUBLIC_UPLOAD_TEMP', PUBLIC_UPLOAD_PATH . DS . 'temp');
 
         // 系统配置
-        define('SITE_NAME', env('system.sitename'));
-        define('NICK_NAME', env('system.nickname'));
-        define('SYSTEM_VERSION', env('system.version'));
+        define('SITE_NAME', env('system_sitename'));
+        define('NICK_NAME', env('system_nickname'));
+        define('SYSTEM_VERSION', env('system_version'));
 
         // 系统域名
-        define('IMG_URL', env('domain.img_url'));
+        define('IMG_URL', env('domain_img_url'));
         define('DOMAIN', getenv('HTTP_HOST'));
         define('SITE_URL', (getenv('SERVER_PORT') == '443' ? 'https://' : 'http://').DOMAIN);
     }

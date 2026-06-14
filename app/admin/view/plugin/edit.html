@@ -16,6 +16,7 @@
 .related-search-item .meta { margin-top:3px; font-size:12px; color:#999; }
 .related-clear { margin-left:8px; color:#999; cursor:pointer; }
 .related-clear:hover { color:#ff5722; }
+.cover-preview { max-width: 360px; width: 100%; height: 160px; object-fit: cover; border: 1px solid #e6e6e6; border-radius: 6px; display: block; background: #f7f7f7; }
 </style>
 
 <div class="layui-fluid plugin-form">
@@ -24,6 +25,21 @@
         <input type="hidden" name="file_path" id="file_path" value="{$plugin.file_path|default=''}">
         <input type="hidden" name="file_hash" id="file_hash" value="{$plugin.file_hash|default=''}">
         <input type="hidden" name="file_size" id="file_size" value="{$plugin.file_size|default='0'}">
+        <input type="hidden" name="storage_driver" id="storage_driver" value="{$plugin.storage_driver|default='local'}">
+        <input type="hidden" name="package_object_key" id="package_object_key" value="{$plugin.package_object_key|default=''}">
+        <input type="hidden" name="package_file_name" id="package_file_name" value="{$plugin.package_file_name|default=''}">
+        <input type="hidden" name="package_mime_type" id="package_mime_type" value="{$plugin.package_mime_type|default=''}">
+        <input type="hidden" name="icon_object_key" id="icon_object_key" value="{$plugin.icon_object_key|default=''}">
+        <input type="hidden" name="icon_storage_driver" id="icon_storage_driver" value="{$plugin.storage_driver|default='local'}">
+        <input type="hidden" name="icon_file_name" id="icon_file_name" value="">
+        <input type="hidden" name="icon_file_size" id="icon_file_size" value="0">
+        <input type="hidden" name="icon_mime_type" id="icon_mime_type" value="">
+        <input type="hidden" name="cover" id="coverInput" value="{$plugin.cover|default=''}">
+        <input type="hidden" name="cover_object_key" id="cover_object_key" value="{$plugin.cover_object_key|default=''}">
+        <input type="hidden" name="cover_storage_driver" id="cover_storage_driver" value="{$plugin.storage_driver|default='local'}">
+        <input type="hidden" name="cover_file_name" id="cover_file_name" value="">
+        <input type="hidden" name="cover_file_size" id="cover_file_size" value="0">
+        <input type="hidden" name="cover_mime_type" id="cover_mime_type" value="">
 
         <!-- 文件上传 -->
         <div class="layui-card" style="border:1px solid #d0e8ff;">
@@ -206,9 +222,25 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
+                    <label class="layui-form-label">插件封面</label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="uploadCover"><i class="layui-icon">&#xe67c;</i>上传封面</button>
+                        <div style="margin-top:10px;">
+                            <img id="coverPreview" src="{$plugin.cover|default=''}" class="cover-preview" style="{if condition='empty($plugin.cover)'}display:none;{/if}">
+                        </div>
+                        <div style="font-size:12px;color:#999;margin-top:6px;">支持 jpg、jpeg、png、webp，单张不超过 5MB</div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
                     <label class="layui-form-label">简介 <span style="color:red">*</span></label>
                     <div class="layui-input-block">
                         <textarea name="description" class="layui-textarea" rows="2" placeholder="插件简介（纯文本）">{$plugin.description|default=''}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">更新说明</label>
+                    <div class="layui-input-block">
+                        <textarea name="update_description" class="layui-textarea" rows="3" placeholder="本版本改动说明，可为空">{$plugin.update_description|default=''}</textarea>
                     </div>
                 </div>
                 <div class="layui-form-item">
@@ -380,6 +412,17 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
         var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
         return String(s || '').replace(/[&<>"']/g, function(c){ return map[c]; });
     }
+    function setResourceMeta(prefix, data) {
+        $('#' + prefix + '_object_key').val(data.object_key || '');
+        $('#' + prefix + '_storage_driver').val(data.storage_driver || 'local');
+        $('#' + prefix + '_file_name').val(data.file_name || '');
+        $('#' + prefix + '_file_size').val(data.file_size || 0);
+        $('#' + prefix + '_mime_type').val(data.mime_type || '');
+    }
+    function resourceUrl(data) {
+        data = data || {};
+        return data.path || data.url || data.src || data.href || '';
+    }
     function renderRelatedList(list) {
         if (!list || !list.length) {
             $('#relatedPluginList').html('<div class="related-search-item"><div class="meta">暂无匹配插件</div></div>').show();
@@ -460,13 +503,39 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
         }
     });
 
-    upload.render({ elem:'#uploadIcon', url:'{:url("/Upload/image")}', accept:'images',
-        done:function(r){ if(r.code==0){ $('#iconInput').val(r.data.path); $('#iconPreview').attr('src',r.data.path).show(); $('#iconEmpty').hide(); } else notice.msg(r.msg,{icon:2}); } });
+    upload.render({ elem:'#uploadIcon', url:'{:url("/Plugin/uploadResource")}?type=icon', accept:'images', exts:'jpg|jpeg|png|webp', size:5120,
+        done:function(r){
+            if(r.code==0){
+                var url = resourceUrl(r.data);
+                if(!url){ notice.msg('图标上传成功但返回地址为空',{icon:2}); return; }
+                $('#iconInput').val(url);
+                setResourceMeta('icon', r.data);
+                $('#iconPreview').attr('src',url).show();
+                $('#iconEmpty').hide();
+                notice.msg('图标上传成功',{icon:1});
+            } else notice.msg(r.msg,{icon:2});
+        } });
+
+    upload.render({ elem:'#uploadCover', url:'{:url("/Plugin/uploadResource")}?type=cover', accept:'images', exts:'jpg|jpeg|png|webp', size:5120,
+        done:function(r){
+            if(r.code==0){
+                var url = resourceUrl(r.data);
+                if(!url){ notice.msg('封面上传成功但返回地址为空',{icon:2}); return; }
+                $('#coverInput').val(url);
+                setResourceMeta('cover', r.data);
+                $('#coverPreview').attr('src',url).show();
+                notice.msg('封面上传成功',{icon:1});
+            } else notice.msg(r.msg,{icon:2});
+        } });
 
     upload.render({ elem:'#uploadPlugin', url:'{:url("/Plugin/uploadFile")}', accept:'file', exts:'zip',
         done:function(r){
             if(r.code==0 && r.data.status==1){
                 $('#file_path').val(r.data.file_path); $('#file_hash').val(r.data.file_hash); $('#file_size').val(r.data.file_size);
+                $('#storage_driver').val(r.data.storage_driver || 'local');
+                $('#package_object_key').val(r.data.package_object_key || '');
+                $('#package_file_name').val(r.data.package_file_name || r.data.original_name || '');
+                $('#package_mime_type').val(r.data.package_mime_type || 'application/zip');
                 $('#fileInfo').html('<i class="layui-icon layui-icon-ok-circle"></i> 已上传 ('+(r.data.file_size/1024).toFixed(1)+' KB)');
                 var slugInput = $('#slugInput');
                 if (!slugInput.val()) {
@@ -479,7 +548,17 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
                     if (a.name) { $('input[name=name]').val(a.name); f.push('名称'); }
                     if (a.description) { $('textarea[name=description]').val(a.description); f.push('简介'); }
                     if (a.version) { $('input[name=version]').val(a.version); f.push('版本'); }
-                    if (a.icon) { $('#iconInput').val(a.icon); $('#iconPreview').attr('src',a.icon).show(); $('#iconEmpty').hide(); f.push('图标'); }
+                    if (a.icon) {
+                        $('#iconInput').val(a.icon);
+                        $('#iconPreview').attr('src',a.icon).show();
+                        $('#iconEmpty').hide();
+                        $('#icon_object_key').val(a.icon_object_key || '');
+                        $('#icon_storage_driver').val(a.icon_storage_driver || r.data.storage_driver || 'local');
+                        $('#icon_file_name').val(a.icon_file_name || 'icon.png');
+                        $('#icon_file_size').val(a.icon_file_size || 0);
+                        $('#icon_mime_type').val(a.icon_mime_type || 'image/png');
+                        f.push('图标');
+                    }
                     if (f.length) notice.msg('已自动填充：'+f.join('、'),{icon:1});
                 }
                 notice.msg('上传成功',{icon:1});
@@ -489,7 +568,11 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
     $('#btnReset').click(function(){
         setTimeout(function(){
             $('#iconInput').val(''); $('#iconPreview').attr('src','').hide(); $('#iconEmpty').show();
+            $('#coverInput').val(''); $('#coverPreview').attr('src','').hide();
             $('#file_path').val(''); $('#file_hash').val(''); $('#file_size').val('');
+            $('#icon_object_key').val(''); $('#icon_storage_driver').val('local'); $('#icon_file_name').val(''); $('#icon_file_size').val('0'); $('#icon_mime_type').val('');
+            $('#cover_object_key').val(''); $('#cover_storage_driver').val('local'); $('#cover_file_name').val(''); $('#cover_file_size').val('0'); $('#cover_mime_type').val('');
+            $('#storage_driver').val('local'); $('#package_object_key').val(''); $('#package_file_name').val(''); $('#package_mime_type').val('');
             $('#fileInfo').html('<i class="layui-icon layui-icon-close-fill"></i> 请上传插件文件 (*.zip)').css('color','#ff5722');
             $('#slugInput').val('');
         },50);
@@ -505,6 +588,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
         if (data.field.publish_type == '1' && !data.field.publish_time) { notice.msg('请选择定时发布时间',{icon:2}); return false; }
         if (data.field.publish_type == '1' && !validatePublishDate(data.field.publish_time, true)) { return false; }
         if (data.field.publish_type != '1') data.field.publish_time = '';
+        if (!$.trim($('#relatedPluginSearch').val()) || !data.field.related_plugin_id) data.field.related_plugin_id = '0';
         data.field.content = tinymce.get('pluginContent').getContent();
         if (data.field.origin_type == '2') data.field.price = '0';
         if (!data.field.price) data.field.price = '0';

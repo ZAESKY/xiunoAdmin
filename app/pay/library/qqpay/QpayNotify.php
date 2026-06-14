@@ -14,12 +14,13 @@ class QpayNotify{
 	function getParams() {
 		$post_data = file_get_contents("php://input");
 		$params =  QpayMchUtil::xmlToArray($post_data);
-		$this->params = $params;
-		$this->sign = $params['sign'];
-		return $params;
+		$this->params = is_array($params) ? $params : [];
+		$this->sign = isset($params['sign']) ? $params['sign'] : '';
+		return $this->params;
 	}
 
 	function verifySign() {
+		if (empty($this->params) || empty($this->sign)) return false;
 		$sign = QpayMchUtil::getSign($this->params);
 		return $sign == $this->sign;
 	}

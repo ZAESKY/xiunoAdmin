@@ -149,8 +149,12 @@ class WxPay extends PayBackend
     }
 
     public function notify(){
-        $notify = new PayNotifyCallBack();
-        $notify->Handle(false);
+        try {
+            $notify = new PayNotifyCallBack();
+            $notify->Handle(false);
+        } catch (\Throwable $e) {
+            echo 'FAIL';
+        }
     }
 
     public function return(){

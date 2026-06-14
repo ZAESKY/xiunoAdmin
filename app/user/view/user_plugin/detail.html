@@ -3,12 +3,19 @@
 .detail-wrap { max-width: 1100px; margin: 0 auto; padding: 16px 16px; }
 
 /* ====== Hero ====== */
-.detail-hero { display: flex; gap: 20px; align-items: stretch; padding: 24px; background: #fff; border-radius: 8px; border: 1px solid #e6e6e6; margin-bottom: 16px; }
-.detail-hero .hero-icon { width: 130px; flex-shrink: 0; border-radius: 20px; object-fit: cover; background: #f7f8fa; border: 1px solid #eee; }
+.detail-hero { background: #fff; border-radius: 8px; border: 1px solid #e6e6e6; margin-bottom: 16px; overflow: hidden; }
+.detail-hero .hero-banner { height: 260px; background: #f7f8fa; border-bottom: 1px solid #eee; overflow: hidden; }
+.detail-hero .hero-banner img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+.detail-hero .hero-content { display: flex; gap: 20px; align-items: stretch; padding: 24px; }
+.detail-hero.has-cover .hero-content { position: relative; margin-top: -42px; padding-top: 0; }
+.detail-hero .hero-icon { width: 130px; height: 130px; flex-shrink: 0; border-radius: 20px; object-fit: cover; background: #f7f8fa; border: 4px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.10); }
 .detail-hero .hero-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.detail-hero.has-cover .hero-body { padding-top: 50px; }
 .detail-hero .hero-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .detail-hero .hero-name { font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.3; }
 .detail-hero .hero-version { font-size: 13px; color: #9e9e9e; font-weight: 700; white-space: nowrap; }
+.detail-hero .hero-version.version-link { cursor:pointer; color:#1890ff; }
+.official-badge { display:inline-flex; align-items:center; gap:3px; color:#1677ff; font-weight:600; }
 .detail-hero .hero-badges { display: inline-flex; gap: 5px; align-items: center; }
 .detail-hero .hero-badges .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 3px; }
 .detail-hero .hero-badges .badge.origin { background: #e8f4ff; color: #1890ff; }
@@ -23,20 +30,12 @@
 .detail-hero .hero-desc { color: #6e6e73; font-size: 13px; line-height: 1.5; }
 
 .detail-hero .hero-actions { flex-shrink: 0; text-align: center; min-width: 130px; align-self: center; }
+.detail-hero.has-cover .hero-actions { padding-top: 50px; }
 .detail-hero .hero-actions .price { font-size: 28px; font-weight: 700; color: #ff5722; margin-bottom: 10px; }
 .detail-hero .hero-actions .price.free { color: #34c759; }
 .detail-hero .hero-actions .price small { font-size: 14px; color: #8e8e93; font-weight: 400; }
 .detail-hero .hero-actions .btn-dl { width: 130px; height: 40px; line-height: 40px; font-size: 14px; border-radius: 20px; }
 .detail-hero .hero-actions .bal-hint { font-size: 12px; color: #8e8e93; margin-top: 8px; }
-
-/* ====== Screenshots ====== */
-.screenshots { margin-bottom: 16px; }
-.screenshots h3 { font-size: 16px; font-weight: 600; color: #1d1d1f; margin: 0 0 10px; }
-.screenshots .shot-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
-.screenshots .shot-scroll::-webkit-scrollbar { height: 5px; }
-.screenshots .shot-scroll::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
-.screenshots .shot-scroll img { height: 280px; border-radius: 8px; scroll-snap-align: start; box-shadow: 0 2px 12px rgba(0,0,0,0.06); cursor: pointer; transition: transform .2s; }
-.screenshots .shot-scroll img:hover { transform: scale(1.02); }
 
 /* ====== Two-column ====== */
 .detail-main { display: flex; gap: 16px; align-items: flex-start; }
@@ -60,6 +59,15 @@
 .info-card .btn-feedback { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 14px; padding-top: 14px; font-size: 12px; color: #8e8e93; cursor: pointer; transition: color .2s; }
 .info-card .btn-feedback:hover { color: #2f54eb; }
 .info-card .btn-feedback i { font-size: 14px; }
+.update-desc { font-size:13px; color:#555; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+.version-timeline { padding:18px 22px 22px; }
+.version-item { position:relative; padding:0 0 18px 22px; border-left:2px solid #e8eef7; }
+.version-item:last-child { padding-bottom:0; }
+.version-item:before { content:''; position:absolute; left:-6px; top:2px; width:10px; height:10px; border-radius:50%; background:#1890ff; box-shadow:0 0 0 4px #e8f4ff; }
+.version-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:14px; font-weight:600; color:#1d1d1f; }
+.version-time { margin-top:4px; font-size:12px; color:#999; }
+.version-desc { margin-top:8px; font-size:13px; color:#555; line-height:1.7; white-space:pre-wrap; }
+.version-actions { margin-top:10px; }
 
 /* ====== Author other plugins ====== */
 .ap-item { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; text-decoration: none; transition: background .15s; }
@@ -94,90 +102,95 @@
 .repost-notice .disclaimer { margin-top: 8px; font-size: 12px; color: #d48806; line-height: 1.8; }
 
 @media (max-width: 900px) {
-    .detail-hero { flex-direction: column; align-items: center; text-align: center; }
+    .detail-hero { text-align: center; }
+    .detail-hero .hero-banner { height: 180px; }
+    .detail-hero .hero-content { flex-direction: column; align-items: center; padding: 18px; }
+    .detail-hero.has-cover .hero-content { margin-top: -38px; }
     .detail-hero .hero-icon { width: 120px; height: 120px; }
     .detail-hero .hero-body { align-items: center; }
+    .detail-hero.has-cover .hero-body { padding-top: 0; }
     .detail-hero .hero-top { align-items: center; }
-    .detail-hero .hero-actions { width: 100%; }
+    .detail-hero .hero-actions { width: 100%; padding-top: 0; }
     .detail-hero .hero-sub { justify-content: center; }
     .detail-hero .hero-title { justify-content: center; }
     .detail-main { flex-direction: column; }
     .detail-main .main-right { width: 100%; }
-    .screenshots .shot-scroll img { height: 200px; }
 }
 @media (max-width: 500px) {
-    .detail-hero { padding: 16px; }
+    .detail-hero .hero-content { padding: 16px; }
     .detail-hero .hero-icon { width: 100px; height: 100px; border-radius: 18px; }
     .detail-hero .hero-name { font-size: 18px; }
 }
 </style>
 
 <div class="layui-fluid detail-wrap">
-    <div class="detail-hero">
-        <img src="{$plugin.icon|default=''}" class="hero-icon" onerror="this.style.display='none'" id="heroIcon">
-        <div class="hero-body">
-            <div class="hero-top">
-                <div class="hero-title">
-                    <span class="hero-name">{$plugin.name}</span>
-                    <span class="hero-version">v{$plugin.version}</span>
-                    <span class="hero-badges">
-                        {if condition="isset($plugin.origin_type) && $plugin.origin_type == 2"}
-                        <span class="badge repost">转载</span>
-                        {else/}
-                        <span class="badge origin">原创</span>
-                        {/if}
-                    </span>
+    <div class="detail-hero {if condition='!empty($plugin.coverUrl)'}has-cover{/if}">
+        {if condition="!empty($plugin.coverUrl)"}
+        <div class="hero-banner">
+            <img src="{$plugin.coverUrl}" onclick="previewImage('{$plugin.coverUrl}')" onerror="this.parentNode.style.display='none'">
+        </div>
+        {/if}
+        <div class="hero-content">
+            <img src="{$plugin.icon|default=''}" class="hero-icon" onerror="this.style.display='none'" id="heroIcon">
+            <div class="hero-body">
+                <div class="hero-top">
+                    <div class="hero-title">
+                        <span class="hero-name">{$plugin.name}</span>
+                        <span class="hero-version version-link" id="heroVersion">v{$plugin.version}</span>
+                        <span class="hero-badges">
+                            {if condition="isset($plugin.origin_type) && $plugin.origin_type == 2"}
+                            <span class="badge repost">转载</span>
+                            {else/}
+                            <span class="badge origin">原创</span>
+                            {/if}
+                        </span>
+                    </div>
+                    <div class="hero-sub">
+                        <span class="hero-author">
+                            {if condition="!empty($plugin.isOfficialAuthor)"}
+                            <span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>{$plugin.authorDisplayName}</span>
+                            {else/}
+                            {$plugin.authorDisplayName|default=$plugin.author}
+                            {/if}
+                        </span>
+                        <span class="hero-cat">{:plugin_category_label($plugin.category)}</span>
+                        <span class="hero-rating">
+                            <span class="stars" id="heroStars"></span>
+                            <strong>{$plugin.rating_avg}</strong>
+                            <span>({$plugin.rating_count})</span>
+                        </span>
+                    </div>
                 </div>
-                <div class="hero-sub">
-                    <span class="hero-author">{$plugin.author}</span>
-                    <span class="hero-cat">{:plugin_category_label($plugin.category)}</span>
-                    <span class="hero-rating">
-                        <span class="stars" id="heroStars"></span>
-                        <strong>{$plugin.rating_avg}</strong>
-                        <span>({$plugin.rating_count})</span>
-                    </span>
-                </div>
+                {if condition="!empty($plugin.description)"}
+                <div class="hero-desc">{$plugin.description}</div>
+                {/if}
             </div>
-            {if condition="!empty($plugin.description)"}
-            <div class="hero-desc">{$plugin.description}</div>
-            {/if}
-        </div>
-        <div class="hero-actions">
-            {php}$isScheduled = !empty($plugin['published_at']) && strtotime($plugin['published_at']) > time();{/php}
-            {if condition="$isScheduled"}
-            <div class="price" style="color:#2d8cf0;">即将上线</div>
-            <button class="layui-btn layui-btn-disabled btn-dl" id="btnComingSoon"><i class="layui-icon layui-icon-log"></i> 发布日期</button>
-            <div class="bal-hint">{$plugin.publish_time|date='Y-m-d H:i'} 开放</div>
-            {else/}
-            {if condition="$plugin.price == 0"}
-            <div class="price free">免费</div>
-            {elseif condition="($plugin.pay_type ?? 'balance') == 'points'"}
-            <div class="price">{$plugin.price|intval} <small>积分</small></div>
-            {else/}
-            <div class="price">¥{$plugin.price}</div>
-            {/if}
-            {if condition="$isPurchased"}
-            <button class="layui-btn layui-btn-normal btn-dl" id="btnDownload"><i class="layui-icon layui-icon-download-circle"></i> 获取</button>
-            {if condition="$isOwner"}
-            <div class="bal-hint">我发布的插件</div>
-            {/if}
-            {else/}
-            <button class="layui-btn layui-btn-warm btn-dl" id="btnPurchase"><i class="layui-icon layui-icon-diamond"></i> {if condition="($plugin.pay_type ?? 'balance') == 'points'"}积分购买{else/}购买{/if}</button>
-            {/if}
-            {/if}
+            <div class="hero-actions">
+                {php}$isScheduled = !empty($plugin['published_at']) && strtotime($plugin['published_at']) > time();{/php}
+                {if condition="$isScheduled"}
+                <div class="price" style="color:#2d8cf0;">即将上线</div>
+                <button class="layui-btn layui-btn-disabled btn-dl" id="btnComingSoon"><i class="layui-icon layui-icon-log"></i> 发布日期</button>
+                <div class="bal-hint">{$plugin.publish_time|date='Y-m-d H:i'} 开放</div>
+                {else/}
+                {if condition="$plugin.price == 0"}
+                <div class="price free">免费</div>
+                {elseif condition="($plugin.pay_type ?? 'balance') == 'points'"}
+                <div class="price">{$plugin.price|intval} <small>积分</small></div>
+                {else/}
+                <div class="price">¥{$plugin.price}</div>
+                {/if}
+                {if condition="$isPurchased"}
+                <button class="layui-btn layui-btn-normal btn-dl" id="btnDownload"><i class="layui-icon layui-icon-download-circle"></i> 获取</button>
+                {if condition="$isOwner"}
+                <div class="bal-hint">我发布的插件</div>
+                {/if}
+                {else/}
+                <button class="layui-btn layui-btn-warm btn-dl" id="btnPurchase"><i class="layui-icon layui-icon-diamond"></i> {if condition="($plugin.pay_type ?? 'balance') == 'points'"}积分购买{else/}购买{/if}</button>
+                {/if}
+                {/if}
+            </div>
         </div>
     </div>
-
-    {if condition="!empty($plugin.images)"}
-    <div class="screenshots">
-        <h3>预览</h3>
-        <div class="shot-scroll">
-            {foreach $plugin.images as $img}
-            <img src="{$img}" onclick="previewImage('{$img}')">
-            {/foreach}
-        </div>
-    </div>
-    {/if}
 
     <div class="detail-main">
         <div class="main-left">
@@ -227,7 +240,7 @@
                         <div style="color:#8c8c8c;font-size:12px;margin-bottom:6px;">我的评分：<b style="color:#f5a623;font-size:15px;">{$myComment.rating} 星</b></div>
                         <div style="font-size:13px;color:#555;line-height:1.7;">{$myComment.content}</div>
                     </div>
-                    {else/}
+                    {elseif condition="$canComment"}
                     <h4>发表评论</h4>
                     <form class="layui-form" lay-filter="commentForm" style="max-width:560px;">
                         <input type="hidden" name="plugin_id" value="{$plugin.id}">
@@ -250,6 +263,10 @@
                             </div>
                         </div>
                     </form>
+                    {else/}
+                    <div style="background:#f9f9fb;border-radius:6px;padding:16px;color:#8c8c8c;font-size:13px;">
+                        购买或下载插件后才能发表评论。
+                    </div>
                     {/if}
                 </div>
                 {/if}
@@ -259,12 +276,18 @@
         <div class="main-right">
             <div class="info-card">
                 <h4>信息</h4>
-                <div class="info-row"><span class="label">开发者</span><span class="value">{$plugin.author}</span></div>
+                <div class="info-row"><span class="label">开发者</span><span class="value">
+                    {if condition="!empty($plugin.isOfficialAuthor)"}
+                    <span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>{$plugin.authorDisplayName}</span>
+                    {else/}
+                    {$plugin.authorDisplayName|default=$plugin.author}
+                    {/if}
+                </span></div>
                 {if condition="!empty($plugin.author_url)"}
                 <div class="info-row"><span class="label">作者主页</span><span class="value"><a href="{$plugin.author_url}" target="_blank">访问 <i class="layui-icon layui-icon-link" style="font-size:10px;"></i></a></span></div>
                 {/if}
                 <div class="info-row"><span class="label">分类</span><span class="value">{:plugin_category_label($plugin.category)}</span></div>
-                <div class="info-row"><span class="label">版本</span><span class="value">v{$plugin.version}</span></div>
+                <div class="info-row"><span class="label">版本</span><span class="value"><a href="javascript:;" id="sideVersion">v{$plugin.version}</a></span></div>
                 <div class="info-row"><span class="label">下载</span><span class="value">{$plugin.download_count}</span></div>
                 {if condition="!empty($plugin.published_at)"}
                 <div class="info-row"><span class="label">发布时间</span><span class="value">{$plugin.published_at|date='Y-m-d'}</span></div>
@@ -277,6 +300,11 @@
                 <div class="info-row"><span class="label">关联插件</span><span class="value"><a href="{:url('/UserPlugin/detail', ['id' => $plugin.related_plugin.id])}">{$plugin.related_plugin.name}</a></span></div>
                 {/if}
                 <div class="btn-feedback" id="btnFeedback"><i class="layui-icon layui-icon-survey"></i> 反馈</div>
+            </div>
+            <div class="info-card">
+                <h4>更新说明</h4>
+                <div class="update-desc">{$plugin.latestUpdateDescription|default='暂无更新说明'}</div>
+                <div class="btn-feedback" id="btnVersions"><i class="layui-icon layui-icon-log"></i> 查看全部更新记录</div>
             </div>
             {if condition="!empty($plugin.related_plugin)"}
             <div class="info-card">
@@ -399,6 +427,68 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
             jump:function(o,f){ if(!f){ currentPage=o.curr; loadComments(o.curr); } } });
     }
     function esc(s){ var m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(s||'').replace(/[&<>"']/g,function(c){return m[c];}); }
+    function renderOfficial(name, flag) {
+        if (!flag) return esc(name || '未知用户');
+        return '<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name || '官方')+'</span>';
+    }
+    function openVersions() {
+        notice.msg('正在加载版本记录...',{icon:4,close:true});
+        $.ajax({
+            type:'GET', url:'{:url("/UserPlugin/versions")}', data:{plugin_id:pluginId}, dataType:'json',
+            success:function(r){
+                notice.destroy();
+                if(r.code!=0){ notice.msg(r.msg,{icon:2}); return; }
+                var list = (r.data && r.data.list) ? r.data.list : [];
+                var html = '<div class="version-timeline">';
+                if(!list.length){
+                    html += '<div style="text-align:center;color:#bbb;padding:42px 0;">暂无版本记录</div>';
+                } else {
+                    list.forEach(function(v){
+                        html += '<div class="version-item">';
+                        html += '<div class="version-head"><span>v'+esc(v.version)+'</span>';
+                        if(v.is_latest) html += '<span class="layui-badge layui-bg-blue">当前版本</span>';
+                        html += '<span style="font-size:12px;font-weight:400;color:#8e8e93;">'+renderOfficial(v.authorDisplayName, v.isOfficialAuthor)+'</span></div>';
+                        html += '<div class="version-time">'+esc(v.created_at || v.updated_at || '')+'</div>';
+                        html += '<div class="version-desc">'+esc(v.update_description || '暂无更新说明')+'</div>';
+                        if(v.can_download){
+                            html += '<div class="version-actions"><button class="layui-btn layui-btn-xs layui-btn-normal btn-version-download" data-id="'+v.id+'"><i class="layui-icon layui-icon-download-circle"></i> 下载</button></div>';
+                        }
+                        html += '</div>';
+                    });
+                }
+                html += '</div>';
+                layer.open({type:1,title:'版本历史',area:['560px','70%'],shade:.25,content:html});
+            },
+            error:function(){ notice.destroy(); notice.msg('版本记录加载失败',{icon:2}); }
+        });
+    }
+    $('#btnVersions,#heroVersion,#sideVersion').click(openVersions);
+    $(document).on('click','.btn-version-download',function(e){
+        e.stopPropagation();
+        var versionId = $(this).data('id');
+        if(!versionId){ notice.msg('版本记录不存在',{icon:2}); return; }
+        var url = '{:url("/UserPlugin/downloadVersion")}?plugin_id=' + pluginId + '&version_id=' + versionId;
+        notice.msg('正在检查下载权限...',{icon:4,close:true});
+        $.ajax({
+            type:'GET',
+            url:'{:url("/UserPlugin/checkVersionDownload")}',
+            data:{plugin_id:pluginId, version_id:versionId},
+            dataType:'json',
+            success:function(r){
+                notice.destroy();
+                if(r.code != 0){
+                    layer.msg(r.msg || '暂时无法下载该版本',{icon:2});
+                    return;
+                }
+                notice.msg('开始下载',{icon:1});
+                window.location.href = url;
+            },
+            error:function(){
+                notice.destroy();
+                layer.msg('下载检查失败，请稍后重试',{icon:2});
+            }
+        });
+    });
 
     $('#btnFeedback').click(function(){
         var p = parent.layui ? parent.layui.layer : layer;

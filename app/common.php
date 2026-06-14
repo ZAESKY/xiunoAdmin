@@ -2583,3 +2583,124 @@ if (!function_exists('checkWords')) {
         }
     }
 }
+
+if (!function_exists('move_temp_images_in_content')) {
+
+    /**
+     * 将HTML内容中的临时图片移动到正式目录
+     * @param string $content 富文本HTML内容
+     * @return string 处理后的HTML内容（临时路径替换为正式路径）
+     */
+    function move_temp_images_in_content($content)
+    {
+        if (empty($content)) {
+            return $content;
+        }
+        $pattern = '/\/upload\/temp\/[\d]{8}\/[a-f0-9]+\.(?:jpg|jpeg|png|gif|bmp|webp)/i';
+        if (!preg_match_all($pattern, $content, $matches)) {
+            return $content;
+        }
+        $baseDir = PUBLIC_UPLOAD_PATH . DS;
+        $tempDir = PUBLIC_UPLOAD_TEMP . DS;
+        $permanentDir = PUBLIC_UPLOAD_PATH . DS;
+        $replaceMap = [];
+        foreach ($matches[0] as $url) {
+            $relativePath = ltrim($url, '/');
+            $tempFile = $baseDir . str_replace('/', DS, $relativePath);
+            if (!file_exists($tempFile)) {
+                continue;
+            }
+            $filename = basename($relativePath);
+            $dateDir = date('Ymd');
+            $destDir = $permanentDir . $dateDir;
+            if (!is_dir($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
+            $destFile = $destDir . DS . $filename;
+            $newUrl = '/upload/' . $dateDir . '/' . $filename;
+            if (rename($tempFile, $destFile)) {
+                $replaceMap[$url] = $newUrl;
+            }
+        }
+        if (!empty($replaceMap)) {
+            $content = str_replace(array_keys($replaceMap), array_values($replaceMap), $content);
+        }
+        return $content;
+    }
+}
+
+if (!function_exists('clean_temp_uploads')) {
+
+    /**
+     * 清理过期的临时上传图片
+     * @param int $maxAgeSeconds 超过此时间的文件将被删除（默认24小时）
+     * @return int 删除的文件数量
+     */
+    function clean_temp_uploads($maxAgeSeconds = 86400)
+    {
+        $tempDir = PUBLIC_UPLOAD_TEMP;
+        if (!is_dir($tempDir)) {
+            return 0;
+        }
+        $cutoff = time() - $maxAgeSeconds;
+        $deleted = 0;
+        $dateDirs = glob($tempDir . DS . '*', GLOB_ONLYDIR);
+        if (empty($dateDirs)) {
+            return 0;
+        }
+        foreach ($dateDirs as $dateDir) {
+            $files = glob($dateDir . DS . '*');
+            if (empty($files)) {
+                continue;
+            }
+            $dirEmpty = true;
+            foreach ($files as $file) {
+                if (is_file($file) && filemtime($file) < $cutoff) {
+                    @unlink($file);
+                    $deleted++;
+                } elseif (is_file($file)) {
+                    $dirEmpty = false;
+                }
+            }
+            if ($dirEmpty) {
+                @rmdir($dateDir);
+            }
+        }
+        return $deleted;
+    }
+}
+
+if (!function_exists('addon_url')) {
+    /**
+     * 生成插件内 URL(兼容 think-addons v2)
+     * 用法: {:addon_url('AddCode/index')}
+     * 规则:访问入口(根域名) + /addons/<plugin>/<controller>/<action>.html
+     * @param string $url  形如 'AddCode/index' 或 'AddCode/index/someArg'
+     * @param array  $vars 额外查询参数
+     * @param bool   $full 是否返回完整 URL
+     * @return string
+     */
+    function addon_url($url = '', array $vars = [], $full = false)
+    {
+        $url = (string)$url;
+        $url = ltrim($url, '/');
+        // 默认入口:从当前请求推断
+        $script = request()->baseFile(true);
+        // 默认带 .php 后缀则替换为 addons.php 不存在,所以保留当前入口
+        // 实际访问: 域名/addons/<plugin>/<ctrl>/<action>.html
+        $base = preg_replace('/\\.php$/', '', $script);
+        $fullUrl = $base . '/addons/' . $url;
+        if (!str_ends_with($fullUrl, '.html')) {
+            $fullUrl .= '.html';
+        }
+        if (!empty($vars)) {
+            $fullUrl .= (strpos($fullUrl, '?') === false ? '?' : '&') . http_build_query($vars);
+        }
+        if ($full) {
+            $host = request()->host(true);
+            $proto = request()->scheme();
+            return $proto . '://' . $host . $fullUrl;
+        }
+        return $fullUrl;
+    }
+}

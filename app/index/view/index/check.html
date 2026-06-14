@@ -1,0 +1,53 @@
+{include file="/public/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form" lay-filter="check-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{:t('common_ui.belong_app')}</label>
+                    <div class="layui-input-block">
+                        <select name="appid" class="layui-input ew-select-fixed" lay-filter="app" lay-search lay-verify="required">
+                            <option value="">{:t('download_ui.select_app')}</option>
+                            {volist name="app_list.data.data" id="res"}
+                            <option value="{$res.id}">{$res.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{:t('download_ui.auth_content_label')}</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="auth_info" class="layui-input" placeholder="{:t('download_ui.auth_content_placeholder')}" lay-verify="required"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{:t('common_ui.auth_type')}QQ</label>
+                    <div class="layui-input-block">
+                        <input type="number" name="qq" class="layui-input" placeholder="{:t('common.enter_auth_holder_qq')}" lay-verify="required"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{:t('download_ui.auth_code_label')}</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="authcode" class="layui-input" placeholder="{:t('download_ui.auth_code_placeholder')}" lay-verify="required"/>
+                    </div>
+                </div>
+                <div class="layui-form-item text-right">
+                    <button type="button" class="layui-btn" lay-submit lay-filter="check-submit">{:t('common.check')}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+layui.use(['form'], function(){
+    var form = layui.form;
+    form.on('submit(check-submit)', function(data){
+        $.post('/index.php/Index/check', data.field, function(res){
+            layer.msg(res.msg || '已提交', {icon: res.code === 0 ? 1 : 2});
+        });
+        return false;
+    });
+});
+</script>
+{include file="/public/footer"}

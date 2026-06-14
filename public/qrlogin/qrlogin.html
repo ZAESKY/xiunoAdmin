@@ -181,7 +181,11 @@
                                                 var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                                                 parent.layer.close(index);
                                                 if(!data.data){
-                                                    parent.layui.layer.alert('登录成功！',{icon:1,skin: 'layui-layer-admin',closeBtn:0});
+                                                    try {
+                                                        (parent.top || parent).location.replace('/user.php/Index/index');
+                                                    } catch (e) {
+                                                        parent.location.href = '/user.php/Index/index';
+                                                    }
                                                 }else{
                                                     var content = '<div class="layui-card" style="margin: 30px 30px 30px 30px;border-radius: 10px"><div class="layui-card-body">';
                                                     $.each(data.data, function(index, value){

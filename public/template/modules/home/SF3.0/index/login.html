@@ -1,0 +1,44 @@
+{include file="index/header"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-header">用户登录</div>
+        <div class="layui-card-body">
+            <form class="layui-form" lay-filter="login-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" required lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-block">
+                        <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" lay-submit lay-filter="login-submit">登录</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+layui.use(['form'], function(){
+    var form = layui.form;
+    form.on('submit(login-submit)', function(data){
+        $.post('/user.php/Login/login', data.field, function(res){
+            if (res.code === 0) {
+                layer.msg('登录成功', {icon: 1});
+                setTimeout(function(){ location.href = '/user.php/Index/main.html'; }, 800);
+            } else {
+                layer.msg(res.msg || '登录失败', {icon: 2});
+            }
+        });
+        return false;
+    });
+});
+</script>
+{include file="index/footer"}

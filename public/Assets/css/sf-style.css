@@ -692,4 +692,74 @@
     border: 2px solid #dddddd;
 }
 /** // 应用列表样式结束 */
-body {
+
+/* ═══════════════════════════════════════════════════════
+   Dashboard Shared Utilities
+   ═══════════════════════════════════════════════════════ */
+
+/* Scrollbar styling */
+.dash-card-body.scroll::-webkit-scrollbar,
+.u-card-body.scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.dash-card-body.scroll::-webkit-scrollbar-track,
+.u-card-body.scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dash-card-body.scroll::-webkit-scrollbar-thumb,
+.u-card-body.scroll::-webkit-scrollbar-thumb {
+  background: #d0d5dd;
+  border-radius: 10px;
+}
+
+/* Smooth page transitions */
+.dash-shell, .u-shell {
+  animation: fadeInUp .35s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Number pulse animation for stat cards */
+@keyframes numPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.stat-card:hover .stat-num,
+.stat-card:hover .st-num {
+  animation: numPop .3s ease;
+}
+
+/* Security dot items */
+.sec-item .dot {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+}
+.sec-item .dot.danger { background: #e8553d; }
+.sec-item .dot.warning { background: #faad14; }
+.sec-item .dot.info { background: #3a6fd8; }
+
+/* Circle progress overrides for dashboard */
+#SF_Progress .circle-progress-circle {
+  stroke-width: 5px;
+  stroke: #e8eaed;
+  stroke-dasharray: 1 4;
+  stroke-dashoffset: 1.4;
+}
+#SF_Progress .circle-progress-value { stroke: #3a6fd8; }
+#SF_Progress.circle-progress-success .circle-progress-value { stroke: #34a853; }
+#SF_Progress.circle-progress-danger .circle-progress-value { stroke: #e8553d; }
+#SF_Progress.circle-progress-warning .circle-progress-value { stroke: #faad14; }
+#SF_Progress.circle-progress-info .circle-progress-value { stroke: #3a6fd8; }
+#SF_Progress.circle-progress-success .circle-progress-text { fill: #34a853; }
+#SF_Progress.circle-progress-danger .circle-progress-text { fill: #e8553d; }
+#SF_Progress.circle-progress-warning .circle-progress-text { fill: #faad14; }
+#SF_Progress.circle-progress-info .circle-progress-text { fill: #3a6fd8; }
+
+/* Button reset for hero actions */
+.hero-actions button {
+  font-family: inherit; line-height: normal;
+}

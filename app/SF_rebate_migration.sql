@@ -1,12 +1,36 @@
 -- 返利/折扣码功能 — 数据库迁移
+-- 说明: 兼容旧库升级和新库初始化后的重复执行。
+
+DROP PROCEDURE IF EXISTS SF_ADD_COLUMN_IF_MISSING;
+DELIMITER $$
+CREATE PROCEDURE SF_ADD_COLUMN_IF_MISSING(
+  IN p_table_name VARCHAR(64),
+  IN p_column_name VARCHAR(64),
+  IN p_column_definition TEXT
+)
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = p_table_name
+      AND COLUMN_NAME = p_column_name
+  ) THEN
+    SET @sf_sql = CONCAT('ALTER TABLE `', p_table_name, '` ADD COLUMN ', p_column_definition);
+    PREPARE sf_stmt FROM @sf_sql;
+    EXECUTE sf_stmt;
+    DEALLOCATE PREPARE sf_stmt;
+  END IF;
+END$$
+DELIMITER ;
+
 -- power_price 新增返利配置字段
-ALTER TABLE `SF_power_price`
-  ADD COLUMN `rebate_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '启用返利 0=否 1=是',
-  ADD COLUMN `rebate_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT '返利比例(%)，如5.00=5%',
-  ADD COLUMN `discount_code_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '启用折扣码功能 0=否 1=是';
+CALL SF_ADD_COLUMN_IF_MISSING('SF_power_price', 'rebate_enabled', '`rebate_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT ''启用返利 0=否 1=是''');
+CALL SF_ADD_COLUMN_IF_MISSING('SF_power_price', 'rebate_rate', '`rebate_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT ''返利比例(%)，如5.00=5%''');
+CALL SF_ADD_COLUMN_IF_MISSING('SF_power_price', 'discount_code_enabled', '`discount_code_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT ''启用折扣码功能 0=否 1=是''');
 
 -- 折扣码表
-CREATE TABLE `SF_discount_code` (
+CREATE TABLE IF NOT EXISTS `SF_discount_code` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '所属用户ID',
   `code` varchar(32) NOT NULL COMMENT '唯一折扣码',
@@ -19,7 +43,7 @@ CREATE TABLE `SF_discount_code` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='折扣码表';
 
 -- 返利记录表
-CREATE TABLE `SF_rebate_record` (
+CREATE TABLE IF NOT EXISTS `SF_rebate_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `order_id` int(11) unsigned NOT NULL COMMENT 'SF_order.id',
   `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'SF_pay.trade_no',
@@ -39,5 +63,7 @@ CREATE TABLE `SF_rebate_record` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='返利记录表';
 
 -- pay/order 表增加折扣码字段
-ALTER TABLE `SF_pay` ADD COLUMN `discount_code` varchar(32) DEFAULT NULL COMMENT '使用的折扣码';
-ALTER TABLE `SF_order` ADD COLUMN `discount_code` varchar(32) DEFAULT NULL COMMENT '使用的折扣码';
+CALL SF_ADD_COLUMN_IF_MISSING('SF_pay', 'discount_code', '`discount_code` varchar(32) DEFAULT NULL COMMENT ''使用的折扣码''');
+CALL SF_ADD_COLUMN_IF_MISSING('SF_order', 'discount_code', '`discount_code` varchar(32) DEFAULT NULL COMMENT ''使用的折扣码''');
+
+DROP PROCEDURE IF EXISTS SF_ADD_COLUMN_IF_MISSING;

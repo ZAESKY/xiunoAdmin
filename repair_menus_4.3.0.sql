@@ -161,30 +161,30 @@ SELECT '意见反馈', 'Feedback/index', 'layui-icon-email', 0, NOW(), 2, 1
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Feedback/index' AND `power` = 2);
 
 INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
-SELECT '返利中心', '#', 'layui-icon-rmb', 0, NOW(), 2, 1
+SELECT '返利中心', 'Rebate/index', 'layui-icon-rmb', 0, NOW(), 2, 1
 FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM `SF_menu`
-  WHERE `name` = '返利中心' AND `parentid` = 0 AND `url` = '#' AND `power` = 2
+  WHERE `name` = '返利中心' AND `parentid` = 0 AND `url` = 'Rebate/index' AND `power` = 2
 );
 
 SET @user_rebate_id = (
   SELECT `id` FROM `SF_menu`
-  WHERE `name` = '返利中心' AND `parentid` = 0 AND `url` = '#' AND `power` = 2
+  WHERE `name` = '返利中心' AND `parentid` = 0 AND `url` = 'Rebate/index' AND `power` = 2
   ORDER BY `id` ASC LIMIT 1
 );
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
-SELECT '我的折扣码', 'Rebate/index', '', @user_rebate_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Rebate/index' AND `power` = 2);
+UPDATE `SF_menu`
+SET `parentid` = 0, `url` = 'Rebate/index', `icon` = 'layui-icon-rmb', `power` = 2, `status` = 1
+WHERE `id` = @user_rebate_id;
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
-SELECT '返利记录', 'Rebate/myRebateList', '', @user_rebate_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Rebate/myRebateList' AND `power` = 2);
+UPDATE `SF_menu`
+SET `status` = 0
+WHERE `parentid` = @user_rebate_id AND `url` = 'Rebate/index';
 
 UPDATE `SF_menu`
 SET `parentid` = @user_rebate_id, `power` = 2, `status` = 1
-WHERE `url` IN ('Rebate/index', 'Rebate/myRebateList');
+WHERE `url` = 'Rebate/myRebateList' AND `power` = 2;
 
 INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '积分兑换', 'PointExchange/index', 'layui-icon-cart-simple', 0, NOW(), 2, 1

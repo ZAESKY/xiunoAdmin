@@ -230,9 +230,12 @@ class AjaxService extends BaseService
             return message(t('install.db_connect_failed').$e->getMessage(), false);
         }
 
-        $db->exec("update SF_admin set `username` = '".$admin_username."', `password` = '".$admin_password."', `qq` = '".$admin_qq."', `email` = '$admin_email' where `id` = 1");
-        $db->exec("update SF_config set `value` = '".$sitename."' where `name` = 'title'");
-        $db->exec("update SF_config set `value` = '".$SF_LOGIN_KEY."' where `name` = 'login_key'");
+        $stmt = $db->prepare("update SF_admin set `username` = ?, `password` = ?, `qq` = ?, `email` = ? where `id` = 1");
+        $stmt->execute([$admin_username, $admin_password, $admin_qq, $admin_email]);
+        $stmt = $db->prepare("update SF_config set `value` = ? where `name` = 'title'");
+        $stmt->execute([$sitename]);
+        $stmt = $db->prepare("update SF_config set `value` = ? where `name` = 'login_key'");
+        $stmt->execute([$SF_LOGIN_KEY]);
         session('SF_LOGIN_KEY', $SF_LOGIN_KEY);
         rename(PUBLIC_PATH . DS . 'admin.php',$login_address.'.php');
         return message(t('install.config_save_success'), true);

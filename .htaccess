@@ -1,0 +1,15 @@
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(\.env|sf\.env|composer\.(json|lock)|.*\.sql|.*\.log)$">
+        Require all denied
+    </FilesMatch>
+    RedirectMatch 403 ^/(app|addons|config|extend|runtime|vendor|phpMyAdmin4\.8\.5)(/|$)
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^(\.env|sf\.env|composer\.(json|lock)|.*\.sql|.*\.log)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>

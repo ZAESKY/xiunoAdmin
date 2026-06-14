@@ -14,14 +14,23 @@ CREATE TABLE IF NOT EXISTS `SF_plugin` (
   `description` text COMMENT '插件简介',
   `content` longtext COMMENT '插件详细介绍(富文本)',
   `icon` varchar(255) DEFAULT '' COMMENT '插件图标URL',
-  `images` text COMMENT '插件截图(JSON数组)',
+  `images` text COMMENT '插件图片(JSON数组,兼容旧数据)',
+  `cover` varchar(255) DEFAULT '' COMMENT '插件封面图URL',
   `origin_type` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '来源:1=原创,2=转载',
   `origin_url` varchar(255) DEFAULT '' COMMENT '转载来源地址',
   `origin_author` varchar(100) DEFAULT '' COMMENT '转载原作者',
   `origin_note` varchar(500) DEFAULT '' COMMENT '转载声明/备注',
+  `related_plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '关联插件ID，可选',
+  `storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT '存储驱动:local/oss',
   `file_path` varchar(255) NOT NULL DEFAULT '' COMMENT '插件文件路径(私有存储)',
+  `package_object_key` varchar(500) DEFAULT '' COMMENT '插件包OSS对象Key',
+  `package_file_name` varchar(255) DEFAULT '' COMMENT '插件包原始文件名',
   `file_size` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '文件大小(字节)',
+  `package_mime_type` varchar(100) DEFAULT '' COMMENT '插件包MIME类型',
   `file_hash` varchar(64) DEFAULT '' COMMENT '文件MD5哈希',
+  `icon_object_key` varchar(500) DEFAULT '' COMMENT '图标OSS对象Key',
+  `cover_object_key` varchar(500) DEFAULT '' COMMENT '封面OSS对象Key',
+  `update_description` text COMMENT '最新版本更新说明',
   `price` decimal(10,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '插件价格(0为免费)',
   `pay_type` varchar(10) DEFAULT 'balance' COMMENT '支付方式:balance=余额,points=积分',
   `download_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '下载次数',
@@ -36,6 +45,8 @@ CREATE TABLE IF NOT EXISTS `SF_plugin` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
   `published_at` datetime DEFAULT NULL COMMENT '上架时间',
+  `publish_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '发布类型:0=立即发布,1=定时发布',
+  `publish_time` datetime DEFAULT NULL COMMENT '定时发布时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
   KEY `status` (`status`),
@@ -43,9 +54,55 @@ CREATE TABLE IF NOT EXISTS `SF_plugin` (
   KEY `download_count` (`download_count`),
   KEY `rating_avg` (`rating_avg`),
   KEY `sort` (`sort`),
+  KEY `related_plugin_id` (`related_plugin_id`),
   KEY `is_hot` (`is_hot`),
   KEY `is_recommend` (`is_recommend`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表';
+
+-- 插件版本历史表
+CREATE TABLE IF NOT EXISTS `SF_plugin_versions` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '版本记录ID',
+  `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
+  `version` varchar(50) NOT NULL DEFAULT '' COMMENT '版本号',
+  `storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT '存储驱动:local/oss',
+  `package_path` varchar(500) DEFAULT '' COMMENT '本地插件包路径或URL',
+  `package_object_key` varchar(500) DEFAULT '' COMMENT '插件包OSS对象Key',
+  `package_file_name` varchar(255) DEFAULT '' COMMENT '插件包原始文件名',
+  `package_file_size` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '插件包大小',
+  `package_mime_type` varchar(100) DEFAULT '' COMMENT '插件包MIME类型',
+  `package_hash` varchar(64) DEFAULT '' COMMENT '插件包MD5哈希',
+  `update_description` text COMMENT '更新说明',
+  `created_by` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建人用户ID',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_plugin_version` (`plugin_id`,`version`),
+  KEY `idx_plugin_id` (`plugin_id`),
+  KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件版本历史表';
+
+-- 插件资源表
+CREATE TABLE IF NOT EXISTS `SF_plugin_resources` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '资源ID',
+  `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
+  `version_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件版本ID',
+  `resource_type` varchar(50) NOT NULL DEFAULT '' COMMENT '资源类型:icon/cover/package/attachment',
+  `storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT '存储驱动:local/oss',
+  `url` varchar(500) DEFAULT '' COMMENT '资源访问URL或本地路径',
+  `object_key` varchar(500) DEFAULT '' COMMENT 'OSS对象Key',
+  `file_name` varchar(255) DEFAULT '' COMMENT '原始文件名',
+  `file_size` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '文件大小',
+  `mime_type` varchar(100) DEFAULT '' COMMENT 'MIME类型',
+  `sort_order` int(11) NOT NULL DEFAULT '0' COMMENT '排序',
+  `created_by` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建人用户ID',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_plugin_id` (`plugin_id`),
+  KEY `idx_version_id` (`version_id`),
+  KEY `idx_resource_type` (`resource_type`),
+  KEY `idx_sort_order` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件资源表';
 
 -- 插件订单表
 CREATE TABLE IF NOT EXISTS `SF_plugin_order` (

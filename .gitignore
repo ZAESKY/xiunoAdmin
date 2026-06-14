@@ -4,3 +4,9 @@
 /runtime
 /.claude
 /upload
+/.env
+/phpMyAdmin4.8.5/
+/storage/
+/tests/
+.DS_Store
+**/.DS_Store

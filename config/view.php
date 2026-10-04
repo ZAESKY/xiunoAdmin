@@ -26,6 +26,10 @@ return [
     'tpl_replace_string' => array(
         '{__CSS__}' => '/Assets/css/',
         '{__JS__}' => '/Assets/js/',
+        // Shared cache key for the runtime language loader and client translator.
+        // Keep these two files on the same version so an old embedded dictionary
+        // can never be mixed with newly rendered translation keys.
+        '{__I18N_VERSION__}' => '20261004.5',
         '{__IMG__}' => '/Assets/img/',
         '{__MODULE__}' => '/Assets/module/',
         '{__LIBS__}' => '/Assets/libs/',

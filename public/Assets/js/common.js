@@ -12,13 +12,29 @@
     var messages = window.SF_I18N_MESSAGES || parentMessages || {};
     var locale = window.SF_I18N_LOCALE || parentLocale || (window.SF_LANG && window.SF_LANG.current) || 'en-us';
 
+    function getMessage(key) {
+        var currentMessages = window.SF_I18N_MESSAGES || messages;
+        if (Object.prototype.hasOwnProperty.call(currentMessages, key)) {
+            return currentMessages[key];
+        }
+        try {
+            if (window.parent && window.parent !== window) {
+                var currentParentMessages = window.parent.SF_I18N_MESSAGES || parentMessages || {};
+                if (Object.prototype.hasOwnProperty.call(currentParentMessages, key)) {
+                    return currentParentMessages[key];
+                }
+            }
+        } catch (e) {}
+        return key;
+    }
+
     window.SF_I18N = {
         messages: messages,
         lang: function () {
             return locale;
         },
         t: function (key, vars) {
-            var text = Object.prototype.hasOwnProperty.call(messages, key) ? messages[key] : key;
+            var text = getMessage(key);
             vars = vars || {};
             return String(text).replace(/\{:?([\w]+)\}/g, function (match, name) {
                 return vars[name] === undefined ? match : vars[name];

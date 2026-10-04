@@ -76,8 +76,76 @@ function referencedLanguageKeys(string $root): array
     return $result;
 }
 
+/**
+ * Ensure every rendered entry point uses the shared i18n asset cache key.
+ * A stale common.js used to keep an embedded, incomplete dictionary alive and
+ * rendered untranslated keys even though the PHP language files were correct.
+ *
+ * @return array{0:int,1:string[]}
+ */
+function i18nAssetReferenceErrors(string $root, string $assetVersion): array
+{
+    $count = 0;
+    $errors = [];
+    $scanRoots = [$root . '/app', $root . '/addons', $root . '/public/template'];
+    $extensions = ['html' => true, 'php' => true];
+    $pattern = '~(?:common|lang)\.js(?:\?v=([A-Za-z0-9._{}-]+))?~';
+
+    foreach ($scanRoots as $scanRoot) {
+        if (!is_dir($scanRoot)) {
+            continue;
+        }
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($scanRoot, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $item) {
+            if (!$item instanceof SplFileInfo || !$item->isFile()) {
+                continue;
+            }
+            if (!isset($extensions[strtolower($item->getExtension())])) {
+                continue;
+            }
+            $contents = file_get_contents($item->getPathname());
+            if ($contents === false || !preg_match_all($pattern, $contents, $matches, PREG_SET_ORDER)) {
+                continue;
+            }
+            foreach ($matches as $match) {
+                $count++;
+                $version = $match[1] ?? '';
+                if ($version !== '{__I18N_VERSION__}') {
+                    $relative = substr($item->getPathname(), strlen($root) + 1);
+                    $errors[] = sprintf('%s uses an unmanaged i18n asset version: %s', $relative, $match[0]);
+                }
+            }
+        }
+    }
+
+    foreach (['public/qrlogin/qrlogin.html', 'public/wechat_mp_login.html'] as $relative) {
+        $file = $root . '/' . $relative;
+        $contents = is_file($file) ? file_get_contents($file) : false;
+        if ($contents === false || !preg_match_all($pattern, $contents, $matches, PREG_SET_ORDER)) {
+            continue;
+        }
+        foreach ($matches as $match) {
+            $count++;
+            $version = $match[1] ?? '';
+            if ($version !== $assetVersion) {
+                $errors[] = sprintf('%s uses a stale i18n asset version: %s', $relative, $match[0]);
+            }
+        }
+    }
+
+    return [$count, array_values(array_unique($errors))];
+}
+
 $languages = [];
 $hasError = false;
+$viewConfig = require $root . '/config/view.php';
+$assetVersion = (string)($viewConfig['tpl_replace_string']['{__I18N_VERSION__}'] ?? '');
+if ($assetVersion === '') {
+    fwrite(STDERR, "[ERROR] Missing {__I18N_VERSION__} template replacement.\n");
+    $hasError = true;
+}
 
 foreach ($languageFiles as $locale => $file) {
     $messages = require $file;
@@ -121,6 +189,15 @@ if (count($languages) === count($languageFiles)) {
         count($referenced)
     );
 }
+
+[$assetReferenceCount, $assetErrors] = i18nAssetReferenceErrors($root, $assetVersion);
+if ($assetErrors !== []) {
+    foreach ($assetErrors as $error) {
+        fwrite(STDERR, '[ERROR] ' . $error . "\n");
+    }
+    $hasError = true;
+}
+printf("i18n asset references=%d; cache version=%s.\n", $assetReferenceCount, $assetVersion ?: '(missing)');
 
 if ($hasError) {
     exit(1);

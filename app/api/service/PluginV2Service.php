@@ -368,7 +368,8 @@ class PluginV2Service extends BaseService
             $plugin['is_free'] = (float)$plugin['price'] <= 0;
         }
         if (isset($plugin['rating_avg'])) {
-            $plugin['rating_avg'] = round((float)$plugin['rating_avg'], 2);
+            // 签名规范拒绝浮点数，统一使用固定两位小数字符串，避免跨平台表示歧义。
+            $plugin['rating_avg'] = number_format((float)$plugin['rating_avg'], 2, '.', '');
         }
         foreach (['icon', 'cover', 'iconUrl', 'coverUrl'] as $field) {
             if (isset($plugin[$field])) {

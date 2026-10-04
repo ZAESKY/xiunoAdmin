@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta charset="utf-8">
     <title>{$title}|{:t('login.verify_token_title')}</title>
@@ -67,14 +67,14 @@
                 <div class="layui-card-body">
                     <form class="layui-form layui-form-pane" id="formBasForm" lay-filter="formBasForm">
                         <div class="layui-form-item">
-                            <blockquote class="layui-elem-quote-sf-danger">{:t('login.no_access')}，您的IP：<b>{:get_client_ip()}</b> 已被记录
+                            <blockquote class="layui-elem-quote-sf-danger">{:t('login.no_access')} {:t('login.ip_recorded', ['ip' => get_client_ip()])}
                             </blockquote>
                             <blockquote class="layui-elem-quote-sf-warning">
-                                若您记得{:t('common_ui.dir')}保护密码，也可访问：http://{:DOMAIN}/admin/Login?登录口令 ，进入登录哦~
+                                {:t('login.token_access_tip', ['domain' => DOMAIN])}
                             </blockquote>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label">口令</label>
+                            <label class="layui-form-label">{:t('login.token_label')}</label>
                             <div class="layui-input-block">
                                 <input type="password" name="SF_LOGIN_KEY" class="layui-input"  placeholder="{:t('login.token_placeholder')}" required/>
                             </div>
@@ -95,6 +95,8 @@
 </div>
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script type="text/javascript" src="{__JS__}lang.js?v=20261004"></script>
 <script type="text/javascript" src="{__JS__}common.js?v=321"></script>
 <script>
     layui.use(['layer', 'form', 'admin', 'notice'], function () {
@@ -108,27 +110,27 @@
 
         $('#formreset').click(function () {
             document.getElementById("formBasForm").reset();
-            notice.msg('重置表单成功！', {icon: 1});
+            notice.msg(t('notify.form_reset_success'), {icon: 1});
         });
         $("#tip").click(function (){
             layer.open({
                 type: 1,
                 area:['300px',''],
-                title:'忘记口令',
+                title:t('login.forgot_token'),
                 closeBtn:0,
-                btn:['知道了'],
-                content: '<div class="layui-card-body"><blockquote class="layui-elem-quote-sf-info" >方法一：进入数据库找到数据表SF_config，在找到字段SF_Login_Key，修改口令或清空（清空后登陆免验证口令）<br><br>方法二：进入数据库找到数据表SF_config，在找到字段is_SF_Login_Key，把数字1改成数字0即可免验证口令</blockquote></div>'
+                btn:[t('login.got_it')],
+                content: '<div class="layui-card-body"><blockquote class="layui-elem-quote-sf-info">'+t('login.forgot_token_help')+'</blockquote></div>'
             });
         });
-        layer.tips('忘记登陆口令点这里', '#tip', {
+        layer.tips(t('login.forgot_token_tip'), '#tip', {
             tips: 3
         });
         $('#noticeBtn').click(function () {
             var SF_LOGIN_KEY = $("input[name='SF_LOGIN_KEY']").val();
             if (SF_LOGIN_KEY == "") {
                 notice.warning({
-                    title: '温馨提示',
-                    message: '请填写登录口令！',
+                    title: t('common.nice_tips'),
+                    message: t('login.token_empty'),
                     animateInside:true,
                     position:'topCenter',
                     transitionOut:'flipOutX',
@@ -139,7 +141,7 @@
                 return false;
             }
             admin.showLoading('#loading', 2, '.8');
-            admin.btnLoading('[lay-filter="noticeBtn"]','提交中');
+            admin.btnLoading('[lay-filter="noticeBtn"]',t('login.submitting'));
             $.ajax({
                 type: "POST",
                 url: "{:url('/Login/checkLoginKey')}",
@@ -148,7 +150,7 @@
                 success: function(data) {
                     if (data.code == 0) {
                         notice.success({
-                            title: '温馨提示',
+                            title: t('common.nice_tips'),
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -158,14 +160,14 @@
                             audio:'1'
                         });
                         setTimeout(function() {
-                            notice.msg('正在为您跳转登录页面...', {icon: 4, close: true, audio:'1'});
+                            notice.msg(t('login.redirecting'), {icon: 4, close: true, audio:'1'});
                         }, 450);
                         setTimeout(function() {
                             location.href="{:url('/Login/index')}";
                         }, 1500);
                     } else {
                         notice.error({
-                            title: '温馨提示',
+                            title: t('common.nice_tips'),
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -179,8 +181,8 @@
                     admin.removeLoading('#loading', true, true);
                 }, error: function () {
                     notice.error({
-                        title: '温馨提示',
-                        message: '服务器错误，请稍后重试~',
+                        title: t('common.nice_tips'),
+                        message: t('common.server_error'),
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',

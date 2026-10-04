@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
@@ -71,7 +71,7 @@
                     success: function (data, textStatus) {
                         //从服务器得到数据，显示数据并继续查询
                         if (data.code == 0) {
-                            if (confirm("您已支付完成，需要跳转到订单页面吗？")) {
+                            if (confirm({:json_encode(t('confirm.payment_done'), 271)})) {
                                 window.location.href = {$redirect_url};
                             } else {
                                 // 用户取消
@@ -85,7 +85,7 @@
                         if (textStatus == "timeout") {
                             setTimeout("loadmsg()", 1000);
                         } else { //异常
-                            alert('创建连接失败！');
+                            alert({:json_encode(t('payment_ui.create_link_failed'), 271)});
                         }
                     }
                 });

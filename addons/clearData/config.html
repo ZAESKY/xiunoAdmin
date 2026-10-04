@@ -4,15 +4,14 @@
     <div class="layui-card">
         <div class="layui-card-body">
             <div class="layui-btn-container">
-                <a class="layui-btn layui-icon layui-icon-menu-fill" onclick="clearCache('menu')"> 清除菜单缓存</a>
-                <a class="layui-btn layui-icon layui-icon-menu-fill" onclick="clearCache('app')"> 清除应用缓存</a>
-                <a class="layui-btn layui-icon layui-icon-set-fill" onclick="clearCache('set')"> 清除系统设置缓存</a>
-                <a class="layui-btn layui-icon layui-icon-set-fill" onclick="clearCache('version')"> 清除版本缓存</a>
-                <a class="layui-btn layui-icon layui-icon-refresh" onclick="clearCache('all')"> 清除全部缓存</a>
+                <a class="layui-btn layui-icon layui-icon-menu-fill" onclick="clearCache('menu')"> {:t('cache.clear_menu')}</a>
+                <a class="layui-btn layui-icon layui-icon-menu-fill" onclick="clearCache('app')"> {:t('cache.clear_app')}</a>
+                <a class="layui-btn layui-icon layui-icon-set-fill" onclick="clearCache('set')"> {:t('cache.clear_settings')}</a>
+                <a class="layui-btn layui-icon layui-icon-set-fill" onclick="clearCache('version')"> {:t('cache.clear_version')}</a>
+                <a class="layui-btn layui-icon layui-icon-refresh" onclick="clearCache('all')"> {:t('cache.clear_all')}</a>
             </div>
         </div>
     </div>
-</div>
 </div>
 {include file="/public/footer"}
 <script>
@@ -22,7 +21,7 @@
         var notice = layui.notice;
 
        window.clearCache = function (type){
-           notice.msg('正在执行中..', {icon: 4, close: true});
+           notice.msg(window.t('common.loading'), {icon: 4, close: true});
            admin.ajax({
                url: '{:addons_url("ClearData/clearCache")}',
                data: {'type':type},
@@ -39,7 +38,7 @@
                },
                error: function() {
                    notice.destroy();
-                   notice.msg("服务器错误，请检查插件是否启用！", {icon: 2, audio:'1'});
+                   notice.msg(window.t('cache.plugin_server_error'), {icon: 2, audio:'1'});
                }
            });
         }

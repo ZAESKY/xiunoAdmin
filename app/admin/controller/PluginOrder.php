@@ -23,9 +23,9 @@ class PluginOrder extends Backend
     {
         if (!feature_enabled('feature_admin_plugin_enabled')) {
             if (IS_POST) {
-                exit(json_encode(message('插件管理功能已关闭', false), JSON_UNESCAPED_UNICODE));
+                exit(json_encode(message('plugin_action.management_closed', false), JSON_UNESCAPED_UNICODE));
             }
-            exit($this->render('/public/error', ['msg' => '插件管理功能已关闭']));
+            exit($this->render('/public/error', ['msg' => t('plugin_action.management_closed')]));
         }
     }
 }

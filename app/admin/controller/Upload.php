@@ -3,8 +3,8 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use app\common\service\PluginStorageService;
 use app\admin\service\UploadService;
-use think\facade\Filesystem;
 use think\Exception;
 
 class Upload extends Backend
@@ -17,9 +17,12 @@ class Upload extends Backend
     /**图片上传*/
     public function image()
     {
+        if (!IS_POST) {
+            return json(message('common.illegal_request', false), 405);
+        }
         $file = request()->file('file');
         if (!$file) {
-            return message(t('upload.upload_failed') . '请选择要上传的文件', false);
+            return message('upload.select_file', false);
         }
         // 移动到框架应用根目录/uploads/ 目录下
         try{
@@ -29,12 +32,16 @@ class Upload extends Backend
                 'fileExt' => 'jpg,jpeg,png,bmp,gif',
                 'fileMime' => 'image/jpeg,image/png,image/gif',
             ]])->check(['file' => $file]);
-            // 上传图片到本地服务器
-            $saveName = Filesystem::disk('public')->putFile('temp', $file);
-            if (!$saveName) {
-                return message(t('upload.upload_failed') . '保存到存储失败', false);
+            $stored = (new PluginStorageService())->storeUploadedFile(
+                $file,
+                'image',
+                ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp'],
+                10 * 1024 * 1024
+            );
+            if (empty($stored['url'])) {
+                return message('upload.storage_save_failed', false);
             }
-            return message('success' ,true ,['path' => '/upload/'. $saveName]);
+            return message('success', true, ['path' => $stored['url']]);
         } catch (\Exception $e) {
             // 验证失败 输出错误信息
             return message(t('upload.upload_failed') . $e->getMessage(), false);
@@ -65,7 +72,7 @@ class Upload extends Backend
                 return message(t('validation.missing_fileext'),false, ['status' => 0, 'downUrl' => '']);
             }
             if (!$file) {
-                return message(t('upload.upload_failed') . '请上传分片文件',false, ['status' => 0, 'downUrl' => '']);
+                return message('upload.chunk_file_required', false, ['status' => 0, 'downUrl' => '']);
             }
             try {
                 validate([

@@ -3,8 +3,8 @@
 namespace app\index\controller;
 
 use app\common\controller\Frontend;
-use think\facade\Cache;
 use think\facade\Db;
+use app\common\service\RateLimitService;
 
 class DownloadQrCode extends Frontend
 {
@@ -14,15 +14,26 @@ class DownloadQrCode extends Frontend
 
     public function verification(){
         if(IS_POST){
+            if (sf_download_mode() !== 'qrcode') {
+                return message(t('download.qq_disabled'), false);
+            }
             $post = $this->request->post();
             $appid = !empty($post['appid'])?intval($post['appid']):null;
-            $auth_info = !empty($post['auth_info'])?$post['auth_info']:null;
+            $auth_info = !empty($post['auth_info'])?trim((string)$post['auth_info']):null;
+            $qq = !empty($post['qq']) ? trim((string)$post['qq']) : '';
 
             if(empty($appid)){
-                return message('请选择所属应用！' ,false);
+                return message(t('auth.select_app') ,false);
             }
             if(empty($auth_info)){
-                return message('请填写授权内容！' ,false);
+                return message(t('auth.enter_content') ,false);
+            }
+            if (mb_strlen($auth_info) > 255 || !preg_match('/^[1-9][0-9]{4,11}$/D', $qq)) {
+                return message(t('download.auth_or_qq_invalid'), false);
+            }
+            $rate = RateLimitService::hit('download_qrcode', (string)get_client_ip(), 30, 3600);
+            if (!$rate['ok']) {
+                return message(t('download.verification_rate_limited'), false);
             }
 
             $row = Db::name('auth')
@@ -30,12 +41,15 @@ class DownloadQrCode extends Frontend
                     'appid' => $appid,
                     'auth_info' => $auth_info
                 ])
-                ->field('qq,authcode')
+                ->field('qq')
                 ->find();
             if(empty($row)){
-                return message('不存在此授权！' ,false);
+                return message(t('auth.not_exist') ,false);
             }
-            return message('请使用绑定该授权QQ继续扫码' ,true);
+            if (!hash_equals((string)$row['qq'], $qq)) {
+                return message(t('auth.qq_mismatch'), false);
+            }
+            return message(t('auth.scan_use_bound_qq') ,true);
         }
     }
 }

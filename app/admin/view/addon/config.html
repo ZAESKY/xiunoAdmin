@@ -27,10 +27,10 @@
                         <table class="layui-table" id="addField{$item.name}">
                             <tr>
                                 <td style="min-width: 100px">
-                                    <input type="text" id="key{$item.name}" class="layui-input" lay-tips="请输入键名"/>
+                                    <input type="text" id="key{$item.name}" class="layui-input" lay-tips="{:t('addon_ui.enter_key')}"/>
                                 </td>
                                 <td style="min-width: 100px">
-                                    <input type="text" id="value{$item.name}" class="layui-input" lay-tips="请输入键值"/>
+                                    <input type="text" id="value{$item.name}" class="layui-input" lay-tips="{:t('addon_ui.enter_value')}"/>
                                 </td>
                                 <td>
                                     <a class="layui-btn layui-btn-sm layui-icon layui-icon-add-1" onclick="AddField('{$item.name}')"></a>
@@ -68,11 +68,11 @@
                                     var value = $('#value' + id).val();
                                     var length = new Date().valueOf();
                                     if (key == '') {
-                                        notice.msg('请填写键名！', {icon: 2});
+                                        notice.msg('{:t("notify.config_key_empty")}', {icon: 2});
                                         return false;
                                     }
                                     if (value == '') {
-                                        notice.msg('请填写键值！', {icon: 2});
+                                        notice.msg('{:t("notify.config_value_empty")}', {icon: 2});
                                         return false;
                                     }
                                     $('#addField' + id).append('<tr id="tr' + id + length + '"><td><input type="text" name="row[' + id + '][' + length + '][key]" value="' + key + '" class="layui-input"/></td><td><input type="text" name="row[' + id + '][' + length + '][value]" value="' + value + '" class="layui-input"/></td><td><a class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete" onclick="DeleteField(\'' + id + '\',\'' + length + '\')"></a></td></tr>');
@@ -162,10 +162,10 @@
                         <div class="layui-form-item">
                             <div class="layui-upload-drag" id="image{$item.name}">
                                 <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
+                                <p>{:t('version_ui.drag_upload')}</p>
                                 <div class="layui-hide" id="uploadImage{$item.name}">
                                     <hr>
-                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="img{$item.name}" style="max-width: 196px">
+                                    <img src="" alt="{:t('addon_ui.upload_preview_alt')}" id="img{$item.name}" style="max-width: 196px">
                                 </div>
                             </div>
                         </div>
@@ -183,16 +183,16 @@
                                         obj.preview(function(index, file, result){
                                             $('#img{$item.name}').attr('src', result); //图片链接（base64）
                                         });
-                                        notice.msg('上传中...', {icon: 4, close: true});
+                                        notice.msg('{:t("withdraw_admin.uploading")}', {icon: 4, close: true});
                                     }
                                     ,done: function(res){
                                         notice.destroy();
                                         if(res.code == 0){
-                                            notice.msg('上传成功！', {icon: 1, audio:'1'});
+                                            notice.msg('{:t("upload.upload_success")}', {icon: 1, audio:'1'});
                                             $("input[name='row[{$item.name}]']").val(res.data.path);
                                             layui.$('#uploadImage{$item.name}').removeClass('layui-hide').find('img').attr('src', res.files.file);
                                         }else{
-                                            notice.msg('上传失败！', {icon: 2, audio:'1'});
+                                            notice.msg('{:t("addon_ui.upload_failed")}', {icon: 2, audio:'1'});
                                         }
                                     }
                                 });
@@ -211,14 +211,14 @@
                             <input type="hidden" id="status" value="0"/>
                             <div class="layui-upload-drag" id="fileUpload{$item.name}">
                                 <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
+                                <p>{:t('version_ui.drag_upload')}</p>
                                 <div class="layui-hide" id="uploadFile{$item.name}">
                                     <hr>
                                     <div class="layui-form-item">
-                                        <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="fileImg{$item.name}" style="max-width: 196px">
+                                        <img src="" alt="{:t('addon_ui.upload_preview_alt')}" id="fileImg{$item.name}" style="max-width: 196px">
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">文件名</label>
+                                        <label class="layui-form-label">{:t('version_ui.file_name')}</label>
                                         <div class="layui-input-block">
                                             <input type="text" name="name" id="name" value="" lay-verify="title" autocomplete="off" readonly="true" class="layui-input">
                                         </div>
@@ -291,7 +291,6 @@
                                                 var totalPage = parseInt($('#totalPage').val());
                                                 element.progress('uploadProgress{$item.name}', Math.ceil(page * 100 / totalPage) + '%');
                                                 page = page + 1;
-                                                console.log(page);
                                                 $('#page').val(page);
                                                 $('#status').val('1');
                                             } else if (res.data.status == 2) { //上传完成
@@ -299,14 +298,13 @@
                                                 $('#status').val('2');
                                                 $('#downUrl').val(res.data.downUrl);
                                                 layui.$('#uploadFile{$item.name}').removeClass('layui-hide').find('img').attr('src', '{__MODULE__}fileChoose/img/file.png');
-                                                notice.msg('上传成功', {icon: 1,audio: '1',onOpening: function () {
+                                                notice.msg('{:t("version_ui.upload_success")}', {icon: 1,audio: '1',onOpening: function () {
                                                         $('.mask').hide();
                                                         $('.loading').hide();}
                                                 });
                                             } else { //上传错误
                                                 $('#status').val('-1');
                                                 element.progress('uploadProgress{$item.name}', '0%');
-                                                console.log(!typeof (res.data.downUrl) == "undefined");
                                                 if (typeof (res.data.downUrl) == "undefined") {
                                                 } else {
                                                     $('#downUrl').val(res.data.downUrl);
@@ -319,7 +317,6 @@
                                         }else{
                                             $('#status').val('-1');
                                             element.progress('uploadProgress{$item.name}', '0%');
-                                            console.log(!typeof (res.data.downUrl) == "undefined");
                                             if (typeof (res.data.downUrl) == "undefined") {
                                             } else {
                                                 $('#downUrl').val(res.data.downUrl);
@@ -331,14 +328,14 @@
                                         }
                                     },
                                     error: function(){
-                                        notice.msg('服务器错误', {icon: 2,audio: '1',onOpening: function () {
+                                        notice.msg('{:t("common.server_error")}', {icon: 2,audio: '1',onOpening: function () {
                                                 $('.mask').hide();
                                                 $('.loading').hide();}
                                         });
                                     }
                                 });
                                 form.on('submit(SF_DeleteFile{$item.name})', function () {
-                                    notice.msg('正在执行中...', {icon: 4, close: true});
+                                    notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '{$item.upload.delete.url}',
@@ -355,7 +352,7 @@
                                         },
                                         error: function() {
                                             notice.destroy();
-                                            notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                            notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                                         }
                                     });
                                 });
@@ -386,7 +383,7 @@
         var notice = layui.notice;
 
         form.on('submit(SF_EditSubmit)', function (data) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: '{:url("/Addon/config")}?name={$name}',
@@ -402,7 +399,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
             return false;

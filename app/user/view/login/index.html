@@ -12,269 +12,10 @@
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
+    <link rel="stylesheet" href="{__CSS__}login.css?v=20261004"/>
     .
 
 </head>
-
-<style>
-    .login-wrapper {
-        max-width: 420px;
-        padding: 20px;
-        margin: 0 auto;
-        position: relative;
-        box-sizing: border-box;
-        z-index: 2;
-    }
-
-    .login-wrapper > .layui-form {
-        padding: 25px 30px;
-        background-color: #fff;
-        box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.19);
-        box-sizing: border-box;
-        border-radius: 4px;
-    }
-
-    .login-wrapper > .layui-form > h2 {
-        color: #333;
-        font-size: 18px;
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item {
-        margin-bottom: 25px;
-        position: relative;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item > .layui-input {
-        height: 40px;
-        line-height: 1.5;
-        border-radius: 4px !important;
-    }
-
-    .login-wrapper .layui-input-icon-group > .layui-input {
-        padding-left: 40px;
-    }
-
-    .login-wrapper .layui-input-icon-group > .layui-icon {
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
-        font-size: 18px;
-        color: #909399;
-        position: absolute;
-        left: 0;
-        top: 0;
-        text-align: center;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item.login-captcha-group {
-        padding-right: 135px;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item.login-captcha-group > .login-captcha {
-        height: 46px;
-        width: 120px;
-        cursor: pointer;
-        box-sizing: border-box;
-        border: 1px solid #e6e6e6;
-        border-radius: 4px !important;
-        position: absolute;
-        right: 0;
-        top: 0;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item > .layui-form-checkbox {
-        margin: 0 !important;
-        padding-left: 25px;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item > .layui-form-checkbox > .layui-icon {
-        width: 15px !important;
-        height: 15px !important;
-    }
-
-    .login-wrapper > .layui-form .sf {
-        display: inline-block;
-        margin-bottom: 0;
-        font-weight: 400;
-        text-align: center;
-        vertical-align: middle;
-        touch-action: manipulation;
-        cursor: pointer;
-        background-image: none;
-        border: 1px solid transparent;
-        white-space: nowrap;
-        user-select: none;
-        height: 40px;
-        padding: 0 15px;
-        font-size: 16px;
-        border-radius: 4px;
-        transition: color .2s linear,background-color .2s linear,border .2s linear,box-shadow .2s linear;
-        color: #fff;
-        background-color: #fff;
-        border-color: #dcdee2;
-        line-height: 1.5;
-        border-radius: 4px !important;
-        background-color: #2d8cf0;
-        border-color: #2d8cf0;
-    }
-    .login-wrapper > .layui-form .sf2 {
-        display: inline-block;
-        margin-bottom: 0;
-        font-weight: 400;
-        text-align: center;
-        vertical-align: middle;
-        touch-action: manipulation;
-        cursor: pointer;
-        background-image: none;
-        border: 1px solid transparent;
-        white-space: nowrap;
-        user-select: none;
-        height: 40px;
-        padding: 0 15px;
-        font-size: 16px;
-        border-radius: 4px;
-        transition: color .2s linear,background-color .2s linear,border .2s linear,box-shadow .2s linear;
-        color: #000000;
-        background-color: #fff;
-        border-color: #dcdee2;
-        line-height: 1.5;
-        border-radius: 4px !important;
-    }
-
-    .login-wrapper > .layui-form > .layui-form-item.login-oauth-group > a > .layui-icon {
-        font-size: 26px;
-    }
-
-    .login-copyright {
-        color: #eee;
-        padding-bottom: 20px;
-        text-align: center;
-        position: relative;
-        z-index: 1;
-    }
-
-    @media screen and (min-height: 550px) {
-        .login-wrapper {
-            margin: -250px auto 0;
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            width: 100%;
-        }
-
-        .login-copyright {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            left: 0;
-        }
-    }
-
-    .layui-btn {
-        background-color: #5FB878;
-        border-color: #5FB878;
-    }
-
-    .layui-link {
-        color: #5FB878 !important;
-    }
-
-    .login-captcha-btn {
-        line-height: 44px;
-        text-align: center;
-        background-color: transparent;
-        outline: none;
-        color: #666;
-        padding: 0 !important;
-    }
-
-    /** 获取图形验证码弹窗 */
-    .layer-get-code {
-        padding: 25px 25px;
-    }
-
-    .layer-get-code > p {
-        color: #666;
-        font-size: 16px;
-    }
-
-    .layer-get-code > .lay-code-group {
-        position: relative;
-        padding-right: 135px;
-        margin: 15px 0;
-    }
-
-    .layer-get-code > .lay-code-group > .layui-input {
-        border-radius: 0;
-        height: 46px;
-        line-height: 46px;
-        background-color: transparent;
-        border-color: rgba(111, 121, 122, 0.3);
-    }
-
-    .layer-get-code > .lay-code-group > img {
-        position: absolute;
-        right: 0;
-        top: 0;
-        height: 46px;
-        width: 120px;
-        box-sizing: border-box;
-        cursor: pointer;
-    }
-
-    .layer-get-code .layui-btn-fluid {
-        line-height: 50px;
-        height: 50px;
-    }
-
-    .logo {
-        width: 60px !important;
-        margin-top: 10px !important;
-        margin-bottom: 10px !important;
-        margin-left: 20px !important;
-    }
-    .title {
-        font-size: 30px !important;
-        font-weight: 550 !important;
-        margin-left: 20px !important;
-        color: #3492ed !important;
-        display: inline-block !important;
-        height: 60px !important;
-        line-height: 60px !important;
-        margin-top: 10px !important;
-        position: absolute !important;
-    }
-
-    .desc {
-        width: 100% !important;
-        text-align: center !important;
-        color: gray !important;
-        height: 60px !important;
-        line-height: 60px !important;
-    }
-    .page-account-other {
-        margin: 24px 0;
-        text-align: left;
-    }
-    .page-account-other img {
-        width: 24px;
-        margin-left: 16px;
-        cursor: pointer;
-        vertical-align: middle;
-        opacity: .7;
-        transition: all .2s ease-in-out;
-    }
-    .layui-layer-page .layui-layer-content{
-        background-color: #f5f5f5;
-    }
-</style>
 <body style="background-image: url('{__IMG__}background.svg');background-size: cover;">
 <a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}" style="position:absolute;right:24px;top:18px;color:#fff;z-index:3;">{:t('common.lang_toggle')}</a>
 <div class="login-wrapper layui-anim layui-anim-scale layui-hide">
@@ -283,7 +24,7 @@
         <div class="layui-form-item">
             <img class="logo" src="{__IMG__}logo.png" />
             <div class="title">{:t('login.login_user')}</div>
-            <div class="desc">后 台 管 理 中 心
+            <div class="desc">{:t('login.user_subtitle')}
             </div>
         </div>
         <div class="layui-form-item layui-input-icon-group">
@@ -298,7 +39,7 @@
         </div>
         <div class="layui-form-item">
             <input type="checkbox" name="remember" title="{:t('login.remember_me')}" lay-skin="primary" checked>
-            <a href="{:url('/login/forgot')}" class="layui-link pull-right">忘记密码</a>
+            <a href="{:url('/login/forgot')}" class="layui-link pull-right">{:t('login.forgot_password')}</a>
             <a href="{:url('/login/reg')}" class="layui-link">{:t('login.register_user')}</a>
         </div>
         <div class="layui-form-item">
@@ -307,7 +48,7 @@
         {if condition="!empty($login_switch)"}
         <div class="layui-form-item page-account-other" style="font-size: 14px;">
             <span>{:t('login.other_login')}</span>
-            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}{if in_array('wechat_mp', $login_switch)}<a id="wechat_mp_login"><img src="{__IMG__}wechat.svg" alt="微信公众号"></a>{/if}&emsp;
+            {if in_array('qq', $login_switch)}<a id="qq_login"><img src="{__IMG__}qq.svg" alt="qq"></a>{/if}{if in_array('qrcode', $login_switch)}<a id="code"><img src="{__IMG__}code.svg" alt="{:t('login.qq_scan')}"></a>{/if}&emsp;
         </div>
         {/if}
     </form>
@@ -315,8 +56,10 @@
 
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v=20260501"></script>
 <script type="text/javascript" src="{__JS__}common.js?v=321"></script>
+<script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
 <script src="{__JS__}gt.js"></script>
 <script>
     layui.use(['layer', 'form', 'admin', 'notice'], function () {
@@ -327,8 +70,93 @@
         var notice = layui.notice;
         $('.login-wrapper').removeClass('layui-hide');
 
+        function qqOauthEscape(value) {
+            return $('<div>').text(value == null ? '' : String(value)).html();
+        }
+
+        window.chooseQqOauthUser = function(userId, selectionToken) {
+            notice.msg(t('login.logging_in'), {icon: 4, close: true});
+            $.ajax({
+                type: 'POST',
+                url: '/api.php/Social/chooseUser',
+                data: {user_id: userId, selection_token: selectionToken},
+                dataType: 'json',
+                success: function(result) {
+                    notice.destroy();
+                    window.handleQqOauthResult(result);
+                },
+                error: function() {
+                    notice.destroy();
+                    notice.error({title:t('login.notice'), message:t('common.server_error'), position:'topCenter'});
+                }
+            });
+        };
+
+        window.handleQqOauthResult = function(result) {
+            if (!result || result.code != 0) {
+                notice.error({
+                    title: t('login.qq_notice'),
+                    message: result && result.msg ? result.msg : t('login.qq_failed'),
+                    position: 'topCenter', displayMode: '2', audio: '1'
+                });
+                return;
+            }
+
+            var payload = result.data || {};
+            if (payload.status === 'unbound') {
+                layer.confirm(t('login.first_qq_help'), {
+                    title: t('login.first_qq_login'),
+                    btn: [t('login.migrate_legacy_account'), t('login.create_new_account')],
+                    skin: 'layui-layer-admin',
+                    closeBtn: 0
+                }, function(index) {
+                    layer.close(index);
+                    admin.open({
+                        type: 2,
+                        title: t('login.scan_migrate_legacy'),
+                        content: '/qrlogin/qrlogin.html?v=' + Date.now(),
+                        area: ['400px', '300px'],
+                        data: {type:'oauthMigrate', pending_token:payload.pending_token}
+                    });
+                }, function() {
+                    notice.msg(t('login.creating_account'), {icon: 4, close: true});
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api.php/Social/autoRegister',
+                        data: {pending_token: payload.pending_token},
+                        dataType: 'json',
+                        success: function(data) {
+                            notice.destroy();
+                            window.handleQqOauthResult(data);
+                        },
+                        error: function() {
+                            notice.destroy();
+                            notice.error({title:t('login.registration_notice'), message:t('common.server_error'), position:'topCenter'});
+                        }
+                    });
+                });
+                return;
+            }
+
+            if (payload.status === 'select' && payload.accounts) {
+                var content = '<div class="layui-card" style="margin:20px"><div class="layui-card-body">';
+                $.each(payload.accounts, function(index, account) {
+                    content += '<button type="button" class="layui-btn layui-btn-primary layui-btn-fluid" style="margin:0 0 10px 0;height:auto;padding:12px" onclick="chooseQqOauthUser('
+                        + parseInt(account.id, 10) + ',\'' + payload.selection_token + '\')">'
+                        + '<b>' + qqOauthEscape(account.username) + '</b><br><small>'+t('login.account_app')
+                        + qqOauthEscape(account.appname) + '</small></button>';
+                });
+                content += '</div></div>';
+                layer.open({type:1, title:t('login.select_account'), content:content, area:['380px','auto'], closeBtn:0});
+                return;
+            }
+
+            notice.msg(result.msg || t('login.success'), {icon: 1});
+            setTimeout(function(){ location.href = payload.url || '/user.php/Index/index.html'; }, 600);
+        };
+
         window.qrcodeLogin = function(username, appid){
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(t('common.loading'), {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: '/api.php/Qrlogin/userLogin',
@@ -338,7 +166,7 @@
                     notice.destroy();
                     if(data.code == 0){
                         notice.success({
-                            title: '登录通知',
+                            title: t('login.notice'),
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -351,7 +179,7 @@
 
                     }else{
                         notice.error({
-                            title: '登录通知',
+                            title: t('login.notice'),
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -365,8 +193,8 @@
                 error: function() {
                     notice.destroy();
                     notice.error({
-                        title: '登录通知',
-                        message: '服务器错误',
+                        title: t('login.notice'),
+                        message: t('common.server_error'),
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',
@@ -381,61 +209,35 @@
         $("#code").click(function(){
             admin.open({
                 type: 2,
-                title: '扫码登录',
+                title: t('login.qr_title'),
                 content: '/qrlogin/qrlogin.html?v=' + Date.now(),
                 area: ['400px', '300px'],
                 data: {type:'userLogin'}
             });
         });
         {/if}
-        {if in_array('wechat_mp', $login_switch)}
-        $("#wechat_mp_login").click(function(){
-            admin.open({
-                type: 2,
-                title: '微信公众号登录',
-                content: '/wechat_mp_login.html?v=' + Date.now(),
-                area: ['360px', '330px'],
-                data: {type:'userLogin'}
-            });
-        });
-        {/if}
-        {notempty name="code"}
+        {if $code != '' || $oauth_error != ''}
+        var qqCallbackPayload = {$oauth_callback_json|raw};
         admin.btnLoading(' #loginBtn');
         admin.showLoading('#divLoading', 2, '.8');
         $.ajax({
             type: "post",
             url: "/api.php/Social/login",
-            data: {
-                "code": "{$code}",
-                "state": "{$state}",
-                "userType": "user",
-            },
+            data: qqCallbackPayload,
             dataType: "json",
             success: function(data) {
-                if (data.code == 0) {
-                    notice.msg('正在为您跳转QQ登录页面...', {icon: 4, close: true, audio:'1'});
-                    setTimeout(function (){
-                        notice.destroy();
-                        location.href=data.data.url;
-                    },1000)
+                notice.destroy();
+                if (window.opener && !window.opener.closed) {
+                    notice.msg(t('login.oauth_returning'), {icon:1});
                 } else {
-                    notice.error({
-                        title: '温馨提示',
-                        message: data.msg,
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        displayMode:'2',
-                        audio:'1'
-                    });
+                    window.handleQqOauthResult(data);
                 }
                 admin.removeLoading('#divLoading', true, true);
                 admin.btnLoading(' #loginBtn', false);
             }, error: function () {
                 notice.error({
-                    title: '温馨提示',
-                    message: '服务器错误，请稍后重试~',
+                    title: t('common.nice_tips'),
+                    message: t('common.server_error'),
                     animateInside:true,
                     position:'topCenter',
                     transitionOut:'flipOutX',
@@ -449,56 +251,28 @@
                 return false;
             }
         });
-        {/notempty}
+        {/if}
         {if in_array('qq', $login_switch)}
         $("#qq_login").click(function(){
             admin.btnLoading(' #loginBtn');
             admin.showLoading('#divLoading', 2, '.8');
-            $.ajax({
-                type: "post",
-                url: "/api.php/Social/login",
-                data: {
-                    "userType": "user",
+            SfQqOauth.start({
+                url: '/api.php/Social/login',
+                data: {userType:'user'},
+                onResult: function(data) {
+                    admin.removeLoading('#divLoading', true, true);
+                    admin.btnLoading(' #loginBtn', false);
+                    window.handleQqOauthResult(data);
                 },
-                dataType: "json",
-                success: function(data) {
-                    if (data.code == 0) {
-                        notice.msg('正在为您跳转QQ登录页面...', {icon: 4, close: true, audio:'1'});
-                        setTimeout(function (){
-                            notice.destroy();
-                            location.href=data.data.url;
-                        },1000)
-                    } else {
-                        notice.error({
-                            title: '温馨提示',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
-                    }
+                onError: function(message) {
                     admin.removeLoading('#divLoading', true, true);
                     admin.btnLoading(' #loginBtn', false);
-                }, error: function () {
-                    notice.error({
-                        title: '温馨提示',
-                        message: '服务器错误，请稍后重试~',
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        timeout:false,
-                        displayMode:'2',
-                        audio:'1'
-                    });
-                    admin.removeLoading('#divLoading', true, true);
-                    admin.btnLoading(' #loginBtn', false);
-                    return false;
+                    notice.error({title:t('login.qq_notice'), message:message, position:'topCenter'});
                 }
             });
+        });
+        SfQqOauth.resume(window.handleQqOauthResult, function(message){
+            notice.error({title:t('login.qq_notice'), message:message, position:'topCenter'});
         });
         {/if}
 
@@ -526,7 +300,7 @@
                             success: function(data) {
                                 if (data.code == 0) {
                                     notice.success({
-                                        title: '温馨提示',
+                                        title: t('common.nice_tips'),
                                         message: data.msg,
                                         animateInside:true,
                                         position:'topCenter',
@@ -540,7 +314,7 @@
                                     },2000)
                                 } else {
                                     notice.error({
-                                        title: '温馨提示',
+                                        title: t('common.nice_tips'),
                                         message: data.msg,
                                         animateInside:true,
                                         position:'topCenter',
@@ -554,8 +328,8 @@
                                 admin.btnLoading('#loginBtn', false);
                             }, error: function () {
                                 notice.error({
-                                    title: '温馨提示',
-                                    message: '服务器错误，请稍后重试~',
+                                    title: t('common.nice_tips'),
+                                    message: t('common.server_error'),
                                     animateInside:true,
                                     position:'topCenter',
                                     transitionOut:'flipOutX',
@@ -577,8 +351,8 @@
                 var pass = $("input[name='pass']").val();
                 if(!user){
                     notice.warning({
-                        title: '温馨提示',
-                        message: '请填写用户名！',
+                        title: t('common.nice_tips'),
+                        message: t('login.please_enter_username'),
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',
@@ -590,8 +364,8 @@
                 }
                 if(!pass){
                     notice.warning({
-                        title: '温馨提示',
-                        message: '请填写密码！',
+                        title: t('common.nice_tips'),
+                        message: t('login.please_enter_password'),
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',
@@ -609,8 +383,8 @@
                 var pass = $("input[name='pass']").val();
                 if(!user){
                     notice.warning({
-                        title: '温馨提示',
-                        message: '请填写用户名！',
+                        title: t('common.nice_tips'),
+                        message: t('login.please_enter_username'),
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',
@@ -622,8 +396,8 @@
                 }
                 if(!pass){
                     notice.warning({
-                        title: '温馨提示',
-                        message: '请填写密码！',
+                        title: t('common.nice_tips'),
+                        message: t('login.please_enter_password'),
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',
@@ -646,7 +420,7 @@
                     success: function(data) {
                         if (data.code == 0) {
                             notice.success({
-                                title: '温馨提示',
+                                title: t('common.nice_tips'),
                                 message: data.msg,
                                 animateInside:true,
                                 position:'topCenter',
@@ -660,7 +434,7 @@
                             },2000)
                         } else {
                             notice.error({
-                                title: '温馨提示',
+                                title: t('common.nice_tips'),
                                 message: data.msg,
                                 animateInside:true,
                                 position:'topCenter',
@@ -674,8 +448,8 @@
                         admin.btnLoading(' #loginBtn', false);
                     }, error: function () {
                         notice.error({
-                            title: '温馨提示',
-                            message: '服务器错误，请稍后重试~',
+                            title: t('common.nice_tips'),
+                            message: t('common.server_error'),
                             animateInside:true,
                             position:'topCenter',
                             transitionOut:'flipOutX',

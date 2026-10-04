@@ -14,6 +14,8 @@ use think\facade\Cache;
  */
 class Menu extends BaseModel
 {
+    private const CACHE_VERSION = 'v2';
+
     // 设置数据表
     protected $name = "menu";
 
@@ -31,10 +33,23 @@ class Menu extends BaseModel
     }
 
     public function getList(){
-        $alwaysHiddenUrls = ['PointLog/index', 'Rebate/myRebateList', 'Checkin/records'];
-        $cache = Cache::get('SF_UserMenu'.cookie('userId'));
-        if(!empty($cache)){
+        $alwaysHiddenUrls = ['PointLog/index', 'Rebate/myRebateList', 'Checkin/records', 'MyList/auth'];
+        $userId = intval(cookie('userId'));
+        $cacheKey = self::cacheKey($userId);
+        try {
+            $cache = Cache::get($cacheKey);
+        } catch (\Throwable $e) {
+            $cache = null;
+        }
+        if ($this->isValidMenuTree($cache)) {
             return $this->filterHiddenMenuUrls($cache, $alwaysHiddenUrls);
+        }
+        if ($cache !== null) {
+            try {
+                Cache::delete($cacheKey);
+            } catch (\Throwable $e) {
+                // 菜单缓存损坏时继续从数据库重建，不能阻断用户后台。
+            }
         }
         try{
             $userModel = new \app\user\model\User();
@@ -60,9 +75,6 @@ class Menu extends BaseModel
 
         $parent_id = [];
         $hiddenUrls = $alwaysHiddenUrls;
-        if ($powerPriceInfo['addauth_power'] != 1) {
-            $hiddenUrls[] = 'Auth/list';
-        }
         if ($powerPriceInfo['adduser_power'] != 1) {
             $hiddenUrls[] = 'User/list';
         }
@@ -83,9 +95,56 @@ class Menu extends BaseModel
             }
         }
         $all_node_lists = $this->setMenuTree($parent_id, $data);
+        $all_node_lists = $this->pruneEmptyParents($all_node_lists);
         $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
-        Cache::tag('SF_Menu')->set('SF_UserMenu'.cookie('userId'), $all_node_lists);
+        try {
+            Cache::tag('SF_Menu')->set($cacheKey, $all_node_lists);
+        } catch (\Throwable $e) {
+            // 缓存属于可选加速层，写入失败不影响菜单正常返回。
+        }
         return $all_node_lists;
+    }
+
+    public static function clearUserCache(int $userId): void
+    {
+        if ($userId <= 0) {
+            return;
+        }
+        foreach ([self::cacheKey($userId), 'SF_UserMenu'.$userId] as $key) {
+            try {
+                Cache::delete($key);
+            } catch (\Throwable $e) {
+                // 用户资料已经保存成功时，缓存清理失败不应回滚业务数据。
+            }
+        }
+    }
+
+    private static function cacheKey(int $userId): string
+    {
+        return 'SF_UserMenu:'.self::CACHE_VERSION.':'.$userId;
+    }
+
+    private function isValidMenuTree($menus): bool
+    {
+        if (!is_array($menus) || empty($menus)) {
+            return false;
+        }
+        foreach ($menus as $menu) {
+            if (!is_array($menu)
+                || !array_key_exists('id', $menu)
+                || !array_key_exists('name', $menu)
+                || !array_key_exists('url', $menu)
+                || !array_key_exists('parentid', $menu)
+            ) {
+                return false;
+            }
+            if (array_key_exists('children', $menu)
+                && (!$this->isValidMenuTree($menu['children'] ?? null))
+            ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function filterHiddenMenuUrls(array $menus, array $hiddenUrls): array
@@ -101,6 +160,25 @@ class Menu extends BaseModel
             $filtered[] = $menu;
         }
         return array_values($filtered);
+    }
+
+    /**
+     * Remove placeholder groups whose children were filtered by user power.
+     */
+    private function pruneEmptyParents(array $menus): array
+    {
+        $result = [];
+        foreach ($menus as $menu) {
+            if (!empty($menu['children']) && is_array($menu['children'])) {
+                $menu['children'] = $this->pruneEmptyParents($menu['children']);
+            }
+            $url = ltrim((string)($menu['url'] ?? ''), '/');
+            if (in_array($url, ['', '#'], true) && empty($menu['children'])) {
+                continue;
+            }
+            $result[] = $menu;
+        }
+        return array_values($result);
     }
 
     private function setMenuTree($data = [], $all_data = []){

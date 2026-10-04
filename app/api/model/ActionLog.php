@@ -49,6 +49,8 @@ class ActionLog extends BaseModel
     public static function record()
     {
 
+        $operation = request()->controller().'/'.request()->action();
+
 //        if (!self::$title) {
 //            // 操作控制器名
 //            $menuMod = new Menu();
@@ -74,9 +76,9 @@ class ActionLog extends BaseModel
             'action' => request()->url(),
             'method' => request()->method(),
             'url' => request()->url(true), // 获取完成URL
-            'param' => !empty(request()->param()) ? json_encode(request()->param()) : '',
+            'param' => !empty(request()->param()) ? sf_action_log_params(request()->param()) : '',
             'title' => !empty(self::$title) ? self::$title : '操作API',
-            'content' => !empty(self::$content) ? self::$content : '操作 '.CONTROLLER_NAME.'/'.ACTION_NAME.' API',
+            'content' => !empty(self::$content) ? self::$content : '操作 '.$operation.' API',
             'ip' => request()->ip(),
             'user_agent' => request()->server('HTTP_USER_AGENT'),
             'create_user' => empty(session('userId')) ? 0 : session('userId'),

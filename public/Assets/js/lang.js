@@ -22,7 +22,8 @@
     }
 
     function writeCookie(name, value) {
-        document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + '; path=/; max-age=31536000; SameSite=Lax';
+        var secure = window.location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + '; path=/; max-age=31536000; SameSite=Lax' + secure;
     }
 
     var cookieName = 'think_lang';
@@ -34,10 +35,8 @@
 
     if (readCookie(cookieName) !== next) {
         writeCookie(cookieName, next);
-        if (!requested) {
-            window.location.reload();
-            return;
-        }
+        window.location.reload();
+        return;
     }
 
     window.SF_LANG = {
@@ -45,6 +44,12 @@
         set: function (lang) {
             var normalized = normalize(lang);
             writeCookie(cookieName, normalized);
+            var url = new URL(window.location.href);
+            if (url.searchParams.has('lang')) {
+                url.searchParams.set('lang', normalized);
+                window.location.replace(url.toString());
+                return;
+            }
             window.location.reload();
         },
         toggle: function () {

@@ -62,7 +62,7 @@
                     admin.removeLoading('#divLoading', true, true);
                     if (data.code == 0) {
                         parent.layui.notice.success({
-                            title: '获取通知',
+                            title: "{:t('download_ui.notice_title')}",
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -74,7 +74,7 @@
                         window.open(data.data.url);
                     } else {
                         parent.layui.notice.error({
-                            title: '获取通知',
+                            title: "{:t('download_ui.notice_title')}",
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -89,8 +89,8 @@
                     admin.btnLoading('#SF_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     parent.layui.notice.error({
-                        title: '获取通知',
-                        message: '服务器错误',
+                        title: "{:t('download_ui.notice_title')}",
+                        message: "{:t('common.server_error')}",
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',

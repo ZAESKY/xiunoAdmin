@@ -1,7 +1,7 @@
 {include file="/public/header"}
 <div class="layui-fluid">
     <div class="layui-card">
-        <div class="layui-card-header">提现管理</div>
+        <div class="layui-card-header">{:t('withdraw_admin.title')}</div>
         <div class="layui-card-body">
             <table id="SF_Table" lay-filter="SF_Table"></table>
         </div>
@@ -10,34 +10,34 @@
 
 <script type="text/html" id="SF_TbBar">
     {{# if(d.status === 'pending'){ }}
-    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="approve"><i class="layui-icon layui-icon-ok"></i>处理</a>
-    <a class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reject"><i class="layui-icon layui-icon-close"></i>驳回</a>
+    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="approve"><i class="layui-icon layui-icon-ok"></i>{:t('feedback.handle')}</a>
+    <a class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reject"><i class="layui-icon layui-icon-close"></i>{:t('withdraw_admin.reject')}</a>
     {{# } }}
 </script>
 <script type="text/html" id="SF_TbStatus">
-    {{# var m = {pending:'<span class="layui-badge layui-bg-orange">待处理</span>', approved:'<span class="layui-badge layui-badge-green">已处理</span>', rejected:'<span class="layui-badge layui-badge-red">已驳回</span>', withdrawn:'<span class="layui-badge layui-bg-gray">已撤回</span>'}; }}
+    {{# var m = {pending:'<span class="layui-badge layui-bg-orange">{:t('common_ui.status_pending')}</span>', approved:'<span class="layui-badge layui-badge-green">{:t('notification_email.sample.remark')}</span>', rejected:'<span class="layui-badge layui-badge-red">{:t('feedback.status_rejected')}</span>', withdrawn:'<span class="layui-badge layui-bg-gray">{:t('withdraw_admin.withdrawn')}</span>'}; }}
     {{# return m[d.status] || d.status; }}
 </script>
 <script type="text/html" id="SF_ApproveDialog">
     <form id="SF_ApproveForm" lay-filter="SF_ApproveForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">处理备注</label>
+            <label class="layui-form-label layui-form-required">{:t('withdraw_admin.process_remark')}</label>
             <div class="layui-input-block">
-                <textarea name="remark" class="layui-textarea" placeholder="请填写处理备注" lay-verType="tips" lay-verify="required" style="height:80px;"></textarea>
+                <textarea name="remark" class="layui-textarea" placeholder="{:t('withdraw_admin.process_remark_placeholder')}" lay-verType="tips" lay-verify="required" style="height:80px;"></textarea>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">转账凭证</label>
+            <label class="layui-form-label layui-form-required">{:t('withdraw_admin.transfer_proof')}</label>
             <div class="layui-input-block">
-                <input type="text" name="image" id="approveImage" placeholder="请上传转账凭证图片" class="layui-input" lay-verType="tips" lay-verify="required"/>
-                <button type="button" class="layui-btn layui-btn-normal" id="approveUploadBtn" style="margin-top:8px;"><i class="layui-icon layui-icon-upload"></i> 上传图片</button>
+                <input type="text" name="image" id="approveImage" placeholder="{:t('withdraw_admin.transfer_proof_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required"/>
+                <button type="button" class="layui-btn layui-btn-normal" id="approveUploadBtn" style="margin-top:8px;"><i class="layui-icon layui-icon-upload"></i> {:t('withdraw_admin.upload_image')}</button>
                 <div id="approveImgPreview" style="margin-top:8px;display:none;"><img src="" style="max-width:260px;border-radius:6px;border:1px solid #eee;"></div>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_ApproveSubmit" lay-submit>确认处理</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_ApproveSubmit" lay-submit>{:t('withdraw_admin.confirm_process')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -45,14 +45,14 @@
     <form id="SF_RejectForm" lay-filter="SF_RejectForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">驳回原因</label>
+            <label class="layui-form-label layui-form-required">{:t('withdraw_admin.reject_reason')}</label>
             <div class="layui-input-block">
-                <textarea name="remark" class="layui-textarea" placeholder="请填写驳回原因" lay-verType="tips" lay-verify="required" style="height:80px;"></textarea>
+                <textarea name="remark" class="layui-textarea" placeholder="{:t('withdraw_admin.reject_reason_placeholder')}" lay-verType="tips" lay-verify="required" style="height:80px;"></textarea>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn layui-btn-danger" lay-filter="SF_RejectSubmit" lay-submit>确认驳回</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn layui-btn-danger" lay-filter="SF_RejectSubmit" lay-submit>{:t('withdraw_admin.confirm_reject')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -68,18 +68,18 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.data.total, data: res.data.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 60, sort: true},
-            {field: 'username', title: '用户', width: 100},
-            {field: 'amount', title: '金额', width: 100, templet: '<span style="color:#ff5722;font-weight:700;">¥{{d.amount}}</span>'},
-            {field: 'phone', title: '手机号', width: 120},
-            {field: 'real_name', title: '姓名', width: 80},
-            {field: 'pay_method', title: '收款方式', width: 90, templet: function(d) { var m={alipay:'支付宝',wechat:'微信',bank:'银行卡'}; return m[d.pay_method]||d.pay_method||'-'; }},
-            {field: 'qr_image', title: '收款码', width: 80, templet: function(d) { return d.qr_image ? '<a href="'+d.qr_image+'" target="_blank"><span class="layui-badge layui-badge-blue">查看</span></a>' : '-'; }},
-            {field: 'user_remark', title: '用户备注', minWidth: 120},
-            {field: 'status', title: '状态', width: 90, templet: '#SF_TbStatus'},
-            {field: 'admin_remark', title: '管理员备注', minWidth: 130, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
-            {field: 'transfer_image', title: '凭证', width: 80, templet: function(d) { return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">查看</span></a>' : '-'; }},
-            {field: 'applied_at', title: '申请时间', width: 150},
-            {title: '操作', toolbar: '#SF_TbBar', width: 140}
+            {field: 'username', title: '{:t("admin_user.user_suffix")}', width: 100},
+            {field: 'amount', title: '{:t("accounting.amount")}', width: 100, templet: '<span style="color:#ff5722;font-weight:700;">¥{{d.amount}}</span>'},
+            {field: 'phone', title: '{:t("withdraw_admin.phone")}', width: 120},
+            {field: 'real_name', title: '{:t("withdraw_admin.real_name")}', width: 80},
+            {field: 'pay_method', title: '{:t("withdraw_admin.payment_method")}', width: 90, templet: function(d) { var m={alipay:'{:t("order_ui.alipay")}',wechat:'{:t("order_ui.wechat")}',bank:'{:t("withdraw_admin.bank_card")}'}; return m[d.pay_method]||d.pay_method||'-'; }},
+            {field: 'qr_image', title: '{:t("withdraw_admin.payment_qr")}', width: 80, templet: function(d) { return d.qr_image ? '<a href="'+d.qr_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '-'; }},
+            {field: 'user_remark', title: '{:t("withdraw_admin.user_remark")}', minWidth: 120},
+            {field: 'status', title: '{:t("common.status")}', width: 90, templet: '#SF_TbStatus'},
+            {field: 'admin_remark', title: '{:t("withdraw_admin.admin_remark")}', minWidth: 130, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
+            {field: 'transfer_image', title: '{:t("withdraw_admin.proof")}', width: 80, templet: function(d) { return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '-'; }},
+            {field: 'applied_at', title: '{:t("withdraw_admin.applied_at")}', width: 150},
+            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', width: 140}
         ]]
     });
 
@@ -87,16 +87,16 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
 
     table.on('tool(SF_Table)', function(obj) {
         if (obj.event === 'approve') {
-            admin.open({ type: 1, area: ['520px', '340px'], title: '处理提现', content: $('#SF_ApproveDialog').html(),
+            admin.open({ type: 1, area: ['520px', '340px'], title: '{:t("withdraw_admin.process_title")}', content: $('#SF_ApproveDialog').html(),
                 success: function(layero, dIndex) {
                     form.render();
                     form.val('SF_ApproveForm', {id: obj.data.id});
                     upload.render({ elem: '#approveUploadBtn', url: '{:url("/Upload/image")}',
-                        before: function() { notice.msg('上传中...', {icon:4, close:true}); },
-                        done: function(res) { notice.destroy(); if (res.code == 0) { $('#approveImage').val(res.data.path); $('#approveImgPreview').show().find('img').attr('src', res.data.path); notice.msg('上传成功', {icon:1}); } }
+                        before: function() { notice.msg('{:t("withdraw_admin.uploading")}', {icon:4, close:true}); },
+                        done: function(res) { notice.destroy(); if (res.code == 0) { $('#approveImage').val(res.data.path); $('#approveImgPreview').show().find('img').attr('src', res.data.path); notice.msg('{:t("version_ui.upload_success")}', {icon:1}); } }
                     });
                     form.on('submit(SF_ApproveSubmit)', function(data) {
-                        notice.msg('处理中...', {icon:4, close:true});
+                        notice.msg('{:t("common_ui.processing")}', {icon:4, close:true});
                         $.ajax({ type:'POST', url:'{:url("/Order/withdraw")}', data:{action:'approve', id: data.field.id, remark: data.field.remark, image: data.field.image}, dataType:'json',
                             success: function(r) { notice.destroy(); if (r.code == 0) { reloadTb(); admin.closeDialog(dIndex); } notice.msg(r.msg, {icon: r.code==0?1:2}); } });
                         return false;
@@ -104,12 +104,12 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                 }
             });
         } else if (obj.event === 'reject') {
-            admin.open({ type: 1, area: ['460px', '260px'], title: '驳回提现', content: $('#SF_RejectDialog').html(),
+            admin.open({ type: 1, area: ['460px', '260px'], title: '{:t("withdraw_admin.reject_title")}', content: $('#SF_RejectDialog').html(),
                 success: function(layero, dIndex) {
                     form.render();
                     form.val('SF_RejectForm', {id: obj.data.id});
                     form.on('submit(SF_RejectSubmit)', function(data) {
-                        notice.msg('处理中...', {icon:4, close:true});
+                        notice.msg('{:t("common_ui.processing")}', {icon:4, close:true});
                         $.ajax({ type:'POST', url:'{:url("/Order/withdraw")}', data:{action:'reject', id: data.field.id, remark: data.field.remark}, dataType:'json',
                             success: function(r) { notice.destroy(); if (r.code == 0) { reloadTb(); admin.closeDialog(dIndex); } notice.msg(r.msg, {icon: r.code==0?1:2}); } });
                         return false;

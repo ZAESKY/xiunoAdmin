@@ -10,7 +10,7 @@
     <meta name="description" content="{$description}"/>
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
-    <link rel="stylesheet" href="{__CSS__}sf-style.css"/>
+    <link rel="stylesheet" href="{__CSS__}sf-style.css?v=20261004.2"/>
 </head>
 <body class="page-no-scroll">
 
@@ -53,7 +53,7 @@
                     {/eq}
                     {eq name="layoutRole" value="admin"}
                     <dd lay-unselect>
-                        <a href="javascript:;" id="btnBindQQ" lay-filter="bindQQ" lay-submit>{if !empty($layoutAdminQQ)}<i class="layui-icon layui-icon-login-qq"></i> 已绑定QQ:{$layoutAdminQQ}{else}绑定QQ{/if}</a>
+                        <a href="javascript:;" id="btnBindQQ" lay-filter="bindQQ" lay-submit>{if $layoutAdminQqOauthBound}<i class="layui-icon layui-icon-login-qq"></i> {:t('layout.qq_login_bound')}{else}{:t('layout.bind_qq_login')}{/if}</a>
                     </dd>
                     {/eq}
                     <dd lay-unselect>
@@ -114,9 +114,12 @@
     </div>
 </div>
 
-<script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
+<script type="text/javascript" src="{__LIBS__}layui/layui.js?v=20260820"></script>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v=20260501"></script>
-<script type="text/javascript" src="{__JS__}common.js?v=328"></script>
+<script type="text/javascript" src="{__JS__}common.js?v=329"></script>
+<script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
+<script>layui.config({version: '20260820'});</script>
 <script>
     layui.use(['index', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;
@@ -130,21 +133,20 @@
         });
         // QQ绑定（管理员）
         var layoutRole = '{$layoutRole}';
-        var layoutAdminQQ = '{$layoutAdminQQ|default=""}';
+        var layoutAdminQqOauthBound = {if $layoutAdminQqOauthBound}true{else}false{/if};
         form.on('submit(bindQQ)', function () {
             if (layoutRole !== 'admin') return;
-            if (layoutAdminQQ) {
-                // 已绑定：解除绑定
-                parent.layui.admin.confirm('确定要解除QQ绑定吗？', function (index) {
-                    notice.msg('正在解绑..', {icon: 4, close: true});
+            if (layoutAdminQqOauthBound) {
+                parent.layui.admin.confirm(t('layout.unbind_qq_confirm'), function (index) {
+                    notice.msg(t('layout.unbinding'), {icon: 4, close: true});
                     $.ajax({
                         type: "POST",
-                        url: '/api.php/Qrlogin/adminUnbindQQ',
+                        url: '/api.php/Social/adminUnbind',
                         dataType: "json",
                         success: function(data) {
                             notice.destroy();
                             if (data.code == 0) {
-                                notice.msg('QQ解绑成功！', {icon: 1});
+                                notice.msg(t('layout.qq_unbind_success'), {icon: 1});
                                 setTimeout(function(){ location.reload(); }, 1200);
                             } else {
                                 notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -152,22 +154,31 @@
                         },
                         error: function() {
                             notice.destroy();
-                            notice.msg('服务器错误', {icon: 2, audio:'1'});
+                            notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                         }
                     });
                     parent.layer.close(index);
                 });
             } else {
-                // 未绑定：打开扫码
-                parent.layui.admin.open({
-                    type: 2,
-                    title: '管理员扫码绑定QQ',
-                    content: '/qrlogin/qrlogin.html',
-                    area: ['400px', '300px'],
-                    data: {type:'adminBindQQ'}
+                notice.msg(t('auth_portal.opening_qq'), {icon:4, close:true});
+                SfQqOauth.start({
+                    url:'/api.php/Social/binding',
+                    data:{userType:'admin',return_to:location.pathname+location.search},
+                    onResult:function(data){
+                        notice.destroy();
+                        notice.msg(data.msg || (data.code == 0 ? t('layout.bind_success') : t('layout.bind_failed')), {icon:data.code == 0 ? 1 : 2});
+                        if(data.code == 0) setTimeout(function(){ location.reload(); },800);
+                    },
+                    onError:function(message){notice.destroy();notice.msg(message,{icon:2});}
                 });
             }
         });
+        if (layoutRole === 'admin') {
+            SfQqOauth.resume(function(data){
+                notice.msg(data.msg || (data.code == 0 ? t('layout.qq_operation_success') : t('layout.qq_operation_failed')), {icon:data.code == 0 ? 1 : 2});
+                if(data.code == 0) setTimeout(function(){ location.reload(); },800);
+            }, function(message){notice.msg(message,{icon:2});});
+        }
         form.on('submit(logout)', function () {
             parent.layui.admin.confirm('{:t("confirm.logout")}', function (index) {
                 notice.msg('{:t("layout.logging_out")}', {icon: 4, close: true});
@@ -232,33 +243,5 @@
     setInterval(updateBadge, 60000);
 })();
 </script>
-<style>
-    .sf-admin-shell .layui-header .layui-layout-right .sf-header-message {
-        position: relative;
-        min-width: 46px;
-        text-align: center;
-    }
-    .sf-admin-shell .layui-header .layui-layout-right .sf-header-message .layui-icon {
-        font-size: 18px;
-    }
-    .sf-admin-shell .layui-header .sf-notify-badge {
-        position: absolute;
-        top: 13px;
-        right: 8px;
-        height: 16px;
-        line-height: 16px;
-        min-width: 16px;
-        box-sizing: border-box;
-        padding: 0 4px;
-        text-align: center;
-        border-radius: 10px;
-        background: #ff5722;
-        color: #fff;
-        font-size: 10px;
-        font-style: normal;
-        display: none;
-        pointer-events: none;
-    }
-</style>
 </body>
 </html>

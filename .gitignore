@@ -8,5 +8,9 @@
 /phpMyAdmin4.8.5/
 /storage/
 /tests/
+/vendor/
+/public/upload/
+/deploy/sf_admin_*.tar.gz
+/forum.html
 .DS_Store
 **/.DS_Store

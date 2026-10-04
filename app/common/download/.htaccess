@@ -1,0 +1,9 @@
+# 更新包与补丁的存放目录，任何情况下都不应被 Web 直接访问。
+# 本目录位于 Web 根（public/）之外，此文件仅作为配置失误时的二次兜底。
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

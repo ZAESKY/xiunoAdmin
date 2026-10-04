@@ -1,10 +1,10 @@
-<html lang="zh-cn">
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <meta name="renderer" content="webkit"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>QQ钱包支付</title>
+    <title>{:t('payment_ui.qqpay')}</title>
     <link href="//cdn.staticfile.org/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body>
@@ -13,7 +13,7 @@
     <div class="panel panel-default">
         <div class="panel-heading" style="text-align: center;">
             <h3 class="panel-title">
-                <img src="{__IMG__}qqpay.png">QQ钱包支付手机版
+                <img src="{__IMG__}qqpay.png">{:t('payment_ui.qpay_mobile')}
             </h3>
         </div>
         <div class="list-group" style="text-align: center;">
@@ -26,7 +26,7 @@
                 {:t('codepay_ui.label_create_time')}：{$row['addtime']}
             </div>
             <div class="list-group-item">
-                <a href="" id="openUrl" class="btn btn-primary btn-block">跳转到QQ支付</a>
+                <a href="" id="openUrl" class="btn btn-primary btn-block">{:t('payment_ui.jump_qq_pay')}</a>
             </div>
             <div class="list-group-item">
                 <a href="#" onclick="checkresult()" class="btn btn-success btn-block">{:t('payment_ui.check_pay_status')}</a>
@@ -62,7 +62,7 @@
             success: function (data, textStatus) {
                 //从服务器得到数据，显示数据并继续查询
                 if (data.code == 0) {
-                    if (confirm("您已支付完成，需要跳转到订单页面吗？")) {
+                    if (confirm({:json_encode(t('confirm.payment_done'), 271)})) {
                         window.location.href=data.data.backurl;
                     } else {
                         // 用户取消
@@ -91,7 +91,7 @@
             success: function (data, textStatus) {
                 //从服务器得到数据，显示数据并继续查询
                 if (data.code == 0) {
-                    if (confirm("您已支付完成，需要跳转到订单页面吗？")) {
+                    if (confirm({:json_encode(t('confirm.payment_done'), 271)})) {
                         window.location.href = data.data.backurl;
                     } else {
                         // 用户取消
@@ -100,7 +100,7 @@
             },
             //Ajax请求超时，继续查询
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert('服务器错误');
+                alert({:json_encode(t('common.server_error'), 271)});
             }
         });
     }

@@ -4,6 +4,9 @@ namespace app\admin\model;
 
 use app\common\model\BaseModel;
 use app\common\model\NotificationModel;
+use app\common\service\PluginPackageUploadService;
+use app\common\service\PluginRewardService;
+use app\common\service\PluginStorageService;
 use think\Exception;
 use think\facade\Cache;
 use think\facade\Db;
@@ -31,6 +34,7 @@ class PluginModel extends BaseModel
                 }
                 $this->attachRelatedPlugin($result);
                 $this->attachPluginResources($result);
+                $this->sanitizePluginForDisplay($result);
                 return $result;
             }
             return false;
@@ -52,6 +56,7 @@ class PluginModel extends BaseModel
                 }
                 $this->attachRelatedPlugin($result);
                 $this->attachPluginResources($result);
+                $this->sanitizePluginForDisplay($result);
                 return $result;
             }
             return false;
@@ -75,7 +80,11 @@ class PluginModel extends BaseModel
         $icon = !empty($post['icon']) ? $post['icon'] : '';
         $cover = !empty($post['cover']) ? $post['cover'] : '';
         $images = !empty($post['images']) ? $post['images'] : [];
-        $price = !empty($post['price']) ? floatval($post['price']) : 0.00;
+        try {
+            $price = sf_money_format(!empty($post['price']) ? $post['price'] : '0.00');
+        } catch (\InvalidArgumentException $e) {
+            return message('plugin_action.price_format_error', false);
+        }
         $pay_type = !empty($post['pay_type']) ? trim($post['pay_type']) : 'balance';
         $origin_type = !empty($post['origin_type']) ? intval($post['origin_type']) : 1;
         $origin_url = !empty($post['origin_url']) ? trim($post['origin_url']) : '';
@@ -86,7 +95,7 @@ class PluginModel extends BaseModel
         $is_hot = !empty($post['is_hot']) ? 1 : 0;
         $is_recommend = !empty($post['is_recommend']) ? 1 : 0;
         if (!isset($post['publish_type']) || !in_array((string)$post['publish_type'], ['0', '1'], true)) {
-            return message('请选择发布方式', false);
+            return message('plugin_admin.publish_type_required', false);
         }
         $publish_type = intval($post['publish_type']);
         $publish_time = !empty($post['publish_time']) ? trim($post['publish_time']) : null;
@@ -99,50 +108,51 @@ class PluginModel extends BaseModel
         $package_object_key = !empty($post['package_object_key']) ? trim($post['package_object_key']) : '';
         $package_file_name = !empty($post['package_file_name']) ? trim($post['package_file_name']) : '';
         $package_mime_type = !empty($post['package_mime_type']) ? trim($post['package_mime_type']) : '';
+        $upload_token = !empty($post['upload_token']) ? trim((string)$post['upload_token']) : '';
         $icon_object_key = !empty($post['icon_object_key']) ? trim($post['icon_object_key']) : '';
         $cover_object_key = !empty($post['cover_object_key']) ? trim($post['cover_object_key']) : '';
         $update_description = isset($post['update_description']) ? trim((string)$post['update_description']) : '';
 
         if (empty($name)) {
-            return message('插件名称不能为空', false);
+            return message('plugin_action.name_required', false);
         }
         if (empty($slug)) {
-            return message('插件标识不能为空', false);
+            return message('plugin_action.slug_required', false);
         }
         if (!preg_match('/^[a-z0-9_-]+$/', $slug)) {
-            return message('插件标识只能包含小写字母、数字、下划线和连字符', false);
+            return message('plugin_action.slug_format_error', false);
         }
         if (empty($version)) {
-            return message('版本号不能为空', false);
+            return message('plugin_action.version_required', false);
         }
         if (empty($category)) {
-            return message('请选择插件分类', false);
+            return message('plugin_admin.category_required', false);
         }
         if (empty($description)) {
-            return message('插件简介不能为空', false);
+            return message('plugin_action.summary_required', false);
         }
         if (empty($icon)) {
-            return message('请上传插件图标', false);
+            return message('plugin_admin.icon_required', false);
         }
         if ($origin_type == 2) {
-            if ($price > 0) {
-                return message('转载插件不能设置为付费', false);
+            if (sf_money_to_cents($price) > 0) {
+                return message('plugin_action.repost_paid_forbidden', false);
             }
-            $price = 0.00;
+            $price = '0.00';
         }
         if ($publish_type == 1) {
             if (empty($publish_time)) {
-                return message('请选择定时发布时间', false);
+                return message('plugin_admin.publish_time_required', false);
             }
             if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $publish_time) || strtotime($publish_time) === false) {
-                return message('发布时间格式不正确，请使用时间选择器选择', false);
+                return message('plugin_admin.publish_time_invalid', false);
             }
             $publishTimestamp = strtotime($publish_time);
             if ($publishTimestamp < time() + 10 * 60) {
-                return message('发布时间必须选择当前时间的10分钟后', false);
+                return message('plugin_admin.publish_time_too_soon', false);
             }
             if ($publishTimestamp > strtotime('+6 months')) {
-                return message('发布时间不得大于6个月', false);
+                return message('plugin_admin.publish_time_too_late', false);
             }
         } else {
             $publish_time = null;
@@ -161,19 +171,43 @@ class PluginModel extends BaseModel
             $images = json_encode($images, JSON_UNESCAPED_UNICODE);
         }
 
+        $hasNewPackage = $upload_token !== '';
+        $package = null;
+        if ($hasNewPackage) {
+            try {
+                $package = PluginPackageUploadService::claim(
+                    $upload_token,
+                    'admin',
+                    intval(session('adminId'))
+                );
+            } catch (\Throwable $e) {
+                return message($e->getMessage(), false);
+            }
+            $file_path = $package['file_path'];
+            $file_hash = $package['file_hash'];
+            $file_size = $package['file_size'];
+            $storage_driver = $package['storage_driver'];
+            $package_object_key = $package['package_object_key'];
+            $package_file_name = $package['package_file_name'];
+            $package_mime_type = $package['package_mime_type'];
+        }
+
         if (!empty($id)) {
             $row = $this->getInfo($id);
             if (!$row) {
-                return message('插件不存在', false);
+                return message('plugin_action.not_found', false);
+            }
+            if (!$hasNewPackage) {
+                $storage_driver = (string)($row['storage_driver'] ?? 'local');
             }
 
             $exists = self::where('slug', $slug)->where('id', '<>', $id)->find();
             if ($exists) {
-                return message('插件标识「' . $slug . '」已存在', false);
+                return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
             }
             $nameExists = self::where('name', $name)->where('id', '<>', $id)->find();
             if ($nameExists) {
-                return message('插件名称「' . $name . '」已存在', false);
+                return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
 
             $data = [
@@ -192,7 +226,14 @@ class PluginModel extends BaseModel
                 'updated_at' => datetime(),
             ];
 
-            if (!empty($file_path)) {
+            if ($hasNewPackage) {
+                $versionExists = Db::name('plugin_versions')
+                    ->where('plugin_id', intval($id))
+                    ->where('version', $version)
+                    ->find();
+                if ($versionExists) {
+                    return message(t('plugin_action.version_exists_retry', ['version' => $version]), false);
+                }
                 $data['file_path'] = $file_path;
                 $data['file_hash'] = $file_hash;
                 $data['file_size'] = $file_size;
@@ -200,18 +241,24 @@ class PluginModel extends BaseModel
                 $data['package_file_name'] = $package_file_name;
                 $data['package_mime_type'] = $package_mime_type;
             } elseif ($version !== ($row['version'] ?? '')) {
-                return message('发布新版本请先上传对应插件包', false);
-            }
-
-            if ($status == 1 && $row['status'] != 1) {
-                $data['published_at'] = ($publish_type == 1 && !empty($publish_time)) ? $publish_time : datetime();
+                return message('plugin_action.version_package_required', false);
             }
 
             try {
                 Db::startTrans();
+                $lockedRow = Db::name('plugin')->where('id', intval($id))->lock(true)->find();
+                if (!$lockedRow) {
+                    throw new Exception(t('plugin_action.not_found'));
+                }
+                $isFirstApproval = $status === 1
+                    && intval($lockedRow['status'] ?? 0) !== 1
+                    && empty($lockedRow['published_at']);
+                if ($status === 1 && intval($lockedRow['status'] ?? 0) !== 1) {
+                    $data['published_at'] = ($publish_type == 1 && !empty($publish_time)) ? $publish_time : datetime();
+                }
                 self::where('id', $id)->data($data)->update();
                 $versionId = $this->latestVersionId(intval($id));
-                if (!empty($file_path) && $file_path !== ($row['file_path'] ?? '')) {
+                if ($hasNewPackage) {
                     $versionId = $this->insertVersionRecord(intval($id), $version, [
                         'storage_driver' => $storage_driver,
                         'package_path' => $file_path,
@@ -223,27 +270,42 @@ class PluginModel extends BaseModel
                         'update_description' => $update_description,
                         'created_by' => 0,
                     ]);
+                    PluginPackageUploadService::consume(intval($package['upload_id']), intval($id));
                 }
                 $this->syncPluginResources(intval($id), $versionId, 0, $icon, $cover, $storage_driver, $post);
+                $reward = null;
+                if ($isFirstApproval) {
+                    $rewardPlugin = array_merge($lockedRow, $data, ['id' => intval($id)]);
+                    $reward = PluginRewardService::issueFirstApproval(
+                        $rewardPlugin,
+                        intval(session('adminId')),
+                        true
+                    );
+                }
                 Db::commit();
                 Cache::tag('SF_Plugin')->clear();
-                return message(t('user.edit_success'), true);
+                $message = t('user.edit_success');
+                $rewardText = $reward ? PluginRewardService::rewardText($reward) : '';
+                if ($rewardText !== '') {
+                    $message .= t('plugin_admin.reward_granted', ['reward' => $rewardText]);
+                }
+                return message($message, true, ['reward' => $reward]);
             } catch (\Exception $e) {
                 Db::rollback();
                 return message(t('user.edit_failed') . $e->getMessage(), false);
             }
         } else {
-            if (empty($file_path)) {
-                return message('请先上传插件文件', false);
+            if (!$hasNewPackage) {
+                return message('plugin_admin.file_required', false);
             }
 
             $exists = self::where('slug', $slug)->find();
             if ($exists) {
-                return message('插件标识「' . $slug . '」已存在', false);
+                return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
             }
             $nameExists = self::where('name', $name)->find();
             if ($nameExists) {
-                return message('插件名称「' . $name . '」已存在', false);
+                return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
 
             $data = [
@@ -286,6 +348,7 @@ class PluginModel extends BaseModel
                     'update_description' => $update_description,
                     'created_by' => 0,
                 ]);
+                PluginPackageUploadService::consume(intval($package['upload_id']), intval($pluginId));
                 $this->syncPluginResources($pluginId, $versionId, 0, $icon, $cover, $storage_driver, $post);
                 Db::commit();
                 Cache::tag('SF_Plugin')->clear();
@@ -301,16 +364,24 @@ class PluginModel extends BaseModel
     {
         try {
             if (empty($id)) {
-                throw new Exception('插件ID不能为空');
+                throw new Exception(t('plugin_action.id_required'));
             }
             $row = $this->getInfo($id);
             if (!$row) {
-                throw new Exception('插件不存在');
+                throw new Exception(t('plugin_action.not_found'));
             }
 
-            // 删除插件文件
-            if (!empty($row['file_path']) && file_exists($row['file_path'])) {
-                @unlink($row['file_path']);
+            $storage = new PluginStorageService();
+            $storage->deletePackage($row);
+            $versions = Db::name('plugin_versions')->where('plugin_id', $id)->select()->toArray();
+            foreach ($versions as $version) {
+                $storage->deletePackage($version);
+            }
+            $resources = Db::name('plugin_resources')->where('plugin_id', $id)->select()->toArray();
+            foreach ($resources as $resource) {
+                if (($resource['storage_driver'] ?? 'local') === 'oss' && !empty($resource['object_key'])) {
+                    $storage->deleteObject((string)$resource['object_key']);
+                }
             }
 
             // 删除插件
@@ -320,6 +391,8 @@ class PluginModel extends BaseModel
             Db::name('plugin_comment')->where('plugin_id', $id)->delete();
             Db::name('plugin_rating')->where('plugin_id', $id)->delete();
             Db::name('plugin_download')->where('plugin_id', $id)->delete();
+            Db::name('plugin_resources')->where('plugin_id', $id)->delete();
+            Db::name('plugin_versions')->where('plugin_id', $id)->delete();
 
             Cache::tag('SF_Plugin')->clear();
             return true;
@@ -335,7 +408,7 @@ class PluginModel extends BaseModel
             ->where('version', $version)
             ->find();
         if ($exists) {
-            throw new Exception('当前插件下版本号「' . $version . '」已存在');
+            throw new Exception(t('plugin_action.version_exists', ['version' => $version]));
         }
         $data['plugin_id'] = $pluginId;
         $data['version'] = $version;
@@ -410,27 +483,49 @@ class PluginModel extends BaseModel
             $id = !empty($post['id']) ? intval($post['id']) : null;
             $status = isset($post['status']) ? intval($post['status']) : 0;
             $audit_note = !empty($post['audit_note']) ? trim($post['audit_note']) : '';
+            $allowReward = !isset($post['issue_reward']) || intval($post['issue_reward']) === 1;
 
             if (empty($id)) {
-                throw new Exception('插件ID不能为空');
+                throw new Exception(t('plugin_action.id_required'));
             }
-            $row = $this->getInfo($id);
-            if (!$row) {
-                throw new Exception('插件不存在');
+            if (!in_array($status, [0, 1, 2, 3], true)) {
+                throw new Exception(t('plugin_admin.status_invalid'));
             }
 
-            $data = ['status' => $status, 'audit_note' => $audit_note];
-
-            // 如果状态改为已上架，记录上架时间（定时发布使用预选时间）
-            if ($status == 1 && $row['status'] != 1) {
-                if (($row['publish_type'] ?? 0) == 1 && !empty($row['publish_time'])) {
-                    $data['published_at'] = $row['publish_time'];
-                } else {
-                    $data['published_at'] = datetime();
+            Db::startTrans();
+            try {
+                $row = Db::name('plugin')->where('id', $id)->lock(true)->find();
+                if (!$row) {
+                    throw new Exception(t('plugin_action.not_found'));
                 }
+
+                $data = ['status' => $status, 'audit_note' => $audit_note, 'updated_at' => datetime()];
+                $isApprovalTransition = $status === 1 && intval($row['status'] ?? 0) !== 1;
+                $isFirstApproval = $isApprovalTransition && empty($row['published_at']);
+
+                // 如果状态改为已上架，记录上架时间（定时发布使用预选时间）
+                if ($isApprovalTransition) {
+                    if (intval($row['publish_type'] ?? 0) === 1 && !empty($row['publish_time'])) {
+                        $data['published_at'] = $row['publish_time'];
+                    } else {
+                        $data['published_at'] = datetime();
+                    }
+                }
+
+                self::where('id', $id)->data($data)->update();
+                $reward = $isFirstApproval
+                    ? PluginRewardService::issueFirstApproval(
+                        array_merge($row, $data),
+                        intval(session('adminId')),
+                        $allowReward
+                    )
+                    : null;
+                Db::commit();
+            } catch (\Throwable $e) {
+                Db::rollback();
+                throw $e;
             }
 
-            self::where('id', $id)->data($data)->update();
             Cache::tag('SF_Plugin')->clear();
 
             // 审核通过时将临时图片移动到正式目录
@@ -444,22 +539,46 @@ class PluginModel extends BaseModel
             // 通知插件开发者审核结果
             try {
                 if (!empty($row['user_id'])) {
-                    $statusMap = [0 => '待审核', 1 => '已通过', 2 => '已下架', 3 => '已拒绝'];
-                    $statusLabel = $statusMap[$status] ?? '未知';
-                    $noteText = !empty($audit_note) ? '，备注：' . $audit_note : '';
+                    $statusMap = [
+                        0 => t('plugin_admin.status_pending'),
+                        1 => t('plugin_admin.status_approved'),
+                        2 => t('plugin_admin.status_offline'),
+                        3 => t('plugin_admin.status_rejected'),
+                    ];
+                    $statusLabel = $statusMap[$status] ?? t('plugin_admin.status_unknown');
+                    $noteText = !empty($audit_note)
+                        ? t('plugin_admin.audit_note', ['note' => $audit_note])
+                        : '';
+                    if (is_array($reward)) {
+                        $rewardText = PluginRewardService::rewardText($reward);
+                        if ($rewardText !== '') {
+                            $noteText .= t('plugin_admin.audit_reward', ['reward' => $rewardText]);
+                        } elseif (!empty($reward['reason'])) {
+                            $noteText .= t('plugin_admin.audit_reward_skipped', ['reason' => $reward['reason']]);
+                        }
+                    }
                     NotificationModel::add([
                         'user_id'    => intval($row['user_id']),
-                        'title'      => '插件审核通知',
-                        'content'    => '您的插件「' . $row['name'] . '」审核状态已更新为：' . $statusLabel . $noteText,
+                        'title'      => t('plugin_admin.audit_notice_title'),
+                        'content'    => t('plugin_admin.audit_notice_content', [
+                            'plugin' => $row['name'],
+                            'status' => $statusLabel,
+                            'details' => $noteText,
+                        ]),
                         'type'       => 'plugin_audit',
                         'link'       => '/UserPlugin/list.html',
+                        'variables'  => [
+                            'plugin_name' => $row['name'],
+                            'review_status' => $statusLabel,
+                            'audit_note' => $audit_note,
+                        ],
                         'is_read'    => 0,
                         'created_at' => datetime(),
                     ]);
                 }
             } catch (\Throwable $e) {}
 
-            return true;
+            return ['reward' => $reward];
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -469,8 +588,8 @@ class PluginModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = !empty($post['limit']) ? $post['limit'] : 10;
-            $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|name|slug|author');
 
             $list = self::order('sort', 'desc')
@@ -489,10 +608,16 @@ class PluginModel extends BaseModel
             }
             $purchaseCounts = $this->countByPlugin('plugin_purchase', $pluginIds);
             $downloadCounts = $this->countByPlugin('plugin_download', $pluginIds);
+            $rewardMap = $this->rewardMap($pluginIds);
             foreach ($list as $item) {
                 $pluginId = intval($item['id'] ?? 0);
                 $item['purchase_count'] = $purchaseCounts[$pluginId] ?? 0;
                 $item['download_record_count'] = $downloadCounts[$pluginId] ?? 0;
+                $reward = $rewardMap[$pluginId] ?? [];
+                $item['reward_status'] = $reward['status'] ?? '';
+                $item['reward_points'] = intval($reward['points'] ?? 0);
+                $item['reward_balance'] = sf_money_format($reward['balance'] ?? 0);
+                $item['reward_reason'] = $reward['reason'] ?? '';
             }
             return $list;
         } catch (\Exception $e) {
@@ -515,6 +640,25 @@ class PluginModel extends BaseModel
         $map = [];
         foreach ($rows as $row) {
             $map[intval($row['plugin_id'])] = intval($row['total']);
+        }
+        return $map;
+    }
+
+    private function rewardMap(array $pluginIds): array
+    {
+        $pluginIds = array_values(array_unique(array_filter(array_map('intval', $pluginIds))));
+        if (empty($pluginIds)) {
+            return [];
+        }
+        $rows = Db::name('plugin_reward')
+            ->whereIn('plugin_id', $pluginIds)
+            ->where('scene', PluginRewardService::SCENE_FIRST_APPROVAL)
+            ->field('plugin_id,status,points,balance,reason')
+            ->select()
+            ->toArray();
+        $map = [];
+        foreach ($rows as $row) {
+            $map[intval($row['plugin_id'])] = $row;
         }
         return $map;
     }
@@ -565,7 +709,16 @@ class PluginModel extends BaseModel
             ->toArray();
 
         foreach ($resources as $resource) {
-            $url = $resource['url'] ?: ($resource['object_key'] ?? '');
+            $url = '';
+            if (($resource['storage_driver'] ?? 'local') === 'oss' && !empty($resource['object_key'])) {
+                try {
+                    $url = (new PluginStorageService())->getMediaUrl((string)$resource['object_key']);
+                } catch (\Throwable $e) {
+                    $url = '';
+                }
+            } else {
+                $url = sf_safe_url($resource['url'] ?? '', true);
+            }
             if ($resource['resource_type'] === 'icon' && $url !== '') {
                 $plugin['icon'] = $url;
                 $plugin['iconUrl'] = $url;
@@ -575,6 +728,37 @@ class PluginModel extends BaseModel
                 $plugin['coverUrl'] = $url;
                 $plugin['cover_object_key'] = $resource['object_key'] ?? ($plugin['cover_object_key'] ?? '');
             }
+        }
+    }
+
+    private function sanitizePluginForDisplay(array &$plugin): void
+    {
+        foreach (['name' => 100, 'version' => 50, 'author' => 100, 'description' => 1000, 'update_description' => 2000, 'origin_author' => 100, 'origin_note' => 1000] as $field => $limit) {
+            if (isset($plugin[$field])) {
+                $plugin[$field] = sf_plain_text($plugin[$field], $limit);
+            }
+        }
+        foreach (['icon', 'cover', 'iconUrl', 'coverUrl'] as $field) {
+            if (isset($plugin[$field])) {
+                $plugin[$field] = sf_safe_url($plugin[$field], true);
+            }
+        }
+        foreach (['author_url', 'origin_url'] as $field) {
+            if (isset($plugin[$field])) {
+                $plugin[$field] = sf_safe_url($plugin[$field], false);
+            }
+        }
+        if (isset($plugin['content'])) {
+            $plugin['content'] = clean_rich_text($plugin['content']);
+        }
+        if (isset($plugin['images']) && is_array($plugin['images'])) {
+            $plugin['images'] = array_values(array_filter(array_map(static function ($url) {
+                return sf_safe_url($url, true);
+            }, $plugin['images'])));
+        }
+        if (!empty($plugin['related_plugin']) && is_array($plugin['related_plugin'])) {
+            $plugin['related_plugin']['name'] = sf_plain_text($plugin['related_plugin']['name'] ?? '', 100);
+            $plugin['related_plugin']['icon'] = sf_safe_url($plugin['related_plugin']['icon'] ?? '', true);
         }
     }
 

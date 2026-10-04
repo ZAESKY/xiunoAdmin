@@ -45,11 +45,12 @@ class ApiBackend extends CommonBase
             // 登录用户信息
             $userModel = new \app\user\model\User();
             $userInfo = $userModel->getInfo();
-             if(!empty($userId) && $sign != data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash())){
-                throw new Exception(t('login.user_session_expired'));
-            }
             if(!$userInfo){
                 throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
+            }
+            $expectedSign = data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash());
+            if(!empty($userId) && !hash_equals((string)$expectedSign, (string)$sign)){
+                throw new Exception(t('login.user_session_expired'));
             }
             $this->userInfo = $userInfo;
             if(empty($userInfo['appid'])){
@@ -62,7 +63,7 @@ class ApiBackend extends CommonBase
                 throw new Exception(t('user.account_blocked').'[errorCode:UserStatusBlocked]');
             }
             if(!empty($userInfo['ip'])){
-                if(!in_array(get_client_ip(),unserialize($userInfo['ip']))){
+                if(!in_array(get_client_ip(), sf_safe_unserialize_array($userInfo['ip']), true)){
                     throw new Exception(t('user.ip_not_whitelist'));
                 }
             }

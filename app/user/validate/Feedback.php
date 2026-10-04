@@ -12,9 +12,9 @@ class Feedback extends Validate
     ];
 
     protected $message = [
-        'title.require'   => '请填写反馈标题',
-        'title.max'       => '标题不能超过255个字符',
-        'content.require' => '请填写反馈内容',
-        'content.max'     => '内容不能超过5000个字符',
+        'title.require'   => 'feedback.title_required',
+        'title.max'       => 'feedback.title_too_long',
+        'content.require' => 'feedback.content_required',
+        'content.max'     => 'feedback.content_too_long',
     ];
 }

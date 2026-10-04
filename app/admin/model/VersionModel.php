@@ -5,6 +5,9 @@ namespace app\admin\model;
 use app\admin\validate\Version;
 use app\common\model\BaseModel;
 use app\common\extend\CheckInfo;
+use app\common\service\ReleasePackageService;
+use app\common\service\PluginStorageService;
+use app\common\service\VersionReleaseService;
 use think\Exception;
 use think\exception\ValidateException;
 use think\facade\Cache;
@@ -44,19 +47,33 @@ class VersionModel extends BaseModel
             if(!$row){
                 throw new Exception(t('version.not_exist'));
             }
-            if(empty($row['download_catalogue'])){
-                throw new Exception(t('version.get_download_dir_empty'));
+            if (($row['storage_driver'] ?? 'local') === 'oss') {
+                $key = (string)($row['package_object_key'] ?? '');
+                if ($key === '' || !(new PluginStorageService())->deleteObject($key)) {
+                    throw new Exception(t('user.delete_failed'));
+                }
+                self::where('id', $id)->update([
+                    'storage_driver' => 'local',
+                    'package_object_key' => '',
+                    'package_sha256' => '',
+                    'package_size' => 0,
+                ]);
+            } else {
+                if(empty($row['download_catalogue'])){
+                    throw new Exception(t('version.get_download_dir_empty'));
+                }
+                $filePath = ReleasePackageService::existingDir($row['type'], $row['download_catalogue']);
+                if($filePath === ''){
+                    throw new Exception(t('version.download_dir_not_exist'));
+                }
+                $packageFile = ReleasePackageService::file($row['type'], $row['download_catalogue']);
+                if ($packageFile === '' || is_link($packageFile) || !@unlink($packageFile)) {
+                    throw new Exception(t('user.delete_failed'));
+                }
             }
-            $filePath = APP_PATH.'/common/download/'.(($row['type'] == 0)?'release':'update').'/'.$row['download_catalogue'];
-            if(!is_dir($filePath)){
-                throw new Exception(t('version.download_dir_not_exist'));
-            }
-            if(rmdirs($filePath,false)){
-                Cache::tag('SF_Version')->clear();
-                return true;
-            }else{
-                throw new Exception(t('user.delete_failed'));
-            }
+            VersionReleaseService::deleteForVersion($this->rowArray($row));
+            Cache::tag('SF_Version')->clear();
+            return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
         }
@@ -73,14 +90,18 @@ class VersionModel extends BaseModel
             if(!$row){
                 throw new Exception(t('version.not_exist'));
             }
+            if (($row['storage_driver'] ?? 'local') === 'oss') {
+                (new PluginStorageService())->objectDownloadUrl((string)($row['package_object_key'] ?? ''), 30);
+                return true;
+            }
             if(empty($row['download_catalogue'])){
                 throw new Exception(t('version.get_download_dir_empty'));
             }
-            $filePath = APP_PATH.'/common/download/'.(($row['type'] == 0)?'release':'update').'/'.$row['download_catalogue'];
-            if(!is_dir($filePath)){
+            $filePath = ReleasePackageService::existingDir($row['type'], $row['download_catalogue']);
+            if($filePath === ''){
                 throw new Exception(t('version.download_dir_not_exist'));
             }
-            if(!is_file($filePath.'/SF.zip')){
+            if(ReleasePackageService::file($row['type'], $row['download_catalogue']) === ''){
                 throw new Exception(t('common.no_data'));
             }else{
                 return true;
@@ -100,6 +121,10 @@ class VersionModel extends BaseModel
         $type = !empty($post['type'])?intval($post['type']):0;
         $beta = !empty($post['beta'])?intval($post['beta']):0;
         $status = !empty($post['status'])?1:0;
+
+        if (!in_array($type, [0, 1], true)) {
+            return message('version.type_invalid', false);
+        }
 
         try {
             validate(Version::class)->check($post);
@@ -127,8 +152,23 @@ class VersionModel extends BaseModel
             if(empty($row['download_catalogue'])){
                 return message(t('version.get_download_dir_empty'), false);
             }
-            if(!is_dir(APP_PATH.'/common/download/'.(($row['type'] == 0)?'release':'update').'/'.$row['download_catalogue'])){
+            $hasPackage = $this->hasPackage($row);
+            if ($hasPackage && (
+                (string)$edition !== (string)$row['edition']
+                || (int)$version !== (int)$row['version']
+                || (int)$type !== (int)$row['type']
+                || (int)$beta !== (int)$row['beta']
+            )) {
+                return message('version.package_blocks_metadata_change', false);
+            }
+            $currentDir = ReleasePackageService::existingDir($row['type'], $row['download_catalogue']);
+            if($currentDir === ''){
                 return message(t('version.download_dir_not_exist'), false);
+            }
+            try {
+                $moved = $this->moveDownloadDirectory($row, $type, $currentDir);
+            } catch (\Exception $e) {
+                return message($e->getMessage(), false);
             }
             $data = [
                 'edition' => $edition,
@@ -143,9 +183,12 @@ class VersionModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
+                $publishedRow = array_merge($this->rowArray($row), $data, ['id' => $id]);
+                VersionReleaseService::syncStatus($publishedRow);
                 Cache::tag('SF_Version')->clear();
                 return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
+                $this->rollbackDownloadDirectoryMove($moved);
                 return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
@@ -157,9 +200,10 @@ class VersionModel extends BaseModel
             if ($row) {
                 return message(t('version.number_exists'), false);
             }
-            $download_catalogue = $appid.'_'.$version.'_'.md5(time() . 'SF2129876388');
+            $download_catalogue = $appid.'_'.$version.'_'.sf_secure_token(16) /* A-15: 原 md5(time().常量) 可预测 */;
             try {
-                $result = mkdirs(APP_PATH.'/common/download/'.(($type == 0)?'release':'update').'/'.$download_catalogue);
+                $newDir = ReleasePackageService::dir($type, $download_catalogue);
+                $result = $newDir !== '' && mkdirs($newDir, 0755);
                 if(!$result){
                     return message(t('app.create_dir_failed'), false);
                 }
@@ -182,6 +226,9 @@ class VersionModel extends BaseModel
                 Cache::tag('SF_Version')->clear();
                 return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
+                if (!empty($newDir) && is_dir($newDir) && !is_link($newDir)) {
+                    rmdirs($newDir);
+                }
                 return message(t('user.add_failed').$e->getMessage() ,false);
             }
         }
@@ -196,7 +243,21 @@ class VersionModel extends BaseModel
             if(!$row){
                 throw new Exception(t('version.not_exist'));
             }
+            $rowData = $this->rowArray($row);
+            if (($rowData['storage_driver'] ?? 'local') === 'oss') {
+                (new PluginStorageService())->deleteObject((string)($rowData['package_object_key'] ?? ''));
+            } else {
+                $package = ReleasePackageService::file($rowData['type'] ?? 0, $rowData['download_catalogue'] ?? '');
+                if ($package !== '' && !is_link($package)) {
+                    @unlink($package);
+                }
+            }
+            VersionReleaseService::deleteForVersion($rowData);
             self::where('id', $id)->delete();
+            $dir = ReleasePackageService::existingDir($rowData['type'] ?? 0, $rowData['download_catalogue'] ?? '');
+            if ($dir !== '') {
+                @rmdir(rtrim($dir, DIRECTORY_SEPARATOR));
+            }
             Cache::tag('SF_Version')->clear();
             return true;
         }catch (\Exception $e){
@@ -221,6 +282,9 @@ class VersionModel extends BaseModel
             self::where('id', $id)
                 ->data(['status' => $status])
                 ->update();
+            $version = $this->rowArray($row);
+            $version['status'] = $status;
+            VersionReleaseService::syncStatus($version);
             Cache::tag('SF_Version')->clear();
             return true;
         }catch (\Exception $e){
@@ -234,6 +298,10 @@ class VersionModel extends BaseModel
             $id = !empty($post['id'])?intval($post['id']):null;
             $type = !empty($post['type'])?intval($post['type']):0;
 
+            if (!in_array($type, [0, 1], true)) {
+                throw new Exception(t('version.type_invalid'));
+            }
+
             if(empty($id)){
                 throw new Exception(t('validation.missing_id'));
             }
@@ -241,14 +309,60 @@ class VersionModel extends BaseModel
             if(!$row){
                 throw new Exception(t('version.not_exist'));
             }
-            self::where('id', $id)
-                ->data(['type' => $type])
-                ->update();
+            $currentDir = ReleasePackageService::existingDir($row['type'], $row['download_catalogue']);
+            if ($currentDir === '') {
+                throw new Exception(t('version.download_dir_not_exist'));
+            }
+            if ((int)$row['type'] !== $type
+                && $this->hasPackage($row)) {
+                throw new Exception(t('version.package_blocks_type_change'));
+            }
+            $moved = $this->moveDownloadDirectory($row, $type, $currentDir);
+            try {
+                self::where('id', $id)
+                    ->data(['type' => $type])
+                    ->update();
+            } catch (\Exception $e) {
+                $this->rollbackDownloadDirectoryMove($moved);
+                throw $e;
+            }
             Cache::tag('SF_Version')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
         }
+    }
+
+    private function moveDownloadDirectory($row, int $newType, string $currentDir): array
+    {
+        $oldType = (int)($row['type'] ?? 0);
+        if ($oldType === $newType) {
+            return [];
+        }
+
+        $targetDir = ReleasePackageService::dir($newType, $row['download_catalogue'] ?? '');
+        if ($targetDir === '' || file_exists($targetDir) || is_link($targetDir)) {
+            throw new Exception(t('version.download_dir_not_exist'));
+        }
+        $targetParent = dirname(rtrim($targetDir, DS));
+        if (!is_dir($targetParent) || is_link($targetParent)) {
+            throw new Exception(t('version.download_dir_not_exist'));
+        }
+
+        $from = rtrim($currentDir, DS);
+        $to = rtrim($targetDir, DS);
+        if (!rename($from, $to)) {
+            throw new Exception(t('user.edit_failed'));
+        }
+        return ['from' => $from, 'to' => $to];
+    }
+
+    private function rollbackDownloadDirectoryMove(array $moved): void
+    {
+        if (empty($moved['from']) || empty($moved['to']) || !is_dir($moved['to']) || file_exists($moved['from'])) {
+            return;
+        }
+        @rename($moved['to'], $moved['from']);
     }
 
     public function setBeta(){
@@ -264,6 +378,10 @@ class VersionModel extends BaseModel
             if(!$row){
                 throw new Exception(t('version.not_exist'));
             }
+            if ((int)$row['beta'] !== $beta
+                && $this->hasPackage($row)) {
+                throw new Exception(t('version.package_blocks_channel_change'));
+            }
             self::where('id', $id)
                 ->data(['beta' => $beta])
                 ->update();
@@ -274,11 +392,22 @@ class VersionModel extends BaseModel
         }
     }
 
+    private function hasPackage($row): bool
+    {
+        $data = $this->rowArray($row);
+        if (($data['storage_driver'] ?? 'local') === 'oss') {
+            return !empty($data['package_object_key'])
+                && preg_match('/^[a-f0-9]{64}$/D', (string)($data['package_sha256'] ?? ''))
+                && (int)($data['package_size'] ?? 0) > 0;
+        }
+        return ReleasePackageService::file($data['type'] ?? 0, $data['download_catalogue'] ?? '') !== '';
+    }
+
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($post['appid'])?intval($post['appid']):null;
             $data = $this->buildSearchWhere('id|edition|version');
 
@@ -294,5 +423,10 @@ class VersionModel extends BaseModel
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
         }
+    }
+
+    private function rowArray($row): array
+    {
+        return is_object($row) && method_exists($row, 'toArray') ? $row->toArray() : (array)$row;
     }
 }

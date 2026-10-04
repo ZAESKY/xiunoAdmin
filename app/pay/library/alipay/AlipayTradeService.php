@@ -17,10 +17,10 @@ use app\pay\library\alipay\model\request\AlipayTradeQueryRequest;
 use app\pay\library\alipay\model\request\AlipayTradeRefundRequest;
 use app\pay\library\alipay\model\request\AlipayTradeCloseRequest;
 use app\pay\library\alipay\model\request\AlipayTradeFastpayRefundQueryRequest;
-use app\pay\library\alipay\model\request\AlipayF2FPrecreateResult;
-use app\pay\library\alipay\model\request\AlipayF2FQueryResult;
-use app\pay\library\alipay\model\request\AlipayF2FRefundResult;
-use app\pay\library\alipay\model\request\AlipayTradeQueryContentBuilder;
+use app\pay\library\alipay\model\result\AlipayF2FPrecreateResult;
+use app\pay\library\alipay\model\result\AlipayF2FQueryResult;
+use app\pay\library\alipay\model\result\AlipayF2FRefundResult;
+use app\pay\library\alipay\model\builder\AlipayTradeQueryContentBuilder;
 
 class AlipayTradeService {
 
@@ -141,6 +141,9 @@ class AlipayTradeService {
 
 		// 首先调用支付api
 		$response = $this->aopclientRequestExecute ( $request );
+		if (!is_object($response) || !isset($response->alipay_trade_create_response)) {
+			throw new Exception('支付宝网关返回格式异常');
+		}
 		$response = $response->alipay_trade_create_response;
 
 		$result = new AlipayF2FPrecreateResult($response);
@@ -165,6 +168,9 @@ class AlipayTradeService {
 
 		// 首先调用支付api
 		$response = $this->aopclientRequestExecute ( $request );
+		if (!is_object($response) || !isset($response->alipay_trade_precreate_response)) {
+			throw new Exception('支付宝网关返回格式异常');
+		}
 		$response = $response->alipay_trade_precreate_response;
 
 		$result = new AlipayF2FPrecreateResult($response);
@@ -296,6 +302,9 @@ class AlipayTradeService {
 		$request = new AlipayTradeQueryRequest();
 		$request->setBizContent ( $biz_content );
 		$response = $this->aopclientRequestExecute ( $request );
+		if (!is_object($response) || !isset($response->alipay_trade_query_response)) {
+			throw new Exception('支付宝查询接口返回格式异常');
+		}
 
 		return $response->alipay_trade_query_response;
 	}
@@ -377,20 +386,27 @@ class AlipayTradeService {
 	 * @return boolean
 	 */
 	public function check($arr){
+		if (empty($arr['sign']) || (empty($arr['trade_no']) && empty($arr['out_trade_no']))) {
+			return false;
+		}
 		$aop = new AopClient();
 		$aop->alipayrsaPublicKey = $this->alipay_public_key;
 		$result = $aop->rsaCheckV1($arr, $this->alipay_public_key, $this->signtype);
 		if($result){
-			$queryResponse = $this->orderQuery($arr['trade_no']);
+			$queryContentBuilder = new AlipayTradeQueryContentBuilder();
+			if (!empty($arr['trade_no'])) {
+				$queryContentBuilder->setTradeNo($arr['trade_no']);
+			} else {
+				$queryContentBuilder->setOutTradeNo($arr['out_trade_no']);
+			}
+			$queryResponse = $this->query($queryContentBuilder);
 			$result = $this->querySuccess($queryResponse);
 		}
 		return $result;
 	}
 
 	public function writeLog($text) {
-		// $text=iconv("GBK", "UTF-8//IGNORE", $text);
-		//$text = characet ( $text );
-		file_put_contents ( app()->getAppPath()."\library\alipay\log\log.txt", date ( "Y-m-d H:i:s" ) . "  " . $text . "\r\n", FILE_APPEND );
+		// 支付请求正文不落盘，避免敏感业务参数泄露及只读发布目录写入失败。
 	}
 
 }

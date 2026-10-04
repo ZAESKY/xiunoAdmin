@@ -6,6 +6,7 @@ use app\admin\validate\PowerPrice;
 use app\common\model\BaseModel;
 use think\Exception;
 use think\exception\ValidateException;
+use think\facade\Db;
 
 /**
  * 权限-模型
@@ -35,20 +36,30 @@ class PowerPriceModel extends BaseModel
 
     public function isUserSubordinatePower($pid, $sid){
         try{
-            if($pid == $sid){
+            $pid = intval($pid);
+            $currentId = intval($sid);
+            if ($pid <= 0 || $currentId <= 0 || $pid === $currentId) {
                 return false;
             }
-            $row = self::where(['id' => $sid, 'status' => 1])->find();
-            if(!$row){
-                return false;
+
+            $visited = [];
+            while ($currentId > 0) {
+                if (isset($visited[$currentId])) {
+                    return false;
+                }
+                $visited[$currentId] = true;
+
+                $row = self::where(['id' => $currentId, 'status' => 1])->find();
+                if (!$row) {
+                    return false;
+                }
+                $parentId = intval($row['parentid']);
+                if ($parentId === $pid) {
+                    return true;
+                }
+                $currentId = $parentId;
             }
-            if($row['parentid'] == 0){
-                return false;
-            }
-            if($row['parentid'] == $pid){
-                return true;
-            }
-            return $this->isUserSubordinatePower($pid,$row['parentid']);
+            return false;
         }catch (\Exception $e){
             return false;
         }
@@ -133,14 +144,15 @@ class PowerPriceModel extends BaseModel
         $id = !empty($post['id'])?intval($post['id']):null;
         $tid = !empty($post['tid'])?intval($post['tid']):null;
         $name = !empty($post['name'])?$post['name']:null;
-        $money = !empty($post['money'])?floatval($post['money']):'0.00';
+        $money = !empty($post['money'])?$post['money']:'0.00';
+        $addauth_power = !empty($post['addauth_power']) ? 1 : 0;
+        $adduser_power = !empty($post['adduser_power']) ? 1 : 0;
         $addauth_discount = !empty($post['addauth_discount'])?intval($post['addauth_discount']):0;
         $adduser_discount = !empty($post['adduser_discount'])?intval($post['adduser_discount']):0;
         $rebate_enabled = !empty($post['rebate_enabled']) ? 1 : 0;
         $rebate_rate = isset($post['rebate_rate']) ? floatval($post['rebate_rate']) : 0.00;
         $discount_code_enabled = !empty($post['discount_code_enabled']) ? 1 : 0;
         $introduce = !empty($post['introduce'])?htmlentities($post['introduce']):null;
-        $default_power = !empty($post['default_power'])?intval($post['default_power']):0;
         $parentid = !empty($post['parentid'])?intval($post['parentid']):0;
         $status = !empty($post['status'])?1:0;
 
@@ -150,18 +162,39 @@ class PowerPriceModel extends BaseModel
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
         }
+        try {
+            $money = sf_money_format($money);
+        } catch (\InvalidArgumentException $e) {
+            return message('validation.amount_format', false);
+        }
+        try {
+            $this->assertValidParent($id, $tid, $parentid);
+        } catch (\Exception $e) {
+            return message($e->getMessage(), false);
+        }
         if(!empty($id)){
+            $current = $this->getInfo($id);
+            if (!$current) {
+                return message(t('power.not_exist'), false);
+            }
+            if (intval($current['default_power']) === 1 && $status !== 1) {
+                return message(t('power.default_cannot_disable'), false);
+            }
+            if (intval($current['default_power']) === 1 && intval($current['tid']) !== $tid) {
+                return message(t('power.default_cannot_move'), false);
+            }
             $data = [
                 "tid" => $tid,
                 "name" => $name,
                 "money" => $money,
+                "addauth_power" => $addauth_power,
+                "adduser_power" => $adduser_power,
                 "addauth_discount" => $addauth_discount,
                 "adduser_discount" => $adduser_discount,
                 "rebate_enabled" => $rebate_enabled,
                 "rebate_rate" => $rebate_rate,
                 "discount_code_enabled" => $discount_code_enabled,
                 "introduce" => $introduce,
-                "default_power" => $default_power,
                 "status" => $status,
                 "parentid" => $parentid
             ];
@@ -178,13 +211,17 @@ class PowerPriceModel extends BaseModel
                 "tid" => $tid,
                 "name" => $name,
                 "money" => $money,
+                "addauth_power" => $addauth_power,
+                "addpay_power" => 0,
+                "pirate_power" => 0,
+                "adduser_power" => $adduser_power,
                 "addauth_discount" => $addauth_discount,
                 "adduser_discount" => $adduser_discount,
                 "rebate_enabled" => $rebate_enabled,
                 "rebate_rate" => $rebate_rate,
                 "discount_code_enabled" => $discount_code_enabled,
                 "introduce" => $introduce,
-                "default_power" => $default_power,
+                "default_power" => 0,
                 "status" => $status,
                 "addtime" => datetime(),
                 "parentid" => $parentid
@@ -207,6 +244,15 @@ class PowerPriceModel extends BaseModel
             if(!$row){
                 throw new Exception(t('power.not_exist'));
             }
+            if (intval($row['default_power']) === 1) {
+                throw new Exception(t('power.default_cannot_delete'));
+            }
+            if (self::where('parentid', intval($id))->find()) {
+                throw new Exception(t('power.has_children'));
+            }
+            if (Db::name('user')->where('power', intval($id))->find()) {
+                throw new Exception(t('power.in_use'));
+            }
             self::where('id', $id)->delete();
             return true;
         }catch (\Exception $e){
@@ -227,6 +273,9 @@ class PowerPriceModel extends BaseModel
             if(!$row){
                 throw new Exception(t('power.not_exist'));
             }
+            if ($status === 0 && intval($row['default_power']) === 1) {
+                throw new Exception(t('power.default_cannot_disable'));
+            }
 
             self::where('id', $id)
                 ->data(['status' => $status])
@@ -243,7 +292,7 @@ class PowerPriceModel extends BaseModel
             if(!$row){
                 throw new Exception(t('power.not_exist'));
             }
-            $allowedColumns = ['status', 'default_power', 'rebate_enabled'];
+            $allowedColumns = ['addauth_power', 'adduser_power'];
             if (!in_array($type, $allowedColumns, true)) {
                 throw new Exception(t('validation.invalid_field'));
             }
@@ -269,15 +318,20 @@ class PowerPriceModel extends BaseModel
             if(!$powerPriceInfo){
                 throw new Exception(t('power.not_exist'));
             }
-            $row = self::where(['tid' => $powerPriceInfo['tid'], 'default_power' => 1])->find();
-            if($row){
-                self::where('id', $row['id'])
+            if ($default_power !== 1) {
+                throw new Exception(t('power.default_required'));
+            }
+            if (intval($powerPriceInfo['status']) !== 1) {
+                throw new Exception(t('power.default_must_enabled'));
+            }
+            Db::transaction(function () use ($id, $powerPriceInfo) {
+                self::where('tid', intval($powerPriceInfo['tid']))
                     ->data(['default_power' => 0])
                     ->update();
-            }
-            self::where('id', $id)
-                ->data(['default_power' => $default_power])
-                ->update();
+                self::where('id', $id)
+                    ->data(['default_power' => 1])
+                    ->update();
+            });
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -306,15 +360,27 @@ class PowerPriceModel extends BaseModel
         }
     }
 
-    public function getPowerList($tid = ''){
+    public function getPowerList($tid = '', $excludeId = 0, $includeDisabled = false){
         try{
             if(empty($tid)){
                 throw new Exception(t('validation.params_missing'));
             }
             $data = array();
-            $list = self::field('id,name,money')->where(['tid' => $tid, 'status' => 1])->select();
+            $query = self::field('id,name,money,status')->where('tid', $tid);
+            if (!$includeDisabled) {
+                $query->where('status', 1);
+            }
+            if (intval($excludeId) > 0) {
+                $query->where('id', '<>', intval($excludeId));
+            }
+            $list = $query->select();
             foreach ($list as $res){
-                $data[] = array('id' => $res['id'], 'name' => $res['name'], 'money' => $res['money']);
+                $data[] = array(
+                    'id' => $res['id'],
+                    'name' => $res['name'],
+                    'money' => $res['money'],
+                    'status' => $res['status'],
+                );
             }
             return $data;
         }catch (\Exception $e){
@@ -336,6 +402,37 @@ class PowerPriceModel extends BaseModel
             return $list;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
+        }
+    }
+
+    private function assertValidParent($id, $tid, $parentId): void
+    {
+        $id = intval($id);
+        $tid = intval($tid);
+        $parentId = intval($parentId);
+        if ($parentId === 0) {
+            return;
+        }
+        if ($id > 0 && $parentId === $id) {
+            throw new Exception(t('power.parent_self'));
+        }
+
+        $visited = [];
+        $currentId = $parentId;
+        while ($currentId > 0) {
+            if (isset($visited[$currentId])) {
+                throw new Exception(t('power.parent_cycle'));
+            }
+            $visited[$currentId] = true;
+
+            $row = self::where('id', $currentId)->find();
+            if (!$row || intval($row['tid']) !== $tid) {
+                throw new Exception(t('power.parent_invalid'));
+            }
+            if ($id > 0 && intval($row['id']) === $id) {
+                throw new Exception(t('power.parent_cycle'));
+            }
+            $currentId = intval($row['parentid']);
         }
     }
 }

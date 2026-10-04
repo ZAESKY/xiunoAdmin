@@ -5,6 +5,7 @@ namespace app\pay\controller;
 use app\common\controller\PayBackend;
 use app\pay\service\CommonService;
 use think\facade\Db;
+use think\facade\Log;
 use app\pay\library\qqpay\QpayMchAPI;
 use app\pay\library\qqpay\QpayMchUtil;
 use app\pay\library\qqpay\QpayNotify;
@@ -21,9 +22,10 @@ class QqPay extends PayBackend
     public function index(){
         $get = request()->get();
         $trade_no = isset($get['trade_no'])?$get['trade_no']:null;
-        if(conf('qqpay_api') != 1) return $this->render('public/error', ['msg' => '当前支付接口未开启！','time' => 5, 'url' => '/']);
+        if(conf('qqpay_api') != 1) return $this->render('public/error', ['msg' => t('pay.interface_disabled'),'time' => 5, 'url' => '/']);
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
-        if(!$row) return $this->render('public/error', ['msg' => '该订单号不存在，请返回来源地重新发起请求！','time' => 5, 'url' => '/']);
+        if(!$row) return $this->render('public/error', ['msg' => t('pay.order_not_exist'),'time' => 5, 'url' => '/']);
+        if (!$this->ownsPaymentOrder($row)) return $this->render('public/error', ['msg' => t('pay.order_access_denied'),'time' => 5, 'url' => '/']);
         $ordername = $row['name'];
 
         //入参
@@ -33,7 +35,7 @@ class QqPay extends PayBackend
         $params["fee_type"] = "CNY";
         $params["notify_url"] = SITE_URL.url('/QqPay/notify');
         $params["spbill_create_ip"] = get_client_ip();
-        $params["total_fee"] = intval($row['money'] * 100);
+        $params["total_fee"] = sf_money_to_cents($row['money']);
         $params["trade_type"] = "NATIVE";
 
         //api调用
@@ -45,9 +47,9 @@ class QqPay extends PayBackend
         if($result['return_code'] == 'SUCCESS' && $result['result_code'] == 'SUCCESS'){
             $code_url = $result['code_url'];
         }elseif(isset($result["err_code"])){
-            return $this->render('public/error', ['msg' => 'QQ钱包支付下单失败！['.$result["err_code"].'] '.$result["err_code_des"],'time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.qq_create_failed', ['code' => $result["err_code"]]),'time' => 5, 'url' => '/']);
         }else{
-            return $this->render('public/error', ['msg' => 'QQ钱包支付下单失败！['.$result["return_code"].'] '.$result["return_msg"],'time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.qq_create_failed', ['code' => $result["return_code"]]),'time' => 5, 'url' => '/']);
         }
         View::assign([
             'row' => $row,
@@ -59,9 +61,10 @@ class QqPay extends PayBackend
     public function wapPay(){
         $get = request()->get();
         $trade_no = isset($get['trade_no'])?$get['trade_no']:null;
-        if(conf('qqpay_api') != 1) return $this->render('public/error', ['msg' => '当前支付接口未开启！','time' => 5, 'url' => '/']);
+        if(conf('qqpay_api') != 1) return $this->render('public/error', ['msg' => t('pay.interface_disabled'),'time' => 5, 'url' => '/']);
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
-        if(!$row) return $this->render('public/error', ['msg' => '该订单号不存在，请返回来源地重新发起请求！','time' => 5, 'url' => '/']);
+        if(!$row) return $this->render('public/error', ['msg' => t('pay.order_not_exist'),'time' => 5, 'url' => '/']);
+        if (!$this->ownsPaymentOrder($row)) return $this->render('public/error', ['msg' => t('pay.order_access_denied'),'time' => 5, 'url' => '/']);
         $ordername = $row['name'];
         //入参
         $params = array();
@@ -70,7 +73,7 @@ class QqPay extends PayBackend
         $params["fee_type"] = "CNY";
         $params["notify_url"] = SITE_URL.url('/QqPay/notify');
         $params["spbill_create_ip"] = get_client_ip();
-        $params["total_fee"] = intval($row['money'] * 100);
+        $params["total_fee"] = sf_money_to_cents($row['money']);
         $params["trade_type"] = "NATIVE";
 
         //api调用
@@ -81,9 +84,9 @@ class QqPay extends PayBackend
         if($result['return_code']=='SUCCESS' && $result['result_code']=='SUCCESS'){
             $code_url = 'https://myun.tenpay.com/mqq/pay/qrcode.html?_wv=1027&_bid=2183&t='.$result['prepay_id'];
         }elseif(isset($result["err_code"])){
-            return $this->render('public/error', ['msg' => 'QQ钱包支付下单失败！['.$result["err_code"].'] '.$result["err_code_des"],'time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.qq_create_failed', ['code' => $result["err_code"]]),'time' => 5, 'url' => '/']);
         }else{
-            return $this->render('public/error', ['msg' => 'QQ钱包支付下单失败！['.$result["return_code"].'] '.$result["return_msg"],'time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.qq_create_failed', ['code' => $result["return_code"]]),'time' => 5, 'url' => '/']);
         }
         if(strpos($_SERVER['HTTP_USER_AGENT'], 'QQ/') !== false){
             return $this->redirectTo($code_url);
@@ -120,12 +123,14 @@ class QqPay extends PayBackend
                 //处理业务开始
                 //------------------------------
                 $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
-                if($srow['status'] == 0){
-                    $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                    if($result){
-                        Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $transaction_id]);
-                        $this->service->processOrder($srow);
-                    }
+                if (!$srow || strtoupper((string)$fee_type) !== 'CNY'
+                    || sf_money_to_cents($srow['money']) !== (int)$total_fee) {
+                    echo "<xml><return_code>FAIL</return_code><return_msg>订单金额或币种校验失败</return_msg></xml>";
+                    return;
+                }
+                if (!$this->completeOrder($srow, (string)$transaction_id)) {
+                    echo "<xml><return_code>FAIL</return_code><return_msg>订单入账失败</return_msg></xml>";
+                    return;
                 }
                 //------------------------------
                 //处理业务完毕
@@ -144,6 +149,38 @@ class QqPay extends PayBackend
                       <return_code>FAIL</return_code>
                       <return_msg>签名失败</return_msg>
                   </xml>";
+        }
+    }
+
+    private function completeOrder(array $row, string $apiTradeNo): bool
+    {
+        if ($apiTradeNo === '') {
+            return false;
+        }
+        try {
+            return (bool)Db::transaction(function () use ($row, $apiTradeNo) {
+                $current = Db::name('pay')->where('trade_no', $row['trade_no'])->lock(true)->find();
+                if (!$current) {
+                    return false;
+                }
+                if ((int)$current['status'] >= 1) {
+                    return true;
+                }
+                Db::name('pay')->where('trade_no', $current['trade_no'])->update([
+                    'endtime' => datetime(),
+                    'api_trade_no' => $apiTradeNo,
+                ]);
+                if ($this->service->processOrder($current) !== true) {
+                    throw new \RuntimeException('QQ 钱包订单入账失败');
+                }
+                return Db::name('pay')
+                    ->where('trade_no', $current['trade_no'])
+                    ->where('status', 0)
+                    ->update(['status' => 1]) === 1;
+            });
+        } catch (\Throwable $e) {
+            Log::error('QQ 钱包订单入账失败', ['order' => (string)($row['trade_no'] ?? ''), 'error' => $e->getMessage()]);
+            return false;
         }
     }
 }

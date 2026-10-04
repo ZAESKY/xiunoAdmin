@@ -16,8 +16,8 @@ class PointProductService extends BaseService
     public function records()
     {
         $post = request()->post();
-        $limit = !empty($post['limit']) ? $post['limit'] : 10;
-        $currentPage = !empty($post['current_page']) ? $post['current_page'] : 1;
+        $limit = sf_page_limit($post['limit'] ?? null, 10);
+        $currentPage = sf_page_number($post['current_page'] ?? null);
         $data = [];
         $text = trim((string)($post['text'] ?? ''));
         if ($text !== '') {

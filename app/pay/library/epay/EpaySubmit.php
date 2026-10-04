@@ -12,12 +12,17 @@ namespace app\pay\library\epay;
 class EpaySubmit
 {
     public $epay_config;
+    public $epay_gateway_new;
+    public $epay_qrcode;
+    public $epayCommon;
 
     function __construct($epay_config)
     {
         $this->epay_config = $epay_config;
-        $this->epay_gateway_new = $this->epay_config['apiurl'] . 'submit.php';
-        $this->epay_qrcode = $this->epay_config['apiurl'] . 'qrcode.php';
+        $apiUrl = rtrim((string)($this->epay_config['apiurl'] ?? ''), '/') . '/';
+        $this->epay_config['apiurl'] = $apiUrl;
+        $this->epay_gateway_new = $apiUrl . 'submit.php';
+        $this->epay_qrcode = $apiUrl . 'qrcode.php';
         $this->epayCommon = new EpayCommon();
     }
 
@@ -134,4 +139,3 @@ class EpaySubmit
         return json_decode($response, true);
     }
 }
-

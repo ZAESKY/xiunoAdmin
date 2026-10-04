@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -15,18 +15,8 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<style>
-    .vp-page-section { padding: 40px 0; min-height: calc(100vh - 52px); }
-    .vp-page-footer {
-        text-align: center;
-        padding: 20px 24px;
-        color: #94a3b8;
-        font-size: 13px;
-        line-height: 1.8;
-        border-top: 1px solid #e2e8f0;
-    }
-    .vp-page-footer p { margin: 2px 0; }
-</style>
 <body>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script type="text/javascript" src="{__JS__}lang.js?v=20261004"></script>
 <div class="vp-page-section">
     <div class="vp-container">

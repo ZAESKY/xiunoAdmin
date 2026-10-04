@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use app\common\service\WithdrawableBalanceService;
 use app\admin\service\OrderService;
 
 class Order extends Backend
@@ -17,9 +18,9 @@ class Order extends Backend
     {
         if (!feature_enabled('feature_withdraw_enabled')) {
             if (IS_POST) {
-                return json(message('提现功能已关闭', false));
+                return json(message('withdraw.feature_closed', false));
             }
-            return $this->render('/public/error', ['msg' => '提现功能已关闭']);
+            return $this->render('/public/error', ['msg' => t('withdraw.feature_closed')]);
         }
 
         if (IS_POST) {
@@ -28,66 +29,107 @@ class Order extends Backend
 
             if ($action === 'approve') {
                 $id = intval($post['id'] ?? 0);
-                $remark = trim($post['remark'] ?? '');
-                $image = trim($post['image'] ?? '');
-                if (empty($remark)) return json(message('请填写处理备注', false));
-                if (empty($image)) return json(message('请上传转账凭证', false));
-                $row = \think\facade\Db::name('withdraw')->where('id', $id)->find();
-                if (!$row) return json(message('记录不存在', false));
-                if ($row['status'] !== 'pending') return json(message('当前状态不可处理', false));
-                \think\facade\Db::name('withdraw')->where('id', $id)->data([
-                    'status' => 'approved', 'admin_remark' => $remark,
-                    'transfer_image' => $image, 'handled_at' => datetime(), 'updated_at' => datetime(),
-                ])->update();
+                $remark = sf_plain_text($post['remark'] ?? '', 500);
+                $image = sf_safe_url($post['image'] ?? '', true);
+                if ($id <= 0) return json(message('withdraw.record_not_found', false));
+                if (empty($remark)) return json(message('withdraw.process_remark_required', false));
+                if (empty($image)) return json(message('withdraw.transfer_proof_required', false));
+                try {
+                    $row = \think\facade\Db::transaction(function () use ($id, $remark, $image) {
+                        $locked = \think\facade\Db::name('withdraw')->where('id', $id)->lock(true)->find();
+                        if (!$locked) throw new \RuntimeException(t('withdraw.record_not_found'));
+                        if ((string)$locked['status'] !== 'pending') throw new \RuntimeException(t('withdraw.status_not_processable'));
+                        $updated = \think\facade\Db::name('withdraw')
+                            ->where('id', $id)
+                            ->where('status', 'pending')
+                            ->data([
+                                'status' => 'approved', 'admin_remark' => $remark,
+                                'transfer_image' => $image, 'handled_at' => datetime(), 'updated_at' => datetime(),
+                            ])->update();
+                        if ($updated !== 1) throw new \RuntimeException(t('withdraw.status_not_processable'));
+                        return $locked;
+                    });
+                } catch (\Throwable $e) {
+                    return json(message($e->getMessage(), false));
+                }
                 // Notify user
                 \app\common\model\NotificationModel::add([
-                    'user_id' => intval($row['user_id']), 'title' => '提现已处理',
-                    'content' => "您的提现申请 {$row['amount']} 元已处理，备注：{$remark}",
+                    'user_id' => intval($row['user_id']), 'title' => t('withdraw.notification_approved_title'),
+                    'content' => t('withdraw.notification_approved_content', ['amount' => $row['amount'], 'remark' => $remark]),
                     'type' => 'withdraw_approved', 'link' => '/Withdraw/index.html', 'created_at' => datetime(),
+                    'variables' => ['amount' => $row['amount'], 'remark' => $remark],
                 ]);
-                return json(message('处理成功', true));
+                return json(message('feedback.handle_success', true));
             }
 
             if ($action === 'reject') {
                 $id = intval($post['id'] ?? 0);
-                $remark = trim($post['remark'] ?? '');
-                if (empty($remark)) return json(message('请填写驳回原因', false));
-                $row = \think\facade\Db::name('withdraw')->where('id', $id)->find();
-                if (!$row) return json(message('记录不存在', false));
-                if ($row['status'] !== 'pending') return json(message('当前状态不可处理', false));
-                \think\facade\Db::startTrans();
+                $remark = sf_plain_text($post['remark'] ?? '', 500);
+                if ($id <= 0) return json(message('withdraw.record_not_found', false));
+                if (empty($remark)) return json(message('withdraw.reject_reason_required', false));
                 try {
-                    $amount = floatval($row['amount']);
-                    $user = \think\facade\Db::name('user')->where('id', intval($row['user_id']))->find();
-                    $newBalance = round(floatval($user['balance']) + $amount, 2);
-                    \think\facade\Db::name('user')->where('id', intval($row['user_id']))->data(['balance' => $newBalance])->update();
-                    \app\common\model\BalanceLogModel::add(intval($row['user_id']), 'withdraw_reject', $amount, "提现驳回，返还 {$amount} 元，原因：{$remark}");
-                    \think\facade\Db::name('withdraw')->where('id', $id)->data([
-                        'status' => 'rejected', 'admin_remark' => $remark,
-                        'handled_at' => datetime(), 'updated_at' => datetime(),
-                    ])->update();
-                    \think\facade\Db::commit();
+                    $result = \think\facade\Db::transaction(function () use ($id, $remark) {
+                        $row = \think\facade\Db::name('withdraw')->where('id', $id)->lock(true)->find();
+                        if (!$row) throw new \RuntimeException(t('withdraw.record_not_found'));
+                        if ((string)$row['status'] !== 'pending') throw new \RuntimeException(t('withdraw.status_not_processable'));
+
+                        $amount = sf_money_format($row['amount']);
+                        $userId = intval($row['user_id']);
+                        $user = \think\facade\Db::name('user')->where('id', $userId)->lock(true)->find();
+                        if (!$user) throw new \RuntimeException(t('withdraw.user_not_found'));
+
+                        $updated = \think\facade\Db::name('withdraw')
+                            ->where('id', $id)
+                            ->where('status', 'pending')
+                            ->data([
+                                'status' => 'rejected', 'admin_remark' => $remark,
+                                'handled_at' => datetime(), 'updated_at' => datetime(),
+                            ])->update();
+                        if ($updated !== 1) throw new \RuntimeException(t('withdraw.status_not_processable'));
+
+                        if (!WithdrawableBalanceService::restoreWithdrawal(
+                            $userId,
+                            $amount,
+                            'withdraw_reject',
+                            t('withdraw.balance_log_reject', ['amount' => $amount, 'reason' => $remark])
+                        )) {
+                            throw new \RuntimeException(t('withdraw.restore_failed'));
+                        }
+                        return ['row' => $row, 'amount' => $amount];
+                    });
+                    $row = $result['row'];
+                    $amount = $result['amount'];
                     \app\common\model\NotificationModel::add([
-                        'user_id' => intval($row['user_id']), 'title' => '提现被驳回',
-                        'content' => "您的提现申请 {$amount} 元已被驳回，原因：{$remark}，金额已返还余额",
+                        'user_id' => intval($row['user_id']), 'title' => t('withdraw.notification_rejected_title'),
+                        'content' => t('withdraw.notification_rejected_content', ['amount' => $amount, 'reason' => $remark]),
                         'type' => 'withdraw_rejected', 'link' => '/Withdraw/index.html', 'created_at' => datetime(),
+                        'variables' => ['amount' => $amount, 'remark' => $remark],
                     ]);
-                    return json(message('驳回成功，金额已返还用户', true));
-                } catch (\Exception $e) {
-                    \think\facade\Db::rollback();
+                    return json(message('withdraw.reject_success', true));
+                } catch (\Throwable $e) {
                     return json(message($e->getMessage(), false));
                 }
             }
 
             // List
-            $limit = input('post.limit', 15, 'intval');
-            $page = input('post.current_page', 1, 'intval');
+            $limit = sf_page_limit(input('post.limit', null), 15);
+            $page = sf_page_number(input('post.current_page', null));
             $query = \think\facade\Db::name('withdraw')->alias('w')
                 ->join('user u', 'w.user_id = u.id', 'left')
                 ->order('w.id', 'desc')
                 ->field('w.*, u.username');
             $list = $query->paginate(['list_rows' => $limit, 'page' => $page]);
-            return json(message('ok', true, ['data' => $list->items(), 'total' => $list->total()]));
+            $items = array_map(static function (array $row): array {
+                $row['username'] = sf_plain_text($row['username'] ?? '', 150);
+                $row['phone'] = preg_replace('/[^0-9+ -]/', '', (string)($row['phone'] ?? ''));
+                $row['real_name'] = sf_plain_text($row['real_name'] ?? '', 50);
+                $row['user_remark'] = sf_plain_text($row['user_remark'] ?? '', 200);
+                $row['admin_remark'] = sf_plain_text($row['admin_remark'] ?? '', 500);
+                $row['qr_image'] = sf_safe_url($row['qr_image'] ?? '', true);
+                $row['transfer_image'] = sf_safe_url($row['transfer_image'] ?? '', true);
+                return $row;
+            }, $list->items());
+            return json(message('ok', true, ['data' => $items, 'total' => $list->total()]));
         }
         return $this->render();
     }

@@ -1,32 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>支付结果</title>
+    <title>{:t('payment_ui.pay_result_title')}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/favicon.ico" />
-    <style>
-        *{box-sizing:border-box;margin:0;padding:0;font-family:Lantinghei SC,Open Sans,Arial,Hiragino Sans GB,Microsoft YaHei,STHeiti,WenQuanYi Micro Hei,SimSun,sans-serif}
-        body{padding:50px 12px;background:#edf1f4;color:#333}
-        .system-message{word-break:break-word;margin:0 auto;padding:34px 18px;max-width:640px;background:#fff;box-shadow:1px 1px 1px hsla(0,0%,39%,.1);text-align:center}
-        .system-message h1{margin-bottom:12px;color:#444;font-weight:400;font-size:30px;line-height:1.35}
-        .system-message p{font-size:14px;line-height:24px;color:#666}
-        .system-message .btn{display:inline-block;margin-top:18px;width:138px;height:32px;border:1px solid #44a0e8;border-radius:30px;color:#44a0e8;text-align:center;font-size:16px;line-height:32px;text-decoration:none}
-        .success .btn{border-color:#69bf4e;color:#69bf4e}
-        .error .btn{border-color:#ff8992;color:#ff8992}
-        @media (max-width:480px){.system-message h1{font-size:24px}}
-    </style>
+    <link rel="stylesheet" href="/Assets/css/system-message.css?v=20261004" />
+    <link rel="stylesheet" href="/Assets/css/payment.css?v=20261004" />
 </head>
-<body>
+<body class="payment-page epay-return">
 <div class="system-message {if condition='$success'}success{else/}error{/if}">
     <h1>{$msg}</h1>
-    {notempty name="trade_no"}<p>订单号：{$trade_no}</p>{/notempty}
+    {notempty name="trade_no"}<p>{:t('payment_ui.merchant_order_no')}{$trade_no}</p>{/notempty}
     {if condition="$success"}
-    <p>支付成功，正在关闭付款窗口...</p>
+    <p>{:t('payment_ui.pay_success_closing')}</p>
     {else/}
-    <p>页面将在 <span id="wait">{$time}</span> 秒后自动跳转</p>
+    <p>{:t('common.page_auto_redirect', ['time' => $time])}</p>
     {/if}
-    <a id="href" href="{$url}" class="btn">{if condition='$success'}完成{else/}返回首页{/if}</a>
+    <a id="href" href="{$url}" class="btn">{if condition='$success'}{:t('common.complete')}{else/}{:t('common.go_back')}{/if}</a>
 </div>
 <script>
 (function () {

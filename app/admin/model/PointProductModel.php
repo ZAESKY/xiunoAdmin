@@ -18,8 +18,8 @@ class PointProductModel extends BaseModel
     public function list()
     {
         $post = request()->post();
-        $limit = !empty($post['limit']) ? $post['limit'] : 10;
-        $currentPage = !empty($post['current_page']) ? $post['current_page'] : 1;
+        $limit = sf_page_limit($post['limit'] ?? null, 10);
+        $currentPage = sf_page_number($post['current_page'] ?? null);
         $data = $this->buildSearchWhere('id|name', 'text', 'status');
 
         return self::order('id', 'desc')->where($data)->paginate([
@@ -39,22 +39,22 @@ class PointProductModel extends BaseModel
         $rewardItems = $this->parseRewardItems((string)($post['reward_info'] ?? ''));
 
         if ($name === '') {
-            return message('请填写商品名称', false);
+            return message('point_product.name_required', false);
         }
         if ($requiredPoints <= 0) {
-            return message('兑换所需积分必须大于0', false);
+            return message('point_product.points_positive', false);
         }
         if ($exchangeLimit < 0) {
-            return message('兑换上限不能小于0', false);
+            return message('point_product.limit_non_negative', false);
         }
         if (empty($rewardItems)) {
-            return message('请填写奖品信息，一行一个', false);
+            return message('point_product.reward_required', false);
         }
 
         $data = [
             'name' => $name,
             'image' => trim((string)($post['image'] ?? '')),
-            'description' => trim((string)($post['description'] ?? '')),
+            'description' => clean_rich_text($post['description'] ?? ''),
             'type' => 'virtual_goods',
             'stock' => count($rewardItems),
             'required_points' => $requiredPoints,

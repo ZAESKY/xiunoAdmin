@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\common\controller\Backend;
 use app\admin\service\FeedbackService;
 use app\common\model\NotificationModel;
+use app\common\service\PluginStorageService;
 
 class Feedback extends Backend
 {
@@ -29,35 +30,38 @@ class Feedback extends Backend
 
     public function handle()
     {
+        if (!IS_POST) {
+            return json(message('common.illegal_request', false), 405);
+        }
         return json($this->service->handle());
     }
 
     public function uploadImage()
     {
+        if (!IS_POST) {
+            return json(['code' => 1, 'msg' => t('common.illegal_request')], 405);
+        }
         try {
             $file = request()->file('file');
             if (!$file) {
-                return json(['code' => 1, 'msg' => '请选择图片']);
+                return json(['code' => 1, 'msg' => t('upload.please_select_image')]);
             }
             $allowedExt = 'jpg,jpeg,png,gif,bmp,webp';
             $maxSize = 5 * 1024 * 1024;
             $ext = strtolower($file->getOriginalExtension());
             if (!in_array($ext, explode(',', $allowedExt))) {
-                return json(['code' => 1, 'msg' => '仅支持 jpg/png/gif/bmp/webp 图片']);
+                return json(['code' => 1, 'msg' => t('feedback.image_type_error')]);
             }
             if ($file->getSize() > $maxSize) {
-                return json(['code' => 1, 'msg' => '图片不能超过5MB']);
+                return json(['code' => 1, 'msg' => t('feedback.image_size_error')]);
             }
-            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR . date('Ymd');
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $fileName = md5(uniqid(mt_rand(), true)) . '.' . $ext;
-            $info = $file->move($uploadDir, $fileName);
-            if (!$info) {
-                return json(['code' => 1, 'msg' => $file->getError()]);
-            }
-            $url = '/upload/temp/' . date('Ymd') . '/' . $fileName;
+            $stored = (new PluginStorageService())->storeUploadedFile(
+                $file,
+                'feedback',
+                explode(',', $allowedExt),
+                $maxSize
+            );
+            $url = $stored['url'];
             return json(['code' => 0, 'msg' => 'ok', 'data' => ['src' => $url, 'title' => $file->getOriginalName()]]);
         } catch (\Throwable $e) {
             return json(['code' => 1, 'msg' => $e->getMessage()]);
@@ -87,6 +91,9 @@ class Feedback extends Backend
 
     public function notificationRead()
     {
+        if (!IS_POST) {
+            return json(message('common.illegal_request', false), 405);
+        }
         try {
             $id = request()->post('id', 0);
             NotificationModel::markRead((int) $id, 0, true);
@@ -98,6 +105,9 @@ class Feedback extends Backend
 
     public function notificationReadAll()
     {
+        if (!IS_POST) {
+            return json(message('common.illegal_request', false), 405);
+        }
         try {
             NotificationModel::markAllRead(0, true);
             return json(message('', true));

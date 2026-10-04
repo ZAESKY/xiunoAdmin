@@ -35,14 +35,14 @@ class FeedbackModel extends BaseModel
     public function submit(array $userInfo)
     {
         $post = request()->post();
-        $title = trim((string)($post['title'] ?? ''));
-        $content = $post['content'] ?? '';
+        $title = trim(strip_tags((string)($post['title'] ?? '')));
+        $content = clean_rich_text($post['content'] ?? '');
         $type = !empty($post['type']) && in_array($post['type'], ['bug', 'feature', 'other']) ? $post['type'] : 'other';
 
         if (empty($title)) {
             throw new Exception(t('feedback.title_required'));
         }
-        if (empty(strip_tags($content))) {
+        if (!rich_text_has_content($content)) {
             throw new Exception(t('feedback.content_required'));
         }
 
@@ -79,6 +79,7 @@ class FeedbackModel extends BaseModel
                     'title'    => $title,
                 ]),
                 'type'       => 'feedback_new',
+                'variables'  => ['username' => $username, 'feedback_title' => $title],
                 'is_read'    => 0,
                 'created_at' => datetime(),
             ]);
@@ -91,8 +92,8 @@ class FeedbackModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = !empty($post['limit']) ? $post['limit'] : 10;
-            $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
 
             $data = [];
             $text = $post['text'] ?? '';
@@ -105,7 +106,7 @@ class FeedbackModel extends BaseModel
             }
             $data[] = ['user_id', '=', $userId];
 
-            return self::alias('f')
+            $list = self::alias('f')
                 ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
                 ->field('f.*, u.username')
                 ->order('f.id', 'desc')
@@ -113,6 +114,13 @@ class FeedbackModel extends BaseModel
                     'list_rows' => $limit,
                     'page'      => $current_page,
                 ]);
+            $list->each(static function ($item) {
+                $item['title'] = trim(strip_tags((string)($item['title'] ?? '')));
+                $item['content'] = clean_rich_text($item['content'] ?? '');
+                $item['reply'] = clean_rich_text($item['reply'] ?? '');
+                return $item;
+            });
+            return $list;
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }

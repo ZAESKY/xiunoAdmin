@@ -3,7 +3,7 @@
 <html lang="{:t('common.lang_code')}">
 <head>
     <meta charset="utf-8">
-    <title>{$title}|找回密码</title>
+    <title>{$title}|{:t('password_recovery.page_title')}</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -25,42 +25,44 @@
     }
 </style>
 <body style="background-image: url('{__IMG__}background.svg');background-size: cover;">
+<a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}" style="position:absolute;right:24px;top:18px;color:#fff;z-index:3;">{:t('common.lang_toggle')}</a>
 <div class="login-wrapper layui-anim layui-anim-scale">
     <form class="layui-form layui-card-body" style="padding: 25px 28px;opacity:0.95;">
-        <h2>找回密码</h2>
+        <h2>{:t('password_recovery.page_title')}</h2>
         <div class="layui-form-item">
-            <input type="text" name="username" placeholder="请输入用户名" class="layui-input" lay-verType="tips" lay-verify="required" autocomplete="off">
+            <input type="text" name="username" placeholder="{:t('password_recovery.username_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required" autocomplete="off">
         </div>
         <div class="layui-form-item">
-            <input type="text" name="email" placeholder="请输入绑定的邮箱" class="layui-input" lay-verType="tips" lay-verify="required|email">
+            <input type="text" name="email" placeholder="{:t('password_recovery.email_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required|email">
         </div>
         <div class="layui-form-item">
             <div class="layui-input-block layui-col-space5" style="margin-left:0;">
                 <div class="layui-col-lg7 layui-col-md7 layui-col-sm7 layui-col-xs7" style="padding-left:0;">
-                    <input type="text" name="code" placeholder="请输入验证码" class="layui-input" lay-verType="tips" lay-verify="required">
+                    <input type="text" name="code" placeholder="{:t('password_recovery.code_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required">
                 </div>
                 <div class="layui-col-lg5 layui-col-md5 layui-col-sm5 layui-col-xs5" style="padding-right:0;">
-                    <button type="button" class="layui-btn layui-btn-primary layui-btn-fluid" id="sendResetCode">获取验证码</button>
+                    <button type="button" class="layui-btn layui-btn-primary layui-btn-fluid" id="sendResetCode">{:t('password_recovery.send_code')}</button>
                 </div>
             </div>
         </div>
         <div class="layui-form-item">
-            <input type="password" name="newPassword" placeholder="请输入新密码(至少6位)" class="layui-input" lay-verType="tips" lay-verify="required">
+            <input type="password" name="newPassword" placeholder="{:t('password_recovery.new_password_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required">
         </div>
         <div class="layui-form-item">
-            <input type="password" name="confirmNewPassword" placeholder="请确认新密码" class="layui-input" lay-verType="tips" lay-verify="required">
+            <input type="password" name="confirmNewPassword" placeholder="{:t('password_recovery.confirm_password_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required">
         </div>
         <div class="layui-form-item">
-            <button type="button" class="layui-btn layui-btn-fluid" id="resetBtn">重 置 密 码</button>
+            <button type="button" class="layui-btn layui-btn-fluid" id="resetBtn">{:t('password_recovery.reset_button')}</button>
         </div>
         <div class="layui-form-item" style="text-align:center;margin-bottom:0;">
-            <a href="{:url('/login/index')}" class="layui-link">想起密码了？返回登录</a>
+            <a href="{:url('/login/index')}" class="layui-link">{:t('password_recovery.back_login')}</a>
         </div>
     </form>
 </div>
 
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v=20260501"></script>
 <script type="text/javascript" src="{__JS__}common.js?v=321"></script>
 <script>
@@ -76,25 +78,25 @@
             btn.prop("disabled", true).addClass("layui-disabled");
             var timer = setInterval(function() {
                 countdown--;
-                if (countdown <= 0) { clearInterval(timer); btn.prop("disabled", false).removeClass("layui-disabled").text("获取验证码"); }
-                else { btn.text(countdown + "s后重试"); }
+                if (countdown <= 0) { clearInterval(timer); btn.prop("disabled", false).removeClass("layui-disabled").text(t('password_recovery.send_code')); }
+                else { btn.text(countdown + t('password_recovery.retry_suffix')); }
             }, 1000);
         }
 
         $('#sendResetCode').click(function() {
             var username = $('input[name=username]').val();
             var email = $('input[name=email]').val();
-            if (!username) { notice.warning({title:'提示', message:'请先输入用户名', position:'topCenter', displayMode:'2'}); return; }
-            if (!email) { notice.warning({title:'提示', message:'请先输入邮箱', position:'topCenter', displayMode:'2'}); return; }
+            if (!username) { notice.warning({title:t('common.nice_tips'), message:t('login.please_enter_username'), position:'topCenter', displayMode:'2'}); return; }
+            if (!email) { notice.warning({title:t('common.nice_tips'), message:t('registration.enter_email'), position:'topCenter', displayMode:'2'}); return; }
             if (countdown > 0) return;
-            notice.msg('发送中...', {icon:4, close:true});
+            notice.msg(t('registration.sending'), {icon:4, close:true});
             $.ajax({
                 type: "POST", url: "{:url('/login/sendResetCode')}",
                 data: {username: username, email: email}, dataType: "json",
                 success: function(r) {
                     notice.destroy();
-                    if (r.code == 0) { notice.msg('验证码已发送', {icon:1}); setTimer($('#sendResetCode'), 60); }
-                    else { notice.error({title:'提示', message:r.msg, position:'topCenter', displayMode:'2'}); }
+                    if (r.code == 0) { notice.msg(t('password_recovery.code_sent'), {icon:1}); setTimer($('#sendResetCode'), 60); }
+                    else { notice.error({title:t('common.nice_tips'), message:r.msg, position:'topCenter', displayMode:'2'}); }
                 }
             });
         });
@@ -103,11 +105,11 @@
             var username = $('input[name=username]').val(), email = $('input[name=email]').val();
             var code = $('input[name=code]').val(), pass = $('input[name=newPassword]').val();
             var cpass = $('input[name=confirmNewPassword]').val();
-            if (!username) { layer.msg('请输入用户名'); return; }
-            if (!email) { layer.msg('请输入绑定的邮箱'); return; }
-            if (!code) { layer.msg('请输入验证码'); return; }
-            if (!pass || pass.length < 6) { layer.msg('新密码至少6位'); return; }
-            if (pass != cpass) { layer.msg('两次密码不一致'); return; }
+            if (!username) { layer.msg(t('password_recovery.username_placeholder')); return; }
+            if (!email) { layer.msg(t('password_recovery.email_placeholder')); return; }
+            if (!code) { layer.msg(t('password_recovery.code_placeholder')); return; }
+            if (!pass || pass.length < 6) { layer.msg(t('password_recovery.password_length')); return; }
+            if (pass != cpass) { layer.msg(t('password_recovery.password_mismatch')); return; }
             var load = layer.load();
             $.ajax({
                 type: "POST", url: "{:url('/login/forgot')}",
@@ -115,10 +117,10 @@
                 dataType: "json",
                 success: function(r) {
                     layer.close(load);
-                    if (r.code == 0) { layer.msg('密码重置成功！', {icon:1}, function(){ location.href = '{:url("/login/index")}'; }); }
+                    if (r.code == 0) { layer.msg(t('password_recovery.reset_success'), {icon:1}, function(){ location.href = '{:url("/login/index")}'; }); }
                     else { layer.msg(r.msg); }
                 },
-                error: function() { layer.close(load); layer.msg('服务器错误'); }
+                error: function() { layer.close(load); layer.msg(t('common.server_error')); }
             });
         });
     });

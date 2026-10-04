@@ -33,7 +33,7 @@ class QueryService extends BaseService
             $list = $this->blackModel->getList($where);
             return json(message('success', true, $list));
         }catch (Exception $e){
-            return json(message($e->getMessage(), false));
+            return json(message(sf_public_exception_message($e, t('common.query_failed')), false));
         }
     }
 }

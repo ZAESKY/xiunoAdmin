@@ -7,7 +7,7 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('feedback.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_name')}"/>
                         </div>
@@ -37,14 +37,14 @@
 
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
 <script type="text/html" id="SF_TbState">
     <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="显示|隐藏" {{d.status==1?'checked':''}} style="display: none;"/>
-    <p style="display: none;">{{d.status==1?'显示':'隐藏'}}</p>
+           lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}} style="display: none;"/>
+    <p style="display: none;">{{d.status==1?'{:t("common.show")}':'{:t("common.hide")}'}}</p>
 </script>
 <script type="text/html" id="SF_Tbid">
     <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
@@ -54,28 +54,28 @@
     <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">模式名称:</label>
+            <label class="layui-form-label layui-form-required">{:t('check_type_ui.mode_name')}:</label>
             <div class="layui-input-block">
-                <input name="name" placeholder="请输入模式的名称" class="layui-input"
+                <input name="name" placeholder="{:t('check_type_ui.mode_name_placeholder')}" class="layui-input"
                        lay-verType="tips" lay-verify="required" required/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">方法名称:</label>
+            <label class="layui-form-label layui-form-required">{:t('check_type_ui.method_name')}:</label>
             <div class="layui-input-block">
-                <input name="type" placeholder="请输入方法的名称" class="layui-input"
+                <input name="type" placeholder="{:t('check_type_ui.method_name_placeholder')}" class="layui-input"
                        lay-verType="tips" lay-verify="required" required/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">状态:</label>
+            <label class="layui-form-label layui-form-required">{:t('common.status')}:</label>
             <div class="layui-input-block">
                 <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -100,8 +100,8 @@
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>{:t('common.add')}</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>',
                 '</p>'].join(''),
             cellMinWidth: 100,
             request: {
@@ -119,11 +119,11 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
-                {field: 'name', title: '模式名称', sort: true, width: 180},
-                {field: 'type', title: '方法名称', sort: true, width: 180},
-                {field: 'addtime', title: '添加时间', sort: true, width: 200},
-                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, width: 100},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 200}
+                {field: 'name', title: '{:t("check_type_ui.mode_name")}', sort: true, width: 180},
+                {field: 'type', title: '{:t("check_type_ui.method_name")}', sort: true, width: 180},
+                {field: 'addtime', title: '{:t("common.add_time")}', sort: true, width: 200},
+                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, width: 100},
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 200}
             ]]
         });
 
@@ -151,7 +151,7 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
                 if (checkRows.data.length === 0) {
-                    layer.msg('请选择要删除的数据！', {icon: 2});
+                    layer.msg('{:t("confirm.please_select_data")}', {icon: 2});
                     return;
                 }
                 var ids = checkRows.data.map(function (d) {
@@ -165,7 +165,7 @@
         function showEditModel(mData) {
             admin.popupRight({
                 type: 1,
-                title: (mData ? '修改' : '添加') + '模式',
+                title: (mData ? '{:t("common.edit")}' : '{:t("common.add")}') + ' {:t("check_type_ui.mode")}',
                 content: $('#SF_EditDialog').html(),
                 success: function (layero, dIndex) {
                     // 回显表单数据
@@ -173,7 +173,7 @@
                     // 表单提交事件
                     form.on('submit(SF_EditSubmit)', function (data) {
                         //var loadIndex = layer.load(2);
-                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/CheckType/edit")}',
@@ -190,7 +190,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                             }
                         });
                         return false;
@@ -203,13 +203,13 @@
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm('{:t("auth_portal.confirm_delete")}', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/CheckType/drop")}' : '{:url("/CheckType/batchDrop")}',
@@ -226,7 +226,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
             });
@@ -234,7 +234,7 @@
 
         /* 修改用户状态 */
         form.on('switch(SF_TbStateCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/CheckType/setStatus")}',
@@ -251,7 +251,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });

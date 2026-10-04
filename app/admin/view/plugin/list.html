@@ -6,29 +6,29 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内容</label>
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="搜索插件名称/标识/作者"/>
+                            <input name="text" class="layui-input" placeholder="{:t('plugin_ui.search_placeholder')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
-                                <option value="">全部状态</option>
-                                <option value="0">待审核</option>
-                                <option value="1">已上架</option>
-                                <option value="2">已下架</option>
-                                <option value="3">审核拒绝</option>
+                                <option value="">{:t('feedback.all_statuses')}</option>
+                                <option value="0">{:t('plugin_ui.pending_review')}</option>
+                                <option value="1">{:t('user_home.published')}</option>
+                                <option value="2">{:t('plugin_ui.off_shelf')}</option>
+                                <option value="3">{:t('plugin_ui.review_rejected')}</option>
                             </select>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common.search')}
                         </button>
                         <button type="button" class="layui-btn layui-btn-normal" onclick="showEditDialog(0)">
-                            <i class="layui-icon">&#xe654;</i>添加插件
+                            <i class="layui-icon">&#xe654;</i>{:t('plugin_ui.add_plugin')}
                         </button>
                     </div>
                 </div>
@@ -39,34 +39,51 @@
     </div>
 </div>
 
+<style>
+    /* 操作按钮必须保持单行；列宽不足时由表格主体横向滚动。 */
+    #SF_Table + .layui-table-view td[data-off="true"] > .layui-table-cell {
+        height: 40px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .plugin-table-actions {
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+</style>
+
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
-    <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="purchases"><i class="layui-icon layui-icon-rmb"></i>购买</a>
-    <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="downloads"><i class="layui-icon layui-icon-download-circle"></i>下载</a>
-    <a class="layui-btn layui-btn-sm" lay-event="status"><i class="layui-icon">&#xe605;</i>状态</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>删除</a>
+    <div class="plugin-table-actions">
+        <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="edit"><i class="layui-icon">&#xe642;</i>{:t('common_ui.edit')}</a>
+        <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="purchases"><i class="layui-icon layui-icon-rmb"></i>{:t('plugin_ui.purchase')}</a>
+        <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="downloads"><i class="layui-icon layui-icon-download-circle"></i>{:t('wxpay_ui.download')}</a>
+        <a class="layui-btn layui-btn-sm layui-btn-warm" lay-event="rewards"><i class="layui-icon layui-icon-gift"></i>{:t('plugin_ui.reward')}</a>
+        <a class="layui-btn layui-btn-sm" lay-event="status"><i class="layui-icon">&#xe605;</i>{:t('common.status')}</a>
+        <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</a>
+    </div>
 </script>
 
 <!-- 状态模板 -->
 <script type="text/html" id="SF_TbStatus">
     {{# if(d.status == 0){ }}
-        <span class="layui-badge layui-badge-orange">待审核</span>
+        <span class="layui-badge layui-badge-orange">{:t('plugin_ui.pending_review')}</span>
     {{# } else if(d.status == 1){ }}
-        <span class="layui-badge layui-badge-green">已上架</span>
+        <span class="layui-badge layui-badge-green">{:t('user_home.published')}</span>
     {{# } else if(d.status == 2){ }}
-        <span class="layui-badge layui-badge-gray">已下架</span>
+        <span class="layui-badge layui-badge-gray">{:t('plugin_ui.off_shelf')}</span>
     {{# } else if(d.status == 3){ }}
-        <span class="layui-badge layui-badge-red">审核拒绝</span>
+        <span class="layui-badge layui-badge-red">{:t('plugin_ui.review_rejected')}</span>
     {{# } }}
 </script>
 
 <!-- 价格模板 -->
 <script type="text/html" id="SF_TbPrice">
     {{# if(d.price == 0){ }}
-        <span class="layui-badge layui-badge-green">免费</span>
+        <span class="layui-badge layui-badge-green">{:t('upgrade.free')}</span>
     {{# } else if(d.pay_type == 'points') { }}
-        <span class="layui-badge layui-badge-orange">{{parseInt(d.price)}} 积分</span>
+        <span class="layui-badge layui-badge-orange">{{parseInt(d.price)}} {:t('accounting.point_unit')}</span>
     {{# } else { }}
         <span class="layui-badge layui-badge-orange">¥{{d.price}}</span>
     {{# } }}
@@ -74,9 +91,9 @@
 
 <script type="text/html" id="SF_TbPublish">
     {{# if(d.publish_type == 1){ }}
-        <span class="layui-badge layui-badge-blue">定时发布</span>
+        <span class="layui-badge layui-badge-blue">{:t('plugin_ui.publish_scheduled')}</span>
     {{# } else { }}
-        <span class="layui-badge layui-bg-gray">立即发布</span>
+        <span class="layui-badge layui-bg-gray">{:t('plugin_ui.publish_now')}</span>
     {{# } }}
 </script>
 
@@ -88,6 +105,18 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     var form = layui.form;
     var table = layui.table;
     var notice = layui.notice;
+    var rewardConfig = {
+        enabled: parseInt('{$pluginRewardConfig.enabled|default=0}', 10) === 1,
+        points: parseInt('{$pluginRewardConfig.points|default=0}', 10) || 0,
+        balance: '{$pluginRewardConfig.balance|default="0.00"}',
+        originalOnly: parseInt('{$pluginRewardConfig.original_only|default=1}', 10) === 1,
+        monthlyLimit: parseInt('{$pluginRewardConfig.monthly_limit|default=0}', 10) || 0,
+        minAccountDays: parseInt('{$pluginRewardConfig.min_account_days|default=0}', 10) || 0
+    };
+
+    function esc(value) {
+        return $('<div>').text(value == null ? '' : String(value)).html();
+    }
 
     /* 渲染表格 */
     var insTb = table.render({
@@ -98,7 +127,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         skin: 'line',
         size: 'lg',
         toolbar: ['<p>',
-            '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>批量删除</button>',
+            '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t('plugin_ui.batch_delete')}</button>',
             '</p>'].join(''),
         cellMinWidth: 100,
         request: {
@@ -116,39 +145,51 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         cols: [[
             {type: 'checkbox', fixed: true},
             {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
-            {field: 'icon', title: '图标', width: 80, templet: function(d){
+            {field: 'icon', title: '{:t("plugin_ui.icon")}', width: 80, templet: function(d){
                 return '<img src="'+(d.icon || '/Assets/img/default-plugin.png')+'" style="width:50px;height:50px;object-fit:cover;">';
             }},
-            {field: 'name', title: '插件名称', minWidth: 150},
-            {field: 'slug', title: '插件标识', minWidth: 120},
-            {field: 'version', title: '版本', width: 100},
-            {field: 'author', title: '作者', width: 120},
-            {field: 'origin_type', title: '来源', width: 80, templet: function(d){
-                return d.origin_type == 2 ? '<span class="layui-badge layui-badge-orange">转载</span>' : '<span class="layui-badge layui-badge-green">原创</span>';
+            {field: 'name', title: '{:t("plugin_ui.name")}', minWidth: 150},
+            {field: 'slug', title: '{:t("plugin_ui.slug")}', minWidth: 120},
+            {field: 'version', title: '{:t("version_ui.version_suffix")}', width: 100},
+            {field: 'author', title: '{:t("plugin_ui.author")}', width: 120},
+            {field: 'origin_type', title: '{:t("accounting.source")}', width: 80, templet: function(d){
+                return d.origin_type == 2 ? '<span class="layui-badge layui-badge-orange">{:t('plugin_ui.repost')}</span>' : '<span class="layui-badge layui-badge-green">{:t('plugin_ui.original')}</span>';
             }},
-            {field: 'user_id', title: '发布者', width: 80, templet: function(d){
-                return d.user_id == 0 ? '管理员' : 'UID:'+d.user_id;
+            {field: 'user_id', title: '{:t("plugin_ui.publisher")}', width: 80, templet: function(d){
+                return d.user_id == 0 ? '{:t("feedback.admin_role")}' : 'UID:'+d.user_id;
             }},
-            {field: 'price', title: '价格', width: 100, templet: '#SF_TbPrice'},
-            {field: 'publish_type', title: '发布方式', width: 105, templet: '#SF_TbPublish'},
-            {field: 'publish_time', title: '发布时间', minWidth: 160, templet: function(d){
+            {field: 'price', title: '{:t("plugin_ui.price")}', width: 100, templet: '#SF_TbPrice'},
+            {field: 'publish_type', title: '{:t("plugin_ui.publish_method")}', width: 105, templet: '#SF_TbPublish'},
+            {field: 'publish_time', title: '{:t("plugin_ui.publish_time")}', minWidth: 160, templet: function(d){
                 return d.publish_type == 1 ? (d.publish_time || '-') : (d.published_at || '-');
             }},
-            {field: 'download_count', title: '下载次数', width: 100, sort: true},
-            {field: 'download_record_count', title: '下载记录', width: 100, templet: function(d){
+            {field: 'download_count', title: '{:t("common_ui.download_count")}', width: 100, sort: true},
+            {field: 'download_record_count', title: '{:t("plugin_ui.download_records")}', width: 100, templet: function(d){
                 return '<a lay-event="downloads" style="color:#2d8cf0;">'+(d.download_record_count || 0)+'</a>';
             }},
-            {field: 'purchase_count', title: '购买记录', width: 100, templet: function(d){
+            {field: 'purchase_count', title: '{:t("plugin_ui.purchase_records")}', width: 100, templet: function(d){
                 return '<a lay-event="purchases" style="color:#2d8cf0;">'+(d.purchase_count || 0)+'</a>';
             }},
-            {field: 'rating_avg', title: '评分', width: 100, sort: true, templet: function(d){
-                return d.rating_avg + ' (' + d.rating_count + '人)';
+            {field: 'rating_avg', title: '{:t("plugin_ui.rating")}', width: 100, sort: true, templet: function(d){
+                return d.rating_avg + ' (' + d.rating_count + ' {:t("plugin_ui.people_suffix")})';
             }},
-            {field: 'comment_count', title: '评论数', width: 100},
-            {field: 'status', title: '状态', width: 100, templet: '#SF_TbStatus'},
-            {field: 'sort', title: '排序', width: 80, sort: true},
-            {field: 'created_at', title: '创建时间', minWidth: 160},
-            {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 330, fixed: 'right'}
+            {field: 'comment_count', title: '{:t("plugin_ui.comment_count")}', width: 100},
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#SF_TbStatus'},
+            {field: 'reward_status', title: '{:t("plugin_ui.publish_reward")}', minWidth: 150, templet: function(d){
+                if (d.reward_status === 'issued') {
+                    var parts = [];
+                    if (parseInt(d.reward_points, 10) > 0) parts.push(parseInt(d.reward_points, 10) + '{:t("accounting.point_unit")}');
+                    if (parseFloat(d.reward_balance) > 0) parts.push('¥' + d.reward_balance);
+                    return '<span class="layui-badge layui-badge-green">{:t('plugin_ui.reward_issued')}</span> ' + esc(parts.join(' + '));
+                }
+                if (d.reward_status === 'skipped') {
+                    return '<span class="layui-badge layui-badge-gray" title="'+esc(d.reward_reason)+'">{:t('plugin_ui.reward_not_issued')}</span>';
+                }
+                return '<span style="color:#999;">{:t('plugin_ui.reward_unprocessed')}</span>';
+            }},
+            {field: 'sort', title: '{:t("plugin_ui.sort")}', width: 80, sort: true},
+            {field: 'created_at', title: '{:t("payment_ui.create_time")}', minWidth: 160},
+            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 480, unresize: true}
         ]]
     });
 
@@ -166,6 +207,8 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             showRecordDialog('purchase', obj.data);
         } else if (obj.event === 'downloads') {
             showRecordDialog('download', obj.data);
+        } else if (obj.event === 'rewards') {
+            showRewardDialog(obj.data);
         } else if (obj.event === 'status') {
             showStatusDialog(obj.data);
         } else if (obj.event === 'del') {
@@ -178,7 +221,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         if (obj.event === 'del') {
             var checkRows = table.checkStatus('SF_Table');
             if (checkRows.data.length === 0) {
-                notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                 return;
             }
             var ids = checkRows.data.map(function (d) {
@@ -190,13 +233,13 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
 
     /* 删除 */
     function doDel(obj) {
-        layer.confirm('确定要删除选中数据吗？', {
+        layer.confirm('{:t("auth_portal.confirm_delete")}', {
             skin: 'layui-layer-admin',
             icon: 3,
             shade: .1
         }, function (i) {
             layer.close(i);
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: obj.data ? '{:url("/Plugin/drop")}' : '{:url("/Plugin/batchDrop")}',
@@ -213,7 +256,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });
@@ -223,7 +266,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     window.showEditDialog = function(id) {
         layer.open({
             type: 2,
-            title: id > 0 ? '编辑插件' : '添加插件',
+            title: id > 0 ? '{:t("plugin_ui.edit_plugin")}' : '{:t("plugin_ui.add_plugin")}',
             content: '{:url("/Plugin/edit")}?id=' + id,
             area: ['90%', '90%'],
             maxmin: true,
@@ -237,7 +280,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         var tableId = 'plugin_record_table_' + type + '_' + data.id;
         layer.open({
             type: 1,
-            title: (type === 'purchase' ? '购买记录 - ' : '下载记录 - ') + data.name,
+            title: (type === 'purchase' ? '{:t("plugin_ui.purchase_records")} - ' : '{:t("plugin_ui.download_records")} - ') + data.name,
             area: ['90%', '78%'],
             maxmin: true,
             content: '<div style="padding:15px;"><table id="'+tableId+'" lay-filter="'+tableId+'"></table></div>',
@@ -256,22 +299,22 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                             return {code: res.code, msg: res.msg, count: res.data.data.total, data: res.data.data.data};
                         },
                         cols: [[
-                            {field:'order_no', title:'订单号', minWidth:190},
-                            {field:'user_id', title:'用户ID', width:90},
-                            {field:'app_id', title:'应用ID', width:90},
-                            {field:'price', title:'金额', width:100, templet:function(d){
-                                return d.pay_type === 'points' ? parseInt(d.price) + ' 积分' : '¥' + d.price;
+                            {field:'order_no', title:'{:t("plugin_ui.order_number")}', minWidth:190},
+                            {field:'user_id', title:'{:t("common_ui.user_id")}', width:90},
+                            {field:'app_id', title:'{:t("plugin_ui.app_id")}', width:90},
+                            {field:'price', title:'{:t("accounting.amount")}', width:100, templet:function(d){
+                                return d.pay_type === 'points' ? parseInt(d.price) + ' {:t("accounting.point_unit")}' : '¥' + d.price;
                             }},
-                            {field:'pay_type', title:'支付方式', width:100},
-                            {field:'status', title:'状态', width:100, templet:function(d){
-                                if (d.status == 1) return '<span class="layui-badge layui-badge-green">已支付</span>';
-                                if (d.status == 0) return '<span class="layui-badge layui-badge-orange">待支付</span>';
-                                if (d.status == 2) return '<span class="layui-badge layui-bg-gray">已取消</span>';
-                                if (d.status == 3) return '<span class="layui-badge layui-badge-red">已退款</span>';
+                            {field:'pay_type', title:'{:t("common_ui.payment_method")}', width:100},
+                            {field:'status', title:'{:t("common.status")}', width:100, templet:function(d){
+                                if (d.status == 1) return '<span class="layui-badge layui-badge-green">{:t('plugin_ui.paid')}</span>';
+                                if (d.status == 0) return '<span class="layui-badge layui-badge-orange">{:t('plugin_ui.pending_payment')}</span>';
+                                if (d.status == 2) return '<span class="layui-badge layui-bg-gray">{:t('plugin_ui.cancelled')}</span>';
+                                if (d.status == 3) return '<span class="layui-badge layui-badge-red">{:t('plugin_ui.refunded')}</span>';
                                 return '-';
                             }},
-                            {field:'paid_at', title:'支付时间', minWidth:160},
-                            {field:'created_at', title:'创建时间', minWidth:160}
+                            {field:'paid_at', title:'{:t("plugin_ui.payment_time")}', minWidth:160},
+                            {field:'created_at', title:'{:t("payment_ui.create_time")}', minWidth:160}
                         ]]
                     });
                 } else {
@@ -289,14 +332,14 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                         },
                         cols: [[
                             {field:'id', title:'ID', width:80},
-                            {field:'username', title:'用户', minWidth:120, templet:function(d){
+                            {field:'username', title:'{:t("admin_user.user_suffix")}', minWidth:120, templet:function(d){
                                 return d.username || ('UID:' + d.user_id);
                             }},
-                            {field:'app_id', title:'应用ID', width:90},
-                            {field:'plugin_version', title:'版本', width:100},
-                            {field:'order_id', title:'订单ID', width:100},
+                            {field:'app_id', title:'{:t("plugin_ui.app_id")}', width:90},
+                            {field:'plugin_version', title:'{:t("version_ui.version_suffix")}', width:100},
+                            {field:'order_id', title:'{:t("plugin_ui.order_id")}', width:100},
                             {field:'ip', title:'IP', width:140},
-                            {field:'created_at', title:'下载时间', minWidth:160}
+                            {field:'created_at', title:'{:t("plugin_ui.download_time")}', minWidth:160}
                         ]]
                     });
                 }
@@ -304,18 +347,56 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         });
     }
 
+    function showRewardDialog(data) {
+        var tableId = 'plugin_reward_table_' + data.id;
+        layer.open({
+            type: 1,
+            title: '{:t("plugin_ui.reward_records")} - ' + esc(data.name),
+            area: ['900px', '520px'],
+            content: '<div style="padding:15px;"><table id="'+tableId+'"></table></div>',
+            success: function() {
+                table.render({
+                    elem: '#' + tableId,
+                    url: '{:url("/Plugin/rewardRecords")}',
+                    method: 'post',
+                    page: true,
+                    skin: 'line',
+                    where: {plugin_id: data.id},
+                    request: {pageName: 'current_page', limitName: 'limit'},
+                    parseData: function(res){
+                        var page = res.data && res.data.data ? res.data.data : {total:0,data:[]};
+                        return {code: res.code, msg: res.msg, count: page.total || 0, data: page.data || []};
+                    },
+                    cols: [[
+                        {field:'id', title:'ID', width:70},
+                        {field:'status', title:'{:t("common.status")}', width:90, templet:function(d){
+                            return d.status === 'issued'
+                                ? '<span class="layui-badge layui-badge-green">{:t('plugin_ui.reward_issued')}</span>'
+                                : '<span class="layui-badge layui-badge-gray">{:t('plugin_ui.reward_not_issued')}</span>';
+                        }},
+                        {field:'points', title:'{:t("accounting.point_unit")}', width:90},
+                        {field:'balance', title:'{:t("plugin_ui.platform_balance_label")}', width:100, templet:function(d){ return '¥'+d.balance; }},
+                        {field:'reason', title:'{:t("accounting.description")}', minWidth:200, templet:function(d){ return esc(d.reason || '{:t("plugin_ui.first_approval")}'); }},
+                        {field:'admin_username', title:'{:t("plugin_ui.reviewer")}', width:100, templet:function(d){ return esc(d.admin_username || ('ID:'+d.approved_by)); }},
+                        {field:'approved_at', title:'{:t("plugin_ui.review_time")}', width:165}
+                    ]]
+                });
+            }
+        });
+    }
+
     /* 显示状态对话框 */
     function showStatusDialog(data) {
         var statusOptions = [
-            {value: 0, text: '待审核'},
-            {value: 1, text: '已上架'},
-            {value: 2, text: '已下架'},
-            {value: 3, text: '审核拒绝'}
+            {value: 0, text: '{:t("plugin_ui.pending_review")}'},
+            {value: 1, text: '{:t("user_home.published")}'},
+            {value: 2, text: '{:t("plugin_ui.off_shelf")}'},
+            {value: 3, text: '{:t("plugin_ui.review_rejected")}'}
         ];
 
         var html = '<div style="padding:20px;">';
         html += '<div class="layui-form-item">';
-        html += '<label class="layui-form-label">状态</label>';
+        html += '<label class="layui-form-label">{:t('common.status')}</label>';
         html += '<div class="layui-input-block">';
         html += '<select id="plugin_status">';
         statusOptions.forEach(function(opt) {
@@ -325,27 +406,38 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         html += '</div>';
         html += '</div>';
         html += '<div class="layui-form-item">';
-        html += '<label class="layui-form-label">审核备注</label>';
+        html += '<label class="layui-form-label">{:t('plugin_ui.review_note')}</label>';
         html += '<div class="layui-input-block">';
-        html += '<textarea id="audit_note" class="layui-textarea" placeholder="审核备注（可选）">'+(data.audit_note || '')+'</textarea>';
+        html += '<textarea id="audit_note" class="layui-textarea" placeholder="{:t('plugin_ui.review_note_placeholder')}">'+esc(data.audit_note || '')+'</textarea>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div class="layui-form-item" id="plugin_reward_row">';
+        html += '<label class="layui-form-label">{:t('plugin_ui.publish_reward')}</label>';
+        html += '<div class="layui-input-block">';
+        html += '<input type="checkbox" id="issue_reward" value="1" checked> {:t("plugin_ui.issue_on_first_approval")}';
+        var rewardParts = [];
+        if (rewardConfig.points > 0) rewardParts.push(rewardConfig.points + ' {:t("accounting.point_unit")}');
+        if (parseFloat(rewardConfig.balance) > 0) rewardParts.push(rewardConfig.balance + ' {:t("plugin_ui.platform_balance")}');
+        html += '<div id="plugin_reward_hint" style="font-size:12px;color:#999;margin-top:6px;line-height:20px;">{:t("plugin_ui.current_config")}：'+esc(rewardParts.join(' + ') || '{:t("plugin_ui.zero_reward")}')+'。{:t("plugin_ui.reward_validation_help")}</div>';
         html += '</div>';
         html += '</div>';
         html += '</div>';
 
         layer.open({
             type: 1,
-            title: '修改状态',
+            title: '{:t("plugin_ui.change_status")}',
             content: html,
-            area: ['500px', '300px'],
-            btn: ['确定', '取消'],
+            area: ['560px', '410px'],
+            btn: ['{:t("common.confirm")}', '{:t("common.cancel")}'],
             yes: function(index) {
                 var status = $('#plugin_status').val();
                 var audit_note = $('#audit_note').val();
+                var issue_reward = $('#issue_reward').prop('checked') ? 1 : 0;
 
                 $.ajax({
                     type: "POST",
                     url: '{:url("/Plugin/setStatus")}',
-                    data: {id: data.id, status: status, audit_note: audit_note},
+                    data: {id: data.id, status: status, audit_note: audit_note, issue_reward: issue_reward},
                     dataType: "json",
                     success: function(res) {
                         if (res.code == 0) {
@@ -357,13 +449,30 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                         }
                     },
                     error: function() {
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
             }
         });
 
         form.render('select');
+        function updateRewardRow() {
+            var approving = parseInt($('#plugin_status').val(), 10) === 1 && parseInt(data.status, 10) !== 1;
+            $('#plugin_reward_row').toggle(approving);
+            if (!approving) return;
+            if (!rewardConfig.enabled) {
+                $('#issue_reward').prop('checked', false).prop('disabled', true);
+                $('#plugin_reward_hint').text('{:t("plugin_ui.reward_disabled")}');
+            } else if (data.published_at || data.reward_status) {
+                $('#issue_reward').prop('checked', false).prop('disabled', true);
+                $('#plugin_reward_hint').text(data.reward_status ? '{:t("plugin_ui.reward_already_processed")}' : '{:t("plugin_ui.reward_re_review")}');
+            } else if (rewardConfig.originalOnly && parseInt(data.origin_type, 10) !== 1) {
+                $('#issue_reward').prop('checked', false).prop('disabled', true);
+                $('#plugin_reward_hint').text('{:t("plugin_ui.reward_original_only")}');
+            }
+        }
+        $('#plugin_status').on('change', updateRewardRow);
+        updateRewardRow();
     }
 });
 </script>

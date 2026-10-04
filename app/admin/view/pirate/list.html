@@ -7,7 +7,7 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('feedback.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_pirate_content')}"/>
                         </div>
@@ -20,7 +20,7 @@
                 </div>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">应&emsp;用</label>
+                        <label class="layui-form-label">{:t('admin_home.applications')}</label>
                         <div class="layui-input-inline">
                             <select class="layui-input ew-select-fixed" lay-filter="app" lay-search>
                                 <option value="">{:t('common_ui.select_all_apps')}</option>
@@ -40,7 +40,7 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 
 {include file="/public/footer"}
@@ -62,7 +62,7 @@
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>',
                 '</p>'].join(''),
             cellMinWidth: 100,
             request: {
@@ -80,17 +80,17 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
-                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                {field: 'appName', title: '{:t("profile.application")}', sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
                     }},
-                {field: 'pirate_info', title: '盗版内容', sort: true, minWidth: 160},
-                {field: 'param', title: '请求参数', sort: true, minWidth: 120, templet: function (d){
-                        return '<a class="layui-btn layui-btn-xs" lay-event="seeParam">查看参数</a>';
+                {field: 'pirate_info', title: '{:t("pirate_ui.content")}', sort: true, minWidth: 160},
+                {field: 'param', title: '{:t("common_ui.request_params")}', sort: true, minWidth: 120, templet: function (d){
+                        return '<a class="layui-btn layui-btn-xs" lay-event="seeParam">{:t("pirate_admin.view_params")}</a>';
                     }
                 },
                 {field: 'ip', title: 'IP', sort: true, minWidth: 100},
-                {field: 'addtime', title: '添加时间', sort: true, minWidth: 180},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {field: 'addtime', title: '{:t("common.add_time")}', sort: true, minWidth: 180},
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
             ]]
         });
 
@@ -122,9 +122,9 @@
                 let arr;
                 try{
                     arr = JSON.parse(obj.data.param);
-                    notice.msg("解析请求参数成功！", {icon: 1, audio:'1'});
+                    notice.msg("{:t('common_ui.parsing_params_success')}", {icon: 1, audio:'1'});
                 }catch (e){
-                    notice.msg("解析请求参数失败！[errorCode:GetLogContentError]", {icon: 2, audio:'1'});
+                    notice.msg("{:t('pirate_admin.parse_params_failed')} [errorCode:GetLogContentError]", {icon: 2, audio:'1'});
                     return false;
                 }
                 $.each(arr,function(index, value) {
@@ -138,7 +138,7 @@
                         '</div>';
                 });
                 admin.open({
-                    title: '查看盗版 ID:'+obj.data.id,
+                    title: '{:t("pirate_admin.view_title")} ID:'+obj.data.id,
                     type: 1,
                     area: ['80%',''],
                     content:'<div class="layui-card">' +
@@ -162,26 +162,25 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
                 if (checkRows.data.length === 0) {
-                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                     return;
                 }
                 var ids = checkRows.data.map(function (d) {
                     return d.id;
                 });
-                console.log(ids)
                 doDel({ids: ids});
             }
         });
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm('{:t("auth_portal.confirm_delete")}', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/Pirate/drop")}' : '{:url("/Pirate/batchDrop")}',
@@ -198,7 +197,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
             });

@@ -10,27 +10,13 @@
 	<meta name="description" content=""/>
 	<link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
 	<link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
-	<link rel="stylesheet" href="{__CSS__}sf-style.css"/>
+	<link rel="stylesheet" href="{__CSS__}sf-style.css?v=20261004.2"/>
 
 	<!--[if lt IE 9]>
 	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
-	<style>
-		.layui-card .layui-table-view {
-			margin: 0;
-		}
-		.layui-table td, .layui-table th, .layui-table-col-set, .layui-table-fixed-r, .layui-table-grid-down, .layui-table-header, .layui-table-page, .layui-table-tips-main, .layui-table-tool, .layui-table-total, .layui-table-view, .layui-table[lay-skin=line], .layui-table[lay-skin=row] {
-			color: #515a6e;
-			border: 0;
-			border-width: 1px;
-			border-bottom-style: solid;
-			border-color: #E8EAEC;
-			white-space: nowrap;
-		}
-t/* 移动端弹窗自适应 */
-	@media (max-width: 768px) { .layui-layer-page { left: 2.5% !important; width: 95% !important; max-height: 90vh !important; } }
-	</style>
 </head>
 <body>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v=20260501"></script>

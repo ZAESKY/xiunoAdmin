@@ -176,7 +176,7 @@ class AuthModel extends BaseModel
                 }else{
                     $sign = $row['sign'] + 1;
                 }
-                $authcode = md5(time().$qq.'SF');
+                $authcode = sf_generate_authcode(); // A-01: 原 md5(time().$qq.'SF') 可离线推导
             }else{
                 $sign = $row['sign'];
                 $authcode = $row['authcode'];
@@ -295,13 +295,17 @@ class AuthModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($post['appid'])?intval($post['appid']):'';
+            $userid = !empty($post['userid'])?intval($post['userid']):0;
             $data = $this->buildSearchWhere('id|auth_info|qq');
 
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
+            }
+            if($userid > 0){
+                $data[] = ['userid', '=', $userid];
             }
 
             $list = self::order('id' ,'desc')->where($data)->paginate([

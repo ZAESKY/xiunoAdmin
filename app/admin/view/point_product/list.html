@@ -10,27 +10,27 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">商品</label>
+                        <label class="layui-form-label">{:t('codepay_ui.label_product')}</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="输入ID或商品名称"/>
+                            <input name="text" class="layui-input" placeholder="{:t('point_product.search_placeholder')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status">
-                                <option value="">全部状态</option>
-                                <option value="1">上架</option>
-                                <option value="0">下架</option>
+                                <option value="">{:t('feedback.all_statuses')}</option>
+                                <option value="1">{:t('point_product.listed')}</option>
+                                <option value="0">{:t('point_product.unlisted')}</option>
                             </select>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                         <button type="button" class="layui-btn layui-btn-normal icon-btn" id="SF_Add">
-                            <i class="layui-icon">&#xe654;</i>新增商品
+                            <i class="layui-icon">&#xe654;</i>{:t('point_product.add_product')}
                         </button>
                     </div>
                 </div>
@@ -41,13 +41,13 @@
 </div>
 
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">{:t('common_ui.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">{:t('common.delete')}</a>
 </script>
 
 <script type="text/html" id="SF_Status">
     <input type="checkbox" lay-filter="SF_StatusCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="上架|下架" {{d.status==1?'checked':''}}/>
+           lay-text="{:t('point_product.listed_unlisted')}" {{d.status==1?'checked':''}}/>
 </script>
 
 <script type="text/html" id="SF_EditDialog">
@@ -55,55 +55,55 @@
         <input name="id" type="hidden"/>
         <input name="image" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">商品名称</label>
+            <label class="layui-form-label layui-form-required">{:t('point_product.name')}</label>
             <div class="layui-input-block">
-                <input name="name" class="layui-input" lay-verify="required" placeholder="请输入商品名称"/>
+                <input name="name" class="layui-input" lay-verify="required" placeholder="{:t('point_product.name_placeholder')}"/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">商品图片</label>
+            <label class="layui-form-label">{:t('point_product.image')}</label>
             <div class="layui-input-block">
                 <button type="button" class="layui-btn layui-btn-primary" id="SF_UploadImage">
-                    <i class="layui-icon layui-icon-upload"></i>上传图片
+                    <i class="layui-icon layui-icon-upload"></i>{:t('set_ui.upload_image')}
                 </button>
                 <div class="point-upload-preview layui-hide" id="SF_ImagePreview">
-                    <img src="" alt="商品图片"/>
+                    <img src="" alt="{:t('point_product.image')}"/>
                 </div>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">所需积分</label>
+            <label class="layui-form-label layui-form-required">{:t('point_product.required_points')}</label>
             <div class="layui-input-block">
                 <input type="number" name="required_points" class="layui-input" min="1" step="1" lay-verify="required|number"/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">用户上限</label>
+            <label class="layui-form-label">{:t('point_product.user_limit')}</label>
             <div class="layui-input-block">
-                <input type="number" name="exchange_limit" class="layui-input" min="0" step="1" placeholder="0表示不限制"/>
+                <input type="number" name="exchange_limit" class="layui-input" min="0" step="1" placeholder="{:t('point_product.no_limit_hint')}"/>
             </div>
         </div>
         <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">商品描述</label>
+            <label class="layui-form-label">{:t('point_product.description')}</label>
             <div class="layui-input-block">
                 <textarea name="description" class="sf-product-desc" style="display:none;"></textarea>
             </div>
         </div>
         <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label layui-form-required">奖品信息</label>
+            <label class="layui-form-label layui-form-required">{:t('point_product.reward_info')}</label>
             <div class="layui-input-block">
-                <textarea name="reward_info" class="layui-textarea" style="min-height:160px;" lay-verify="required" placeholder="一行一个奖品码或虚拟商品内容。用户每次兑换会随机发放其中一行，并自动标记为已发放。"></textarea>
+                <textarea name="reward_info" class="layui-textarea" style="min-height:160px;" lay-verify="required" placeholder="{:t('point_product.reward_info_help')}"></textarea>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">状态</label>
+            <label class="layui-form-label">{:t('common.status')}</label>
             <div class="layui-input-block">
-                <input type="checkbox" name="status" value="1" lay-skin="switch" lay-text="上架|下架" checked/>
+                <input type="checkbox" name="status" value="1" lay-skin="switch" lay-text="{:t('point_product.listed_unlisted')}" checked/>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -133,16 +133,16 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
         },
         cols: [[
             {field: 'id', title: 'ID', width: 70, sort: true},
-            {field: 'image', title: '图片', width: 90, templet: function(d){
+            {field: 'image', title: '{:t("set_ui.image")}', width: 90, templet: function(d){
                 return d.image ? '<img class="point-product-cover" src="'+escapeAttr(d.image)+'">' : '-';
             }},
-            {field: 'name', title: '商品名称', minWidth: 170},
-            {field: 'required_points', title: '所需积分', width: 110, sort: true},
-            {field: 'stock', title: '剩余库存', width: 100, sort: true},
-            {field: 'exchange_limit', title: '用户上限', width: 100, templet:function(d){return d.exchange_limit > 0 ? d.exchange_limit : '不限';}},
-            {field: 'status', title: '状态', width: 100, templet: '#SF_Status'},
-            {field: 'created_at', title: '创建时间', minWidth: 170},
-            {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 150}
+            {field: 'name', title: '{:t("point_product.name")}', minWidth: 170},
+            {field: 'required_points', title: '{:t("point_product.required_points")}', width: 110, sort: true},
+            {field: 'stock', title: '{:t("point_product.remaining_stock")}', width: 100, sort: true},
+            {field: 'exchange_limit', title: '{:t("point_product.user_limit")}', width: 100, templet:function(d){return d.exchange_limit > 0 ? d.exchange_limit : '{:t("point_product.unlimited")}';}},
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#SF_Status'},
+            {field: 'created_at', title: '{:t("payment_ui.create_time")}', minWidth: 170},
+            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 150}
         ]]
     });
 
@@ -168,7 +168,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
     function showEdit(data) {
         admin.open({
             type: 1,
-            title: (data ? '编辑' : '新增') + '积分商品',
+            title: data ? '{:t("point_product.edit_product")}' : '{:t("point_product.add_product")}',
             area: ['720px', '700px'],
             content: $('#SF_EditDialog').html(),
             success: function(layero, index){
@@ -215,21 +215,21 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
                         obj.preview(function(index, file, result){
                             $(layero).find('#SF_ImagePreview').removeClass('layui-hide').find('img').attr('src', result);
                         });
-                        notice.msg('上传中...', {icon: 4, close: true});
+                        notice.msg('{:t("app_ui.uploading")}', {icon: 4, close: true});
                     },
                     done: function(res){
                         notice.destroy();
                         if(res.code == 0){
                             $(layero).find('input[name="image"]').val(res.data.path);
                             $(layero).find('#SF_ImagePreview').removeClass('layui-hide').find('img').attr('src', res.data.path);
-                            notice.msg('上传成功！', {icon: 1, audio:'1'});
+                            notice.msg('{:t("upload.upload_success")}', {icon: 1, audio:'1'});
                         }else{
-                            notice.msg(res.msg || '上传失败！', {icon: 2, audio:'1'});
+                            notice.msg(res.msg || '{:t("common.upload_failed")}', {icon: 2, audio:'1'});
                         }
                     },
                     error: function(){
                         notice.destroy();
-                        notice.msg('上传失败！', {icon: 2, audio:'1'});
+                        notice.msg('{:t("common.upload_failed")}', {icon: 2, audio:'1'});
                     }
                 });
 
@@ -246,7 +246,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
     }
 
     function doDel(obj) {
-        layer.confirm('确定删除该商品吗？', {icon: 3, shade: .1}, function(i){
+        layer.confirm('{:t("point_product.delete_confirm")}', {icon: 3, shade: .1}, function(i){
             layer.close(i);
             $.post('{:url("/PointProduct/drop")}', {id: obj.data.id}, function(res){
                 notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2});

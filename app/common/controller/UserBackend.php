@@ -1,10 +1,12 @@
 <?php
 namespace app\common\controller;
 
+use app\common\service\BindingMailVerificationService;
+use app\common\service\RateLimitService;
 use think\App;
 use think\Exception;
-use think\facade\Cache;
 use think\facade\Event;
+use think\facade\Log;
 use think\facade\View;
 use think\facade\Cookie;
 /**
@@ -56,13 +58,14 @@ class UserBackend extends CommonBase
             // 登录用户信息
             $userModel = new \app\user\model\User();
             $userInfo = $userModel->getInfo();
-            if(!empty($userId) && $sign != data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash())){
+            if(!$userInfo){
+                throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
+            }
+            $expectedSign = data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash());
+            if(!empty($userId) && !hash_equals((string)$expectedSign, (string)$sign)){
                 cookie('userId',null);
                 cookie('userSign',null);
                 throw new Exception(t('login.user_session_expired'));
-            }
-            if(!$userInfo){
-                throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
             }
             $this->userInfo = $userInfo;
             if(empty($userInfo['appid'])){
@@ -75,7 +78,7 @@ class UserBackend extends CommonBase
                 throw new Exception(t('user.account_blocked').'[errorCode:UserStatusBlocked]');
             }
             if(!empty($userInfo['ip'])){
-                if(!in_array(get_client_ip(),unserialize($userInfo['ip']))){
+                if(!in_array(get_client_ip(), sf_safe_unserialize_array($userInfo['ip']), true)){
                     throw new Exception(t('user.ip_not_whitelist'));
                 }
             }
@@ -139,44 +142,108 @@ class UserBackend extends CommonBase
     }
 
     public function sendCode(){
-        if(IS_POST){
-            $cleartime = 180;// 过期时间 单位:秒
-            $type = input('post.type');
-            if(empty($type)){
-                return message(t('validation.missing_type'), false);
-            }
-            $code = get_random_code(6);
-            switch ($type){
-                case 'changeBindingMail':
-//                    if(Cache::get('changeBindingMail'.$this->userId)){
-//                        return message("请勿频繁发送验证码！" ,false);
-//                    }
-                    if(!empty($this->userInfo['email'])){
-                        $param = [
-                            'to' => $this->userInfo['email'],
-                            'title' => conf('title').' - 验证码通知',
-                            'from_name' => conf('title'),
-                            'content' => '验证码:'.$code.'。此验证码只用于更换用户账号'.$this->userInfo['username'].'的邮箱，请妥善保管，不要透露给任何人。如非本人操作请忽略。'
-                        ];
-                    }else{
-                        $email = input('post.content');
-                        if(empty($email)){
-                            return message(t('user.bind_email_empty'), false);
-                        }
-                        $param = [
-                            'to' => $email,
-                            'title' => conf('title').' - 验证码通知',
-                            'from_name' => conf('title'),
-                            'content' => '验证码:'.$code.'。此验证码只用于更换用户账号'.$this->userInfo['username'].'的邮箱，请妥善保管，不要透露给任何人。如非本人操作请忽略。'
-                        ];
-                    }
-                    $param = !empty($this->userInfo['config'])?array_merge_recursive($param, unserialize($this->userInfo['config'])):$param;
+        if(!IS_POST){
+            return message(t('validation.param_error'), false);
+        }
 
-                    Cache::set('changeBindingMail'.$this->userId, $code, $cleartime);
-                    return Event::trigger('ChangeBindingMailNotice', $param)[0];
-                default:
-                    return message(t('validation.param_error'), false);
+        $type = input('post.type');
+        if($type !== 'changeBindingMail'){
+            return message(empty($type) ? t('validation.missing_type') : t('validation.param_error'), false);
+        }
+
+        $userId = intval($this->userId);
+        $stage = strtolower(trim((string)input('post.stage', 'new')));
+        $newEmail = BindingMailVerificationService::normalizeEmail(input('post.content'));
+        $currentEmail = BindingMailVerificationService::normalizeEmail($this->userInfo['email'] ?? '');
+        if(!in_array($stage, ['old', 'new'], true)){
+            return message(t('validation.param_error'), false);
+        }
+        if(!filter_var($newEmail, FILTER_VALIDATE_EMAIL)){
+            return message(t('profile.new_email_invalid'), false);
+        }
+        if($currentEmail !== '' && hash_equals($currentEmail, $newEmail)){
+            return message(t('profile.new_email_same'), false);
+        }
+        if(\app\user\model\User::where('email', $newEmail)->where('id', '<>', $userId)->find()){
+            return message(t('profile.email_already_used'), false);
+        }
+
+        if($stage === 'old'){
+            if($currentEmail === ''){
+                return message(t('profile.current_email_unbound'), false);
             }
+            $recipient = $currentEmail;
+            $mailContent = t('mail.current_email_code_body', ['code' => '{{code}}', 'username' => $this->userInfo['username']]);
+        }else{
+            if($currentEmail !== '' && !BindingMailVerificationService::isOldVerified($userId, $currentEmail)){
+                $oldResult = BindingMailVerificationService::verifyCode(
+                    $userId,
+                    'old',
+                    $currentEmail,
+                    trim((string)input('post.old_code'))
+                );
+                if(!$oldResult['ok']){
+                    return message($oldResult['message'], false);
+                }
+                BindingMailVerificationService::consumeCode($userId, 'old', $currentEmail);
+                BindingMailVerificationService::markOldVerified($userId, $currentEmail);
+            }
+            $recipient = $newEmail;
+            $mailContent = t('mail.new_email_code_body', ['code' => '{{code}}', 'username' => $this->userInfo['username']]);
+        }
+
+        $cooldownKey = BindingMailVerificationService::cooldownKey($userId, $stage, $recipient);
+        if(\think\facade\Cache::get($cooldownKey)){
+            return message(t('login.send_too_frequent'), false);
+        }
+        $rate = RateLimitService::hit('change_binding_mail', (string)get_client_ip(), 20, 3600);
+        if(!$rate['ok']){
+            return message(t('login.network_send_limited'), false);
+        }
+
+        $code = sprintf('%06d', random_int(0, 999999));
+        $param = [
+            'to' => $recipient,
+            'title' => conf('title').' - '.t('mail.verification_code_subject'),
+            'from_name' => conf('title'),
+            'content' => str_replace('{{code}}', $code, $mailContent),
+        ];
+        if(!empty($this->userInfo['config'])){
+            $param = array_replace_recursive($param, sf_safe_unserialize_array($this->userInfo['config']));
+        }
+        // 用户邮件配置只能提供 SMTP 参数，不允许改写本次收件人和验证内容。
+        $param['to'] = $recipient;
+        $param['title'] = conf('title').' - '.t('mail.verification_code_subject');
+        $param['from_name'] = conf('title');
+        $param['content'] = str_replace('{{code}}', $code, $mailContent);
+
+        try {
+            $result = Event::trigger('ChangeBindingMailNotice', $param)[0] ?? null;
+            if (is_string($result)) {
+                $decoded = json_decode($result, true);
+                $result = is_array($decoded) ? $decoded : null;
+            }
+            if (!is_array($result) || intval($result['code'] ?? -1) !== 0) {
+                Log::warning('Binding mail verification dispatch failed', [
+                    'user_id' => $userId,
+                    'stage' => $stage,
+                ]);
+                return message(t('login.email_send_failed'), false);
+            }
+
+            \think\facade\Cache::set($cooldownKey, 1, 60);
+            if($stage === 'old'){
+                BindingMailVerificationService::clearOldVerified($userId, $currentEmail);
+            }
+            BindingMailVerificationService::storeCode($userId, $stage, $recipient, $code);
+            return message($stage === 'old' ? t('profile.current_email_code_sent') : t('profile.new_email_code_sent'), true);
+        } catch (\Throwable $e) {
+            Log::error('Binding mail verification dispatch exception: ' . $e->getMessage(), [
+                'user_id' => $userId,
+                'stage' => $stage,
+                'exception' => $e,
+            ]);
+            return message(t('login.email_send_failed'), false);
         }
     }
 
@@ -450,6 +517,9 @@ class UserBackend extends CommonBase
                 if (empty($ids)) {
                     return json(message('common.invalid_id', false));
                 }
+                if (count($ids) > 100) {
+                    return json(message(t('batch.delete_limit', ['limit' => 100]), false));
+                }
                 //批量删除
                 $num = 0;
                 foreach ($ids as $key => $val) {
@@ -515,7 +585,7 @@ class UserBackend extends CommonBase
                 if($this->myPowerInfo['pirate_power'] != 1){
                     return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
-                View::assign('price', round($this->myAppInfo['pirate_money'] * floatval($this->myPowerInfo['pirate_discount'] / 100), 2));
+                View::assign('price', sf_money_apply_rate($this->myAppInfo['pirate_money'], $this->myPowerInfo['pirate_discount']));
             } else if ($this->service instanceof \app\user\service\UserService){
                 if($this->myPowerInfo['adduser_power'] != 1){
                     return $this->render('public/error', ['msg' => t('login.no_access')]);

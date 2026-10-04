@@ -15,7 +15,7 @@ return [
             'password' => env('database_password', '123456'),
             'hostport' => env('database_hostport', 3306),
             'params' => [],
-            'charset' => 'utf8',
+            'charset' => env('database_charset', 'utf8mb4'),
             'prefix' => 'SF_',
             'deploy' => 0,
             'rw_separate' => false,

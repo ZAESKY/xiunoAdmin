@@ -5,25 +5,25 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内容</label>
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="搜索评论内容"/>
+                            <input name="text" class="layui-input" placeholder="{:t('plugin_record.search_comment')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
-                                <option value="">全部状态</option>
-                                <option value="0">待审核</option>
-                                <option value="1">已通过</option>
-                                <option value="2">已拒绝</option>
+                                <option value="">{:t('feedback.all_statuses')}</option>
+                                <option value="0">{:t('plugin_ui.pending_review')}</option>
+                                <option value="1">{:t('plugin_detail.approved')}</option>
+                                <option value="2">{:t('plugin_detail.rejected')}</option>
                             </select>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
@@ -34,9 +34,9 @@
 </div>
 
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="approve"><i class="layui-icon">&#xe605;</i>通过</a>
-    <a class="layui-btn layui-btn-sm layui-btn-warm" lay-event="reject"><i class="layui-icon">&#x1006;</i>拒绝</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>删除</a>
+    <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="approve"><i class="layui-icon">&#xe605;</i>{:t('plugin_record.approve')}</a>
+    <a class="layui-btn layui-btn-sm layui-btn-warm" lay-event="reject"><i class="layui-icon">&#x1006;</i>{:t('plugin_record.reject')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</a>
 </script>
 
 {include file="/public/footer"}
@@ -56,7 +56,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         skin: 'line',
         size: 'lg',
         toolbar: ['<p>',
-            '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>批量删除</button>',
+            '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t('plugin_ui.batch_delete')}</button>',
             '</p>'].join(''),
         cellMinWidth: 100,
         request: {
@@ -74,26 +74,26 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         cols: [[
             {type: 'checkbox', fixed: true},
             {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
-            {field: 'plugin_id', title: '插件ID', width: 100},
-            {field: 'plugin_name', title: '插件名称', minWidth: 150},
-            {field: 'user_id', title: '用户ID', width: 100},
-            {field: 'username', title: '用户名', width: 120},
-            {field: 'app_id', title: '应用ID', width: 100},
-            {field: 'content', title: '评论内容', minWidth: 250},
-            {field: 'rating', title: '评分', width: 80, templet: function(d){
-                return d.rating + '星';
+            {field: 'plugin_id', title: '{:t("plugin_record.plugin_id")}', width: 100},
+            {field: 'plugin_name', title: '{:t("plugin_ui.name")}', minWidth: 150},
+            {field: 'user_id', title: '{:t("common_ui.user_id")}', width: 100},
+            {field: 'username', title: '{:t("registration.username")}', width: 120},
+            {field: 'app_id', title: '{:t("plugin_ui.app_id")}', width: 100},
+            {field: 'content', title: '{:t("plugin_record.comment_content")}', minWidth: 250},
+            {field: 'rating', title: '{:t("plugin_ui.rating")}', width: 80, templet: function(d){
+                return d.rating + '{:t("plugin_detail.star")}';
             }},
-            {field: 'status', title: '状态', width: 100, templet: function(d){
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: function(d){
                 switch(d.status){
-                    case 0: return '<span class="layui-badge layui-badge-orange">待审核</span>';
-                    case 1: return '<span class="layui-badge layui-badge-green">已通过</span>';
-                    case 2: return '<span class="layui-badge layui-badge-red">已拒绝</span>';
+                    case 0: return '<span class="layui-badge layui-badge-orange">{:t('plugin_ui.pending_review')}</span>';
+                    case 1: return '<span class="layui-badge layui-badge-green">{:t('plugin_detail.approved')}</span>';
+                    case 2: return '<span class="layui-badge layui-badge-red">{:t('plugin_detail.rejected')}</span>';
                     default: return '-';
                 }
             }},
             {field: 'ip', title: 'IP', width: 120},
-            {field: 'created_at', title: '评论时间', minWidth: 160},
-            {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 220, fixed: 'right'}
+            {field: 'created_at', title: '{:t("plugin_record.comment_time")}', minWidth: 160},
+            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 220, fixed: 'right'}
         ]]
     });
 
@@ -115,14 +115,14 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     table.on('toolbar(SF_Table)', function (obj) {
         if (obj.event === 'del') {
             var checkRows = table.checkStatus('SF_Table');
-            if (checkRows.data.length === 0) { notice.msg('请选择要删除的数据！', {icon:3}); return; }
+            if (checkRows.data.length === 0) { notice.msg('{:t("confirm.please_select_data")}', {icon:3}); return; }
             var ids = checkRows.data.map(function(d){ return d.id; });
             doDel({ids: ids});
         }
     });
 
     function doSetStatus(id, status) {
-        notice.msg('正在执行中..', {icon: 4, close: true});
+        notice.msg('{:t("common.loading")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",
             url: '{:url("/PluginComment/setStatus")}',
@@ -139,17 +139,17 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             },
             error: function() {
                 notice.destroy();
-                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
             }
         });
     }
 
     function doDel(obj) {
-        layer.confirm('确定要删除选中数据吗？', {
+        layer.confirm('{:t("auth_portal.confirm_delete")}', {
             skin: 'layui-layer-admin', icon: 3, shade: .1
         }, function (i) {
             layer.close(i);
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: obj.data ? '{:url("/PluginComment/drop")}' : '{:url("/PluginComment/batchDrop")}',
@@ -166,7 +166,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });

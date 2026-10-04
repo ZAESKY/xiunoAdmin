@@ -1,8 +1,8 @@
 <?php
 namespace app\user\model;
 
+use app\common\service\BindingMailVerificationService;
 use app\common\model\BaseModel;
-use think\facade\Cache;
 use think\Validate;
 use think\facade\Db;
 /**
@@ -23,7 +23,15 @@ class User extends BaseModel
         $info = self::where('id', $userId)->find();
         if ($info) {
             // 头像
-            if ($info['qq']) {
+            $oauthAvatar = Db::name('user_social_identity')->alias('usi')
+                ->join('social_identity si', 'si.id = usi.identity_id')
+                ->where('usi.user_id', intval($userId))
+                ->where('si.provider', 'qq')
+                ->value('si.avatar');
+            $oauthAvatar = sf_safe_url($oauthAvatar ?? '', false);
+            if ($oauthAvatar !== '') {
+                $info['img'] = $oauthAvatar;
+            } elseif ($info['qq']) {
                 $info['img'] = '//q1.qlogo.cn/g?b=qq&nk='.$info['qq'].'&s=100';
             } else {
                 $info['img'] = '/Assets/img/logo.png';
@@ -36,40 +44,63 @@ class User extends BaseModel
     public function editUserInfo(){
         $post = request()->post();
         $type = !empty($post['type'])?$post['type']:null;
-        $code = !empty($post['code'])?$post['code']:null;
-        $content = !empty($post['content'])?$post['content']:null;
-        if(empty($code)) return message(t('notify.enter_captcha') ,false);
+        $code = !empty($post['code'])?trim((string)$post['code']):'';
+        $content = BindingMailVerificationService::normalizeEmail($post['content'] ?? '');
         switch ($type){
             case 'changeBindingMail':
                 if(empty($content)) return message(t('user.bind_email_empty') ,false);
-                if(!empty(cache('changeBindingMail'.cookie('userId')))){
-                    cache('changeBindingMail'.cookie('userId'),null);
-                    $validate = new Validate([
-                        'content' => 'email'
-                    ]);
-                    if (!$validate->check(['content' => $content])) return message($validate->getError() ,false);
-                    $result = $this->setOne(['email' => $content]);
-                    if($result){
-                        return message(t('user.bind_success') ,true);
-                    }else{
-                        return message(t('user.bind_failed').'[errorCode:UserBindingMailError]' ,false);
-                    }
-                }else{
-                    return message(t('notify.captcha_expired') ,false);
+                if($code === '') return message(t('notify.enter_captcha') ,false);
+
+                $validate = new Validate(['content' => 'email']);
+                if (!$validate->check(['content' => $content])) return message($validate->getError() ,false);
+
+                $userId = intval(cookie('userId'));
+                $userInfo = $this->getInfo();
+                if(!$userInfo) return message(t('user.account_abnormal'), false);
+                $currentEmail = BindingMailVerificationService::normalizeEmail($userInfo['email'] ?? '');
+                if($currentEmail !== '' && hash_equals($currentEmail, $content)){
+                    return message('profile.new_email_same', false);
                 }
+                if(self::where('email', $content)->where('id', '<>', $userId)->find()){
+                    return message('profile.email_already_used', false);
+                }
+                if($currentEmail !== '' && !BindingMailVerificationService::isOldVerified($userId, $currentEmail)){
+                    return message('profile.verify_current_email_first', false);
+                }
+
+                $newResult = BindingMailVerificationService::verifyCode($userId, 'new', $content, $code);
+                if(!$newResult['ok']){
+                    return message($newResult['message'], false);
+                }
+
+                try {
+                    $result = self::where('id', $userId)
+                        ->where('email', $userInfo['email'])
+                        ->data(['email' => $content])
+                        ->update();
+                } catch (\Throwable $e) {
+                    $result = false;
+                }
+                if($result === 1){
+                    BindingMailVerificationService::clearCompletedFlow($userId, $currentEmail, $content);
+                    return message(t('user.bind_success') ,true);
+                }
+                return message(t('user.bind_failed').'[errorCode:UserBindingMailError]' ,false);
             case 'changeBindingQQ':
-                $result = $this->setOne(['qq' => '']);
+                if(empty($code)) return message(t('notify.enter_captcha') ,false);
+                $result = $this->setOne(['qq' => null]);
                 if($result){
-                    return message('QQ解绑成功' ,true);
+                    return message('profile.qq_unbind_success', true);
                 }else{
-                    return message('QQ解绑失败' ,false);
+                    return message('profile.qq_unbind_failed', false);
                 }
             case 'changeBindingWechatMp':
+                if(empty($code)) return message(t('notify.enter_captcha') ,false);
                 $result = $this->setOne(['wechat_openid' => '']);
                 if($result){
-                    return message('微信公众号解绑成功' ,true);
+                    return message('profile.wechat_unbind_success', true);
                 }else{
-                    return message('微信公众号解绑失败' ,false);
+                    return message('profile.wechat_unbind_failed', false);
                 }
             default:
                 return message(t('common_ui.type_error') ,false);
@@ -84,7 +115,7 @@ class User extends BaseModel
             if(empty($userInfo['config'])){
                 $oldConfig = [];
             }else{
-                $oldConfig = unserialize($userInfo['config']);
+                $oldConfig = sf_safe_unserialize_array($userInfo['config']);
             }
             $newConfig = array_merge($oldConfig, $post);
             if(empty($newConfig)){
@@ -140,24 +171,27 @@ class User extends BaseModel
             $row = Db::name('power_price')->where('id',$power)->find();
             if(!$row) return message(t('power.not_exist') ,false);
             if(!$userPower) return message(t('user.power_error') ,false);
-            $allmoney = round((($row['money'] - $userPower['money']) > 0 ? ($row['money'] - $userPower['money']) : 0), 2);
+            $upgradeCents = max(sf_money_to_cents($row['money']) - sf_money_to_cents($userPower['money']), 0);
+            $allmoney = sf_money_from_cents($upgradeCents);
             if($allmoney > $userInfo['balance']) return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
-            $remainderBalance = $userInfo['balance'] - $allmoney;
-            try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance], '升级权限 -'.$allmoney.' 元');
-                if(!$result){
-                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
-                }
-            } catch (\Exception $e) {
-                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-            }
+            $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
             $data = [
                 "power" => $row['id']
             ];
             try {
-                self::where('id', $userInfo['id'])
-                    ->data($data)
-                    ->update();
+                $result = parent::updateUserInfoAnd(
+                    ['balance' => $remainderBalance],
+                    t('user_action.upgrade_permission_log', ['amount' => $allmoney]),
+                    static function () use ($userInfo, $userPower, $data) {
+                        return self::where('id', $userInfo['id'])
+                            ->where('power', $userPower['id'])
+                            ->data($data)
+                            ->update() === 1;
+                    }
+                );
+                if (!$result) {
+                    throw new \RuntimeException(t('user_action.upgrade_permission_transaction_failed'));
+                }
                 $content = [
                     'Title' => '升级权限',
                     '操作' => '升级权限',
@@ -167,7 +201,7 @@ class User extends BaseModel
                     'Result' => 'success'
                 ];
                 event('ActionLog', $content);
-                Cache::delete('SF_UserMenu'.$userInfo['id']);
+                Menu::clearUserCache(intval($userInfo['id']));
                 return message(t('user.upgrade_success').'<br> '.t('order_ui.total', ['amount' => $allmoney]).' <br> '.t('common_ui.balance_field').$remainderBalance, true);
             } catch (\Exception $e) {
                 $content = [

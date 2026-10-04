@@ -11,10 +11,10 @@ var css = $("head").children(":last");
 css.attr({
     rel: "stylesheet",
     type: "text/css",
-    href: "//lib.baomitu.com/aplayer/1.10.1/APlayer.min.css"
+    href: "https://lib.baomitu.com/aplayer/1.10.1/APlayer.min.css"
 });
 document.write('<div id="aplayer"></div>');
-$.getScript('//lib.baomitu.com/aplayer/1.10.1/APlayer.min.js', function () {
+$.getScript('https://lib.baomitu.com/aplayer/1.10.1/APlayer.min.js', function () {
     $.ajax({
         type: "GET",
         url: '/api.php/MusicAnalysis',

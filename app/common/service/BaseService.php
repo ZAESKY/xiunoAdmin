@@ -9,6 +9,7 @@ use think\Exception;
  * @author 陌上花开
  * @since 2022-01-21
  */
+#[\AllowDynamicProperties]
 class BaseService
 {
     // 模型

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="bg-white">
+<html lang="en-us" class="bg-white">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>微信公众号登录</title>
+    <title></title>
     <link rel="stylesheet" href="/Assets/libs/layui/css/layui.css"/>
     <link rel="stylesheet" href="/Assets/module/admin.css?v=318"/>
     <style>
@@ -22,22 +22,27 @@
 </head>
 <body>
 <div class="wx-login">
-    <div class="wx-title">请使用微信扫码关注公众号</div>
+    <div class="wx-title" id="wechatTitle"></div>
     <div class="wx-qrcode" id="qrcode">
         <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i>
     </div>
-    <div class="wx-msg" id="message">正在生成二维码...</div>
-    <button type="button" class="layui-btn layui-btn-sm wx-refresh" id="refreshBtn">刷新二维码</button>
+    <div class="wx-msg" id="message"></div>
+    <button type="button" class="layui-btn layui-btn-sm wx-refresh" id="refreshBtn"></button>
 </div>
 
 <script type="text/javascript" src="/Assets/libs/layui/layui.js"></script>
 <script type="text/javascript" src="/Assets/js/common.js?v=318"></script>
 <script>
+document.documentElement.lang = window.SF_I18N.lang();
+document.title = t('login.wechat_login');
+document.getElementById('wechatTitle').textContent = t('wechat_mp.scan_follow');
+document.getElementById('message').textContent = t('wechat_mp.generating_qr');
+document.getElementById('refreshBtn').textContent = t('wechat_mp.refresh_qr');
+
 layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
     var $ = layui.jquery;
     var notice = layui.notice;
     var admin = layui.admin;
-    var layer = layui.layer;
     var layerData = JSON.parse(JSON.stringify(admin.getLayerData() || {}));
     var token = '';
     var timer = null;
@@ -69,15 +74,15 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
         var html = '<div style="padding: 12px 0;">';
         $.each(accounts || [], function (_, item) {
             html += '<a class="wx-account" data-id="' + item.id + '">' +
-                '<b>' + item.username + '</b><small>所属应用：' + item.appname + '</small></a>';
+                '<b>' + item.username + '</b><small>' + t('qrlogin.application_label') + item.appname + '</small></a>';
         });
         html += '</div>';
         $('#qrcode').html(html).css({width: '260px', height: 'auto'});
-        $('#message').text('请选择要登录的账号');
+        $('#message').text(t('wechat_mp.select_account'));
     }
 
     function chooseUser(userId) {
-        notice.msg('正在登录...', {icon: 4, close: true});
+        notice.msg(t('wechat_mp.logging_in'), {icon: 4, close: true});
         $.ajax({
             type: 'POST',
             url: '/api.php/WechatMp/chooseUser',
@@ -93,7 +98,7 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
             },
             error: function () {
                 notice.destroy();
-                notice.msg('服务器错误，请稍后重试', {icon: 2});
+                notice.msg(t('common.server_error'), {icon: 2});
             }
         });
     }
@@ -116,7 +121,7 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
             success: function (res) {
                 var data = res.data || {};
                 if (data.status === 'pending') {
-                    $('#message').text('等待微信扫码，未关注时请先关注公众号');
+                    $('#message').text(t('wechat_mp.waiting_scan'));
                     return;
                 }
                 if (data.status === 'select') {
@@ -125,7 +130,7 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
                 }
                 if (res.code === 0 && data.status === 'success') {
                     stopPoll();
-                    parent.layui.notice.msg(res.msg || '操作成功', {icon: 1});
+                    parent.layui.notice.msg(res.msg || t('common.success'), {icon: 1});
                     if (data.url) {
                         go(data.url);
                     } else {
@@ -136,19 +141,19 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
                 }
                 if (data.status === 'expired') {
                     stopPoll();
-                    $('#message').text(res.msg || '二维码已过期');
+                    $('#message').text(res.msg || t('wechat_mp.qr_expired'));
                     $('#refreshBtn').show();
                     return;
                 }
                 if (res.code !== 0) {
                     stopPoll();
-                    $('#message').text(res.msg || '操作失败');
+                    $('#message').text(res.msg || t('common.failed'));
                     $('#refreshBtn').show();
                 }
             },
             error: function () {
                 stopPoll();
-                $('#message').text('服务器错误，请刷新重试');
+                $('#message').text(t('wechat_mp.server_refresh_retry'));
                 $('#refreshBtn').show();
             }
         });
@@ -159,7 +164,7 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
         token = '';
         $('#refreshBtn').hide();
         $('#qrcode').css({width: '180px', height: '180px'}).html('<i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i>');
-        $('#message').text('正在生成二维码...');
+        $('#message').text(t('wechat_mp.generating_qr'));
         $.ajax({
             type: 'POST',
             url: '/api.php/WechatMp/qrcode',
@@ -167,18 +172,18 @@ layui.use(['jquery', 'notice', 'admin', 'layer'], function () {
             dataType: 'json',
             success: function (res) {
                 if (res.code !== 0) {
-                    $('#message').text(res.msg || '二维码生成失败');
+                    $('#message').text(res.msg || t('wechat_mp.qr_generate_failed'));
                     $('#refreshBtn').show();
                     return;
                 }
                 token = res.data.token;
-                $('#qrcode').html('<img src="' + res.data.qr_url + '" alt="微信公众号二维码">');
-                $('#message').text('请使用微信扫码，未关注时请先关注公众号');
+                $('#qrcode').html('<img src="' + res.data.qr_url + '" alt="' + t('wechat_mp.qr_alt') + '">');
+                $('#message').text(t('wechat_mp.waiting_scan'));
                 timer = setInterval(poll, 1800);
                 poll();
             },
             error: function () {
-                $('#message').text('服务器错误，请刷新重试');
+                $('#message').text(t('wechat_mp.server_refresh_retry'));
                 $('#refreshBtn').show();
             }
         });

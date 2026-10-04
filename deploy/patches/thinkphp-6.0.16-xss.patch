@@ -1,0 +1,11 @@
+--- a/src/tpl/think_exception.tpl
++++ b/src/tpl/think_exception.tpl
+@@ -68,7 +68,7 @@
+                     break;
+             }
+
+-            $result[] = is_int($key) ? $value : "'{$key}' => {$value}";
++            $result[] = is_int($key) ? $value : sprintf('\'%s\' => %s', htmlentities($key), $value);
+         }
+
+         return implode(', ', $result);

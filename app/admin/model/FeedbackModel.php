@@ -22,6 +22,11 @@ class FeedbackModel extends BaseModel
                 ->field('f.*, u.username')
                 ->where('f.id', $id)
                 ->find();
+            if ($result) {
+                $result['title'] = trim(strip_tags((string)($result['title'] ?? '')));
+                $result['content'] = clean_rich_text($result['content'] ?? '');
+                $result['reply'] = clean_rich_text($result['reply'] ?? '');
+            }
             return $result ?: false;
         } catch (\Exception $e) {
             return false;
@@ -32,8 +37,8 @@ class FeedbackModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = !empty($post['limit']) ? $post['limit'] : 10;
-            $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
 
             $data = $this->buildSearchWhere('f.id|f.title', 'text', '');
             // 手动处理 status 筛选避免 join 后歧义
@@ -46,7 +51,7 @@ class FeedbackModel extends BaseModel
                 $data[] = ['f.type', '=', $type];
             }
 
-            return self::alias('f')
+            $list = self::alias('f')
                 ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
                 ->field('f.*, u.username')
                 ->order('f.id', 'desc')
@@ -55,6 +60,13 @@ class FeedbackModel extends BaseModel
                     'list_rows' => $limit,
                     'page'      => $current_page,
                 ]);
+            $list->each(static function ($item) {
+                $item['title'] = trim(strip_tags((string)($item['title'] ?? '')));
+                $item['content'] = clean_rich_text($item['content'] ?? '');
+                $item['reply'] = clean_rich_text($item['reply'] ?? '');
+                return $item;
+            });
+            return $list;
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -64,7 +76,7 @@ class FeedbackModel extends BaseModel
     {
         $post = request()->post();
         $id = !empty($post['id']) ? intval($post['id']) : null;
-        $reply = $post['reply'] ?? '';
+        $reply = clean_rich_text($post['reply'] ?? '');
         $status = isset($post['status']) ? intval($post['status']) : null;
 
         if (empty($id)) {
@@ -79,6 +91,17 @@ class FeedbackModel extends BaseModel
             throw new Exception(t('common.no_data'));
         }
 
+        if (!rich_text_has_content($reply)) {
+            throw new Exception(t('feedback.reply_required'));
+        }
+
+        $oldReply = clean_rich_text($row['reply'] ?? '');
+        $replyChanged = trim($oldReply) !== trim($reply);
+        $statusChanged = intval($row['status']) !== $status;
+        if (!$replyChanged && !$statusChanged) {
+            throw new Exception(t('feedback.no_changes'));
+        }
+
         self::where('id', $id)->data([
             'reply'      => $reply,
             'status'     => $status,
@@ -90,6 +113,7 @@ class FeedbackModel extends BaseModel
             $movedReply = move_temp_images_in_content($reply);
             if ($movedReply !== $reply) {
                 self::where('id', $id)->update(['reply' => $movedReply]);
+                $reply = $movedReply;
             }
         }
 
@@ -100,14 +124,25 @@ class FeedbackModel extends BaseModel
                 self::STATUS_REJECTED => t('feedback.status_rejected'),
             ];
             $statusLabel = $statusMap[$status] ?? '';
+            $replyText = trim((string)preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode($reply, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+            if ($replyText === '' && preg_match('/<img\b/i', $reply)) {
+                $replyText = t('feedback.image_reply');
+            }
+            $replyText = mb_substr($replyText, 0, 2000);
             NotificationModel::add([
                 'user_id'    => $row['user_id'],
                 'title'      => t('feedback.notify_title_handled'),
                 'content'    => t('feedback.notify_content_handled', [
                     'title'  => $row['title'],
                     'status' => $statusLabel,
+                    'reply'  => $replyText,
                 ]),
                 'type'       => 'feedback_handled',
+                'variables'  => [
+                    'feedback_title' => $row['title'],
+                    'review_status'  => $statusLabel,
+                    'feedback_reply' => $replyText,
+                ],
                 'is_read'    => 0,
                 'created_at' => datetime(),
             ]);

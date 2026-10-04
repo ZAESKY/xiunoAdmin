@@ -4,6 +4,7 @@ namespace app\admin\model;
 
 use app\admin\validate\AuthTemplate;
 use app\common\model\BaseModel;
+use think\Exception;
 use think\exception\ValidateException;
 /**
  * 价格模板-模型
@@ -123,8 +124,8 @@ class AuthTemplateModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|name');
 
             $list = self::order('id' ,'desc')->where($data)->paginate([

@@ -2,7 +2,7 @@
 <div class="layui-fluid">
     <div class="layui-card">
         <div class="layui-card-header">
-            <i class="layui-icon layui-icon-star"></i> 积分明细
+            <i class="layui-icon layui-icon-star"></i> {:t('accounting.point_detail')}
         </div>
         <div class="layui-card-body">
             <table id="SF_PointTable" lay-filter="SF_PointTable"></table>
@@ -11,14 +11,13 @@
 </div>
 
 <script type="text/html" id="SF_PtType">
-    {{# var m={consume:'消费赠送',recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
-    <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
+    <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{d.type_label}}</span>
 </script>
 <script type="text/html" id="SF_PtAmount">
     {{# if(d.amount > 0){ }}
-    <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}}</span>
+    <span class="text-success">+{{d.amount}}</span>
     {{# } else { }}
-    <span style="color:#d9534f;">{{d.amount}}</span>
+    <span class="text-danger">{{d.amount}}</span>
     {{# } }}
 </script>
 
@@ -32,11 +31,11 @@ layui.use(['table'], function(){
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 70},
-            {field: 'type', title: '类型', width: 100, templet: '#SF_PtType'},
-            {field: 'amount', title: '积分变动', width: 120, templet: '#SF_PtAmount'},
-            {field: 'integral_after', title: '剩余积分', width: 120, templet: function(d){ return (d.integral_after||0)+' 积分'; }},
-            {field: 'description', title: '说明', minWidth: 200},
-            {field: 'created_at', title: '时间', width: 170}
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_PtType'},
+            {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: '#SF_PtAmount'},
+            {field: 'integral_after', title: '{:t("accounting.remaining_points")}', width: 150, templet: function(d){ return (d.integral_after||0)+' {:t("accounting.point_unit")}'; }},
+            {field: 'description', title: '{:t("accounting.description")}', minWidth: 200},
+            {field: 'created_at', title: '{:t("accounting.time")}', width: 170}
         ]]
     });
 });

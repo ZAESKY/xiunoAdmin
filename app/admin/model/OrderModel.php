@@ -122,7 +122,7 @@ class OrderModel extends BaseModel
                         \app\common\model\BalanceLogModel::add(
                             intval($row['userid']),
                             'refund',
-                            floatval($row['money']),
+                            sf_money_format($row['money']),
                             '订单退款 +' . $row['money'] . ' 元',
                             intval($id)
                         );
@@ -176,8 +176,8 @@ class OrderModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|trade_no');
 
             $list = self::order('id' ,'desc')->where($data)->paginate([

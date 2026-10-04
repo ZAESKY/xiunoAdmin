@@ -2,7 +2,7 @@
 -- Safe to run multiple times on an existing database.
 
 INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
-SELECT 'oss_enabled', 'storage', '启用 OSS 上传', '开启后插件包、图标、封面上传到阿里云 OSS；关闭后全部保存到本地', 'bool', '0', '', '', '', NULL
+SELECT 'oss_enabled', 'storage', '启用 OSS 上传', '开启后插件包、应用安装包、版本更新包、程序补丁和站内上传图片统一保存到阿里云 OSS；关闭后保存到本地', 'bool', '0', '', '', '', NULL
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'oss_enabled');
 
 INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
@@ -26,5 +26,5 @@ SELECT 'oss_public_base_url', 'storage', 'OSS 公开访问域名', '可填写 CD
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'oss_public_base_url');
 
 INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
-SELECT 'oss_use_private_bucket', 'storage', 'OSS 私有 Bucket', '开启后历史版本下载由后端生成临时签名 URL', 'bool', '0', '', '', '', NULL
+SELECT 'oss_use_private_bucket', 'storage', 'OSS 私有 Bucket', '必须开启；文件回显和授权下载均由后端生成短时签名 URL，新对象强制使用 private ACL', 'bool', '1', '', '', '', NULL
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'oss_use_private_bucket');

@@ -4,22 +4,22 @@
         <div class="layui-card-body">
             <div class="layui-tab layui-tab-brief">
                 <ul class="layui-tab-title">
-                    <li class="layui-this" data-type="purchase">已购买</li>
-                    <li data-type="download">下载记录</li>
+                    <li class="layui-this" data-type="purchase">{:t('plugin_record.purchased')}</li>
+                    <li data-type="download">{:t('plugin_ui.download_records')}</li>
                 </ul>
                 <div class="layui-tab-content">
                     <div class="layui-tab-item layui-show">
                         <form class="layui-form toolbar">
                             <div class="layui-form-item">
                                 <div class="layui-inline">
-                                    <label class="layui-form-label">搜索</label>
+                                    <label class="layui-form-label">{:t('common.search')}</label>
                                     <div class="layui-input-inline">
-                                        <input name="text" class="layui-input" placeholder="搜索插件名称"/>
+                                        <input name="text" class="layui-input" placeholder="{:t('plugin_record.search_plugin')}"/>
                                     </div>
                                 </div>
                                 <div class="layui-inline layui-btn-container">
                                     <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                                        <i class="layui-icon">&#xe615;</i>搜索
+                                        <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                                     </button>
                                 </div>
                             </div>
@@ -33,7 +33,7 @@
 </div>
 
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="detail"><i class="layui-icon">&#xe705;</i>详情</a>
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="detail"><i class="layui-icon">&#xe705;</i>{:t('common.detail')}</a>
 </script>
 
 {include file="/public/footer"}
@@ -65,35 +65,35 @@ layui.use(['layer', 'form', 'table', 'element'], function () {
         },
         cols: [[
             {field: 'id', title: 'ID', width: 80},
-            {field: 'icon', title: '图标', width: 70, templet: function(d){
+            {field: 'icon', title: '{:t("plugin_ui.icon")}', width: 70, templet: function(d){
                 return '<img src="'+(d.icon || '/Assets/img/default-plugin.png')+'" style="width:36px;height:36px;object-fit:cover;border-radius:4px;" onerror="this.src=\'/Assets/img/default-plugin.png\'">';
             }},
-            {field: 'plugin_name', title: '插件名称', minWidth: 150},
-            {field: 'plugin_version', title: '版本', width: 80},
-            {field: 'author', title: '作者', width: 120},
-            {field: 'plugin_price', title: '价格', width: 100, templet: function(d){
+            {field: 'plugin_name', title: '{:t("plugin_ui.name")}', minWidth: 150},
+            {field: 'plugin_version', title: '{:t("version_ui.version_suffix")}', width: 80},
+            {field: 'author', title: '{:t("plugin_ui.author")}', width: 120},
+            {field: 'plugin_price', title: '{:t("plugin_ui.price")}', width: 100, templet: function(d){
                 var price = d.plugin_price || d.price || 0;
-                if (price == 0) return '<span class="layui-badge layui-badge-green">免费</span>';
-                if (d.pay_type === 'points') return '<span style="color:#ff5722;">'+parseInt(price)+' 积分</span>';
+                if (price == 0) return '<span class="layui-badge layui-badge-green">{:t('upgrade.free')}</span>';
+                if (d.pay_type === 'points') return '<span style="color:#ff5722;">'+parseInt(price)+' {:t("accounting.point_unit")}</span>';
                 return '<span style="color:#ff5722;">¥'+price+'</span>';
             }},
-            {field: 'order_price', title: '实付', width: 100, templet: function(d){
+            {field: 'order_price', title: '{:t("plugin_record.actual_paid")}', width: 100, templet: function(d){
                 if (currentType === 'download') return '-';
-                if (d.order_pay_type === 'points') return '<span style="color:#ff5722;">'+parseInt(d.order_price)+' 积分</span>';
+                if (d.order_pay_type === 'points') return '<span style="color:#ff5722;">'+parseInt(d.order_price)+' {:t("accounting.point_unit")}</span>';
                 return '<span style="color:#ff5722;">¥'+(d.order_price || 0)+'</span>';
             }},
-            {field: 'paid_at', title: '时间', width: 160, templet: function(d){
+            {field: 'paid_at', title: '{:t("accounting.time")}', width: 160, templet: function(d){
                 return currentType === 'download' ? escapeHtml(d.created_at) : escapeHtml(d.paid_at);
             }},
-            {field: 'plugin_status', title: '插件状态', width: 100, templet: function(d){
+            {field: 'plugin_status', title: '{:t("plugin_record.plugin_status")}', width: 100, templet: function(d){
                 var s = d.plugin_status;
-                if (s == 1) return '<span class="layui-badge layui-badge-green">已上架</span>';
-                if (s == 0) return '<span class="layui-badge layui-badge-orange">待审核</span>';
-                if (s == 2) return '<span class="layui-badge layui-badge-gray">已下架</span>';
-                if (s == 3) return '<span class="layui-badge layui-badge-red">已拒绝</span>';
+                if (s == 1) return '<span class="layui-badge layui-badge-green">{:t('user_home.published')}</span>';
+                if (s == 0) return '<span class="layui-badge layui-badge-orange">{:t('plugin_ui.pending_review')}</span>';
+                if (s == 2) return '<span class="layui-badge layui-badge-gray">{:t('plugin_ui.off_shelf')}</span>';
+                if (s == 3) return '<span class="layui-badge layui-badge-red">{:t('plugin_detail.rejected')}</span>';
                 return '-';
             }},
-            {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 100}
+            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 100}
         ]]
     });
 
@@ -121,7 +121,7 @@ layui.use(['layer', 'form', 'table', 'element'], function () {
             var pluginId = obj.data.plugin_id;
             layer.open({
                 type: 2,
-                title: '插件详情',
+                title: '{:t("home.plugin_details")}',
                 content: '{:url("/UserPlugin/detail")}?id=' + pluginId,
                 area: ['90%', '90%'],
                 maxmin: true

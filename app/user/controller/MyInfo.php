@@ -3,7 +3,10 @@
 namespace app\user\controller;
 
 use app\common\controller\UserBackend;
+use app\common\service\PhoneVerificationService;
+use app\common\service\EmailNotificationService;
 use app\user\service\MyInfoService;
+use think\facade\Db;
 use think\facade\View;
 
 class MyInfo extends UserBackend
@@ -15,6 +18,38 @@ class MyInfo extends UserBackend
 
     public function index(){
         View::assign('pay_notice', $this->myAppInfo['pay_notice'] ?? '');
+        $phoneStatus = PhoneVerificationService::status(intval($this->userId));
+        $emailNotificationEnabled = EmailNotificationService::isGlobalEnabled();
+        $userEmailBound = (bool)filter_var(
+            strtolower(trim((string)($this->userInfo['email'] ?? ''))),
+            FILTER_VALIDATE_EMAIL
+        );
+        $qqOauthIdentityId = intval(Db::name('user_social_identity')->alias('usi')
+            ->join('social_identity si', 'si.id = usi.identity_id')
+            ->where('usi.user_id', intval($this->userId))
+            ->where('si.provider', 'qq')
+            ->value('si.id'));
+        $legacyClaim = $qqOauthIdentityId > 0
+            ? Db::name('qq_identity_claim')->where([
+                'identity_id' => $qqOauthIdentityId,
+                'user_id' => intval($this->userId),
+                'status' => 1,
+            ])->find()
+            : null;
+        View::assign([
+            'qqOauthBound' => $qqOauthIdentityId > 0,
+            'qqLegacyVerified' => !empty($legacyClaim),
+            'qqLegacyNumber' => !empty($legacyClaim) ? (string)$legacyClaim['legacy_qq'] : '',
+            'smsEnabled' => !empty($phoneStatus['sms_enabled']),
+            'smsConfigured' => !empty($phoneStatus['sms_configured']),
+            'phoneVerified' => !empty($phoneStatus['verified']),
+            'phoneMasked' => (string)($phoneStatus['phone_masked'] ?? ''),
+            'emailNotificationEnabled' => $emailNotificationEnabled,
+            'userEmailBound' => $userEmailBound,
+            'emailNotificationEvents' => $emailNotificationEnabled
+                ? EmailNotificationService::catalog('user', intval($this->userId))
+                : [],
+        ]);
         return $this->render('my_info/index');
     }
 
@@ -61,6 +96,34 @@ class MyInfo extends UserBackend
     public function editUserInfo(){
         if(IS_POST){
             return $this->service->editUserInfo();
+        }
+    }
+
+    public function changeUsername()
+    {
+        if (!IS_POST) {
+            return json(message(t('validation.param_error'), false), 405);
+        }
+        return json($this->service->changeUsername(intval($this->userId)));
+    }
+
+    public function emailNotification()
+    {
+        if (!IS_POST) {
+            return json(message(t('validation.param_error'), false), 405);
+        }
+        try {
+            $events = $this->request->post('events/a', []);
+            EmailNotificationService::savePreferences(
+                'user',
+                intval($this->userId),
+                is_array($events) ? $events : []
+            );
+            return json(message(t('notification_email.settings_saved'), true));
+        } catch (\InvalidArgumentException $e) {
+            return json(message($e->getMessage(), false));
+        } catch (\Throwable $e) {
+            return json(message(t('notification_email.operation_failed'), false));
         }
     }
 

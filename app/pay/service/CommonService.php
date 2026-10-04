@@ -7,6 +7,7 @@ use app\common\service\BaseService;
 use app\admin\model\OrderModel;
 use app\common\model\NotificationModel;
 use app\common\model\BalanceLogModel;
+use app\common\service\RebateRiskService;
 use think\Exception;
 use think\facade\Db;
 
@@ -18,59 +19,72 @@ class CommonService extends BaseService
     }
 
     public function processOrder($srow){
-        try{
-            //if(!is_array($srow)) return false;
-            $srow = $this->payModel->getInfo($srow['trade_no']);
-            if(!$srow) return false;
-            $srow = $srow->toArray();
-            //$input = unserialize($srow['input']);
-            //throw new Exception(gettype($srow));
-            switch ($srow['buy_type']){
-                case 'recharge':
-                    try{
-                        $userId = !empty($srow['userid']) ? intval($srow['userid']) : null;
-                        $money = !empty($srow['money']) ? round($srow['money'], 2) : null;
-                        if(empty($userId)){
-                            return false;
-                        }
-                        if(empty($money)){
-                            return false;
-                        }
-                        try{
-                            // 若有折扣码，按原始金额到账而非折扣后金额
-                            $rechargeAmount = round(floatval($srow['money']), 2);
-                            if (!empty($srow['input'])) {
-                                $inputData = json_decode($srow['input'], true);
-                                if (!empty($inputData['original_money'])) {
-                                    $rechargeAmount = round(floatval($inputData['original_money']), 2);
-                                }
-                            }
-                            Db::name('user')
-                                ->where('id', $srow['userid'])
-                                ->inc('balance', $rechargeAmount)
-                                ->update();
-                            BalanceLogModel::add($srow['userid'], 'recharge', $rechargeAmount, '余额充值 +'.$rechargeAmount.' 元', 'pay_recharge', $srow['trade_no']);
-                            $srow['status'] = 1;
-                        }catch (\Exception $e){
-                            $srow['status'] = 3;
-                            $srow['return'] = '执行充值操作失败！';
-                        }
-                        $this->orderModel->edit($srow);
-                        // 返利处理
-                        $this->processRebate($srow);
-                    }catch (\Exception $e){
-                        $srow['status'] = 3;
-                        $srow['return'] = $e->getMessage();
-                        $this->orderModel->edit($srow);
-                        return false;
-                    }
-                    break;
-                default:
-                    return false;
-            }
-        }catch (\Exception $e){
-            throw new Exception($e->getMessage());
+        if (!is_array($srow) || empty($srow['trade_no'])) {
+            throw new Exception(t('pay.order_params_invalid'));
         }
+
+        return (bool) Db::transaction(function () use ($srow) {
+            $srow = Db::name('pay')
+                ->where('trade_no', $srow['trade_no'])
+                ->lock(true)
+                ->find();
+            if (!$srow) {
+                throw new Exception(t('pay.payment_order_not_found'));
+            }
+            if ($srow['buy_type'] !== 'recharge') {
+                return false;
+            }
+
+            $userId = (int)($srow['userid'] ?? 0);
+            $rechargeAmount = sf_money_format($srow['money'] ?? 0);
+            if (!empty($srow['input'])) {
+                $inputData = json_decode($srow['input'], true);
+                if (is_array($inputData) && isset($inputData['original_money'])) {
+                    $rechargeAmount = sf_money_format($inputData['original_money']);
+                }
+            }
+            if ($userId <= 0 || $rechargeAmount <= 0) {
+                throw new Exception(t('pay.recharge_user_or_amount_invalid'));
+            }
+
+            // 支付订单行已被锁定；余额流水作为业务幂等凭据，避免回调重试重复加款。
+            $credited = Db::name('balance_log')
+                ->where('source_type', 'pay_recharge')
+                ->where('source_no', $srow['trade_no'])
+                ->lock(true)
+                ->find();
+            if (!$credited) {
+                $updated = Db::name('user')
+                    ->where('id', $userId)
+                    ->inc('balance', $rechargeAmount)
+                    ->update();
+                if (!$updated) {
+                    throw new Exception(t('pay.recharge_balance_update_failed'));
+                }
+                if (!BalanceLogModel::add($userId, 'recharge', $rechargeAmount, t('pay.recharge_log', ['amount' => $rechargeAmount]), 'pay_recharge', $srow['trade_no'])) {
+                    throw new Exception(t('pay.recharge_log_failed'));
+                }
+            }
+
+            $srow['status'] = 1;
+            $srow['endtime'] = !empty($srow['endtime']) ? $srow['endtime'] : datetime();
+            $existingOrder = Db::name('order')
+                ->where('trade_no', $srow['trade_no'])
+                ->lock(true)
+                ->find();
+            if ($existingOrder) {
+                Db::name('order')->where('id', $existingOrder['id'])->update([
+                    'status' => 1,
+                    'endtime' => $srow['endtime'],
+                    'api_trade_no' => $srow['api_trade_no'] ?? null,
+                ]);
+            } elseif (!$this->orderModel->edit($srow)) {
+                throw new Exception(t('pay.recharge_order_write_failed'));
+            }
+
+            $this->processRebate($srow);
+            return true;
+        });
     }
 
     private function processRebate(array $payRow): void
@@ -111,15 +125,26 @@ class CommonService extends BaseService
             return;
         }
 
-        // 5. 计算返利金额（基于实付金额）
-        $paidAmount = round(floatval($payRow['money']), 2);
-        $rebateAmount = round($paidAmount * $rebateRate / 100, 2);
+        // 5. 计算返利金额（基于充值面额，避免在折扣后的实付金额上二次折算）
+        $paidAmount = sf_money_format($payRow['money']);
+        $rebateBaseAmount = $this->resolveRebateBaseAmount($payRow);
+        $rebateAmount = sf_money_apply_rate($rebateBaseAmount, $rebateRate);
         if ($rebateAmount <= 0) {
             return;
         }
 
         Db::startTrans();
         try {
+            // 串行化同一码主的返利创建，防止并发订单绕过日/月额度。
+            $lockedOwner = Db::name('user')
+                ->where('id', intval($codeRow['user_id']))
+                ->lock(true)
+                ->find();
+            if (!$lockedOwner || intval($lockedOwner['status']) !== 1) {
+                Db::rollback();
+                return;
+            }
+
             // 6. 防重：事务内检查，利用唯一索引防止并发双写
             $existing = Db::name('rebate_record')
                 ->where('pay_trade_no', $payRow['trade_no'])
@@ -130,7 +155,21 @@ class CommonService extends BaseService
                 return;
             }
 
-            // 7. 写入返利记录
+            // 7. 返利先冻结，关联账号或超限订单只留风控审计记录。
+            $riskReason = RebateRiskService::relatedAccountReason(
+                intval($payRow['userid']),
+                intval($codeRow['user_id'])
+            );
+            if ($riskReason === '') {
+                $riskReason = RebateRiskService::limitReason(
+                    intval($payRow['userid']),
+                    intval($codeRow['user_id']),
+                    $rebateAmount
+                );
+            }
+            $status = $riskReason === '' ? 'pending' : 'rejected';
+            $settleAt = date('Y-m-d H:i:s', strtotime('+' . RebateRiskService::holdDays() . ' days'));
+
             Db::name('rebate_record')->insert([
                 'order_id' => $orderRow['id'],
                 'pay_trade_no' => $payRow['trade_no'],
@@ -138,50 +177,60 @@ class CommonService extends BaseService
                 'referrer_user_id' => $codeRow['user_id'],
                 'discount_code' => $payRow['discount_code'],
                 'paid_amount' => $paidAmount,
+                'rebate_base_amount' => $rebateBaseAmount,
                 'rebate_rate' => $rebateRate,
                 'rebate_amount' => $rebateAmount,
-                'status' => 'settled',
+                'status' => $status,
+                'settle_at' => $settleAt,
+                'settled_at' => null,
+                'risk_reason' => sf_plain_text($riskReason, 255),
                 'created_at' => datetime(),
                 'updated_at' => datetime(),
             ]);
 
-            // 8. 返利入账到码主余额
-            Db::name('user')
-                ->where('id', $codeRow['user_id'])
-                ->inc('balance', $rebateAmount)
-                ->update();
-            BalanceLogModel::add($codeRow['user_id'], 'rebate', $rebateAmount, '返利 +'.$rebateAmount.' 元（订单 '.$payRow['trade_no'].'）');
-
             Db::commit();
 
-            // 9. 发送通知给码主
-            NotificationModel::add([
-                'user_id' => $codeRow['user_id'],
-                'title' => '返利到账通知',
-                'content' => sprintf(
-                    '您的折扣码 %s 被使用，获得返利 +%s 元（订单 %s，支付金额 %s 元，返利比例 %s%%）',
-                    $payRow['discount_code'],
-                    $rebateAmount,
-                    $payRow['trade_no'],
-                    $paidAmount,
-                    $rebateRate
-                ),
-                'type' => 'rebate',
-                'is_read' => 0,
-                'created_at' => datetime(),
-            ]);
+            // 8. 仅通知正常进入冻结期的返利；风控原因不向前台披露。
+            if ($status === 'pending') {
+                NotificationModel::add([
+                    'user_id' => $codeRow['user_id'],
+                    'title' => t('rebate.pending_notice_title'),
+                    'content' => t('rebate.pending_notice_content', [
+                        'code' => $payRow['discount_code'],
+                        'amount' => $rebateAmount,
+                        'time' => $settleAt,
+                        'order' => $payRow['trade_no'],
+                        'face_amount' => $rebateBaseAmount,
+                        'paid_amount' => $paidAmount,
+                    ]),
+                    'type' => 'rebate',
+                    'variables' => [
+                        'discount_code' => $payRow['discount_code'],
+                        'amount' => $rebateAmount,
+                        'order_no' => $payRow['trade_no'],
+                        'settled_at' => $settleAt,
+                        'phase' => t('rebate.pending_settlement'),
+                    ],
+                    'is_read' => 0,
+                    'created_at' => datetime(),
+                ]);
+            }
 
-            // 10. 审计日志
+            // 9. 审计日志
             event('ActionLog', [
-                'Title' => '返利结算',
+                'Title' => '返利冻结审核',
                 '订单号' => $payRow['trade_no'],
                 '付款用户' => $payRow['userid'],
                 '返利用户' => $codeRow['user_id'],
                 '折扣码' => $payRow['discount_code'],
+                '返利基数' => $rebateBaseAmount,
                 '支付金额' => $paidAmount,
                 '返利比例' => $rebateRate . '%',
                 '返利金额' => $rebateAmount,
-                'Result' => 'success'
+                '结算时间' => $settleAt,
+                '风控结果' => $status,
+                '风控原因' => $riskReason,
+                'Result' => $status === 'pending' ? 'success' : 'rejected'
             ]);
         } catch (\Exception $e) {
             Db::rollback();
@@ -193,5 +242,25 @@ class CommonService extends BaseService
                 'Result' => 'failed'
             ]);
         }
+    }
+
+    /**
+     * 返利以充值面额为基数；历史无折扣订单没有 original_money 时退回实付金额。
+     */
+    private function resolveRebateBaseAmount(array $payRow): string
+    {
+        $paidAmount = sf_money_format($payRow['money'] ?? 0);
+        $inputData = json_decode((string)($payRow['input'] ?? ''), true);
+        if (!is_array($inputData) || !array_key_exists('original_money', $inputData)) {
+            return $paidAmount;
+        }
+
+        try {
+            $originalAmount = sf_money_format($inputData['original_money']);
+        } catch (\InvalidArgumentException $e) {
+            return $paidAmount;
+        }
+
+        return sf_money_to_cents($originalAmount) > 0 ? $originalAmount : $paidAmount;
     }
 }

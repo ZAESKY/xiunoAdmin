@@ -38,8 +38,19 @@ a{color:inherit;}
 .user-card-top{display:flex;align-items:center;gap:13px;min-width:0;}
 .user-card-top img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#eef3f8;box-shadow:0 8px 18px rgba(47,125,246,.12);}
 .user-card-title{flex:1;min-width:0;}
-.user-card-title strong{display:block;font-size:16px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.user-card-title span{display:block;font-size:12px;color:var(--muted);line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-card-title>strong{display:block;margin:0 0 7px;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-card-meta{display:block;font-size:12px;color:var(--muted);line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-power-banner{--tier-a:#526b84;--tier-b:#91a4b8;--tier-edge:#d8e1ea;--tier-glow:rgba(83,105,128,.26);position:relative;isolation:isolate;min-height:64px;padding:10px 14px;box-sizing:border-box;display:flex;align-items:center;gap:13px;overflow:hidden;border:1px solid var(--tier-edge);border-radius:11px;color:#fff;background:radial-gradient(circle at 88% 20%,rgba(255,255,255,.28) 0 2px,transparent 3px),radial-gradient(circle at 94% 72%,rgba(255,255,255,.18) 0 1px,transparent 2px),linear-gradient(135deg,var(--tier-a),var(--tier-b));box-shadow:0 8px 20px var(--tier-glow),inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 0 rgba(0,0,0,.15);transition:transform .25s ease,filter .25s ease;animation:userPowerBreath 3.8s ease-in-out infinite;}
+.user-power-banner:hover{transform:translateY(-2px);filter:saturate(1.08);}
+.user-power-banner:after{content:"";position:absolute;right:-45px;top:-60px;width:126px;height:126px;border-radius:50%;border:1px solid rgba(255,255,255,.2);box-shadow:0 0 0 16px rgba(255,255,255,.06),0 0 0 32px rgba(255,255,255,.035);}
+.user-power-shine{position:absolute;inset:0;z-index:0;pointer-events:none;transform:translateX(-125%) skewX(-22deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);animation:agentShine 4.4s ease-in-out infinite;}
+.user-power-medal{position:relative;z-index:1;isolation:isolate;width:40px;height:40px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 5px 12px rgba(0,0,0,.16);}
+.user-power-medal:before{content:"";position:absolute;inset:-3px;z-index:-1;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,255,255,.2),rgba(255,255,255,.9),rgba(255,255,255,.2),rgba(255,255,255,.68),rgba(255,255,255,.2));animation:userMedalSpin 8s linear infinite;}
+.user-power-medal i{font-size:22px;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.24);}
+.user-power-copy{position:relative;z-index:1;flex:1;min-width:0;}
+.user-power-copy small{display:block;margin-bottom:4px;overflow:hidden;color:rgba(255,255,255,.72);font-size:8px;font-weight:600;letter-spacing:1.1px;line-height:1;white-space:nowrap;text-overflow:ellipsis;}
+.user-power-copy strong{display:block;overflow:hidden;color:#fff;font-size:17px;font-weight:800;letter-spacing:.6px;line-height:1.25;text-shadow:0 2px 5px rgba(0,0,0,.23);white-space:nowrap;text-overflow:ellipsis;}
+.user-power-star{position:relative;z-index:1;flex:none;color:rgba(255,255,255,.9);font-size:17px;text-shadow:0 0 9px rgba(255,255,255,.7);animation:userPowerStar 2.2s ease-in-out infinite;}
 .user-badge{height:26px;line-height:26px;padding:0 10px;border-radius:5px;background:var(--blue-soft);color:var(--blue);font-size:12px;white-space:nowrap;}
 .asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .asset{border:1px solid #eef3f8;border-radius:7px;background:#fbfdff;padding:12px 13px;}
@@ -86,6 +97,42 @@ a{color:inherit;}
 .rank:nth-child(1) em{background:#fff1da;color:#e48b10;}
 .rank:nth-child(2) em{background:#eaf2ff;color:#2f7df6;}
 .rank:nth-child(3) em{background:#eaf8ef;color:#19a96f;}
+.agent-showcase-head span{font-size:11px;color:#9aa7b6;font-weight:400;}
+.agent-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:6px;row-gap:20px;padding:4px 0 3px;}
+.agent-item{--tier-a:#64748b;--tier-b:#94a3b8;--tier-edge:#cbd5e1;--tier-glow:rgba(100,116,139,.3);min-width:0;text-align:center;position:relative;animation:agentEnter .55s cubic-bezier(.22,.8,.28,1) backwards;transition:transform .25s ease;}
+.agent-item:nth-child(2){animation-delay:.05s}.agent-item:nth-child(3){animation-delay:.1s}.agent-item:nth-child(4){animation-delay:.15s}.agent-item:nth-child(5){animation-delay:.2s}
+.agent-item:nth-child(6){animation-delay:.25s}.agent-item:nth-child(7){animation-delay:.3s}.agent-item:nth-child(8){animation-delay:.35s}.agent-item:nth-child(9){animation-delay:.4s}.agent-item:nth-child(10){animation-delay:.45s}
+.agent-item:hover{transform:translateY(-4px);}
+.agent-contact{display:block;width:52px;height:52px;margin:0 auto 15px;padding:0;position:relative;border:0;border-radius:50%;background:transparent;text-decoration:none;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.agent-contact:focus-visible{box-shadow:0 0 0 3px rgba(47,125,246,.22);}
+.agent-avatar-wrap{width:100%;height:100%;position:relative;border-radius:50%;isolation:isolate;}
+.agent-avatar-wrap:before{content:"";position:absolute;inset:-3px;border-radius:50%;z-index:-1;background:conic-gradient(from 0deg,var(--tier-a),var(--tier-edge),var(--tier-b),var(--tier-a));box-shadow:0 5px 15px var(--tier-glow);animation:agentHalo 3.2s ease-in-out infinite;}
+.agent-avatar{display:block;width:100%;height:100%;box-sizing:border-box;border:2px solid #fff;border-radius:50%;object-fit:cover;background:#eef3f8;transition:transform .28s ease,filter .28s ease;}
+.agent-contact:hover .agent-avatar,.agent-contact:focus-visible .agent-avatar{transform:scale(1.06);filter:saturate(1.08);}
+.agent-badge{position:absolute;left:50%;bottom:-9px;z-index:2;transform:translateX(-50%);max-width:60px;height:18px;line-height:18px;padding:0 5px;box-sizing:border-box;border:1px solid rgba(255,255,255,.55);border-radius:4px 4px 6px 6px;color:#fff;background:linear-gradient(135deg,var(--tier-a),var(--tier-b));box-shadow:0 4px 9px var(--tier-glow),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.16);font-size:8.5px;font-weight:700;letter-spacing:.1px;text-shadow:0 1px 2px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agent-badge:before{content:"";position:absolute;inset:0;transform:translateX(-125%) skewX(-24deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:agentShine 4s ease-in-out infinite;}
+.agent-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4d5a6c;font-size:11px;line-height:16px;transition:color .2s ease;}
+.agent-item:hover .agent-name{color:var(--tier-a);}
+.agent-contact-tip{min-width:92px;padding:2px 3px;text-align:center;line-height:1.55;}
+.agent-contact-tip strong{display:block;color:#fff;font-size:12px;font-weight:700;}
+.agent-contact-tip span{display:block;color:rgba(255,255,255,.78);font-size:11px;white-space:nowrap;}
+.agent-tier-1{--tier-a:#8a4b28;--tier-b:#d49462;--tier-edge:#f0bb8f;--tier-glow:rgba(174,102,55,.30)}
+.agent-tier-2{--tier-a:#64748b;--tier-b:#a8b4c5;--tier-edge:#edf2f7;--tier-glow:rgba(100,116,139,.28)}
+.agent-tier-3{--tier-a:#b46e00;--tier-b:#f2b936;--tier-edge:#ffe79a;--tier-glow:rgba(225,158,22,.34)}
+.agent-tier-4{--tier-a:#25808b;--tier-b:#5bc4bd;--tier-edge:#b8f1e8;--tier-glow:rgba(44,157,157,.30)}
+.agent-tier-5{--tier-a:#283548;--tier-b:#68778e;--tier-edge:#aab7ca;--tier-glow:rgba(40,53,72,.35)}
+.agent-tier-6{--tier-a:#5558c9;--tier-b:#8098f9;--tier-edge:#c9d8ff;--tier-glow:rgba(85,88,201,.34)}
+.agent-tier-7{--tier-a:#1769b0;--tier-b:#42bfe8;--tier-edge:#b5eeff;--tier-glow:rgba(26,143,201,.35)}
+.agent-tier-8{--tier-a:#171d2c;--tier-b:#6f42c1;--tier-edge:#c7a9ff;--tier-glow:rgba(86,55,151,.40)}
+.agent-tier-9{--tier-a:#9b2467;--tier-b:#e7538e;--tier-edge:#ffc1da;--tier-glow:rgba(194,45,116,.36)}
+.agent-tier-10{--tier-a:#b8232f;--tier-b:#f06d3e;--tier-edge:#ffc19f;--tier-glow:rgba(201,50,53,.36)}
+.agent-tier-standard{--tier-a:#526b84;--tier-b:#91a4b8;--tier-edge:#d8e1ea;--tier-glow:rgba(83,105,128,.26)}
+@keyframes agentEnter{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes agentHalo{0%,100%{filter:saturate(.92);transform:scale(1)}50%{filter:saturate(1.18);transform:scale(1.035)}}
+@keyframes agentShine{0%,58%{transform:translateX(-125%) skewX(-24deg)}78%,100%{transform:translateX(145%) skewX(-24deg)}}
+@keyframes userPowerBreath{0%,100%{box-shadow:0 8px 20px var(--tier-glow),inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 0 rgba(0,0,0,.15)}50%{box-shadow:0 11px 26px var(--tier-glow),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(0,0,0,.12)}}
+@keyframes userMedalSpin{to{transform:rotate(360deg)}}
+@keyframes userPowerStar{0%,100%{opacity:.55;transform:scale(.86) rotate(0)}50%{opacity:1;transform:scale(1.12) rotate(18deg)}}
 .trend{height:180px;display:flex;align-items:flex-end;gap:16px;padding-top:10px;}
 .bar{flex:1;min-width:22px;height:100%;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;gap:7px;color:#8a97a8;font-size:11px;}
 .bar-stack{height:126px;width:100%;display:flex;align-items:flex-end;gap:4px;}
@@ -99,11 +146,6 @@ a{color:inherit;}
 .plugin-title b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;}
 .plugin p{height:36px;line-height:18px;overflow:hidden;margin:0;color:var(--muted);font-size:12px;}
 .notice-list .line{min-height:50px;}
-.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.team{height:70px;border:1px solid #eef3f8;border-radius:7px;background:#fbfdff;display:flex;align-items:center;gap:13px;padding:0 16px;cursor:pointer;}
-.team i{font-size:28px;color:var(--blue);}
-.team b{display:block;font-size:14px;margin-bottom:4px;}
-.team span{font-size:12px;color:var(--muted);}
 .checkin-card{display:flex;align-items:center;gap:16px;}
 .checkin-icon{width:66px;height:66px;border-radius:10px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:32px;}
 .checkin-info{flex:1;min-width:0;}
@@ -135,8 +177,10 @@ a{color:inherit;}
 .notice-clickable{cursor:pointer;transition:background .15s;}
 .notice-clickable:hover{background:#f7faff;border-radius:4px;padding-left:6px;margin-left:-6px;padding-right:6px;margin-right:-6px;}
 @media(max-width:1280px){.mp-layout,.mp-hero{grid-template-columns:1fr}.metric-grid,.todo-row{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.mp-page{padding:10px}.split{grid-template-columns:1fr}.chip-grid,.team-grid,.plugin-grid{grid-template-columns:1fr 1fr}.metric-grid,.todo-row{grid-template-columns:1fr}.mp-head{padding:0 14px}.mp-body{padding:14px}.carousel-slide img{height:140px}}
-@media(max-width:520px){.chip-grid,.team-grid,.plugin-grid,.asset-grid{grid-template-columns:1fr}.quick-banner{min-height:0}.user-actions{grid-template-columns:1fr}.carousel-slide img{height:130px}}
+@media(max-width:760px){.mp-page{padding:10px}.split{grid-template-columns:1fr}.chip-grid,.plugin-grid{grid-template-columns:1fr 1fr}.metric-grid,.todo-row{grid-template-columns:1fr}.mp-head{padding:0 14px}.mp-body{padding:14px}.carousel-slide img{height:140px}}
+@media(max-width:520px){.chip-grid,.plugin-grid,.asset-grid{grid-template-columns:1fr}.quick-banner{min-height:0}.user-actions{grid-template-columns:1fr}.carousel-slide img{height:130px}}
+@media(max-width:380px){.agent-grid{column-gap:2px}.agent-contact{width:46px;height:46px}.agent-badge{max-width:54px;padding:0 4px;font-size:8px}}
+@media(prefers-reduced-motion:reduce){.agent-item,.agent-avatar-wrap:before,.agent-badge:before,.user-power-banner,.user-power-shine,.user-power-medal:before,.user-power-star{animation:none!important}.agent-item,.agent-avatar,.user-power-banner{transition:none!important}}
 </style>
 
 <div class="mp-page">
@@ -145,7 +189,7 @@ a{color:inherit;}
       <!-- 应用公告 -->
       {notempty name="app_notice"}
       <section class="mp-card">
-        <div class="mp-head"><h3><i class="layui-icon layui-icon-speaker" style="color:var(--blue);margin-right:6px;"></i>应用公告</h3></div>
+        <div class="mp-head"><h3><i class="layui-icon layui-icon-speaker" style="color:var(--blue);margin-right:6px;"></i>{:t('user_home.app_announcement')}</h3></div>
         <div class="mp-body">
           <div class="rt-content">{$app_notice|raw}</div>
         </div>
@@ -154,7 +198,7 @@ a{color:inherit;}
       <!-- 系统公告 -->
       {notempty name="notice"}
       <section class="mp-card">
-        <div class="mp-head"><h3><i class="layui-icon layui-icon-notice" style="color:var(--orange);margin-right:6px;"></i>系统公告</h3></div>
+        <div class="mp-head"><h3><i class="layui-icon layui-icon-notice" style="color:var(--orange);margin-right:6px;"></i>{:t('user_home.system_announcement')}</h3></div>
         <div class="mp-body">
           <div class="rt-content">{$notice|raw}</div>
         </div>
@@ -162,56 +206,56 @@ a{color:inherit;}
       {/notempty}
 
       <section class="mp-card">
-        <div class="mp-head"><h3>工作空间</h3><a ew-href="{:url('/MyInfo/index')}">更多</a></div>
+        <div class="mp-head"><h3>{:t('user_home.workspace')}</h3><a ew-href="{:url('/MyInfo/index')}">{:t('user_home.more')}</a></div>
         <div class="mp-body workspace">
           <div>
             <div class="workspace-title">
               <div class="workspace-logo"><i class="layui-icon layui-icon-template-1"></i></div>
               <div>
-                <h2>{$app_name|default='我的应用'}工作台</h2>
-                <p>成员：{$userInfo['username']|default='用户'} · 角色：{$userInfo['power_name']|default='普通用户'} · 应用ID：{$app_id}</p>
+                <h2>{if !empty($app_name)}{$app_name}{else/}{:t('user_home.my_application')}{/if}{:t('user_home.console_suffix')}</h2>
+                <p>{:t('user_home.member')}：{if !empty($userInfo['username'])}{$userInfo['username']}{else/}{:t('user_home.user')}{/if} · {:t('user_home.role')}：{if !empty($userInfo['power_name'])}{$userInfo['power_name']}{else/}{:t('upgrade.default_user')}{/if} · {:t('user_home.app_id')}：{$app_id}</p>
               </div>
             </div>
             <div class="metric-grid">
-              <a class="metric" ew-href="{:url('/Auth/list')}"><b>{$auth_count}</b><span>授权总数</span><small>今日 {$today_auths}</small></a>
-              <a class="metric" ew-href="{:url('/Cdkey/list')}"><b>{$cdkey_count}</b><span>卡密数量</span><small>未使用 {$cdkey_unused|default=0}</small></a>
-              <a class="metric" ew-href="{:url('/User/list')}"><b>{$user_count}</b><span>下级用户</span><small>今日 {if $user_increase>=0}+{/if}{$user_increase}</small></a>
-              <a class="metric" ew-href="{:url('/UserPlugin/list')}"><b>{$my_plugin_count|default=0}</b><span>我的插件</span><small>已上架 {$my_online_plugin_count|default=0}</small></a>
+              <a class="metric" ew-href="{:url('/Auth/list')}"><b>{$auth_count}</b><span>{:t('dashboard.auth_total')}</span><small>{:t('user_home.today')} {$today_auths}</small></a>
+              <a class="metric" ew-href="{:url('/Cdkey/list')}"><b>{$cdkey_count}</b><span>{:t('user_home.cdkey_count')}</span><small>{:t('user_home.unused')} {$cdkey_unused|default=0}</small></a>
+              <a class="metric" ew-href="{:url('/User/list')}"><b>{$user_count}</b><span>{:t('user_home.subordinate_users')}</span><small>{:t('user_home.today')} {if $user_increase>=0}+{/if}{$user_increase}</small></a>
+              <a class="metric" ew-href="{:url('/UserPlugin/list')}"><b>{$my_plugin_count|default=0}</b><span>{:t('user_home.my_plugins')}</span><small>{:t('user_home.published')} {$my_online_plugin_count|default=0}</small></a>
             </div>
             <div class="chip-grid">
-              <a class="chip" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i>我的授权</a>
-              <a class="chip" ew-href="{:url('/Cdkey/exchange')}"><i class="layui-icon layui-icon-cols"></i>卡密兑换</a>
-              <a class="chip" ew-href="{:url('/UserPlugin/market')}"><i class="layui-icon layui-icon-util"></i>插件市场</a>
-              <a class="chip" ew-href="{:url('/PointExchange/list')}"><i class="layui-icon layui-icon-cart-simple"></i>积分兑换</a>
-              <a class="chip" ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i>余额充值</a>
-              <a class="chip js-withdraw-entry" href="javascript:;" data-url="{:url('/Withdraw/index', [])}"><i class="layui-icon layui-icon-export"></i>申请提现</a>
-              <a class="chip" ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-date"></i>签到记录</a>
-              <a class="chip" ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-username"></i>个人资料</a>
+              <a class="chip" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i>{:t('user_home.my_authorizations')}</a>
+              <a class="chip" ew-href="{:url('/Cdkey/exchange')}"><i class="layui-icon layui-icon-cols"></i>{:t('user_home.cdkey_exchange')}</a>
+              <a class="chip" ew-href="{:url('/UserPlugin/market')}"><i class="layui-icon layui-icon-util"></i>{:t('user_home.plugin_market')}</a>
+              <a class="chip" ew-href="{:url('/PointExchange/list')}"><i class="layui-icon layui-icon-cart-simple"></i>{:t('user_home.points_exchange')}</a>
+              <a class="chip" ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i>{:t('user_home.balance_recharge')}</a>
+              <a class="chip js-withdraw-entry" href="javascript:;" data-url="{:url('/Withdraw/index', [])}"><i class="layui-icon layui-icon-export"></i>{:t('user_home.request_withdrawal')}</a>
+              <a class="chip" ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-date"></i>{:t('user_home.checkin_records')}</a>
+              <a class="chip" ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-username"></i>{:t('user_home.profile')}</a>
             </div>
           </div>
         </div>
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>待办事项</h3><a ew-href="{:url('/MyInfo/index')}">更多</a></div>
+        <div class="mp-head"><h3>{:t('user_home.todos')}</h3><a ew-href="{:url('/MyInfo/index')}">{:t('user_home.more')}</a></div>
         <div class="mp-body todo-row">
-          <a class="todo blue" ew-href="{:url('/Auth/list')}"><div class="icon"><i class="layui-icon layui-icon-auz"></i></div><div><b>{$auth_count}</b><span>我的授权</span></div></a>
-          <a class="todo green" ew-href="{:url('/Cdkey/list')}"><div class="icon"><i class="layui-icon layui-icon-cols"></i></div><div><b>{$cdkey_unused|default=0}</b><span>未用卡密</span></div></a>
-          <a class="todo orange" ew-href="{:url('/UserPlugin/market')}"><div class="icon"><i class="layui-icon layui-icon-util"></i></div><div><b>{:count($latest_plugins)}</b><span>最新插件</span></div></a>
-          <a class="todo red" ew-href="{:url('/PointExchange/list')}"><div class="icon"><i class="layui-icon layui-icon-diamond"></i></div><div><b>{if isset($userInfo['integral'])}{$userInfo['integral']}{else/}0{/if}</b><span>可用积分</span></div></a>
+          <a class="todo blue" ew-href="{:url('/Auth/list')}"><div class="icon"><i class="layui-icon layui-icon-auz"></i></div><div><b>{$auth_count}</b><span>{:t('user_home.my_authorizations')}</span></div></a>
+          <a class="todo green" ew-href="{:url('/Cdkey/list')}"><div class="icon"><i class="layui-icon layui-icon-cols"></i></div><div><b>{$cdkey_unused|default=0}</b><span>{:t('user_home.unused_cdkeys')}</span></div></a>
+          <a class="todo orange" ew-href="{:url('/UserPlugin/market')}"><div class="icon"><i class="layui-icon layui-icon-util"></i></div><div><b>{:count($latest_plugins)}</b><span>{:t('user_home.latest_plugins')}</span></div></a>
+          <a class="todo red" ew-href="{:url('/PointExchange/list')}"><div class="icon"><i class="layui-icon layui-icon-diamond"></i></div><div><b>{if isset($userInfo['integral'])}{$userInfo['integral']}{else/}0{/if}</b><span>{:t('profile.available_points')}</span></div></a>
         </div>
       </section>
 
       <section class="split">
         <div class="mp-card">
-          <div class="mp-head"><h3>七日统计</h3><a ew-href="{:url('/Auth/list')}">授权 / 用户</a></div>
+          <div class="mp-head"><h3>{:t('user_home.seven_day_stats')}</h3><a ew-href="{:url('/Auth/list')}">{:t('user_home.auth_users')}</a></div>
           <div class="mp-body">
             <div class="trend">
               {volist name="week_trend" id="trend"}
               <div class="bar">
                 <div class="bar-stack">
-                  <div class="bar-auth" title="新增授权 {$trend.auth}" style="height:{$trend.auth_rate}%;"></div>
-                  <div class="bar-user" title="新增用户 {$trend.user}" style="height:{$trend.user_rate}%;"></div>
+                  <div class="bar-auth" title="{:t('user_home.new_authorizations')} {$trend.auth}" style="height:{$trend.auth_rate}%;"></div>
+                  <div class="bar-user" title="{:t('user_home.new_users')} {$trend.user}" style="height:{$trend.user_rate}%;"></div>
                 </div>
                 <span>{$trend.day}</span>
               </div>
@@ -220,17 +264,17 @@ a{color:inherit;}
           </div>
         </div>
         <div class="mp-card">
-          <div class="mp-head"><h3>每日签到</h3><a ew-href="{:url('/MyInfo/index')}">记录</a></div>
+          <div class="mp-head"><h3>{:t('user_home.daily_checkin')}</h3><a ew-href="{:url('/MyInfo/index')}">{:t('user_home.records')}</a></div>
           <div class="mp-body checkin-card">
             <div class="checkin-icon"><i class="layui-icon layui-icon-date"></i></div>
             <div class="checkin-info">
-              <b>{if $checkin_status.checked_today}今日已签到{else/}今日待签到{/if}</b>
-              <span>连续 {$checkin_status.consecutive_days|default=0} 天 · 今日可得 {$checkin_base_points} 积分</span>
+              <b>{if $checkin_status.checked_today}{:t('user_home.checked_today')}{else/}{:t('user_home.pending_today')}{/if}</b>
+              <span>{:t('user_home.consecutive')} {$checkin_status.consecutive_days|default=0} {:t('user_home.days')} · {:t('user_home.today_earn')} {$checkin_base_points} {:t('user_home.points')}</span>
             </div>
             {if $checkin_enabled}
-            <button type="button" class="checkin-btn {if $checkin_status.checked_today}done{/if}" id="checkinBtn" {if $checkin_status.checked_today}disabled{/if}>{if $checkin_status.checked_today}已签到{else/}签到{/if}</button>
+            <button type="button" class="checkin-btn {if $checkin_status.checked_today}done{/if}" id="checkinBtn" {if $checkin_status.checked_today}disabled{/if}>{if $checkin_status.checked_today}{:t('user_home.checked_in')}{else/}{:t('user_home.check_in')}{/if}</button>
             {else/}
-            <button type="button" class="checkin-btn done" disabled>未开启</button>
+            <button type="button" class="checkin-btn done" disabled>{:t('user_home.disabled')}</button>
             {/if}
           </div>
         </div>
@@ -238,26 +282,26 @@ a{color:inherit;}
 
       <section class="split">
         <div class="mp-card">
-          <div class="mp-head"><h3>我的插件</h3><a ew-href="{:url('/UserPlugin/list')}">全部</a></div>
+          <div class="mp-head"><h3>{:t('user_home.my_plugins')}</h3><a ew-href="{:url('/UserPlugin/list')}">{:t('user_home.all')}</a></div>
           <div class="mp-body plugin-grid">
-            {empty name="my_plugins"}<div class="empty">暂无发布插件</div>{else/}
+            {empty name="my_plugins"}<div class="empty">{:t('user_home.no_published_plugins')}</div>{else/}
             {volist name="my_plugins" id="plugin"}
             <a class="plugin" ew-href="{:url('/UserPlugin/detail', ['id' => $plugin.id])}">
-              <div class="plugin-title"><img src="{$plugin.icon|default=''}" onerror="this.style.opacity='0.2'"><b>{$plugin.name|default='插件'}</b></div>
-              <p>{$plugin.description|default='暂无描述'}</p>
+              <div class="plugin-title"><img src="{$plugin.icon|default=''}" onerror="this.style.opacity='0.2'"><b>{if !empty($plugin.name)}{$plugin.name}{else/}{:t('user_home.plugin')}{/if}</b></div>
+              <p>{if !empty($plugin.description)}{$plugin.description}{else/}{:t('user_home.no_description')}{/if}</p>
             </a>
             {/volist}
             {/empty}
           </div>
         </div>
         <div class="mp-card">
-          <div class="mp-head"><h3>最新上架</h3><a ew-href="{:url('/UserPlugin/market')}">更多</a></div>
+          <div class="mp-head"><h3>{:t('user_home.latest_listings')}</h3><a ew-href="{:url('/UserPlugin/market')}">{:t('user_home.more')}</a></div>
           <div class="mp-body plugin-grid">
-            {empty name="latest_plugins"}<div class="empty">暂无插件</div>{else/}
+            {empty name="latest_plugins"}<div class="empty">{:t('user_home.no_plugins')}</div>{else/}
             {volist name="latest_plugins" id="plugin"}
             <a class="plugin" ew-href="{:url('/UserPlugin/detail', ['id' => $plugin.id])}">
-              <div class="plugin-title"><img src="{$plugin.icon|default=''}" onerror="this.style.opacity='0.2'"><b>{$plugin.name|default='插件'}</b></div>
-              <p>{$plugin.description|default='暂无描述'}</p>
+              <div class="plugin-title"><img src="{$plugin.icon|default=''}" onerror="this.style.opacity='0.2'"><b>{if !empty($plugin.name)}{$plugin.name}{else/}{:t('user_home.plugin')}{/if}</b></div>
+              <p>{if !empty($plugin.description)}{$plugin.description}{else/}{:t('user_home.no_description')}{/if}</p>
             </a>
             {/volist}
             {/empty}
@@ -271,24 +315,35 @@ a{color:inherit;}
       <div class="user-card-top">
         <img src="{$userInfo['img']}" onerror="this.style.opacity='0.25'">
         <div class="user-card-title">
-          <strong>{$greeting}，{$userInfo['username']|default='用户'}</strong>
-          <span>{$app_name|default='系统'} · 已使用 {$member_days} 天 · {$userInfo['power_name']|default='默认权限'}</span>
+          <strong>{$greeting}，{if !empty($userInfo['username'])}{$userInfo['username']}{else/}{:t('user_home.user')}{/if}</strong>
+          <span class="user-card-meta">{if !empty($app_name)}{$app_name}{else/}{:t('user_home.system')}{/if} · {:t('user_home.used_for')} {$member_days} {:t('user_home.days')}</span>
         </div>
       </div>
+      {if $show_power_badge}
+      <div class="user-power-banner {$current_power_tier}" title="{if !empty($userInfo['power_name'])}{$userInfo['power_name']}{else/}{:t('user_home.default_permission')}{/if}">
+        <span class="user-power-shine" aria-hidden="true"></span>
+        <span class="user-power-medal" aria-hidden="true"><i class="layui-icon layui-icon-diamond"></i></span>
+        <span class="user-power-copy">
+          <small>EXCLUSIVE IDENTITY · {:t('user_home.exclusive_identity')}</small>
+          <strong>{if !empty($userInfo['power_name'])}{$userInfo['power_name']}{else/}{:t('user_home.default_permission')}{/if}</strong>
+        </span>
+        <span class="user-power-star" aria-hidden="true">✦</span>
+      </div>
+      {/if}
       <div class="asset-grid">
         <div class="asset balance">
-          <span>账户余额</span>
+          <span>{:t('upgrade.account_balance')}</span>
           <b>¥{$userInfo['balance']|default=0}</b>
         </div>
         <div class="asset points">
-          <span>可用积分</span>
+          <span>{:t('profile.available_points')}</span>
           <b>{$userInfo['integral']|default=0}</b>
         </div>
       </div>
       <div class="user-actions">
-        <a class="primary" ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i>充值</a>
-        <a href="javascript:;" class="js-withdraw-entry" data-url="{:url('/Withdraw/index', [])}"><i class="layui-icon layui-icon-export"></i>提现</a>
-        <a ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-username"></i>资料</a>
+        <a class="primary" ew-href="{:url('/MyInfo/recharge')}"><i class="layui-icon layui-icon-rmb"></i>{:t('recharge.submit')}</a>
+        <a href="javascript:;" class="js-withdraw-entry" data-url="{:url('/Withdraw/index', [])}"><i class="layui-icon layui-icon-export"></i>{:t('user_home.withdraw')}</a>
+        <a ew-href="{:url('/MyInfo/index')}"><i class="layui-icon layui-icon-username"></i>{:t('user_home.profile_short')}</a>
       </div>
     </div>
 
@@ -312,15 +367,15 @@ a{color:inherit;}
 
       <!-- 公告列表（点击弹窗查看详情） -->
       <section class="mp-card notice-list">
-        <div class="mp-head"><h3>公告</h3></div>
+        <div class="mp-head"><h3>{:t('user_home.announcements')}</h3></div>
         <div class="mp-body">
           {empty name="notice_list"}
-            <div class="empty">暂无公告</div>
+            <div class="empty">{:t('user_home.no_announcements')}</div>
           {else/}
             {volist name="notice_list" id="vo" offset="0" length="5" key="k"}
             <div class="line notice-clickable" data-notice-index="{$k-1}">
               <i class="layui-icon layui-icon-notice"></i>
-              <span class="text">{$vo.title|default='公告'}</span>
+              <span class="text">{if !empty($vo.title)}{$vo.title}{else/}{:t('user_home.announcement')}{/if}</span>
               <span class="time">{$vo.created_at|default=''}</span>
             </div>
             {/volist}
@@ -329,32 +384,45 @@ a{color:inherit;}
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>常用功能</h3><a ew-href="{:url('/UserPlugin/market')}">更多</a></div>
-        <div class="mp-body team-grid">
-          <a class="team" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i><div><b>授权服务</b><span>授权与设备</span></div></a>
-          <a class="team" ew-href="{:url('/Cdkey/list')}"><i class="layui-icon layui-icon-cols"></i><div><b>卡密服务</b><span>卡密与兑换</span></div></a>
-          <a class="team" ew-href="{:url('/UserPlugin/market')}"><i class="layui-icon layui-icon-util"></i><div><b>插件服务</b><span>市场与购买</span></div></a>
-          <a class="team" ew-href="{:url('/PointExchange/list')}"><i class="layui-icon layui-icon-diamond"></i><div><b>积分服务</b><span>兑换与记录</span></div></a>
-        </div>
-      </section>
-
-      <section class="mp-card">
-        <div class="mp-head"><h3>最近购买</h3><a ew-href="{:url('/UserPlugin/purchases')}">全部</a></div>
+        <div class="mp-head"><h3>{:t('user_home.recent_purchases')}</h3><a ew-href="{:url('/UserPlugin/purchases')}">{:t('user_home.all')}</a></div>
         <div class="mp-body line-list">
-          {empty name="my_purchases"}<div class="empty">暂无购买记录</div>{else/}
+          {empty name="my_purchases"}<div class="empty">{:t('user_home.no_purchases')}</div>{else/}
           {volist name="my_purchases" id="buy"}
-          <div class="line"><i class="layui-icon layui-icon-cart-simple"></i><span class="text">{$buy.name|default='插件'}</span><span class="value">¥{$buy.price|default=0}</span></div>
+          <div class="line"><i class="layui-icon layui-icon-cart-simple"></i><span class="text">{if !empty($buy.name)}{$buy.name}{else/}{:t('user_home.plugin')}{/if}</span><span class="value">¥{$buy.price|default=0}</span></div>
           {/volist}
           {/empty}
         </div>
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>积分排行</h3><a ew-href="{:url('/User/list')}">全部</a></div>
+        <div class="mp-head agent-showcase-head"><h3>{:t('user_home.partners')}</h3><span>{:t('user_home.random_each_refresh')}</span></div>
         <div class="mp-body">
-          {empty name="integral_ranking"}<div class="empty">暂无排行数据</div>{else/}
+          {empty name="agent_users"}
+          <div class="empty">{:t('user_home.no_partners')}</div>
+          {else/}
+          <div class="agent-grid">
+            {volist name="agent_users" id="agent"}
+            <div class="agent-item {$agent.tier_class}">
+              <button type="button" class="agent-contact js-agent-contact" data-qq="{$agent.qq}" aria-label="{:t('user_home.copy_partner_qq')} {$agent.display_name}: {$agent.qq}">
+                <div class="agent-avatar-wrap">
+                  <img class="agent-avatar" src="{$agent.avatar}" alt="{$agent.display_name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/Assets/img/logo.png';">
+                  <span class="agent-badge">{$agent.power_name}</span>
+                </div>
+              </button>
+              <span class="agent-name">{$agent.display_name}</span>
+            </div>
+            {/volist}
+          </div>
+          {/empty}
+        </div>
+      </section>
+
+      <section class="mp-card">
+        <div class="mp-head"><h3>{:t('user_home.points_ranking')}</h3><a ew-href="{:url('/User/list')}">{:t('user_home.all')}</a></div>
+        <div class="mp-body">
+          {empty name="integral_ranking"}<div class="empty">{:t('user_home.no_ranking')}</div>{else/}
           {volist name="integral_ranking" id="vo" offset="0" length="5" key="k"}
-          <div class="rank"><em>{$k}</em><span class="text">{$vo.username|default='用户'}</span><span class="value">{$vo.integral|default=0}</span></div>
+          <div class="rank"><em>{$k}</em><span class="text">{if !empty($vo.username)}{$vo.username}{else/}{:t('user_home.user')}{/if}</span><span class="value">{$vo.integral|default=0}</span></div>
           {/volist}
           {/empty}
         </div>
@@ -387,6 +455,70 @@ layui.use(['jquery', 'notice', 'layer'], function(){
     SF_URL.normalizePageLinks(document);
   }
 
+  // ========== 合伙人 QQ 复制 ==========
+  var agentTipIndex = 0;
+  function closeAgentTip() {
+    if (agentTipIndex) {
+      layer.close(agentTipIndex);
+      agentTipIndex = 0;
+    }
+  }
+  $(document)
+    .on('mouseenter focusin', '.js-agent-contact', function(){
+      var qq = String($(this).attr('data-qq') || '').replace(/[^0-9]/g, '');
+      if (!qq) return;
+      closeAgentTip();
+      agentTipIndex = layer.tips(
+        '<div class="agent-contact-tip"><strong>' + t('user_home.click_copy_qq') + '</strong><span>QQ: ' + qq + '</span></div>',
+        this,
+        {tips: [1, '#1f2a3d'], time: 0, area: 'auto'}
+      );
+    })
+    .on('mouseleave focusout', '.js-agent-contact', closeAgentTip)
+    .on('click', '.js-agent-contact', function(){
+      var qq = String($(this).attr('data-qq') || '').replace(/[^0-9]/g, '');
+      closeAgentTip();
+      if (!/^[1-9][0-9]{4,11}$/.test(qq)) {
+        notice.msg(t('user_home.invalid_partner_qq'), {icon: 2});
+        return;
+      }
+
+      function copyFallback() {
+        var textarea = document.createElement('textarea');
+        textarea.value = qq;
+        textarea.setAttribute('readonly', 'readonly');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        var copied = false;
+        try {
+          copied = document.execCommand('copy');
+        } catch (e) {}
+        document.body.removeChild(textarea);
+        return copied;
+      }
+
+      function copySuccess() {
+        notice.msg(t('user_home.partner_qq_copied'), {icon: 1});
+      }
+
+      function copyFailed() {
+        if (copyFallback()) {
+          copySuccess();
+        } else {
+          notice.msg(t('user_home.copy_failed', {qq: qq}), {icon: 2});
+        }
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(qq).then(copySuccess).catch(copyFailed);
+      } else {
+        copyFailed();
+      }
+    });
+
   // ========== 轮播图 ==========
   (function(){
     var $track = $('#carouselTrack');
@@ -418,10 +550,10 @@ layui.use(['jquery', 'notice', 'layer'], function(){
   // ========== 公告点击弹窗 ==========
   $(document).on('click', '.notice-clickable', function(){
     var idx = parseInt($(this).data('notice-index'));
-    var title = $(this).find('.text').text().trim() || '公告详情';
+    var title = $(this).find('.text').text().trim() || t('user_home.announcement_details');
     var content = NOTICE_DATA[idx] || '';
     if (!content) {
-      notice.msg('暂无公告内容', {icon: 2});
+      notice.msg(t('user_home.no_announcement_content'), {icon: 2});
       return;
     }
     layer.open({
@@ -437,24 +569,24 @@ layui.use(['jquery', 'notice', 'layer'], function(){
   $('#checkinBtn').on('click', function(){
     var $btn = $(this);
     if ($btn.prop('disabled')) return;
-    $btn.prop('disabled', true).text('签到中');
+    $btn.prop('disabled', true).text(t('user_home.checking_in'));
     $.ajax({
       type: 'POST',
       url: "{:url('/Checkin/doCheckin')}",
       dataType: 'json',
       success: function(res){
         if (res && res.code == 0) {
-          notice.msg(res.msg || '签到成功', {icon: 1, audio: '1'});
-          $btn.addClass('done').text('已签到');
+          notice.msg(res.msg || t('user_home.checkin_success'), {icon: 1, audio: '1'});
+          $btn.addClass('done').text(t('user_home.checked_in'));
           setTimeout(function(){ window.location.reload(); }, 900);
         } else {
-          notice.msg((res && res.msg) || '签到失败', {icon: 2, audio: '1'});
-          $btn.prop('disabled', false).text('签到');
+          notice.msg((res && res.msg) || t('user_home.checkin_failed'), {icon: 2, audio: '1'});
+          $btn.prop('disabled', false).text(t('user_home.check_in'));
         }
       },
       error: function(){
-        notice.msg('签到请求失败', {icon: 2, audio: '1'});
-        $btn.prop('disabled', false).text('签到');
+        notice.msg(t('user_home.checkin_request_failed'), {icon: 2, audio: '1'});
+        $btn.prop('disabled', false).text(t('user_home.check_in'));
       }
     });
   });
@@ -462,7 +594,7 @@ layui.use(['jquery', 'notice', 'layer'], function(){
   // ========== 提现入口 ==========
   $('.js-withdraw-entry').on('click', function(){
     var url = $(this).data('url') || "{:url('/Withdraw/index', [])}";
-    notice.msg('正在检查提现条件...', {icon: 4, close: true});
+    notice.msg(t('user_home.checking_withdrawal'), {icon: 4, close: true});
     $.ajax({
       type: 'POST',
       url: "{:url('/Withdraw/check', [])}",
@@ -472,11 +604,11 @@ layui.use(['jquery', 'notice', 'layer'], function(){
         if (res && res.code == 0) {
           var balance = res.data && res.data.balance !== undefined ? res.data.balance : '{$userInfo["balance"]|default=0}';
           var min = res.data && res.data.min !== undefined ? res.data.min : 0;
-          layer.confirm('当前可提现余额 ¥' + balance + '，最低提现金额 ¥' + min + '。确认进入提现吗？', {icon: 3, shade: .1}, function(i){
+          layer.confirm(t('user_home.withdrawal_confirm', {balance: balance, min: min}), {icon: 3, shade: .1}, function(i){
             layer.close(i);
             var tab = {};
             tab.url = url;
-            tab.title = '申请提现';
+            tab.title = t('user_home.request_withdrawal');
             if (top.layui && top.layui.index) {
               top.layui.index.openTab(tab);
             } else if (layui.index) {
@@ -486,12 +618,12 @@ layui.use(['jquery', 'notice', 'layer'], function(){
             }
           });
         } else {
-          notice.msg((res && res.msg) || '暂不满足提现条件', {icon: 2, audio: '1'});
+          notice.msg((res && res.msg) || t('user_home.withdrawal_not_available'), {icon: 2, audio: '1'});
         }
       },
       error: function(){
         notice.destroy();
-        notice.msg('提现条件检查失败，请稍后再试', {icon: 2, audio: '1'});
+        notice.msg(t('user_home.withdrawal_check_failed'), {icon: 2, audio: '1'});
       }
     });
   });

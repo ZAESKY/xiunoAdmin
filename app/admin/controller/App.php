@@ -45,4 +45,14 @@ class App extends Backend
         }
     }
 
+    public function uploadInstaller()
+    {
+        if (!IS_POST) {
+            return json(message('common.illegal_request', false), 405);
+        }
+        $appId = input('post.id', 0, 'intval');
+        $file = request()->file('file');
+        return json($this->service->uploadInstaller($appId, $file));
+    }
+
 }

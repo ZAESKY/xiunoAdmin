@@ -241,9 +241,9 @@
                                         <div class="layui-form-item" lay-tips="点击可自动{:t('wxpay_ui.play')}当前{:t('common_ui.choose')}音速效果音" lay-direction="1" lay-bg="#4facfe" pane>
                                             <label class="layui-form-label">语速</label>
                                             <div class="layui-input-block  inline-block">
-                                                <input  type="radio"  value="0"  name="background_text_spd" lay-filter="background_text_spd" title="快" />
+                                                <input  type="radio"  value="0"  name="background_text_spd" lay-filter="background_text_spd" title="{:t('set_ui.speed_fast')}" />
                                                 <input  type="radio"  value="1"  name="background_text_spd" lay-filter="background_text_spd" title="{:t('set_ui.speed_normal')}" checked/>
-                                                <input  type="radio"  value="2"  name="background_text_spd" lay-filter="background_text_spd" title="慢" />
+                                                <input  type="radio"  value="2"  name="background_text_spd" lay-filter="background_text_spd" title="{:t('set_ui.speed_slow')}" />
                                             </div>
                                         </div>
                                     </div>
@@ -292,7 +292,6 @@
                                         <div class="layui-input-block  inline-block">
                                             <input type="checkbox" name="login_switch" value="qq" lay-skin="primary" title="<img src='/Assets/img/qq.png' width='18'> ＱＱ快捷登录"/>
                                             <input type="checkbox" name="login_switch" value="qrcode" lay-skin="primary" title="<img src='/Assets/img/pays.png' width='18'> ＱＱ{:t('login.qq_scan')}登陆"/>
-                                            <input type="checkbox" name="login_switch" value="wechat_mp" lay-skin="primary" title="<img src='/Assets/img/wechat.svg' width='18'> 微信公众号扫码登录"/>
                                         </div>
                                     </div>
                                 </div>
@@ -407,7 +406,7 @@
                                                 <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
                                                     <img onclick="previewImg('{__IMG__}logo.png')" src="{__IMG__}logo.png" width="50px"  border="0" />
                                                     <br>
-                                                    <input type="radio" value="0" name="notice_template" title="自定义" lay-filter="notice_select" checked/>
+                                                    <input type="radio" value="0" name="notice_template" title="{:t('recharge.custom')}" lay-filter="notice_select" checked/>
                                                 </div>
                                                 {volist name="notice_template_list" id="res"}
                                                 <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
@@ -810,7 +809,7 @@
                     }else{
                         $("#notice_template").css("display","inherit");
                     }
-                    notice.msg("获取信息成功！", {icon: 1, audio:'1'});
+                    notice.msg("{:t('set_ui.get_info_success')}", {icon: 1, audio:'1'});
                 } else {
                     notice.msg(data.msg, {icon: 2, audio:'1'});
                 }
@@ -819,7 +818,7 @@
             },
             error: function() {
                 notice.destroy();
-                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
             }
         });
 
@@ -839,7 +838,7 @@
                 if(res.code == 0){
                     $("input[name='diy_background']").val(res.data.path);
                     layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', res.files.file);
-                    notice.msg('上传成功！', {icon: 1, audio:'1'});
+                    notice.msg('{:t("upload.upload_success")}', {icon: 1, audio:'1'});
                 }else{
                     notice.msg('上传失败！', {icon: 2, audio:'1'});
                 }
@@ -1003,7 +1002,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
             return false;

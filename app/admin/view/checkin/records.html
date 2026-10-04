@@ -1,13 +1,13 @@
 {include file="/public/header"}
 <div class="layui-fluid">
   <div class="layui-card">
-    <div class="layui-card-header">打卡记录</div>
+    <div class="layui-card-header">{:t('accounting.checkin_history')}</div>
     <div class="layui-card-body">
       <div class="layui-form">
         <div class="layui-form-item" style="display:inline-block;margin-bottom:6px;">
-          <input type="text" id="searchUsername" placeholder="搜索用户" class="layui-input" style="width:200px;">
+          <input type="text" id="searchUsername" placeholder="{:t('checkin_ui.search_user')}" class="layui-input" style="width:200px;">
         </div>
-        <button class="layui-btn" id="btnSearch" style="margin-bottom:6px;"><i class="layui-icon layui-icon-search"></i> 搜索</button>
+        <button class="layui-btn" id="btnSearch" style="margin-bottom:6px;"><i class="layui-icon layui-icon-search"></i> {:t('common_ui.search_btn')}</button>
       </div>
       <table id="recordsTable" lay-filter="recordsTable"></table>
     </div>
@@ -25,12 +25,12 @@ layui.use(['table'], function(){
     where: {username: ''},
     cols: [[
       {field: 'id', title: 'ID', width: 70, sort: true},
-      {field: 'username', title: '用户', width: 130},
-      {field: 'checkin_date', title: '打卡日期', width: 120, sort: true},
-      {field: 'consecutive_days', title: '连续天数', width: 100, sort: true},
-      {field: 'points_earned', title: '获得积分', width: 110, sort: true},
-      {field: 'ip', title: 'IP地址', width: 150},
-      {field: 'created_at', title: '打卡时间', width: 170, sort: true}
+      {field: 'username', title: '{:t("admin_user.user_suffix")}', width: 130},
+      {field: 'checkin_date', title: '{:t("accounting.checkin_date")}', width: 120, sort: true},
+      {field: 'consecutive_days', title: '{:t("accounting.consecutive_days")}', width: 100, sort: true},
+      {field: 'points_earned', title: '{:t("accounting.points_earned")}', width: 110, sort: true},
+      {field: 'ip', title: '{:t("common_ui.ip_address")}', width: 150},
+      {field: 'created_at', title: '{:t("accounting.checkin_time")}', width: 170, sort: true}
     ]],
     page: true,
     limit: 15,

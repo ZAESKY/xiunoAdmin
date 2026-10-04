@@ -39,11 +39,11 @@ class PluginOrderModel extends BaseModel
     {
         try {
             if (empty($id)) {
-                throw new Exception('订单ID不能为空');
+                throw new Exception(t('plugin_order.id_required'));
             }
             $row = $this->getInfo($id);
             if (!$row) {
-                throw new Exception('订单不存在');
+                throw new Exception(t('plugin_order.not_found'));
             }
             self::where('id', $id)->delete();
             return true;
@@ -60,11 +60,11 @@ class PluginOrderModel extends BaseModel
             $status = isset($post['status']) ? intval($post['status']) : 0;
 
             if (empty($id)) {
-                throw new Exception('订单ID不能为空');
+                throw new Exception(t('plugin_order.id_required'));
             }
             $row = $this->getInfo($id);
             if (!$row) {
-                throw new Exception('订单不存在');
+                throw new Exception(t('plugin_order.not_found'));
             }
 
             $data = ['status' => $status, 'updated_at' => datetime()];
@@ -83,8 +83,8 @@ class PluginOrderModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = !empty($post['limit']) ? $post['limit'] : 10;
-            $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|order_no|plugin_name');
             if (!empty($post['plugin_id'])) {
                 $data[] = ['plugin_id', '=', intval($post['plugin_id'])];

@@ -5,6 +5,7 @@ namespace app\user\controller;
 use app\common\controller\UserBackend;
 use app\user\service\MyListService;
 use think\Exception;
+use think\facade\Db;
 use think\facade\View;
 
 class MyList extends UserBackend
@@ -18,9 +19,9 @@ class MyList extends UserBackend
         if(IS_POST){
             $bindingType = input('post.bindingType');
             try{
-                return $this->service->editBinding($bindingType);
-            }catch (\Exception $e){
-                return message(t('replace.auth_failed').$e->getMessage(), false);
+                return json($this->service->editBinding($bindingType));
+            }catch (\Throwable $e){
+                return json(message(t('replace.auth_failed').$e->getMessage(), false));
             }
         }
     }
@@ -32,9 +33,9 @@ class MyList extends UserBackend
             $type = input('post.type');
             try{
                 $this->service->unbind($id,$type);
-                return message(t('user.unbind_success'), true);
-            }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                return json(message(t('user.unbind_success'), true));
+            }catch (\Throwable $e){
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -43,19 +44,30 @@ class MyList extends UserBackend
     {
         if (IS_POST) {
             try{
-                $ids = explode(',', input('post.id'));
+                $ids = array_values(array_unique(array_filter(
+                    array_map('intval', explode(',', (string)input('post.id'))),
+                    static fn ($id) => $id > 0
+                )));
                 $type = input('post.type');
-                //批量删除
-                $num = 0;
-                foreach ($ids as $key => $val) {
-                    $res = $this->service->unbind($val,$type);
-                    if ($res !== false) {
-                        $num++;
-                    }
+                if (empty($ids)) {
+                    return json(message(t('validation.missing_id'), false));
                 }
-                return message(t('user.unbind_count', ['total' => count($ids), 'count' => $num]));
-            }catch (\Exception $e){
-                return message($e->getMessage(), false);
+                if (count($ids) > 100) {
+                    return json(message('auth.batch_unbind_limit', false));
+                }
+                $num = Db::transaction(function () use ($ids, $type) {
+                    $done = 0;
+                    foreach ($ids as $id) {
+                        if ($this->service->unbind($id, $type) !== true) {
+                            throw new \RuntimeException(t('user.delete_failed'));
+                        }
+                        $done++;
+                    }
+                    return $done;
+                });
+                return json(message(t('user.unbind_count', ['total' => count($ids), 'count' => $num]), true));
+            }catch (\Throwable $e){
+                return json(message($e->getMessage(), false));
             }
         }
     }
@@ -64,14 +76,13 @@ class MyList extends UserBackend
         try{
             if (IS_POST) {
                 $result = $this->service->auth();
-                return message(t('common.list_success'), true, ['data' => $result]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
             }
-        }catch (\Exception $e){
-            return message($e->getMessage(), false, ['data' => []]);
+        }catch (\Throwable $e){
+            return json(message($e->getMessage(), false, ['data' => []]));
         }
         try{
-            View::assign('replace_notice', $this->myAppInfo['replace_notice']);
-            return $this->render();
+            return redirect((string)url('/Auth/list', ['tab' => 'bound']));
         }catch (\Exception $e){
             return $this->render('public/error', ['msg' => $e->getMessage()]);
         }

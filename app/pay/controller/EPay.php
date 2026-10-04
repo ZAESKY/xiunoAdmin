@@ -5,6 +5,7 @@ namespace app\pay\controller;
 use app\common\controller\PayBackend;
 use think\facade\Db;
 use think\facade\Config;
+use think\facade\Log;
 use app\pay\library\epay\EpayNotify;
 use app\pay\service\CommonService;
 class EPay extends PayBackend
@@ -44,7 +45,7 @@ class EPay extends PayBackend
         if (!$this->isPaidStatus($trade_status)) {
             return $this->renderPayResult(false, '验证订单交易状态失败！[errorCode:CheckPayStatusError]', $out_trade_no);
         }
-        if (intval($srow['status']) == 0 && round($srow['money'], 2) != round($money, 2)) {
+        if (sf_money_to_cents($srow['money']) !== sf_money_to_cents($money)) {
             return $this->renderPayResult(false, '订单金额不一致！[errorCode:PayOrderMoneyError]', $out_trade_no);
         }
 
@@ -72,12 +73,14 @@ class EPay extends PayBackend
         $epayNotify = new EpayNotify($pay_config);
         $verify_result = $epayNotify->verifyNotify();
 
-        if ($verify_result && $this->isEpayEnabled($pay_config) && $this->isPaidStatus($trade_status)) {
-            if (intval($srow['status']) >= 1 || round($srow['money'], 2) == round($money, 2)) {
-                $this->completeOrder($srow, $trade_no);
-                echo "success";
-                return;
-            }
+        if ($verify_result
+            && $this->isEpayEnabled($pay_config)
+            && $this->isPaidStatus($trade_status)
+            && sf_money_to_cents($srow['money']) === sf_money_to_cents($money)
+            && $this->completeOrder($srow, $trade_no)
+        ) {
+            echo "success";
+            return;
         }
         echo "fail";
     }
@@ -111,27 +114,58 @@ class EPay extends PayBackend
 
     private function completeOrder(array $srow, $apiTradeNo)
     {
-        if (intval($srow['status']) >= 1) {
-            if (empty($srow['api_trade_no']) && !empty($apiTradeNo)) {
-                Db::name('pay')->where('trade_no', $srow['trade_no'])->update(['api_trade_no' => $apiTradeNo]);
-            }
-            return true;
-        }
-
-        $result = Db::name('pay')->where('trade_no', $srow['trade_no'])->where('status', 0)->update([
-            'status' => 1,
-            'endtime' => datetime(),
-            'api_trade_no' => $apiTradeNo,
-        ]);
-        if (!$result) {
-            return true;
-        }
-
         try {
-            $this->service->processOrder($srow);
-            return true;
-        } catch (\Exception $e) {
-            Db::name('pay')->where('trade_no', $srow['trade_no'])->update(['status' => 3]);
+            return (bool) Db::transaction(function () use ($srow, $apiTradeNo) {
+                $current = Db::name('pay')
+                    ->where('trade_no', $srow['trade_no'])
+                    ->lock(true)
+                    ->find();
+                if (!$current) {
+                    return false;
+                }
+
+                // 已成功的充值订单还要核对余额流水，兼容修复前可能留下的半完成状态。
+                if ((int)$current['status'] === 1) {
+                    if ($current['buy_type'] === 'recharge') {
+                        $credited = Db::name('balance_log')
+                            ->where('source_type', 'pay_recharge')
+                            ->where('source_no', $current['trade_no'])
+                            ->find();
+                        if (!$credited && $this->service->processOrder($current) !== true) {
+                            throw new \RuntimeException('充值订单补偿入账失败');
+                        }
+                    }
+                    if (empty($current['api_trade_no']) && !empty($apiTradeNo)) {
+                        Db::name('pay')->where('trade_no', $current['trade_no'])->update([
+                            'api_trade_no' => $apiTradeNo,
+                        ]);
+                    }
+                    return true;
+                }
+
+                // 先在同一事务内保存网关信息；余额、流水和业务订单完成后再标记支付成功。
+                Db::name('pay')->where('trade_no', $current['trade_no'])->update([
+                    'endtime' => datetime(),
+                    'api_trade_no' => $apiTradeNo,
+                ]);
+                if ($this->service->processOrder($current) !== true) {
+                    throw new \RuntimeException('充值订单入账失败');
+                }
+
+                $updated = Db::name('pay')
+                    ->where('trade_no', $current['trade_no'])
+                    ->whereIn('status', [0, 3])
+                    ->update(['status' => 1]);
+                if (!$updated) {
+                    throw new \RuntimeException('支付订单状态更新失败');
+                }
+                return true;
+            });
+        } catch (\Throwable $e) {
+            Log::error('易支付订单入账失败', [
+                'order' => (string)($srow['trade_no'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             return false;
         }
     }

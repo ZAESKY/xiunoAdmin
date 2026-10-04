@@ -7,26 +7,18 @@ class Encryption extends Backend
 {
     private static $config = [
         1 => [
-            'name' => 'SG11加密',
             'method' => 'Sg11',
             'versionSelection' => '1',
-            'introduce' => 'SG11目前支持PHP版本为：最高支持7.4版本&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:red&quot;&gt; 关于批量加密：&lt;/b&gt;&lt;br&gt;1. 仅支持上传zip后缀的压缩文件，所有目录不能包含中文和其他非法字符。&lt;br&gt;2. 压缩包大小不能超过2M，普通会员一次一个压缩包最多10个文件。&lt;br&gt;3. 一般10秒-60S出结果，等待完整，点击下载，也可在加密记录中下载。&lt;br&gt;SourceGuardian是组件加密，需要安装组件才能运行，不适合虚拟主机上运行。',
             'version' => ['5.4','5.5','5.6','7.0','7.1','7.2','7.3','7.4']
         ],
         2 => [
-            'name' => 'SG12加密',
             'method' => 'Sg12',
             'versionSelection' => '1',
-            'introduce' => 'SG12目前支持PHP版本为：最高支持8.0版本&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:red&quot;&gt; 关于批量加密：&lt;/b&gt;&lt;br&gt;1. 仅支持上传zip后缀的压缩文件，所有目录不能包含中文和其他非法字符。&lt;br&gt;2. 压缩包大小不能超过2M，普通会员一次一个压缩包最多10个文件。&lt;br&gt;3. 一般10秒-60S出结果，等待完整，点击下载，也可在加密记录中下载。&lt;br&gt;SourceGuardian是组件加密，需要安装组件才能运行，不适合虚拟主机上运行。&lt;br&gt;Sg13组件
-            &lt;br&gt;Windows/Linux/Max OS: &lt;a target=&quot;_blank&quot; href=&quot;https://sf2129876388.lanzouv.com/iTWSG0glnrra&quot;&gt;点击下载&lt;/a&gt;',
             'version' => ['5.4','5.5','5.6','7.0','7.1','7.2','7.3','7.4','8.0']
         ],
         3 => [
-            'name' => 'SG13加密',
             'method' => 'Sg13',
             'versionSelection' => '1',
-            'introduce' => 'SG13目前支持PHP版本为：最高支持8.1版本&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:red&quot;&gt; 关于批量加密：&lt;/b&gt;&lt;br&gt;1. 仅支持上传zip后缀的压缩文件，所有目录不能包含中文和其他非法字符。&lt;br&gt;2. 压缩包大小不能超过2M，普通会员一次一个压缩包最多10个文件。&lt;br&gt;3. 一般10秒-60S出结果，等待完整，点击下载，也可在加密记录中下载。&lt;br&gt;SourceGuardian是组件加密，需要安装组件才能运行，不适合虚拟主机上运行。&lt;br&gt;Sg13组件
-            &lt;br&gt;Windows/Linux/Max OS: &lt;a target=&quot;_blank&quot; href=&quot;https://sf2129876388.lanzouv.com/iTWSG0glnrra&quot;&gt;点击下载&lt;/a&gt;',
             'version' => ['5.4','5.5','5.6','7.0','7.1','7.2','7.3','7.4','8.0','8.1']
         ]
     ];
@@ -37,7 +29,18 @@ class Encryption extends Backend
     }
 
     public function list(){
-        return self::$config;
+        $config = self::$config;
+        $introductions = [
+            1 => t('encryption_ui.sg11_intro'),
+            2 => t('encryption_ui.sg12_intro'),
+            3 => t('encryption_ui.sg13_intro'),
+        ];
+        foreach ($config as $id => &$item) {
+            $item['name'] = t('encryption_ui.sg_name', ['version' => $id + 10]);
+            $item['introduce'] = $introductions[$id];
+        }
+        unset($item);
+        return $config;
     }
 
     public function index()
@@ -47,26 +50,29 @@ class Encryption extends Backend
             $type = !empty($post['type'])?intval($post['type']):null;
             $version = !empty($post['version'])?$post['version']:null;
             $comment = !empty($post['comment'])?$post['comment']:null;
-            $filename = !empty($post['name'])?$post['name']:null;
+            $filename = !empty($post['name'])?trim((string)$post['name']):null;
 
             if(empty($type)){
-                return message('请选择加密类型！', false);
+                return message(t('encryption.select_type'), false);
             }
 
             if(empty($comment)){
-                return message('请输入版权信息！', false);
+                return message(t('encryption.copyright_required'), false);
             }
 
             if(empty($filename)){
-                return message('请先上传文件！', false);
+                return message(t('upload.select_file'), false);
+            }
+            if ($filename !== basename($filename) || !preg_match('/^[^\x00\/\\\\]{1,180}\.zip$/iu', $filename)) {
+                return message(t('upload.filename_invalid'), false);
             }
 
             if(!array_key_exists($type, self::$config)){
-                return message('不存在此加密类型！', false);
+                return message(t('encryption.type_not_found'), false);
             }
 
             if(self::$config[$type]['versionSelection'] && empty($version)){
-                return message('请选择PHP版本！', false);
+                return message(t('encryption.select_php_version'), false);
             }
 
             try{
@@ -75,30 +81,33 @@ class Encryption extends Backend
                 $completePath = RUNTIME_PATH . DS . 'temp' . DS . 'upload' . DS . $zip_name;
                 $class = '\\addons\\encryption\\library\\' . self::$config[$type]['method'];
                 if (!class_exists($class)) {
-                    return message('不存在此加密类库！', false);
+                    return message(t('encryption.library_not_found'), false);
                 }
                 $encryptionClass = new $class();
                 $result = $encryptionClass->encryption($comment, $version, $filePath, $completePath);
                 if($result['code'] == 1){
-                    return message('加密成功！', true, $zip_name);
+                    return message(t('encryption.success'), true, $zip_name);
                 }else{
-                    return message('加密失败，请稍后重试！<br>失败原因：'.$result['info'], false);
+                    return message(t('encryption.failed'), false);
                 }
             }catch(\Exception $e){
-                return message('加密失败！' . $e->getMessage(), false);
+                return message(t('encryption.failed'), false);
             }
 
         }
     }
 
     public function download(){
-        $name = $this->request->get('name');
+        $name = trim((string)$this->request->get('name'));
         if(empty($name)){
-            return $this->render('/public/error', ['msg' => '压缩包名不能为空！']);
+            return $this->render('/public/error', ['msg' => t('archive.name_required')]);
+        }
+        if ($name !== basename($name) || !preg_match('/^[^\x00\/\\\\]{1,180}\.zip$/iu', $name)) {
+            return $this->render('/public/error', ['msg' => t('archive.name_invalid')]);
         }
         $filePath = RUNTIME_PATH . DS . 'temp' . DS . 'upload' . DS . $name;
         if(!is_file($filePath)){
-            return $this->render('/public/error', ['msg' => '不存在此压缩包！']);
+            return $this->render('/public/error', ['msg' => t('archive.not_found')]);
         }
         return download($filePath, $name);
     }
@@ -106,8 +115,8 @@ class Encryption extends Backend
     private function get_curl($url, $paras = array()) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         if (@$paras['Header']) {
             $Header = $paras['Header'];
         } else {

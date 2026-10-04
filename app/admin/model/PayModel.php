@@ -3,6 +3,7 @@
 namespace app\admin\model;
 
 use app\common\model\BaseModel;
+use think\Exception;
 
 class PayModel extends BaseModel
 {
@@ -26,7 +27,7 @@ class PayModel extends BaseModel
         $buy_type = !empty($wap['buy_type']) ? $wap['buy_type'] : null;
         $num = !empty($wap['num']) ? $wap['num'] : 1;
         $name = !empty($wap['name']) ? $wap['name'] : null;
-        $money = !empty($wap['money']) ? round($wap['money'], 2) : 0;
+        $money = !empty($wap['money']) ? sf_money_format($wap['money']) : '0.00';
         $input = !empty($wap['input']) ? $wap['input'] : '';
         $userId = !empty($wap['userid']) ? intval($wap['userid']) : null;
 
@@ -39,7 +40,11 @@ class PayModel extends BaseModel
         if(empty($userId)){
             return message(t('order.create_user_id_empty').$userId, false);
         }
-        $trade_no = date("YmdHis") . mt_rand(111, 999);
+        // Keep the legacy numeric format while making new order identifiers
+        // impractical to enumerate (old format only had 889 possibilities/sec).
+        do {
+            $trade_no = date('YmdHis') . sprintf('%09d', random_int(0, 999999999));
+        } while (self::where('trade_no', $trade_no)->find());
         $data = [
             'trade_no' => $trade_no,
             'buy_type' => $buy_type,
@@ -105,8 +110,8 @@ class PayModel extends BaseModel
     {
         try{
             $post = request()->post();
-            $limit = !empty($post['limit']) ? $post['limit'] : 10;
-            $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('trade_no|name');
 
             $list = self::order('id', 'asc')->where($data)->paginate([

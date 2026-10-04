@@ -16,7 +16,7 @@
                     <label class="layui-form-label layui-form-required">{:t('common_ui.belong_app')}:</label>
                     <div class="layui-input-block">
                         <select name="appid" class="layui-input ew-select-fixed" lay-filter="appid" lay-search>
-                            <option value="">{:t('common.nothing_selected')}所属的应用</option>
+                            <option value="">{:t('add_code.select_app')}</option>
                             {volist name="app_list.data.data" id="res"}
                             <option value="{$res.id}">{$res.name}</option>
                             {/volist}
@@ -24,18 +24,18 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label layui-form-required">{:t('common.upload')}文件:</label>
+                    <label class="layui-form-label layui-form-required">{:t('add_code.upload_file')}:</label>
                     <div class="layui-input-block">
                         <div class="layui-upload-drag" id="fileUpload">
                             <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                            <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
+                            <p>{:t('version_ui.drag_upload')}</p>
                             <div class="layui-hide" id="uploadDemoView">
                                 <hr>
                                 <div class="layui-form-item">
-                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="demo1" style="max-width: 196px">
+                                    <img src="" alt="{:t('addon_ui.upload_preview_alt')}" id="demo1" style="max-width: 196px">
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">文件名</label>
+                                    <label class="layui-form-label">{:t('version_ui.file_name')}</label>
                                     <div class="layui-input-block">
                                         <input type="text" name="name" id="name" value="" lay-verify="title" autocomplete="off" readonly="true" class="layui-input">
                                     </div>
@@ -51,12 +51,12 @@
                     </div>
                 </div>
                 <div class="layui-form-item text-right">
-                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>开始</button>
+                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('add_code.start')}</button>
                     <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.reset')}</button>
                 </div>
                 <div class="layui-form-item">
                     <div class="sf-tips">
-                        目前暂只支持彩虹自助下单系统一键二开
+                        {:t('add_code.support_notice')}
                     </div>
                 </div>
             </form>
@@ -124,14 +124,13 @@
                         var totalPage = parseInt($('#totalPage').val());
                         element.progress('uploadProgress', Math.ceil(page * 100 / totalPage) + '%');
                         page = page + 1;
-                        console.log(page);
                         $('#page').val(page);
                         $('#status').val('1');
                     } else if (res.data.status == 2) { //上传完成
                         element.progress('uploadProgress', '100%');
                         $('#status').val('2');
                         layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', '{__MODULE__}fileChoose/img/zip.png');
-                        notice.msg('上传成功', {icon: 1,audio: '1',onOpening: function () {
+                        notice.msg('{:t("version_ui.upload_success")}', {icon: 1,audio: '1',onOpening: function () {
                                 $("input[name='filename']").val(res.data.filename);
                                 $('.mask').hide();
                                 $('.loading').hide();}
@@ -139,7 +138,6 @@
                     } else { //上传错误
                         $('#status').val('-1');
                         element.progress('uploadProgress', '0%');
-                        console.log(!typeof (res.data.downUrl) == "undefined");
                         if (typeof (res.data.downUrl) == "undefined") {
                         } else {
                             $('#downUrl').val(res.data.downUrl);
@@ -152,7 +150,6 @@
                 }else{
                     $('#status').val('-1');
                     element.progress('uploadProgress', '0%');
-                    console.log(!typeof (res.data.downUrl) == "undefined");
                     if (typeof (res.data.downUrl) == "undefined") {
                     } else {
                         $('#downUrl').val(res.data.downUrl);
@@ -164,7 +161,7 @@
                 }
             },
             error: function(){
-                notice.msg('服务器错误', {icon: 2,audio: '1',onOpening: function () {
+                notice.msg('{:t("common.server_error")}', {icon: 2,audio: '1',onOpening: function () {
                         $('.mask').hide();
                         $('.loading').hide();}
                 });
@@ -172,7 +169,7 @@
         });
 
         form.on('submit(SF_EditSubmit)', function (data) {
-            notice.msg('正在执行中...', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: '{:addon_url("AddCode/index")}',
@@ -188,7 +185,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
             return false;

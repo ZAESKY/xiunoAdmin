@@ -3,8 +3,9 @@
 namespace app\index\controller;
 
 use app\common\controller\Frontend;
-use think\facade\Cache;
 use think\facade\Db;
+use app\common\service\RateLimitService;
+use app\common\service\ApplicationInstallerService;
 
 class DownloadInfo extends Frontend
 {
@@ -15,56 +16,57 @@ class DownloadInfo extends Frontend
 
     public function verification(){
         if(IS_POST){
+            if (sf_download_mode() !== 'info') {
+                return message(t('download.info_disabled'), false);
+            }
             $post = $this->request->post();
-            $qq = !empty($post['qq'])?intval($post['qq']):null;
+            $qq = !empty($post['qq'])?trim((string)$post['qq']):null;
             $appid = !empty($post['appid'])?intval($post['appid']):null;
             $auth_info = !empty($post['auth_info'])?$post['auth_info']:null;
             $authcode = !empty($post['authcode'])?$post['authcode']:null;
             if(empty($appid)){
-                return message('请选择所属应用！' ,false);
+                return message(t('auth.select_app') ,false);
             }
             if(empty($auth_info)){
-                return message('请填写授权内容！' ,false);
+                return message(t('auth.enter_content') ,false);
             }
             if(empty($qq)){
-                return message('请填写授权者QQ！' ,false);
+                return message(t('auth.enter_qq') ,false);
             }
             if(empty($authcode)){
-                return message('请填写授权码！' ,false);
+                return message(t('auth.enter_code') ,false);
+            }
+            $rate = RateLimitService::hit('download_info', (string)get_client_ip(), 30, 3600);
+            if (!$rate['ok']) {
+                return message(t('download.verification_rate_limited'), false);
             }
             $row = Db::name('auth')
                 ->where([
                     'appid' => $appid,
                     'auth_info' => $auth_info
                 ])
-                ->field('qq,authcode')
+                ->field('id,qq,authcode')
                 ->find();
             if(empty($row)){
-                return message('不存在此授权！' ,false);
+                return message(t('auth.not_exist') ,false);
             }
             if($row['qq'] != $qq){
-                return message('该授权QQ与所填QQ不匹配！' ,false);
+                return message(t('auth.qq_mismatch') ,false);
             }
-            if($row['authcode'] != $authcode){
-                return message('该授权授权码与所填授权码不匹配！' ,false);
+            if(!hash_equals((string)$row['authcode'], (string)$authcode)){
+                return message(t('auth.code_mismatch') ,false);
             }
-            $res = Db::name('version')
-                ->where([
-                    ['appid', '=', $appid],
-                    ['status', '=', 1],
-                    ['type', '=', 0]
-                ])
-                ->find();
-            if(empty($res)){
-                return message('此应用无安装包' ,false);
+            $ticket = ApplicationInstallerService::issueDownloadTicket(
+                $appid,
+                (int)$row['id'],
+                (string)get_client_ip()
+            );
+            if (empty($ticket['ok'])) {
+                return message((string)$ticket['msg'], false);
             }
-            $value = serialize([
-                'versionInfo' => $res,
-                'authInfo' => $row
+            return message(t('app.download_link_success') ,true, [
+                'url' => SITE_URL.'/api.php/Download/download/?sign='.$ticket['ticket'],
             ]);
-            $key = md5(uniqid());
-            Cache::set($key, $value, 43200);
-            return message('获取下载链接成功' ,true, ['url' => 'http://'.DOMAIN.'/api.php/Download/download/?sign='.$key]);
         }
     }
 }

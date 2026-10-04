@@ -4,6 +4,8 @@ namespace app\user\service;
 use app\user\model\User;
 use app\common\service\UserBaseService;
 use app\api\lib\GeetestLib;
+use think\facade\Cache;
+use think\facade\Session;
 
 /**
  * 系统登录服务
@@ -37,7 +39,7 @@ class LoginService extends UserBaseService
         if (conf('captcha_open') == 1) {
             $captcha_id = conf('captcha_id');
             $captcha_key = conf('captcha_key');
-            $api_server = 'http://gcaptcha4.geetest.com';
+            $api_server = 'https://gcaptcha4.geetest.com';
             $lot_number = $param['lot_number']??null;
             $captcha_output = $param['captcha_output']??null;
             $pass_token = $param['pass_token']??null;
@@ -55,20 +57,25 @@ class LoginService extends UserBaseService
             );
             $url = sprintf($api_server . '/validate' . '?captcha_id=%s', $captcha_id);
             $res = $this->post_request($url,$query);
-            if ($res !== false) {
-                $obj = json_decode($res,true);
-                if (!is_array($obj)) {
-                    return message(t('login.captcha_error'), false);
-                }
-                if (isset($obj['result']) && in_array($obj['result'], ['error', 'fail'])) {
-                    return message($obj['reason'] ?? t('login.captcha_error'), false);
-                }
+            if ($res === false) {
+                return message(t('login.captcha_error'), false);
+            }
+            $obj = json_decode($res,true);
+            if (!is_array($obj)) {
+                return message(t('login.captcha_error'), false);
+            }
+            if (isset($obj['result']) && in_array($obj['result'], ['error', 'fail'], true)) {
+                return message($obj['reason'] ?? t('login.captcha_error'), false);
             }
         }
         // 登录用户名
         $username = $param['username'] ?? '';
         if (!$username) {
             return message(t('login.username_empty'), false, 'username');
+        }
+        $rateKeys = $this->loginRateKeys((string)$username);
+        if ($this->loginRateLimited($rateKeys)) {
+            return message('login.too_many_attempts', false);
         }
         // 登录密码
         $password = $param['password'] ?? '';
@@ -78,10 +85,13 @@ class LoginService extends UserBaseService
         // 用户验证
         $info = $this->model->getOne($username);
         if (!$info) {
+            $this->recordLoginFailure($rateKeys);
             return message(t('login.username_not_exist'), false, 'username');
         }
-        // 密码校验
-        if (get_password($password) != $info['password']) {
+        // 密码校验：兼容旧生产的明文/双 MD5，并在成功登录后升级为现代哈希。
+        $needsRehash = false;
+        if (!sf_password_verify($password, $info['password'], $needsRehash)) {
+            $this->recordLoginFailure($rateKeys);
             $content = [
                 'Title' => '登录后台',
                 '结果' => '登陆失败[账号密码错误]',
@@ -93,6 +103,7 @@ class LoginService extends UserBaseService
 
         // 使用状态校验
         if ($info['status'] != 1) {
+            $this->recordLoginFailure($rateKeys);
             $content = [
                 'Title' => '登录后台',
                 '结果' => '登陆失败[账号已被禁用]',
@@ -101,8 +112,14 @@ class LoginService extends UserBaseService
             event('UserLogin', $content);
             return message(t('login.account_disabled'), false);
         }
+        if ($needsRehash) {
+            $newHash = sf_password_make($password);
+            $this->model->where('id', $info['id'])->update(['password' => $newHash]);
+            $info['password'] = $newHash;
+        }
         if(!empty($info['ip'])) {
-            if (!in_array(get_client_ip(), unserialize($info['ip']))) {
+            if (!in_array(get_client_ip(), sf_safe_unserialize_array($info['ip']), true)) {
+                $this->recordLoginFailure($rateKeys);
                 $content = [
                     'Title' => '登录后台',
                     '结果' => '登陆失败[IP不在白名单]',
@@ -113,8 +130,10 @@ class LoginService extends UserBaseService
             }
         }
         // 本地cookie存储登录信息
+        Session::regenerate(true);
         cookie('userId', $info['id']);
         cookie('userSign',data_auth_sign($info['appid'].$info['username'].$info['password'].sf_password_hash()));
+        Cache::delete($rateKeys['account']);
 
         $content = [
             'Title' => '登录后台',
@@ -143,5 +162,26 @@ class LoginService extends UserBaseService
             return false;
         }
         return $result;
+    }
+
+    private function loginRateKeys(string $username): array
+    {
+        $ip = get_client_ip();
+        return [
+            'ip' => 'login:user:ip:' . hash('sha256', $ip),
+            'account' => 'login:user:account:' . hash('sha256', strtolower(trim($username)) . '|' . $ip),
+        ];
+    }
+
+    private function loginRateLimited(array $keys): bool
+    {
+        return (int)Cache::get($keys['ip'], 0) >= 50
+            || (int)Cache::get($keys['account'], 0) >= 10;
+    }
+
+    private function recordLoginFailure(array $keys): void
+    {
+        Cache::set($keys['ip'], (int)Cache::get($keys['ip'], 0) + 1, 600);
+        Cache::set($keys['account'], (int)Cache::get($keys['account'], 0) + 1, 600);
     }
 }

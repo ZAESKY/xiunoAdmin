@@ -13,12 +13,13 @@
         var form = layui.form;
         var admin = layui.admin;
         var notice = layui.notice;
-        notice.msg('正在为您跳转到支付页面，请稍候...', {icon: 4, close: true});
+        var paymentRequest = {$payment_payload|raw};
+        notice.msg(window.t('order_ui.redirecting_wait'), {icon: 4, close: true});
         $(document).ready(function(){
             $.ajax({
                 type: "POST",
                 url: '{:url("/Index/check")}',
-                data :{'type': '{$type}', 'orderid': '{$orderid}'},
+                data: paymentRequest,
                 dataType: "json",
                 success: function(data) {
                     notice.destroy();
@@ -30,8 +31,8 @@
                             $("#SF").html(data.data.html);
                         }else{
                             notice.error({
-                                title: '跳转失败',
-                                message: '获取跳转支付链接失败',
+                                title: window.t('order_ui.redirect_fail'),
+                                message: window.t('order_ui.get_link_fail'),
                                 animateInside:true,
                                 position:'topCenter',
                                 transitionOut:'flipOutX',
@@ -45,7 +46,7 @@
                         }
                     } else {
                         notice.error({
-                            title: '跳转失败',
+                            title: window.t('order_ui.redirect_fail'),
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -62,7 +63,7 @@
                 error: function() {
                     notice.destroy();
                     admin.removeLoading();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
         });

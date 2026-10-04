@@ -2,6 +2,7 @@
 namespace app\admin\model;
 
 use app\common\model\BaseModel;
+use think\Exception;
 
 /**
  * 日志-模型
@@ -46,8 +47,8 @@ class LogModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $power = !empty($post['power'])?intval($post['power']):'';
 
             $data = $this->buildSearchWhere('id|title|ip', 'text', '');

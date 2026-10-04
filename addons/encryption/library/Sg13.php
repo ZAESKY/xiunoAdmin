@@ -12,7 +12,7 @@ class Sg13
             return $data;
         }
         $version = implode(',' ,$version);
-        $result = json_decode($this->get_curl('http://api.phpth.cn/api.php?act=encode',[
+        $result = json_decode($this->get_curl('https://api.phpth.cn/api.php?act=encode',[
             'post'=> [
                 'edition'   => 'Sg13',
                 'version'   => $version,
@@ -22,7 +22,7 @@ class Sg13
         ]),true);
         
         if($result['code'] == 1){
-            file_put_contents($complete, $this->get_curl('http://api.phpth.cn/api.php?act=downfile&file='.$result['down']));
+            file_put_contents($complete, $this->get_curl('https://api.phpth.cn/api.php?act=downfile&file='.rawurlencode((string)$result['down'])));
             $data = [
                 'code' => 1,
                 'info' => $result['info'],
@@ -40,8 +40,8 @@ class Sg13
     private function get_curl($url, $paras = array()) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         if (@$paras['Header']) {
             $Header = $paras['Header'];
         } else {

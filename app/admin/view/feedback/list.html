@@ -8,16 +8,16 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">搜索</label>
+                        <label class="layui-form-label">{:t('common.search')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('feedback.search_by_id_or_title')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status">
-                                <option value="">全部</option>
+                                <option value="">{:t('common.all')}</option>
                                 <option value="0">{:t('feedback.status_pending')}</option>
                                 <option value="1">{:t('feedback.status_accepted')}</option>
                                 <option value="2">{:t('feedback.status_rejected')}</option>
@@ -25,19 +25,19 @@
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">类型</label>
+                        <label class="layui-form-label">{:t('accounting.type')}</label>
                         <div class="layui-input-inline">
                             <select name="type">
-                                <option value="">全部类型</option>
-                                <option value="bug">BUG反馈</option>
-                                <option value="feature">功能需求</option>
-                                <option value="other">其他</option>
+                                <option value="">{:t('feedback.all_types')}</option>
+                                <option value="bug">{:t('feedback.type_bug')}</option>
+                                <option value="feature">{:t('feedback.type_feature')}</option>
+                                <option value="other">{:t('feedback.type_other')}</option>
                             </select>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
@@ -58,31 +58,28 @@
 </script>
 
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="view">查看</a>
-    <a class="layui-btn layui-btn-sm" data-dropdown="#feedbackDrop{{d.LAY_INDEX}}" no-shade="true">处理</a>
-    <ul class="dropdown-menu-nav dropdown-bottom-right layui-hide" id="feedbackDrop{{d.LAY_INDEX}}">
-        <div class="dropdown-anchor"></div>
-        <li><a onclick="setFeedbackStatus('{{d.id}}',0)"><i class="layui-icon layui-icon-tips"></i>待处理</a></li>
-        <li><a onclick="setFeedbackStatus('{{d.id}}',1)"><i class="layui-icon layui-icon-ok"></i>已受理</a></li>
-        <li><a onclick="setFeedbackStatus('{{d.id}}',2)"><i class="layui-icon layui-icon-close"></i>已驳回</a></li>
-    </ul>
+    <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="view">{:t('common.view')}</a>
 </script>
 
 {include file="/public/footer"}
 <script>
-    layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit', 'dropdown'], function () {
+    layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () {
         var $ = layui.jquery;
         var form = layui.form;
         var table = layui.table;
         var admin = layui.admin;
         var notice = layui.notice;
         var layedit = layui.layedit;
-        var dropdown = layui.dropdown;
 
         function decodeHtml(v) {
             var t = document.createElement('textarea');
             t.innerHTML = v || '';
             return t.value;
+        }
+        function escapeHtml(v) {
+            return String(v || '').replace(/[&<>"']/g, function(s){
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
+            });
         }
 
         var insTb = table.render({
@@ -96,20 +93,20 @@
             },
             cols: [[
                 {field: 'id', title: 'ID', sort: true, width: 80},
-                {field: 'username', title: '提交用户', sort: true, width: 130},
-                {field: 'type', title: '类型', sort: true, width: 100, templet: function(d){
-                    var m = {bug:'<span class="layui-badge layui-badge-red">BUG</span>', feature:'<span class="layui-badge layui-badge-blue">需求</span>', other:'<span class="layui-badge layui-badge-gray">其他</span>'};
+                {field: 'username', title: '{:t("feedback.submit_user")}', sort: true, width: 130},
+                {field: 'type', title: '{:t("accounting.type")}', sort: true, width: 100, templet: function(d){
+                    var m = {bug:'<span class="layui-badge layui-badge-red">BUG</span>', feature:'<span class="layui-badge layui-badge-blue">{:t('feedback.type_feature_short')}</span>', other:'<span class="layui-badge layui-badge-gray">{:t('feedback.type_other')}</span>'};
                     return m[d.type] || d.type;
                 }},
-                {field: 'title', title: '标题', sort: true, minWidth: 180},
-                {field: 'reply', title: '回复', minWidth: 150, templet: function(d){
+                {field: 'title', title: '{:t("feedback.title")}', sort: true, minWidth: 180},
+                {field: 'reply', title: '{:t("feedback.reply")}', minWidth: 150, templet: function(d){
                     var t = (d.reply||'').replace(/<[^>]+>/g,'');
-                    return t ? (t.length > 40 ? t.substring(0,40)+'...' : t) : '<span style="color:#999">暂无</span>';
+                    return t ? (t.length > 40 ? t.substring(0,40)+'...' : t) : '<span style="color:#999">{:t('feedback.no_reply_short')}</span>';
                 }},
-                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, width: 100},
-                {field: 'created_at', title: '提交时间', sort: true, width: 170},
-                {field: 'updated_at', title: '处理时间', sort: true, width: 170},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 160}
+                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, width: 100},
+                {field: 'created_at', title: '{:t("feedback.submit_time")}', sort: true, width: 170},
+                {field: 'updated_at', title: '{:t("feedback.handle_time")}', sort: true, width: 170},
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 110}
             ]]
         });
 
@@ -118,28 +115,6 @@
             return false;
         });
 
-        // 快捷状态修改
-        function setStatus(id, status) {
-            notice.msg('处理中...', {icon: 4, close: true});
-            $.ajax({
-                type: "POST", url: '{:url("/Feedback/handle")}',
-                data: {id: id, status: status}, dataType: "json",
-                success: function(res) {
-                    notice.destroy();
-                    if (res.code == 0) {
-                        insTb.reload({page: {curr: 1}});
-                        notice.msg(res.msg, {icon: 1, audio:'1'});
-                        if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
-                    } else { notice.msg(res.msg, {icon: 2}); }
-                },
-                error: function() { notice.destroy(); notice.msg('服务器错误！', {icon: 2}); }
-            });
-        }
-
-        window.setFeedbackStatus = function (id, status) {
-            setStatus(id, status);
-        };
-
         table.on('tool(SF_Table)', function (obj) {
             if (obj.event === 'view') {
                 showView(obj.data);
@@ -147,35 +122,45 @@
         });
 
         function showView(d) {
-            var typeMap = {bug:'BUG反馈', feature:'功能需求', other:'其他'};
-            var statusMap = {0:'<span class="layui-badge layui-badge-orange" style="float:right;">待处理</span>',
-                             1:'<span class="layui-badge layui-badge-green" style="float:right;">已受理</span>',
-                             2:'<span class="layui-badge layui-badge-red" style="float:right;">已驳回</span>'};
+            var typeMap = {bug:'{:t("feedback.type_bug")}', feature:'{:t("feedback.type_feature")}', other:'{:t("feedback.type_other")}'};
+            var statusMap = {0:'<span class="layui-badge layui-badge-orange" style="float:right;">{:t('common_ui.status_pending')}</span>',
+                             1:'<span class="layui-badge layui-badge-green" style="float:right;">{:t('feedback.status_accepted')}</span>',
+                             2:'<span class="layui-badge layui-badge-red" style="float:right;">{:t('feedback.status_rejected')}</span>'};
             var replyId = 'SF_Reply_' + d.id;
             var html = '<div style="padding:16px;max-height:700px;overflow:auto;">'+
                 '<div style="border:1px solid #e6e6e6;border-radius:6px;padding:14px 16px;margin-bottom:12px;background:#fafafa;">'+
                 '<div style="margin-bottom:8px;font-size:13px;color:#999;">'+
-                '<span>'+(d.username||'')+'</span> '+
+                '<span>'+escapeHtml(d.username||'')+'</span> '+
                 '<span class="layui-badge layui-badge-blue" style="margin-left:8px;">'+(typeMap[d.type]||d.type||'')+'</span> '+
-                '<span style="margin-left:8px;">'+(d.created_at||'')+'</span>'+
+                '<span style="margin-left:8px;">'+escapeHtml(d.created_at||'')+'</span>'+
                 (statusMap[d.status]||'')+
                 '</div>'+
-                '<div style="font-size:15px;font-weight:bold;margin-bottom:8px;">'+(d.title||'')+'</div>'+
+                '<div style="font-size:15px;font-weight:bold;margin-bottom:8px;">'+escapeHtml(d.title||'')+'</div>'+
                 '<div style="font-size:14px;line-height:1.8;word-break:break-all;">'+decodeHtml(d.content||'')+'</div>'+
                 '</div>';
             if (d.reply) {
                 html += '<div style="border:1px solid #d2e8c8;border-radius:6px;padding:14px 16px;background:#f0f9eb;margin-bottom:12px;">'+
-                    '<div style="margin-bottom:6px;font-size:13px;color:#67c23a;"><i class="layui-icon layui-icon-user"></i> 管理员回复 '+
-                    '<span style="margin-left:8px;">'+(d.updated_at||'')+'</span></div>'+
+                    '<div style="margin-bottom:6px;font-size:13px;color:#67c23a;"><i class="layui-icon layui-icon-user"></i> {:t("feedback.admin_reply")} '+
+                    '<span style="margin-left:8px;">'+escapeHtml(d.updated_at||'')+'</span></div>'+
                     '<div style="font-size:14px;line-height:1.8;word-break:break-all;color:#333;">'+decodeHtml(d.reply||'')+'</div></div>';
             }
-            html += '<div style="margin-top:8px;font-size:13px;color:#666;margin-bottom:6px;">回复</div>'+
+            html += '<div class="layui-form" style="margin-top:8px;">'+
+                '<div class="layui-form-item">'+
+                '<label class="layui-form-label" style="width:80px;padding-left:0;text-align:left;">{:t("feedback.handle_status")}</label>'+
+                '<div class="layui-input-block">'+
+                '<select id="SF_FeedbackStatus">'+
+                '<option value="0"'+(parseInt(d.status, 10) === 0 ? ' selected' : '')+'>{:t("feedback.status_pending")}</option>'+
+                '<option value="1"'+(parseInt(d.status, 10) === 1 ? ' selected' : '')+'>{:t("feedback.status_accepted")}</option>'+
+                '<option value="2"'+(parseInt(d.status, 10) === 2 ? ' selected' : '')+'>{:t("feedback.status_rejected")}</option>'+
+                '</select></div></div></div>'+
+                '<div style="font-size:13px;color:#666;margin-bottom:6px;">{:t("feedback.reply")}</div>'+
                 '<textarea id="'+replyId+'" style="display:none;"></textarea>'+
-                '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm" id="SF_ReplyBtn">回复</button></div>'+
+                '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm" id="SF_ReplyBtn">{:t("feedback.save_handle")}</button></div>'+
                 '</div>';
             layer.open({
-                type: 1, title: '反馈详情', area: ['760px', '680px'], content: html,
+                type: 1, title: '{:t("feedback.detail_title")}', area: ['760px', '680px'], content: html,
                 success: function(layero, index) {
+                    form.render('select');
                     var replyLayedit = layedit.build(replyId, {
                         height: 150,
                         uploadImage: { url: '{:url("/Feedback/uploadImage")}', type: 'post' }
@@ -190,16 +175,24 @@
                         }
                     }, 500);
                     $(layero).find('#SF_ReplyBtn').on('click', function(){
+                        var $button = $(this);
+                        if ($button.prop('disabled')) return;
                         var reply = layedit.getContent(replyLayedit);
+                        var status = parseInt($(layero).find('#SF_FeedbackStatus').val(), 10);
                         var hasImg = /<img[^>]+>/i.test(reply || '');
                         var hasText = (reply || '').replace(/<[^>]+>/g, '').trim() !== '';
                         if (!hasImg && !hasText) {
-                            notice.msg('请填写回复内容', {icon: 3}); return;
+                            notice.msg('{:t("feedback.reply_required")}', {icon: 3}); return;
                         }
-                        notice.msg('处理中...', {icon: 4, close: true});
+                        if ([0, 1, 2].indexOf(status) === -1) {
+                            notice.msg('{:t("feedback.invalid_status")}', {icon: 3}); return;
+                        }
+                        var originalButtonHtml = $button.html();
+                        $button.prop('disabled', true).addClass('layui-btn-disabled').html('{:t("feedback.processing")}');
+                        notice.msg('{:t("feedback.processing")}', {icon: 4, close: true});
                         $.ajax({
                             type: 'POST', url: '{:url("/Feedback/handle")}',
-                            data: {id: d.id, reply: reply, status: d.status}, dataType: 'json',
+                            data: {id: d.id, reply: reply, status: status}, dataType: 'json',
                             success: function(res) {
                                 notice.destroy();
                                 if (res.code == 0) {
@@ -209,7 +202,10 @@
                                     if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
                                 } else { notice.msg(res.msg, {icon: 2}); }
                             },
-                            error: function() { notice.destroy(); notice.msg('服务器错误！', {icon: 2}); }
+                            error: function() { notice.destroy(); notice.msg('{:t("common.server_error")}', {icon: 2}); },
+                            complete: function() {
+                                $button.prop('disabled', false).removeClass('layui-btn-disabled').html(originalButtonHtml);
+                            }
                         });
                     });
                 }

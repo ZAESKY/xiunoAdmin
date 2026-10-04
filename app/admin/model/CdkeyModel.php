@@ -4,6 +4,7 @@ namespace app\admin\model;
 
 use app\admin\validate\Cdkey;
 use app\common\model\BaseModel;
+use think\Exception;
 use think\exception\ValidateException;
 
 /**
@@ -41,7 +42,7 @@ class CdkeyModel extends BaseModel
         $auth_status = !empty($post['auth_status'])?intval($post['auth_status']):0;
         $power = !empty($post['power'])?intval($post['power']):null;
         $user_status = !empty($post['user_status'])?intval($post['user_status']):0;
-        $balance = !empty($post['balance'])?floatval($post['balance']):0.00;
+        $balance = !empty($post['balance'])?$post['balance']:'0.00';
         $integral = !empty($post['integral'])?intval($post['integral']):0;
         $number = !empty($post['number'])?intval($post['number']):0;
         $cdkey = !empty($post['cdkey'])?$post['cdkey']:null;
@@ -51,6 +52,11 @@ class CdkeyModel extends BaseModel
         } catch (ValidateException $e) {
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
+        }
+        try {
+            $balance = sf_money_format($balance);
+        } catch (\InvalidArgumentException $e) {
+            return message('validation.balance_format', false);
         }
         $info = array();
 
@@ -256,13 +262,17 @@ class CdkeyModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($post['appid'])?intval($post['appid']):null;
+            $userid = isset($post['userid']) && $post['userid'] !== '' ? intval($post['userid']) : null;
             $data = $this->buildSearchWhere('id|cdkey');
 
             if(!empty($appid)){
                 $data[] = ['appid', '=', $appid];
+            }
+            if($userid !== null && $userid > 0){
+                $data[] = ['userid', '=', $userid];
             }
 
             $list = self::order('id' ,'desc')->where($data)->paginate([

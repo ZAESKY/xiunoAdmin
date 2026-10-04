@@ -120,7 +120,7 @@ class CdkeyModel extends BaseModel
                             }else{
                                 $sign = $result['sign'] + 1;
                             }
-                            $authcode = md5(time().$qq.'SF');
+                            $authcode = sf_generate_authcode(); // A-01: 原 md5(time().$qq.'SF') 可离线推导
                         }else{
                             $sign = $result['sign'];
                             $authcode = $result['authcode'];
@@ -141,15 +141,16 @@ class CdkeyModel extends BaseModel
                         ];
                         Db::startTrans();
                         try {
+                            $claimed = Db::name('cdkey')
+                                ->where('cdkey', $cdkey)
+                                ->where('appid', $appid)
+                                ->where('status', 0)
+                                ->update(['status' => 1, 'usetime' => datetime()]);
+                            if ($claimed !== 1) {
+                                throw new Exception(t('cdkey.used'));
+                            }
                             Db::name('auth')
                                 ->insert($data);
-                            Db::name('cdkey')
-                                ->where('cdkey', $cdkey)
-                                ->data([
-                                    'status' => 1,
-                                    'usetime' => datetime()
-                                ])
-                                ->update();
                             // 提交事务
                             Db::commit();
                             $content = [
@@ -194,18 +195,19 @@ class CdkeyModel extends BaseModel
                         }
                         Db::startTrans();
                         try {
+                            $claimed = Db::name('cdkey')
+                                ->where('cdkey', $cdkey)
+                                ->where('appid', $appid)
+                                ->where('status', 0)
+                                ->update(['status' => 1, 'usetime' => datetime()]);
+                            if ($claimed !== 1) {
+                                throw new Exception(t('cdkey.used'));
+                            }
                             Db::name('user')
                                 ->where('id', $userInfo['id'])
                                 ->data([
                                     'power' => $power,
                                     'status' => intval($info['user_status'])
-                                ])
-                                ->update();
-                            Db::name('cdkey')
-                                ->where('cdkey', $cdkey)
-                                ->data([
-                                    'status' => 1,
-                                    'usetime' => datetime()
                                 ])
                                 ->update();
                             // 提交事务
@@ -214,54 +216,67 @@ class CdkeyModel extends BaseModel
                         } catch (\Exception $e) {
                             // 回滚事务
                             Db::rollback();
-                            return message(t('cdkey.exchange_power_failed').$e->getMessage(), true);
+                            return message(t('cdkey.exchange_power_failed').$e->getMessage(), false);
                         }
                     case 'balance':
                         $info = json_decode($row['info'],true);
                         Db::startTrans();
                         try {
+                            $claimed = Db::name('cdkey')
+                                ->where('cdkey', $cdkey)
+                                ->where('appid', $appid)
+                                ->where('status', 0)
+                                ->update(['status' => 1, 'usetime' => datetime()]);
+                            if ($claimed !== 1) {
+                                throw new Exception(t('cdkey.used'));
+                            }
                             Db::name('user')
                                 ->where('id', $userInfo['id'])
                                 ->inc('balance', $info['balance'])
                                 ->update();
-                            \app\common\model\BalanceLogModel::add($userInfo['id'], 'cdkey_exchange', floatval($info['balance']), '卡密兑换余额 +'.$info['balance'].' 元');
-                            Db::name('cdkey')
-                                ->where('cdkey', $cdkey)
-                                ->data([
-                                    'status' => 1,
-                                    'usetime' => datetime()
-                                ])
-                                ->update();
+                            \app\common\model\BalanceLogModel::add($userInfo['id'], 'cdkey_exchange', sf_money_format($info['balance']), '卡密兑换余额 +'.$info['balance'].' 元');
                             // 提交事务
                             Db::commit();
                             return message(t('cdkey.exchange_balance_success'), true);
                         } catch (\Exception $e) {
                             // 回滚事务
                             Db::rollback();
-                            return message(t('cdkey.exchange_balance_failed').$e->getMessage(), true);
+                            return message(t('cdkey.exchange_balance_failed').$e->getMessage(), false);
                         }
                     case 'integral':
                         $info = json_decode($row['info'],true);
-                        Db::name('user')
-                            ->where('id', $userInfo['id'])
-                            ->inc('integral', $info['integral'])
-                            ->update();
-                        \app\common\model\PointLogModel::add(
-                            intval($userInfo['id']),
-                            'cdkey_exchange',
-                            intval($info['integral']),
-                            '卡密兑换积分 +' . intval($info['integral']),
-                            'cdkey_exchange',
-                            $cdkey
-                        );
-                        Db::name('cdkey')
-                            ->where('cdkey', $cdkey)
-                            ->data([
-                                'status' => 1,
-                                'usetime' => datetime()
-                            ])
-                            ->update();
-                        return message(t('cdkey.exchange_balance_success'), true);
+                        $integral = intval($info['integral'] ?? 0);
+                        if ($integral <= 0) {
+                            return message(t('cdkey.get_info_error'), false);
+                        }
+                        Db::startTrans();
+                        try {
+                            $claimed = Db::name('cdkey')
+                                ->where('cdkey', $cdkey)
+                                ->where('appid', $appid)
+                                ->where('status', 0)
+                                ->update(['status' => 1, 'usetime' => datetime()]);
+                            if ($claimed !== 1) {
+                                throw new Exception(t('cdkey.used'));
+                            }
+                            Db::name('user')
+                                ->where('id', $userInfo['id'])
+                                ->inc('integral', $integral)
+                                ->update();
+                            \app\common\model\PointLogModel::add(
+                                intval($userInfo['id']),
+                                'cdkey_exchange',
+                                $integral,
+                                '卡密兑换积分 +' . $integral,
+                                'cdkey_exchange',
+                                $cdkey
+                            );
+                            Db::commit();
+                            return message(t('cdkey.exchange_balance_success'), true);
+                        } catch (\Throwable $e) {
+                            Db::rollback();
+                            return message(t('cdkey.exchange_balance_failed').$e->getMessage(), false);
+                        }
                     default:
                         throw new Exception(t('cdkey.type_not_exist_contact'));
                 }
@@ -335,15 +350,15 @@ class CdkeyModel extends BaseModel
                         if($differDay <= 0){
                             return message(t('auth.correct_expire_time') ,false);
                         }else{
-                            $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
-                            $allmoney = ($price * $differDay * $number) * floatval($powerPriceInfo['addauth_discount'] / 100);
+                            $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                            $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay * $number);
                         }
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
-                        $allmoney = ($price * $number) * floatval($powerPriceInfo['addauth_discount'] / 100);
+                        $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $number);
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                         }
@@ -370,7 +385,7 @@ class CdkeyModel extends BaseModel
                         return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]' ,false);
                     }
                     $price = $powerInfo['money'];
-                    $allmoney = ($price * $number) * floatval($powerPriceInfo['adduser_discount'] / 100);
+                    $allmoney = sf_money_apply_rate($price, $powerPriceInfo['adduser_discount'], $number);
                     if($allmoney > $userInfo['balance']){
                         return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                     }
@@ -383,54 +398,57 @@ class CdkeyModel extends BaseModel
             default:
                 return message(t('cdkey.type_error').'[errorCode:CDKEYTypeError]',false);
         }
-        $remainderBalance = $userInfo['balance'] - $allmoney;
-        try{
-            $result = \think\facade\Db::name('user')->where('id', $userInfo['id'])->update(['balance' => $remainderBalance]);
-            if($result === false){
-                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
+        Db::startTrans();
+        try {
+            $lockedUser = Db::name('user')->where('id', $userInfo['id'])->lock(true)->find();
+            if (!$lockedUser || sf_money_to_cents($lockedUser['balance']) < sf_money_to_cents($allmoney)) {
+                throw new Exception(t('user.balance_insufficient'));
             }
-            BalanceLogModel::add($userInfo['id'], 'cdkey_create', -$allmoney, '生成卡密扣款 -'.$allmoney.' 元');
-        } catch (\Exception $e) {
-            return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-        }
-        for($i=0;$i<$number;$i++){
-            $cdkey = (conf('cdkey_head')??'SF').'_'.get_random_str(20,5);
-            $data = [
-                'cdkey' => $cdkey,
-                'cdkey_type' => $cdkey_type,
-                'info' => json_encode($info),
-                'addtime' => datetime(),
-                'status' => 0,
-                'appid' => $appid,
-                'userid' => $userInfo['id'],
-            ];
-            try{
+            $currentUnused = self::where(['userid' => $userInfo['id'], 'status' => 0])->count('id');
+            if (($currentUnused + $number) > conf('have_cdkey_max_number')) {
+                throw new Exception(t('cdkey.limit_exceeded', ['limit' => conf('have_cdkey_max_number')]));
+            }
+
+            $remainderBalance = sf_money_subtract($lockedUser['balance'], $allmoney);
+            Db::name('user')->where('id', $userInfo['id'])->update(['balance' => $remainderBalance]);
+            BalanceLogModel::add($userInfo['id'], 'cdkey_create', sf_money_from_cents(-sf_money_to_cents($allmoney)), '生成卡密扣款 -'.$allmoney.' 元');
+
+            for ($i = 0; $i < $number; $i++) {
+                $cdkey = (conf('cdkey_head')??'SF').'_'.bin2hex(random_bytes(16));
+                $data = [
+                    'cdkey' => $cdkey,
+                    'cdkey_type' => $cdkey_type,
+                    'info' => json_encode($info),
+                    'addtime' => datetime(),
+                    'status' => 0,
+                    'appid' => $appid,
+                    'userid' => $userInfo['id'],
+                ];
                 self::insert($data);
-                $content = [
-                    'Title' => '添加卡密',
-                    '操作' => '添加卡密',
-                    '生成类型' => $cdkey_type_name,
-                    '生成数量' => $number,
-                    '花费' => '- '.$allmoney.' 元',
-                    '剩余余额' => $remainderBalance.' 元',
-                    'Result' => 'success'
-                ];
-                event('ActionLog', $content);
-            } catch (\Exception $e) {
-                $content = [
-                    'Title' => '添加卡密',
-                    '操作' => '添加卡密',
-                    '生成类型' => $cdkey_type_name,
-                    '生成数量' => $number,
-                    '花费' => '- '.$allmoney.' 元',
-                    '剩余余额' => $remainderBalance.' 元',
-                    'Result' => '[errorCode:AddCDKEYError]'
-                ];
-                event('ActionLog', $content);
-                return message(t('common.preview').$number.t('common_ui.cdkey').t('common.add_success').$i.t('common_ui.cdkey_label').'[errorCode:AddCDKEYError]' ,false);
             }
+            Db::commit();
+            event('ActionLog', [
+                'Title' => '添加卡密',
+                '操作' => '添加卡密',
+                '生成类型' => $cdkey_type_name,
+                '生成数量' => $number,
+                '花费' => '- '.$allmoney.' 元',
+                '剩余余额' => $remainderBalance.' 元',
+                'Result' => 'success'
+            ]);
+            return message(t('cdkey.generate_success', ['count' => $number]) ,true);
+        } catch (\Throwable $e) {
+            Db::rollback();
+            event('ActionLog', [
+                'Title' => '添加卡密',
+                '操作' => '添加卡密',
+                '生成类型' => $cdkey_type_name,
+                '生成数量' => $number,
+                '花费' => '- '.$allmoney.' 元',
+                'Result' => '[errorCode:AddCDKEYError]'
+            ]);
+            return message(t('cdkey.generate_failed_with_error', ['error' => $e->getMessage()]), false);
         }
-        return message(t('cdkey.generate_success', ['count' => $i]) ,true);
     }
 
     public function drop($id){
@@ -475,8 +493,8 @@ class CdkeyModel extends BaseModel
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             if(!empty($appid)){
                 $order = 'id';

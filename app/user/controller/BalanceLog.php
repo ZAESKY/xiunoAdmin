@@ -4,6 +4,7 @@ namespace app\user\controller;
 
 use app\common\controller\UserBackend;
 use app\common\model\BalanceLogModel;
+use app\common\service\AccountingLogService;
 
 class BalanceLog extends UserBackend
 {
@@ -11,12 +12,20 @@ class BalanceLog extends UserBackend
     {
         if (IS_POST) {
             $post = request()->post();
-            $limit = !empty($post['limit']) ? intval($post['limit']) : 15;
-            $page = !empty($post['current_page']) ? intval($post['current_page']) : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 15);
+            $page = sf_page_number($post['current_page'] ?? null);
             $list = BalanceLogModel::where('user_id', $this->userId)
                 ->order('id', 'desc')
                 ->paginate(['list_rows' => $limit, 'page' => $page]);
-            return json(['code' => 0, 'msg' => '', 'count' => $list->total(), 'data' => $list->items()]);
+            return json([
+                'code' => 0,
+                'msg' => '',
+                'count' => $list->total(),
+                'data' => AccountingLogService::decorateItems(
+                    $list->items(),
+                    AccountingLogService::LEDGER_BALANCE
+                ),
+            ]);
         }
         return $this->render();
     }

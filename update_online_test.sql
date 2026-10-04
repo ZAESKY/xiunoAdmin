@@ -96,10 +96,25 @@ DROP PROCEDURE IF EXISTS `sf_add_column`;
 -- ================================================================
 
 -- 使用 INSERT ... ON DUPLICATE KEY UPDATE 确保幂等
--- 插件佣金比例（默认10%）
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`)
-VALUES ('plugin_commission_rate', 'function', '插件佣金比例(%)', '平台从插件销售中抽取的佣金百分比', 'number', '10', '', '', '')
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `type` = VALUES(`type`);
+-- 插件销售平台抽成（默认开启，10%）
+INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+SELECT 'plugin_commission_enabled', 'plugin_market', '启用插件销售平台抽成', '开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', 'bool', '1', '', '', '', ''
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_enabled');
+
+INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+SELECT 'plugin_commission_rate', 'plugin_market', '插件销售平台抽成比例（%）', '仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。', 'number', '10.00', '', 'required', 'min="0" max="100" step="0.01"', ''
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_rate');
+
+UPDATE `SF_config`
+SET `group`='plugin_market', `title`='启用插件销售平台抽成',
+    `tip`='开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', `type`='bool'
+WHERE `name`='plugin_commission_enabled';
+
+UPDATE `SF_config`
+SET `group`='plugin_market', `title`='插件销售平台抽成比例（%）',
+    `tip`='仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。',
+    `type`='number', `rule`='required', `extend`='min="0" max="100" step="0.01"'
+WHERE `name`='plugin_commission_rate';
 
 -- ================================================================
 -- 第四部分：菜单/权限初始化（可重复执行）

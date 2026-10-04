@@ -114,13 +114,13 @@ class AuthModel extends BaseModel
         }
 
         if($row['qq'] == $qq && $row['auth_info'] == $auth_info){
-            $allmoney = 0;
+            $allmoney = '0.00';
             $replace_number = $row['replace_number'];
         }else{
             if($row['replace_number'] >= $appInfo['free_replace_number']){
-                $allmoney = $appInfo['replace_money'];
+                $allmoney = sf_money_format($appInfo['replace_money']);
             }else{
-                $allmoney = 0;
+                $allmoney = '0.00';
             }
             $replace_number = $row['replace_number'] + 1;
         }
@@ -147,12 +147,12 @@ class AuthModel extends BaseModel
                     if($differDay <= 0){
                         return message(t('auth.correct_expire_time') ,false);
                     }else{
-                        $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
-                        $allmoney += round(($price * $differDay) * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
+                        $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                        $allmoney = sf_money_add($allmoney, sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay));
                     }
                 }else{
                     $price = $authPriceInfo['money'];
-                    $allmoney += round($price * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
+                    $allmoney = sf_money_add($allmoney, sf_money_apply_rate($price, $powerPriceInfo['addauth_discount']));
 
                     if($authPriceInfo['permanent_switch'] == 1){
                         $endtime = $row['endtime'];
@@ -172,15 +172,7 @@ class AuthModel extends BaseModel
         if($allmoney > $userInfo['balance']){
             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
         }
-        $remainderBalance = $userInfo['balance'] - $allmoney;
-        try{
-            $result = parent::updateUserInfo(['balance' => $remainderBalance], '授权操作 -'.$allmoney.' 元');
-            if(!$result){
-                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
-            }
-        } catch (\Exception $e) {
-            return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-        }
+        $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
         $data = [
             'auth_info' => $auth_info,
             'qq' => $qq,
@@ -189,9 +181,19 @@ class AuthModel extends BaseModel
             'replace_number' => $replace_number
         ];
         try{
-            self::where('id', $id)
-                ->data($data)
-                ->update();
+            $result = parent::updateUserInfoAnd(
+                ['balance' => $remainderBalance],
+                '授权操作 -'.$allmoney.' 元',
+                static function () use ($id, $userInfo, $data) {
+                    $affected = self::where(['id' => $id, 'bindingid' => $userInfo['id']])
+                        ->data($data)
+                        ->update();
+                    return $affected !== false;
+                }
+            );
+            if (!$result) {
+                throw new \RuntimeException(t('auth_action.replace_transaction_failed'));
+            }
             $content = [
                 'Title' => '更换授权',
                 '操作' => '更换授权',
@@ -291,15 +293,15 @@ class AuthModel extends BaseModel
                         if($differDay <= 0){
                             return message(t('auth.correct_expire_time') ,false);
                         }else{
-                            $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
-                            $allmoney = round(($price * $differDay) * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
+                            $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                            $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay);
                         }
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
-                        $allmoney = round($price * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
+                        $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount']);
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                         }
@@ -313,18 +315,10 @@ class AuthModel extends BaseModel
                 } catch (\Exception $e) {
                     return message(t('auth.get_price_failed').'[errorCode:GetAuthPriceInfoError]' ,false);
                 }
-                $remainderBalance = $userInfo['balance'] - $allmoney;
-                try{
-                    $result = parent::updateUserInfo(['balance' => $remainderBalance], '授权操作 -'.$allmoney.' 元');
-                    if(!$result){
-                        return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
-                    }
-                } catch (\Exception $e) {
-                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-                }
+                $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
             }else{
-                $allmoney = 0;
-                $remainderBalance = $userInfo['balance'];
+                $allmoney = '0.00';
+                $remainderBalance = sf_money_format($userInfo['balance']);
                 $endtime = $row['endtime'];
                 $permanent_switch = $row['permanent_switch'];
             }
@@ -337,9 +331,19 @@ class AuthModel extends BaseModel
                 'status' => $status,
             ];
             try{
-                self::where('id', $id)
-                    ->data($data)
-                    ->update();
+                $result = parent::updateUserInfoAnd(
+                    ['balance' => $remainderBalance],
+                    '授权操作 -'.$allmoney.' 元',
+                    static function () use ($id, $userInfo, $data) {
+                        $affected = self::where(['id' => $id, 'userid' => $userInfo['id']])
+                            ->data($data)
+                            ->update();
+                        return $affected !== false;
+                    }
+                );
+                if (!$result) {
+                    throw new \RuntimeException(t('auth_action.edit_transaction_failed'));
+                }
                 $content = [
                     'Title' => '编辑授权',
                     '操作' => '编辑授权',
@@ -398,15 +402,15 @@ class AuthModel extends BaseModel
                     if($differDay <= 0){
                         return message(t('auth.correct_expire_time') ,false);
                     }else{
-                        $price = ceil(($authPriceInfo['money'] / $authPriceInfo['day']) * 100) / 100;
-                        $allmoney = round(($price * $differDay) * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
+                        $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                        $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay);
                     }
                     if($allmoney > $userInfo['balance']){
                         return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                     }
                 }else{
                     $price = $authPriceInfo['money'];
-                    $allmoney = round($price * floatval($powerPriceInfo['addauth_discount'] / 100), 2);
+                    $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount']);
                     if($allmoney > $userInfo['balance']){
                         return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                     }
@@ -420,15 +424,7 @@ class AuthModel extends BaseModel
             } catch (\Exception $e) {
                 return message(t('auth.get_price_failed').'[errorCode:GetAuthPriceInfoError]' ,false);
             }
-            $remainderBalance = $userInfo['balance'] - $allmoney;
-            try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance], '授权操作 -'.$allmoney.' 元');
-                if(!$result){
-                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
-                }
-            } catch (\Exception $e) {
-                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-            }
+            $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
 
             $row = self::where('qq', $qq)->field('sign,authcode')->find();
             if(empty($row)){
@@ -438,7 +434,7 @@ class AuthModel extends BaseModel
                 }else{
                     $sign = $row['sign'] + 1;
                 }
-                $authcode = md5(time().$qq.'SF');
+                $authcode = sf_generate_authcode(); // A-01: 原 md5(time().$qq.'SF') 可离线推导
             }else{
                 $sign = $row['sign'];
                 $authcode = $row['authcode'];
@@ -459,7 +455,16 @@ class AuthModel extends BaseModel
                 'bindingid' => 0
             ];
             try{
-                self::insert($data);
+                $result = parent::updateUserInfoAnd(
+                    ['balance' => $remainderBalance],
+                    '授权操作 -'.$allmoney.' 元',
+                    static function () use ($data) {
+                        return self::insert($data) === 1;
+                    }
+                );
+                if (!$result) {
+                    throw new \RuntimeException(t('auth_action.add_transaction_failed'));
+                }
                 $content = [
                     'Title' => '添加授权',
                     '操作' => '添加授权',
@@ -500,11 +505,14 @@ class AuthModel extends BaseModel
             if(!$row){
                 throw new Exception(t('auth.not_exist'));
             }
-            self::where('id', $id)
+            $updated = self::where(['id' => $id, 'bindingid' => $userInfo['id']])
                 ->data([
                     'bindingid' => 0
                 ])
                 ->update();
+            if ($updated !== 1) {
+                throw new Exception(t('auth.not_exist'));
+            }
             $content = [
                 'Title' => '取绑授权',
                 '操作' => '取绑授权',
@@ -608,8 +616,8 @@ class AuthModel extends BaseModel
         }
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             $data = $this->buildSearchWhere('id|auth_info|qq');
             if(!empty($appid)){
@@ -658,8 +666,8 @@ class AuthModel extends BaseModel
 
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             $data = $this->buildSearchWhere('id|auth_info|qq');
             if(!empty($appid)){
@@ -667,15 +675,37 @@ class AuthModel extends BaseModel
             }else{
                 throw new Exception(t('user.info_error').'[errorCode:UserAppIdEmpty]');
             }
-            $data[] = ['userid', '=', $userInfo['id']];
             try{
-                $list = self::order('id' ,'desc')->where($data)->paginate([
-                    'list_rows'=> $limit,
-                    'page' => $current_page,
-                ]);
+                $userId = (int)$userInfo['id'];
+                $powerInfo = parent::getPowerPriceInfo($userInfo['power'] ?? 0);
+                $canManageAuth = $powerInfo
+                    && (int)($powerInfo['addauth_power'] ?? 0) === 1;
+                $list = self::order('id' ,'desc')
+                    ->where($data)
+                    ->where(function ($query) use ($userId) {
+                        $query->where('userid', $userId)->whereOr('bindingid', $userId);
+                    })
+                    ->paginate([
+                        'list_rows'=> $limit,
+                        'page' => $current_page,
+                    ]);
+                foreach ($list as $row) {
+                    $isManaged = (int)$row['userid'] === $userId;
+                    $isBound = (int)$row['bindingid'] === $userId;
+                    $row['relation_type'] = $isManaged && $isBound
+                        ? 'both'
+                        : ($isManaged ? 'managed' : 'bound');
+                    $row['relation_label'] = $isManaged && $isBound
+                        ? t('auth_portal.relation_both')
+                        : ($isManaged ? t('auth_portal.relation_managed') : t('auth_portal.relation_bound'));
+                    $row['can_manage'] = $isManaged && $canManageAuth ? 1 : 0;
+                    $row['can_binding_edit'] = $isBound ? 1 : 0;
+                    $row['can_unbind'] = $isBound ? 1 : 0;
+                    $row['can_offline_activate'] = ($isManaged || $isBound) ? 1 : 0;
+                }
                 $content = [
                     'Title' => '授权列表',
-                    '操作' => '获取授权列表',
+                    '操作' => '获取统一授权列表',
                     '获取条数' => $list->total().' 条',
                     'Result' => 'success'
                 ];

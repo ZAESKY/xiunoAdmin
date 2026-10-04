@@ -570,6 +570,29 @@
     text-overflow:inherit;
     white-space:normal;
 }
+
+/**
+ * Layui marks row-toolbar cells with data-off="true".  Toolbars must always
+ * stay on one row; common.js measures their real content width and expands
+ * the matching column.  When space is limited the table body scrolls
+ * horizontally instead of stacking controls on top of the next record.
+ */
+.layui-table-view td[data-off="true"] > .layui-table-cell {
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.layui-table-view td[data-off="true"] > .layui-table-cell > .layui-btn {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* A wide right-fixed toolbar would cover the table. Keep it in the normal
+ * table flow so users can reach it with the standard horizontal scrollbar. */
+.layui-table-view.sf-action-columns-scroll > .layui-table-box > .layui-table-fixed-r {
+    display: none !important;
+}
 /** 应用列表样式 */
 .add-application-list-item {
     background-color: #fff;
@@ -762,4 +785,155 @@
 /* Button reset for hero actions */
 .hero-actions button {
   font-family: inherit; line-height: normal;
+}
+
+/* Shared admin/user shell and table layout. */
+.layui-card .layui-table-view {
+  margin: 0;
+}
+
+.layui-table td,
+.layui-table th,
+.layui-table-col-set,
+.layui-table-fixed-r,
+.layui-table-grid-down,
+.layui-table-header,
+.layui-table-page,
+.layui-table-tips-main,
+.layui-table-tool,
+.layui-table-total,
+.layui-table-view,
+.layui-table[lay-skin=line],
+.layui-table[lay-skin=row] {
+  color: #515a6e;
+  border: 0;
+  border-bottom: 1px solid #e8eaec;
+  white-space: nowrap;
+}
+
+.sf-admin-shell .layui-header .layui-layout-right .sf-header-message {
+  position: relative;
+  min-width: 46px;
+  text-align: center;
+}
+
+.sf-admin-shell .layui-header .layui-layout-right .sf-header-message .layui-icon {
+  font-size: 18px;
+}
+
+.sf-admin-shell .layui-header .sf-notify-badge {
+  position: absolute;
+  top: 13px;
+  right: 8px;
+  display: none;
+  min-width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 10px;
+  font-style: normal;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+  background: #ff5722;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .layui-layer-page {
+    left: 2.5% !important;
+    width: 95% !important;
+    max-height: 90vh !important;
+  }
+}
+
+.sf-form-label-compact {
+  height: 32px;
+  border-radius: 4px;
+}
+
+.sf-form-input-compact {
+  border-radius: 0 4px 4px 0;
+}
+
+.sf-form-help {
+  margin-top: 6px;
+  color: #999;
+  font-size: 12px;
+}
+
+.sf-download-help {
+  line-height: 1.7;
+}
+
+.sf-code-field {
+  padding-right: 135px;
+}
+
+.sf-code-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  cursor: pointer;
+}
+
+.sf-upload-mask {
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: .8;
+}
+
+.sf-upload-loading {
+  position: fixed;
+  z-index: 9999;
+  top: 200px;
+  left: 50%;
+  display: none;
+  width: 300px;
+  height: 18px;
+  margin-left: -150px;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 10px;
+}
+.sf-upload-mask {
+    position: fixed;
+    z-index: 999;
+    inset: 0;
+    display: none;
+    background: rgba(0, 0, 0, .8);
+}
+
+.sf-upload-progress {
+    position: fixed;
+    z-index: 9999;
+    top: 200px;
+    left: 50%;
+    display: none;
+    width: 300px;
+    height: 18px;
+    margin-left: -150px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.sf-upload-icon {
+    color: #2d8cf0;
+}
+
+.sf-upload-preview {
+    max-width: 196px;
+}
+
+.sf-toggle-section {
+    display: none;
 }

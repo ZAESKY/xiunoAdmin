@@ -3,10 +3,10 @@
 return [
     [
         'name' => 'type',
-        'title' => '消息接口',
+        'title' => t('wxpush_config.interface'),
         'type' => 'radio',
         'content' => [
-            '关闭',
+            t('common.closed'),
             'Server酱',
             'WxPusher',
         ],
@@ -19,11 +19,11 @@ return [
     ],
     [
         'name' => 'server',
-        'title' => 'Server酱',
+        'title' => 'ServerChan',
         'type' => 'array',
         'content' => [],
         'value' => [
-            'sendkey' => 'server酱的SendKey',
+            'sendkey' => t('wxpush_config.send_key_placeholder'),
         ],
         'rule' => 'required',
         'msg' => '',
@@ -37,8 +37,8 @@ return [
         'type' => 'array',
         'content' => [],
         'value' => [
-            'uid' => '填写UID',
-            'apptoken' => '填写appToken',
+            'uid' => t('wxpush_config.uid_placeholder'),
+            'apptoken' => t('wxpush_config.app_token_placeholder'),
         ],
         'rule' => 'required',
         'msg' => '',
@@ -48,11 +48,10 @@ return [
     ],
     [
         'name' => '__tips__',
-        'title' => '温馨提示',
+        'title' => t('common.nice_tips'),
         'type' => 'string',
         'content' => [],
-        'value' => 'Server酱：<a href="https://sct.ftqq.com/sendkey" target="_blank">点击进入</a> ，登录账号 -> 绑定自己的微信号 -> 获取到SendKey填写到下方输入框！<br><br>
-WxPusher：<a href="https://wxpusher.zjiecode.com/admin/main/" target="_blank">点此进入</a> ，注册并且创建应用 -> 将appToken填写到上方输入框 -> 扫码关注应用 -> 在用户列表查看自己的UID填写到下方输入框',
+        'value' => t('wxpush_config.help_html'),
         'rule' => 'required',
         'msg' => '',
         'tip' => '',

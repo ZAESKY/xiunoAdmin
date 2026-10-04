@@ -26,10 +26,10 @@ class WxPusher
 
     function __construct($Token = 0){
         $this->appToken = $Token;
-        $this->appMsgGate = 'http://wxpusher.zjiecode.com/api/send/message';
-        $this->appMsgCheckGate = 'http://wxpusher.zjiecode.com/api/send/query';
-        $this->appUserFunGate = 'http://wxpusher.zjiecode.com/api/fun/wxuser';
-        $this->appQrCreatGate = 'http://wxpusher.zjiecode.com/api/fun/create/qrcode';
+        $this->appMsgGate = 'https://wxpusher.zjiecode.com/api/send/message';
+        $this->appMsgCheckGate = 'https://wxpusher.zjiecode.com/api/send/query';
+        $this->appUserFunGate = 'https://wxpusher.zjiecode.com/api/fun/wxuser';
+        $this->appQrCreatGate = 'https://wxpusher.zjiecode.com/api/fun/create/qrcode';
     }
 
     /**
@@ -38,18 +38,56 @@ class WxPusher
      */
     private function post_json($url, $jsonStr){
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStr);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json; charset=utf-8',
-            'Content-Length: ' . strlen($jsonStr)
-        ));
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_URL => $url,
+            CURLOPT_POSTFIELDS => $jsonStr,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($jsonStr),
+            ],
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+        ]);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        return  $response;
+        return $response !== false && $httpCode >= 200 && $httpCode < 300 ? $response : '';
+    }
+
+    /**
+     * 仅向插件内置的 HTTPS 接口发起受限 GET 请求。
+     */
+    private function get_json($url, array $query = [])
+    {
+        if (!is_string($url) || stripos($url, 'https://wxpusher.zjiecode.com/') !== 0) {
+            return [];
+        }
+        if ($query !== []) {
+            $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        }
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+            return [];
+        }
+        $decoded = json_decode($response, true);
+        return is_array($decoded) ? $decoded : [];
     }
 
     /**
@@ -66,21 +104,19 @@ class WxPusher
      *      false   失败返回false
      */
     public function quickSend($uid = null , $topicId = null , $content = 'Hello',$url = null,$debug = false){
-        $data = http_build_query(
-            array(
-                'appToken' => $this->appToken,
-                'content' => $content,
-                'uid' => $uid,
-                'topicId' => $topicId,
-                'url'   => urlencode($url),
-            ));
-        $result = json_decode(file_get_contents($this->appMsgGate.'/?'.$data),TRUE);
+        $result = $this->get_json($this->appMsgGate, [
+            'appToken' => $this->appToken,
+            'content' => $content,
+            'uid' => $uid,
+            'topicId' => $topicId,
+            'url' => $url,
+        ]);
 
-        if ($result['data'][0]['code'] == 1000){
+        if (($result['data'][0]['code'] ?? 0) == 1000){
             return true;
         }else{
             if ($debug){
-                return $result['data'][0]['status'];
+                return $result['data'][0]['status'] ?? '推送服务请求失败';
             }else{
                 return false;
             }
@@ -142,7 +178,7 @@ class WxPusher
             $jsonStr = json_encode($postdata);
             $result_Original = json_decode($this->post_json($this->appMsgGate, $jsonStr),TRUE);//取出data内执行信息
 
-            if ($result_Original['success']){       //判断服务器是否回复成功识别指令
+            if (is_array($result_Original) && !empty($result_Original['success']) && is_array($result_Original['data'] ?? null)){       //判断服务器是否回复成功识别指令
                 $result = $result_Original['data']; //获取执行结果
                 //记录错误信息
                 $error = [];
@@ -176,7 +212,7 @@ class WxPusher
                     }
                 }
             }else{
-                return $result_Original['msg']; //输出服务器指令识别失败状态
+                return is_array($result_Original) ? ($result_Original['msg'] ?? '推送服务响应异常') : '推送服务请求失败'; //输出服务器指令识别失败状态
             }
         }
     }
@@ -229,11 +265,11 @@ class WxPusher
      *  其余状态返回服务器提示信息(msg)
      */
     public function checkStatus($messageId){
-        $result = json_decode(file_get_contents($this->appMsgCheckGate.'/'.$messageId));
-        if ($result->code == 1000){
+        $result = $this->get_json($this->appMsgCheckGate.'/'.rawurlencode((string)$messageId));
+        if (($result['code'] ?? 0) == 1000){
             return true;
         }else{
-            return $result->msg;
+            return $result['msg'] ?? '推送服务请求失败';
         }
     }
 
@@ -256,23 +292,21 @@ class WxPusher
      */
 
     public function getFunInfo($page = 1,$pageSize = 100,$uid = ''){
-        $data = http_build_query(
-            array(
-                'appToken' => $this->appToken,
-                'page' => $page,
-                'pageSize' => $pageSize,
-                'uid'   => $uid
-            ));
-        $result = json_decode($result = file_get_contents($this->appUserFunGate.'/?'.$data),true);
-        if ($result['code'] == 1000){ //判断服务器是否执行成功
-            $data = $result['data']['records'];
+        $result = $this->get_json($this->appUserFunGate, [
+            'appToken' => $this->appToken,
+            'page' => max(1, (int)$page),
+            'pageSize' => min(100, max(1, (int)$pageSize)),
+            'uid' => $uid,
+        ]);
+        if (($result['code'] ?? 0) == 1000){ //判断服务器是否执行成功
+            $data = $result['data']['records'] ?? [];
             if (empty($data)){
                 return null;
             }else{
                 return $data;
             }
         }else{
-            return $result['msg']; //反馈服务器给出的错误信息
+            return $result['msg'] ?? '推送服务请求失败'; //反馈服务器给出的错误信息
         }
     }
     /**
@@ -280,17 +314,15 @@ class WxPusher
      *  返回用户关注总数 int
      */
     public function getFunTotal(){
-        $data = http_build_query(
-            array(
-                'appToken' => $this->appToken,
-                'page' => 1,
-                'pageSize' => 1,
-            ));
-        $result = json_decode($result = file_get_contents($this->appUserFunGate.'/?'.$data),true);
-        if ($result['code'] == 1000){ //判断服务器是否执行成功
-            return $result['data']['total'];
+        $result = $this->get_json($this->appUserFunGate, [
+            'appToken' => $this->appToken,
+            'page' => 1,
+            'pageSize' => 1,
+        ]);
+        if (($result['code'] ?? 0) == 1000){ //判断服务器是否执行成功
+            return (int)($result['data']['total'] ?? 0);
         }else{
-            return $result['msg']; //反馈服务器给出的错误信息
+            return $result['msg'] ?? '推送服务请求失败'; //反馈服务器给出的错误信息
         }
     }
 }

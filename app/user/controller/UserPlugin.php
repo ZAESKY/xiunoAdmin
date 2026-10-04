@@ -3,6 +3,10 @@
 namespace app\user\controller;
 
 use app\common\controller\UserBackend;
+use app\common\service\PluginStorageService;
+use app\common\service\PluginCommissionService;
+use app\common\service\PluginRewardService;
+use app\common\service\PhoneVerificationService;
 use app\user\service\UserPluginService;
 use app\admin\model\PluginModel;
 use think\facade\View;
@@ -25,9 +29,9 @@ class UserPlugin extends UserBackend
     {
         if (!feature_enabled('feature_user_plugin_enabled')) {
             if (IS_POST) {
-                exit(json_encode(message('插件中心功能已关闭', false), JSON_UNESCAPED_UNICODE));
+                exit(json_encode(message('plugin_action.feature_closed', false), JSON_UNESCAPED_UNICODE));
             }
-            exit($this->render('/public/error', ['msg' => '插件中心功能已关闭']));
+            exit($this->render('/public/error', ['msg' => t('plugin_action.feature_closed')]));
         }
     }
 
@@ -38,7 +42,10 @@ class UserPlugin extends UserBackend
     {
         if (IS_POST) {
             try {
-                $result = $this->service->marketList();
+                $mode = strtolower(trim((string)input('post.mode', 'list')));
+                $result = $mode === 'showcase'
+                    ? $this->service->marketShowcase()
+                    : $this->service->marketList();
                 return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false, ['data' => []]));
@@ -82,16 +89,25 @@ class UserPlugin extends UserBackend
             $pluginModel = new PluginModel();
             $plugin = $pluginModel->getInfo($id);
             if (!$plugin) {
-                return $this->render('public/error', ['msg' => '插件不存在']);
+                return $this->render('public/error', ['msg' => t('plugin_action.not_found')]);
             }
             // 只能编辑自己的插件
             if ($plugin['user_id'] != $this->userId) {
-                return $this->render('public/error', ['msg' => '无权编辑此插件']);
+                return $this->render('public/error', ['msg' => t('plugin_action.edit_forbidden')]);
             }
             $this->service->enrichPluginDetail($plugin);
         }
         View::assign('plugin', $plugin);
-        View::assign('commissionRate', conf('plugin_commission_rate') ?? 10);
+        View::assign('commissionConfig', PluginCommissionService::config());
+        View::assign('pluginRewardConfig', PluginRewardService::config());
+        $phoneStatus = PhoneVerificationService::status(intval($this->userId));
+        View::assign('pluginPhoneStatus', $phoneStatus);
+        View::assign(
+            'pluginPhoneBindingRequired',
+            PhoneVerificationService::requiredFor('plugin_reward')
+                && !empty($phoneStatus['sms_configured'])
+                && empty($phoneStatus['verified'])
+        );
         return $this->render();
     }
 
@@ -100,30 +116,32 @@ class UserPlugin extends UserBackend
      */
     public function uploadImage()
     {
+        if (!IS_POST) {
+            return json(['code' => 1, 'msg' => t('common.illegal_request')], 405);
+        }
         try {
             $file = request()->file('file');
             if (!$file) {
-                return json(['code' => 1, 'msg' => '请选择图片']);
+                return json(['code' => 1, 'msg' => t('upload.please_select_image')]);
             }
             $allowedExt = 'jpg,jpeg,png,gif,bmp,webp';
             $maxSize = 5 * 1024 * 1024;
             $ext = strtolower($file->getOriginalExtension());
             if (!in_array($ext, explode(',', $allowedExt))) {
-                return json(['code' => 1, 'msg' => '仅支持 jpg/jpeg/png/gif/bmp/webp 图片']);
+                return json(['code' => 1, 'msg' => t('plugin_action.image_type_error')]);
             }
             if ($file->getSize() > $maxSize) {
-                return json(['code' => 1, 'msg' => '图片不能超过5MB']);
+                return json(['code' => 1, 'msg' => t('plugin_action.image_size_error')]);
             }
-            $uploadDir = app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR . date('Ymd');
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $fileName = md5(uniqid(mt_rand(), true)) . '.' . $ext;
-            $file->move($uploadDir, $fileName);
-            $path = '/upload/temp/' . date('Ymd') . '/' . $fileName;
-            return json(message('success', true, ['path' => $path]));
+            $stored = (new PluginStorageService())->storeUploadedFile(
+                $file,
+                'richtext',
+                explode(',', $allowedExt),
+                $maxSize
+            );
+            return json(message('success', true, ['path' => $stored['url']]));
         } catch (\Throwable $e) {
-            return json(['code' => 1, 'msg' => '上传失败: ' . $e->getMessage()]);
+            return json(['code' => 1, 'msg' => t('plugin_action.upload_failed', ['error' => $e->getMessage()])]);
         }
     }
 
@@ -133,7 +151,7 @@ class UserPlugin extends UserBackend
     public function uploadFile()
     {
         if (IS_POST) {
-            return json($this->service->uploadFile());
+            return json($this->service->uploadFile($this->userId));
         }
     }
 
@@ -170,18 +188,18 @@ class UserPlugin extends UserBackend
                 $pluginModel = new PluginModel();
                 $info = $pluginModel->getInfo($id);
                 if (!$info) {
-                    return json(message('插件不存在', false));
+                    return json(message('plugin_action.not_found', false));
                 }
                 // 只能删除自己的插件
                 if ($info['user_id'] != $this->userId) {
-                    return json(message('无权删除此插件', false));
+                    return json(message('plugin_action.delete_forbidden', false));
                 }
                 // 已上架的插件不能删除
                 if ($info['status'] == 1) {
-                    return json(message('已上架的插件不能删除，请联系管理员', false));
+                    return json(message('plugin_action.published_delete_forbidden', false));
                 }
                 $pluginModel->drop($id);
-                return json(message('删除成功', true));
+                return json(message('plugin_action.delete_success', true));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false));
             }
@@ -195,13 +213,16 @@ class UserPlugin extends UserBackend
     {
         $id = input('get.id', 0, 'intval');
         if ($id <= 0) {
-            return $this->render('public/error', ['msg' => '插件ID错误']);
+            return $this->render('public/error', ['msg' => t('plugin_action.invalid_id')]);
         }
 
         $pluginModel = new PluginModel();
         $plugin = $pluginModel->getInfo($id);
         if (!$plugin) {
-            return $this->render('public/error', ['msg' => '插件不存在']);
+            return $this->render('public/error', ['msg' => t('plugin_action.not_found')]);
+        }
+        if (intval($plugin['status'] ?? 0) !== 1 && intval($plugin['user_id'] ?? 0) !== intval($this->userId)) {
+            return $this->render('public/error', ['msg' => t('plugin_action.not_published')]);
         }
         $this->service->enrichPluginDetail($plugin);
 
@@ -218,7 +239,7 @@ class UserPlugin extends UserBackend
             $userInfo = \think\facade\Db::name('user')->where('id', intval($this->userId))->find();
             if ($userInfo) {
                 $app_id = intval($userInfo['appid']);
-                $userBalance = floatval($userInfo['balance']);
+                $userBalance = sf_money_format($userInfo['balance']);
 
                 $myComment = \think\facade\Db::name('plugin_comment')
                     ->where('plugin_id', $id)
@@ -278,6 +299,18 @@ class UserPlugin extends UserBackend
             ->select()
             ->toArray();
 
+        // 联系方式只在详情页按需读取，且仅允许纯数字 QQ，避免把任意用户资料写入页面脚本。
+        $publisherQq = '';
+        $publisherUserId = intval($plugin['user_id'] ?? 0);
+        if ($publisherUserId > 0) {
+            $candidateQq = trim((string)\think\facade\Db::name('user')
+                ->where('id', $publisherUserId)
+                ->value('qq'));
+            if (preg_match('/^[1-9][0-9]{4,19}$/D', $candidateQq)) {
+                $publisherQq = $candidateQq;
+            }
+        }
+
         View::assign('plugin', $plugin);
         View::assign('hasCommented', $hasCommented);
         View::assign('myComment', $myComment);
@@ -287,6 +320,7 @@ class UserPlugin extends UserBackend
         View::assign('userBalance', $userBalance);
         View::assign('authorPlugins', $authorPlugins);
         View::assign('referencingPlugins', $referencingPlugins);
+        View::assign('publisherQq', $publisherQq);
         return $this->render();
     }
 
@@ -324,7 +358,7 @@ class UserPlugin extends UserBackend
     public function download()
     {
         try {
-            $this->service->download();
+            $this->service->download($this->userId);
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false));
         }
@@ -334,7 +368,7 @@ class UserPlugin extends UserBackend
     {
         try {
             $pluginId = input('get.plugin_id', input('post.plugin_id', 0, 'intval'), 'intval');
-            return json(message('获取成功', true, ['list' => $this->service->getVersions($pluginId, $this->userId)]));
+            return json(message('plugin_action.get_success', true, ['list' => $this->service->getVersions($pluginId, $this->userId)]));
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false, ['list' => []]));
         }

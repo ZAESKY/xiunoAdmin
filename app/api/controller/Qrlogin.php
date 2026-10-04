@@ -5,10 +5,10 @@ namespace app\api\controller;
 use app\common\controller\ApiBackend;
 use think\Exception;
 use app\common\extend\CheckInfo;
-use think\facade\Cache;
 use think\facade\Session;
 use think\facade\Cookie;
 use think\facade\Db;
+use app\common\service\ApplicationInstallerService;
 class Qrlogin extends ApiBackend
 {
     public function initialize()
@@ -20,11 +20,11 @@ class Qrlogin extends ApiBackend
     public function getqrpic(){
         if(IS_POST){
             $url = 'https://ssl.ptlogin2.qq.com/ptqrshow?appid=716027609&e=2&l=M&s=3&d=72&v=4&t=0.' . time() . '&daid=383&pt_3rd_aid=101996138';
-            $login_sig = md5(uniqid(rand(), TRUE));
+            $login_sig = bin2hex(random_bytes(24));
             $arr = $this->get_curl($login_sig, $url, 0, 0, 0, 1, 0, 0, 1);
             preg_match('/qrsig=(.*?);/', $arr['header'], $match);
             if ($qrsig = $match[1]){
-                return message('success！' ,true ,['qrsig' => $qrsig, 'data' => base64_encode($arr['body'])]);
+                return message(t('common.success') ,true ,['qrsig' => $qrsig, 'data' => base64_encode($arr['body'])]);
             }else{
                 return message(t('auth.qrcode_failed') ,false);
             }
@@ -61,16 +61,21 @@ class Qrlogin extends ApiBackend
                     break;
                 case 'bindQQ':
                 case 'adminBindQQ':
+                case 'oauthMigrate':
+                case 'oauthClaim':
                     break;
                 case 'binding':
                     try{
                         parent::userLogin();
                     }catch (\Exception $e){
-                        return message($e->getMessage() ,false ,['code' => 6]);
+                        return message(sf_public_exception_message($e, t('qq.login_check_failed')) ,false ,['code' => 6]);
                     }
                     if($this->myAppInfo['binding_auth_switch'] != 1) return message(t('auth.bind_auth_disabled') ,false ,['code' => 6]);
                     break;
                 case 'download':
+                    if (sf_download_mode() !== 'qrcode') {
+                        return message(t('download.qq_disabled'), false, ['code' => 6]);
+                    }
                     $appid = !empty($post['appid'])?intval($post['appid']):null;
                     $auth_info = !empty($post['auth_info'])?$post['auth_info']:null;
                     if(empty($appid)){
@@ -85,7 +90,7 @@ class Qrlogin extends ApiBackend
                             'appid' => $appid,
                             'auth_info' => $auth_info
                         ])
-                        ->field('qq')
+                        ->field('id,qq')
                         ->find();
                     if(empty($row)){
                         return message(t('auth.not_exist') ,false);
@@ -103,11 +108,11 @@ class Qrlogin extends ApiBackend
                     case 0:
                         preg_match('/uin=(\d+)&/', $ret, $uin);
                         $uin = $this->getuin($uin[1]);
-                        $get_token = base64_encode(md5($uin . md5($uin . '*$$*') . '23132' . md5(date("Y-m-d-H"))));
+                        $get_token = bin2hex(random_bytes(32));
                         session('get_token', $get_token);
                         session('get_qq', $uin);
                         Session::save();
-                        return message('success！' ,true ,['code' => 0, 'nick' => urlencode($r[5]), 'qq' => $uin]);
+                        return message(t('common.success') ,true ,['code' => 0, 'nick' => urlencode($r[5]), 'qq' => $uin]);
                     case 65:
                         return message(t('auth.qrcode_invalid') ,false ,['code' => 1]);
                     case 66:
@@ -115,15 +120,18 @@ class Qrlogin extends ApiBackend
                     case 67:
                         return message(t('auth.qrcode_verifying') ,true ,['code' => 3]);
                     default:
-                        return message($r[4] ,false ,['code' => 6]);
+                        return message(t('qq.login_status_abnormal') ,false ,['code' => 6]);
                 }
             } else {
-                return message($ret ,false ,['code' => 6]);
+                return message(t('qq.service_response_error') ,false ,['code' => 6]);
             }
         }
     }
 
     public function userLogin(){
+        if (!IS_POST) {
+            return message(t('common.illegal_request'), false);
+        }
         $post = $this->request->post();
         $get_token = !empty(session('get_token'))?session('get_token'):null;
         $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
@@ -136,8 +144,15 @@ class Qrlogin extends ApiBackend
             return message(t('auth.token_expired') ,false);
         }
         if(!empty($username) && !empty($appid)){
-            $row = Db::name('user')->where(['username' => $username, 'appid' => $appid, 'status' => 1])->find();
+            // 多账号选择必须仍然受本次扫码得到的 QQ 约束，不能只凭用户名和应用 ID 登录。
+            $row = Db::name('user')->where([
+                'username' => $username,
+                'appid' => $appid,
+                'qq' => $get_qq,
+                'status' => 1,
+            ])->find();
             if(empty($row))return message(t('user.not_exist') ,false);
+            Session::regenerate(true);
             cookie('userId', $row['id']);
             cookie('userSign', data_auth_sign($row['appid'].$row['username'].$row['password'].sf_password_hash()));
             Session::delete('get_token');
@@ -160,8 +175,9 @@ class Qrlogin extends ApiBackend
                 case 1:
                     $user = $row->first();
                     if (empty($user['appid']) || empty($user['username'])) {
-                        return message('用户数据异常: appid=' . ($user['appid'] ?? 'null') . ' username=' . ($user['username'] ?? 'null'), false);
+                        return message(t('user.account_abnormal'), false);
                     }
+                    Session::regenerate(true);
                     cookie('userId', $user['id']);
                     cookie('userSign', data_auth_sign($user['appid'].$user['username'].$user['password'].sf_password_hash()));
                     Session::delete('get_token');
@@ -196,6 +212,9 @@ class Qrlogin extends ApiBackend
     }
 
     public function bindQQ(){
+        if (!IS_POST) {
+            return message(t('common.illegal_request'), false);
+        }
         $get_token = !empty(session('get_token'))?session('get_token'):null;
         $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
         if(empty($get_token) || empty($get_qq)){
@@ -204,21 +223,31 @@ class Qrlogin extends ApiBackend
         try{
             parent::userLogin();
         }catch (\Exception $e){
-            return message($e->getMessage() ,false);
+            return message(sf_public_exception_message($e, t('qq.login_check_failed')) ,false);
         }
         $userId = cookie('userId');
         if(empty($userId)){
             return message(t('common.need_login') ,false);
         }
         try{
-            Db::name('user')->where('id', $userId)->data(['qq' => $get_qq])->update();
+            Db::transaction(function () use ($userId, $get_qq) {
+                $exists = Db::name('user')
+                    ->where('qq', $get_qq)
+                    ->where('id', '<>', $userId)
+                    ->lock(true)
+                    ->find();
+                if ($exists) {
+                    throw new \RuntimeException(t('login.qq_already_bound'));
+                }
+                Db::name('user')->where('id', $userId)->data(['qq' => $get_qq])->update();
+            });
         }catch (\Exception $e){
-            return message('QQ绑定失败' ,false);
+            return message(sf_public_exception_message($e, t('profile.qq_bind_failed')) ,false);
         }
         Session::delete('get_token');
         Session::delete('get_qq');
         Session::save();
-        return message('QQ绑定成功' ,true);
+        return message(t('profile.qq_bind_success') ,true);
     }
 
     /**
@@ -226,7 +255,7 @@ class Qrlogin extends ApiBackend
      */
     public function adminLogin(){
         if (!IS_POST) {
-            return message('非法请求', false);
+            return message(t('common.illegal_request'), false);
         }
         $get_token = !empty(session('get_token'))?session('get_token'):null;
         $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
@@ -235,20 +264,24 @@ class Qrlogin extends ApiBackend
         }
         $admin = Db::name('admin')->where(['qq' => $get_qq, 'status' => 1])->find();
         if(empty($admin)){
-            return message('该QQ未绑定管理员账号，请先在后台个人中心绑定QQ' ,false);
+            return message(t('qq.admin_not_bound') ,false);
         }
+        Session::regenerate(true);
         session('adminId', $admin['id'], 86400);
         session('adminSign', data_auth_sign($admin['username'].$admin['password'].sf_password_hash()), 86400);
         Session::delete('get_token');
         Session::delete('get_qq');
         Session::save();
-        return message('登录成功' ,true, ['url' => '/admin.php/Index/index.html']);
+        return message(t('login.success') ,true, ['url' => '/admin.php/Index/index.html']);
     }
 
     /**
      * 管理员QQ扫码绑定
      */
     public function adminBindQQ(){
+        if (!IS_POST) {
+            return message(t('common.illegal_request'), false);
+        }
         $get_token = !empty(session('get_token'))?session('get_token'):null;
         $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
         if(empty($get_token) || empty($get_qq)){
@@ -259,14 +292,24 @@ class Qrlogin extends ApiBackend
             return message(t('common.need_login') ,false);
         }
         try{
-            Db::name('admin')->where('id', $adminId)->data(['qq' => $get_qq])->update();
+            Db::transaction(function () use ($adminId, $get_qq) {
+                $exists = Db::name('admin')
+                    ->where('qq', $get_qq)
+                    ->where('id', '<>', $adminId)
+                    ->lock(true)
+                    ->find();
+                if ($exists) {
+                    throw new \RuntimeException(t('qq.admin_already_bound'));
+                }
+                Db::name('admin')->where('id', $adminId)->data(['qq' => $get_qq])->update();
+            });
         }catch (\Exception $e){
-            return message('QQ绑定失败' ,false);
+            return message(sf_public_exception_message($e, t('profile.qq_bind_failed')) ,false);
         }
         Session::delete('get_token');
         Session::delete('get_qq');
         Session::save();
-        return message('QQ绑定成功' ,true);
+        return message(t('profile.qq_bind_success') ,true);
     }
 
     /**
@@ -274,26 +317,29 @@ class Qrlogin extends ApiBackend
      */
     public function adminUnbindQQ(){
         if (!IS_POST) {
-            return message('非法请求', false);
+            return message(t('common.illegal_request'), false);
         }
         $adminId = session('adminId');
         if(empty($adminId)){
             return message(t('common.need_login') ,false);
         }
         try{
-            Db::name('admin')->where('id', $adminId)->data(['qq' => ''])->update();
+            Db::name('admin')->where('id', $adminId)->data(['qq' => null])->update();
         }catch (\Exception $e){
-            return message('QQ解绑失败' ,false);
+            return message(t('profile.qq_unbind_failed') ,false);
         }
-        return message('QQ解绑成功' ,true);
+        return message(t('profile.qq_unbind_success') ,true);
     }
 
     public function binding(){
+        if (!IS_POST) {
+            return message(t('common.illegal_request'), false);
+        }
         $post = $this->request->post();
         $get_token = !empty(session('get_token'))?session('get_token'):null;
         $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
         $bindingType = !empty($post['bindingType']) ? $post['bindingType'] : null;
-        $list = !empty($post['list']) ? $post['list'] : null;
+        $list = $post['list'] ?? null;
         if(empty($get_token)){
             return message(t('auth.token_expired') ,false);
         }
@@ -303,7 +349,7 @@ class Qrlogin extends ApiBackend
         try{
             parent::userLogin();
         }catch (\Exception $e){
-            return message($e->getMessage() ,false ,['code' => 6]);
+            return message(sf_public_exception_message($e, t('qq.login_check_failed')) ,false ,['code' => 6]);
         }
         if($get_qq != $this->userInfo['qq']){
             return message(t('user.qq_bind_auth_mismatch') ,false);
@@ -311,17 +357,47 @@ class Qrlogin extends ApiBackend
         switch($bindingType){
             case 'auth':
                 if(!empty($list)){
-                    if(empty($list))return message(t('auth.select_bind_auth') ,false);
-                    foreach ($list as $res){
-                        $row = Db::name('auth')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->field('id,bindingid,qq')->find();
-                        if(empty($row)) return message(t('auth.not_exist').' [ID:'.$res.']' ,false);
-                        if($row['bindingid'] != 0) return message(t('auth.not_exist').' [ID:'.$res.', auth_info:'.$res['auth_info'].'] '.t('auth.already_exist') ,false);
-                        if($row['qq'] != $get_qq) return message(t('auth.not_exist').' [ID:'.$res.', auth_info:'.$res['auth_info'].'] '.t('auth.qq_mismatch') ,false);
-                        try{
-                            Db::name('auth')->where(['id' => $res, 'appid' => $this->userInfo['appid']])->data(['bindingid' => $this->userId])->update();
-                        }catch (\Exception $e){
-                            return message($e->getMessage() ,false);
-                        }
+                    if (!is_array($list)) {
+                        return message(t('common_ui.type_error'), false);
+                    }
+                    $ids = array_values(array_unique(array_filter(array_map('intval', $list), static function ($id) {
+                        return $id > 0;
+                    })));
+                    if (empty($ids)) {
+                        return message(t('auth.select_bind_auth'), false);
+                    }
+                    if (count($ids) > 100) {
+                        return message(t('auth.batch_bind_limit', ['limit' => 100]), false);
+                    }
+                    try {
+                        Db::transaction(function () use ($ids, $get_qq) {
+                            foreach ($ids as $id) {
+                                $row = Db::name('auth')
+                                    ->where(['id' => $id, 'appid' => $this->userInfo['appid']])
+                                    ->field('id,auth_info,bindingid,qq')
+                                    ->lock(true)
+                                    ->find();
+                                if (empty($row)) {
+                                    throw new \RuntimeException(t('auth.not_exist') . ' [ID:' . $id . ']');
+                                }
+                                $label = ' [ID:' . $id . ', auth_info:' . (string)$row['auth_info'] . '] ';
+                                if ((int)$row['bindingid'] !== 0) {
+                                    throw new \RuntimeException(t('auth.not_exist') . $label . t('auth.already_exist'));
+                                }
+                                if ((string)$row['qq'] !== (string)$get_qq) {
+                                    throw new \RuntimeException(t('auth.not_exist') . $label . t('auth.qq_mismatch'));
+                                }
+                                $updated = Db::name('auth')
+                                    ->where(['id' => $id, 'appid' => $this->userInfo['appid'], 'bindingid' => 0])
+                                    ->data(['bindingid' => $this->userId])
+                                    ->update();
+                                if ($updated !== 1) {
+                                    throw new \RuntimeException(t('auth.bind_state_changed'));
+                                }
+                            }
+                        });
+                    } catch (\Exception $e) {
+                        return message(sf_public_exception_message($e, t('auth.bind_retry')), false);
                     }
                     Session::delete('get_token');
                     Session::delete('get_qq');
@@ -342,6 +418,12 @@ class Qrlogin extends ApiBackend
     }
 
     public function download(){
+        if (!IS_POST) {
+            return message(t('common.illegal_request'), false);
+        }
+        if (sf_download_mode() !== 'qrcode') {
+            return message(t('download.qq_disabled'), false);
+        }
         $post = $this->request->post();
         $get_token = !empty(session('get_token'))?session('get_token'):null;
         $get_qq = !empty(session('get_qq'))?session('get_qq'):null;
@@ -366,7 +448,7 @@ class Qrlogin extends ApiBackend
                 'appid' => $appid,
                 'auth_info' => $auth_info
             ])
-            ->field('qq')
+            ->field('id,qq')
             ->find();
         if(empty($row)){
             return message(t('auth.not_exist') ,false);
@@ -378,23 +460,17 @@ class Qrlogin extends ApiBackend
             return message(t('auth.qq_mismatch') ,false);
         }
 
-        $res = Db::name('version')
-            ->where([
-                ['appid', '=', $appid],
-                ['status', '=', 1],
-                ['type', '=', 0]
-            ])
-            ->find();
-        if(empty($res)){
-            return message(t('app.no_install_package') ,false);
+        $ticket = ApplicationInstallerService::issueDownloadTicket(
+            $appid,
+            (int)$row['id'],
+            (string)get_client_ip()
+        );
+        if (empty($ticket['ok'])) {
+            return message((string)$ticket['msg'], false);
         }
-        $value = serialize([
-            'versionInfo' => $res,
-            'authInfo' => $row
+        return message(t('app.download_link_success') ,true, [
+            'url' => SITE_URL.'/api.php/Download/download/?sign='.$ticket['ticket'],
         ]);
-        $key = md5(uniqid());
-        Cache::set($key, $value, 43200);
-        return message(t('app.download_link_success') ,true, ['url' => 'http://'.DOMAIN.'/api.php/Download/download/?sign='.$key]);
     }
     private function getGTK($skey){
         $len = strlen($skey);
@@ -426,8 +502,10 @@ class Qrlogin extends ApiBackend
     private function get_curl($login_sig, $url, $post = 0, $referer = 0, $cookie = 0, $header = 0, $ua = 0, $nobaody = 0, $split = 0){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $httpheader[] = 'Accept: image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8';
         $httpheader[] = 'Accept-Encoding: gzip, deflate, br';
         $httpheader[] = 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6';
@@ -484,8 +562,10 @@ class Qrlogin extends ApiBackend
     private function login_get_curl($qrsig, $url, $post = 0, $referer = 0, $cookie = 0, $header = 0, $ua = 0, $nobaody = 0, $split = 0){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
         $httpheader[] = 'Accept:*/*';
         $httpheader[] = 'Accept-Encoding:gzip,deflate,sdch';

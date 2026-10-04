@@ -82,7 +82,7 @@ class KaYiXinSubmit
         //待请求参数数组
         $para = $this->buildRequestPara($para_temp);
 
-        $sHtml = "<div class=\"page-loading\"><div class=\"signal-loader\"><span></span><span></span><span></span><span></span></div></div><form id='alipaysubmit' name='alipaysubmit' action='http://".$this->alipay_config['getway']."/open/gateway.html' method='".$method."'>";
+        $sHtml = "<div class=\"page-loading\"><div class=\"signal-loader\"><span></span><span></span><span></span><span></span></div></div><form id='alipaysubmit' name='alipaysubmit' action='https://".$this->alipay_config['getway']."/open/gateway.html' method='".$method."'>";
         while (list ($key, $val) = each ($para)) {
             $sHtml.= "<input type='hidden' name='".$key."' value='".$val."'/>";
         }

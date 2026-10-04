@@ -45,4 +45,6 @@ return [
     'error_message'    => '温馨提示：页面错误！请稍后再试～',
     // 显示错误信息
     'show_error_msg'   => false,
+    // Comma-separated exact origins permitted to make credentialed browser API calls.
+    'cors_origins'     => array_values(array_filter(array_map('trim', explode(',', (string)env('app.cors_origins', ''))))),
 ];

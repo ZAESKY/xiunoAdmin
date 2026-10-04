@@ -14,18 +14,23 @@ class PointExchangeModel extends BaseModel
     public function list()
     {
         $post = request()->post();
-        $limit = !empty($post['limit']) ? $post['limit'] : 12;
-        $currentPage = !empty($post['current_page']) ? $post['current_page'] : 1;
+        $limit = sf_page_limit($post['limit'] ?? null, 12);
+        $currentPage = sf_page_number($post['current_page'] ?? null);
         $data = [['status', '=', 1]];
         $text = trim((string)($post['text'] ?? ''));
         if ($text !== '') {
             $data[] = ['name', 'like', '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $text) . '%'];
         }
 
-        return self::where($data)->order('id', 'desc')->paginate([
+        $list = self::where($data)->order('id', 'desc')->paginate([
             'list_rows' => $limit,
             'page' => $currentPage,
         ]);
+        $list->each(static function ($item) {
+            $item['description'] = clean_rich_text($item['description'] ?? '');
+            return $item;
+        });
+        return $list;
     }
 
     public function exchange(int $userId, int $appid)
@@ -42,23 +47,23 @@ class PointExchangeModel extends BaseModel
                 throw new Exception(t('user.info_error'));
             }
             if ((int)$user['integral'] < 0) {
-                throw new Exception('用户积分异常');
+                throw new Exception(t('point_exchange.user_points_invalid'));
             }
 
             $product = Db::name('point_product')->where('id', $productId)->lock(true)->find();
             if (!$product || (int)$product['status'] !== 1) {
-                throw new Exception('商品已下架，无法兑换');
+                throw new Exception(t('point_exchange.product_unavailable'));
             }
             if ((int)$product['stock'] <= 0) {
-                throw new Exception('商品库存不足');
+                throw new Exception(t('point_exchange.insufficient_stock'));
             }
 
             $costPoints = (int)$product['required_points'];
             if ($costPoints <= 0) {
-                throw new Exception('商品积分配置错误');
+                throw new Exception(t('point_exchange.points_config_invalid'));
             }
             if ((int)$user['integral'] < $costPoints) {
-                throw new Exception('积分不足，无法兑换');
+                throw new Exception(t('point_exchange.insufficient_points'));
             }
 
             $limit = (int)$product['exchange_limit'];
@@ -69,7 +74,7 @@ class PointExchangeModel extends BaseModel
                     ->where('status', 'success')
                     ->count();
                 if ($usedCount >= $limit) {
-                    throw new Exception('已超过该商品兑换上限');
+                    throw new Exception(t('point_exchange.limit_reached'));
                 }
             }
 
@@ -80,7 +85,7 @@ class PointExchangeModel extends BaseModel
                 ->lock(true)
                 ->find();
             if (!$reward) {
-                throw new Exception('商品库存不足');
+                throw new Exception(t('point_exchange.insufficient_stock'));
             }
 
             $recordId = Db::name('point_exchange_record')->insertGetId([
@@ -99,7 +104,7 @@ class PointExchangeModel extends BaseModel
                 ->dec('integral', $costPoints)
                 ->update();
             if (!$deducted) {
-                throw new Exception('积分不足，无法兑换');
+                throw new Exception(t('point_exchange.insufficient_points'));
             }
 
             $issued = Db::name('point_product_reward')
@@ -113,7 +118,7 @@ class PointExchangeModel extends BaseModel
                     'updated_at' => datetime(),
                 ]);
             if (!$issued) {
-                throw new Exception('奖品已被发放，请重试');
+                throw new Exception(t('point_exchange.reward_already_issued'));
             }
 
             Db::name('point_product')
@@ -126,7 +131,7 @@ class PointExchangeModel extends BaseModel
                 $userId,
                 'exchange',
                 -$costPoints,
-                '积分兑换：' . $product['name'],
+                t('point_exchange.log_description', ['product' => $product['name']]),
                 'point_exchange',
                 (string)$recordId,
                 $recordId
@@ -143,10 +148,10 @@ class PointExchangeModel extends BaseModel
     public function myRecords(int $userId)
     {
         $post = request()->post();
-        $limit = !empty($post['limit']) ? $post['limit'] : 10;
-        $currentPage = !empty($post['current_page']) ? $post['current_page'] : 1;
+        $limit = sf_page_limit($post['limit'] ?? null, 10);
+        $currentPage = sf_page_number($post['current_page'] ?? null);
 
-        return Db::name('point_exchange_record')->alias('r')
+        $list = Db::name('point_exchange_record')->alias('r')
             ->join('point_product p', 'r.product_id = p.id', 'LEFT')
             ->field('r.*, p.image, p.description')
             ->where('r.user_id', $userId)
@@ -155,5 +160,10 @@ class PointExchangeModel extends BaseModel
                 'list_rows' => $limit,
                 'page' => $currentPage,
             ]);
+        $list->each(static function ($item) {
+            $item['description'] = clean_rich_text($item['description'] ?? '');
+            return $item;
+        });
+        return $list;
     }
 }

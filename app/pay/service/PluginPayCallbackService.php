@@ -2,7 +2,12 @@
 
 namespace app\pay\service;
 
+use app\common\model\NotificationModel;
+use app\common\service\PluginCommissionService;
+use app\common\service\RebateRiskService;
+use app\common\service\WithdrawableBalanceService;
 use think\facade\Db;
+use think\facade\Log;
 
 /**
  * 插件订单支付回调处理
@@ -17,32 +22,44 @@ class PluginPayCallbackService
     public static function handlePaySuccess($orderNo, $payType, $payTradeNo)
     {
         try {
-            // 查询订单
-            $order = Db::name('plugin_order')
-                ->where('order_no', $orderNo)
-                ->find();
-
-            if (!$order) {
-                return ['success' => false, 'msg' => '订单不存在'];
-            }
-
-            if ($order['status'] == 1) {
-                return ['success' => true, 'msg' => '订单已支付'];
-            }
-
             // 开启事务
             Db::startTrans();
             try {
-                // 计算平台抽成
-                $commissionRate = floatval(conf('plugin_commission_rate') ?? 10);
-                $commissionRate = max(0, min(100, $commissionRate));
-                $price = floatval($order['price']);
-                $commissionAmount = round($price * $commissionRate / 100, 2);
-                $developerIncome = round($price - $commissionAmount, 2);
+                // Lock the order so concurrent provider callbacks are idempotent.
+                $order = Db::name('plugin_order')
+                    ->where('order_no', $orderNo)
+                    ->lock(true)
+                    ->find();
+
+                if (!$order) {
+                    Db::rollback();
+                    return ['success' => false, 'msg' => t('plugin_order.not_found')];
+                }
+
+                if (intval($order['status']) === 1) {
+                    Db::commit();
+                    return ['success' => true, 'msg' => t('pay.already_paid_short')];
+                }
+
+                $price = sf_money_format($order['price']);
+                $settlement = PluginCommissionService::settle($price, (string)$payType);
+                $commissionRate = $settlement['rate'];
+                $commissionAmount = $settlement['amount'];
+                $developerIncome = $settlement['developer_income'];
+                $plugin = Db::name('plugin')->where('id', $order['plugin_id'])->find();
+                $developerId = $plugin ? intval($plugin['user_id'] ?? 0) : 0;
+                $relatedPurchase = $developerId > 0
+                    && RebateRiskService::relatedAccountReason(intval($order['user_id']), $developerId) !== '';
+                if ($relatedPurchase) {
+                    // 历史待支付订单也必须在回调时复核，关联账号交易不产生可提现收入。
+                    $commissionAmount = $price;
+                    $developerIncome = '0.00';
+                }
 
                 // 更新订单状态
-                Db::name('plugin_order')
+                $claimed = Db::name('plugin_order')
                     ->where('id', $order['id'])
+                    ->where('status', 0)
                     ->update([
                         'status' => 1,
                         'pay_type' => $payType,
@@ -53,6 +70,9 @@ class PluginPayCallbackService
                         'paid_at' => date('Y-m-d H:i:s'),
                         'updated_at' => date('Y-m-d H:i:s'),
                     ]);
+                if ($claimed !== 1) {
+                    throw new \RuntimeException('payment order was not claimed');
+                }
 
                 // 创建购买记录
                 $purchaseExists = Db::name('plugin_purchase')
@@ -84,37 +104,75 @@ class PluginPayCallbackService
                 }
 
                 // 给插件开发者打款
-                $plugin = Db::name('plugin')->where('id', $order['plugin_id'])->find();
                 if ($developerIncome > 0 && $plugin && !empty($plugin['user_id'])) {
-                    $developerId = intval($plugin['user_id']);
                     if ($developerId != intval($order['user_id'])) {
-                        Db::name('user')->where('id', $developerId)->inc('balance', $developerIncome)->update();
-                        \app\common\model\BalanceLogModel::add(
+                        if (!WithdrawableBalanceService::credit(
                             $developerId,
-                            'plugin_income',
                             $developerIncome,
-                            '插件销售收入：' . ($plugin['name'] ?? '') . '（佣金' . $commissionRate . '%）',
+                            'plugin_income',
+                            '插件销售收入：' . ($plugin['name'] ?? '') . '（' . PluginCommissionService::summary($settlement) . '）',
+                            'plugin_order_income',
                             intval($order['id'])
-                        );
+                        )) {
+                            throw new \RuntimeException('developer income credit failed');
+                        }
                     }
                 }
 
                 // 记录日志
                 $content = [
                     'Title' => '插件订单支付成功',
-                    'Result' => 'success',
+                    'Result' => $relatedPurchase ? 'risk_blocked' : 'success',
                     'Detail' => '订单号:' . $orderNo . ',用户ID:' . $order['user_id'] . ',插件ID:' . $order['plugin_id'] . ',开发者收入:' . $developerIncome,
                 ];
                 event('ActionLog', $content);
 
                 Db::commit();
-                return ['success' => true, 'msg' => '支付成功'];
-            } catch (\Exception $e) {
+                try {
+                    if ($plugin && $developerId > 0 && $developerId !== intval($order['user_id'])) {
+                        $buyer = Db::name('user')->where('id', intval($order['user_id']))->field('username')->find();
+                        $buyerName = $buyer ? (string)$buyer['username'] : t('plugin_action.unknown_user');
+                        $commissionSummary = sf_money_to_cents($settlement['amount'] ?? 0) <= 0
+                            ? t('plugin_commission.no_commission')
+                            : t('plugin_commission.summary', [
+                                'rate' => PluginCommissionService::displayRate($settlement['rate'] ?? 0),
+                                'amount' => sf_money_format($settlement['amount'] ?? 0),
+                            ]);
+                        $incomeText = t('plugin_action.balance_income', [
+                            'amount' => $developerIncome,
+                            'summary' => $commissionSummary,
+                        ]);
+                        NotificationModel::add([
+                            'user_id' => $developerId,
+                            'title' => t('plugin_action.sale_notice_title'),
+                            'content' => t('plugin_action.sale_notice_content', [
+                                'username' => $buyerName,
+                                'plugin' => $plugin['name'],
+                                'income' => $incomeText,
+                            ]),
+                            'type' => 'plugin_purchase',
+                            'link' => '/UserPlugin/list.html',
+                            'variables' => [
+                                'buyer_name' => $buyerName,
+                                'plugin_name' => $plugin['name'],
+                                'income' => $incomeText,
+                            ],
+                            'is_read' => 0,
+                            'created_at' => datetime(),
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('Plugin purchase notification failed: ' . $e->getMessage());
+                }
+                return ['success' => true, 'msg' => t('pay.success')];
+            } catch (\Throwable $e) {
                 Db::rollback();
-                return ['success' => false, 'msg' => '处理失败:' . $e->getMessage()];
+                Log::error('Plugin payment callback failed: ' . $e->getMessage(), ['exception' => $e, 'order_no' => (string)$orderNo]);
+                return ['success' => false, 'msg' => t('pay.result_processing_failed')];
             }
-        } catch (\Exception $e) {
-            return ['success' => false, 'msg' => '系统错误:' . $e->getMessage()];
+        } catch (\Throwable $e) {
+            Log::error('Plugin payment callback exception: ' . $e->getMessage(), ['exception' => $e, 'order_no' => (string)$orderNo]);
+            return ['success' => false, 'msg' => t('common.server_error')];
         }
     }
 }

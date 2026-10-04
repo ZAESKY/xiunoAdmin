@@ -1,227 +1,5 @@
 {include file="/public/header"}
-<style>
-    .profile-card { border-radius: 10px; overflow: hidden; background: #fff; border: 1px solid #f0f0f0; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
-    /* cover */
-    .profile-cover {
-        height: 118px; position: relative; overflow: hidden;
-        background: linear-gradient(135deg, #1a3a5c 0%, #26547c 40%, #3a7ca5 100%);
-    }
-    .profile-cover::before {
-        content: ''; position: absolute; inset: 0; opacity: .1;
-        background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,.3) 8px, rgba(255,255,255,.3) 10px),
-                    radial-gradient(circle at 75% 25%, rgba(255,255,255,.25) 0%, transparent 45%),
-                    radial-gradient(circle at 15% 70%, rgba(120,200,255,.15) 0%, transparent 40%);
-    }
-    .profile-cover::after {
-        content: ''; position: absolute; right: -25px; bottom: -35px;
-        width: 130px; height: 130px; border-radius: 50%;
-        border: 24px solid rgba(255,255,255,.06);
-    }
-    /* power glow badge over cover */
-    .power-badge-overlay {
-        position: absolute; right: 18px; top: 16px; z-index: 2;
-        padding: 4px 14px; border-radius: 12px; font-size: 11px; font-weight: 700;
-        background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
-        color: #fff; letter-spacing: .5px; backdrop-filter: blur(4px);
-        animation: badgeShine 3s ease-in-out infinite;
-    }
-    @keyframes badgeShine {
-        0%, 100% { box-shadow: 0 0 6px rgba(255,255,255,.1); }
-        50% { box-shadow: 0 0 16px rgba(255,255,255,.25), 0 0 30px rgba(255,255,255,.08); }
-    }
-    /* avatar + name group */
-    .profile-top { position: relative; padding: 0 20px 16px; margin-top: -36px; z-index: 2; }
-    .profile-avatar-wrap { display: flex; align-items: flex-end; gap: 14px; }
-    .profile-avatar {
-        width: 76px; height: 76px; border-radius: 50%; object-fit: cover;
-        border: 4px solid #fff; box-shadow: 0 4px 18px rgba(0,0,0,.12), 0 0 0 4px rgba(58,124,165,.15);
-        flex-shrink: 0; cursor: pointer; transition: .25s;
-    }
-    .profile-avatar:hover { transform: scale(1.06); box-shadow: 0 8px 24px rgba(0,0,0,.18), 0 0 0 8px rgba(58,124,165,.1); }
-    .profile-name-badge { flex: 1; min-width: 0; }
-    .profile-name-badge h3 { margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
-    .profile-name-badge .greet { font-size: 12px; color: #8c8c8c; margin-top: 3px; }
-
-    /* stat cards - 2x2 grid */
-    .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px 14px; }
-    .ps-card {
-        background: #f9fafb; border-radius: 8px; padding: 12px 14px; text-align: center;
-        border: 1px solid #f0f0f0; transition: .2s;
-    }
-    .ps-card:hover { background: #f3f6fc; border-color: #d0ddf5; }
-    .ps-card .ps-num { font-size: 22px; font-weight: 700; line-height: 1.1; }
-    .ps-card .ps-num.bal { color: #ff5722; }
-    .ps-card .ps-num.pts { color: #faad14; }
-    .ps-card .ps-label { font-size: 11px; color: #8c8c8c; margin-top: 3px; }
-    .ps-card .ps-links { margin-top: 8px; display: flex; gap: 6px; justify-content: center; }
-    .ps-card .ps-btn { padding: 3px 10px; border-radius: 4px; font-size: 11px; border: 1px solid #d0ddf5; color: #3a6fd8; text-decoration: none; transition: .2s; display: inline-block; }
-    .ps-card .ps-btn:hover { background: #eaf2ff; border-color: #3a6fd8; }
-
-    /* info list */
-    .profile-detail { padding: 0 18px; }
-    .pd-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #f5f5f5; }
-    .pd-row:last-child { border-bottom: 0; }
-    .pd-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-    .pd-icon.c1 { background: #f3eeff; color: #7c5ce7; }
-    .pd-icon.c2 { background: #ffeaea; color: #e8553d; }
-    .pd-icon.c3 { background: #eaf2ff; color: #3492ed; }
-    .pd-body { flex: 1; min-width: 0; }
-    .pd-body .pd-title { font-size: 12px; color: #8c8c8c; }
-    .pd-body .pd-val { font-size: 13px; color: #1a1a1a; font-weight: 500; margin-top: 1px; }
-
-    /* discount tags */
-    .discount-strip { display: flex; gap: 8px; padding: 10px 18px 4px; flex-wrap: wrap; }
-    .d-tag { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-    .d-tag.free { background: #e6f9f0; color: #34a853; border: 1px solid #b7ebd0; }
-    .d-tag.discount { background: #fff8e6; color: #d48806; border: 1px solid #ffe8a1; }
-    .d-tag.normal { background: #f5f5f5; color: #8c8c8c; border: 1px solid #e8e8e8; }
-
-    /* footer */
-    .profile-foot { padding: 14px 18px; border-top: 1px solid #f0f0f0; margin-top: 8px; }
-    .profile-foot .pf-row { font-size: 11px; color: #bbb; padding: 2px 0; display: flex; justify-content: space-between; }
-    .profile-foot .pf-row span { color: #8c8c8c; }
-    .point-preview { padding: 10px 12px; border-radius: 4px; background: #f7fbff; color: #1e9fff; line-height: 1.8; font-size: 13px; }
-    .point-preview.warn { background: #fff7e6; color: #ff8c00; }
-
-    /* 打卡统计卡片 */
-    .ci-stat-cards { display: flex; gap: 14px; margin-bottom: 14px; }
-    .ci-stat-card { flex: 1; display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: 10px; background: #fff; border: 1px solid #f0f0f0; }
-    .ci-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .ci-icon.c1 { background: #fff3e0; color: #f09d3c; }
-    .ci-icon.c2 { background: #e6f7ed; color: #34a853; }
-    .ci-icon.c3 { background: #eaf2ff; color: #3a6fd8; }
-    .ci-val { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
-    .ci-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
-    @media (max-width: 768px) { .ci-stat-cards { flex-direction: column; } }
-
-    @media (max-width: 768px) {
-        .profile-stats { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* ===== 权限升级 卡片网格 ===== */
-    .sf-upgrade-header {
-        display: flex; align-items: center; justify-content: space-between; gap: 16px;
-        padding: 20px 24px; margin-bottom: 22px;
-        background: linear-gradient(135deg, #1f2a44 0%, #2c3a64 50%, #3a4a85 100%);
-        border-radius: 14px; color: #fff; position: relative; overflow: hidden;
-        box-shadow: 0 8px 24px rgba(31,42,68,.18);
-    }
-    .sf-upgrade-header::before {
-        content: ''; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px;
-        background: radial-gradient(circle, rgba(255,255,255,.10) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .sf-upgrade-header::after {
-        content: ''; position: absolute; right: 60px; bottom: -60px; width: 160px; height: 160px;
-        background: radial-gradient(circle, rgba(124,92,231,.28) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .sf-uh-left { position: relative; z-index: 1; }
-    .sf-uh-eyebrow { font-size: 12px; color: rgba(255,255,255,.65); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-    .sf-uh-name { font-size: 26px; font-weight: 800; line-height: 1.1; display: flex; align-items: center; gap: 10px; }
-    .sf-uh-name i { font-size: 28px; color: #ffd66b; }
-    .sf-uh-sub { margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.72); }
-    .sf-uh-right { position: relative; z-index: 1; text-align: right; }
-    .sf-uh-balance-label { font-size: 12px; color: rgba(255,255,255,.65); margin-bottom: 4px; }
-    .sf-uh-balance { font-size: 30px; font-weight: 800; color: #ffd66b; line-height: 1; letter-spacing: -.5px; }
-    .sf-uh-balance .currency { font-size: 18px; font-weight: 600; margin-right: 2px; }
-
-    .sf-upgrade-grid {
-        display: grid; gap: 16px; padding: 4px 2px 4px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .sf-upgrade-card {
-        position: relative; background: #fff; border: 2px solid #ebeef5; border-radius: 14px;
-        padding: 20px 20px 18px; cursor: pointer;
-        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
-        display: flex; flex-direction: column;
-    }
-    .sf-upgrade-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(58,111,216,.12); border-color: #b6cdf3; }
-    .sf-upgrade-card .uc-name { font-size: 17px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
-    .sf-upgrade-card .uc-price-row { margin-top: 14px; display: flex; align-items: baseline; gap: 4px; }
-    .sf-upgrade-card .uc-currency { font-size: 15px; color: #ff5722; font-weight: 600; }
-    .sf-upgrade-card .uc-price { font-size: 32px; font-weight: 800; color: #ff5722; line-height: 1; letter-spacing: -1px; }
-    .sf-upgrade-card .uc-price.free { color: #34a853; font-size: 24px; }
-
-    .sf-upgrade-card.selected {
-        border-color: #2563eb;
-        box-shadow: 0 12px 30px rgba(37,99,235,.20), 0 0 0 4px rgba(37,99,235,.10);
-        transform: translateY(-3px);
-    }
-    .sf-upgrade-card.selected::after {
-        content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
-        background: linear-gradient(180deg, rgba(37,99,235,.04) 0%, transparent 45%);
-    }
-    .sf-upgrade-card.selected .uc-check {
-        position: absolute; bottom: 14px; right: 14px; z-index: 3;
-        width: 24px; height: 24px; border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 13px; box-shadow: 0 3px 8px rgba(37,99,235,.40);
-    }
-
-    /* ===== 权益详情面板 ===== */
-    .sf-upgrade-detail {
-        margin-top: 22px; padding: 20px 24px;
-        background: linear-gradient(135deg, #eff6ff 0%, #fff 70%);
-        border: 1px solid #bfdbfe; border-left: 4px solid #2563eb;
-        border-radius: 12px; min-height: 88px;
-    }
-    .sf-ud-title {
-        display: flex; align-items: center; gap: 10px;
-        font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 10px;
-    }
-    .sf-ud-title i { font-size: 16px; }
-    .sf-ud-target { color: #0f172a; font-weight: 800; font-size: 16px; }
-    .sf-ud-text { font-size: 14px; line-height: 1.7; color: #475569; word-break: break-word; }
-    .sf-ud-text.empty { color: #b6b6b6; font-style: italic; }
-
-    /* ===== 底部升级按钮 ===== */
-    .sf-upgrade-action {
-        margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-        padding: 18px 24px; background: #fafbfc; border-radius: 12px; border: 1px solid #ebeef5;
-    }
-    .sf-ua-info { font-size: 13px; color: #6b7280; }
-    .sf-ua-info b { color: #1a1a1a; font-weight: 700; }
-    .sf-ua-price { color: #2563eb; font-weight: 800; }
-    .sf-ua-btn {
-        min-width: 200px; height: 46px; border: 0; border-radius: 23px; cursor: pointer;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
-        color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 1px;
-        box-shadow: 0 6px 16px rgba(37,99,235,.32);
-        transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .sf-ua-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(37,99,235,.45); }
-    .sf-ua-btn:active { transform: translateY(0); }
-    .sf-ua-btn[disabled] { background: #c9d1d9; box-shadow: none; cursor: not-allowed; opacity: .85; }
-
-    .sf-upgrade-empty {
-        text-align: center; padding: 60px 20px; color: #8c8c8c; font-size: 14px;
-        background: #f9fafb; border-radius: 12px; border: 1px dashed #e0e0e0;
-    }
-    .sf-upgrade-empty .ue-icon {
-        display: inline-flex; width: 64px; height: 64px; border-radius: 50%;
-        background: #eaf2ff; color: #3a6fd8; align-items: center; justify-content: center;
-        font-size: 32px; margin-bottom: 12px;
-    }
-    .sf-upgrade-loading { padding: 40px; text-align: center; color: #8c8c8c; font-size: 13px; }
-    @media (max-width: 900px) {
-        .sf-upgrade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 600px) {
-        .sf-upgrade-header { padding: 16px 18px; flex-direction: column; align-items: flex-start; }
-        .sf-uh-right { text-align: left; }
-        .sf-upgrade-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sf-upgrade-card { padding: 16px 14px 14px; }
-        .sf-upgrade-card .uc-price { font-size: 26px; }
-        .sf-upgrade-action { flex-direction: column; align-items: stretch; }
-        .sf-ua-btn { width: 100%; }
-    }
-    @media (max-width: 420px) {
-        .sf-upgrade-grid { grid-template-columns: 1fr; }
-    }
-</style>
+<link rel="stylesheet" href="{__CSS__}my-info.css?v=20261004"/>
 <div class="layui-fluid">
     <div class="layui-row layui-col-space15">
         <div class="layui-col-sm12 layui-col-md3">
@@ -242,49 +20,49 @@
                 <div class="profile-stats">
                     <div class="ps-card">
                         <div class="ps-num bal">¥{$userInfo['balance']}</div>
-                        <div class="ps-label">可用余额</div>
+                        <div class="ps-label">{:t('profile.available_balance')}</div>
                     </div>
                     <div class="ps-card">
                         <div class="ps-num pts">{$userInfo['integral']}</div>
-                        <div class="ps-label">可用积分</div>
+                        <div class="ps-label">{:t('profile.available_points')}</div>
                     </div>
                 </div>
                 <!-- 折扣 -->
                 <div class="discount-strip">
                     {if $userInfo['addauth_discount'] <= 0}
-                    <span class="d-tag free">加授权 免费</span>
+                    <span class="d-tag free">{:t('profile.add_auth_free')}</span>
                     {elseif $userInfo['addauth_discount'] >= 1}
-                    <span class="d-tag normal">加授权 原价</span>
+                    <span class="d-tag normal">{:t('profile.add_auth_original')}</span>
                     {else}
-                    <span class="d-tag discount">加授权 {$userInfo['addauth_discount']*10}折</span>
+                    <span class="d-tag discount">{:t('profile.add_auth_discount', ['discount' => $userInfo['addauth_discount']*10])}</span>
                     {/if}
                     {if $userInfo['adduser_discount'] <= 0}
-                    <span class="d-tag free">加用户 免费</span>
+                    <span class="d-tag free">{:t('profile.add_user_free')}</span>
                     {elseif $userInfo['adduser_discount'] >= 1}
-                    <span class="d-tag normal">加用户 原价</span>
+                    <span class="d-tag normal">{:t('profile.add_user_original')}</span>
                     {else}
-                    <span class="d-tag discount">加用户 {$userInfo['adduser_discount']*10}折</span>
+                    <span class="d-tag discount">{:t('profile.add_user_discount', ['discount' => $userInfo['adduser_discount']*10])}</span>
                     {/if}
                 </div>
                 <!-- 详细信息 -->
-                <div class="profile-detail" style="margin-top:4px;">
+                <div class="profile-detail profile-detail-spaced">
                     <div class="pd-row">
                         <div class="pd-icon c1"><i class="layui-icon layui-icon-app"></i></div>
-                        <div class="pd-body"><div class="pd-title">所属应用</div><div class="pd-val">{$userInfo['app_name']}</div></div>
+                        <div class="pd-body"><div class="pd-title">{:t('profile.application')}</div><div class="pd-val">{$userInfo['app_name']}</div></div>
                     </div>
                     <div class="pd-row">
                         <div class="pd-icon c2"><i class="layui-icon layui-icon-diamond"></i></div>
-                        <div class="pd-body"><div class="pd-title">当前权限</div><div class="pd-val" style="font-weight:700;background:linear-gradient(135deg,#26547c,#3a7ca5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{$userInfo['power_name']}</div></div>
+                        <div class="pd-body"><div class="pd-title">{:t('profile.current_permission')}</div><div class="pd-val pd-val-power">{$userInfo['power_name']}</div></div>
                     </div>
                     <div class="pd-row">
                         <div class="pd-icon c3"><i class="layui-icon layui-icon-login-qq"></i></div>
-                        <div class="pd-body"><div class="pd-title">绑定QQ</div><div class="pd-val">{$userInfo['qq']}</div></div>
+                        <div class="pd-body"><div class="pd-title">{:t('profile.bound_qq')}</div><div class="pd-val">{$userInfo['qq']}</div></div>
                     </div>
                 </div>
                 <!-- 底部 -->
                 <div class="profile-foot">
-                    <div class="pf-row"><span>注册时间</span> {$userInfo['addtime']|date='Y-m-d'}</div>
-                    <div class="pf-row"><span>最近登录</span> {$userInfo['lasttime']}</div>
+                    <div class="pf-row"><span>{:t('profile.registered_at')}</span> {$userInfo['addtime']|date='Y-m-d'}</div>
+                    <div class="pf-row"><span>{:t('profile.last_login')}</span> {$userInfo['lasttime']}</div>
                 </div>
             </div>
         </div>
@@ -294,12 +72,15 @@
                 <!-- 选项卡开始 -->
                 <div class="layui-tab layui-tab-brief" lay-filter="userInfoTab">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">账号{:t('install_ui.binding_title')}</li>
-                        <li>余额充值</li>
-                        <li>{:t('common_ui.power_type')}升级</li>
-                        <li>余额明细</li>
-                        <li>积分明细</li>
-                        <li>打卡记录</li>
+                        <li class="layui-this">{:t('accounting.account_binding')}</li>
+                        <li>{:t('common_ui.recharge')}</li>
+                        <li>{:t('accounting.power_upgrade')}</li>
+                        <li>{:t('accounting.balance_detail')}</li>
+                        <li>{:t('accounting.point_detail')}</li>
+                        <li>{:t('accounting.checkin_history')}</li>
+                        {if $emailNotificationEnabled}
+                        <li>{:t('notification_email.user_tab')}</li>
+                        {/if}
                     </ul>
                     <div class="layui-tab-content">
                         <!-- tab1 -->
@@ -307,17 +88,52 @@
                             <div class="user-bd-list layui-text">
                                 <div class="user-bd-list-item">
                                     <div class="user-bd-list-img">
+                                        <i class="layui-icon layui-icon-username"
+                                           style="color:#7c5ce7;font-size:48px;"></i>
+                                    </div>
+                                    <div class="user-bd-list-content">
+                                        <div class="user-bd-list-lable">{:t('profile_username.title')}</div>
+                                        <div class="user-bd-list-text">{:t('profile_username.current')}{$userInfo['username']}</div>
+                                        {if $qqOauthBound}
+                                        <a class="user-bd-list-oper" lay-filter="changeUsername" lay-submit>{:t('common.edit')}</a>
+                                        {else}
+                                        <span class="user-bd-list-oper" style="color:#b2b2b2;">{:t('profile_username.qq_only_short')}</span>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <div class="user-bd-list-item">
+                                    <div class="user-bd-list-img">
                                         <i class="layui-icon layui-icon-email"
                                            style="color: #faad14;font-size: 48px;"></i>
                                     </div>
                                     <div class="user-bd-list-content">
-                                        <div class="user-bd-list-lable">密保邮箱</div>
+                                        <div class="user-bd-list-lable">{:t('profile.security_email')}</div>
                                         {if $userInfo['email'] == ''}
-                                        <div class="user-bd-list-text">未{:t('install_ui.binding_title')}</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>{:t('install_ui.binding_title')}</a>
+                                        <div class="user-bd-list-text">{:t('profile.unbound')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>{:t('profile.bind')}</a>
                                         {else}
                                         <div class="user-bd-list-text">{:t('install_bind.bound')}{:t('common_ui.email_field')}{:substr_replace($userInfo['email'],'****',3,4)}</div>
                                         <a class="user-bd-list-oper" lay-filter="bindingEmail" lay-submit>{:t('common_ui.repair')}</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <div class="user-bd-list-item">
+                                    <div class="user-bd-list-img">
+                                        <i class="layui-icon layui-icon-cellphone"
+                                           style="color:#24a36a;font-size:48px;"></i>
+                                    </div>
+                                    <div class="user-bd-list-content">
+                                        <div class="user-bd-list-lable">{:t('profile.security_phone')}</div>
+                                        {if $phoneVerified}
+                                        <div class="user-bd-list-text">{:t('profile.phone_verified_detail', ['phone' => $phoneMasked])}</div>
+                                        <span class="user-bd-list-oper text-verified">{:t('profile.verified')}</span>
+                                        {elseif !$smsEnabled}
+                                        <div class="user-bd-list-text">{:t('profile.sms_disabled')}</div>
+                                        {elseif !$smsConfigured}
+                                        <div class="user-bd-list-text">{:t('profile.sms_incomplete')}</div>
+                                        {else}
+                                        <div class="user-bd-list-text">{:t('profile.phone_bind_help')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingPhone" lay-submit>{:t('profile.bind')}</a>
                                         {/if}
                                     </div>
                                 </div>
@@ -327,29 +143,31 @@
                                            style="color: #3492ED;font-size: 48px;"></i>
                                     </div>
                                     <div class="user-bd-list-content">
-                                        <div class="user-bd-list-lable">{:t('install_ui.binding_title')}QQ</div>
-                                        {if !empty($userInfo['qq'])}
-                                        <div class="user-bd-list-text">已绑定 QQ：{$userInfo['qq']}</div>
-                                        <a class="user-bd-list-oper" lay-filter="unbindingQQ" lay-submit>解绑</a>
+                                        <div class="user-bd-list-lable">{:t('profile.legacy_qq')}</div>
+                                        {if $qqLegacyVerified}
+                                        <div class="user-bd-list-text">{:t('profile.legacy_migrated', ['qq' => $qqLegacyNumber])}</div>
+                                        <span class="user-bd-list-oper text-verified">{:t('profile.verified')}</span>
+                                        {elseif $qqOauthBound}
+                                        <div class="user-bd-list-text">{:t('profile.legacy_help')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingQQ" lay-submit>{:t('profile.start_migration')}</a>
                                         {else}
-                                        <div class="user-bd-list-text">当前未{:t('install_ui.binding_title')}QQ账号</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingQQ" lay-submit>绑定</a>
+                                        <div class="user-bd-list-text">{:t('profile.bind_official_first')}</div>
                                         {/if}
                                     </div>
                                 </div>
                                 <div class="user-bd-list-item">
                                     <div class="user-bd-list-img">
-                                        <i class="layui-icon layui-icon-login-wechat"
-                                           style="color: #1AAD19;font-size: 48px;"></i>
+                                        <i class="layui-icon layui-icon-login-qq"
+                                           style="color:#12b7f5;font-size:48px;"></i>
                                     </div>
                                     <div class="user-bd-list-content">
-                                        <div class="user-bd-list-lable">绑定微信公众号</div>
-                                        {if !empty($userInfo['wechat_openid'])}
-                                        <div class="user-bd-list-text">已绑定微信公众号</div>
-                                        <a class="user-bd-list-oper" lay-filter="unbindingWechatMp" lay-submit>解绑</a>
+                                        <div class="user-bd-list-lable">{:t('profile.qq_quick_login')}</div>
+                                        {if $qqOauthBound}
+                                        <div class="user-bd-list-text">{:t('profile.qq_login_bound')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="unbindingQqOauth" lay-submit>{:t('profile.unbind')}</a>
                                         {else}
-                                        <div class="user-bd-list-text">当前未绑定微信公众号</div>
-                                        <a class="user-bd-list-oper" lay-filter="bindingWechatMp" lay-submit>绑定</a>
+                                        <div class="user-bd-list-text">{:t('profile.qq_login_help')}</div>
+                                        <a class="user-bd-list-oper" lay-filter="bindingQqOauth" lay-submit>{:t('profile.bind')}</a>
                                         {/if}
                                     </div>
                                 </div>
@@ -362,38 +180,38 @@
                                 <div class="layui-form-item"><div class="sf-tag layui-badge-blue">{$pay_notice|raw}</div></div>
                                 {/notempty}
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label layui-form-required">充值金额</label>
+                                    <label class="layui-form-label layui-form-required">{:t('recharge.amount')}</label>
                                     <div class="layui-input-block">
-                                        <input type="radio" name="money" value="10" title="10元" lay-verify="required" lay-filter="rechargeMoney" checked/>
-                                        <input type="radio" name="money" value="50" title="50元" lay-filter="rechargeMoney"/>
-                                        <input type="radio" name="money" value="100" title="100元" lay-filter="rechargeMoney"/>
-                                        <input type="radio" name="money" value="diy" title="自定义" lay-filter="rechargeMoney"/>
+                                        <input type="radio" name="money" value="10" title="10 {:t('accounting.currency_unit')}" lay-verify="required" lay-filter="rechargeMoney" checked/>
+                                        <input type="radio" name="money" value="50" title="50 {:t('accounting.currency_unit')}" lay-filter="rechargeMoney"/>
+                                        <input type="radio" name="money" value="100" title="100 {:t('accounting.currency_unit')}" lay-filter="rechargeMoney"/>
+                                        <input type="radio" name="money" value="diy" title="{:t('recharge.custom')}" lay-filter="rechargeMoney"/>
                                     </div>
                                 </div>
                                 <div id="rechargeDiy" style="display:none;">
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label layui-form-required">自定义金额</label>
+                                        <label class="layui-form-label layui-form-required">{:t('recharge.custom_amount')}</label>
                                         <div class="layui-input-block">
-                                            <input type="text" name="diy" id="rechargeDiyInput" class="layui-input" placeholder="最低充值10元，最多两位小数"/>
+                                            <input type="text" name="diy" id="rechargeDiyInput" class="layui-input" placeholder="{:t('recharge.amount_placeholder')}"/>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">预计积分</label>
+                                    <label class="layui-form-label">{:t('recharge.estimated_points')}</label>
                                     <div class="layui-input-block">
                                         <div id="pointPreview" class="point-preview"></div>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">折扣码</label>
+                                    <label class="layui-form-label">{:t('recharge.discount_code')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="discount_code" id="rechargeDiscountCode" class="layui-input" placeholder="输入折扣码（选填）"/>
+                                        <input type="text" name="discount_code" id="rechargeDiscountCode" class="layui-input" placeholder="{:t('recharge.discount_placeholder')}"/>
                                         <div id="codePreview" style="margin-top:8px;display:none;"></div>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
                                     <div class="layui-input-block">
-                                        <button class="layui-btn" lay-filter="rechargeSubmit" lay-submit>充值</button>
+                                        <button class="layui-btn" lay-filter="rechargeSubmit" lay-submit>{:t('recharge.submit')}</button>
                                     </div>
                                 </div>
                             </form>
@@ -404,15 +222,15 @@
                                     <!-- 顶部:当前等级 -->
                                     <div class="sf-upgrade-header">
                                         <div class="sf-uh-left">
-                                            <div class="sf-uh-eyebrow">当前等级</div>
+                                            <div class="sf-uh-eyebrow">{:t('upgrade.current_level')}</div>
                                             <div class="sf-uh-name">
                                                 <i class="layui-icon layui-icon-diamond"></i>
-                                                {$userInfo['power_name']|default='普通用户'}
+                                                {if !empty($userInfo['power_name'])}{$userInfo['power_name']}{else/}{:t('upgrade.default_user')}{/if}
                                             </div>
-                                            <div class="sf-uh-sub">选择下方卡片可升级到更高级别</div>
+                                            <div class="sf-uh-sub">{:t('upgrade.choose_help')}</div>
                                         </div>
                                         <div class="sf-uh-right">
-                                            <div class="sf-uh-balance-label">账户余额</div>
+                                            <div class="sf-uh-balance-label">{:t('upgrade.account_balance')}</div>
                                             <div class="sf-uh-balance">
                                                 <span class="currency">¥</span>{$userInfo['balance']|default='0.00'}
                                             </div>
@@ -421,24 +239,24 @@
                                     <!-- 中部:卡片网格 -->
                                     <div id="SF_UpgradeList" class="sf-upgrade-grid">
                                         <div class="sf-upgrade-loading">
-                                            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 正在加载可升级的权限...
+                                            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> {:t('upgrade.loading')}
                                         </div>
                                     </div>
                                     <!-- 权益详情 + 升级按钮 (由 JS 填充) -->
                                     <div id="SF_UpgradeDetail" class="sf-upgrade-detail" style="display:none;">
                                         <div class="sf-ud-title">
                                             <i class="layui-icon layui-icon-gift"></i>
-                                            <span>所选等级权益</span>
+                                            <span>{:t('upgrade.selected_benefits')}</span>
                                             <span class="sf-ud-target" id="SF_UDTarget"></span>
                                         </div>
                                         <div class="sf-ud-text" id="SF_UDText"></div>
                                     </div>
                                     <div id="SF_UpgradeAction" class="sf-upgrade-action" style="display:none;">
                                         <div class="sf-ua-info">
-                                            您即将升级到 <b id="SF_UATarget"></b> · 所需费用 <span class="sf-ua-price" id="SF_UAPrice"></span>
+                                            {:t('upgrade.target_prefix')} <b id="SF_UATarget"></b> · {:t('upgrade.cost')} <span class="sf-ua-price" id="SF_UAPrice"></span>
                                         </div>
                                         <button type="button" id="SF_UABtn" class="sf-ua-btn">
-                                            立即升级 <i class="layui-icon layui-icon-right"></i>
+                                            {:t('upgrade.now')} <i class="layui-icon layui-icon-right"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -454,19 +272,49 @@
                             <div class="ci-stat-cards">
                                 <div class="ci-stat-card">
                                     <div class="ci-icon c1"><i class="layui-icon layui-icon-fire"></i></div>
-                                    <div class="ci-info"><div class="ci-val" id="statTotal">0</div><div class="ci-label">累计打卡天数</div></div>
+                                    <div class="ci-info"><div class="ci-val" id="statTotal">0</div><div class="ci-label">{:t('upgrade.total_checkin_days')}</div></div>
                                 </div>
                                 <div class="ci-stat-card">
                                     <div class="ci-icon c2"><i class="layui-icon layui-icon-star"></i></div>
-                                    <div class="ci-info"><div class="ci-val" id="statPoints">0</div><div class="ci-label">累计获得积分</div></div>
+                                    <div class="ci-info"><div class="ci-val" id="statPoints">0</div><div class="ci-label">{:t('upgrade.total_points')}</div></div>
                                 </div>
                                 <div class="ci-stat-card">
                                     <div class="ci-icon c3"><i class="layui-icon layui-icon-tree"></i></div>
-                                    <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">最长连续打卡</div></div>
+                                    <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">{:t('upgrade.max_consecutive')}</div></div>
                                 </div>
                             </div>
                             <table id="SF_CheckinTable" lay-filter="SF_CheckinTable" style="margin: 0;"></table>
                         </div>
+                        {if $emailNotificationEnabled}
+                        <div class="layui-tab-item">
+                            <form class="layui-form formBasForm" lay-filter="userEmailNotificationForm">
+                                {if !$userEmailBound}
+                                <blockquote class="layui-elem-quote layui-quote-nm">{:t('notification_email.bind_email_first')}</blockquote>
+                                {else/}
+                                <blockquote class="layui-elem-quote">{:t('notification_email.user_help')}</blockquote>
+                                {/if}
+                                {foreach $emailNotificationEvents as $event}
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">{$event.name}</label>
+                                    <div class="layui-input-block">
+                                        <input type="checkbox" name="events[]" value="{$event.event_code}" lay-skin="switch"
+                                               lay-filter="userEmailNotificationSwitch"
+                                               lay-text="{:t('common_ui.enabled')}|{:t('common_ui.disabled')}"
+                                               {if $event.enabled && $userEmailBound}checked{/if}>
+                                        <div class="layui-form-mid layui-word-aux">{$event.description}</div>
+                                    </div>
+                                </div>
+                                {/foreach}
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit lay-filter="userEmailNotificationSubmit">
+                                            <i class="layui-icon layui-icon-ok"></i> {:t('common_ui.save')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        {/if}
                     </div>
                 </div>
                 <!-- //选项卡结束 -->
@@ -475,58 +323,124 @@
     </div>
 </div>
 
+<script type="text/html" id="changeUsernameDialog">
+    <form class="layui-form model-form layui-row">
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">{:t('profile_username.new')}:</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" value="{$userInfo['username']}"
+                       placeholder="{:t('profile_username.placeholder')}" class="layui-input"
+                       autocomplete="off" maxlength="30" lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block layui-word-aux">{:t('profile_username.help')}</div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="submitUsername" lay-submit>{:t('common.confirm')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
+        </div>
+    </form>
+</script>
 <script type="text/html" id="bindingEmail">
     <form class="layui-form model-form layui-row">
         <input name="schedulingId" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">邮箱:</label>
+            <label class="layui-form-label layui-form-required">{:t('profile.new_email')}</label>
             <div class="layui-input-block">
-                <input type="text" name="email" placeholder="请输入要绑定的邮箱" class="layui-input"
+                <input type="text" name="email" placeholder="{:t('profile.new_email_placeholder')}" class="layui-input"
                        lay-verType="tips" lay-verify="required"/>
             </div>
         </div>
+        {if !empty($userInfo['email'])}
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">验证码:</label>
+            <label class="layui-form-label">{:t('profile.old_email_verification')}</label>
             <div class="layui-input-block layui-col-space5">
                     <div class="layui-col-lg6 layui-col-md6 layui-col-sm6 layui-col-xs6">
-                        <input type="text" name="code" placeholder="请输入验证码" class="layui-input"
+                        <input type="text" name="old_code" placeholder="{:t('profile.old_email_code_placeholder')}" class="layui-input"
                                lay-verType="tips"/>
                     </div>
                     <div class="layui-col-lg6 layui-col-md6 layui-col-sm6 layui-col-xs6">
-                        <button id="sendCode" class="layui-btn layui-btn-primary" lay-filter="sendCode" lay-submit>发送验证码</button>
+                        <button id="sendOldMailCode" class="layui-btn layui-btn-primary" lay-filter="sendOldMailCode" lay-submit>{:t('profile.send_old_email')}</button>
                     </div>
             </div>
-
+        </div>
+        {/if}
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:t('profile.new_email_verification')}</label>
+            <div class="layui-input-block layui-col-space5">
+                <div class="layui-col-lg6 layui-col-md6 layui-col-sm6 layui-col-xs6">
+                    <input type="text" name="code" placeholder="{:t('profile.new_email_code_placeholder')}" class="layui-input"
+                           lay-verType="tips"/>
+                </div>
+                <div class="layui-col-lg6 layui-col-md6 layui-col-sm6 layui-col-xs6">
+                    <button id="sendNewMailCode" class="layui-btn layui-btn-primary" lay-filter="sendNewMailCode" lay-submit>{:t('profile.send_new_email')}</button>
+                </div>
+            </div>
+        </div>
+        {if !empty($userInfo['email'])}
+        <div class="layui-form-item">
+            <div class="layui-input-block profile-form-help">{:t('profile.email_change_help')}</div>
+        </div>
+        {/if}
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="submitMail" lay-submit>{:t('profile.confirm_binding')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
+        </div>
+    </form>
+</script>
+<script type="text/html" id="bindingPhone">
+    <form class="layui-form model-form layui-row profile-phone-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">{:t('profile.phone')}</label>
+            <div class="layui-input-block">
+                <input type="text" name="phone" placeholder="{:t('profile.phone_placeholder')}" class="layui-input"
+                       autocomplete="off" inputmode="numeric" maxlength="13"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">{:t('profile.verification_code')}</label>
+            <div class="layui-input-block layui-col-space5">
+                <div class="layui-col-xs7">
+                    <input type="text" name="code" placeholder="{:t('profile.sms_code_placeholder')}" class="layui-input"
+                           autocomplete="one-time-code" inputmode="numeric" maxlength="6"/>
+                </div>
+                <div class="layui-col-xs5">
+                    <button id="sendPhoneCode" type="button" class="layui-btn layui-btn-primary layui-btn-fluid">{:t('profile.send_code')}</button>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block profile-form-help">{:t('profile.phone_unique_help')}</div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="submitMail" lay-submit>绑定</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button id="submitPhoneBinding" type="button" class="layui-btn">{:t('profile.confirm_binding')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
 <script type="text/html" id="SF_BL_Amount">
     {{# if(d.amount > 0){ }}
-    <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}} 元</span>
+    <span class="text-success">+{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } else { }}
-    <span style="color:#d9534f;">{{d.amount}} 元</span>
+    <span class="text-danger">{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } }}
 </script>
 <script type="text/html" id="SF_BL_Type">
-    {{# var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入',withdraw_apply:'提现申请',withdraw_cancel:'提现撤回',withdraw_reject:'提现驳回',withdraw_reject_refund:'提现驳回返还'}; }}
-    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
+    <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">{{d.type_label}}</span>
 </script>
 <script type="text/html" id="SF_PtAmount">
     {{# if(d.amount > 0){ }}
-    <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}}</span>
+    <span class="text-success">+{{d.amount}}</span>
     {{# } else { }}
-    <span style="color:#d9534f;">{{d.amount}}</span>
+    <span class="text-danger">{{d.amount}}</span>
     {{# } }}
 </script>
 <script type="text/html" id="SF_PtType">
-    {{# var m={consume:'消费赠送',recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'}; }}
-    <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{m[d.type] || d.type}}</span>
+    <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{d.type_label}}</span>
 </script>
 {include file="/public/footer"}
+<script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
 <script>
     layui.use(['layer', 'form', 'element', 'admin', 'notice', 'jQueryCookie', 'table'], function () {
         var table = layui.table;
@@ -537,9 +451,14 @@
         var admin = layui.admin;
         var notice = layui.notice;
         var cookie = layui.jQueryCookie;
+        function sfEscapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, function(s){
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
+            });
+        }
 
         $(function(){
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(t('common.loading'), {icon: 4, close: true});
             admin.ajax({
                 url: '{:url("/MyInfo/getUserUpdatePowerList")}',
                 data: {},
@@ -549,17 +468,17 @@
                 success: function(res){
                     notice.destroy();
                     if(res.code == 0){
-                        notice.msg('获取列表成功！', {icon: 1});
+                        notice.msg(t('upgrade.list_success'), {icon: 1});
                         renderUpgradeCards(res.data.data || []);
                     } else {
                         notice.msg(res.msg, {icon: 2, audio: '1'});
-                        $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">获取权限列表失败:'+ (res.msg || '') +'</div>');
+                        $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">' + t('upgrade.list_failed') + sfEscapeHtml(res.msg || '') + '</div>');
                     }
                 },
                 error: function(){
                     notice.destroy();
-                    notice.msg('服务器错误！', {icon: 2, audio: '1'});
-                    $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">服务器错误,请稍后再试</div>');
+                    notice.msg(t('common.server_error'), {icon: 2, audio: '1'});
+                    $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">' + t('upgrade.server_error') + '</div>');
                 }
             });
 
@@ -571,8 +490,8 @@
             if (!list || list.length === 0) {
                 $box.html('<div class="sf-upgrade-empty">' +
                     '<div class="ue-icon"><i class="layui-icon layui-icon-ok-circle"></i></div>' +
-                    '<div>您当前已是最高权限</div>' +
-                    '<div style="margin-top:6px;font-size:12px;color:#bbb;">如需调整请联系管理员</div>' +
+                    '<div>' + t('upgrade.highest') + '</div>' +
+                    '<div class="ue-sub">' + t('upgrade.contact_admin') + '</div>' +
                     '</div>');
                 $('#SF_UpgradeDetail, #SF_UpgradeAction').hide();
                 return;
@@ -594,7 +513,7 @@
                 html += '<div class="uc-name">' + name + '</div>';
                 html += '<div class="uc-price-row">';
                 if (isFree) {
-                    html += '<span class="uc-price free">免费</span>';
+                    html += '<span class="uc-price free">' + t('upgrade.free') + '</span>';
                 } else {
                     html += '<span class="uc-currency">¥</span><span class="uc-price">' + price + '</span>';
                 }
@@ -615,7 +534,7 @@
             $('#SF_UABtn').off('click').on('click', function(){
                 var $sel = $box.find('.sf-upgrade-card.selected');
                 if ($sel.length === 0) {
-                    notice.msg('请先选择要升级的等级', {icon: 2, audio: '1'});
+                    notice.msg(t('upgrade.select_level'), {icon: 2, audio: '1'});
                     return;
                 }
                 var id = $sel.data('id');
@@ -639,16 +558,16 @@
             if (introduce) {
                 $('#SF_UDText').removeClass('empty').text(introduce);
             } else {
-                $('#SF_UDText').addClass('empty').text('该等级暂无详细介绍');
+                $('#SF_UDText').addClass('empty').text(t('upgrade.no_description'));
             }
 
             $('#SF_UATarget').text(name);
             if (price > 0) {
                 $('#SF_UAPrice').html('<span style="font-size:12px;font-weight:600;">¥</span> ' + price);
-                $('#SF_UABtn').html('立即升级 ¥' + price + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
+                $('#SF_UABtn').html(t('upgrade.now') + ' ¥' + price + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
             } else {
-                $('#SF_UAPrice').html('免费');
-                $('#SF_UABtn').html('立即升级 · 免费 <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
+                $('#SF_UAPrice').html(t('upgrade.free'));
+                $('#SF_UABtn').html(t('upgrade.now') + ' · ' + t('upgrade.free') + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
             }
 
             $('#SF_UpgradeDetail, #SF_UpgradeAction').show();
@@ -656,18 +575,19 @@
 
         // 升级权限
         function doUpgradePower(powerId, name, price){
-            if (!powerId) { notice.msg('请选择要升级的权限！', {icon: 2, audio: '1'}); return; }
-            if (powerId < 0) { notice.msg('不存在此权限！', {icon: 2, audio: '1'}); return; }
+            if (!powerId) { notice.msg(t('upgrade.select_permission'), {icon: 2, audio: '1'}); return; }
+            if (powerId < 0) { notice.msg(t('upgrade.permission_missing'), {icon: 2, audio: '1'}); return; }
             var priceText = parseFloat(price) > 0
-                ? '<span class="layui-badge layui-badge-yellow">' + price + ' 元</span>'
-                : '<span class="layui-badge layui-badge-green">免费</span>';
-            layer.confirm('确定要花费 ' + priceText + ' 升级成 <span class="layui-badge layui-badge-orange">' + name + '</span> 吗？', {
+                ? '<span class="layui-badge layui-badge-yellow">' + price + ' ' + t('accounting.currency_unit') + '</span>'
+                : '<span class="layui-badge layui-badge-green">' + t('upgrade.free') + '</span>';
+            var targetName = '<span class="layui-badge layui-badge-orange">' + sfEscapeHtml(name) + '</span>';
+            layer.confirm(t('upgrade.confirm', {price: priceText, name: targetName}), {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg(t('common.loading'), {icon: 4, close: true});
                 admin.ajax({
                     url: '{:url("/MyInfo/updatePower")}',
                     data: {power: powerId},
@@ -677,7 +597,7 @@
                     success: function(res){
                         notice.destroy();
                         if(res.code == 0){
-                            notice.msg('升级权限成功！', {icon: 1, audio: '1'});
+                            notice.msg(t('upgrade.success'), {icon: 1, audio: '1'});
                             setTimeout(function(){ location.reload(); }, 1000);
                         } else {
                             notice.msg(res.msg, {icon: 2, audio: '1'});
@@ -685,7 +605,7 @@
                     },
                     error: function(){
                         notice.destroy();
-                        notice.msg('服务器错误！', {icon: 2, audio: '1'});
+                        notice.msg(t('common.server_error'), {icon: 2, audio: '1'});
                     }
                 });
             });
@@ -697,13 +617,13 @@
                 if (countdown == 0) {
                     val.removeProp("disabled");
                     val.removeClass("layui-disabled");
-                    val.text("发送验证码");
+                    val.text(t('profile.send_code'));
                     countdown = 60;
                     return false;
                 } else {
                     val.prop("disabled", "true");
                     val.addClass("layui-disabled");
-                    val.text("还剩 " + countdown + " S");
+                    val.text(t('profile.code_countdown', {seconds: countdown}));
                     countdown--;
                 }
                 setTimeout(function() {
@@ -744,8 +664,8 @@
                     success: function(res){
                         if (res.code == 0) {
                             rcDiscountRate = parseFloat(res.data.rate) || 0;
-                            $('#codePreview').show().html('<span class="layui-badge layui-badge-green">有效</span> 折扣 '+rcDiscountRate+'%，来自 <b>'+res.data.owner+'</b><span id="savePreview" style="color:#5cb85c;margin-left:8px;"></span>');
-                        } else { rcDiscountRate = 0; $('#codePreview').show().html('<span class="layui-badge layui-badge-red">无效</span> '+res.msg); }
+                            $('#codePreview').show().html('<span class="layui-badge layui-badge-green">' + t('recharge.valid') + '</span> ' + t('recharge.discount_from', {discount: rcDiscountRate}) + ' <b>'+sfEscapeHtml(res.data.owner)+'</b><span id="savePreview" class="recharge-save-preview"></span>');
+                        } else { rcDiscountRate = 0; $('#codePreview').show().html('<span class="layui-badge layui-badge-red">' + t('recharge.invalid') + '</span> '+sfEscapeHtml(res.msg)); }
                         rcUpdatePreview();
                     }
                 });
@@ -764,21 +684,82 @@
             var points = Math.floor(actualPay);
             var $p = $('#pointPreview');
             if (money <= 0) {
-                $p.addClass('warn').html('请选择或输入充值金额');
+                $p.addClass('warn').text(t('recharge.select_amount'));
             } else if (money < 10) {
-                $p.addClass('warn').html('充值金额：'+money.toFixed(2)+' 元，最低需充值 10 元');
+                $p.addClass('warn').text(t('recharge.below_min_preview', {amount: money.toFixed(2)}));
             } else {
-                $p.removeClass('warn').html('充值金额：'+money.toFixed(2)+' 元，预计实付：'+actualPay.toFixed(2)+' 元，后续消费余额可按消费金额获得积分');
+                $p.removeClass('warn').text(t('recharge.payment_preview', {amount: money.toFixed(2), actual: actualPay.toFixed(2)}));
             }
-            if (rcDiscountRate > 0 && money >= 10) { $('#savePreview').text('预计实付 '+actualPay.toFixed(2)+' 元，节省 '+(money - actualPay).toFixed(2)+' 元'); }
+            if (rcDiscountRate > 0 && money >= 10) { $('#savePreview').text(t('recharge.saving_preview', {actual: actualPay.toFixed(2), saving: (money - actualPay).toFixed(2)})); }
         }
         rcUpdatePreview();
+        var userEmailBound = {if $userEmailBound}true{else/}false{/if};
+        form.on('switch(userEmailNotificationSwitch)', function(data) {
+            if (!userEmailBound && data.elem.checked) {
+                data.elem.checked = false;
+                form.render('checkbox');
+                notice.msg('{:t("notification_email.bind_email_required")}', {icon:2});
+            }
+        });
+        form.on('submit(userEmailNotificationSubmit)', function(data) {
+            notice.msg('{:t("common_ui.processing")}', {icon:4, close:true});
+            $.ajax({
+                type:'POST',
+                url:'{:url("/MyInfo/emailNotification")}',
+                data:data.field,
+                dataType:'json',
+                success:function(res) {
+                    notice.destroy();
+                    notice.msg(res.msg, {icon:res.code === 0 ? 1 : 2});
+                },
+                error:function() {
+                    notice.destroy();
+                    notice.msg('{:t("notification_email.operation_failed")}', {icon:2});
+                }
+            });
+            return false;
+        });
+        form.on('submit(changeUsername)', function() {
+            admin.open({
+                type: 1,
+                title: '{:t("profile_username.dialog_title")}',
+                area: ['500px', '285px'],
+                content: $('#changeUsernameDialog').html(),
+                success: function() {
+                    form.render();
+                    form.on('submit(submitUsername)', function(data) {
+                        var username = $.trim(data.field.username || '');
+                        if (!username) {
+                            notice.msg('{:t("profile_username.invalid")}', {icon: 2});
+                            return false;
+                        }
+                        notice.msg('{:t("common.loading")}', {icon: 4, close: true});
+                        admin.ajax({
+                            url: '{:url("/MyInfo/changeUsername")}',
+                            data: {username: username},
+                            headers: {},
+                            type: 'post',
+                            dataType: 'json',
+                            success: function(res) {
+                                notice.destroy();
+                                notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2});
+                                if (res.code == 0) {
+                                    setTimeout(function(){ location.reload(); }, 800);
+                                }
+                            }
+                        });
+                        return false;
+                    });
+                }
+            });
+            return false;
+        });
         form.on('submit(rechargeSubmit)', function(data) {
             var money = rcSelectedMoney();
-            if (data.field.money === '') { notice.msg('请选择需要充值的金额', {icon:2}); return false; }
-            if (data.field.money === 'diy' && data.field.diy === '') { notice.msg('请输入需要充值的金额', {icon:2}); return false; }
-            if (money < 10) { notice.msg('最低充值金额为10元', {icon:2}); return false; }
-            notice.msg('正在执行中...', {icon:4, close:true});
+            if (data.field.money === '') { notice.msg(t('recharge.select_amount'), {icon:2}); return false; }
+            if (data.field.money === 'diy' && data.field.diy === '') { notice.msg(t('recharge.enter_amount'), {icon:2}); return false; }
+            if (money < 10) { notice.msg(t('recharge.min_amount'), {icon:2}); return false; }
+            notice.msg(t('common.loading'), {icon:4, close:true});
             data.field.type = 'recharge';
             $.ajax({ type:'POST', url:'{:url("/MyInfo/createOrder")}', data:data.field, dataType:'json',
                 success: function(res) {
@@ -794,7 +775,7 @@
                             clearInterval(pollTimer);
                             window.removeEventListener('message', payMessageHandler);
                             layer.close(payIndex);
-                            notice.msg('支付成功！', {icon:1});
+                            notice.msg(t('recharge.payment_success'), {icon:1});
                             setTimeout(function(){ location.reload(); }, 1200);
                         };
                         var payMessageHandler = function(event) {
@@ -804,7 +785,7 @@
                             }
                         };
                         var payIndex = layer.open({
-                            type: 2, title: '付款界面',
+                            type: 2, title: t('recharge.payment_title'),
                             area: [isMobile ? '100%' : '800px', isMobile ? '100%' : '600px'],
                             content: payUrl, maxmin: true,
                             cancel: function() { clearInterval(pollTimer); window.removeEventListener('message', payMessageHandler); layer.closeAll(); },
@@ -837,23 +818,27 @@
                 success: function(res){
                     admin.open({
                         type: 1,
-                        title: (res.code == 0?'更换':'绑定') + '邮箱',
+                        title: res.code == 0 ? t('profile.change_email_title') : t('profile.bind_email_title'),
                         content: $('#bindingEmail').html(),
                         success: function (layero, dIndex) {
                             form.render();
-                            form.on('submit(sendCode)', function (data) {
-                                notice.msg('正在执行中..', {icon: 4, close: true});
+                            form.on('submit(sendOldMailCode)', function (data) {
+                                if (!data.field.email) {
+                                    notice.msg(t('profile.enter_new_email'), {icon: 2});
+                                    return false;
+                                }
+                                notice.msg(t('common.loading'), {icon: 4, close: true});
                                 admin.ajax({
                                     url: '{:url("/MyInfo/sendCode")}',
-                                    data: {type:'changeBindingMail',content:data.field.email},
+                                    data: {type:'changeBindingMail',stage:'old',content:data.field.email},
                                     headers: {},
                                     type: 'post',
                                     dataType: 'json',
                                     success: function(res){
                                         notice.destroy();
                                         if(res.code == 0){
-                                            notice.msg('发送验证码成功！', {icon: 1, audio: '1'});
-                                            setTime($("#sendCode"), 60);
+                                            notice.msg(res.msg || t('profile.old_email_code_sent'), {icon: 1, audio: '1'});
+                                            setTime($("#sendOldMailCode"), 60);
                                         } else {
                                             notice.msg(res.msg, {icon: 2, audio: '1'});
                                         }
@@ -861,8 +846,47 @@
                                 });
                                 return false;
                             });
+                            form.on('submit(sendNewMailCode)', function (data) {
+                                if (!data.field.email) {
+                                    notice.msg(t('profile.enter_new_email'), {icon: 2});
+                                    return false;
+                                }
+                                {if !empty($userInfo['email'])}
+                                if (!data.field.old_code) {
+                                    notice.msg(t('profile.enter_old_email_code'), {icon: 2});
+                                    return false;
+                                }
+                                {/if}
+                                notice.msg(t('common.loading'), {icon: 4, close: true});
+                                admin.ajax({
+                                    url: '{:url("/MyInfo/sendCode")}',
+                                    data: {
+                                        type:'changeBindingMail',
+                                        stage:'new',
+                                        content:data.field.email,
+                                        old_code:data.field.old_code || ''
+                                    },
+                                    headers: {},
+                                    type: 'post',
+                                    dataType: 'json',
+                                    success: function(sendRes){
+                                        notice.destroy();
+                                        if(sendRes.code == 0){
+                                            notice.msg(sendRes.msg || t('profile.new_email_code_sent'), {icon: 1, audio: '1'});
+                                            setTime($("#sendNewMailCode"), 60);
+                                        } else {
+                                            notice.msg(sendRes.msg, {icon: 2, audio: '1'});
+                                        }
+                                    }
+                                });
+                                return false;
+                            });
                             form.on('submit(submitMail)', function (data) {
-                                notice.msg('正在执行中..', {icon: 4, close: true});
+                                if (!data.field.email || !data.field.code) {
+                                    notice.msg(t('profile.enter_new_email_and_code'), {icon: 2});
+                                    return false;
+                                }
+                                notice.msg(t('common.loading'), {icon: 4, close: true});
                                 admin.ajax({
                                     url: '{:url("/MyInfo/editUserInfo")}',
                                     data: {type:'changeBindingMail',code:data.field.code,content:data.field.email},
@@ -872,7 +896,8 @@
                                     success: function(data){
                                         notice.destroy();
                                         if(data.code == 0){
-                                            notice.msg((res.code == 0?'更换':'绑定')+ '成功！', {icon: 1, audio: '1'});
+                                            notice.msg(res.code == 0 ? t('profile.email_change_success') : t('profile.email_bind_success'), {icon: 1, audio: '1'});
+                                            setTimeout(function(){ location.reload(); }, 1000);
                                         } else {
                                             notice.msg(data.msg, {icon: 2, audio: '1'});
                                         }
@@ -888,14 +913,94 @@
             return false;
         });
 
+        form.on('submit(bindingPhone)', function () {
+            admin.open({
+                type: 1,
+                title: t('profile.bind_phone_title'),
+                area: ['500px', '330px'],
+                content: $('#bindingPhone').html(),
+                success: function (layero, dIndex) {
+                    form.render();
+                    var $phone = $(layero).find('input[name="phone"]');
+                    var $code = $(layero).find('input[name="code"]');
+                    var $send = $(layero).find('#sendPhoneCode');
+                    var sending = false;
+                    var binding = false;
+
+                    $send.on('click', function () {
+                        var phone = $.trim($phone.val());
+                        if (!/^1[3-9][0-9]{9}$/.test(phone)) {
+                            notice.msg(t('profile.phone_invalid'), {icon: 2});
+                            return;
+                        }
+                        if (sending || $send.prop('disabled')) return;
+                        sending = true;
+                        notice.msg(t('profile.sms_sending'), {icon: 4, close: true});
+                        $.ajax({
+                            type: 'POST',
+                            url: '{:url("/Phone/sendCode")}',
+                            data: {scene:'bind', phone:phone},
+                            dataType: 'json',
+                            success: function (res) {
+                                notice.destroy();
+                                sending = false;
+                                notice.msg(res.msg || (res.code == 0 ? t('profile.code_sent') : t('profile.send_failed')), {icon:res.code == 0 ? 1 : 2});
+                                if (res.code == 0) setTime($send, 60);
+                            },
+                            error: function () {
+                                notice.destroy();
+                                sending = false;
+                                notice.msg(t('profile.sms_send_failed'), {icon: 2});
+                            }
+                        });
+                    });
+
+                    $(layero).find('#submitPhoneBinding').on('click', function () {
+                        var phone = $.trim($phone.val());
+                        var code = $.trim($code.val());
+                        if (!/^1[3-9][0-9]{9}$/.test(phone) || !/^[0-9]{6}$/.test(code)) {
+                            notice.msg(t('profile.phone_code_invalid'), {icon: 2});
+                            return;
+                        }
+                        if (binding) return;
+                        binding = true;
+                        notice.msg(t('profile.verifying'), {icon: 4, close: true});
+                        $.ajax({
+                            type: 'POST',
+                            url: '{:url("/Phone/bind")}',
+                            data: {phone:phone, code:code},
+                            dataType: 'json',
+                            success: function (res) {
+                                notice.destroy();
+                                binding = false;
+                                if (res.code == 0) {
+                                    layer.close(dIndex);
+                                    notice.msg(res.msg || t('profile.phone_bind_success'), {icon: 1});
+                                    setTimeout(function(){ location.reload(); }, 700);
+                                } else {
+                                    notice.msg(res.msg || t('profile.phone_bind_failed'), {icon: 2});
+                                }
+                            },
+                            error: function () {
+                                notice.destroy();
+                                binding = false;
+                                notice.msg(t('profile.verify_failed'), {icon: 2});
+                            }
+                        });
+                    });
+                }
+            });
+            return false;
+        });
+
         form.on('submit(unbindingQQ)', function (data) {
-            layer.confirm('确定要解除QQ绑定吗？解绑后该账号将不再出现在QQ扫码登录的账户列表中。', {
+            layer.confirm(t('profile.qq_unbind_confirm'), {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在解绑...', {icon: 4, close: true});
+                notice.msg(t('profile.unbinding'), {icon: 4, close: true});
                 admin.ajax({
                     url: '{:url("/MyInfo/editUserInfo")}',
                     data: {type:'changeBindingQQ', code:'unbind'},
@@ -905,7 +1010,7 @@
                     success: function(r){
                         notice.destroy();
                         if (r.code == 0) {
-                            notice.msg('QQ解绑成功！', {icon: 1});
+                            notice.msg(t('profile.qq_unbind_success'), {icon: 1});
                             setTimeout(function(){ location.reload(); }, 1200);
                         } else {
                             notice.msg(r.msg, {icon: 2});
@@ -919,49 +1024,57 @@
         form.on('submit(bindingQQ)', function (data) {
             admin.open({
                 type: 2,
-                title: '扫码绑定QQ',
+                title: t('profile.legacy_migration_title'),
                 content: '/qrlogin/qrlogin.html?v=' + Date.now(),
                 area: ['400px', '300px'],
-                data: {type:'bindQQ'}
+                data: {type:'oauthClaim'}
             });
             return false;
         });
 
-        form.on('submit(unbindingWechatMp)', function (data) {
-            layer.confirm('确定要解除微信公众号绑定吗？解绑后将不能使用微信公众号扫码登录。', {
-                skin: 'layui-layer-admin',
-                icon: 3,
-                shade: .1
-            }, function (i) {
-                layer.close(i);
-                notice.msg('正在解绑...', {icon: 4, close: true});
-                admin.ajax({
-                    url: '{:url("/MyInfo/editUserInfo")}',
-                    data: {type:'changeBindingWechatMp', code:'unbind'},
-                    headers: {},
-                    type: 'post',
+        form.on('submit(bindingQqOauth)', function () {
+            notice.msg(t('profile.qq_window_opening'), {icon: 4, close: true});
+            SfQqOauth.start({
+                url:'/api.php/Social/binding',
+                data:{userType:'user',return_to:location.pathname+location.search},
+                onResult:function(res){
+                    notice.destroy();
+                    notice.msg(res.msg || (res.code == 0 ? t('profile.binding_success') : t('profile.binding_failed')), {icon:res.code == 0 ? 1 : 2});
+                    if(res.code == 0) setTimeout(function(){ location.reload(); },700);
+                },
+                onError:function(message){
+                    notice.destroy();
+                    notice.msg(message,{icon:2});
+                }
+            });
+            return false;
+        });
+
+        SfQqOauth.resume(function(res){
+            notice.msg(res.msg || (res.code == 0 ? t('profile.qq_operation_success') : t('profile.qq_operation_failed')), {icon:res.code == 0 ? 1 : 2});
+            if(res.code == 0) setTimeout(function(){ location.reload(); },700);
+        }, function(message){ notice.msg(message,{icon:2}); });
+
+        form.on('submit(unbindingQqOauth)', function () {
+            layer.confirm(t('profile.qq_quick_unbind_confirm'), {
+                skin: 'layui-layer-admin', icon: 3, shade: .1
+            }, function(index) {
+                layer.close(index);
+                notice.msg(t('profile.unbinding'), {icon:4, close:true});
+                $.ajax({
+                    type: 'POST',
+                    url: '/api.php/Social/unbind',
                     dataType: 'json',
-                    success: function(r){
+                    success: function(res) {
                         notice.destroy();
-                        if (r.code == 0) {
-                            notice.msg('微信公众号解绑成功！', {icon: 1});
-                            setTimeout(function(){ location.reload(); }, 1200);
-                        } else {
-                            notice.msg(r.msg, {icon: 2});
-                        }
+                        notice.msg(res.msg, {icon:res.code == 0 ? 1 : 2});
+                        if (res.code == 0) setTimeout(function(){ location.reload(); }, 1000);
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg(t('common.server_error'), {icon:2});
                     }
                 });
-            });
-            return false;
-        });
-
-        form.on('submit(bindingWechatMp)', function (data) {
-            admin.open({
-                type: 2,
-                title: '扫码绑定微信公众号',
-                content: '/wechat_mp_login.html?v=' + Date.now(),
-                area: ['360px', '330px'],
-                data: {type:'bindUser'}
             });
             return false;
         });
@@ -972,11 +1085,11 @@
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
-            {field: 'type', title: '类型', width: 100, templet: '#SF_BL_Type'},
-            {field: 'amount', title: '金额', width: 120, templet: '#SF_BL_Amount'},
-            {field: 'balance', title: '余额', width: 100, templet: function(d){ return (d.balance||'0.00')+' 元'; }},
-            {field: 'description', title: '说明', minWidth: 160},
-            {field: 'created_at', title: '时间', width: 160}
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_BL_Type'},
+            {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: '#SF_BL_Amount'},
+            {field: 'balance', title: '{:t("accounting.balance")}', width: 130, templet: function(d){ return (d.balance||'0.00')+' {:t("accounting.currency_unit")}'; }},
+            {field: 'description', title: '{:t("accounting.description")}', minWidth: 160},
+            {field: 'created_at', title: '{:t("accounting.time")}', width: 160}
         ]]
     });
     // 积分明细
@@ -985,11 +1098,11 @@
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
-            {field: 'type', title: '类型', width: 100, templet: '#SF_PtType'},
-            {field: 'amount', title: '积分变动', width: 120, templet: '#SF_PtAmount'},
-            {field: 'integral_after', title: '剩余积分', width: 120, templet: function(d){ return (d.integral_after||0)+' 积分'; }},
-            {field: 'description', title: '说明', minWidth: 160},
-            {field: 'created_at', title: '时间', width: 160}
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_PtType'},
+            {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: '#SF_PtAmount'},
+            {field: 'integral_after', title: '{:t("accounting.remaining_points")}', width: 150, templet: function(d){ return (d.integral_after||0)+' {:t("accounting.point_unit")}'; }},
+            {field: 'description', title: '{:t("accounting.description")}', minWidth: 160},
+            {field: 'created_at', title: '{:t("accounting.time")}', width: 160}
         ]]
     });
     // 打卡统计
@@ -1006,10 +1119,10 @@
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
-            {field: 'checkin_date', title: '打卡日期', width: 120, sort: true},
-            {field: 'consecutive_days', title: '连续天数', width: 100},
-            {field: 'points_earned', title: '获得积分', width: 110},
-            {field: 'created_at', title: '打卡时间', width: 170, sort: true}
+            {field: 'checkin_date', title: '{:t("accounting.checkin_date")}', width: 140, sort: true},
+            {field: 'consecutive_days', title: '{:t("accounting.consecutive_days")}', width: 140},
+            {field: 'points_earned', title: '{:t("accounting.points_earned")}', width: 140},
+            {field: 'created_at', title: '{:t("accounting.checkin_time")}', width: 170, sort: true}
         ]]
     });
     });

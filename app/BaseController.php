@@ -10,6 +10,7 @@ use think\Validate;
 /**
  * 控制器基础类
  */
+#[\AllowDynamicProperties]
 abstract class BaseController
 {
     /**

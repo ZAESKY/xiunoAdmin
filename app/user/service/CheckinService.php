@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace app\user\service;
 
+use app\common\service\CheckinConfigService;
 use think\facade\Db;
 
 class CheckinService
@@ -78,14 +79,14 @@ class CheckinService
         try {
             return $this->handleDoCheckin($ip);
         } catch (\Throwable $e) {
-            return ['success' => false, 'msg' => '打卡失败，请稍后重试'];
+            return ['success' => false, 'msg' => t('checkin_ui.failed_retry')];
         }
     }
 
     private function handleDoCheckin(string $ip): array
     {
         if (!$this->isEnabled()) {
-            return ['success' => false, 'msg' => '打卡功能未开启'];
+            return ['success' => false, 'msg' => t('checkin_ui.disabled')];
         }
 
         $today = date('Y-m-d');
@@ -97,7 +98,7 @@ class CheckinService
             ->find();
 
         if ($exists) {
-            return ['success' => false, 'msg' => '今日已打卡，请明天再来'];
+            return ['success' => false, 'msg' => t('checkin_ui.already_today')];
         }
 
         // 计算连续天数
@@ -139,7 +140,9 @@ class CheckinService
                 ->update();
 
             // 记录积分日志
-            $desc = '每日打卡' . ($bonusPoints > 0 ? "（含连续{$consecutiveDays}天奖励{$bonusPoints}积分）" : '');
+            $desc = t('checkin_ui.daily_log') . ($bonusPoints > 0
+                ? t('checkin_ui.streak_bonus_log', ['days' => $consecutiveDays, 'points' => $bonusPoints])
+                : '');
             $sourceNo = 'checkin_' . $this->userId . '_' . $today;
             \app\common\model\PointLogModel::add(
                 $this->userId,
@@ -156,14 +159,14 @@ class CheckinService
         } catch (\Throwable $e) {
             Db::rollback();
             if (strpos($e->getMessage(), '1062') !== false) {
-                return ['success' => false, 'msg' => '今日已打卡，请明天再来'];
+                return ['success' => false, 'msg' => t('checkin_ui.already_today')];
             }
-            return ['success' => false, 'msg' => '打卡失败，请稍后重试'];
+            return ['success' => false, 'msg' => t('checkin_ui.failed_retry')];
         }
 
         return [
             'success' => true,
-            'msg' => '打卡成功',
+            'msg' => t('checkin_ui.success'),
             'data' => [
                 'consecutive_days' => $consecutiveDays,
                 'base_points' => $basePoints,
@@ -178,18 +181,12 @@ class CheckinService
      */
     private function calcBonusPoints(int $consecutiveDays): int
     {
-        $daysConf = conf('checkin_consecutive_days');
-        $bonusConf = conf('checkin_consecutive_bonus');
-
-        if (empty($daysConf) || empty($bonusConf)) {
-            return 0;
-        }
-
-        // 解析逗号分隔的配置值
-        $days = is_string($daysConf) ? array_map('intval', explode(',', $daysConf)) : $daysConf;
-        $bonuses = is_string($bonusConf) ? array_map('intval', explode(',', $bonusConf)) : $bonusConf;
-
-        if (!is_array($days) || !is_array($bonuses)) {
+        try {
+            [$days, $bonuses] = CheckinConfigService::normalizeMilestones(
+                conf('checkin_consecutive_days'),
+                conf('checkin_consecutive_bonus')
+            );
+        } catch (\InvalidArgumentException $e) {
             return 0;
         }
 

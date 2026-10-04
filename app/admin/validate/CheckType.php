@@ -9,14 +9,15 @@ class CheckType extends Validate
      * 验证规则.
      */
     protected $rule =   [
-        'name|模板名称'   => 'require',
-        'type|方法名称' => 'require',
+        'name'   => 'require',
+        'type' => 'require',
     ];
     /**
      * 提示消息.
      */
     protected $message  =   [
-
+        'name.require' => 'validation.template_name_required',
+        'type.require' => 'validation.method_name_required',
     ];
     /**
      * 验证场景.

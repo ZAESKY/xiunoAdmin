@@ -4,45 +4,44 @@
 <div class="layui-fluid">
     <div class="layui-card">
 
-        <div class="layui-card-body images" style="background-image: url('https://bing.ioliu.cn/v1/rand?h=70');">
-            <img style="border-radius:50%;width:50px;height:50px;" src="{__IMG__}logo.png" alt="SF"/>
-            <b id="SF_title" style="color:#fff;font-size: 18px">SF{:t('common_ui.auth_type')}系统</b>
+        <div class="layui-card-body images install-banner">
+            <img class="install-logo" src="{__IMG__}logo.png" alt="SF"/>
+            <b id="SF_title" class="install-title">{:t('install_ui.system_title')}</b>
             <span id="tip" class="pull-right">
-                <i class="sf-avatar sf-avatar-icon sf-avatar-small layui-icon layui-icon-help" style="position: relative;top: 12px;color: rgb(255, 169, 64); background-color: rgb(255, 247, 230);"></i>
+                <i class="sf-avatar sf-avatar-icon sf-avatar-small layui-icon layui-icon-help install-help-icon"></i>
             </span>
         </div>
         <div class="layui-card-body layui-form">
-            <div class="layui-tab layui-steps layui-steps-readonly" lay-filter="stepsDemoForget"
-                 style="max-width: 1000px;">
+            <div class="layui-tab layui-steps layui-steps-readonly install-wizard" lay-filter="stepsDemoForget">
                 <ul class="layui-tab-title">
                     <li class="layui-this">
                         <i class="layui-icon layui-icon-ok">1</i>
-                        <span class="layui-steps-title">第一步</span>
-                        <span class="layui-steps-content">同意{:t('install_ui.tab_agreement')}</span>
+                        <span class="layui-steps-title">{:t('install_ui.step_label_1')}</span>
+                        <span class="layui-steps-content">{:t('install_ui.step_agreement')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">2</i>
-                        <span class="layui-steps-title">第二步</span>
-                        <span class="layui-steps-content">检查安装环境</span>
+                        <span class="layui-steps-title">{:t('install_ui.step_label_2')}</span>
+                        <span class="layui-steps-content">{:t('install.env_check')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">3</i>
-                        <span class="layui-steps-title">第三步</span>
+                        <span class="layui-steps-title">{:t('install_ui.step_label_3')}</span>
                         <span class="layui-steps-content">{:t('install.fill_db_info')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">4</i>
-                        <span class="layui-steps-title">第四步</span>
+                        <span class="layui-steps-title">{:t('install_ui.step_label_4')}</span>
                         <span class="layui-steps-content">{:t('install_ui.create_data_table')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">5</i>
-                        <span class="layui-steps-title">第五步</span>
-                        <span class="layui-steps-content">填写站点信息</span>
+                        <span class="layui-steps-title">{:t('install_ui.step_label_5')}</span>
+                        <span class="layui-steps-content">{:t('install_ui.fill_site_info')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">6</i>
-                        <span class="layui-steps-title">第六步</span>
+                        <span class="layui-steps-title">{:t('install_ui.step_label_6')}</span>
                         <span class="layui-steps-content">{:t('install.finish_install')}</span>
                     </li>
                 </ul>
@@ -57,21 +56,21 @@
                                     <li>{:t('install_ui.tab_about')}</li>
                                 </ul>
                                 <div class="layui-tab-content">
-                                    <div class="layui-tab-item layui-show" id="divLoading"><iframe style="width:100%;height:400px;border: 1px solid #fff ;" src="{:url('/Index/userAgreen')}"></iframe></div>
-                                    <div class="layui-tab-item"><iframe style="width:100%;height:400px;border: 1px solid #fff ;" src="{:url('/Index/updateLog')}"></iframe></div>
-                                    <div class="layui-tab-item"><iframe style="width:100%;height:400px;border: 1px solid #fff ;" src="{:url('/Index/userAgreen')}"></iframe></div>
+                                    <div class="layui-tab-item layui-show" id="divLoading"><iframe class="install-content-frame" src="{:url('/Index/userAgreen')}"></iframe></div>
+                                    <div class="layui-tab-item"><iframe class="install-content-frame" src="{:url('/Index/updateLog')}"></iframe></div>
+                                    <div class="layui-tab-item"><iframe class="install-content-frame" src="{:url('/Index/userAgreen')}"></iframe></div>
                                     <div class="layui-tab-item">
                                         <div class="layui-col-sm12 layui-col-md12">
                                             <div class="layui-card">
-                                                <div class="layui-card-body" style="padding: 25px;">
+                                                <div class="layui-card-body install-profile-card">
                                                     <div class="text-center layui-text">
                                                         <div class="user-info-head" id="userInfoHead">
                                                             <img src="//q4.qlogo.cn/headimg_dl?dst_uin=2129876388&amp;spec=100" alt=""/>
                                                         </div>
-                                                        <h2 style="padding-top: 20px;">{:t('install_ui.author')}</h2>
-                                                        <p style="padding-top: 8px;">{:t('install_ui.motto')}</p>
+                                                        <h2 class="install-profile-title">{:t('install_ui.author')}</h2>
+                                                        <p class="install-profile-subtitle">{:t('install_ui.motto')}</p>
                                                     </div>
-                                                    <div class="layui-text" style="padding-top: 30px;">
+                                                    <div class="layui-text install-profile-list">
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-username"></i>
                                                             <p>QQ:2129876388</p>
@@ -86,12 +85,12 @@
                                                         </div>
                                                     </div>
                                                     <div class="layui-line-dash"></div>
-                                                    <h3>标签</h3>
-                                                    <div class="layui-badge-list" style="padding-top: 6px;">
+                                                    <h3>{:t('install_ui.tags')}</h3>
+                                                    <div class="layui-badge-list install-badge-list">
                                                         <span class="layui-badge layui-badge-red">{:t('install_ui.tag_creative')}</span>
                                                         <span class="layui-badge layui-badge-orange">{:t('install_ui.tag_design')}</span>
                                                         <span class="layui-badge layui-badge-yellow">{:t('install_ui.tag_ocd')}</span>
-                                                        <span class="layui-badge layui-badge-green">懒</span>
+                                                        <span class="layui-badge layui-badge-green">{:t('install_ui.tag_lazy')}</span>
                                                         <span class="layui-badge layui-badge-blue">{:t('install_ui.tag_coding')}</span>
                                                         <span class="layui-badge layui-badge-purple">hhhc</span>
                                                     </div>
@@ -100,22 +99,22 @@
                                         </div>
                                         <div class="layui-col-sm12 layui-col-md12">
                                             <div class="layui-card">
-                                                <div class="layui-card-body" style="padding: 25px;">
+                                                <div class="layui-card-body install-profile-card">
                                                     <div class="text-center layui-text">
                                                         <div class="user-info-head" id="userInfoHead">
                                                             <img src="//q4.qlogo.cn/headimg_dl?dst_uin=869998889&amp;spec=100" alt=""/>
                                                         </div>
-                                                        <h2 style="padding-top: 20px;">{:t('install_ui.sponsor_name')}</h2>
-                                                        <p style="padding-top: 8px;"><a target="_blank" href="https://www.shiwaiyun.com/" style="text-decoration: none;font-weight: 700;">www.shiwaiyun.com</a> {:t('install_ui.sponsor_desc')}，品牌成立于2016年，拥有多年云计算经验，使用本{:t('common_ui.auth_type')}系统<font style="color:#ff0000">免费领取8核8G云主机一月!</font></p>
+                                                        <h2 class="install-profile-title">{:t('install_ui.sponsor_name')}</h2>
+                                                        <p class="install-profile-subtitle"><a target="_blank" href="https://www.shiwaiyun.com/" class="install-sponsor-link">www.shiwaiyun.com</a> {:t('install_ui.sponsor_intro')} <span class="install-sponsor-offer">{:t('install_ui.sponsor_offer')}</span></p>
                                                     </div>
-                                                    <div class="layui-text" style="padding-top: 30px;">
+                                                    <div class="layui-text install-profile-list">
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-username"></i>
                                                             <p>QQ:869998889</p>
                                                         </div>
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-app"></i>
-                                                            <p>世外云-{:t('install_ui.sponsor_desc')}</p>
+                                                            <p>{:t('install_ui.sponsor_brand')} {:t('install_ui.sponsor_desc')}</p>
                                                         </div>
                                                         <div class="user-info-list-item">
                                                             <i class="layui-icon layui-icon-location"></i>
@@ -123,14 +122,14 @@
                                                         </div>
                                                     </div>
                                                     <div class="layui-line-dash"></div>
-                                                    <h3>标签</h3>
-                                                    <div class="layui-badge-list" style="padding-top: 6px;">
-                                                        <span class="layui-badge layui-badge-red">云服务器</span>
-                                                        <span class="layui-badge layui-badge-orange">域名注册</span>
-                                                        <span class="layui-badge layui-badge-yellow">云虚拟主机</span>
-                                                        <span class="layui-badge layui-badge-green">物理服务器</span>
-                                                        <span class="layui-badge layui-badge-blue">机房托管业务</span>
-                                                        <span class="layui-badge layui-badge-purple">短信发送服务</span>
+                                                    <h3>{:t('install_ui.tags')}</h3>
+                                                    <div class="layui-badge-list install-badge-list">
+                                                        <span class="layui-badge layui-badge-red">{:t('install_ui.sponsor_service_cloud')}</span>
+                                                        <span class="layui-badge layui-badge-orange">{:t('install_ui.sponsor_service_domain')}</span>
+                                                        <span class="layui-badge layui-badge-yellow">{:t('install_ui.sponsor_service_hosting')}</span>
+                                                        <span class="layui-badge layui-badge-green">{:t('install_ui.sponsor_service_dedicated')}</span>
+                                                        <span class="layui-badge layui-badge-blue">{:t('install_ui.sponsor_service_colocation')}</span>
+                                                        <span class="layui-badge layui-badge-purple">{:t('install_ui.sponsor_service_sms')}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -148,16 +147,16 @@
                         </form>
                     </div>
                     <div class="layui-tab-item text-center" id="divLoading2">
-                        <div class="demo-cp-item" style="padding-top:15px;height:100px">
+                        <div class="demo-cp-item install-progress">
                             <div id="SF_Progress"></div>
                         </div>
                         <div id="loading"></div>
                         <div id="sfhtml"></div>
 
-                        <div id="stepButton" style="display: none;margin-top: 20px;">
-                            <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
+                        <div id="stepButton" class="install-step-buttons">
+                            <button data-steps="prev" type="button" align="left" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius install-half-button">{:t('intro_ui.prev')}
                             </button>
-                            <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="stepDemoFormSubmit2" lay-submit>{:t('intro_ui.next')}
+                            <button class="layui-btn layui-btn-radius install-half-button" align="right" lay-filter="stepDemoFormSubmit2" lay-submit>{:t('intro_ui.next')}
                             </button>
                         </div>
                     </div>
@@ -190,9 +189,9 @@
                                 </div></div>
 
                             <div class="text-center">
-                                <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
+                                <button data-steps="prev" type="button" align="left" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius install-half-button">{:t('intro_ui.prev')}
                                 </button>
-                                <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="stepDemoFormSubmit3" lay-submit>{:t('intro_ui.next')}
+                                <button class="layui-btn layui-btn-radius install-half-button" align="right" lay-filter="stepDemoFormSubmit3" lay-submit>{:t('intro_ui.next')}
                                 </button>
                             </div>
                         </form>
@@ -203,7 +202,7 @@
                                 <div class="layui-row layui-col-space20">
                                     <div class="layui-col-md12">
                                         <blockquote class="layui-elem-quote-sf-info">
-                                            系统检测到你已安装过SF{:t('common_ui.auth_type')}系统
+                                            {:t('install_ui.existing_install_detected')}
                                         </blockquote>
                                     </div>
                                     <div class="layui-col-md4">
@@ -257,9 +256,9 @@
                                             </div>
                                         </div>
                                         <div class="layui-form-item">
-                                            <label class="layui-form-label">管理员ＱＱ</label>
+                                            <label class="layui-form-label">{:t('install_ui.admin_qq')}</label>
                                             <div class="layui-input-block">
-                                                <input type="number" name="admin_qq" value="" class="layui-input" placeholder="管理员的QQ" lay-required/>
+                                                <input type="number" name="admin_qq" value="" class="layui-input" placeholder="{:t('install_ui.admin_qq_placeholder')}" lay-required/>
                                             </div>
                                         </div>
                                         <div class="layui-form-item">
@@ -267,7 +266,7 @@
                                             <div class="layui-input-block">
                                                 <input type="text" name="admin_email" value="" class="layui-input" placeholder="{:t('install_ui.admin_email_placeholder')}" lay-required/>
                                             </div>
-                                            <blockquote class="layui-elem-quote-sf-warning">请填写您的邮箱,用于{:t('install_ui.login_backend_btn')}</blockquote>
+                                            <blockquote class="layui-elem-quote-sf-warning">{:t('install_ui.admin_email_tip')}</blockquote>
                                         </div>
                                         <hr/><i class="layui-icon layui-icon-tips"></i> {:t('install_ui.install_tip')}
                                     </div>
@@ -275,7 +274,7 @@
                                         <div class="layui-form-item">
                                             <label class="layui-form-label">{:t('install_ui.site_name')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="sitename" value="SF系统{:t('common_ui.auth_type')}中心" class="layui-input" placeholder="{:t('install_ui.site_name_placeholder')}" lay-required/>
+                                                <input type="text" name="sitename" value="{:t('install_ui.default_site_name')}" class="layui-input" placeholder="{:t('install_ui.site_name_placeholder')}" lay-required/>
                                             </div>
                                         </div>
                                         <hr/><i class="layui-icon layui-icon-tips"></i> {:t('install_ui.install_tip')}
@@ -284,45 +283,44 @@
                                         <div class="layui-form-item">
                                             <label class="layui-form-label">{:t('install_ui.backend_entry')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="login_address" value="admin" class="layui-input"  placeholder="留空则默认为admin.php"/>
+                                                <input type="text" name="login_address" value="admin" class="layui-input" placeholder="{:t('install_ui.backend_entry_placeholder')}"/>
                                             </div>
                                             <blockquote class="layui-elem-quote-sf-warning">
-                                                默认为admin.php，只填文件名即可，不带php后缀
+                                                {:t('install_ui.backend_entry_tip')}
                                             </blockquote>
                                         </div>
                                         <div class="layui-form-item">
                                             <label class="layui-form-label">{:t('install_ui.login_token')}</label>
                                             <div class="layui-input-block">
-                                                <input type="text" name="SF_LOGIN_KEY" value="" class="layui-input"  placeholder="留空则不{:t('login.verify_token_title')}"/>
+                                                <input type="text" name="SF_LOGIN_KEY" value="" class="layui-input" placeholder="{:t('install_ui.login_token_placeholder')}"/>
                                             </div>
                                             <blockquote class="layui-elem-quote-sf-warning">
-                                                {:t('install_ui.login_token_tip')}<br><br>若口令为：123456<br>
-                                                登陆示例：{:DOMAIN}/{:t('install_ui.backend_entry')}?123456
+                                                {:t('install_ui.login_token_tip')}<br><br>{:t('install_ui.login_token_example')}<br>
+                                                {:t('install_ui.backend_login_example')}：{:DOMAIN}/{:t('install_ui.backend_entry')}?123456
                                             </blockquote>
                                         </div>
-                                        <button type="button" id="binding" class="layui-btn layui-btn-warm layui-btn-fluid layui-btn-radius">点击{:t('install_ui.binding_title')}QQ快捷登陆
+                                        <button type="button" id="binding" class="layui-btn layui-btn-warm layui-btn-fluid layui-btn-radius">{:t('install_ui.bind_qq_login')}
                                         </button>
                                         <hr/><i class="layui-icon layui-icon-tips"></i> {:t('install_ui.install_tip')}
                                     </div>
                                 </div>
                             </div>
                             <div class="text-center">
-                                <button data-steps="prev" type="button" align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius">{:t('intro_ui.prev')}
+                                <button data-steps="prev" type="button" align="left" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius install-half-button">{:t('intro_ui.prev')}
                                 </button>
-                                <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="admin_info" lay-submit>{:t('install_ui.save_info')}
+                                <button class="layui-btn layui-btn-radius install-half-button" align="right" lay-filter="admin_info" lay-submit>{:t('install_ui.save_info')}
                                 </button>
                             </div>
                         </form>
                     </div>
                     <div class="layui-tab-item text-center" id="divLoading6">
-                        <i class="layui-icon layui-icon-ok layui-circle"
-                           style="background: #52C41A;color: #fff;font-size:30px;font-weight:bold;padding: 20px;line-height: 80px;"></i>
-                        <div style="font-size: 24px;color: #333;margin-top: 30px;">安装{:t('common.success')}</div>
-                        <div style="font-size: 14px;color: #666;margin-top: 20px;">欢迎使用SF{:t('common_ui.auth_type')}系统！</div>
-                        <div style="text-align: center;margin: 50px 0 25px 0;">
-                            <button align="left" style="width:45%;" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius" lay-filter="SFindex" lay-submit>{:t('install_ui.website_home')}
+                        <i class="layui-icon layui-icon-ok layui-circle install-complete-icon"></i>
+                        <div class="install-complete-title">{:t('install_ui.install_success')}</div>
+                        <div class="install-complete-subtitle">{:t('install_ui.welcome')}</div>
+                        <div class="install-complete-actions">
+                            <button align="left" class="layui-btn layui-btn-primary layui-btn-fluid layui-btn-radius install-half-button" lay-filter="SFindex" lay-submit>{:t('install_ui.website_home')}
                             </button>
-                            <button class="layui-btn layui-btn-radius" align="right" style="width:45%;" lay-filter="loginadmin" lay-submit>{:t('install_ui.login_backend_btn')}
+                            <button class="layui-btn layui-btn-radius install-half-button" align="right" lay-filter="loginadmin" lay-submit>{:t('install_ui.login_backend_btn')}
                             </button>
                         </div>
                     </div>
@@ -357,8 +355,8 @@
                 if (chk_value == ""){
                     admin.removeLoading('#divLoading', true, true);
                     admin.btnLoading('[lay-filter="stepDemoFormSubmit1"]', false);
-                    notice.msg('请先同意服务协议！', {icon: 3,audio:'1'});
-                    layer.tips('请先勾选该选项！', '#id', {
+                    notice.msg(window.t('install.agree_first'), {icon: 3,audio:'1'});
+                    layer.tips(window.t('install.agree_checkbox'), '#id', {
                         tips: [1,'#1890ff']
                     });
                     return false;
@@ -366,8 +364,8 @@
                     admin.removeLoading('#divLoading', true, true);
                     admin.btnLoading('[lay-filter="stepDemoFormSubmit1"]', false);
                     steps.next('stepsDemoForget');
-                    $('#SF_title').html('环境检测');
-                    $('#loading').html('<h2 style="padding-top:20px"><b>检测环境中<span id="loginload">.</span></b></h2>');
+                    $('#SF_title').html(window.t('install.env_check'));
+                    $('#loading').html('<h2 class="install-loading-title"><b>' + window.t('install.env_checking') + '<span id="loginload">.</span></b></h2>');
                     var loadnum = 1;
 
                     setInterval(function (){
@@ -394,16 +392,16 @@
                                     max: 100,
                                     value: 0,
                                     textFormat: function (value, max) {
-                                        return value + '分';
+                                        return value + window.t('install_ui.score_suffix');
                                     }
                                 });
                                 var htmlarr = [];
-                                htmlarr.push('<table class="layui-table sf-table" lay-skin="line"><thead><tr><th style="text-align: center;"><b>状况</b></th><th style="text-align: center;"><b>详情</b></th></tr></thead>');
+                                htmlarr.push('<table class="layui-table sf-table" lay-skin="line"><thead><tr><th class="install-status-heading"><b>' + window.t('install_ui.status_detail') + '</b></th><th class="install-status-heading"><b>' + window.t('install_ui.detail') + '</b></th></tr></thead>');
                                 $.each(data.data.check_msg.success, function(){
-                                    htmlarr.push('<tr><td><span class="layui-badge layui-badge-green">支&emsp;持</span></td><td>'+ this +'</td></tr>');
+                                    htmlarr.push('<tr><td><span class="layui-badge layui-badge-green">' + window.t('install_ui.supported') + '</span></td><td>'+ this +'</td></tr>');
                                 });
                                 $.each(data.data.check_msg.error, function(){
-                                    htmlarr.push('<tr><td><span class="layui-badge layui-badge-orange">不支持</span></td><td>'+ this +'</td></tr>');
+                                    htmlarr.push('<tr><td><span class="layui-badge layui-badge-orange">' + window.t('install_ui.not_supported') + '</span></td><td>'+ this +'</td></tr>');
                                 });
                                 htmlarr.push('</table>');
                                 var html = htmlarr.join("");
@@ -415,7 +413,7 @@
                                             $('#loading').html('');
                                             $('#sfhtml').html(html);
                                             clearInterval(timer10);
-                                            notice.msg('检测完成，该环境可以继续安装！', {icon: 1,audio:'1'});
+                                            notice.msg(window.t('install.env_ok'), {icon: 1,audio:'1'});
                                             $("#stepButton").css('display','inherit');
                                         }
                                     } else {
@@ -424,21 +422,21 @@
                                             $('#loading').html('');
                                             $('#sfhtml').html(html);
                                             clearInterval(timer10);
-                                            notice.msg('检测完成，该环境可以继续安装！', {icon: 1,audio:'1'});
+                                            notice.msg(window.t('install.env_ok'), {icon: 1,audio:'1'});
                                             $("#stepButton").css('display','inherit');
                                         }else if(data.data.safe>=90){
                                             $('#SF_Progress').addClass('circle-progress-info');
                                             $('#loading').html('');
                                             $('#sfhtml').html(html);
                                             clearInterval(timer10);
-                                            notice.msg('检测完成，该环境请谨慎安装！', {icon: 3,audio:'1'});
+                                            notice.msg(window.t('install.env_caution'), {icon: 3,audio:'1'});
                                             $("#stepButton").css('display','inherit');
                                         } else {
                                             $('#SF_Progress').addClass('circle-progress-danger');
                                             $('#loading').html('');
                                             $('#sfhtml').html(html);
                                             clearInterval(timer10);
-                                            notice.msg('检测完成，该环境不符合安装条件！', {icon: 2,audio:'1'});
+                                            notice.msg(window.t('install.env_fail'), {icon: 2,audio:'1'});
                                             $("#stepButton").css('display','inherit');
                                         }
                                     }
@@ -467,29 +465,29 @@
                     if (data.code == 0) {
                         if(data.data.safe != 100){
                             if(data.data.safe >= 90) {
-                                layer.confirm('确定要继续安装吗？目前该环境并不完全符合程序运行！', {
+                                layer.confirm(window.t('install.env_continue_confirm'), {
                                     skin: 'layui-layer-admin',
                                     icon: 3,
                                     shade: .1
                                 }, function (i) {
                                     layer.close(i);
                                     steps.next('stepsDemoForget');
-                                    $('#SF_title').html('填写数据库信息');
+                                    $('#SF_title').html(window.t('install.fill_db_info'));
                                 });
                             }else{
-                                notice.msg('该环境不符合安装条件！', {icon: 2,audio:'1'});
+                                notice.msg(window.t('install.env_unsatisfied'), {icon: 2,audio:'1'});
                             }
                         }else{
                             steps.next('stepsDemoForget');
-                            $('#SF_title').html('填写数据库信息');
+                            $('#SF_title').html(window.t('install.fill_db_info'));
                         }
                     }else{
-                        notice.msg('服务器错误！', {icon: 2,audio:'1'});
+                        notice.msg(window.t('common.server_error'), {icon: 2,audio:'1'});
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
         });
@@ -502,31 +500,31 @@
             if(data.hostname == ''){
                 admin.removeLoading('#divLoading3', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
-                notice.msg('请填写数据库地址！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.db_host_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.hostport == ''){
                 admin.removeLoading('#divLoading3', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
-                notice.msg('请填写数据库端口！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.db_port_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.username == ''){
                 admin.removeLoading('#divLoading3', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
-                notice.msg('请填写数据库用户名！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.db_user_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.password == ''){
                 admin.removeLoading('#divLoading3', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
-                notice.msg('请填写数据库密码！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.db_pass_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.database == ''){
                 admin.removeLoading('#divLoading3', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
-                notice.msg('请填写数据库库名！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.db_name_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             $.ajax({
@@ -540,7 +538,7 @@
                     if (data.code == 0) {
                         steps.next('stepsDemoForget');
                         notice.msg(data.msg, {icon: 1,audio:'1'});
-                        $('#SF_title').html('创建数据表');
+                        $('#SF_title').html(window.t('install.create_table'));
                         if(data.data.type == 1){
                             $('#mysql_new').css('display','inherit');
                             $('#mysql_old').css('display','none');
@@ -554,7 +552,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
 
@@ -566,7 +564,7 @@
             admin.btnLoading('[lay-filter="jump_install"]');
             steps.next('stepsDemoForget');
             steps.next('stepsDemoForget');
-            $('#SF_title').html('完成安装');
+            $('#SF_title').html(window.t('install.finish_install'));
             admin.removeLoading('#divLoading4', true, true);
             admin.btnLoading('[lay-filter="jump_install"]', false);
             $.ajax({
@@ -575,25 +573,25 @@
                 dataType: "json",
                 success: function(data) {
                     if (data.code == 0) {
-                        notice.msg('恭喜您，安装程序成功！', {icon: 1,audio:'1'});
+                        notice.msg(window.t('install.congratulations'), {icon: 1,audio:'1'});
                         $('#SF_user').html(data.user);
                         $('#SF_pwd').html(data.pwd);
                         $('#SF_qq').html(data.qq);
                     } else {
-                        notice.msg('安装锁未创建成功，请您手动在install目录下创建SF_auth.lock！', {icon: 2,audio:'1'});
+                        notice.msg(window.t('install.lock_not_created'), {icon: 2,audio:'1'});
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
 
         });
 
         form.on('submit(must_install)', function (data) {
-            layer.confirm('全新安装将会清空所有数据，是否继续？', {
-                btn: ['是','否'],
+            layer.confirm(window.t('install.fresh_install_warning'), {
+                btn: [window.t('common.yes'), window.t('common.no')],
                 skin: 'layui-layer-admin',
                 icon: 3,
                 closeBtn:0,
@@ -612,7 +610,7 @@
                             admin.btnLoading('[lay-filter="must_install"]', false);
                             steps.next('stepsDemoForget');
                             notice.msg(data.msg, {icon: 1,audio:'1'});
-                            $('#SF_title').html('填写管理员信息');
+                            $('#SF_title').html(window.t('install.fill_admin_info'));
                             var qqbindingcheck = setInterval(function() {
                                 $.ajax({
                                     type: "POST",
@@ -622,11 +620,11 @@
                                         var binding=document.getElementById("binding");
                                         if (data.code == 0) {
                                             binding.setAttribute("class","layui-btn layui-btn-SF-green layui-btn-fluid layui-btn-radius");
-                                            $("#binding").html('已绑定QQ快捷登录');
+                                            $("#binding").html(window.t('install_ui.qq_login_bound'));
                                             clearInterval(qqbindingcheck);
                                         } else {
                                             binding.setAttribute("class","layui-btn layui-btn-warm layui-btn-fluid layui-btn-radius");
-                                            $("#binding").html('点击绑定QQ快捷登陆');
+                                            $("#binding").html(window.t('install_ui.bind_qq_login'));
                                         }
                                     }
                                 });
@@ -635,12 +633,12 @@
                             admin.removeLoading('#divLoading4', true, true);
                             admin.btnLoading('[lay-filter="must_install"]', false);
                             notice.msg(data.msg, {icon: 2,audio:'1'});
-                            $('[lay-filter="must_install"]').html('点击重试');
+                            $('[lay-filter="must_install"]').html(window.t('install.click_retry'));
                         }
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                     }
                 });
 
@@ -660,17 +658,17 @@
                         admin.btnLoading('[lay-filter="mysql_install"]', false);
                         steps.next('stepsDemoForget');
                         notice.msg(data.msg, {icon: 1,audio:'1'});
-                        $('#SF_title').html('填写管理员信息');
+                        $('#SF_title').html(window.t('install.fill_admin_info'));
                     } else {
                         admin.removeLoading('#divLoading4', true, true);
                         admin.btnLoading('[lay-filter="mysql_install"]', false);
                         notice.msg(data.msg, {icon: 2,audio:'1'});
-                        $('[lay-filter="mysql_install"]').html('点击重试');
+                        $('[lay-filter="mysql_install"]').html(window.t('install.click_retry'));
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
 
@@ -684,31 +682,31 @@
             if(data.admin_username == ''){
                 admin.removeLoading('#divLoading5', true, true);
                 admin.btnLoading('[lay-filter="admin_info"]', false);
-                notice.msg('请填写管理员账号！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.admin_account_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.admin_password == ''){
                 admin.removeLoading('#divLoading5', true, true);
                 admin.btnLoading('[lay-filter="admin_info"]', false);
-                notice.msg('请填写管理员密码！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.admin_password_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.admin_qq == ''){
                 admin.removeLoading('#divLoading5', true, true);
                 admin.btnLoading('[lay-filter="admin_info"]', false);
-                notice.msg('请填写管理员QQ！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.admin_qq_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.admin_email == ''){
                 admin.removeLoading('#divLoading5', true, true);
                 admin.btnLoading('[lay-filter="admin_info"]', false);
-                notice.msg('请填写管理员邮箱！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.admin_email_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             if(data.sitename==''){
                 admin.removeLoading('#divLoading5', true, true);
                 admin.btnLoading('[lay-filter="admin_info"]', false);
-                notice.msg('请填写站点名称！', {icon: 3,audio:'1'});
+                notice.msg(window.t('install.site_name_empty'), {icon: 3,audio:'1'});
                 return false;
             }
             $.ajax({
@@ -722,16 +720,16 @@
                         admin.btnLoading('[lay-filter="admin_info"]', false);
                         steps.next('stepsDemoForget');
                         notice.msg(data.msg, {icon: 1,audio:'1'});
-                        $('#SF_title').html('完成安装');
+                        $('#SF_title').html(window.t('install.finish_install'));
                         $.ajax({
                             type: "POST",
                             url: "{:url('/Ajax/putInstallLock')}",
                             dataType: "json",
                             success: function(data) {
                                 if (data.code == 0) {
-                                    notice.msg('恭喜您，安装程序成功！', {icon: 1,audio:'1'})
+                                    notice.msg(window.t('install.congratulations'), {icon: 1,audio:'1'})
                                 } else {
-                                    notice.msg('安装锁未创建成功，请您手动在install目录下创建SF_Auth.Lock！', {icon: 2,audio:'1'});
+                                    notice.msg(window.t('install.lock_not_created'), {icon: 2,audio:'1'});
                                 }
                             }
                         });
@@ -739,12 +737,12 @@
                         admin.removeLoading('#divLoading5', true, true);
                         admin.btnLoading('[lay-filter="admin_info"]', false);
                         notice.msg(data.msg, {icon: 2,audio:'1'});
-                        $('[lay-filter="admin_info"]').html('点击重试');
+                        $('[lay-filter="admin_info"]').html(window.t('install.click_retry'));
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
 
@@ -771,13 +769,13 @@
                     if (data.code == 0) {
                         window.open(data.data.url);
                     } else {
-                        notice.msg('获取后台入口失败，请手动跳转！', {icon: 2,audio:'1'});
+                        notice.msg(window.t('install.admin_entry_failed'), {icon: 2,audio:'1'});
                     }
                 },
                 error: function() {
                     admin.removeLoading('#divLoading6', true, true);
                     admin.btnLoading('[lay-filter="loginadmin"]', false);
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(window.t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
             return false;

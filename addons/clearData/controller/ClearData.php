@@ -31,9 +31,9 @@ class ClearData extends Backend
                     Cache::clear();
                     break;
                 default:
-                    return message('清除失败，不存在此缓存类型！', false);
+                    return message(t('cache.type_not_found'), false);
             }
-            return message('清除成功', true);
+            return message(t('cache.clear_success'), true);
         }
     }
 }

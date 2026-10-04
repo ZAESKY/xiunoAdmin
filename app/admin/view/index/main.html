@@ -99,13 +99,13 @@ a{color:inherit;}
 <div class="mp-page">
   <div class="mp-hero">
     <div class="quick-banner">
-      <h2>快速开始</h2>
-      <p>集中查看授权、用户、插件、订单与系统风险状态，按待处理优先级进入对应管理页面。</p>
+      <h2>{:t('admin_home.quick_start')}</h2>
+      <p>{:t('admin_home.quick_start_help')}</p>
     </div>
     <div class="mp-card hello-card">
       <div>
-        <strong>系统管理员，祝您开心每一天</strong>
-        <span>登录于：{:date('Y-m-d H:i:s')} · {:conf('site_name')}</span>
+        <strong>{:t('admin_home.greeting')}</strong>
+        <span>{:t('admin_home.logged_at')}{:date('Y-m-d H:i:s')} · {:conf('site_name')}</span>
       </div>
       <i class="layui-icon layui-icon-set"></i>
     </div>
@@ -114,60 +114,60 @@ a{color:inherit;}
   <div class="mp-layout" style="margin-top:14px;">
     <main class="mp-main">
       <section class="mp-card">
-        <div class="mp-head"><h3>工作空间</h3><a ew-href="{:url('/Set/index')}">更多</a></div>
+        <div class="mp-head"><h3>{:t('admin_home.workspace')}</h3><a ew-href="{:url('/Set/index')}">{:t('admin_home.more')}</a></div>
         <div class="mp-body workspace">
           <div>
             <div class="workspace-title">
               <div class="workspace-logo"><i class="layui-icon layui-icon-template-1"></i></div>
               <div>
-                <h2>系统运营工作台</h2>
-                <p>成员：管理员 · 角色：系统管理 · 应用：{$app_count}</p>
+                <h2>{:t('admin_home.operations_console')}</h2>
+                <p>{:t('admin_home.member')}：{:t('admin_home.administrator')} · {:t('admin_home.role')}：{:t('admin_home.system_management')} · {:t('admin_home.applications')}：{$app_count}</p>
               </div>
             </div>
             <div class="metric-grid">
-              <a class="metric" ew-href="{:url('/Auth/list')}"><b>{$auth_count}</b><span>授权总数</span><small>今日 {$today_auths}</small></a>
-              <a class="metric" ew-href="{:url('/User/list')}"><b>{$user_count}</b><span>用户总数</span><small>今日 {if $user_increase>=0}+{/if}{$user_increase}</small></a>
-              <a class="metric" ew-href="{:url('/App/list')}"><b>{$app_count}</b><span>应用总数</span><small>已接入应用</small></a>
-              <a class="metric" ew-href="{:url('/Pirate/list')}"><b>{$pirate_count}</b><span>风险记录</span><small>今日 {if $pirate_increase>=0}+{/if}{$pirate_increase}</small></a>
+              <a class="metric" ew-href="{:url('/Auth/list')}"><b>{$auth_count}</b><span>{:t('dashboard.auth_total')}</span><small>{:t('admin_home.today')} {$today_auths}</small></a>
+              <a class="metric" ew-href="{:url('/User/list')}"><b>{$user_count}</b><span>{:t('dashboard.user_total')}</span><small>{:t('admin_home.today')} {if $user_increase>=0}+{/if}{$user_increase}</small></a>
+              <a class="metric" ew-href="{:url('/App/list')}"><b>{$app_count}</b><span>{:t('dashboard.app_total')}</span><small>{:t('admin_home.connected_apps')}</small></a>
+              <a class="metric" ew-href="{:url('/Pirate/list')}"><b>{$pirate_count}</b><span>{:t('admin_home.risk_records')}</span><small>{:t('admin_home.today')} {if $pirate_increase>=0}+{/if}{$pirate_increase}</small></a>
             </div>
             <div class="chip-grid">
-              <a class="chip" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i>授权管理</a>
-              <a class="chip" ew-href="{:url('/App/list')}"><i class="layui-icon layui-icon-app"></i>应用管理</a>
-              <a class="chip" ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i>插件中心</a>
-              <a class="chip" ew-href="{:url('/PointProduct/list')}"><i class="layui-icon layui-icon-cart-simple"></i>积分兑换</a>
-              <a class="chip" ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i>订单管理</a>
-              <a class="chip" ew-href="{:url('/Feedback/list')}"><i class="layui-icon layui-icon-dialogue"></i>反馈管理</a>
-              <a class="chip" ew-href="{:url('/Safe/index')}"><i class="layui-icon layui-icon-vercode"></i>安全检测</a>
-              <a class="chip" ew-href="{:url('/Set/index')}"><i class="layui-icon layui-icon-set"></i>系统配置</a>
+              <a class="chip" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i>{:t('admin_home.auth_management')}</a>
+              <a class="chip" ew-href="{:url('/App/list')}"><i class="layui-icon layui-icon-app"></i>{:t('admin_home.app_management')}</a>
+              <a class="chip" ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i>{:t('admin_home.plugin_center')}</a>
+              <a class="chip" ew-href="{:url('/PointProduct/list')}"><i class="layui-icon layui-icon-cart-simple"></i>{:t('admin_home.points_exchange')}</a>
+              <a class="chip" ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i>{:t('admin_home.order_management')}</a>
+              <a class="chip" ew-href="{:url('/Feedback/list')}"><i class="layui-icon layui-icon-dialogue"></i>{:t('admin_home.feedback_management')}</a>
+              <a class="chip" ew-href="{:url('/Safe/index')}"><i class="layui-icon layui-icon-vercode"></i>{:t('admin_home.security_check')}</a>
+              <a class="chip" ew-href="{:url('/Set/index')}"><i class="layui-icon layui-icon-set"></i>{:t('admin_home.system_settings')}</a>
             </div>
           </div>
           <a class="add-panel" ew-href="{:url('/App/edit')}">
             <i class="layui-icon layui-icon-add-1"></i>
-            <span>新增应用</span>
+            <span>{:t('admin_home.add_app')}</span>
           </a>
         </div>
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>待办事项</h3><a ew-href="{:url('/Plugin/list')}">更多</a></div>
+        <div class="mp-head"><h3>{:t('admin_home.todos')}</h3><a ew-href="{:url('/Plugin/list')}">{:t('admin_home.more')}</a></div>
         <div class="mp-body todo-row">
-          <a class="todo red" ew-href="{:url('/Plugin/list')}"><div class="icon"><i class="layui-icon layui-icon-util"></i></div><div><b>{$pending_plugins}</b><span>待审核插件</span></div></a>
-          <a class="todo blue" ew-href="{:url('/Order/list')}"><div class="icon"><i class="layui-icon layui-icon-rmb"></i></div><div><b>{$pending_orders}</b><span>待处理订单</span></div></a>
-          <a class="todo green" ew-href="{:url('/Feedback/list')}"><div class="icon"><i class="layui-icon layui-icon-dialogue"></i></div><div><b>{$pending_feedback}</b><span>待回复反馈</span></div></a>
-          <a class="todo orange" ew-href="{:url('/Plugin/list')}"><div class="icon"><i class="layui-icon layui-icon-download-circle"></i></div><div><b>{$today_downloads}</b><span>今日下载</span></div></a>
+          <a class="todo red" ew-href="{:url('/Plugin/list')}"><div class="icon"><i class="layui-icon layui-icon-util"></i></div><div><b>{$pending_plugins}</b><span>{:t('admin_home.pending_plugins')}</span></div></a>
+          <a class="todo blue" ew-href="{:url('/Order/list')}"><div class="icon"><i class="layui-icon layui-icon-rmb"></i></div><div><b>{$pending_orders}</b><span>{:t('admin_home.pending_orders')}</span></div></a>
+          <a class="todo green" ew-href="{:url('/Feedback/list')}"><div class="icon"><i class="layui-icon layui-icon-dialogue"></i></div><div><b>{$pending_feedback}</b><span>{:t('admin_home.pending_feedback')}</span></div></a>
+          <a class="todo orange" ew-href="{:url('/Plugin/list')}"><div class="icon"><i class="layui-icon layui-icon-download-circle"></i></div><div><b>{$today_downloads}</b><span>{:t('admin_home.today_downloads')}</span></div></a>
         </div>
       </section>
 
       <section class="split">
         <div class="mp-card">
-          <div class="mp-head"><h3>七日趋势</h3><a ew-href="{:url('/Auth/list')}">详情</a></div>
+          <div class="mp-head"><h3>{:t('admin_home.seven_day_trend')}</h3><a ew-href="{:url('/Auth/list')}">{:t('admin_home.details')}</a></div>
           <div class="mp-body">
             <div class="trend">
               {volist name="week_trend" id="trend"}
               <div class="bar">
                 <div class="bar-stack">
-                  <div class="bar-auth" title="授权 {$trend.auth}" style="height:{$trend.auth_rate}%;"></div>
-                  <div class="bar-user" title="用户 {$trend.user}" style="height:{$trend.user_rate}%;"></div>
+                  <div class="bar-auth" title="{:t('admin_home.authorization')} {$trend.auth}" style="height:{$trend.auth_rate}%;"></div>
+                  <div class="bar-user" title="{:t('admin_home.user')} {$trend.user}" style="height:{$trend.user_rate}%;"></div>
                 </div>
                 <span>{$trend.day}</span>
               </div>
@@ -176,11 +176,11 @@ a{color:inherit;}
           </div>
         </div>
         <div class="mp-card">
-          <div class="mp-head"><h3>操作日志</h3><a ew-href="{:url('/Log/list')}">更多</a></div>
+          <div class="mp-head"><h3>{:t('admin_home.operation_log')}</h3><a ew-href="{:url('/Log/list')}">{:t('admin_home.more')}</a></div>
           <div class="mp-body line-list">
-            {empty name="log_list"}<div class="empty">暂无操作日志</div>{else/}
+            {empty name="log_list"}<div class="empty">{:t('admin_home.no_operation_log')}</div>{else/}
             {volist name="log_list" id="vo" offset="0" length="5"}
-            <div class="line"><i class="layui-icon layui-icon-log"></i><span class="text">{$vo.title|default='系统操作'}</span><span class="time">{$vo.create_time|default=''}</span></div>
+            <div class="line"><i class="layui-icon layui-icon-log"></i><span class="text">{if !empty($vo.title)}{$vo.title}{else/}{:t('admin_home.system_operation')}{/if}</span><span class="time">{$vo.create_time|default=''}</span></div>
             {/volist}
             {/empty}
           </div>
@@ -189,21 +189,21 @@ a{color:inherit;}
 
       <section class="split">
         <div class="mp-card">
-          <div class="mp-head"><h3>余额排行</h3><a ew-href="{:url('/User/list')}">全部</a></div>
+          <div class="mp-head"><h3>{:t('admin_home.balance_ranking')}</h3><a ew-href="{:url('/User/list')}">{:t('admin_home.all')}</a></div>
           <div class="mp-body rank-list">
-            {empty name="balance_ranking"}<div class="empty">暂无排行数据</div>{else/}
+            {empty name="balance_ranking"}<div class="empty">{:t('admin_home.no_ranking')}</div>{else/}
             {volist name="balance_ranking" id="vo" offset="0" length="5" key="k"}
-            <div class="rank"><em>{$k}</em><span class="text">{$vo.username|default='用户'}</span><span class="value">¥{$vo.balance|default=0}</span></div>
+            <div class="rank"><em>{$k}</em><span class="text">{if !empty($vo.username)}{$vo.username}{else/}{:t('admin_home.user')}{/if}</span><span class="value">¥{$vo.balance|default=0}</span></div>
             {/volist}
             {/empty}
           </div>
         </div>
         <div class="mp-card">
-          <div class="mp-head"><h3>积分排行</h3><a ew-href="{:url('/User/list')}">全部</a></div>
+          <div class="mp-head"><h3>{:t('admin_home.points_ranking')}</h3><a ew-href="{:url('/User/list')}">{:t('admin_home.all')}</a></div>
           <div class="mp-body rank-list">
-            {empty name="integral_ranking"}<div class="empty">暂无排行数据</div>{else/}
+            {empty name="integral_ranking"}<div class="empty">{:t('admin_home.no_ranking')}</div>{else/}
             {volist name="integral_ranking" id="vo" offset="0" length="5" key="k"}
-            <div class="rank"><em>{$k}</em><span class="text">{$vo.username|default='用户'}</span><span class="value">{$vo.integral|default=0}</span></div>
+            <div class="rank"><em>{$k}</em><span class="text">{if !empty($vo.username)}{$vo.username}{else/}{:t('admin_home.user')}{/if}</span><span class="value">{$vo.integral|default=0}</span></div>
             {/volist}
             {/empty}
           </div>
@@ -213,13 +213,13 @@ a{color:inherit;}
 
     <aside class="mp-side">
       <section class="mp-card notice-list">
-        <div class="mp-head"><h3>公告</h3><a ew-href="{:url('/Order/list')}">更多</a></div>
+        <div class="mp-head"><h3>{:t('admin_home.announcements')}</h3><a ew-href="{:url('/Order/list')}">{:t('admin_home.more')}</a></div>
         <div class="mp-body">
-          {empty name="recent_orders"}<div class="empty">暂无订单动态</div>{else/}
+          {empty name="recent_orders"}<div class="empty">{:t('admin_home.no_order_activity')}</div>{else/}
           {volist name="recent_orders" id="order"}
           <div class="line">
             <i class="layui-icon layui-icon-notice"></i>
-            <span class="text">{$order.name|default='订单'} · {$order.username|default='未知用户'}</span>
+            <span class="text">{if !empty($order.name)}{$order.name}{else/}{:t('admin_home.order')}{/if} · {if !empty($order.username)}{$order.username}{else/}{:t('admin_home.unknown_user')}{/if}</span>
             <span class="time">{$order.addtime|default=''}</span>
           </div>
           {/volist}
@@ -228,32 +228,32 @@ a{color:inherit;}
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>业务模块</h3><a ew-href="{:url('/Set/index')}">更多</a></div>
+        <div class="mp-head"><h3>{:t('admin_home.business_modules')}</h3><a ew-href="{:url('/Set/index')}">{:t('admin_home.more')}</a></div>
         <div class="mp-body team-grid">
-          <a class="team" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i><div><b>授权中心</b><span>授权与卡密</span></div></a>
-          <a class="team" ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i><div><b>插件服务</b><span>审核与市场</span></div></a>
-          <a class="team" ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i><div><b>交易管理</b><span>订单与流水</span></div></a>
-          <a class="team" ew-href="{:url('/Safe/index')}"><i class="layui-icon layui-icon-vercode"></i><div><b>系统巡检</b><span>安全检测</span></div></a>
+          <a class="team" ew-href="{:url('/Auth/list')}"><i class="layui-icon layui-icon-auz"></i><div><b>{:t('admin_home.auth_center')}</b><span>{:t('admin_home.auth_and_cdkey')}</span></div></a>
+          <a class="team" ew-href="{:url('/Plugin/list')}"><i class="layui-icon layui-icon-util"></i><div><b>{:t('admin_home.plugin_service')}</b><span>{:t('admin_home.review_and_market')}</span></div></a>
+          <a class="team" ew-href="{:url('/Order/list')}"><i class="layui-icon layui-icon-rmb"></i><div><b>{:t('admin_home.transaction_management')}</b><span>{:t('admin_home.orders_and_ledger')}</span></div></a>
+          <a class="team" ew-href="{:url('/Safe/index')}"><i class="layui-icon layui-icon-vercode"></i><div><b>{:t('admin_home.system_inspection')}</b><span>{:t('admin_home.security_check')}</span></div></a>
         </div>
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>系统安全</h3><a ew-href="{:url('/Safe/index')}">检测</a></div>
+        <div class="mp-head"><h3>{:t('admin_home.system_security')}</h3><a ew-href="{:url('/Safe/index')}">{:t('admin_home.check')}</a></div>
         <div class="mp-body safe-score">
           <div class="safe-ring" id="safeRing"><span id="safeScore">--</span></div>
           <div class="safe-meta">
-            <div id="safeText">正在读取安全检测结果</div>
-            <div>建议定期检查目录权限、调试模式和默认入口。</div>
+            <div id="safeText">{:t('admin_home.reading_security')}</div>
+            <div>{:t('admin_home.security_advice')}</div>
           </div>
         </div>
       </section>
 
       <section class="mp-card">
-        <div class="mp-head"><h3>最新插件</h3><a ew-href="{:url('/Plugin/list')}">全部</a></div>
+        <div class="mp-head"><h3>{:t('admin_home.latest_plugins')}</h3><a ew-href="{:url('/Plugin/list')}">{:t('admin_home.all')}</a></div>
         <div class="mp-body line-list">
-          {empty name="latest_plugins"}<div class="empty">暂无插件</div>{else/}
+          {empty name="latest_plugins"}<div class="empty">{:t('admin_home.no_plugins')}</div>{else/}
           {volist name="latest_plugins" id="plugin"}
-          <div class="line"><i class="layui-icon layui-icon-component"></i><span class="text">{$plugin.name|default='插件'}</span><span class="value">v{$plugin.version|default='1.0'}</span></div>
+          <div class="line"><i class="layui-icon layui-icon-component"></i><span class="text">{if !empty($plugin.name)}{$plugin.name}{else/}{:t('admin_home.plugin')}{/if}</span><span class="value">v{$plugin.version|default='1.0'}</span></div>
           {/volist}
           {/empty}
         </div>
@@ -278,11 +278,11 @@ layui.use(['jquery'], function(){
       score = Math.max(0, Math.min(100, score || 0));
       $('#safeScore').text(score);
       $('#safeRing').css('background', 'conic-gradient(var(--blue) ' + (score * 3.6) + 'deg,#edf3f9 0deg)');
-      $('#safeText').text(score >= 85 ? '系统状态良好' : (score >= 60 ? '存在可优化项目' : '建议尽快处理风险项'));
+      $('#safeText').text(score >= 85 ? t('admin_home.security_good') : (score >= 60 ? t('admin_home.security_can_improve') : t('admin_home.security_risk')));
     },
     error: function(){
       $('#safeScore').text('--');
-      $('#safeText').text('安全检测暂不可用');
+      $('#safeText').text(t('admin_home.security_unavailable'));
     }
   });
 });

@@ -62,7 +62,7 @@ class ActionLog extends BaseModel
         if (!self::$title) {
             // 操作控制器名
             $menuMod = new Menu();
-            $url = CONTROLLER_NAME.'/'.ACTION_NAME;
+            $url = request()->controller().'/'.request()->action();
             $info = $menuMod->getOne([['url', '=', $url],['status', '=', 1]]);
             if ($info) {
 //                if ($info['type'] == 4) {
@@ -85,7 +85,7 @@ class ActionLog extends BaseModel
             'method' => request()->method(),
             'result' => self::$result,
             'url' => request()->url(true), // 获取完成URL
-            'param' => !empty(request()->param()) ? json_encode(request()->param()) : '',
+            'param' => !empty(request()->param()) ? sf_action_log_params(request()->param()) : '',
             'title' => !empty(self::$title) ? self::$title : '操作后台',
             'content' => !empty(self::$content) ? self::$content : '无',
             'ip' => request()->ip(),

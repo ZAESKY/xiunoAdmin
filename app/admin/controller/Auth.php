@@ -47,7 +47,9 @@ class Auth extends Backend
             return message($e->getMessage(), false);
         }
         try{
+            $userid = max(0, intval(input('get.userid/d', 0)));
             View::assign('appid', $appid);
+            View::assign('userid', $userid);
             View::assign('app_list', parent::getAppList());
             return $this->render();
         }catch (\Exception $e){

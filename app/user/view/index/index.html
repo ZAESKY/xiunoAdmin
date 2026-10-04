@@ -135,8 +135,8 @@
             menuName: '<i class="layui-icon layui-icon-home"></i>'
         });
         form.on('submit(logout)', function () {
-            parent.layui.admin.confirm('确认退出登录吗？', function (index) {
-                notice.msg('正在退出登录中..', {icon: 4, close: true});
+            parent.layui.admin.confirm('{:t("confirm.logout")}', function (index) {
+                notice.msg('{:t("layout.logging_out")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: '{:url("/Index/logOut")}',
@@ -144,7 +144,7 @@
                     success: function(data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            notice.msg("退出登录成功！", {icon: 1, audio:'1'});
+                            notice.msg("{:t('login.logout_success')}", {icon: 1, audio:'1'});
                             setTimeout(function (){location.href="{:url('/Login/index')}"},1250);
                         } else {
                             notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -152,7 +152,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
                 parent.layer.close(index);

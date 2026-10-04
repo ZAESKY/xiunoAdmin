@@ -7,7 +7,7 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('feedback.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_log_title_or_ip')}"/>
                         </div>
@@ -60,22 +60,22 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
-                {field: 'title', title: '日志标题', sort: true, minWidth: 120},
-                {field: 'result', title: '请求结果', sort: true, minWidth: 80, templet: function (d) {
+                {field: 'title', title: '{:t("common_ui.log_title")}', sort: true, minWidth: 120},
+                {field: 'result', title: '{:t("common_ui.request_result")}', sort: true, minWidth: 80, templet: function (d) {
                         if(d.result == 1){
-                            return '<span class="layui-badge layui-badge-green">成功</span>';
+                            return '<span class="layui-badge layui-badge-green">{:t('common.success')}</span>';
                         }else{
-                            return '<span class="layui-badge layui-badge-red">失败</span>';
+                            return '<span class="layui-badge layui-badge-red">{:t('common.failed')}</span>';
                         }
                     }},
-                {field: 'action', title: '操作方法', sort: true, minWidth: 180},
-                {field: 'content', title: '日志内容', sort: true, minWidth: 160, templet:function (d) {
-                    return '<a class="layui-btn layui-btn-xs" lay-event="seeContent">点击查看</a>';
+                {field: 'action', title: '{:t("common_ui.op_method")}', sort: true, minWidth: 180},
+                {field: 'content', title: '{:t("common_ui.log_content")}', sort: true, minWidth: 160, templet:function (d) {
+                    return '<a class="layui-btn layui-btn-xs" lay-event="seeContent">{:t('auth_portal.view')}</a>';
                     }},
-                {field: 'param', title: '请求参数', sort: true, minWidth: 160},
+                {field: 'param', title: '{:t("common_ui.request_params")}', sort: true, minWidth: 160},
                 {field: 'ip', title: 'IP', sort: true, minWidth: 100},
                 {field: 'user_agent', title: 'User-Agent', sort: true, minWidth: 160},
-                {field: 'create_time', title: '添加时间', sort: true, minWidth: 180},
+                {field: 'create_time', title: '{:t("common.add_time")}', sort: true, minWidth: 180},
             ]]
         });
 
@@ -105,9 +105,9 @@
                 let arr;
                 try{
                     arr = JSON.parse(obj.data.content);
-                    notice.msg("解析日志内容成功！", {icon: 1, audio:'1'});
+                    notice.msg("{:t('log_ui.parse_log_success')}", {icon: 1, audio:'1'});
                 }catch (e){
-                    notice.msg("解析日志内容失败！[errorCode:GetLogContentError]", {icon: 2, audio:'1'});
+                    notice.msg("{:t('log_ui.parse_log_failed')} [errorCode:GetLogContentError]", {icon: 2, audio:'1'});
                     return false;
                 }
                 $.each(arr,function(index, value) {
@@ -115,9 +115,9 @@
                         let info;
                         try{
                             info = JSON.parse(value);
-                            notice.msg("解析Info内容成功！", {icon: 1, audio:'1'});
+                            notice.msg("{:t('log_ui.parse_info_success')}", {icon: 1, audio:'1'});
                         }catch (e){
-                            notice.msg("解析Info内容失败！[errorCode:GetLogContentInfoError]", {icon: 2, audio:'1'});
+                            notice.msg("{:t('log_ui.parse_info_failed')} [errorCode:GetLogContentInfoError]", {icon: 2, audio:'1'});
                             return false;
                         }
                         $.each(info,function(index, value) {
@@ -142,7 +142,7 @@
                     }
                 });
                 admin.open({
-                    title: '查看日志 ID:'+obj.data.id,
+                    title: '{:t("log_ui.view_log")} ID:'+obj.data.id,
                     type: 1,
                     area: ['80%',''],
                     content:'<div class="layui-card">' +
@@ -166,26 +166,25 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
                 if (checkRows.data.length === 0) {
-                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                     return;
                 }
                 var ids = checkRows.data.map(function (d) {
                     return d.id;
                 });
-                console.log(ids)
                 doDel({ids: ids});
             }
         });
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm('{:t("auth_portal.confirm_delete")}', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/Log/drop")}' : '{:url("/Log/batchDrop")}',
@@ -202,7 +201,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
             });

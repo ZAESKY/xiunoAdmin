@@ -1,268 +1,88 @@
 {include file="/public/header"}
-<style>
-/* 顶部 */
-.market-header { display: flex; align-items: center; justify-content: space-between; padding: 0 0 20px 0; }
-.market-header h2 { margin: 0; font-size: 20px; font-weight: 600; color: #1a1a1a; }
-.market-header h2 span { font-size: 14px; color: #999; font-weight: 400; margin-left: 6px; }
-
-/* 卡片网格 */
-.plugin-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 4px; }
-
-/* 卡片 */
-.plugin-card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 18px 16px; cursor: pointer; transition: all .25s; position: relative; overflow: hidden; }
-.plugin-card:hover { border-color: #d0d5dd; box-shadow: 0 6px 24px rgba(0,0,0,0.07); transform: translateY(-2px); }
-.plugin-card .card-badge { position: absolute; top: 0; right: 0; font-size: 11px; padding: 2px 10px; border-radius: 0 10px 0 8px; font-weight: 500; }
-.plugin-card .card-badge.hot { background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: #fff; }
-.plugin-card .card-badge.rec { background: linear-gradient(135deg, #a29bfe, #6c5ce7); color: #fff; }
-.plugin-card .card-badge.soon { background: linear-gradient(135deg, #4facfe, #2d8cf0); color: #fff; }
-
-/* 图标 + 信息 */
-.plugin-card .card-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
-.plugin-card .card-icon { width: 52px; height: 52px; flex-shrink: 0; border-radius: 12px; object-fit: cover; background: #f7f8fa; border: 1px solid #f0f0f0; }
-.plugin-card .card-info { flex: 1; min-width: 0; }
-.plugin-card .card-name { font-size: 14px; font-weight: 600; color: #1d1d1f; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.plugin-card .card-version { font-size: 11px; color: #9e9e9e; font-weight: 700; margin-left: 4px; vertical-align: middle; }
-.plugin-card .card-version { cursor: pointer; }
-.official-badge { display:inline-flex; align-items:center; gap:2px; color:#1677ff; font-weight:600; }
-.plugin-card .card-meta { font-size: 12px; color: #8e8e93; margin-top: 4px; display: flex; align-items: center; gap: 8px; }
-.plugin-card .card-meta .meta-sep { width: 1px; height: 10px; background: #e0e0e0; display: inline-block; }
-.plugin-card .card-meta .meta-icon { font-size: 12px; color: #b0b0b0; }
-.plugin-card .card-cat-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; background: #f5f5f5; color: #8e8e93; }
-.plugin-card .card-desc { font-size: 12px; color: #6e6e73; line-height: 1.5; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
-
-/* 底部 */
-.plugin-card .card-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f5f5f5; }
-.plugin-card .card-price { font-size: 15px; font-weight: 700; }
-.plugin-card .card-price.free { color: #34c759; }
-.plugin-card .card-price.paid { color: #ff5722; }
-.plugin-card .card-extra { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8e8e93; }
-.plugin-card .card-extra .stars { color: #f5a623; }
-
-@media (max-width: 1400px) { .plugin-grid { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 992px)  { .plugin-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px)  { .plugin-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 420px)  { .plugin-grid { grid-template-columns: 1fr; } }
-</style>
+<link rel="stylesheet" href="{__CSS__}plugin-market.css?v=20261004"/>
 
 <div class="layui-fluid">
-    <div class="layui-card">
-        <div class="layui-card-body">
-            <div class="market-header">
-                <h2>插件市场 <span id="totalBadge"></span></h2>
-                <form class="layui-form" style="margin:0;">
-                    <div class="layui-form-item" style="margin:0;">
-                        <div class="layui-inline" style="margin-right:6px;">
-                            <div class="layui-input-inline" style="width:160px;">
-                                <input name="text" class="layui-input" placeholder="搜索名称/作者">
-                            </div>
-                        </div>
-                        <div class="layui-inline" style="margin-right:6px;">
-                            <select name="category" id="filterCategory">
-                                <option value="">全部分类</option>
-                                <option value="feature">功能增强</option>
-                                <option value="security">安全防护</option>
-                                <option value="content">内容管理</option>
-                                <option value="ui">界面美化</option>
-                                <option value="payment">支付集成</option>
-                                <option value="dev">开发工具</option>
-                                <option value="analytics">数据分析</option>
-                                <option value="social">社交互动</option>
-                                <option value="other">其他</option>
-                            </select>
-                        </div>
-                        <div class="layui-inline" style="margin-right:6px;">
-                            <select name="price_type">
-                                <option value="">全部价格</option>
-                                <option value="free">免费</option>
-                                <option value="paid">付费</option>
-                            </select>
-                        </div>
-                        <div class="layui-inline" style="margin-right:6px;">
-                            <select name="sort">
-                                <option value="default">默认排序</option>
-                                <option value="downloads">下载最多</option>
-                                <option value="comments">评论最多</option>
-                                <option value="rating">评分最高</option>
-                                <option value="newest">最新发布</option>
-                            </select>
-                        </div>
-                        <div class="layui-inline">
-                            <button class="layui-btn" lay-filter="SF_TbSearch" lay-submit>
-                                <i class="layui-icon">&#xe615;</i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+    <div class="store-page">
+        <div class="store-heading"><div><h1>{:t('menu.plugin_market')}</h1><p>{:t('plugin_market.tagline')}</p></div></div>
+        <div class="section-title"><h2>{:t('plugin_market.editor_choice')}</h2><span>{:t('plugin_market.recommend_order')}</span></div>
+        <div id="featuredGrid" class="featured-grid"><div class="market-loading" style="grid-column:1/-1;">{:t('plugin_market.loading_recommended')}</div></div>
+        <div class="section-title"><h2>{:t('plugin_market.worth_attention')}</h2><span>{:t('plugin_market.latest_and_popular')}</span></div>
+        <div class="chart-grid">
+            <section class="chart-card"><div class="chart-head"><h3>{:t('plugin_market.new_releases')}</h3><small>NEW RELEASES</small></div><div id="newestList" class="chart-list"><div class="market-loading" style="grid-column:1/-1;">{:t('plugin_market.loading')}</div></div></section>
+            <section class="chart-card"><div class="chart-head"><h3>{:t('plugin_market.top_downloads')}</h3><small>TOP DOWNLOADS</small></div><div id="downloadList" class="chart-list"><div class="market-loading" style="grid-column:1/-1;">{:t('plugin_market.loading')}</div></div></section>
+        </div>
+        <div class="section-title"><h2>{:t('plugin_market.browse_all')}</h2><span>{:t('plugin_market.search_filter_help')}</span></div>
+        <div class="catalog-card">
+            <div class="catalog-toolbar">
+                <h2>{:t('plugin_market.all_plugins')} <span id="totalBadge"></span></h2>
+                <form class="layui-form"><div class="layui-form-item">
+                    <div class="layui-inline"><div class="layui-input-inline" style="width:170px;"><input name="text" class="layui-input" placeholder="{:t('plugin_market.search_placeholder')}"></div></div>
+                    <div class="layui-inline"><select name="category"><option value="">{:t('plugin_market.all_categories')}</option><option value="feature">{:t('plugin_ui.category_feature')}</option><option value="security">{:t('plugin_ui.category_security')}</option><option value="content">{:t('plugin_ui.category_content')}</option><option value="ui">{:t('plugin_ui.category_ui')}</option><option value="payment">{:t('plugin_ui.category_payment')}</option><option value="dev">{:t('plugin_ui.category_dev')}</option><option value="analytics">{:t('plugin_ui.category_analytics')}</option><option value="social">{:t('plugin_ui.category_social')}</option><option value="other">{:t('feedback.type_other')}</option></select></div>
+                    <div class="layui-inline"><select name="price_type"><option value="">{:t('plugin_market.all_prices')}</option><option value="free">{:t('upgrade.free')}</option><option value="paid">{:t('plugin_market.paid')}</option></select></div>
+                    <div class="layui-inline"><select name="sort"><option value="default">{:t('plugin_market.default_sort')}</option><option value="downloads">{:t('plugin_market.download_sort')}</option><option value="comments">{:t('plugin_market.comment_sort')}</option><option value="rating">{:t('plugin_market.rating_sort')}</option><option value="newest">{:t('plugin_market.newest_sort')}</option></select></div>
+                    <div class="layui-inline"><button class="layui-btn" lay-filter="SF_TbSearch" lay-submit><i class="layui-icon layui-icon-search"></i></button></div>
+                </div></form>
             </div>
-
-            <div id="pluginGrid" class="plugin-grid"></div>
-            <div id="pagination" style="text-align:center;margin-top:28px;"></div>
+            <div id="pluginGrid" class="plugin-grid"><div class="market-loading" style="grid-column:1/-1;">{:t('plugin_market.loading_all')}</div></div>
+            <div id="pagination" style="text-align:center;margin-top:26px;"></div>
         </div>
     </div>
 </div>
 
 {include file="/public/footer"}
 <script>
-layui.use(['layer', 'form', 'laypage'], function () {
-    var $ = layui.jquery;
-    var layer = layui.layer;
-    var form = layui.form;
-    var laypage = layui.laypage;
-    var currentPage = 1;
-    var searchParams = {};
-    var catMap = {feature:'功能增强',security:'安全防护',content:'内容管理',ui:'界面美化',payment:'支付集成',dev:'开发工具',analytics:'数据分析',social:'社交互动',other:'其他'};
+layui.use(['layer','form','laypage'], function () {
+    var $=layui.jquery, layer=layui.layer, form=layui.form, laypage=layui.laypage;
+    var searchParams={}, pageLimit=12;
+    var catMap={feature:'{:t("plugin_ui.category_feature")}',security:'{:t("plugin_ui.category_security")}',content:'{:t("plugin_ui.category_content")}',ui:'{:t("plugin_ui.category_ui")}',payment:'{:t("plugin_ui.category_payment")}',dev:'{:t("plugin_ui.category_dev")}',analytics:'{:t("plugin_ui.category_analytics")}',social:'{:t("plugin_ui.category_social")}',other:'{:t("feedback.type_other")}'};
+    function esc(value){var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};return String(value==null?'':value).replace(/[&<>"']/g,function(c){return map[c];});}
+    function fmtCount(value){var n=Math.max(0,Number(value)||0);try{return new Intl.NumberFormat(window.SF_I18N_LOCALE||'en-US',{notation:'compact',maximumFractionDigits:1}).format(n);}catch(e){if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'K';return String(Math.floor(n));}}
+    function renderStars(value){var rating=Math.round(Number(value)||0),stars='';for(var i=1;i<=5;i++)stars+=i<=rating?'★':'☆';return stars;}
+    function authorHtml(p){var name=p.authorDisplayName||p.author||'{:t("admin_home.unknown_user")}';return p.isOfficialAuthor?'<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name)+'</span>':esc(name);}
+    function priceHtml(p,compact){var free=Number(p.price)===0,text=free?'{:t("upgrade.free")}':(p.pay_type==='points'?parseInt(p.price,10)+' {:t("accounting.point_unit")}':'¥'+esc(p.price));return '<span class="'+(compact?'chart-price':'card-price')+(free?' free':'')+'">'+text+'</span>';}
+    function featuredPriceHtml(p){var free=Number(p.price)===0;if(free)return '<span class="featured-price free">{:t('upgrade.free')}</span>';if(p.pay_type==='points')return '<span class="featured-price">'+parseInt(p.price,10)+'<small>{:t('accounting.point_unit')}</small></span>';return '<span class="featured-price">¥'+esc(p.price)+'</span>';}
+    function dateOnly(value){return value?esc(String(value).slice(0,10)):'{:t("plugin_market.just_released")}';}
 
-    function loadPlugins(page) {
-        page = page || 1;
-        $.ajax({
-            type: "POST", url: '{:url("/UserPlugin/market")}',
-            data: Object.assign({}, searchParams, { current_page: page, limit: 10 }),
-            dataType: "json",
-            success: function(res) {
-                if (res.code == 0) {
-                    renderPlugins(res.data.data.data);
-                    renderPagination(res.data.data.total, page);
-                    $('#totalBadge').text('共 '+res.data.data.total+' 款');
-                } else { layer.msg(res.msg, {icon: 2}); }
-            }
-        });
+    function loadShowcase(){
+        $.ajax({type:'POST',url:'{:url("/UserPlugin/market")}',data:{mode:'showcase'},dataType:'json',success:function(res){
+            if(res.code!==0){renderShowcaseError(res.msg||'{:t("plugin_market.home_load_failed")}');return;}
+            var data=(res.data&&res.data.data)||{};
+            renderFeatured(data.featured||[]);renderChart('#newestList',data.newest||[],'newest');renderChart('#downloadList',data.downloads||[],'downloads');
+        },error:function(){renderShowcaseError('{:t("plugin_market.home_load_retry")}');}});
     }
-
-    function renderStars(rating) {
-        var r = Math.round(rating), s = '';
-        for (var i = 1; i <= 5; i++) s += i <= r ? '★' : '☆';
-        return s;
+    function renderShowcaseError(message){var html='<div class="empty-state" style="grid-column:1/-1;">'+esc(message)+'</div>';$('#featuredGrid,#newestList,#downloadList').html(html);}
+    function renderFeatured(list){
+        if(!list.length){$('#featuredGrid').html('<div class="empty-state"><i class="layui-icon layui-icon-rate"></i>{:t('plugin_market.no_recommendations')}</div>');return;}
+        var html='';list.slice(0,3).forEach(function(p){
+            html+='<article class="featured-card js-plugin-card" data-id="'+parseInt(p.id,10)+'">';
+            html+='<div class="featured-banner"><span class="featured-label"><i class="layui-icon layui-icon-rate-solid"></i>{:t('plugin_market.editor_choice')}</span>';if(p.cover)html+='<img class="featured-cover" src="'+esc(p.cover)+'" alt="'+esc(p.name)+'" onerror="this.style.display=\'none\'">';html+='</div>';
+            html+='<div class="featured-content"><div class="featured-info"><img class="featured-icon" src="'+esc(p.icon||'/Assets/img/default-plugin.png')+'" alt="" onerror="this.src=\'/Assets/img/default-plugin.png\'"><div class="featured-text"><div class="featured-title-row"><div class="featured-copy"><div class="featured-title"><span class="featured-name">'+esc(p.name)+'</span><span class="featured-version">v'+esc(p.version||'')+'</span></div><div class="featured-desc" title="'+esc(p.description||'{:t("plugin_market.no_summary")}')+'">'+esc(p.description||'{:t("plugin_market.no_summary")}')+'</div></div>'+featuredPriceHtml(p)+'</div></div></div></div></article>';
+        });$('#featuredGrid').html(html);
     }
-
-    function fmtCount(n) {
-        if (n >= 10000) return (n/10000).toFixed(1)+'万';
-        if (n >= 1000) return (n/1000).toFixed(1)+'k';
-        return n;
+    function renderChart(selector,list,type){
+        if(!list.length){$(selector).html('<div class="empty-state" style="grid-column:1/-1;">{:t('home.no_plugins')}</div>');return;}
+        var html='';list.slice(0,10).forEach(function(p,index){var side=type==='downloads'?'<i class="layui-icon layui-icon-download-circle"></i> '+fmtCount(p.download_count):dateOnly(p.published_at);
+            html+='<div class="chart-item js-plugin-card" data-id="'+parseInt(p.id,10)+'"><span class="chart-rank '+(index<3?'top':'')+'">'+(index+1)+'</span><img class="chart-icon" src="'+esc(p.icon||'/Assets/img/default-plugin.png')+'" alt="" onerror="this.src=\'/Assets/img/default-plugin.png\'"><div class="chart-info"><div class="chart-name">'+esc(p.name)+'</div><div class="chart-meta">'+authorHtml(p)+' · '+esc(catMap[p.category]||'{:t("feedback.type_other")}')+'</div></div><div class="chart-side">'+priceHtml(p,true)+'<div style="margin-top:4px;">'+side+'</div></div></div>';
+        });$(selector).html(html);
     }
-
-    function renderPlugins(plugins) {
-        var html = '';
-        if (plugins.length === 0) {
-            html = '<div style="grid-column:1/-1;text-align:center;padding:90px 0;color:#bbb;"><i class="layui-icon layui-icon-component" style="font-size:52px;display:block;margin-bottom:14px;"></i>暂无插件</div>';
-        } else {
-            plugins.forEach(function(p) {
-                var icon = p.icon || '/Assets/img/default-plugin.png';
-                var desc = p.description || '暂无简介';
-                var badge = '';
-                if (p.published_at && new Date(p.published_at.replace(/-/g, '/')).getTime() > Date.now()) {
-                    badge = '<span class="card-badge soon">即将上线</span>';
-                } else if (p.is_hot == 1) {
-                    badge = '<span class="card-badge hot">热门</span>';
-                } else if (p.is_recommend == 1) {
-                    badge = '<span class="card-badge rec">推荐</span>';
-                }
-
-                html += '<div class="plugin-card" data-id="'+p.id+'">';
-                html +=   badge;
-                html += '  <div class="card-top">';
-                html += '    <img src="'+icon+'" class="card-icon" onerror="this.src=\'/Assets/img/default-plugin.png\'">';
-                html += '    <div class="card-info">';
-                html += '      <div class="card-name" title="'+esc(p.name)+'">'+esc(p.name)+' <span class="card-version" data-plugin-id="'+p.id+'">v'+esc(p.version)+'</span></div>';
-                html += '      <div class="card-meta"><span class="card-cat-tag">'+(catMap[p.category]||'其他')+'</span> <span class="meta-sep"></span> <i class="layui-icon layui-icon-username meta-icon"></i> '+authorHtml(p)+' <span class="meta-sep"></span> <i class="layui-icon layui-icon-download-circle meta-icon"></i> '+fmtCount(p.download_count)+'</div>';
-                html += '    </div>';
-                html += '  </div>';
-                html += '  <div class="card-desc">'+esc(desc)+'</div>';
-                html += '  <div class="card-foot">';
-                if (p.price == 0) {
-                    html += '    <span class="card-price free">免费</span>';
-                } else if (p.pay_type == 'points') {
-                    html += '    <span class="card-price paid">'+parseInt(p.price)+' <span style="font-size:11px;color:#8e8e93;">积分</span></span>';
-                } else {
-                    html += '    <span class="card-price paid">¥'+p.price+'</span>';
-                }
-                html += '    <div class="card-extra"><span class="stars">'+renderStars(p.rating_avg)+'</span> <i class="layui-icon layui-icon-dialogue meta-icon"></i> <span>'+p.comment_count+'</span></div>';
-                html += '  </div>';
-                html += '</div>';
-            });
-        }
-        $('#pluginGrid').html(html);
-        $('.plugin-card').click(function() { showDetail($(this).data('id')); });
-        $('.card-version').click(function(e) { e.stopPropagation(); showVersions($(this).data('plugin-id')); });
+    function loadPlugins(page){page=page||1;$.ajax({type:'POST',url:'{:url("/UserPlugin/market")}',data:Object.assign({},searchParams,{current_page:page,limit:pageLimit}),dataType:'json',success:function(res){
+        if(res.code!==0){layer.msg(res.msg||'{:t("plugin_market.list_load_failed")}',{icon:2});return;}var result=res.data.data,total=Number(result.total)||0,prefix='{:t("plugin_market.total_prefix")}';renderPlugins(result.data||[]);renderPagination(total,page);$('#totalBadge').text(prefix+(prefix?' ':'')+total+'{:t("plugin_market.total_suffix")}');
+    },error:function(){$('#pluginGrid').html('<div class="empty-state"><i class="layui-icon layui-icon-face-cry"></i>{:t('plugin_market.load_retry')}</div>');}});}
+    function renderPlugins(list){
+        if(!list.length){$('#pluginGrid').html('<div class="empty-state"><i class="layui-icon layui-icon-component"></i>{:t('plugin_market.no_matches')}</div>');return;}
+        var html='';list.forEach(function(p){var badge='';if(p.published_at&&new Date(String(p.published_at).replace(/-/g,'/')).getTime()>Date.now())badge='<span class="card-badge soon">{:t('home.coming_soon')}</span>';else if(Number(p.is_hot)===1)badge='<span class="card-badge hot">{:t('home.hot')}</span>';else if(Number(p.is_recommend)===1)badge='<span class="card-badge rec">{:t('plugin_market.recommended')}</span>';
+            html+='<article class="plugin-card js-plugin-card" data-id="'+parseInt(p.id,10)+'">'+badge+'<div class="card-top"><img class="card-icon" src="'+esc(p.icon||'/Assets/img/default-plugin.png')+'" alt="" onerror="this.src=\'/Assets/img/default-plugin.png\'"><div class="card-info"><div class="card-name" title="'+esc(p.name)+'">'+esc(p.name)+' <span class="card-version" data-plugin-id="'+parseInt(p.id,10)+'">v'+esc(p.version)+'</span></div><div class="card-meta"><span class="card-cat">'+esc(catMap[p.category]||'{:t("feedback.type_other")}')+'</span><span>'+authorHtml(p)+'</span><span><i class="layui-icon layui-icon-download-circle"></i> '+fmtCount(p.download_count)+'</span></div></div></div><div class="card-desc">'+esc(p.description||'{:t("plugin_market.no_summary")}')+'</div><div class="card-foot">'+priceHtml(p,false)+'<div class="card-extra"><span class="stars">'+renderStars(p.rating_avg)+'</span> · '+fmtCount(p.comment_count)+'{:t("plugin_market.comment_suffix")}</div></div></article>';
+        });$('#pluginGrid').html(html);
     }
-
-    function renderPagination(total, curr) {
-        laypage.render({
-            elem: 'pagination', count: total, curr: curr, limit: 10,
-            layout: ['prev', 'page', 'next'],
-            jump: function(obj, first) { if (!first) loadPlugins(obj.curr); }
-        });
-    }
-
-    function showDetail(id) {
-        layer.open({
-            type: 2, title: '插件详情',
-            content: '{:url("/UserPlugin/detail")}?id=' + id,
-            area: ['90%', '90%'], maxmin: true
-        });
-    }
-    function authorHtml(p) {
-        var name = p.authorDisplayName || p.author || '未知用户';
-        if (p.isOfficialAuthor) return '<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name)+'</span>';
-        return esc(name);
-    }
-    function showVersions(id) {
-        $.ajax({type:'GET',url:'{:url("/UserPlugin/versions")}',data:{plugin_id:id},dataType:'json',
-            success:function(r){
-                if(r.code!=0){ layer.msg(r.msg,{icon:2}); return; }
-                var list = (r.data && r.data.list) ? r.data.list : [];
-                var html = '<div style="padding:18px 22px;">';
-                if(!list.length) html += '<div style="text-align:center;color:#bbb;padding:40px 0;">暂无版本记录</div>';
-                list.forEach(function(v){
-                    html += '<div style="border-left:2px solid #e8eef7;padding:0 0 18px 18px;position:relative;">';
-                    html += '<div style="font-weight:600;">v'+esc(v.version)+(v.is_latest?' <span class="layui-badge layui-bg-blue">当前版本</span>':'')+'</div>';
-                    html += '<div style="font-size:12px;color:#999;margin-top:4px;">'+esc(v.created_at||'')+' · '+authorHtml({authorDisplayName:v.authorDisplayName,isOfficialAuthor:v.isOfficialAuthor})+'</div>';
-                    html += '<div style="font-size:13px;color:#555;line-height:1.7;margin-top:8px;white-space:pre-wrap;">'+esc(v.update_description||'暂无更新说明')+'</div>';
-                    if(v.can_download){
-                        html += '<button class="layui-btn layui-btn-xs layui-btn-normal market-version-download" data-plugin-id="'+id+'" data-version-id="'+v.id+'" style="margin-top:10px;">下载</button>';
-                    }
-                    html += '</div>';
-                });
-                html += '</div>';
-                layer.open({type:1,title:'版本历史',area:['560px','70%'],content:html});
-            }});
-    }
-    $(document).on('click', '.market-version-download', function(){
-        var pluginId = $(this).data('plugin-id');
-        var versionId = $(this).data('version-id');
-        var url = '{:url("/UserPlugin/downloadVersion")}?plugin_id=' + pluginId + '&version_id=' + versionId;
-        layer.msg('正在检查下载权限...', {icon: 16, shade: 0.01, time: 0});
-        $.ajax({
-            type:'GET',
-            url:'{:url("/UserPlugin/checkVersionDownload")}',
-            data:{plugin_id:pluginId, version_id:versionId},
-            dataType:'json',
-            success:function(r){
-                layer.closeAll('dialog');
-                if(r.code != 0){
-                    layer.msg(r.msg || '暂时无法下载该版本',{icon:2});
-                    return;
-                }
-                layer.msg('开始下载',{icon:1});
-                window.location.href = url;
-            },
-            error:function(){
-                layer.closeAll('dialog');
-                layer.msg('下载检查失败，请稍后重试',{icon:2});
-            }
-        });
-    });
-
-    function esc(s) {
-        var m = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
-        return String(s||'').replace(/[&<>"']/g,function(c){return m[c];});
-    }
-
-    form.on('submit(SF_TbSearch)', function (data) {
-        searchParams = data.field;
-        loadPlugins(1);
-        return false;
-    });
-
-    loadPlugins(1);
+    function renderPagination(total,current){if(total<=pageLimit){$('#pagination').empty();return;}laypage.render({elem:'pagination',count:total,curr:current,limit:pageLimit,layout:['prev','page','next'],jump:function(obj,first){if(!first)loadPlugins(obj.curr);}});}
+    function showDetail(id){layer.open({type:2,title:'{:t("home.plugin_details")}',content:'{:url("/UserPlugin/detail")}?id='+encodeURIComponent(id),area:['90%','90%'],maxmin:true});}
+    function showVersions(id){$.ajax({type:'GET',url:'{:url("/UserPlugin/versions")}',data:{plugin_id:id},dataType:'json',success:function(res){
+        if(res.code!==0){layer.msg(res.msg,{icon:2});return;}var list=(res.data&&res.data.list)||[],html='<div style="padding:18px 22px;">';if(!list.length)html+='<div style="text-align:center;color:#bbb;padding:40px 0;">{:t('plugin_detail.no_versions')}</div>';list.forEach(function(v){html+='<div style="border-left:2px solid #e8eef7;padding:0 0 18px 18px;position:relative;"><div style="font-weight:600;">v'+esc(v.version)+(v.is_latest?' <span class="layui-badge layui-bg-blue">{:t('version_ui.current_version')}</span>':'')+'</div><div style="font-size:12px;color:#999;margin-top:4px;">'+esc(v.created_at||'')+' · '+authorHtml(v)+'</div><div style="font-size:13px;color:#555;line-height:1.7;margin-top:8px;white-space:pre-wrap;">'+esc(v.update_description||'{:t("plugin_detail.no_update_notes")}')+'</div>';if(v.can_download)html+='<button class="layui-btn layui-btn-xs layui-btn-normal market-version-download" data-plugin-id="'+parseInt(id,10)+'" data-version-id="'+parseInt(v.id,10)+'" style="margin-top:10px;">{:t('wxpay_ui.download')}</button>';html+='</div>';});layer.open({type:1,title:'{:t("plugin_detail.version_history")}',area:['560px','70%'],content:html+'</div>'});
+    }});}
+    $(document).on('click','.js-plugin-card',function(){showDetail($(this).data('id'));});
+    $(document).on('click','.card-version',function(event){event.stopPropagation();showVersions($(this).data('plugin-id'));});
+    $(document).on('click','.market-version-download',function(event){event.stopPropagation();var pluginId=$(this).data('plugin-id'),versionId=$(this).data('version-id');layer.msg('{:t("plugin_detail.checking_download")}',{icon:16,shade:.01,time:0});$.ajax({type:'GET',url:'{:url("/UserPlugin/checkVersionDownload")}',data:{plugin_id:pluginId,version_id:versionId},dataType:'json',success:function(res){layer.closeAll('dialog');if(res.code!==0){layer.msg(res.msg||'{:t("plugin_detail.version_unavailable")}',{icon:2});return;}window.location.href='{:url("/UserPlugin/downloadVersion")}?plugin_id='+encodeURIComponent(pluginId)+'&version_id='+encodeURIComponent(versionId);},error:function(){layer.closeAll('dialog');layer.msg('{:t("plugin_detail.download_check_failed")}',{icon:2});}});});
+    form.on('submit(SF_TbSearch)',function(data){searchParams=data.field;loadPlugins(1);return false;});
+    loadShowcase();loadPlugins(1);
 });
 </script>

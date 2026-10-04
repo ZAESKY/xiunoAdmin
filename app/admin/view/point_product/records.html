@@ -5,14 +5,14 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内容</label>
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="输入ID、商品或用户名"/>
+                            <input name="text" class="layui-input" placeholder="{:t('point_product.record_search_placeholder')}"/>
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
                         <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
-                            <i class="layui-icon">&#xe615;</i>搜索
+                            <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
@@ -40,12 +40,12 @@ layui.use(['table', 'form', 'layer'], function(){
         },
         cols: [[
             {field:'id', title:'ID', width:70, sort:true},
-            {field:'username', title:'用户', width:130},
-            {field:'product_name', title:'商品', minWidth:160},
-            {field:'cost_points', title:'消耗积分', width:110},
-            {field:'status', title:'状态', width:100, templet:function(d){return '<span class="layui-badge layui-badge-green">'+d.status+'</span>';}},
-            {field:'created_at', title:'兑换时间', minWidth:170},
-            {title:'奖品详情', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>';}}
+            {field:'username', title:'{:t("admin_user.user_suffix")}', width:130},
+            {field:'product_name', title:'{:t("codepay_ui.label_product")}', minWidth:160},
+            {field:'cost_points', title:'{:t("point_product.points_spent")}', width:110},
+            {field:'status', title:'{:t("common.status")}', width:100, templet:function(d){return '<span class="layui-badge layui-badge-green">'+d.status+'</span>';}},
+            {field:'created_at', title:'{:t("point_product.redeemed_at")}', minWidth:170},
+            {title:'{:t("point_product.reward_details")}', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">{:t('common.view')}</a>';}}
         ]]
     });
     form.on('submit(SF_TbSearch)', function(data){
@@ -55,7 +55,7 @@ layui.use(['table', 'form', 'layer'], function(){
     table.on('tool(SF_Table)', function(obj){
         if(obj.event === 'detail'){
             layer.open({
-                title: '奖品详情',
+                title: '{:t("point_product.reward_details")}',
                 area: ['640px', '420px'],
         content: '<pre style="padding:15px;white-space:pre-wrap;word-break:break-all;">'+escapeHtml(obj.data.reward_info || '-')+'</pre>'
             });

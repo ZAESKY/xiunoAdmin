@@ -59,6 +59,18 @@
 .info-card .btn-feedback { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 14px; padding-top: 14px; font-size: 12px; color: #8e8e93; cursor: pointer; transition: color .2s; }
 .info-card .btn-feedback:hover { color: #2f54eb; }
 .info-card .btn-feedback i { font-size: 14px; }
+.info-card .info-actions { display:flex; align-items:center; border-top:1px solid #f5f5f5; margin-top:14px; padding-top:14px; }
+.info-card .info-actions .btn-feedback { flex:1; margin:0; padding:0 8px; }
+.info-card .info-actions .btn-feedback + .btn-feedback { border-left:1px solid #eee; }
+.info-card #btnContactPublisher { position:relative; outline:none; }
+.info-card #btnContactPublisher::before,
+.info-card #btnContactPublisher::after { position:absolute; left:50%; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .15s ease, transform .15s ease; z-index:30; }
+.info-card #btnContactPublisher::before { content:''; bottom:calc(100% + 3px); border:6px solid transparent; border-top-color:rgba(31,35,41,.92); transform:translate(-50%, 3px); }
+.info-card #btnContactPublisher::after { content:'QQ：' attr(data-qq); bottom:calc(100% + 15px); padding:7px 10px; border-radius:5px; background:rgba(31,35,41,.92); color:#fff; font-size:12px; line-height:1; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,.16); transform:translate(-50%, 3px); }
+.info-card #btnContactPublisher:hover::before,
+.info-card #btnContactPublisher:hover::after,
+.info-card #btnContactPublisher:focus::before,
+.info-card #btnContactPublisher:focus::after { opacity:1; visibility:visible; transform:translate(-50%, 0); }
 .update-desc { font-size:13px; color:#555; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
 .version-timeline { padding:18px 22px 22px; }
 .version-item { position:relative; padding:0 0 18px 22px; border-left:2px solid #e8eef7; }
@@ -139,9 +151,9 @@
                         <span class="hero-version version-link" id="heroVersion">v{$plugin.version}</span>
                         <span class="hero-badges">
                             {if condition="isset($plugin.origin_type) && $plugin.origin_type == 2"}
-                            <span class="badge repost">转载</span>
+                            <span class="badge repost">{:t('plugin_ui.repost')}</span>
                             {else/}
-                            <span class="badge origin">原创</span>
+                            <span class="badge origin">{:t('plugin_ui.original')}</span>
                             {/if}
                         </span>
                     </div>
@@ -168,24 +180,24 @@
             <div class="hero-actions">
                 {php}$isScheduled = !empty($plugin['published_at']) && strtotime($plugin['published_at']) > time();{/php}
                 {if condition="$isScheduled"}
-                <div class="price" style="color:#2d8cf0;">即将上线</div>
-                <button class="layui-btn layui-btn-disabled btn-dl" id="btnComingSoon"><i class="layui-icon layui-icon-log"></i> 发布日期</button>
-                <div class="bal-hint">{$plugin.publish_time|date='Y-m-d H:i'} 开放</div>
+                <div class="price" style="color:#2d8cf0;">{:t('home.coming_soon')}</div>
+                <button class="layui-btn layui-btn-disabled btn-dl" id="btnComingSoon"><i class="layui-icon layui-icon-log"></i> {:t('plugin_detail.release_date')}</button>
+                <div class="bal-hint">{$plugin.publish_time|date='Y-m-d H:i'} {:t('plugin_detail.opens')}</div>
                 {else/}
                 {if condition="$plugin.price == 0"}
-                <div class="price free">免费</div>
+                <div class="price free">{:t('upgrade.free')}</div>
                 {elseif condition="($plugin.pay_type ?? 'balance') == 'points'"}
-                <div class="price">{$plugin.price|intval} <small>积分</small></div>
+                <div class="price">{$plugin.price|intval} <small>{:t('accounting.point_unit')}</small></div>
                 {else/}
                 <div class="price">¥{$plugin.price}</div>
                 {/if}
                 {if condition="$isPurchased"}
-                <button class="layui-btn layui-btn-normal btn-dl" id="btnDownload"><i class="layui-icon layui-icon-download-circle"></i> 获取</button>
+                <button class="layui-btn layui-btn-normal btn-dl" id="btnDownload"><i class="layui-icon layui-icon-download-circle"></i> {:t('plugin_detail.get')}</button>
                 {if condition="$isOwner"}
-                <div class="bal-hint">我发布的插件</div>
+                <div class="bal-hint">{:t('plugin_detail.my_plugin')}</div>
                 {/if}
                 {else/}
-                <button class="layui-btn layui-btn-warm btn-dl" id="btnPurchase"><i class="layui-icon layui-icon-diamond"></i> {if condition="($plugin.pay_type ?? 'balance') == 'points'"}积分购买{else/}购买{/if}</button>
+                <button class="layui-btn layui-btn-warm btn-dl" id="btnPurchase"><i class="layui-icon layui-icon-diamond"></i> {if condition="($plugin.pay_type ?? 'balance') == 'points'"}{:t('plugin_detail.buy_points')}{else/}{:t('plugin_detail.buy')}{/if}</button>
                 {/if}
                 {/if}
             </div>
@@ -195,22 +207,22 @@
     <div class="detail-main">
         <div class="main-left">
             <div class="content-card">
-                <h3>介绍</h3>
+                <h3>{:t('plugin_detail.introduction')}</h3>
                 <div class="detail-content">{$plugin.content|raw}</div>
                 {if condition="isset($plugin.origin_type) && $plugin.origin_type == 2"}
                 <div class="repost-notice">
-                    <h4><i class="layui-icon layui-icon-tips"></i> 转载声明</h4>
+                    <h4><i class="layui-icon layui-icon-tips"></i> {:t('plugin_detail.repost_statement')}</h4>
                     {if condition="!empty($plugin.origin_author)"}
-                    <div class="row"><b>原作者：</b>{$plugin.origin_author}</div>
+                    <div class="row"><b>{:t('plugin_detail.original_author')}：</b>{$plugin.origin_author}</div>
                     {/if}
                     {if condition="!empty($plugin.origin_url)"}
-                    <div class="row"><b>来源：</b><a href="{$plugin.origin_url}" target="_blank">{$plugin.origin_url}</a></div>
+                    <div class="row"><b>{:t('plugin_detail.source')}：</b><a href="{$plugin.origin_url}" target="_blank">{$plugin.origin_url}</a></div>
                     {/if}
                     <div class="disclaimer">
                         {if condition="!empty($plugin.origin_note)"}
                         {$plugin.origin_note}
                         {else/}
-                        本插件为转载资源，版权归原作者所有。平台仅提供展示与下载，不承担因转载产生的任何版权纠纷与法律责任。如涉及侵权请联系平台下架处理。
+                        {:t('plugin_detail.copyright_notice')}
                         {/if}
                     </div>
                 </div>
@@ -218,54 +230,54 @@
             </div>
 
             <div class="comments-card">
-                <h3>评分与评论</h3>
+                <h3>{:t('plugin_detail.rating_comments')}</h3>
                 <div id="commentList"></div>
                 <div id="commentPagination"></div>
                 {if condition="!$isOwner"}
                 <div class="comment-form-wrap">
                     {if condition="$hasCommented"}
-                    <h4>我的评论</h4>
+                    <h4>{:t('plugin_detail.my_comment')}</h4>
                     <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
                         <i class="layui-icon layui-icon-ok-circle" style="font-size:32px;color:#52c41a;"></i>
                         <div>
-                            <div style="font-size:13px;font-weight:600;color:#333;">您已评论过此插件</div>
-                            <div style="font-size:12px;color:#999;">状态：
-                                {if condition="$myComment.status == 0"}<span class="layui-badge layui-badge-orange">待审核</span>
-                                {elseif condition="$myComment.status == 1"}<span class="layui-badge layui-badge-green">已通过</span>
-                                {else/}<span class="layui-badge layui-badge-red">已拒绝</span>{/if}
+                            <div style="font-size:13px;font-weight:600;color:#333;">{:t('plugin_detail.already_commented')}</div>
+                            <div style="font-size:12px;color:#999;">{:t('common.status')}：
+                                {if condition="$myComment.status == 0"}<span class="layui-badge layui-badge-orange">{:t('plugin_ui.pending_review')}</span>
+                                {elseif condition="$myComment.status == 1"}<span class="layui-badge layui-badge-green">{:t('plugin_detail.approved')}</span>
+                                {else/}<span class="layui-badge layui-badge-red">{:t('plugin_detail.rejected')}</span>{/if}
                             </div>
                         </div>
                     </div>
                     <div style="background:#f9f9fb;border-radius:6px;padding:16px;">
-                        <div style="color:#8c8c8c;font-size:12px;margin-bottom:6px;">我的评分：<b style="color:#f5a623;font-size:15px;">{$myComment.rating} 星</b></div>
+                        <div style="color:#8c8c8c;font-size:12px;margin-bottom:6px;">{:t('plugin_detail.my_rating')}：<b style="color:#f5a623;font-size:15px;">{$myComment.rating} {:t('plugin_detail.star')}</b></div>
                         <div style="font-size:13px;color:#555;line-height:1.7;">{$myComment.content}</div>
                     </div>
                     {elseif condition="$canComment"}
-                    <h4>发表评论</h4>
+                    <h4>{:t('plugin_detail.post_comment')}</h4>
                     <form class="layui-form" lay-filter="commentForm" style="max-width:560px;">
                         <input type="hidden" name="plugin_id" value="{$plugin.id}">
                         <div class="layui-form-item">
-                            <label class="layui-form-label" style="width:70px;">评分</label>
+                            <label class="layui-form-label" style="width:70px;">{:t('plugin_ui.rating')}</label>
                             <div class="layui-input-block" style="margin-left:100px;">
                                 <div id="submitRating"></div>
                                 <input type="hidden" name="rating" id="ratingValue" value="5">
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label" style="width:70px;">评论</label>
+                            <label class="layui-form-label" style="width:70px;">{:t('plugin_detail.comment')}</label>
                             <div class="layui-input-block" style="margin-left:100px;">
-                                <textarea name="content" class="layui-textarea" placeholder="请输入评论内容（10-500字）" style="min-height:100px;"></textarea>
+                                <textarea name="content" class="layui-textarea" placeholder="{:t('plugin_detail.comment_placeholder')}" style="min-height:100px;"></textarea>
                             </div>
                         </div>
                         <div class="layui-form-item">
                             <div class="layui-input-block" style="margin-left:100px;">
-                                <button class="layui-btn" lay-submit lay-filter="submitComment"><i class="layui-icon layui-icon-ok"></i> 提交</button>
+                                <button class="layui-btn" lay-submit lay-filter="submitComment"><i class="layui-icon layui-icon-ok"></i> {:t('common.submit')}</button>
                             </div>
                         </div>
                     </form>
                     {else/}
                     <div style="background:#f9f9fb;border-radius:6px;padding:16px;color:#8c8c8c;font-size:13px;">
-                        购买或下载插件后才能发表评论。
+                        {:t('plugin_detail.comment_requirement')}
                     </div>
                     {/if}
                 </div>
@@ -275,8 +287,8 @@
 
         <div class="main-right">
             <div class="info-card">
-                <h4>信息</h4>
-                <div class="info-row"><span class="label">开发者</span><span class="value">
+                <h4>{:t('plugin_detail.info')}</h4>
+                <div class="info-row"><span class="label">{:t('plugin_detail.developer')}</span><span class="value">
                     {if condition="!empty($plugin.isOfficialAuthor)"}
                     <span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>{$plugin.authorDisplayName}</span>
                     {else/}
@@ -284,40 +296,45 @@
                     {/if}
                 </span></div>
                 {if condition="!empty($plugin.author_url)"}
-                <div class="info-row"><span class="label">作者主页</span><span class="value"><a href="{$plugin.author_url}" target="_blank">访问 <i class="layui-icon layui-icon-link" style="font-size:10px;"></i></a></span></div>
+                <div class="info-row"><span class="label">{:t('plugin_detail.author_home')}</span><span class="value"><a href="{$plugin.author_url}" target="_blank">{:t('plugin_detail.visit')} <i class="layui-icon layui-icon-link" style="font-size:10px;"></i></a></span></div>
                 {/if}
-                <div class="info-row"><span class="label">分类</span><span class="value">{:plugin_category_label($plugin.category)}</span></div>
-                <div class="info-row"><span class="label">版本</span><span class="value"><a href="javascript:;" id="sideVersion">v{$plugin.version}</a></span></div>
-                <div class="info-row"><span class="label">下载</span><span class="value">{$plugin.download_count}</span></div>
+                <div class="info-row"><span class="label">{:t('plugin_ui.category')}</span><span class="value">{:plugin_category_label($plugin.category)}</span></div>
+                <div class="info-row"><span class="label">{:t('version_ui.version_suffix')}</span><span class="value"><a href="javascript:;" id="sideVersion">v{$plugin.version}</a></span></div>
+                <div class="info-row"><span class="label">{:t('wxpay_ui.download')}</span><span class="value">{$plugin.download_count}</span></div>
                 {if condition="!empty($plugin.published_at)"}
-                <div class="info-row"><span class="label">发布时间</span><span class="value">{$plugin.published_at|date='Y-m-d'}</span></div>
+                <div class="info-row"><span class="label">{:t('plugin_ui.publish_time')}</span><span class="value">{$plugin.published_at|date='Y-m-d'}</span></div>
                 {/if}
                 {if condition="!empty($plugin.updated_at)"}
-                <div class="info-row"><span class="label">更新时间</span><span class="value">{$plugin.updated_at|date='Y-m-d'}</span></div>
+                <div class="info-row"><span class="label">{:t('plugin_detail.updated_at')}</span><span class="value">{$plugin.updated_at|date='Y-m-d'}</span></div>
                 {/if}
-                <div class="info-row"><span class="label">标识</span><span class="value" title="{$plugin.slug}">{$plugin.slug}</span></div>
+                <div class="info-row"><span class="label">{:t('plugin_detail.identifier')}</span><span class="value" title="{$plugin.slug}">{$plugin.slug}</span></div>
                 {if condition="!empty($plugin.related_plugin)"}
-                <div class="info-row"><span class="label">关联插件</span><span class="value"><a href="{:url('/UserPlugin/detail', ['id' => $plugin.related_plugin.id])}">{$plugin.related_plugin.name}</a></span></div>
+                <div class="info-row"><span class="label">{:t('plugin_ui.related_plugin')}</span><span class="value"><a href="{:url('/UserPlugin/detail', ['id' => $plugin.related_plugin.id])}">{$plugin.related_plugin.name}</a></span></div>
                 {/if}
-                <div class="btn-feedback" id="btnFeedback"><i class="layui-icon layui-icon-survey"></i> 反馈</div>
+                <div class="info-actions">
+                    <div class="btn-feedback" id="btnFeedback"><i class="layui-icon layui-icon-survey"></i> {:t('plugin_detail.feedback')}</div>
+                    {if condition="!empty($publisherQq)"}
+                    <div class="btn-feedback" id="btnContactPublisher" data-qq="{$publisherQq}" role="button" tabindex="0" aria-label="{:t('plugin_ui.publisher')} QQ: {$publisherQq}, {:t('common_ui.click_copy')}"><i class="layui-icon layui-icon-login-qq"></i> {:t('plugin_detail.contact')}</div>
+                    {/if}
+                </div>
             </div>
             <div class="info-card">
-                <h4>更新说明</h4>
-                <div class="update-desc">{$plugin.latestUpdateDescription|default='暂无更新说明'}</div>
-                <div class="btn-feedback" id="btnVersions"><i class="layui-icon layui-icon-log"></i> 查看全部更新记录</div>
+                <h4>{:t('plugin_ui.update_notes')}</h4>
+                <div class="update-desc">{if !empty($plugin.latestUpdateDescription)}{$plugin.latestUpdateDescription}{else/}{:t('plugin_detail.no_update_notes')}{/if}</div>
+                <div class="btn-feedback" id="btnVersions"><i class="layui-icon layui-icon-log"></i> {:t('plugin_detail.all_updates')}</div>
             </div>
             {if condition="!empty($plugin.related_plugin)"}
             <div class="info-card">
-                <h4>关联插件</h4>
+                <h4>{:t('plugin_ui.related_plugin')}</h4>
                 <a class="ap-item" href="{:url('/UserPlugin/detail', ['id' => $plugin.related_plugin.id])}">
                     <img src="{$plugin.related_plugin.icon}" class="ap-icon" onerror="this.style.display='none'">
                     <div class="ap-body">
                         <div class="ap-name">{$plugin.related_plugin.name}</div>
                         <div class="ap-price">
                             {if condition="$plugin.related_plugin.price == 0"}
-                            <span style="color:#34c759;">免费</span>
+                            <span style="color:#34c759;">{:t('upgrade.free')}</span>
                             {elseif condition="($plugin.related_plugin.pay_type ?? 'balance') == 'points'"}
-                            {$plugin.related_plugin.price|intval} 积分
+                            {$plugin.related_plugin.price|intval} {:t('accounting.point_unit')}
                             {else/}
                             ¥{$plugin.related_plugin.price}
                             {/if}
@@ -328,7 +345,7 @@
             {/if}
             {if condition="!empty($referencingPlugins)"}
             <div class="info-card">
-                <h4>被这些插件关联</h4>
+                <h4>{:t('plugin_detail.related_by')}</h4>
                 {foreach $referencingPlugins as $rp}
                 <a class="ap-item" href="{:url('/UserPlugin/detail', ['id' => $rp.id])}">
                     <img src="{$rp.icon}" class="ap-icon" onerror="this.style.display='none'">
@@ -336,9 +353,9 @@
                         <div class="ap-name">{$rp.name}</div>
                         <div class="ap-price">
                             {if condition="$rp.price == 0"}
-                            <span style="color:#34c759;">免费</span>
+                            <span style="color:#34c759;">{:t('upgrade.free')}</span>
                             {elseif condition="($rp.pay_type ?? 'balance') == 'points'"}
-                            {$rp.price|intval} 积分
+                            {$rp.price|intval} {:t('accounting.point_unit')}
                             {else/}
                             ¥{$rp.price}
                             {/if}
@@ -350,13 +367,13 @@
             {/if}
             {if condition="!empty($authorPlugins)"}
             <div class="info-card">
-                <h4>作者其他插件</h4>
+                <h4>{:t('plugin_detail.other_by_author')}</h4>
                 {foreach $authorPlugins as $ap}
                 <a class="ap-item" href="{:url('/UserPlugin/detail', ['id' => $ap.id])}">
                     <img src="{$ap.icon}" class="ap-icon" onerror="this.style.display='none'">
                     <div class="ap-body">
                         <div class="ap-name">{$ap.name}</div>
-                        <div class="ap-price">{if $ap.price == 0}<span style="color:#34c759;">免费</span>{else/}¥{$ap.price}{/if}</div>
+                        <div class="ap-price">{if $ap.price == 0}<span style="color:#34c759;">{:t('upgrade.free')}</span>{else/}¥{$ap.price}{/if}</div>
                     </div>
                 </a>
                 {/foreach}
@@ -389,18 +406,18 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
     $('#heroStars').text(renderStars({$plugin.rating_avg}));
 
     {if condition="!$hasCommented"}
-    rate.render({ elem: '#submitRating', value: 5, setText: function(v) { $('#ratingValue').val(v); return v+' 星'; } });
+    rate.render({ elem: '#submitRating', value: 5, setText: function(v) { $('#ratingValue').val(v); return v+' {:t("plugin_detail.star")}'; } });
     {/if}
 
     form.on('submit(submitComment)', function(data) {
         var c = data.field.content.trim();
-        if (c.length < 10) { notice.msg('评论内容至少10个字', {icon:2}); return false; }
-        if (c.length > 500) { notice.msg('评论内容不能超过500字', {icon:2}); return false; }
-        notice.msg('正在提交...', {icon:4, close:true});
+        if (c.length < 10) { notice.msg('{:t("plugin_detail.comment_too_short")}', {icon:2}); return false; }
+        if (c.length > 500) { notice.msg('{:t("plugin_detail.comment_too_long")}', {icon:2}); return false; }
+        notice.msg('{:t("registration.submitting")}', {icon:4, close:true});
         $.ajax({
             type:'POST', url:'{:url("/UserPlugin/submitComment")}', data:data.field, dataType:'json',
             success:function(r){ notice.destroy(); if(r.code==0){ notice.msg(r.msg,{icon:1}); setTimeout(function(){location.reload();},1500); } else { notice.msg(r.msg,{icon:2}); } },
-            error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
+            error:function(){ notice.destroy(); notice.msg('{:t("common.server_error")}',{icon:2}); }
         });
         return false;
     });
@@ -411,12 +428,12 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
         });
     }
     function renderComments(list){
-        if(list.length===0){ $('#commentList').html('<div style="text-align:center;padding:40px 0;color:#bbb;">暂无评论，快来发表第一条评论吧</div>'); return; }
+        if(list.length===0){ $('#commentList').html('<div style="text-align:center;padding:40px 0;color:#bbb;">{:t('plugin_detail.no_comments')}</div>'); return; }
         var h='';
         list.forEach(function(c){
-            h+='<div class="comment-item"><div class="cmt-head"><div><span class="cmt-user">'+esc(c.username||'匿名')+'</span><span class="cmt-time">'+esc(c.created_at)+'</span></div><div id="r-'+c.id+'"></div></div>';
+            h+='<div class="comment-item"><div class="cmt-head"><div><span class="cmt-user">'+esc(c.username||'{:t("plugin_detail.anonymous")}')+'</span><span class="cmt-time">'+esc(c.created_at)+'</span></div><div id="r-'+c.id+'"></div></div>';
             h+='<div class="cmt-body">'+esc(c.content)+'</div>';
-            if(c.reply_content) h+='<div class="cmt-reply"><div class="rp-label"><i class="layui-icon layui-icon-username"></i> 开发者回复 '+esc(c.reply_at)+'</div>'+esc(c.reply_content)+'</div>';
+            if(c.reply_content) h+='<div class="cmt-reply"><div class="rp-label"><i class="layui-icon layui-icon-username"></i> {:t("plugin_detail.developer_reply")} '+esc(c.reply_at)+'</div>'+esc(c.reply_content)+'</div>';
             h+='</div>';
         });
         $('#commentList').html(h);
@@ -428,11 +445,11 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
     }
     function esc(s){ var m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(s||'').replace(/[&<>"']/g,function(c){return m[c];}); }
     function renderOfficial(name, flag) {
-        if (!flag) return esc(name || '未知用户');
-        return '<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name || '官方')+'</span>';
+        if (!flag) return esc(name || '{:t("admin_home.unknown_user")}');
+        return '<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name || '{:t("plugin_detail.official")}')+'</span>';
     }
     function openVersions() {
-        notice.msg('正在加载版本记录...',{icon:4,close:true});
+        notice.msg('{:t("plugin_detail.loading_versions")}',{icon:4,close:true});
         $.ajax({
             type:'GET', url:'{:url("/UserPlugin/versions")}', data:{plugin_id:pluginId}, dataType:'json',
             success:function(r){
@@ -441,34 +458,34 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
                 var list = (r.data && r.data.list) ? r.data.list : [];
                 var html = '<div class="version-timeline">';
                 if(!list.length){
-                    html += '<div style="text-align:center;color:#bbb;padding:42px 0;">暂无版本记录</div>';
+                    html += '<div style="text-align:center;color:#bbb;padding:42px 0;">{:t('plugin_detail.no_versions')}</div>';
                 } else {
                     list.forEach(function(v){
                         html += '<div class="version-item">';
                         html += '<div class="version-head"><span>v'+esc(v.version)+'</span>';
-                        if(v.is_latest) html += '<span class="layui-badge layui-bg-blue">当前版本</span>';
+                        if(v.is_latest) html += '<span class="layui-badge layui-bg-blue">{:t('version_ui.current_version')}</span>';
                         html += '<span style="font-size:12px;font-weight:400;color:#8e8e93;">'+renderOfficial(v.authorDisplayName, v.isOfficialAuthor)+'</span></div>';
                         html += '<div class="version-time">'+esc(v.created_at || v.updated_at || '')+'</div>';
-                        html += '<div class="version-desc">'+esc(v.update_description || '暂无更新说明')+'</div>';
+                        html += '<div class="version-desc">'+esc(v.update_description || '{:t("plugin_detail.no_update_notes")}')+'</div>';
                         if(v.can_download){
-                            html += '<div class="version-actions"><button class="layui-btn layui-btn-xs layui-btn-normal btn-version-download" data-id="'+v.id+'"><i class="layui-icon layui-icon-download-circle"></i> 下载</button></div>';
+                            html += '<div class="version-actions"><button class="layui-btn layui-btn-xs layui-btn-normal btn-version-download" data-id="'+v.id+'"><i class="layui-icon layui-icon-download-circle"></i> {:t("plugin_detail.download")}</button></div>';
                         }
                         html += '</div>';
                     });
                 }
                 html += '</div>';
-                layer.open({type:1,title:'版本历史',area:['560px','70%'],shade:.25,content:html});
+                layer.open({type:1,title:'{:t("plugin_detail.version_history")}',area:['560px','70%'],shade:.25,content:html});
             },
-            error:function(){ notice.destroy(); notice.msg('版本记录加载失败',{icon:2}); }
+            error:function(){ notice.destroy(); notice.msg('{:t("plugin_detail.version_load_failed")}',{icon:2}); }
         });
     }
     $('#btnVersions,#heroVersion,#sideVersion').click(openVersions);
     $(document).on('click','.btn-version-download',function(e){
         e.stopPropagation();
         var versionId = $(this).data('id');
-        if(!versionId){ notice.msg('版本记录不存在',{icon:2}); return; }
+        if(!versionId){ notice.msg('{:t("plugin_detail.version_missing")}',{icon:2}); return; }
         var url = '{:url("/UserPlugin/downloadVersion")}?plugin_id=' + pluginId + '&version_id=' + versionId;
-        notice.msg('正在检查下载权限...',{icon:4,close:true});
+        notice.msg('{:t("plugin_detail.checking_download")}',{icon:4,close:true});
         $.ajax({
             type:'GET',
             url:'{:url("/UserPlugin/checkVersionDownload")}',
@@ -477,15 +494,15 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
             success:function(r){
                 notice.destroy();
                 if(r.code != 0){
-                    layer.msg(r.msg || '暂时无法下载该版本',{icon:2});
+                    layer.msg(r.msg || '{:t("plugin_detail.version_unavailable")}',{icon:2});
                     return;
                 }
-                notice.msg('开始下载',{icon:1});
+                notice.msg('{:t("plugin_detail.download_started")}',{icon:1});
                 window.location.href = url;
             },
             error:function(){
                 notice.destroy();
-                layer.msg('下载检查失败，请稍后重试',{icon:2});
+                layer.msg('{:t("plugin_detail.download_check_failed")}',{icon:2});
             }
         });
     });
@@ -493,41 +510,67 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
     $('#btnFeedback').click(function(){
         var p = parent.layui ? parent.layui.layer : layer;
         p.open({
-            type: 1, title: '功能反馈', area: ['460px', '210px'],
-            content: '<div style="padding:20px 24px;text-align:center;"><div style="font-size:15px;color:#333;line-height:1.8;margin-bottom:20px;">如果您对此插件有任何意见、建议或BUG反馈，<br>欢迎前往功能反馈页面提交，我们会尽快处理。</div></div>'
+            type: 1, title: '{:t("menu.feedback")}', area: ['460px', '210px'],
+            content: '<div style="padding:20px 24px;text-align:center;"><div style="font-size:15px;color:#333;line-height:1.8;margin-bottom:20px;">{:t("plugin_detail.feedback_help")}</div></div>'
         });
     });
 
+    $('#btnContactPublisher').on('click keydown', function(e){
+        if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.type === 'keydown') e.preventDefault();
+        var qq = '{$publisherQq}';
+        var copied = function(){ notice.msg('{:t("auth_portal.copy_success")}', {icon:1}); };
+        var fallback = function(){
+            var input = document.createElement('textarea');
+            input.value = qq;
+            input.setAttribute('readonly', 'readonly');
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            var ok = document.execCommand('copy');
+            document.body.removeChild(input);
+            ok ? copied() : notice.msg('{:t("plugin_detail.copy_failed_manual")}' + qq, {icon:2});
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(qq).then(copied).catch(fallback);
+        } else {
+            fallback();
+        }
+    });
+
     $('#btnPurchase').click(function(){
-        layer.confirm('确定花费 <b>¥{$plugin.price}</b> 购买「{$plugin.name}」吗？<br><span style="color:#999;font-size:12px;">将从余额扣除</span>',{icon:3,shade:.1,title:'确认购买'},function(i){ layer.close(i);
-            notice.msg('处理中...',{icon:4,close:true});
+        layer.confirm('{:t("plugin_detail.confirm_purchase")}：<b>¥{$plugin.price}</b> — {$plugin.name}<br><span style="color:#999;font-size:12px;">{:t('plugin_detail.balance_deduct')}</span>',{icon:3,shade:.1,title:'{:t("plugin_detail.confirm_purchase")}'},function(i){ layer.close(i);
+            notice.msg('{:t("common_ui.processing")}',{icon:4,close:true});
             $.ajax({type:'POST',url:'{:url("/UserPlugin/purchase")}',data:{plugin_id:pluginId},dataType:'json',
                 success:function(r){ notice.destroy(); if(r.code==0){ notice.msg(r.msg,{icon:1}); setTimeout(function(){location.reload();},1500); } else notice.msg(r.msg,{icon:2}); },
-                error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
+                error:function(){ notice.destroy(); notice.msg('{:t("common.server_error")}',{icon:2}); }
             });
         });
     });
+    {if condition="!empty($plugin.publish_time)"}
     $('#btnComingSoon').click(function(){
         layer.open({
-            type: 1, title: '插件发布时间', shade: .4, area: ['420px', 'auto'],
+            type: 1, title: '{:t("plugin_detail.publish_time_title")}', shade: .4, area: ['420px', 'auto'],
             content: '<div style="text-align:center;padding:32px 24px;">' +
                 '<i class="layui-icon layui-icon-log" style="font-size:48px;color:#2d8cf0;"></i>' +
                 '<p style="margin:16px 0 8px;font-size:16px;font-weight:600;color:#1e293b;">{$plugin.name}</p>' +
-                '<p style="margin:0 0 8px;font-size:14px;color:#64748b;">预计发布于</p>' +
-                '<p style="margin:0 0 20px;font-size:22px;font-weight:700;color:#2d8cf0;">{$plugin.publish_time|date="Y年m月d日 H:i"}</p>' +
-                '<p style="margin:0;font-size:13px;color:#94a3b8;">开放后可下载使用，敬请期待</p>' +
+                '<p style="margin:0 0 8px;font-size:14px;color:#64748b;">{:t('plugin_detail.expected_at')}</p>' +
+                '<p style="margin:0 0 20px;font-size:22px;font-weight:700;color:#2d8cf0;">{$plugin.publish_time|date="Y-m-d H:i"}</p>' +
+                '<p style="margin:0;font-size:13px;color:#94a3b8;">{:t('plugin_detail.coming_soon_help')}</p>' +
                 '</div>'
         });
     });
+    {/if}
     $('#btnDownload').click(function(){
-        notice.msg('获取下载凭证...',{icon:4,close:true});
+        notice.msg('{:t("plugin_detail.getting_credential")}',{icon:4,close:true});
         $.ajax({type:'POST',url:'{:url("/UserPlugin/getDownloadToken")}',data:{plugin_id:pluginId},dataType:'json',
             success:function(r){
                 notice.destroy();
                 if(r.code==0){
-                    var startDownload = function(){ notice.msg('开始下载',{icon:1}); window.location.href='{:url("/UserPlugin/download")}?token='+r.data.token; };
+                    var startDownload = function(){ notice.msg('{:t("plugin_detail.download_started")}',{icon:1}); window.location.href='{:url("/UserPlugin/download")}?token='+r.data.token; };
                     if (r.data && r.data.related_notice) {
-                        layer.alert(r.data.related_notice, {icon: 0, title: '关联插件提示'}, function(index){
+                        layer.alert(r.data.related_notice, {icon: 0, title: '{:t("plugin_detail.related_notice")}'}, function(index){
                             layer.close(index);
                             startDownload();
                         });
@@ -536,7 +579,7 @@ layui.use(['layer', 'form', 'rate', 'laypage', 'notice', 'element'], function ()
                     }
                 } else notice.msg(r.msg,{icon:2});
             },
-            error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); }
+            error:function(){ notice.destroy(); notice.msg('{:t("common.server_error")}',{icon:2}); }
         });
     });
 

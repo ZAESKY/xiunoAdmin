@@ -2,7 +2,7 @@
 namespace app\pay\library\alipay\lib;
 use think\Exception;
 
-require_once 'AopEncrypt.php';
+require_once __DIR__ . '/AopEncrypt.php';
 
 class EncryptParseItem
 {
@@ -141,19 +141,52 @@ class AopClient
         return $stringToBeSigned;
     }
 
+    private function loadPrivateKey($key)
+    {
+        $key = html_entity_decode(trim((string)$key), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $isRsaPem = strpos($key, 'BEGIN RSA PRIVATE KEY') !== false;
+        $isPkcs8Pem = strpos($key, 'BEGIN PRIVATE KEY') !== false;
+        $body = preg_replace('/-----BEGIN [^-]+-----|-----END [^-]+-----/', '', $key);
+        $body = preg_replace('/[^A-Za-z0-9+\/=]/', '', $body);
+        if ($body === '') {
+            return false;
+        }
+
+        $types = $isRsaPem ? ['RSA PRIVATE KEY'] : ($isPkcs8Pem ? ['PRIVATE KEY'] : ['PRIVATE KEY', 'RSA PRIVATE KEY']);
+        foreach ($types as $type) {
+            $pem = "-----BEGIN {$type}-----\n" . wordwrap($body, 64, "\n", true) . "\n-----END {$type}-----";
+            $resource = openssl_pkey_get_private($pem);
+            if ($resource) {
+                return $resource;
+            }
+        }
+        return false;
+    }
+
+    private function loadPublicKey($key)
+    {
+        $key = html_entity_decode(trim((string)$key), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $body = preg_replace('/-----BEGIN [^-]+-----|-----END [^-]+-----/', '', $key);
+        $body = preg_replace('/[^A-Za-z0-9+\/=]/', '', $body);
+        if ($body === '') {
+            return false;
+        }
+        $pem = "-----BEGIN PUBLIC KEY-----\n" . wordwrap($body, 64, "\n", true) . "\n-----END PUBLIC KEY-----";
+        return openssl_pkey_get_public($pem);
+    }
+
     protected function sign($data, $signType = "RSA")
     {
         if ($this->checkEmpty($this->rsaPrivateKeyFilePath)) {
             $priKey = $this->rsaPrivateKey;
-            $res = "-----BEGIN RSA PRIVATE KEY-----\n" .
-                wordwrap($priKey, 64, "\n", true) .
-                "\n-----END RSA PRIVATE KEY-----";
         } else {
             $priKey = file_get_contents($this->rsaPrivateKeyFilePath);
-            $res = openssl_get_privatekey($priKey);
         }
+        $res = $this->loadPrivateKey($priKey);
 
-        ($res) or die('您使用的私钥格式错误，请检查RSA私钥配置');
+        if (!$res) {
+            throw new Exception('支付宝商户私钥格式错误，请检查 RSA 私钥配置');
+        }
 
         if ("RSA2" == $signType) {
             openssl_sign($data, $sign, $res, OPENSSL_ALGO_SHA256);
@@ -161,9 +194,6 @@ class AopClient
             openssl_sign($data, $sign, $res);
         }
 
-        if (!$this->checkEmpty($this->rsaPrivateKeyFilePath)) {
-            openssl_free_key($res);
-        }
         $sign = base64_encode($sign);
         return $sign;
     }
@@ -181,15 +211,14 @@ class AopClient
 
         if (!$keyfromfile) {
             $priKey = $privatekey;
-            $res = "-----BEGIN RSA PRIVATE KEY-----\n" .
-                wordwrap($priKey, 64, "\n", true) .
-                "\n-----END RSA PRIVATE KEY-----";
         } else {
             $priKey = file_get_contents($privatekey);
-            $res = openssl_get_privatekey($priKey);
         }
+        $res = $this->loadPrivateKey($priKey);
 
-        ($res) or die('您使用的私钥格式错误，请检查RSA私钥配置');
+        if (!$res) {
+            throw new Exception('支付宝商户私钥格式错误，请检查 RSA 私钥配置');
+        }
 
         if ("RSA2" == $signType) {
             openssl_sign($data, $sign, $res, OPENSSL_ALGO_SHA256);
@@ -197,9 +226,6 @@ class AopClient
             openssl_sign($data, $sign, $res);
         }
 
-        if ($keyfromfile) {
-            openssl_free_key($res);
-        }
         $sign = base64_encode($sign);
         return $sign;
     }
@@ -211,7 +237,10 @@ class AopClient
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FAILONERROR, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
         $postBodyString = "";
         $encodeArray = Array();
@@ -553,9 +582,7 @@ class AopClient
         try {
             $resp = $this->curl($requestUrl, $apiParams);
         } catch (Exception $e) {
-
-            $this->logCommunicationError($sysParams["method"], $requestUrl, "HTTP_ERROR_" . $e->getCode(), $e->getMessage());
-            return false;
+            throw new Exception('支付宝网关请求失败', (int)$e->getCode(), $e);
         }
 
         //解析AOP返回结果
@@ -737,19 +764,17 @@ class AopClient
     {
 
         if ($this->checkEmpty($this->alipayPublicKey)) {
-
-            $pubKey = $this->alipayrsaPublicKey;
-            $res = "-----BEGIN PUBLIC KEY-----\n" .
-                wordwrap($pubKey, 64, "\n", true) .
-                "\n-----END PUBLIC KEY-----";
+            $pubKey = $this->alipayrsaPublicKey ?: $rsaPublicKeyFilePath;
         } else {
             //读取公钥文件
             $pubKey = file_get_contents($rsaPublicKeyFilePath);
-            //转换为openssl格式密钥
-            $res = openssl_get_publickey($pubKey);
         }
+        //转换为openssl格式密钥
+        $res = $this->loadPublicKey($pubKey);
 
-        ($res) or die('支付宝RSA公钥错误。请检查公钥文件格式是否正确');
+        if (!$res) {
+            throw new Exception('支付宝公钥格式错误，请检查 RSA 公钥配置');
+        }
 
         //调用openssl内置方法验签，返回bool值
 
@@ -758,11 +783,6 @@ class AopClient
             $result = (openssl_verify($data, base64_decode($sign), $res, OPENSSL_ALGO_SHA256) === 1);
         } else {
             $result = (openssl_verify($data, base64_decode($sign), $res) === 1);
-        }
-
-        if (!$this->checkEmpty($this->alipayPublicKey)) {
-            //释放资源
-            openssl_free_key($res);
         }
 
         return $result;
@@ -884,7 +904,7 @@ class AopClient
         return $strnull;
     }
 
-    function splitCN($cont, $n = 0, $subnum, $charset)
+    function splitCN($cont, $n = 0, $subnum = 0, $charset = "utf-8")
     {
         //$len = strlen($cont) / 3;
         $arrr = array();
@@ -898,7 +918,7 @@ class AopClient
         return $arrr;
     }
 
-    function subCNchar($str, $start = 0, $length, $charset = "gbk")
+    function subCNchar($str, $start = 0, $length = 0, $charset = "gbk")
     {
         if (strlen($str) <= $length) {
             return $str;

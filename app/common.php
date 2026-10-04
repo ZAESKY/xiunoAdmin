@@ -2,12 +2,207 @@
 // 应用公共文件
 
 use think\exception\ValidateException;
-use think\facade\Filesystem;
 use think\facade\Db;
 use Symfony\Component\VarExporter\VarExporter;
+use app\common\service\LocalFilesystemService;
+use app\common\service\PluginStorageService;
+
+if (!function_exists('sf_action_log_params')) {
+    /**
+     * Redact credentials and tokens before persisting request parameters.
+     */
+    function sf_action_log_params(array $params): string
+    {
+        $sensitiveKeys = [
+            'password', 'passwd', 'pwd', 'old_password', 'new_password',
+            'repassword', 'confirm_password', 'token', 'access_token',
+            'refresh_token', 'authorization', 'authcode', 'secret',
+            'client_secret', 'license_secret', 'private_key', 'qrsig', 'cookie',
+            'request_code', 'activation_code', 'oss_access_key_id',
+            'oss_access_key_secret', 'code', 'state', 'pending_token',
+            'flow_id', 'proof_token', 'oauth_error', 'sms_access_key_id',
+            'sms_access_key_secret', 'sms_code',
+        ];
+
+        $redact = static function ($value) use (&$redact, $sensitiveKeys) {
+            if (!is_array($value)) {
+                return $value;
+            }
+            foreach ($value as $key => $item) {
+                if (in_array(strtolower((string)$key), $sensitiveKeys, true)) {
+                    $value[$key] = '[REDACTED]';
+                    continue;
+                }
+                $value[$key] = $redact($item);
+            }
+            return $value;
+        };
+
+        $encoded = json_encode($redact($params), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return is_string($encoded) ? $encoded : '';
+    }
+}
+
+if (!function_exists('sf_safe_unserialize_array')) {
+    /**
+     * Decode legacy serialized settings without allowing PHP object creation.
+     */
+    function sf_safe_unserialize_array($value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        if (!is_string($value) || $value === '') {
+            return [];
+        }
+        try {
+            $decoded = @unserialize($value, ['allowed_classes' => false]);
+        } catch (\Throwable $e) {
+            return [];
+        }
+        return is_array($decoded) ? $decoded : [];
+    }
+}
+
+if (!function_exists('sf_page_limit')) {
+    /**
+     * Normalize a client supplied page size and enforce a resource ceiling.
+     */
+    function sf_page_limit($value, int $default = 10, int $max = 100): int
+    {
+        $default = max(1, $default);
+        $max = max(1, $max);
+        if (!is_scalar($value) || filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return min($default, $max);
+        }
+        return max(1, min((int)$value, $max));
+    }
+}
+
+if (!function_exists('sf_page_number')) {
+    /**
+     * Normalize a client supplied page number.
+     */
+    function sf_page_number($value, int $max = 100000): int
+    {
+        $max = max(1, $max);
+        if (!is_scalar($value) || filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return 1;
+        }
+        return max(1, min((int)$value, $max));
+    }
+}
+
+if (!function_exists('sf_download_mode')) {
+    /**
+     * Normalize legacy numeric download configuration to current template names.
+     */
+    function sf_download_mode(): string
+    {
+        $mode = strtolower(trim((string)conf('download')));
+        $legacy = ['1' => 'mail', '2' => 'qrcode', '3' => 'info'];
+        $mode = $legacy[$mode] ?? $mode;
+        return in_array($mode, ['mail', 'qrcode', 'info'], true) ? $mode : '0';
+    }
+}
+
 if (!function_exists('sf_password_hash')) {
     function sf_password_hash(){
         return 'SF*(!@#%!s!0+-*~_-2129876388';
+    }
+}
+
+if (!function_exists('sf_money_to_cents')) {
+    /**
+     * 将金额转换为整数分，业务计算过程中不直接使用二进制浮点金额。
+     */
+    function sf_money_to_cents($amount)
+    {
+        $value = trim((string)$amount);
+        if (!preg_match('/^([+-]?)(\d+)(?:\.(\d*))?$/D', $value, $matches)) {
+            if (!is_numeric($amount)) {
+                throw new \InvalidArgumentException('金额格式无效');
+            }
+            $value = number_format((float)$amount, 8, '.', '');
+            preg_match('/^([+-]?)(\d+)(?:\.(\d*))?$/D', $value, $matches);
+        }
+
+        $fraction = str_pad($matches[3] ?? '', 3, '0');
+        $cents = ((int)$matches[2] * 100) + (int)substr($fraction, 0, 2);
+        if ((int)$fraction[2] >= 5) {
+            $cents++;
+        }
+        return ($matches[1] ?? '') === '-' ? -$cents : $cents;
+    }
+}
+
+if (!function_exists('sf_money_from_cents')) {
+    /**
+     * 将整数分转换成固定两位小数的金额字符串。
+     */
+    function sf_money_from_cents($cents)
+    {
+        $cents = (int)$cents;
+        $sign = $cents < 0 ? '-' : '';
+        $cents = abs($cents);
+        return $sign . intdiv($cents, 100) . '.' . str_pad((string)($cents % 100), 2, '0', STR_PAD_LEFT);
+    }
+}
+
+if (!function_exists('sf_money_format')) {
+    function sf_money_format($amount)
+    {
+        return sf_money_from_cents(sf_money_to_cents($amount));
+    }
+}
+
+if (!function_exists('sf_money_add')) {
+    function sf_money_add($left, $right)
+    {
+        return sf_money_from_cents(sf_money_to_cents($left) + sf_money_to_cents($right));
+    }
+}
+
+if (!function_exists('sf_money_subtract')) {
+    function sf_money_subtract($left, $right)
+    {
+        return sf_money_from_cents(sf_money_to_cents($left) - sf_money_to_cents($right));
+    }
+}
+
+if (!function_exists('sf_money_apply_rate')) {
+    /**
+     * 按百分比计算金额。百分比支持两位小数，数量必须为非负整数。
+     * 例如 sf_money_apply_rate('306.00', 70) 返回 '214.20'。
+     */
+    function sf_money_apply_rate($unitAmount, $ratePercent, $quantity = 1)
+    {
+        $quantity = max(0, (int)$quantity);
+        $amountCents = sf_money_to_cents($unitAmount);
+        $rateBasisPoints = sf_money_to_cents($ratePercent);
+        $numerator = $amountCents * $quantity * $rateBasisPoints;
+        $roundedCents = $numerator >= 0
+            ? intdiv($numerator + 5000, 10000)
+            : -intdiv(abs($numerator) + 5000, 10000);
+        return sf_money_from_cents($roundedCents);
+    }
+}
+
+if (!function_exists('sf_money_daily_rate')) {
+    /**
+     * 按总价计算每日单价（向上取整到分），与授权自定义天数计价规则一致。
+     */
+    function sf_money_daily_rate($totalAmount, $days)
+    {
+        $days = (int)$days;
+        if ($days <= 0) {
+            throw new \InvalidArgumentException('计价天数必须大于 0');
+        }
+        $totalCents = sf_money_to_cents($totalAmount);
+        if ($totalCents < 0) {
+            throw new \InvalidArgumentException('计价金额不能为负数');
+        }
+        return sf_money_from_cents(intdiv($totalCents + $days - 1, $days));
     }
 }
 if (!function_exists('addNoticeGroupList')) {
@@ -637,7 +832,10 @@ if (!function_exists('curl_get')) {
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HEADER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);//这个是重点。
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 15);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
         $result = curl_exec($curl);
         curl_close($curl);
         return $result;
@@ -662,7 +860,10 @@ if (!function_exists('curl_post')) {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
@@ -694,9 +895,9 @@ if (!function_exists('curl_request')) {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         if ($https) {
             // 对认证证书来源的检查
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             // 从证书中检查SSL加密算法是否存在
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         }
         if (strtolower($type) == 'post') {
             // 设置post方式提交
@@ -745,8 +946,9 @@ if (!function_exists('get_curl')) {
     function get_curl($url, $post = 0, $referer = 0, $cookie = 0, $header = 0, $ua = 0, $nobaody = 0, $addheader = 0, $split = 0){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         $httpheader[] = "Accept: */*";
         $httpheader[] = "Accept-Encoding: gzip,deflate,sdch";
         $httpheader[] = "Accept-Language: zh-CN,zh;q=0.8";
@@ -754,7 +956,7 @@ if (!function_exists('get_curl')) {
         if ($addheader) {
             $httpheader = array_merge($httpheader, $addheader);
         }
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         if ($post) {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
@@ -979,6 +1181,45 @@ if (!function_exists('getter')) {
     }
 }
 
+if (!function_exists('sf_secure_token')) {
+
+    /**
+     * 生成密码学安全的十六进制令牌
+     *
+     * 安全用途（授权码、下载票据、用户令牌、密钥）一律使用本函数，
+     * 不得再使用 rand() / uniqid() / md5(time()...) 等可预测来源。
+     *
+     * @param int $bytes 随机字节数，输出长度为 $bytes * 2
+     * @return string 小写十六进制字符串
+     * @since 2026-08-16 P0 安全加固
+     */
+    function sf_secure_token($bytes = 16)
+    {
+        $bytes = max(8, (int)$bytes);
+        return bin2hex(random_bytes($bytes));
+    }
+}
+
+if (!function_exists('sf_generate_authcode')) {
+
+    /**
+     * 生成授权码
+     *
+     * 修复 A-01：原实现为 md5(time() . $qq . 'SF')，三项输入中 'SF' 是源码常量、
+     * $qq 业务上公开、time() 仅秒级熵，可在极小候选空间内离线推导出他人授权码。
+     *
+     * 现改为 CSPRNG。输出仍为 32 位十六进制，与既有 VARCHAR(32) 列和
+     * 客户端长度假设完全兼容，属于可直接替换的实现。
+     *
+     * @return string 32 位小写十六进制授权码
+     * @since 2026-08-16 P0 安全加固
+     */
+    function sf_generate_authcode()
+    {
+        return sf_secure_token(16);
+    }
+}
+
 if (!function_exists('get_random_str')) {
 
     /**
@@ -988,6 +1229,9 @@ if (!function_exists('get_random_str')) {
      * @return string 返回结果
      * @author 陌上花开
      * @date 2022-01-19
+     *
+     * 注意：本函数使用 rand()，属于非密码学安全随机数，仅可用于验证码、
+     * 文件名等非安全场景。授权码、令牌、密钥等一律改用 sf_secure_token()。
      */
     function get_random_str($length = 8, $type = 0)
     {
@@ -1245,6 +1489,61 @@ if (!function_exists('get_password')) {
 
 }
 
+if (!function_exists('sf_password_make')) {
+    /**
+     * 使用 PHP 当前推荐算法生成密码哈希。
+     *
+     * 数据库中的 password 字段为 varchar(150)，可容纳 bcrypt/Argon2 哈希。
+     */
+    function sf_password_make($password)
+    {
+        $hash = password_hash((string) $password, PASSWORD_DEFAULT);
+        if ($hash === false) {
+            throw new \RuntimeException('Password hashing failed.');
+        }
+        return $hash;
+    }
+}
+
+if (!function_exists('sf_password_verify')) {
+    /**
+     * 验证现代哈希及历史密码格式。
+     *
+     * 历史生产环境曾直接保存密码，后续版本又使用 md5(md5(password))。
+     * 兼容分支只用于迁移；成功验证历史格式后由调用方立即写回现代哈希。
+     *
+     * @param string $password 用户提交的明文密码
+     * @param string $stored   数据库中保存的值
+     * @param bool   $needsRehash 是否应在本次成功登录后重哈希
+     */
+    function sf_password_verify($password, $stored, &$needsRehash = false)
+    {
+        $password = (string) $password;
+        $stored = (string) $stored;
+        $needsRehash = false;
+
+        if ($stored === '') {
+            return false;
+        }
+
+        $info = password_get_info($stored);
+        if (!empty($info['algo'])) {
+            if (!password_verify($password, $stored)) {
+                return false;
+            }
+            $needsRehash = password_needs_rehash($stored, PASSWORD_DEFAULT);
+            return true;
+        }
+
+        if (hash_equals($stored, $password) || hash_equals($stored, get_password($password))) {
+            $needsRehash = true;
+            return true;
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('get_image_url')) {
 
     /**
@@ -1476,7 +1775,7 @@ if (!function_exists('rmdirs')) {
      */
     function rmdirs($dir, $rmself = true)
     {
-        if (!is_dir($dir)) {
+        if (is_link($dir) || !is_dir($dir)) {
             return false;
         }
         $files = new RecursiveIteratorIterator(
@@ -1484,15 +1783,27 @@ if (!function_exists('rmdirs')) {
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
+        $success = true;
         foreach ($files as $file) {
+            $path = $file->getPathname();
+            if ($file->isLink()) {
+                if (!@unlink($path)) {
+                    $success = false;
+                }
+                continue;
+            }
             $todo = ($file->isDir() ? 'rmdir' : 'unlink');
-            $todo($file->getRealPath());
+            if (!@$todo($path)) {
+                $success = false;
+            }
         }
         if ($rmself) {
-            @rmdir($dir);
+            if (!@rmdir($dir)) {
+                $success = false;
+            }
         }
 
-        return true;
+        return $success;
     }
 }
 
@@ -1507,21 +1818,46 @@ if (!function_exists('copydirs')) {
      */
     function copydirs($source, $dest)
     {
-        if (!is_dir($dest)) {
-            mkdir($dest, 0755, true);
+        if (is_link($source) || !is_dir($source)) {
+            throw new RuntimeException('复制源目录无效');
         }
+        if (is_link($dest)) {
+            throw new RuntimeException('复制目标目录不能是符号链接');
+        }
+        if (!is_dir($dest) && !mkdir($dest, 0755, true) && !is_dir($dest)) {
+            throw new RuntimeException('无法创建复制目标目录');
+        }
+        $source = realpath($source);
+        $dest = realpath($dest);
+        if ($source === false || $dest === false) {
+            throw new RuntimeException('无法解析复制目录');
+        }
+        $destPrefix = rtrim($dest, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::SELF_FIRST
         );
         foreach ($iterator as $item) {
+            if ($item->isLink()) {
+                throw new RuntimeException('复制目录不能包含符号链接');
+            }
+            $target = $destPrefix . $iterator->getSubPathName();
             if ($item->isDir()) {
-                $sent_dir = $dest . "/" . $iterator->getSubPathName();
-                if (!is_dir($sent_dir)) {
-                    mkdir($sent_dir, 0755, true);
+                if (is_link($target)) {
+                    throw new RuntimeException('复制目标不能经过符号链接');
+                }
+                if (!is_dir($target) && !mkdir($target, 0755, true) && !is_dir($target)) {
+                    throw new RuntimeException('无法创建目标子目录');
                 }
             } else {
-                copy($item, $dest . "/" . $iterator->getSubPathName());
+                $parent = realpath(dirname($target));
+                if ($parent === false || ($parent . DIRECTORY_SEPARATOR !== $destPrefix
+                    && !str_starts_with($parent . DIRECTORY_SEPARATOR, $destPrefix))) {
+                    throw new RuntimeException('复制目标超出允许目录');
+                }
+                if (is_link($target) || !copy($item->getPathname(), $target)) {
+                    throw new RuntimeException('复制文件失败');
+                }
             }
         }
     }
@@ -1974,7 +2310,100 @@ if (!function_exists('save_image_content')) {
         return true;
     }
 }
+if (!function_exists('rich_text_has_content')) {
+
+    /**
+     * Determine whether rich text contains something users can actually see.
+     * Editors commonly submit placeholders such as <p><br></p> after clearing.
+     */
+    function rich_text_has_content($content)
+    {
+        if ($content === null || trim((string)$content) === '') {
+            return false;
+        }
+
+        $content = html_entity_decode((string)$content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (preg_match('/<img\b[^>]*\bsrc\s*=\s*(["\'])?[^>\s"\']+/i', $content)) {
+            return true;
+        }
+
+        $text = html_entity_decode(strip_tags($content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/[\s\x{00A0}\x{200B}\x{FEFF}]+/u', '', $text);
+        return $text !== '';
+    }
+}
+
 if (!function_exists('clean_rich_text')) {
+
+    if (!function_exists('sf_safe_url')) {
+        /**
+         * Accept an HTTP(S) URL or a site-root relative URL and reject
+         * executable schemes, protocol-relative URLs and attribute breakers.
+         */
+        function sf_safe_url($url, $allowRelative = true)
+        {
+            $url = trim(html_entity_decode((string)$url, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if ($url === '' || preg_match('/[\x00-\x20\x7f<>"\'\\\\]/', $url)) {
+                return '';
+            }
+            if ($allowRelative && str_starts_with($url, '/') && !str_starts_with($url, '//')) {
+                return $url;
+            }
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                return '';
+            }
+            $parts = parse_url($url);
+            if (!is_array($parts)
+                || !in_array(strtolower((string)($parts['scheme'] ?? '')), ['http', 'https'], true)
+                || empty($parts['host'])
+                || isset($parts['user'])
+                || isset($parts['pass'])
+            ) {
+                return '';
+            }
+            return $url;
+        }
+    }
+
+    if (!function_exists('sf_plain_text')) {
+        function sf_plain_text($value, $maxLength = 0)
+        {
+            $value = trim(html_entity_decode(strip_tags((string)$value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $value = preg_replace('/[\x00-\x20\x7F]+/u', ' ', $value);
+            $value = trim((string)preg_replace('/\s{2,}/u', ' ', $value));
+            if ((int)$maxLength > 0 && mb_strlen($value, 'UTF-8') > (int)$maxLength) {
+                $value = mb_substr($value, 0, (int)$maxLength, 'UTF-8');
+            }
+            return $value;
+        }
+    }
+
+    if (!function_exists('sf_public_exception_message')) {
+        /**
+         * Preserve useful domain errors while preventing SQL, filesystem and
+         * runtime internals from being reflected to public API clients.
+         */
+        function sf_public_exception_message($error, $fallback = '操作失败，请稍后重试')
+        {
+            if (!($error instanceof \Throwable)) {
+                return (string)$fallback;
+            }
+            $class = strtolower(get_class($error));
+            $message = sf_plain_text($error->getMessage(), 200);
+            $internal = $error instanceof \Error
+                || $error instanceof \PDOException
+                || str_contains($class, 'think\\db\\exception')
+                || preg_match('#(?:SQLSTATE|PDOException|Stack trace|/www/|/Users/|[A-Za-z]:\\\\|vendor/|app/[A-Za-z])#i', $message);
+            if ($internal || $message === '') {
+                try {
+                    \think\facade\Log::error('[SF-PUBLIC-ERROR] ' . get_class($error) . ': ' . $error->getMessage());
+                } catch (\Throwable $ignore) {
+                }
+                return (string)$fallback;
+            }
+            return $message;
+        }
+    }
 
     /**
      * Clean user-provided rich text while preserving common formatting tags.
@@ -1985,13 +2414,138 @@ if (!function_exists('clean_rich_text')) {
             return '';
         }
 
-        $content = html_entity_decode(stripslashes((string)$content), ENT_QUOTES, 'UTF-8');
-        $content = preg_replace('/<\s*(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base)[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $content);
-        $content = preg_replace('/<\s*\/?\s*(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base)[^>]*>/is', '', $content);
-        $content = preg_replace('/\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $content);
-        $content = preg_replace('/\s+(href|src)\s*=\s*([\'"])\s*(javascript|vbscript):.*?\2/i', '', $content);
+        $content = html_entity_decode(stripslashes((string)$content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $content = str_replace("\0", '', $content);
+        $content = preg_replace('/<\s*(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base|svg|math)[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $content);
+        $content = preg_replace('/<\s*\/?\s*(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base|svg|math)[^>]*>/is', '', $content);
 
-        return strip_tags($content, '<p><br><strong><b><em><i><u><s><span><div><blockquote><pre><code><ul><ol><li><table><thead><tbody><tr><th><td><h1><h2><h3><h4><h5><h6><a><img><hr>');
+        if (!class_exists('DOMDocument')) {
+            $content = preg_replace('/\s+(?:on[a-z]+|style)\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $content);
+            $content = preg_replace('/\s+(href|src)\s*=\s*(?:([\'"])(?:(?!\2).)*\2|[^\s>]+)/i', '', $content);
+            $content = strip_tags($content, '<p><br><strong><b><em><i><u><s><span><div><blockquote><pre><code><ul><ol><li><table><thead><tbody><tr><th><td><h1><h2><h3><h4><h5><h6><a><img><hr>');
+            return rich_text_has_content($content) ? trim($content) : '';
+        }
+
+        $allowedTags = array_fill_keys([
+            'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'span', 'div',
+            'blockquote', 'pre', 'code', 'ul', 'ol', 'li', 'table', 'thead',
+            'tbody', 'tr', 'th', 'td', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'a', 'img', 'hr',
+        ], true);
+        $dropEntirely = array_fill_keys(['script', 'style', 'iframe', 'object', 'embed', 'form', 'svg', 'math'], true);
+        $globalAttributes = ['class' => true, 'style' => true, 'title' => true];
+        $tagAttributes = [
+            'a' => ['href' => true, 'target' => true, 'rel' => true],
+            'img' => ['src' => true, 'alt' => true, 'width' => true, 'height' => true],
+            'td' => ['colspan' => true, 'rowspan' => true],
+            'th' => ['colspan' => true, 'rowspan' => true],
+            'ol' => ['start' => true],
+        ];
+
+        $sanitizeStyle = static function (string $style): string {
+            if (preg_match('/(?:url\s*\(|expression\s*\(|@import|javascript\s*:|vbscript\s*:|behavior\s*:|-moz-binding|[<>])/i', $style)) {
+                return '';
+            }
+            $allowed = '/^(?:text-align|color|background-color|font-size|font-weight|font-style|text-decoration|line-height|width|height|max-width|min-width|margin(?:-(?:top|right|bottom|left))?|padding(?:-(?:top|right|bottom|left))?|border(?:-(?:top|right|bottom|left|color|style|width))?)$/i';
+            $clean = [];
+            foreach (explode(';', $style) as $declaration) {
+                if (!str_contains($declaration, ':')) {
+                    continue;
+                }
+                [$property, $value] = array_map('trim', explode(':', $declaration, 2));
+                if (preg_match($allowed, $property) && $value !== '' && !preg_match('/[{}\\]/', $value)) {
+                    $clean[] = strtolower($property) . ': ' . $value;
+                }
+            }
+            return implode('; ', $clean);
+        };
+
+        $safeRichUrl = static function (string $url, bool $image = false): string {
+            $url = trim(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $compact = preg_replace('/[\x00-\x20\x7f]+/', '', $url);
+            if ($url === '' || $compact !== $url || str_starts_with($url, '//')) {
+                return '';
+            }
+            if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
+                return $url;
+            }
+            if (!$image && (str_starts_with($url, '#') || preg_match('/^(?:mailto|tel):/i', $url))) {
+                return $url;
+            }
+            return sf_safe_url($url, false);
+        };
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $previous = libxml_use_internal_errors(true);
+        $loaded = $dom->loadHTML(
+            '<?xml encoding="UTF-8"><div id="sf-clean-root">' . $content . '</div>',
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET
+        );
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        if (!$loaded) {
+            return '';
+        }
+
+        $cleanNode = function (\DOMNode $node) use (&$cleanNode, $allowedTags, $dropEntirely, $globalAttributes, $tagAttributes, $sanitizeStyle, $safeRichUrl): void {
+            foreach (iterator_to_array($node->childNodes) as $child) {
+                if (!($child instanceof \DOMElement)) {
+                    continue;
+                }
+                $tag = strtolower($child->tagName);
+                if (!isset($allowedTags[$tag])) {
+                    if (isset($dropEntirely[$tag])) {
+                        $node->removeChild($child);
+                    } else {
+                        while ($child->firstChild) {
+                            $node->insertBefore($child->firstChild, $child);
+                        }
+                        $node->removeChild($child);
+                    }
+                    continue;
+                }
+
+                foreach (iterator_to_array($child->attributes) as $attribute) {
+                    $name = strtolower($attribute->name);
+                    if (!isset($globalAttributes[$name]) && !isset($tagAttributes[$tag][$name])) {
+                        $child->removeAttributeNode($attribute);
+                        continue;
+                    }
+                    $value = (string)$attribute->value;
+                    if ($name === 'href' || $name === 'src') {
+                        $value = $safeRichUrl($value, $name === 'src');
+                    } elseif ($name === 'style') {
+                        $value = $sanitizeStyle($value);
+                    } elseif ($name === 'target') {
+                        $value = $value === '_blank' ? '_blank' : '';
+                    } elseif (in_array($name, ['width', 'height', 'colspan', 'rowspan', 'start'], true)) {
+                        $value = preg_match('/^\d{1,4}$/D', $value) ? $value : '';
+                    } elseif ($name === 'class') {
+                        $value = preg_match('/^[A-Za-z0-9 _-]{1,200}$/D', $value) ? $value : '';
+                    }
+                    if ($value === '') {
+                        $child->removeAttribute($name);
+                    } else {
+                        $child->setAttribute($name, $value);
+                    }
+                }
+                if ($tag === 'a' && $child->getAttribute('target') === '_blank') {
+                    $child->setAttribute('rel', 'noopener noreferrer');
+                }
+                $cleanNode($child);
+            }
+        };
+
+        $root = $dom->getElementById('sf-clean-root');
+        if (!$root) {
+            return '';
+        }
+        $cleanNode($root);
+        $result = '';
+        foreach ($root->childNodes as $child) {
+            $result .= $dom->saveHTML($child);
+        }
+        return rich_text_has_content($result) ? trim($result) : '';
     }
 }
 if (!function_exists('sysmsg')) {
@@ -2094,6 +2648,26 @@ if (!function_exists('sysmsg')) {
         }
     }
 }
+if (!function_exists('sf_store_managed_upload')) {
+    /**
+     * Return a browser-safe URL. OSS mode never silently falls back to local
+     * storage, otherwise a partial outage would scatter uploads across disks.
+     */
+    function sf_store_managed_upload($file, string $saveDir, string $type, array $allowedExt, int $maxBytes): string
+    {
+        $storage = new PluginStorageService();
+        if ($storage->isOssEnabled()) {
+            $stored = $storage->storeUploadedFile($file, $type, $allowedExt, $maxBytes);
+            if (empty($stored['url'])) {
+                throw new \RuntimeException('云存储未返回可访问地址');
+            }
+            return (string)$stored['url'];
+        }
+        $saveName = (new LocalFilesystemService())->putFile($saveDir, $file);
+        return str_replace('\\', '/', '/' . $saveName);
+    }
+}
+
 if (!function_exists('upload_image')) {
 
     /**
@@ -2130,11 +2704,14 @@ if (!function_exists('upload_image')) {
                         // 限制文件后缀，多个后缀以英文逗号分割
                         'fileExt' => $allowext,
                     ]])->check(['file' => $file]);
-                    // 上传到本地服务器
-                    $savename = Filesystem::putFile($save_dir, $file);
-                    if ($savename) {
-                        // 拼接路径
-                        $path = str_replace('\\', '/', '/' . $savename);
+                    $path = sf_store_managed_upload(
+                        $file,
+                        $save_dir,
+                        'image',
+                        ['gif', 'jpg', 'jpeg', 'png', 'bmp'],
+                        10 * 1024 * 1024
+                    );
+                    if ($path !== '') {
 //                        $data[] = [
 //                            'filepath' => $path,
 //                            'filename' => $file->getOriginalName(),
@@ -2153,11 +2730,14 @@ if (!function_exists('upload_image')) {
                     // 限制文件后缀，多个后缀以英文逗号分割
                     'fileExt' => $allowext,
                 ]])->check(['file' => $files]);
-                // 上传到本地服务器
-                $savename = Filesystem::putFile($save_dir, $files);
-                if ($savename) {
-                    // 拼接路径
-                    $path = str_replace('\\', '/', '/' . $savename);
+                $path = sf_store_managed_upload(
+                    $files,
+                    $save_dir,
+                    'image',
+                    ['gif', 'jpg', 'jpeg', 'png', 'bmp'],
+                    10 * 1024 * 1024
+                );
+                if ($path !== '') {
 //                    $data = [
 //                        'filepath' => $path,
 //                        'filename' => $files->getOriginalName(),
@@ -2277,11 +2857,14 @@ if (!function_exists('upload_file')) {
                             // 限制文件后缀，多个后缀以英文逗号分割
                             'fileExt' => $allowext,
                         ]])->check(['file' => $file]);
-                        // 上传到本地服务器
-                        $savename = Filesystem::putFile($save_dir, $file);
-                        if ($savename) {
-                            // 拼接路径
-                            $path = str_replace('\\', '/', '/' . $savename);
+                        $path = sf_store_managed_upload(
+                            $file,
+                            $save_dir,
+                            'file',
+                            ['xls', 'xlsx', 'doc', 'docx', 'ppt', 'pptx', 'zip', 'rar', 'mp3', 'txt', 'pdf', 'sql', 'js', 'css', 'chm'],
+                            10 * 1024 * 1024
+                        );
+                        if ($path !== '') {
                             $data[] = [
                                 'fileName' => $file->getOriginalName(),
                                 'filePath' => $path,
@@ -2298,11 +2881,14 @@ if (!function_exists('upload_file')) {
                     // 限制文件后缀，多个后缀以英文逗号分割
                     'fileExt' => $allowext,
                 ]])->check(['file' => $files]);
-                // 上传到本地服务器
-                $savename = Filesystem::putFile($save_dir, $files);
-                if ($savename) {
-                    // 拼接路径
-                    $path = str_replace('\\', '/', '/' . $savename);
+                $path = sf_store_managed_upload(
+                    $files,
+                    $save_dir,
+                    'file',
+                    ['xls', 'xlsx', 'doc', 'docx', 'ppt', 'pptx', 'zip', 'rar', 'mp3', 'txt', 'pdf', 'sql', 'js', 'css', 'chm'],
+                    10 * 1024 * 1024
+                );
+                if ($path !== '') {
                     $result = [
                         'fileName' => $files->getOriginalName(),
                         'filePath' => $path,
@@ -2515,7 +3101,14 @@ if (!function_exists('unzip_file')) {
      */
     function unzip_file($file, $dirname)
     {
-        if (!file_exists($file)) {
+        if (!is_file($file) || is_link($file) || is_link($dirname)) {
+            return false;
+        }
+        $problem = \app\common\service\SafeZipService::validate($file, [], 10000, 536870912);
+        if ($problem !== null) {
+            return false;
+        }
+        if (!is_dir($dirname) && !mkdir($dirname, 0755, true) && !is_dir($dirname)) {
             return false;
         }
         // zip实例化对象
@@ -2667,6 +3260,92 @@ if (!function_exists('clean_temp_uploads')) {
             }
         }
         return $deleted;
+    }
+}
+
+if (!function_exists('get_addon_list')) {
+    /**
+     * 获取本地已安装插件列表。
+     *
+     * 这些兼容函数曾只存在于 vendor 的本地改动中，执行生产依赖安装后会丢失。
+     * 放在项目公共函数文件中，并用 function_exists 保护，兼容依赖包后续原生提供。
+     */
+    function get_addon_list()
+    {
+        $addonsPath = app()->getRootPath() . 'addons' . DIRECTORY_SEPARATOR;
+        if (!is_dir($addonsPath)) {
+            return [];
+        }
+
+        $list = [];
+        foreach (glob($addonsPath . '*') ?: [] as $dir) {
+            if (!is_dir($dir)) {
+                continue;
+            }
+            $infoFile = $dir . DIRECTORY_SEPARATOR . 'info.ini';
+            if (!is_file($infoFile)) {
+                continue;
+            }
+            $info = parse_ini_file($infoFile, true, INI_SCANNER_TYPED) ?: [];
+            $info['name'] = basename($dir);
+            $list[] = $info;
+        }
+        return $list;
+    }
+}
+
+if (!function_exists('get_addons_fullconfig')) {
+    /**
+     * 获取插件完整配置（包含配置项元数据）。
+     */
+    function get_addons_fullconfig($name)
+    {
+        $addon = get_addons_instance($name);
+        if ($addon) {
+            return $addon->getConfig(true);
+        }
+        $configFile = app()->getRootPath() . 'addons' . DIRECTORY_SEPARATOR
+            . $name . DIRECTORY_SEPARATOR . 'config.php';
+        return is_file($configFile) ? (array) include $configFile : [];
+    }
+}
+
+if (!function_exists('set_addons_fullconfig')) {
+    /**
+     * 保存插件完整配置。
+     */
+    function set_addons_fullconfig($name, $config)
+    {
+        $configFile = app()->getRootPath() . 'addons' . DIRECTORY_SEPARATOR
+            . $name . DIRECTORY_SEPARATOR . 'config.php';
+        if (!is_file($configFile)) {
+            return false;
+        }
+        $content = "<?php\n\nreturn " . var_export($config, true) . ";\n";
+        return file_put_contents($configFile, $content) !== false;
+    }
+}
+
+if (!function_exists('get_addons_tables')) {
+    /**
+     * 获取插件安装脚本声明的关联表。
+     */
+    function get_addons_tables($name)
+    {
+        $sqlFile = app()->getRootPath() . 'addons' . DIRECTORY_SEPARATOR
+            . $name . DIRECTORY_SEPARATOR . 'install.sql';
+        if (!is_file($sqlFile)) {
+            return [];
+        }
+        $content = file_get_contents($sqlFile);
+        if ($content !== false && preg_match_all(
+            '/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i',
+            $content,
+            $matches
+        )) {
+            return $matches[1];
+        }
+        return [];
     }
 }
 

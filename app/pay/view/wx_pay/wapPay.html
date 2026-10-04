@@ -1,4 +1,4 @@
-<html lang="zh-cn">
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
@@ -25,7 +25,7 @@
             <div class="list-group-item" style="word-wrap: break-word;">
                 <a href="{$target_url}">{$target_url}</a><br/><button id="copy-btn" data-clipboard-text="{$target_url}" class="btn btn-info btn-sm">{:t('payment_ui.one_click_copy')}</button>
             </div>
-            <div class="list-group-item"><small>提示：你可以将以上链接发到自己{:t('common_ui.wechat')}的聊天框（在{:t('common_ui.wechat')}顶部{:t('common_ui.search_btn')}框可以搜到自己的{:t('common_ui.wechat')}），即可点击进入支付</small></div>
+            <div class="list-group-item"><small>{:t('payment_ui.pay_tip')}</small></div>
             <div class="list-group-item"><a href="weixin://" class="btn btn-primary">{:t('payment_ui.open_wx')}</a>&nbsp;<a href="#" onclick="checkresult()" class="btn btn-success">{:t('payment_ui.check_pay_status')}</a></div>
         </div>
     </div>
@@ -36,10 +36,10 @@
 <script>
     var clipboard = new Clipboard('#copy-btn');
     clipboard.on('success', function(e) {
-        layer.msg('复制成功，请到微信里面粘贴');
+        layer.msg({:json_encode(t('payment_ui.copy_link_success_wx'), 271)});
     });
     clipboard.on('error', function(e) {
-        layer.msg('复制失败，请长按链接后手动复制');
+        layer.msg({:json_encode(t('payment_ui.copy_link_failed_manual'), 271)});
     });
     $('#qrcode').qrcode({
         text: "{$target_url}",
@@ -60,7 +60,7 @@
             success: function (data, textStatus) {
                 //从服务器得到数据，显示数据并继续查询
                 if (data.code == 0) {
-                    if (confirm("您已支付完成，需要跳转到订单页面吗？")) {
+                    if (confirm({:json_encode(t('confirm.payment_done'), 271)})) {
                         window.location.href=data.data.backurl;
                     } else {
                         // 用户取消
@@ -89,7 +89,7 @@
             success: function (data, textStatus) {
                 //从服务器得到数据，显示数据并继续查询
                 if (data.code == 0) {
-                    if (confirm("您已支付完成，需要跳转到订单页面吗？")) {
+                    if (confirm({:json_encode(t('confirm.payment_done'), 271)})) {
                         window.location.href=data.data.backurl;
                     } else {
                         // 用户取消

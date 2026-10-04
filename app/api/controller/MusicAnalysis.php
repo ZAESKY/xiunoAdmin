@@ -25,7 +25,7 @@ class MusicAnalysis extends Frontend
     }
 
     private static function api_uri() {
-        return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . strtok($_SERVER['REQUEST_URI'], '?');
+        return rtrim(SITE_URL, '/') . '/api.php/MusicAnalysis';
     }
 
     public function index(){
@@ -119,7 +119,7 @@ class MusicAnalysis extends Frontend
         }else{
             $info = array(
                 "Code" => "NO",
-                "Msg" => '获取失败！'
+                "Msg" => t('music.fetch_failed')
             );
             return json($info, 320);
         }
@@ -131,7 +131,7 @@ class MusicAnalysis extends Frontend
             if (!empty($cache)) {
                 $result = array(
                     "Code" => "OK",
-                    "Msg" => "获取成功",
+                    "Msg" => t('music.fetch_success'),
                     "Body" => $cache
                 );
                 return json_encode($result);
@@ -145,7 +145,7 @@ class MusicAnalysis extends Frontend
         if ($data == '[]') {
             $result = array(
                 "Code" => "NO",
-                "Msg" => "不存在此歌单",
+                "Msg" => t('music.playlist_not_found'),
                 "Body" => ""
             );
             return json_encode($result);
@@ -167,7 +167,7 @@ class MusicAnalysis extends Frontend
         }
         $result = array(
             "Code" => "OK",
-            "Msg" => "获取成功",
+            "Msg" => t('music.fetch_success'),
             "Body" => $playlist
         );
         return json_encode($result);
@@ -180,7 +180,7 @@ class MusicAnalysis extends Frontend
             if (Cache::get($type_key)) {
                 $result = array(
                     "Code" => "OK",
-                    "Msg" => "获取成功",
+                    "Msg" => t('music.fetch_success'),
                     "Body" => json_decode($this->return_data($type, Cache::get($type_key)),true)
                 );
                 return json_encode($result);
@@ -199,7 +199,7 @@ class MusicAnalysis extends Frontend
         if ($song == '[]') {
             $result = array(
                 "Code" => "NO",
-                "Msg" => "不存在此歌曲",
+                "Msg" => t('music.song_not_found'),
                 "Body" => ""
             );
             return json_encode($result);
@@ -214,18 +214,29 @@ class MusicAnalysis extends Frontend
         }
         $result = array(
             "Code" => "OK",
-            "Msg" => "获取成功",
+            "Msg" => t('music.fetch_success'),
             "Body" => json_decode($this->return_data($type, $data),true)
         );
         return json_encode($result);
     }
 
     public function song2($id, $server = 'netease', $type = 'url'){
+        $server = strtolower(trim((string)$server));
+        $id = trim((string)$id);
+        if (!in_array($server, ['netease', 'tencent', 'kugou', 'xiami', 'baidu'], true)
+            || !preg_match('/^[A-Za-z0-9_-]{1,128}$/D', $id)
+        ) {
+            return json_encode([
+                'Code' => 'NO',
+                'Msg' => t('music.invalid_source'),
+                'Body' => '',
+            ], JSON_UNESCAPED_UNICODE);
+        }
         $need_song = !in_array($type, ['url', 'pic', 'lrc']);
         if ($need_song && !in_array($type, ['name', 'artist', 'song'])) {
             $result = array(
                 "Code" => "NO",
-                "Msg" => "不存在此类型",
+                "Msg" => t('music.type_not_found'),
                 "Body" => ""
             );
             return json_encode($result);
@@ -260,7 +271,7 @@ class MusicAnalysis extends Frontend
             case 'lrc':
                 $lrc_data = json_decode($api->lyric($id));
                 if ($lrc_data->lyric == '') {
-                    $lrc = '[00:00.00]这似乎是一首纯音乐呢，请尽情欣赏它吧！';
+                    $lrc = '[00:00.00]' . t('music.instrumental_lyric');
                 } else if ($lrc_data->tlyric == '') {
                     $lrc = $lrc_data->lyric;
                 } else if (self::TLYRIC) { // lyric_cn
@@ -306,7 +317,17 @@ class MusicAnalysis extends Frontend
     private function return_data($type, $data)
     {
         if (in_array($type, ['url', 'pic'])) {
-            header('Location: ' . $data);
+            $url = sf_safe_url((string)$data, false);
+            if ($url === '' || strtolower((string)parse_url($url, PHP_URL_SCHEME)) !== 'https') {
+                http_response_code(502);
+                return json_encode([
+                    'Code' => 'NO',
+                    'Msg' => t('music.unsafe_url'),
+                    'Body' => '',
+                ], JSON_UNESCAPED_UNICODE);
+            }
+            header('Location: ' . $url, true, 302);
+            return '';
         } else {
             return $data;
         }

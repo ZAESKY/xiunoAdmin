@@ -7,7 +7,7 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('feedback.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_log_title_or_ip')}"/>
                         </div>
@@ -24,8 +24,8 @@
                         <div class="layui-input-inline">
                             <select class="layui-input ew-select-fixed" lay-filter="power" lay-search>
                                 <option value="">{:t('common.all')}</option>
-                                <option value="1">站长</option>
-                                <option value="2">用户</option>
+                                <option value="1">{:t('auth_portal.site_owner')}</option>
+                                <option value="2">{:t('admin_user.user_suffix')}</option>
                                 <option value="3">{:t('common_ui.guest_label')}</option>
                             </select>
                         </div>
@@ -40,7 +40,7 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 
 {include file="/public/footer"}
@@ -62,7 +62,7 @@
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>',
                 '</p>'].join(''),
             cellMinWidth: 100,
             request: {
@@ -80,25 +80,25 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', sort: true, width: 80, fixed: true},
-                {field: 'title', title: '日志标题', sort: true, minWidth: 120},
-                {field: 'username', title: '操作人', sort: true, minWidth: 120, templet: function (d) {
+                {field: 'title', title: '{:t("common_ui.log_title")}', sort: true, minWidth: 120},
+                {field: 'username', title: '{:t("common_ui.operator")}', sort: true, minWidth: 120, templet: function (d) {
                     if(d.username == 1 && d.is_admin == 1){
-                        return '<span class="layui-badge layui-badge-orange">管理员'+d.username+'</span>';
+                        return '<span class="layui-badge layui-badge-orange">{:t("common_ui.admin_label")}'+d.username+'</span>';
                     }else if(d.username == 0){
-                        return '<span class="layui-badge layui-badge-yellow">游客</span>';
+                        return '<span class="layui-badge layui-badge-yellow">{:t('common_ui.guest_label')}</span>';
                     }else{
-                        return '<span class="layui-badge layui-badge-blue">用户:'+d.username+'</span>';
+                        return '<span class="layui-badge layui-badge-blue">{:t("common_ui.user_label")}'+d.username+'</span>';
                     }
                 }},
-                {field: 'method', title: '请求类型', sort: true, minWidth: 80},
-                {field: 'module', title: '模型', sort: true, minWidth: 80},
-                {field: 'action', title: '操作方法', sort: true, minWidth: 180},
-                {field: 'content', title: '日志内容', sort: true, minWidth: 160},
-                {field: 'param', title: '请求参数', sort: true, minWidth: 160},
+                {field: 'method', title: '{:t("common_ui.request_type")}', sort: true, minWidth: 80},
+                {field: 'module', title: '{:t("common_ui.model")}', sort: true, minWidth: 80},
+                {field: 'action', title: '{:t("common_ui.op_method")}', sort: true, minWidth: 180},
+                {field: 'content', title: '{:t("common_ui.log_content")}', sort: true, minWidth: 160},
+                {field: 'param', title: '{:t("common_ui.request_params")}', sort: true, minWidth: 160},
                 {field: 'ip', title: 'IP', sort: true, minWidth: 100},
                 {field: 'user_agent', title: 'User-Agent', sort: true, minWidth: 160},
-                {field: 'create_time', title: '添加时间', sort: true, minWidth: 180},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 100}
+                {field: 'create_time', title: '{:t("common.add_time")}', sort: true, minWidth: 180},
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 100}
             ]]
         });
 
@@ -132,26 +132,25 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
                 if (checkRows.data.length === 0) {
-                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                     return;
                 }
                 var ids = checkRows.data.map(function (d) {
                     return d.id;
                 });
-                console.log(ids)
                 doDel({ids: ids});
             }
         });
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm('{:t("auth_portal.confirm_delete")}', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/Log/drop")}' : '{:url("/Log/batchDrop")}',
@@ -168,7 +167,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
             });

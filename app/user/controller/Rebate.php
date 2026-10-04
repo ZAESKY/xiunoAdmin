@@ -3,6 +3,8 @@
 namespace app\user\controller;
 
 use app\common\controller\UserBackend;
+use app\common\service\PhoneVerificationService;
+use app\common\service\RebateRiskService;
 use app\user\service\RebateService;
 use think\facade\View;
 
@@ -19,14 +21,18 @@ class Rebate extends UserBackend
         try {
             if (IS_POST) {
                 $code = trim(request()->post('code', ''));
-                if (empty($code)) return json(message('请输入折扣码', false));
+                if (empty($code)) return json(message('rebate.code_required', false));
                 $codeRow = \think\facade\Db::name('discount_code')->where('code', $code)->find();
-                if (!$codeRow || $codeRow['status'] != 1) return json(message('折扣码不存在或已停用', false));
-                if ($codeRow['user_id'] == $this->userId) return json(message('不能使用自己的折扣码', false));
+                if (!$codeRow || $codeRow['status'] != 1) return json(message('rebate.code_invalid_or_disabled', false));
+                $riskReason = RebateRiskService::relatedAccountReason(
+                    intval($this->userId),
+                    intval($codeRow['user_id'])
+                );
+                if ($riskReason !== '') return json(message('rebate.code_unavailable_for_account', false));
                 $ownerUser = \think\facade\Db::name('user')->where('id', $codeRow['user_id'])->find();
-                if (!$ownerUser) return json(message('折扣码无效', false));
+                if (!$ownerUser) return json(message('rebate.code_invalid', false));
                 $ownerPower = \think\facade\Db::name('power_price')->where('id', $ownerUser['power'])->find();
-                if (!$ownerPower || $ownerPower['rebate_enabled'] != 1) return json(message('折扣码所属用户未开启返利', false));
+                if (!$ownerPower || $ownerPower['rebate_enabled'] != 1) return json(message('rebate.owner_disabled', false));
                 return json(message('ok', true, [
                     'rate' => floatval($ownerPower['rebate_rate']),
                     'owner' => $ownerUser['username'],
@@ -53,8 +59,21 @@ class Rebate extends UserBackend
     {
         try {
             if (IS_POST) {
+                if (empty($this->myPowerInfo['discount_code_enabled'])) {
+                    return json(message('rebate.permission_disabled', false));
+                }
+                if (PhoneVerificationService::requiredFor('rebate')) {
+                    $verified = PhoneVerificationService::verifySensitiveCode(
+                        intval($this->userId),
+                        'rebate',
+                        trim((string)input('post.sms_code/s', ''))
+                    );
+                    if (!$verified['ok']) {
+                        return json(message($verified['message'], false));
+                    }
+                }
                 $code = $this->service->generateCode();
-                return json(message('生成成功', true, $code));
+                return json(message('rebate.generate_success', true, $code));
             }
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false));
@@ -79,7 +98,7 @@ class Rebate extends UserBackend
             if (IS_POST) {
                 return json(message('ok', true, $this->service->getMySummary()));
             }
-            return json(message('非法请求', false));
+            return json(message('common.illegal_request', false));
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false));
         }

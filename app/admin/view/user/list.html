@@ -5,15 +5,24 @@
         <div class="layui-card-body">
             <!-- 表格工具栏 -->
             <form class="layui-form toolbar">
+                {if $userid > 0}
+                <input type="hidden" name="userid" value="{$userid}"/>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <span class="layui-badge layui-badge-blue">{:t('admin_user.viewing_subordinate', ['uid' => $userid])}</span>
+                        <a class="layui-btn layui-btn-primary layui-btn-xs" href="{:url('/User/list')}" style="margin-left:8px;">{:t('admin_user.view_all')}</a>
+                    </div>
+                </div>
+                {/if}
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
-                            <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_username_or_qq')}"/>
+                            <input name="text" class="layui-input" placeholder="{:t('admin_user.search_placeholder')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状&emsp;态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
                                 <option value="">{:t('common_ui.select_used_status')}</option>
@@ -23,10 +32,10 @@
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">权&emsp;限</label>
+                        <label class="layui-form-label">{:t('common_ui.power_type')}</label>
                         <div class="layui-input-inline">
                             <select name="power" class="ew-select-fixed">
-                                <option value="">全部权限</option>
+                                <option value="">{:t('admin_user.all_permissions')}</option>
                                 {volist name="power_list" id="res"}
                                 <option value="{$res.id}">{$res.name}</option>
                                 {/volist}
@@ -41,7 +50,7 @@
                 </div>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">应&emsp;用</label>
+                        <label class="layui-form-label">{:t('common_ui.belong_app')}</label>
                         <div class="layui-input-inline">
                             <select class="layui-input ew-select-fixed" lay-filter="template" lay-search>
                                 <option value="">{:t('common_ui.select_all_apps')}</option>
@@ -60,14 +69,14 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
 <script type="text/html" id="SF_TbState">
     <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="显示|隐藏" {{d.status==1?'checked':''}} style="display: none;"/>
-    <p style="display: none;">{{d.status==0?'正常':'封禁'}}</p>
+           lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}} style="display: none;"/>
+    <p style="display: none;">{{d.status==0?'{:t("common.normal")}':'{:t("common.ban")}'}}</p>
 </script>
 
 <script type="text/html" id="SF_Tbid">
@@ -79,10 +88,10 @@
         <input name="id" type="hidden"/>
         <input name="form_mode" type="hidden" value=""/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">所属应用:</label>
+            <label class="layui-form-label layui-form-required">{:t('common_ui.belong_app_label')}</label>
             <div class="layui-input-block">
                 <select name="appid" class="layui-input ew-select-fixed" lay-search lay-filter="appid">
-                    <option value="">请选择所属的应用</option>
+                    <option value="">{:t('admin_user.select_app')}</option>
                     {volist name="app_list.data.data" id="res"}
                     <option value="{$res.id}">{$res.name}</option>
                     {/volist}
@@ -91,79 +100,94 @@
         </div>
         <div id="form_data" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">权限:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.power_label')}</label>
                 <div class="layui-input-block">
                     <select id="power" name="power" class="layui-input ew-select-fixed" lay-search>
-                        <option value="">请选择权限</option>
+                        <option value="">{:t('common.please_select')} {:t('common_ui.power_type')}</option>
                     </select>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">用户名:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.username_field')}</label>
                 <div class="layui-input-block">
-                    <input type="text" name="username" placeholder="请输入用户名" class="layui-input"
+                    <input type="text" name="username" placeholder="{:t('common_ui.username_placeholder')}" class="layui-input"
                            lay-verType="tips" lay-verify="required"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">密码:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.password_field')}</label>
                 <div class="layui-input-block">
-                    <input type="text" name="password" placeholder="留空则不修改密码" class="layui-input"
+                    <input type="text" name="password" placeholder="{:t('admin_user.password_keep_placeholder')}" class="layui-input"
                            lay-verType="tips"/>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label layui-form-required">QQ:</label>
                 <div class="layui-input-block">
-                    <input type="number" name="qq" placeholder="请输入QQ" class="layui-input"
+                    <input type="number" name="qq" placeholder="{:t('common_ui.qq_placeholder')}" class="layui-input"
                            lay-verType="tips" lay-verify="required"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">邮箱:</label>
+                <label class="layui-form-label">{:t('common_ui.email_field')}</label>
                 <div class="layui-input-block">
-                    <input type="text" name="email" placeholder="请输入邮箱" class="layui-input"
+                    <input type="text" name="email" placeholder="{:t('common_ui.email_placeholder')}" class="layui-input"
                            lay-verType="tips"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">余额:</label>
+                <label class="layui-form-label">{:t('admin_user.phone')}:</label>
                 <div class="layui-input-block">
-                    <input type="number" name="balance" placeholder="留空则为0元" class="layui-input"
+                    <input type="text" name="phone" placeholder="{:t('admin_user.phone_placeholder')}" class="layui-input"
+                           maxlength="11" inputmode="numeric" autocomplete="off" lay-verType="tips"/>
+                    <div class="sf-form-help">{:t('admin_user.phone_help')}</div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">{:t('admin_user.verification_status')}:</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="phone_verified" value="1" lay-skin="switch" lay-text="{:t('admin_user.verified_unverified')}"/>
+                    <div class="sf-form-help">{:t('admin_user.verify_help')}</div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">{:t('common_ui.balance_field')}</label>
+                <div class="layui-input-block">
+                    <input type="number" name="balance" placeholder="{:t('admin_user.balance_placeholder')}" class="layui-input"
                            lay-verType="tips" step="0.01" min="0" max="999999"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">积分:</label>
+                <label class="layui-form-label">{:t('common_ui.integral_field')}</label>
                 <div class="layui-input-block">
-                    <input type="number" name="integral" placeholder="留空则为0积分" class="layui-input"
+                    <input type="number" name="integral" placeholder="{:t('admin_user.points_placeholder')}" class="layui-input"
                            lay-verType="tips"/>
                 </div>
             </div>
             <div class="layui-form-item layui-form-text">
-                <label class="layui-form-label">允许登录IP:</label>
+                <label class="layui-form-label">{:t('admin_user.login_ip')}:</label>
                 <div class="layui-input-block">
-                    <textarea name="ip" class="layui-textarea" style="height:100px" placeholder="多个用 “|” 隔开，留空则不检测" ></textarea>
+                    <textarea name="ip" class="layui-textarea" style="height:100px" placeholder="{:t('common_ui.ip_placeholder_hint')}" ></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">状态:</label>
+                <label class="layui-form-label layui-form-required">{:t('common.status')}:</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">上级ID:</label>
+                <label class="layui-form-label layui-form-required">{:t('admin_user.parent_id')}:</label>
                 <div class="layui-input-block">
                     <select id="userList" name="userid" class="layui-input ew-select-fixed" lay-search>
-                        <option value="">请选择该用户上级</option>
+                        <option value="">{:t('admin_user.select_parent')}</option>
                     </select>
                 </div>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -178,18 +202,22 @@
         var util = layui.util;
         var admin = layui.admin;
         var notice = layui.notice;
+        var selectedUserId = parseInt('{$userid}', 10) || 0;
+        var initialWhere = {};
+        if (selectedUserId > 0) initialWhere.userid = selectedUserId;
 
         /* 渲染表格 */
         var insTb = table.render({
             elem: '#SF_Table',
             url: '{:url("/User/list")}',
             method: 'post',
+            where: initialWhere,
             page: true,
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>{:t("common.add")}</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t("common.delete")}</button>',
                 '</p>'].join(''),
             cellMinWidth: 100,
             request: {
@@ -207,55 +235,62 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
-                {field: 'img', title: '头像', templet: function (d) {
+                {field: 'img', title: '{:t("common_ui.avatar_field")}', templet: function (d) {
                         var url = d.imgUrl || '//q4.qlogo.cn/headimg_dl?dst_uin='+d.qq+'&spec=100';
                         return '<img data-index="' + (d.LAY_INDEX - 1) + '" src="' + url + '" class="tb-img-circle" tb-img alt=""/>';
                     }, width: 70, unresize: true},
-                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                {field: 'appName', title: '{:t("common_ui.belong_app")}', sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
                     }},
-                {field: 'username', title: '用户名', sort: true, minWidth: 150},
-                {field: 'powerName', title: '权限', align: 'right', sort: true, minWidth: 130, templet: function (d) {
+                {field: 'username', title: '{:t("password.username")}', sort: true, minWidth: 150},
+                {field: 'powerName', title: '{:t("common_ui.power_type")}', align: 'right', sort: true, minWidth: 130, templet: function (d) {
                         return '<span class="layui-badge layui-badge-'+d.powerSpan+'">'+d.powerName+'</span>';
                     }},
                 {field: 'qq', title: 'QQ', align: 'right', sort: true, minWidth: 108},
-                {field: 'email', title: '邮箱', align: 'right', sort: true, minWidth: 170},
-                {field: 'balance', title: '财产', align: 'right', templet: function (d) {
-                        return '<span class="layui-badge layui-badge-green">余额：'+d.balance+'</span> <span class="layui-badge layui-badge-yellow">积分：'+d.integral+'</span>';
+                {field: 'email', title: '{:t("registration.email")}', align: 'right', sort: true, minWidth: 170},
+                {field: 'phone', title: '{:t("admin_user.phone")}', align: 'center', minWidth: 155, templet: function (d) {
+                        var phone = String(d.phone || '').replace(/[^0-9]/g, '');
+                        if (!phone) return '<span style="color:#b2b2b2">{:t("profile.unbound")}</span>';
+                        return phone + (parseInt(d.phone_verified, 10) === 1
+                            ? ' <span class="layui-badge layui-badge-green">{:t("admin_user.verified")}</span>'
+                            : ' <span class="layui-badge layui-badge-gray">{:t("admin_user.unverified")}</span>');
+                    }},
+                {field: 'balance', title: '{:t("common_ui.property_field")}', align: 'right', templet: function (d) {
+                        return '<span class="layui-badge layui-badge-green">{:t("accounting.balance")}：'+d.balance+'</span> <span class="layui-badge layui-badge-yellow">{:t("accounting.point_unit")}：'+d.integral+'</span>';
                     }, sort: true, minWidth: 171},
 
                 {field: 'ip', title: 'IP', align: 'right', sort: true, minWidth: 140},
-                {field: 'userid', title: '上级ID', align: 'right', sort: true, templet: function (d) {
+                {field: 'userid', title: '{:t("admin_user.parent_id")}', align: 'right', sort: true, templet: function (d) {
                         if(d.userid == 0){
-                            return '<span class="layui-badge layui-badge-green">站长</span>';
+                            return '<span class="layui-badge layui-badge-green">{:t("admin_user.site_owner")}</span>';
                         }else{
                             return '<span class="layui-badge layui-badge-blue">UID:'+d.userid+'</span>';
                         }
                     }, minWidth: 110},
-                {field: 'authCount', title: '授权数', align: 'center', width: 90, sort: true, templet: function(d){
+                {field: 'authCount', title: '{:t("admin_user.auth_count")}', align: 'center', width: 90, sort: true, templet: function(d){
                     return d.authCount > 0
                         ? '<a class="layui-badge layui-badge-blue" style="cursor:pointer" lay-event="viewAuth">'+d.authCount+'</a>'
                         : '<span class="layui-badge layui-badge-gray">0</span>';
                 }},
-                {field: 'cdkeyCount', title: '卡密数', align: 'center', width: 90, sort: true, templet: function(d){
+                {field: 'cdkeyCount', title: '{:t("admin_user.cdkey_count")}', align: 'center', width: 90, sort: true, templet: function(d){
                     return d.cdkeyCount > 0
                         ? '<a class="layui-badge layui-badge-orange" style="cursor:pointer" lay-event="viewCdkey">'+d.cdkeyCount+'</a>'
                         : '<span class="layui-badge layui-badge-gray">0</span>';
                 }},
-                {field: 'userCount', title: '下级数', align: 'center', width: 90, sort: true, templet: function(d){
+                {field: 'userCount', title: '{:t("admin_user.subordinate_count")}', align: 'center', width: 90, sort: true, templet: function(d){
                     return d.userCount > 0
                         ? '<a class="layui-badge layui-badge-green" style="cursor:pointer" lay-event="viewSubUser">'+d.userCount+'</a>'
                         : '<span class="layui-badge layui-badge-gray">0</span>';
                 }},
-                {field: 'balanceLog', title: '动账', align: 'center', width: 80, templet: function(d){
-                    return '<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="viewBalanceLog">明细</a>';
+                {field: 'balanceLog', title: '{:t("admin_user.account_activity")}', align: 'center', width: 80, templet: function(d){
+                    return '<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="viewBalanceLog">{:t("admin_user.activity_details")}</a>';
                 }},
-                {field: 'pointLog', title: '积分动账', align: 'center', width: 100, templet: function(d){
-                    return '<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="viewPointLog">明细</a>';
+                {field: 'pointLog', title: '{:t("admin_user.points_activity")}', align: 'center', width: 100, templet: function(d){
+                    return '<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="viewPointLog">{:t("admin_user.activity_details")}</a>';
                 }},
-                {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
-                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {field: 'addtime', title: '{:t("common.add_time")}', sort: true, minWidth: 200},
+                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, minWidth: 100},
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
             ]]
         });
         $(document).off('click.tbImg').on('click.tbImg', '[tb-img]', function () {
@@ -271,7 +306,7 @@
             if (data.value == "") {
                 $("#form_data").css("display","none");
             }else{
-                notice.msg('正在获取列表中..', {icon: 4, close: true});
+                notice.msg('{:t("common.loading_list")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: '{:url("/User/getPowerList")}',
@@ -281,7 +316,7 @@
                         notice.destroy();
                         if (data.code == 0) {
                             notice.msg(data.msg, {icon: 1, audio:'1'});
-                            var content = '<option value="">请选择权限</option>';
+                            var content = '<option value="">{:t("common.please_select")} {:t("common_ui.power_type")}</option>';
                             $.each(data.data.data, function(index, value) {
                                 content +='<option value="'+value.id+'">'+value.name+'</option>';
                             });
@@ -293,10 +328,10 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                     }
                 });
-                notice.msg('正在获取列表中..', {icon: 4, close: true});
+                notice.msg('{:t("common.loading_list")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: '{:url("/User/getAppUserList")}',
@@ -306,7 +341,7 @@
                         notice.destroy();
                         if (data.code == 0) {
                             notice.msg(data.msg, {icon: 1, audio:'1'});
-                            var content = '<option value="">请选择该用户上级</option><option value="0">站长</option>';
+                            var content = '<option value="">{:t("admin_user.select_parent")}</option><option value="0">{:t("admin_user.site_owner")}</option>';
                             $.each(data.data.data, function(index, value) {
                                 content +='<option value="'+value.id+'">ID:'+value.id+' '+value.username+'</option>';
                             });
@@ -318,7 +353,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                     }
                 });
                 $("#form_data").css("display","inherit");
@@ -331,15 +366,14 @@
         });
 
         form.on('select(template)', function (data) {
-            if(data.value == ''){
-                insTb.reload({where: {appid:data.value}, page: {curr: 1}});
-            }else{
-                insTb.reload({where: {appid:data.value}, page: {curr: 1}});
-            }
+            var where = {appid:data.value};
+            if (selectedUserId > 0) where.userid = selectedUserId;
+            insTb.reload({where: where, page: {curr: 1}});
             return false;
         });
         {if $appid != ''}
-        insTb.reload({where: {appid:{$appid}}, page: {curr: 1}});
+        initialWhere.appid = {$appid};
+        insTb.reload({where: initialWhere, page: {curr: 1}});
         {/if}
             /* 表格工具条点击事件 */
             table.on('tool(SF_Table)', function (obj) {
@@ -367,13 +401,12 @@
                 } else if (obj.event === 'del') { // 删除
                     var checkRows = table.checkStatus('SF_Table');
                     if (checkRows.data.length === 0) {
-                        notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                        notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                         return;
                     }
                     var ids = checkRows.data.map(function (d) {
                         return d.id;
                     });
-                    console.log(ids)
                     doDel({ids: ids});
                 }
             });
@@ -382,7 +415,7 @@
             function showEditModel(mData) {
                 admin.popupRight({
                     type: 1,
-                    title: (mData ? '修改' : '添加') + '用户',
+                    title: (mData ? '{:t("common.edit")}' : '{:t("common.add")}') + ' {:t("admin_user.user_suffix")}',
                     content: $('#SF_EditDialog').html(),
                     success: function (layero, dIndex) {
                         // 设置表单模式
@@ -390,7 +423,7 @@
                         // 回显表单数据
                         if(mData){
                             $("#form_data").css("display", "inherit");
-                            notice.msg('正在获取列表中..', {icon: 4, close: true});
+                            notice.msg('{:t("common.loading_list")}', {icon: 4, close: true});
                             $.ajax({
                                 type: "POST",
                                 url: '{:url("/User/getPowerList")}',
@@ -400,7 +433,7 @@
                                     notice.destroy();
                                     if (data.code == 0) {
                                         notice.msg(data.msg, {icon: 1, audio:'1'});
-                                        var content = '<option value="">请选择权限</option>';
+                                        var content = '<option value="">{:t("common.please_select")} {:t("common_ui.power_type")}</option>';
                                         $.each(data.data.data, function(index, value) {
                                             content +='<option value="'+value.id+'">'+value.name+'</option>';
                                         });
@@ -410,14 +443,17 @@
                                     }
                                     form.render();
                                     form.val('SF_EditForm', mData);
+                                    $(layero).find('input[name="phone_verified"]')
+                                        .prop('checked', parseInt(mData.phone_verified, 10) === 1);
+                                    form.render('checkbox');
                                 },
                                 error: function() {
                                     notice.destroy();
-                                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                                 }
                             });
 
-                            notice.msg('正在获取列表中..', {icon: 4, close: true});
+                            notice.msg('{:t("common.loading_list")}', {icon: 4, close: true});
                             $.ajax({
                                 type: "POST",
                                 url: '{:url("/User/getAppUserList")}',
@@ -427,7 +463,7 @@
                                     notice.destroy();
                                     if (data.code == 0) {
                                         notice.msg(data.msg, {icon: 1, audio:'1'});
-                                        var content = '<option value="">请选择该用户上级</option><option value="0">站长</option>';
+                                        var content = '<option value="">{:t("admin_user.select_parent")}</option><option value="0">{:t("admin_user.site_owner")}</option>';
                                         $.each(data.data.data, function(index, value) {
                                             content +='<option value="'+value.id+'">ID:'+value.id+' '+value.username+'</option>';
                                         });
@@ -437,10 +473,13 @@
                                     }
                                     form.render();
                                     form.val('SF_EditForm', mData);
+                                    $(layero).find('input[name="phone_verified"]')
+                                        .prop('checked', parseInt(mData.phone_verified, 10) === 1);
+                                    form.render('checkbox');
                                 },
                                 error: function() {
                                     notice.destroy();
-                                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                                 }
                             });
                         }else{
@@ -449,7 +488,16 @@
                         }
                         // 表单提交事件
                         form.on('submit(SF_EditSubmit)', function (data) {
-                            notice.msg('正在执行中..', {icon: 4, close: true});
+                            var phone = $.trim(data.field.phone || '');
+                            if (phone && !/^1[3-9][0-9]{9}$/.test(phone)) {
+                                notice.msg('{:t("admin_user.invalid_phone")}', {icon: 2});
+                                return false;
+                            }
+                            if (data.field.phone_verified && !phone) {
+                                notice.msg('{:t("admin_user.phone_required_for_verified")}', {icon: 2});
+                                return false;
+                            }
+                            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                             $.ajax({
                                 type: "POST",
                                 url: '{:url("/User/edit")}',
@@ -466,7 +514,7 @@
                                 },
                                 error: function() {
                                     notice.destroy();
-                                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                                 }
                             });
                             return false;
@@ -481,7 +529,7 @@
             function showBalanceLog(mData){
                 admin.popupRight({
                     type: 1,
-                    title: mData.username + ' - 余额明细',
+                    title: mData.username + ' - {:t("accounting.balance_detail")}',
                     content: '<table id="SF_BalanceLogTable" lay-filter="SF_BalanceLogTable"></table>',
                     area: ['800px', '600px'],
                     success: function(layero, dIndex){
@@ -496,16 +544,15 @@
                                 return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
                             },
                             cols: [[
-                                {field: 'type', title: '类型', width: 100, templet: function(d){
-                                    var m={recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入',withdraw_apply:'提现申请',withdraw_cancel:'提现撤回',withdraw_reject:'提现驳回',withdraw_reject_refund:'提现驳回返还'};
-                                    return '<span class="layui-badge '+(d.amount>0?'layui-badge-green':'layui-badge-blue')+'">'+(m[d.type]||d.type)+'</span>';
+                                {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: function(d){
+                                    return '<span class="layui-badge '+(d.amount>0?'layui-badge-green':'layui-badge-blue')+'">'+d.type_label+'</span>';
                                 }},
-                                {field: 'amount', title: '金额', width: 100, templet: function(d){
-                                    return d.amount > 0 ? '<span style="color:#5cb85c">+'+d.amount+' 元</span>' : '<span style="color:#d9534f">'+d.amount+' 元</span>';
+                                {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: function(d){
+                                    return d.amount > 0 ? '<span class="text-success">+'+d.amount+' {:t("accounting.currency_unit")}</span>' : '<span class="text-danger">'+d.amount+' {:t("accounting.currency_unit")}</span>';
                                 }},
-                                {field: 'balance_after', title: '余额', width: 100, templet: function(d){ return (d.balance_after||'0.00')+' 元'; }},
-                                {field: 'description', title: '说明', minWidth: 180},
-                                {field: 'created_at', title: '时间', width: 170}
+                                {field: 'balance', title: '{:t("accounting.balance")}', width: 130, templet: function(d){ return (d.balance||'0.00')+' {:t("accounting.currency_unit")}'; }},
+                                {field: 'description', title: '{:t("accounting.description")}', minWidth: 180},
+                                {field: 'created_at', title: '{:t("accounting.time")}', width: 170}
                             ]]
                         });
                     }
@@ -516,7 +563,7 @@
             function showPointLog(mData){
                 admin.popupRight({
                     type: 1,
-                    title: mData.username + ' - 积分明细',
+                    title: mData.username + ' - {:t("accounting.point_detail")}',
                     content: '<table id="SF_PointLogTable" lay-filter="SF_PointLogTable"></table>',
                     area: ['800px', '600px'],
                     success: function(layero, dIndex){
@@ -531,17 +578,16 @@
                                 return {code: res.code, msg: res.msg, count: res.data.data.total || 0, data: res.data.data.data || []};
                             },
                             cols: [[
-                                {field: 'type', title: '类型', width: 110, templet: function(d){
-                                    var m={consume:'消费赠送',recharge:'充值赠送',cdkey_exchange:'卡密兑换',deduct_plugin:'购买插件',plugin_income:'插件收入',exchange:'积分兑换'};
-                                    return '<span class="layui-badge '+(d.amount>0?'layui-badge-green':'layui-badge-blue')+'">'+(m[d.type]||d.type)+'</span>';
+                                {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: function(d){
+                                    return '<span class="layui-badge '+(d.amount>0?'layui-badge-green':'layui-badge-blue')+'">'+d.type_label+'</span>';
                                 }},
-                                {field: 'amount', title: '积分变动', width: 110, templet: function(d){
-                                    return d.amount > 0 ? '<span style="color:#5cb85c">+'+d.amount+'</span>' : '<span style="color:#d9534f">'+d.amount+'</span>';
+                                {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: function(d){
+                                    return d.amount > 0 ? '<span class="text-success">+'+d.amount+'</span>' : '<span class="text-danger">'+d.amount+'</span>';
                                 }},
-                                {field: 'integral_after', title: '剩余积分', width: 110, templet: function(d){ return (d.integral_after||0)+' 积分'; }},
-                                {field: 'description', title: '说明', minWidth: 180},
-                                {field: 'source_type', title: '来源', width: 120},
-                                {field: 'created_at', title: '时间', width: 170}
+                                {field: 'integral_after', title: '{:t("accounting.remaining_points")}', width: 150, templet: function(d){ return (d.integral_after||0)+' {:t("accounting.point_unit")}'; }},
+                                {field: 'description', title: '{:t("accounting.description")}', minWidth: 180},
+                                {field: 'source_type', title: '{:t("accounting.source")}', width: 120},
+                                {field: 'created_at', title: '{:t("accounting.time")}', width: 170}
                             ]]
                         });
                     }
@@ -550,13 +596,13 @@
 
             /* 删除 */
             function doDel(obj) {
-                layer.confirm('确定要删除选中数据吗？', {
+                layer.confirm('{:t("confirm.delete_selected")}', {
                     skin: 'layui-layer-admin',
                     icon: 3,
                     shade: .1
                 }, function (i) {
                     layer.close(i);
-                    notice.msg('正在执行中..', {icon: 4, close: true});
+                    notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                     $.ajax({
                         type: "POST",
                         url: obj.data ? '{:url("/User/drop")}' : '{:url("/User/batchDrop")}',
@@ -573,7 +619,7 @@
                         },
                         error: function() {
                             notice.destroy();
-                            notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                         }
                     });
                 });
@@ -581,7 +627,7 @@
 
             /* 修改用户状态 */
             form.on('switch(SF_TbStateCk)', function (obj) {
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url:'{:url("/User/setStatus")}',
@@ -598,7 +644,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                     }
                 });
             });

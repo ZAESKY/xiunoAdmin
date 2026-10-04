@@ -1,8 +1,6 @@
 <?php
 namespace app\common\extend;
 
-use TrueBV\Punycode;
-
 class CheckInfo
 {
     /**
@@ -22,8 +20,8 @@ class CheckInfo
         }
         switch ($type){
             case 'domain':
-                $Punycode = new Punycode();
-                if(!$this->isValidDomain($Punycode->encode($content))){
+                $asciiDomain = $this->toAsciiDomain((string) $content);
+                if($asciiDomain === false || !$this->isValidDomain($asciiDomain)){
                     return message(t('auth.domain_format_error'), false);
                 }else{
                     return message('success', true);
@@ -43,6 +41,17 @@ class CheckInfo
                 }
                 break;
         }
+    }
+
+    private function toAsciiDomain(string $domain)
+    {
+        if (!function_exists('idn_to_ascii')) {
+            return false;
+        }
+
+        $variant = defined('INTL_IDNA_VARIANT_UTS46') ? INTL_IDNA_VARIANT_UTS46 : 0;
+        $result = idn_to_ascii($domain, IDNA_DEFAULT, $variant);
+        return $result === false ? false : $result;
     }
     /**
      * 判断是否为QQ

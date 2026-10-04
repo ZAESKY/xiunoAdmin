@@ -7,10 +7,10 @@
  */
 namespace app\pay\library\alipay\model\builder;
 
-require_once 'GoodsDetail.php';
-require_once 'ExtendParams.php';
-require_once 'RoyaltyDetailInfo.php';
-require_once 'ContentBuilder.php';
+require_once __DIR__ . '/GoodsDetail.php';
+require_once __DIR__ . '/ExtendParams.php';
+require_once __DIR__ . '/RoyaltyDetailInfo.php';
+require_once __DIR__ . '/ContentBuilder.php';
 
 class AlipayTradeCreateContentBuilder extends ContentBuilder
 {

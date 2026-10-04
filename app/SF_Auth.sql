@@ -57,17 +57,44 @@ INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `cont
 ('feature_point_exchange_enabled', 'feature_access', '积分兑换', '关闭后用户端积分兑换、管理员端积分商品/兑换记录均不可访问', 'bool', '1', '', '', '', NULL),
 ('feature_user_plugin_enabled', 'feature_access', '用户插件中心', '关闭后用户端插件市场、发布插件、我的插件、我的购买等页面均不可访问', 'bool', '1', '', '', '', NULL),
 ('feature_admin_plugin_enabled', 'feature_access', '管理员插件管理', '关闭后管理员端插件列表、插件订单、插件评论等页面均不可访问', 'bool', '1', '', '', '', NULL),
-('feature_withdraw_enabled', 'feature_access', '提现功能', '关闭后用户端提现记录/申请、管理员端提现管理均不可访问', 'bool', '1', '', '', '', NULL),
-('oss_enabled', 'storage', '启用 OSS 上传', '开启后插件包、图标、封面上传到阿里云 OSS；关闭后全部保存到本地', 'bool', '0', '', '', '', NULL),
+('feature_withdraw_enabled', 'feature_access', '提现模块入口', '控制用户端提现入口和管理员端提现管理入口；关闭后两个入口均不可访问', 'bool', '1', '', '', '', NULL),
+('plugin_reward_enabled', 'plugin_reward', '启用发布奖励', '用户原创插件首次审核通过时触发；关闭期间通过的插件以后也不会补发', 'bool', '1', '', '', '', NULL),
+('plugin_reward_points', 'plugin_reward', '首次通过奖励积分', '填0表示不奖励积分；每个插件只奖励一次', 'number', '100', '', '', 'min="0" max="1000000" step="1"', NULL),
+('plugin_reward_balance', 'plugin_reward', '首次通过奖励金额', '作为平台余额发放，不进入可提现余额；填0表示不奖励金额', 'number', '0.00', '', '', 'min="0" max="1000000" step="0.01"', NULL),
+('plugin_reward_original_only', 'plugin_reward', '仅奖励原创插件', '开启后转载插件审核通过但不会获得奖励', 'bool', '1', '', '', '', NULL),
+('plugin_reward_monthly_limit', 'plugin_reward', '用户每月奖励上限', '单个用户每月最多获得奖励的插件数量；0表示不限制', 'number', '3', '', '', 'min="0" max="1000" step="1"', NULL),
+('plugin_reward_min_account_days', 'plugin_reward', '账号最低注册天数', '账号注册达到该天数后才可获得插件发布奖励；0表示不限制', 'number', '7', '', '', 'min="0" max="3650" step="1"', NULL),
+('plugin_reward_duplicate_hash', 'plugin_reward', '拦截重复插件包', '相同插件包哈希全站只允许获得一次首次发布奖励', 'bool', '1', '', '', '', NULL),
+('oss_enabled', 'storage', '启用 OSS 上传', '开启后插件包、应用安装包、版本更新包、程序补丁和站内上传图片统一保存到阿里云 OSS；关闭后保存到本地', 'bool', '0', '', '', '', NULL),
 ('oss_access_key_id', 'storage', 'OSS AccessKey ID', '阿里云 OSS AccessKey ID，仅后端读取，不会暴露到前端', 'string', '', '', '', '', NULL),
 ('oss_access_key_secret', 'storage', 'OSS AccessKey Secret', '阿里云 OSS AccessKey Secret，仅后端读取；留空则使用 .env 中的同名配置', 'string', '', '', '', 'type="password" autocomplete="new-password"', NULL),
 ('oss_bucket', 'storage', 'OSS Bucket', '阿里云 OSS Bucket 名称', 'string', '', '', '', '', NULL),
 ('oss_endpoint', 'storage', 'OSS Endpoint', '例如 oss-cn-hangzhou.aliyuncs.com，支持填写完整 https:// 地址', 'string', '', '', '', '', NULL),
 ('oss_public_base_url', 'storage', 'OSS 公开访问域名', '可填写 CDN/自定义域名，例如 https://cdn.example.com；留空则使用 Bucket Endpoint 拼接', 'string', '', '', '', '', NULL),
-('oss_use_private_bucket', 'storage', 'OSS 私有 Bucket', '开启后历史版本下载由后端生成临时签名 URL', 'bool', '0', '', '', '', NULL),
-('withdraw_enable', 'function', '余额提现', '开启后用户可提交余额提现申请', 'bool', '1', '', '', '', NULL),
-('withdraw_min_amount', 'function', '最低提现金额', '用户单次提现最低金额', 'number', '10', '', '', '', NULL),
-('withdraw_interval', 'function', '提现间隔(小时)', '同一用户两次提现申请之间的最小间隔，0表示不限制', 'number', '24', '', '', '', NULL),
+('oss_use_private_bucket', 'storage', 'OSS 私有 Bucket', '必须开启；文件回显和授权下载均由后端生成短时签名 URL，新对象强制使用 private ACL', 'bool', '1', '', '', '', NULL),
+('sms_enabled', 'sms', '启用阿里云短信', '开启后可绑定已验证手机号，并按下方开关保护敏感操作', 'bool', '0', '', '', '', NULL),
+('sms_access_key_id', 'sms', 'AccessKey ID', '建议使用仅授予短信发送权限的RAM子账号，不要使用主账号AccessKey', 'string', '', '', '', 'autocomplete="off"', NULL),
+('sms_access_key_secret', 'sms', 'AccessKey Secret', '密钥加密保存且永不回显；留空保持原值，填写新值才会替换', 'string', '', '', '', 'autocomplete="new-password"', NULL),
+('sms_sign_name', 'sms', '短信签名', '填写阿里云短信控制台审核通过的签名名称，不包含【】', 'string', '', '', '', 'maxlength="100"', NULL),
+('sms_template_code', 'sms', '备用/自定义验证码模板 CODE', '某个业务模板留空时使用此 CODE；可填写数字赠送模板或 SMS_ 开头的自定义模板。全部业务模板已配置时可留空', 'string', '', '', '', 'maxlength="32"', NULL),
+('sms_template_login_register', 'sms', '登录/注册模板 CODE', '阿里云号码认证赠送模板默认使用 100001；用于短信登录或注册', 'string', '100001', '', '', 'maxlength="32"', NULL),
+('sms_template_phone_change', 'sms', '修改手机号模板 CODE', '阿里云号码认证赠送模板默认使用 100002；用于发起修改绑定手机号', 'string', '100002', '', '', 'maxlength="32"', NULL),
+('sms_template_password_reset', 'sms', '重置密码模板 CODE', '阿里云号码认证赠送模板默认使用 100003；用于手机验证码找回密码', 'string', '100003', '', '', 'maxlength="32"', NULL),
+('sms_template_phone_bind', 'sms', '绑定新手机号模板 CODE', '阿里云号码认证赠送模板默认使用 100004；用于首次绑定或验证新手机号', 'string', '100004', '', '', 'maxlength="32"', NULL),
+('sms_template_phone_verify', 'sms', '验证已绑定手机号模板 CODE', '阿里云号码认证赠送模板默认使用 100005；用于提现、返利等敏感操作验证', 'string', '100005', '', '', 'maxlength="32"', NULL),
+('sms_code_ttl', 'sms', '验证码有效期（秒）', '建议300秒，可设置120至600秒', 'number', '300', '', '', 'min="120" max="600" step="1"', NULL),
+('sms_daily_limit', 'sms', '单手机号每日上限', '包括绑定和敏感操作验证码，建议不超过10条', 'number', '10', '', '', 'min="1" max="30" step="1"', NULL),
+('sms_require_withdraw', 'sms', '提现需要短信验证', '申请提现时必须使用已绑定手机号接收一次性验证码', 'bool', '1', '', '', '', NULL),
+('sms_require_rebate', 'sms', '生成返利码需要短信验证', '首次生成专属折扣码时必须验证已绑定手机号', 'bool', '1', '', '', '', NULL),
+('sms_require_plugin_reward', 'sms', '插件奖励需要已验证手机号', '未绑定已验证手机号的账号可以发布插件，但不会获得首次发布奖励', 'bool', '1', '', '', '', NULL),
+('password_recovery_channel', 'safe', '找回密码验证码', '选择用户找回密码时接收验证码的渠道；短信模式仅允许已验证手机号', 'radio', 'email', '{"email":"邮箱验证码","sms":"手机短信验证码"}', '', '', NULL),
+('withdraw_enable', 'withdraw', '允许提交提现', '关闭后保留提现记录访问，但用户不能提交新的提现申请', 'bool', '1', '', '', '', NULL),
+('withdraw_min_amount', 'withdraw', '最低提现金额', '用户单次提现最低金额', 'number', '10', '', '', '', NULL),
+('withdraw_interval', 'withdraw', '提现间隔(小时)', '同一用户两次提现申请之间的最小间隔，0表示不限制', 'number', '24', '', '', '', NULL),
+('rebate_hold_days', 'rebate', '返利冻结天数', '返利到期并通过复核后进入可提现收益余额，建议不少于7天', 'number', '7', '', '', '', NULL),
+('rebate_pair_daily_count', 'rebate', '同一邀请关系每日上限', '同一付款账号与同一码主每天最多产生的返利笔数', 'number', '3', '', '', '', NULL),
+('rebate_daily_limit', 'rebate', '码主每日返利上限', '单个码主每天可进入冻结期的返利金额上限（元）', 'number', '50', '', '', '', NULL),
+('rebate_monthly_limit', 'rebate', '码主每月返利上限', '单个码主每月可进入冻结期的返利金额上限（元）', 'number', '500', '', '', '', NULL),
 ('alipay_api', 'pay', '支付宝', '', 'radio', '0', '{"0":"关闭","1":"电脑+手机网站支付","2":"易支付免签约接口","3":"当面付扫码支付","5":"码支付免签约接口","7":"卡易信笔笔清接口"}', '', '', NULL),
 ('alipay_config', 'pay', '支付宝官方配置', '', 'array', '{"appid":"应用APPID","publickey":"支付宝公钥(RSA2)","privatekey":"应用私钥(RSA2)"}', '', '', '', NULL),
 ('alipay_epay_config', 'pay', '支付宝易支付配置', '', 'array', '{"url":"易支付接口网址","pid":"易支付商户ID","key":"易支付商户密钥"}', '', '', '', NULL),
@@ -84,6 +111,8 @@ INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `cont
 ('change_binding_phone_message', 'message', '用户绑定手机', '', 'config', '', 'notice', '', '', NULL),
 ('change_binding_mail_message', 'message', '用户绑定邮箱', '', 'config', '', 'notice', '', '', NULL),
 ('download_mail_message', 'message', '源码下载', '', 'config', '', 'notice', '', '', NULL);
+INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
+('email_notification_enabled', 'email_notification', '业务邮件通知', '总开关关闭时仅保留站内消息，不发送审核、交易等业务邮件', 'bool', '0', '', '', '', NULL);
 
 DROP TABLE IF EXISTS `SF_cdkey`;
 CREATE TABLE IF NOT EXISTS `SF_cdkey` (
@@ -266,7 +295,7 @@ CREATE TABLE `SF_admin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(150) NOT NULL,
   `password` varchar(150) NOT NULL,
-  `qq` varchar(20) NOT NULL DEFAULT '',
+  `qq` varchar(20) DEFAULT NULL,
   `wechat_openid` varchar(64) NOT NULL DEFAULT '' COMMENT '微信公众号openid',
   `email` varchar(255) DEFAULT NULL,
   `phone` varchar(11) DEFAULT NULL COMMENT '手机号',
@@ -274,9 +303,11 @@ CREATE TABLE `SF_admin` (
   `ip` varchar(255) DEFAULT NULL,
   `citylist` varchar(255) DEFAULT NULL,
   `believe` text,
-  `access_token` text,
+  `access_token` varchar(128) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_admin_qq` (`qq`),
+  UNIQUE KEY `uk_admin_access_token` (`access_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `SF_admin`(`username`, `password`, `qq`, `status`) VALUES
@@ -291,7 +322,10 @@ CREATE TABLE `SF_user` (
   `wechat_openid` varchar(64) NOT NULL DEFAULT '' COMMENT '微信公众号openid',
   `email` varchar(255) NOT NULL COMMENT '邮箱',
   `phone` varchar(11) NOT NULL COMMENT '手机号',
+  `phone_verified_at` datetime DEFAULT NULL COMMENT '手机号通过短信验证的时间',
+  `phone_verified_source` varchar(20) NOT NULL DEFAULT '' COMMENT '手机号验证来源',
   `balance` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '余额',
+  `withdrawable_balance` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '可提现收益余额，为总余额的子集',
   `integral` int(11) NOT NULL DEFAULT 0 COMMENT '积分',
   `lasttime` datetime DEFAULT NULL COMMENT '最后一次登录时间',
   `ip` varchar(255) DEFAULT NULL COMMENT '用户IP',
@@ -307,8 +341,94 @@ CREATE TABLE `SF_user` (
   `userid` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '上级UID',
   `appid` int(11) unsigned NOT NULL COMMENT '所属应用ID',
   `is_developer` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为开发者',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_username` (`username`),
+  UNIQUE KEY `uk_user_qq` (`qq`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TRIGGER `SF_user_withdrawable_before_insert`
+BEFORE INSERT ON `SF_user`
+FOR EACH ROW SET NEW.`withdrawable_balance` = LEAST(GREATEST(NEW.`withdrawable_balance`, 0.00), GREATEST(NEW.`balance`, 0.00));
+
+CREATE TRIGGER `SF_user_withdrawable_before_update`
+BEFORE UPDATE ON `SF_user`
+FOR EACH ROW SET NEW.`withdrawable_balance` = LEAST(GREATEST(NEW.`withdrawable_balance`, 0.00), GREATEST(NEW.`balance`, 0.00));
+
+DROP TABLE IF EXISTS `SF_social_identity`;
+CREATE TABLE `SF_social_identity` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `provider` varchar(32) NOT NULL COMMENT 'qq/wechat/etc',
+  `provider_appid` varchar(64) NOT NULL COMMENT '第三方平台应用ID',
+  `provider_uid` varchar(128) NOT NULL COMMENT '第三方稳定用户标识，如QQ OpenID',
+  `unionid` varchar(128) NOT NULL DEFAULT '' COMMENT '跨应用标识（平台支持时）',
+  `nickname` varchar(255) NOT NULL DEFAULT '',
+  `avatar` varchar(500) NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_provider_subject` (`provider`,`provider_appid`,`provider_uid`),
+  KEY `idx_unionid` (`provider`,`unionid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='第三方登录身份';
+
+DROP TABLE IF EXISTS `SF_user_social_identity`;
+CREATE TABLE `SF_user_social_identity` (
+  `identity_id` int(11) unsigned NOT NULL,
+  `user_id` int(11) unsigned NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`identity_id`,`user_id`),
+  UNIQUE KEY `uk_social_identity_once` (`identity_id`),
+  UNIQUE KEY `uk_social_user_once` (`user_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户与第三方身份关联';
+
+DROP TABLE IF EXISTS `SF_user_phone_identity`;
+CREATE TABLE `SF_user_phone_identity` (
+  `user_id` int(11) unsigned NOT NULL,
+  `phone_hash` char(64) NOT NULL COMMENT '带服务端pepper的手机号HMAC',
+  `phone_last4` char(4) NOT NULL DEFAULT '',
+  `verified_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_phone_hash` (`phone_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='已验证手机号唯一身份';
+
+DROP TABLE IF EXISTS `SF_sms_audit`;
+CREATE TABLE `SF_sms_audit` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `scene` varchar(32) NOT NULL DEFAULT '',
+  `phone_hash` char(64) NOT NULL DEFAULT '',
+  `phone_masked` varchar(20) NOT NULL DEFAULT '',
+  `status` varchar(20) NOT NULL DEFAULT '',
+  `provider_request_id` varchar(128) NOT NULL DEFAULT '',
+  `error_code` varchar(64) NOT NULL DEFAULT '',
+  `template_code` varchar(32) NOT NULL DEFAULT '' COMMENT '本次发送实际使用的模板CODE',
+  `ip_hash` char(64) NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_scene_time` (`user_id`,`scene`,`created_at`),
+  KEY `idx_phone_time` (`phone_hash`,`created_at`),
+  KEY `idx_status_time` (`status`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='短信发送与验证审计（不保存验证码）';
+
+DROP TABLE IF EXISTS `SF_qq_identity_claim`;
+CREATE TABLE `SF_qq_identity_claim` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `identity_id` int(11) unsigned NOT NULL COMMENT 'SF_social_identity.id',
+  `user_id` int(11) unsigned NOT NULL COMMENT 'SF_user.id',
+  `legacy_qq` varchar(20) NOT NULL COMMENT '旧扫码一次性验证的数字QQ',
+  `proof_method` varchar(32) NOT NULL DEFAULT 'legacy_qr',
+  `verified_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `status` tinyint(1) unsigned NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_qq_claim_identity` (`identity_id`),
+  UNIQUE KEY `uk_qq_claim_user` (`user_id`),
+  UNIQUE KEY `uk_qq_claim_number` (`legacy_qq`),
+  KEY `idx_qq_claim_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='正规QQ身份与已验证历史QQ关系';
 
 DROP TABLE IF EXISTS `SF_menu`;
 CREATE TABLE `SF_menu` (
@@ -341,13 +461,14 @@ INSERT INTO `SF_menu`(`id`,`name`, `url`, `icon`, `parentid`, `addtime`, `power`
 (15, '应用列表', 'App/list', '', 14, NOW(), 1, 1),
 (16, '版本列表', 'Version/list', '', 14, NOW(), 1, 1),
 (17, '模式列表', 'CheckType/list', '', 14, NOW(), 1, 1),
-(18, '我的授权', 'MyList/auth', 'layui-icon-face-smile-b', 0, NOW(), 2, 1),
+(18, '我的授权', 'MyList/auth', 'layui-icon-face-smile-b', 0, NOW(), 2, 0),
 (21, '授权管理', 'Auth/list', 'layui-icon-auz', 0, NOW(), 0, 1),
 (24, '用户管理', 'User/list', 'layui-icon-user', 0, NOW(), 0, 1),
 (26, '盗版管理', 'Pirate/list', 'layui-icon-website', 0, NOW(), 1, 1),
 (27, '系统设置', '#', 'layui-icon-set', 0, NOW(), 1, 1),
 (28, '系统配置', 'Set/index', '', 27, NOW(), 1, 1),
 (29, '软件更新', 'Set/update', '', 27, NOW(), 1, 1),
+(33, '邮件消息通知', 'Set/emailNotification', '', 27, NOW(), 1, 1),
 (31, '插件管理', 'Addon/list', 'layui-icon-component', 0, NOW(), 1, 1),
 (32, '系统日志', 'Log/list', 'layui-icon-log', 0, NOW(), 1, 1);
 
@@ -432,6 +553,10 @@ CREATE TABLE `SF_version` (
 `version` int(11) unsigned NOT NULL COMMENT '版本号',
 `update_log` text COMMENT '更新内容',
 `download_catalogue` varchar(255) NOT NULL COMMENT '下载目录',
+`storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT '版本包存储驱动 local/oss',
+`package_object_key` varchar(500) NOT NULL DEFAULT '' COMMENT '版本包 OSS 对象 Key',
+`package_sha256` char(64) NOT NULL DEFAULT '' COMMENT '版本包 SHA-256',
+`package_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '版本包字节数',
 `number` int(11) unsigned DEFAULT 0 COMMENT '下载次数',
 `addtime` datetime NOT NULL COMMENT '授权添加时间',
 `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '版本状态',
@@ -468,10 +593,16 @@ CREATE TABLE `SF_app` (
   `name` varchar(150) NOT NULL COMMENT '应用名称',
   `check_type` varchar(150) NOT NULL DEFAULT 'domain' COMMENT '判断授权内容规则',
   `introduce` text COMMENT '应用介绍',
-  `logo` varchar(100) NOT NULL DEFAULT '/Assets/img/logo.png' COMMENT '应用LOGO',
+  `logo` varchar(500) NOT NULL DEFAULT '/Assets/img/logo.png' COMMENT '应用LOGO或私有OSS媒体网关URL',
   `authcode_file` varchar(150) NOT NULL COMMENT '授权码路径',
   `sql_file` varchar(150) NOT NULL COMMENT 'SQL路径',
   `download_file` varchar(150) NOT NULL COMMENT '下载路径（安装和更新）',
+  `installer_storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT '安装包存储驱动 local/oss',
+  `installer_object_key` varchar(500) NOT NULL DEFAULT '' COMMENT '安装包 OSS 对象 Key',
+  `installer_file_name` varchar(255) NOT NULL DEFAULT '' COMMENT '公开引导安装包原始文件名',
+  `installer_sha256` char(64) NOT NULL DEFAULT '' COMMENT '公开引导安装包 SHA-256',
+  `installer_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '公开引导安装包字节数',
+  `installer_uploaded_at` datetime DEFAULT NULL COMMENT '公开引导安装包上传时间',
   `hacker_file` varchar(150) NOT NULL COMMENT '后门路径',
   `hacker_key` varchar(150) NOT NULL COMMENT '后门密钥',
   `app_notice` text COMMENT '应用公告',
@@ -578,6 +709,53 @@ CREATE TABLE `SF_notification` (
   PRIMARY KEY (`id`),
   KEY `idx_user_read` (`user_id`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `SF_notification_email_preference`;
+CREATE TABLE `SF_notification_email_preference` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `owner_type` varchar(16) NOT NULL COMMENT 'user/admin',
+  `owner_id` int(11) unsigned NOT NULL,
+  `event_code` varchar(64) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_owner_event` (`owner_type`,`owner_id`,`event_code`),
+  KEY `idx_event_enabled` (`event_code`,`enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='邮件通知接收偏好';
+
+DROP TABLE IF EXISTS `SF_notification_email_template`;
+CREATE TABLE `SF_notification_email_template` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `event_code` varchar(64) NOT NULL,
+  `audience` varchar(16) NOT NULL COMMENT 'user/admin',
+  `subject` varchar(255) NOT NULL,
+  `html_body` mediumtext NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `updated_by` int(11) unsigned NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_event_code` (`event_code`),
+  KEY `idx_audience_enabled` (`audience`,`enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务邮件HTML模板覆盖';
+
+DROP TABLE IF EXISTS `SF_notification_email_log`;
+CREATE TABLE `SF_notification_email_log` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `event_code` varchar(64) NOT NULL,
+  `recipient_type` varchar(16) NOT NULL,
+  `recipient_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `email_hash` char(64) NOT NULL,
+  `email_masked` varchar(255) NOT NULL DEFAULT '',
+  `status` varchar(16) NOT NULL,
+  `error_code` varchar(64) NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_event_time` (`event_code`,`created_at`),
+  KEY `idx_recipient_time` (`recipient_type`,`recipient_id`,`created_at`),
+  KEY `idx_status_time` (`status`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务邮件发送审计（不保存正文和完整邮箱）';
 
 DROP TABLE IF EXISTS `SF_point_log`;
 CREATE TABLE `SF_point_log` (
@@ -791,15 +969,20 @@ CREATE TABLE `SF_rebate_record` (
   `referrer_user_id` int(11) unsigned NOT NULL COMMENT '返利归属用户ID（折扣码所有者）',
   `discount_code` varchar(32) NOT NULL COMMENT '使用的折扣码',
   `paid_amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '支付金额',
+  `rebate_base_amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '返利计算基数（充值面额）',
   `rebate_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT '结算时的返利比例(%)',
   `rebate_amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '返利金额',
-  `status` varchar(20) NOT NULL DEFAULT 'settled' COMMENT 'settled/canceled',
+  `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT 'pending/settled/rejected/canceled',
+  `settle_at` datetime DEFAULT NULL COMMENT '预计结算时间',
+  `settled_at` datetime DEFAULT NULL COMMENT '实际结算时间',
+  `risk_reason` varchar(255) NOT NULL DEFAULT '' COMMENT '内部风控原因',
   `created_at` datetime NOT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_pay_trade_no` (`pay_trade_no`),
   KEY `idx_referrer` (`referrer_user_id`),
-  KEY `idx_code` (`discount_code`)
+  KEY `idx_code` (`discount_code`),
+  KEY `idx_status_settle_at` (`status`,`settle_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='返利记录表';
 
 -- ==================== plugin tables ====================
@@ -829,7 +1012,7 @@ CREATE TABLE `SF_plugin` (
   `package_file_name` varchar(255) DEFAULT '' COMMENT '插件包原始文件名',
   `file_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '文件大小(字节)',
   `package_mime_type` varchar(100) DEFAULT '' COMMENT '插件包MIME类型',
-  `file_hash` varchar(64) DEFAULT '' COMMENT '文件MD5哈希',
+  `file_hash` varchar(64) DEFAULT '' COMMENT '文件SHA-256哈希',
   `icon_object_key` varchar(500) DEFAULT '' COMMENT '图标OSS对象Key',
   `cover_object_key` varchar(500) DEFAULT '' COMMENT '封面OSS对象Key',
   `update_description` text COMMENT '最新版本更新说明',
@@ -861,6 +1044,42 @@ CREATE TABLE `SF_plugin` (
   KEY `is_recommend` (`is_recommend`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表';
 
+DROP TABLE IF EXISTS `SF_plugin_reward`;
+CREATE TABLE `SF_plugin_reward` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '奖励ID',
+  `plugin_id` int(11) unsigned NOT NULL COMMENT '插件ID',
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '发布者用户ID',
+  `plugin_name` varchar(255) NOT NULL DEFAULT '' COMMENT '插件名称快照',
+  `scene` varchar(32) NOT NULL DEFAULT 'first_approval' COMMENT '奖励场景',
+  `status` varchar(20) NOT NULL DEFAULT 'issued' COMMENT 'issued/skipped/revoked',
+  `points` int(11) NOT NULL DEFAULT 0 COMMENT '奖励积分',
+  `balance` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '奖励平台余额（不可提现）',
+  `file_hash` varchar(64) NOT NULL DEFAULT '' COMMENT '插件包哈希快照',
+  `reason` varchar(255) NOT NULL DEFAULT '' COMMENT '跳过或撤销原因',
+  `config_snapshot` text COMMENT '发放时配置快照',
+  `approved_by` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '审核管理员ID',
+  `approved_at` datetime NOT NULL COMMENT '审核通过时间',
+  `issued_at` datetime DEFAULT NULL COMMENT '奖励到账时间',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_plugin_scene` (`plugin_id`,`scene`),
+  KEY `idx_user_status_time` (`user_id`,`status`,`issued_at`),
+  KEY `idx_hash_scene_status` (`file_hash`,`scene`,`status`),
+  KEY `idx_approved_by` (`approved_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件发布奖励记录';
+
+DROP TABLE IF EXISTS `SF_plugin_reward_hash_claim`;
+CREATE TABLE `SF_plugin_reward_hash_claim` (
+  `file_hash` varchar(64) NOT NULL COMMENT '已占用的插件包哈希',
+  `plugin_id` int(11) unsigned NOT NULL COMMENT '首次获奖插件ID',
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '首次获奖用户ID',
+  `claimed_at` datetime NOT NULL COMMENT '占用时间',
+  PRIMARY KEY (`file_hash`),
+  UNIQUE KEY `uk_plugin_id` (`plugin_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件奖励包哈希原子占用';
+
 DROP TABLE IF EXISTS `SF_plugin_versions`;
 CREATE TABLE `SF_plugin_versions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '版本记录ID',
@@ -872,7 +1091,7 @@ CREATE TABLE `SF_plugin_versions` (
   `package_file_name` varchar(255) DEFAULT '' COMMENT '插件包原始文件名',
   `package_file_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '插件包大小',
   `package_mime_type` varchar(100) DEFAULT '' COMMENT '插件包MIME类型',
-  `package_hash` varchar(64) DEFAULT '' COMMENT '插件包MD5哈希',
+  `package_hash` varchar(64) DEFAULT '' COMMENT '插件包SHA-256哈希',
   `update_description` text COMMENT '更新说明',
   `created_by` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '创建人用户ID',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
@@ -882,6 +1101,33 @@ CREATE TABLE `SF_plugin_versions` (
   KEY `idx_plugin_id` (`plugin_id`),
   KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件版本历史表';
+
+DROP TABLE IF EXISTS `SF_plugin_package_upload`;
+CREATE TABLE `SF_plugin_package_upload` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '上传记录ID',
+  `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '一次性上传凭证SHA-256',
+  `actor_type` varchar(10) NOT NULL COMMENT 'user/admin',
+  `actor_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '上传者ID',
+  `storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT 'local/oss',
+  `file_path` varchar(500) NOT NULL DEFAULT '' COMMENT '本地私有文件路径',
+  `package_object_key` varchar(500) NOT NULL DEFAULT '' COMMENT 'OSS对象Key',
+  `package_file_name` varchar(255) NOT NULL DEFAULT '' COMMENT '原始文件名',
+  `package_file_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '文件字节数',
+  `package_mime_type` varchar(100) NOT NULL DEFAULT '' COMMENT 'MIME类型',
+  `package_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '' COMMENT 'SHA-256',
+  `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT 'pending/cleaning/cleaned/consumed',
+  `consumed_plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '最终关联插件ID',
+  `expires_at` datetime NOT NULL COMMENT '凭证过期时间',
+  `consumed_at` datetime DEFAULT NULL COMMENT '提交发布时间',
+  `cleaned_at` datetime DEFAULT NULL COMMENT '孤儿文件清理时间',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_token_hash` (`token_hash`),
+  KEY `idx_actor_status` (`actor_type`,`actor_id`,`status`),
+  KEY `idx_status_expires` (`status`,`expires_at`),
+  KEY `idx_consumed_plugin` (`consumed_plugin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件包待提交上传记录';
 
 DROP TABLE IF EXISTS `SF_plugin_resources`;
 CREATE TABLE `SF_plugin_resources` (
@@ -1048,12 +1294,16 @@ CREATE TABLE IF NOT EXISTS `SF_loginlog` (
 INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
 ('checkin_enabled', 'checkin', '启用打卡功能', '开启后用户可在面板首页进行每日打卡获取积分', 'bool', '1', '', '', '', ''),
 ('checkin_base_points', 'checkin', '单次打卡积分', '用户每次打卡获得的基础积分', 'number', '5', '', 'required', '', ''),
-('checkin_consecutive_days', 'checkin', '连续打卡天数阈值', '达到指定连续天数时发放额外奖励，与下方奖励积分一一对应', 'array', '{"field":["3","7","15","30"]}', '', '', '', ''),
-('checkin_consecutive_bonus', 'checkin', '连续打卡奖励积分', '达到对应连续天数时额外奖励的积分，与上方天数阈值一一对应', 'array', '{"field":["3","7","15","30"]}', '', '', '', '');
+('checkin_consecutive_days', 'checkin', '连续打卡天数阈值', '使用英文逗号分隔，并与奖励积分逐项对应，例如：3,7,15,30', 'string', '3,7,15,30', '', 'required', '', ''),
+('checkin_consecutive_bonus', 'checkin', '连续打卡奖励积分', '使用英文逗号分隔，并与天数阈值逐项对应，例如：3,7,15,30', 'string', '3,7,15,30', '', 'required', '', '');
 
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`)
-VALUES ('plugin_commission_rate', 'function', '插件佣金比例(%)', '平台从插件销售中抽取的佣金百分比', 'number', '10', '', '', '')
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `type` = VALUES(`type`);
+INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+SELECT 'plugin_commission_enabled', 'plugin_market', '启用插件销售平台抽成', '开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', 'bool', '1', '', '', '', ''
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_enabled');
+
+INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+SELECT 'plugin_commission_rate', 'plugin_market', '插件销售平台抽成比例（%）', '仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。', 'number', '10.00', '', 'required', 'min="0" max="100" step="0.01"', ''
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_rate');
 
 -- ==================== corrected menus ====================
 -- Remove any malformed menu entries that may have been created above

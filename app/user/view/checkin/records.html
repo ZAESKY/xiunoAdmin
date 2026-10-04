@@ -21,19 +21,19 @@
   <div style="display:flex;gap:14px;margin-bottom:14px;">
     <div class="ci-stat-card" style="flex:1;">
       <div class="ci-icon c1"><i class="layui-icon layui-icon-fire"></i></div>
-      <div class="ci-info"><div class="ci-val" id="statTotal">0</div><div class="ci-label">累计打卡天数</div></div>
+      <div class="ci-info"><div class="ci-val" id="statTotal">0</div><div class="ci-label">{:t('upgrade.total_checkin_days')}</div></div>
     </div>
     <div class="ci-stat-card" style="flex:1;">
       <div class="ci-icon c2"><i class="layui-icon layui-icon-star"></i></div>
-      <div class="ci-info"><div class="ci-val" id="statPoints">0</div><div class="ci-label">累计获得积分</div></div>
+      <div class="ci-info"><div class="ci-val" id="statPoints">0</div><div class="ci-label">{:t('upgrade.total_points')}</div></div>
     </div>
     <div class="ci-stat-card" style="flex:1;">
       <div class="ci-icon c3"><i class="layui-icon layui-icon-tree"></i></div>
-      <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">最长连续打卡</div></div>
+      <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">{:t('upgrade.max_consecutive')}</div></div>
     </div>
   </div>
   <div class="layui-card">
-    <div class="layui-card-header">打卡记录</div>
+    <div class="layui-card-header">{:t('accounting.checkin_history')}</div>
     <div class="layui-card-body">
       <table id="recordsTable" lay-filter="recordsTable"></table>
     </div>
@@ -56,10 +56,10 @@ layui.use(['table'], function(){
     url: '{:url("/Checkin/myRecords")}',
     method: 'POST',
     cols: [[
-      {field: 'checkin_date', title: '打卡日期', width: 130, sort: true},
-      {field: 'consecutive_days', title: '连续天数', width: 100},
-      {field: 'points_earned', title: '获得积分', width: 110},
-      {field: 'created_at', title: '打卡时间', width: 170, sort: true}
+      {field: 'checkin_date', title: '{:t("accounting.checkin_date")}', width: 130, sort: true},
+      {field: 'consecutive_days', title: '{:t("accounting.consecutive_days")}', width: 100},
+      {field: 'points_earned', title: '{:t("accounting.points_earned")}', width: 110},
+      {field: 'created_at', title: '{:t("accounting.checkin_time")}', width: 170, sort: true}
     ]],
     page: true,
     limit: 15,

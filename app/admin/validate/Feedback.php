@@ -12,9 +12,9 @@ class Feedback extends Validate
     ];
 
     protected $message = [
-        'id.require'     => '缺少反馈ID',
-        'id.number'      => '反馈ID必须为数字',
-        'status.require' => '请选择处理状态',
-        'status.in'      => '无效的处理状态',
+        'id.require'     => 'feedback.id_required',
+        'id.number'      => 'feedback.id_number',
+        'status.require' => 'feedback.status_required',
+        'status.in'      => 'feedback.invalid_status',
     ];
 }

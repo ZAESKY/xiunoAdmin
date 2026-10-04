@@ -45,11 +45,15 @@ class PowerPriceService extends BaseService
         try{
             $post = request()->post();
             $id = !empty($post['id'])?intval($post['id']):null;
-            $type = !empty($post['type'])?$post['type']:null;
-            $status = !empty($post['status'])?1:0;
+            $type = !empty($post['type']) ? trim((string)$post['type']) : null;
+            $rawStatus = $post['status'] ?? null;
             if(empty($id)){
                 throw new Exception(t('validation.missing_id'));
             }
+            if (!in_array($rawStatus, [0, 1, '0', '1'], true)) {
+                throw new Exception(t('validation.invalid_status'));
+            }
+            $status = intval($rawStatus);
             $this->model->setPower($id, $type, $status);
             Cache::tag('SF_Menu')->clear();
             return true;
@@ -79,9 +83,9 @@ class PowerPriceService extends BaseService
             }
             $info = $this->model->getInfo($pid);
             if (!$info) {
-                return ['msg' => '权限价格不存在', 'data' => [], 'success' => false, 'code' => -1];
+                return ['msg' => t('power_price.not_found'), 'data' => [], 'success' => false, 'code' => -1];
             }
-            return ['msg' => '权限价格配置可用', 'data' => $info, 'success' => true, 'code' => 0];
+            return ['msg' => t('power_price.available'), 'data' => $info, 'success' => true, 'code' => 0];
         }catch (\Exception $e){
             return ['msg' => $e->getMessage(), 'data' => [], 'success' => false, 'code' => -1];
         }

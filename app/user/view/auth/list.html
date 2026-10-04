@@ -2,18 +2,29 @@
 <!-- 正文开始 -->
 <div class="layui-fluid">
     <div class="layui-card">
+        <div class="layui-card-header">
+            <i class="layui-icon layui-icon-auz"></i> {:t('auth_portal.title')}
+        </div>
         <div class="layui-card-body">
+            <blockquote class="layui-elem-quote">{:t('auth_portal.subtitle')}</blockquote>
+            {notempty name="replace_notice"}
+            <div class="layui-form-item formBasForm">
+                <div class="sf-tag layui-badge-blue">
+                    {$replace_notice|raw}
+                </div>
+            </div>
+            {/notempty}
             <!-- 表格工具栏 -->
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_auth_content_or_qq')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状&emsp;态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
                                 <option value="">{:t('common_ui.select_used_status')}</option>
@@ -37,24 +48,39 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    {{# if (d.can_manage == 1) { }}
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="editManage"><i class="layui-icon layui-icon-edit"></i>{:t('auth_portal.manage_edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
+    {{# } }}
+    {{# if (d.can_binding_edit == 1) { }}
+    <a class="layui-btn layui-btn-normal layui-btn-sm" lay-event="editBinding"><i class="layui-icon layui-icon-edit"></i>{:t('auth_portal.binding_edit')}</a>
+    {{# } }}
+    {{# if (d.can_unbind == 1) { }}
+    <a class="layui-btn layui-btn-warm layui-btn-sm" lay-event="unbind"><i class="layui-icon layui-icon-unlink"></i>{:t('auth_portal.unbind')}</a>
+    {{# } }}
+    {{# if (d.can_offline_activate == 1) { }}
+    <a class="layui-btn layui-btn-sm" lay-event="offlineIssueRow"><i class="layui-icon layui-icon-auz"></i>{:t('auth_portal.offline_activate')}</a>
+    {{# } }}
 </script>
 <!-- 表格状态列 -->
 <script type="text/html" id="SF_TbState">
+    {{# if (d.can_manage == 1) { }}
     <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="正常|封禁" {{d.status==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common.normal')}|{:t('common.ban')}" {{d.status==1?'checked':''}} style="display: none;"/>
+    {{# } else { }}
+    <span class="layui-badge {{d.status==1?'layui-badge-green':'layui-badge-red'}}">{{d.status==1?'{:t("common.normal")}':'{:t("common.ban")}'}}</span>
+    {{# } }}
 </script>
 <script type="text/html" id="SF_TbPermanent_Switch">
     <input type="checkbox" lay-filter="SF_TbPermanent_SwitchCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="开启|关闭" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common.open')}|{:t('common.closed')}" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_Beta_Switch">
     <input type="checkbox" lay-filter="SF_Beta_SwitchCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="开启|关闭" {{d.beta==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common.open')}|{:t('common.closed')}" {{d.beta==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_Tbid">
-    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo"></span> '+d.id:'<span class="layui-badge-dot layui-bg-red"></span> '+d.id}}</span>
 </script>
 <!-- 表单弹窗 -->
 <script type="text/html" id="SF_EditDialog">
@@ -62,63 +88,107 @@
         <input name="id" type="hidden"/>
 
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">授权内容:</label>
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.auth_content_label')}</label>
             <div class="layui-input-block">
-                <input type="text" name="auth_info" placeholder="请输入授权的内容" class="layui-input"
+                <input type="text" name="auth_info" placeholder="{:t('auth_portal.auth_content_placeholder')}" class="layui-input"
                        lay-verType="tips" lay-verify="required"/>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label layui-form-required">QQ:</label>
             <div class="layui-input-block">
-                <input type="number" name="qq" placeholder="请输入授权者QQ" class="layui-input"
+                <input type="number" name="qq" placeholder="{:t('auth_portal.auth_qq_placeholder')}" class="layui-input"
                        lay-verType="tips" lay-verify="required"/>
             </div>
         </div>
-        <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">授权IP:</label>
+        <div class="layui-form-item layui-form-text sf-manager-only">
+            <label class="layui-form-label">{:t('auth_portal.auth_ip_label')}</label>
             <div class="layui-input-block">
-                <textarea name="ip" class="layui-textarea" style="height:100px" placeholder="多个用 “|” 隔开，留空则不检测" ></textarea>
+                <textarea name="ip" class="layui-textarea" placeholder="{:t('common_ui.ip_placeholder_hint')}"></textarea>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">授权时间:</label>
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.auth_duration_label')}</label>
             <div class="layui-input-block">
                 <select id="auth_price_list" name="type" class="layui-input ew-select-fixed" lay-filter="type">
-                    <option value="">请选择授权时间</option>
+                    <option value="">{:t('common_ui.select_time_first')}</option>
                 </select>
             </div>
         </div>
         <div id="diy" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">到期时间:</label>
+                <label class="layui-form-label layui-form-required">{:t('auth_portal.expire_time_label')}</label>
                 <div class="layui-input-block">
-                    <input type="text" id="test" name="endtime" placeholder="请选择到期时间" class="icon-date layui-input"
+                    <input type="text" id="test" name="endtime" placeholder="{:t('common_ui.enter_expire_first')}" class="icon-date layui-input"
                            lay-verType="tips"/>
                 </div>
             </div>
         </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">状态:</label>
+        <div class="layui-form-item sf-manager-only">
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.status_label')}</label>
             <div class="layui-input-block">
                 <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
             </div>
         </div>
+        <div class="layui-form-item sf-binding-only" style="display:none;">
+            <label class="layui-form-label">{:t('auth_portal.replace_price_label')}</label>
+            <div class="layui-input-block">
+                <input type="text" name="remainderReplacePrice" class="layui-input layui-disabled" disabled/>
+            </div>
+        </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">价格:</label>
+            <label class="layui-form-label">{:t('auth_portal.price_label')}</label>
             <div class="layui-input-block">
                 <input type="text" id="input_price" name="price" value="￥0" class="layui-input layui-disabled"
                        lay-verType="tips" disabled/>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
+        </div>
+    </form>
+</script>
+<!-- 离线激活弹窗 -->
+<script type="text/html" id="SF_OfflineDialog">
+    <form id="SF_OfflineForm" lay-filter="SF_OfflineForm" class="layui-form model-form">
+        <div class="layui-form-item">
+            <blockquote class="layui-elem-quote">{:t('auth_portal.offline_help')}</blockquote>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.authcode_label')}</label>
+            <div class="layui-input-block">
+                <input type="password" name="authcode" maxlength="128" autocomplete="off"
+                       placeholder="{:t('auth_portal.authcode_placeholder')}" class="layui-input"
+                       lay-verType="tips" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.request_code_label')}</label>
+            <div class="layui-input-block">
+                <textarea name="request_code" maxlength="16384" rows="5" autocomplete="off"
+                          placeholder="{:t('auth_portal.request_code_placeholder')}" class="layui-textarea sf-offline-request"
+                          lay-verType="tips" lay-verify="required"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item sf-offline-result" style="display:none;">
+            <label class="layui-form-label">{:t('auth_portal.credential_label')}</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea sf-offline-code" rows="6" readonly
+                          aria-label="{:t('auth_portal.credential_label')}"></textarea>
+                <div class="layui-word-aux">{:t('auth_portal.credential_help')}</div>
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button class="layui-btn sf-offline-submit" lay-filter="SF_OfflineSubmit" lay-submit>{:t('auth_portal.issue_credential')}</button>
+            <button class="layui-btn layui-btn-normal sf-offline-copy" type="button" style="display:none;">{:t('auth_portal.copy_credential')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.close')}</button>
         </div>
     </form>
 </script>
 
 {include file="/public/footer"}
+<script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
 <script>
     layui.use(['layer', 'form', 'table', 'admin', 'notice', 'laydate'], function () {
         var $ = layui.jquery;
@@ -128,8 +198,90 @@
         var admin = layui.admin;
         var notice = layui.notice;
         var laydate = layui.laydate;
+        var offlineSubmitting = false;
+        var canManageAuth = {if $canManageAuth}true{else}false{/if};
+        var authDiscountRate = Number({$userInfo['addauth_discount']});
+        var authText = {
+            addAuth: '{:t("auth_portal.add_auth")}',
+            deleteSelected: '{:t("auth_portal.delete_selected")}',
+            bind: '{:t("auth_portal.bind")}',
+            unbindSelected: '{:t("auth_portal.unbind_selected")}',
+            offlineActivate: '{:t("auth_portal.offline_activate")}',
+            app: '{:t("common_ui.belong_app")}',
+            relation: '{:t("auth_portal.relation")}',
+            authContent: '{:t("common_ui.auth_content")}',
+            authQq: '{:t("common_ui.auth_qq")}',
+            expires: '{:t("common_ui.expire_time")}',
+            permanent: '{:t("auth_portal.permanent")}',
+            expired: '{:t("auth_portal.expired")}',
+            authCode: '{:t("common_ui.auth_code")}',
+            view: '{:t("auth_portal.view")}',
+            copyCode: '{:t("auth_portal.copy_code")}',
+            featureCode: '{:t("common_ui.feature_code")}',
+            addTime: '{:t("common.add_time")}',
+            status: '{:t("common.status")}',
+            operation: '{:t("common.operation")}',
+            enterExpire: '{:t("common_ui.enter_expire_first")}',
+            selectDuration: '{:t("common_ui.select_time_first")}',
+            processing: '{:t("common.loading")}',
+            copied: '{:t("auth_portal.copy_success")}',
+            selectManaged: '{:t("auth_portal.select_managed")}',
+            selectBound: '{:t("auth_portal.select_bound")}',
+            qqVerifyFailed: '{:t("auth_portal.qq_verify_failed")}',
+            dataList: '{:t("auth_portal.data_list")}',
+            selectAll: '{:t("auth_portal.select_all")}',
+            selectBindData: '{:t("auth_portal.select_bind_data")}',
+            listLoadFailed: '{:t("auth_portal.list_load_failed")}',
+            openingQq: '{:t("auth_portal.opening_qq")}',
+            offlineTitle: '{:t("auth_portal.offline_dialog_title")}',
+            issuing: '{:t("auth_portal.issuing")}',
+            issueCredential: '{:t("auth_portal.issue_credential")}',
+            issueSuccess: '{:t("auth_portal.issue_success")}',
+            issueFailed: '{:t("auth_portal.issue_failed")}',
+            networkError: '{:t("auth_portal.network_error")}',
+            noCredential: '{:t("auth_portal.no_credential")}',
+            credentialCopied: '{:t("auth_portal.credential_copied")}',
+            editBinding: '{:t("auth_portal.edit_binding")}',
+            editAuth: '{:t("auth_portal.edit_auth")}',
+            addAuthTitle: '{:t("auth_portal.add_auth_title")}',
+            noRenewal: '{:t("auth_portal.no_renewal")}',
+            listLoading: '{:t("common.loading_list")}',
+            listSuccess: '{:t("common.list_success")}',
+            serverError: '{:t("common.server_error")}',
+            confirmDelete: '{:t("auth_portal.confirm_delete")}',
+            confirmUnbind: '{:t("auth_portal.confirm_unbind")}'
+        };
 
-        /* 渲染表格 */
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];
+            });
+        }
+
+        function discountedMoney(unitPrice, quantity) {
+            var unitCents = Math.round(Number(unitPrice || 0) * 100);
+            var totalCents = Math.round(unitCents * Math.max(0, Number(quantity || 0)) * authDiscountRate);
+            return (totalCents / 100).toFixed(2);
+        }
+
+        function dailyDiscountedMoney(totalPrice, days, quantity) {
+            var dayCount = Math.max(1, parseInt(days, 10) || 1);
+            var dailyCents = Math.ceil(Math.round(Number(totalPrice || 0) * 100) / dayCount);
+            var totalCents = Math.round(dailyCents * Math.max(0, Number(quantity || 0)) * authDiscountRate);
+            return (totalCents / 100).toFixed(2);
+        }
+
+        var toolbarHtml = ['<p>'];
+        if (canManageAuth) {
+            toolbarHtml.push('<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>'+authText.addAuth+'</button>&nbsp;');
+            toolbarHtml.push('<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>'+authText.deleteSelected+'</button>&nbsp;');
+        }
+        toolbarHtml.push('<button lay-event="bind" class="layui-btn layui-btn-sm layui-btn-normal icon-btn"><i class="layui-icon layui-icon-link"></i>'+authText.bind+'</button>&nbsp;');
+        toolbarHtml.push('<button lay-event="unbind" class="layui-btn layui-btn-sm layui-btn-warm icon-btn"><i class="layui-icon layui-icon-unlink"></i>'+authText.unbindSelected+'</button>&nbsp;');
+        toolbarHtml.push('<button lay-event="offlineIssue" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon layui-icon-auz"></i>'+authText.offlineActivate+'</button>');
+        toolbarHtml.push('</p>');
+
+        /* 渲染统一授权表格 */
         var insTb = table.render({
             elem: '#SF_Table',
             url: '{:url("/Auth/list")}',
@@ -137,10 +289,7 @@
             page: true,
             skin: 'line',
             size: 'lg',
-            toolbar: ['<p>',
-                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
-                '</p>'].join(''),
+            toolbar: toolbarHtml.join(''),
             cellMinWidth: 100,
             request: {
                 pageName: 'current_page' //页码的参数名称，默认：page
@@ -157,32 +306,40 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
-                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
-                        return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
+                {field: 'appName', title: authText.app, sort: true, minWidth: 120, templet: function (d) {
+                        return '<span class="layui-badge layui-badge-orange">'+escapeHtml(d.appName)+'</span>';
                     }},
-                {field: 'auth_info', title: '授权内容', sort: true, minWidth: 160},
-                {field: 'qq', title: '授权者QQ', sort: true, minWidth: 120},
+                {field: 'relation_label', title: authText.relation, minWidth: 150, templet: function (d) {
+                        var badgeClass = d.relation_type === 'managed' ? 'layui-badge-blue' : (d.relation_type === 'bound' ? 'layui-badge-green' : 'layui-badge-orange');
+                        return '<span class="layui-badge '+badgeClass+'">'+escapeHtml(d.relation_label)+'</span>';
+                    }},
+                {field: 'auth_info', title: authText.authContent, sort: true, minWidth: 160, templet: function (d) {
+                        return escapeHtml(d.auth_info);
+                    }},
+                {field: 'qq', title: authText.authQq, sort: true, minWidth: 120, templet: function (d) {
+                        return escapeHtml(d.qq);
+                    }},
                 {
-                    field: 'endtime', title: '到期时间', align: 'right', templet: function (d) {
+                    field: 'endtime', title: authText.expires, align: 'right', templet: function (d) {
                         if (d.permanent_switch == '1') {
-                            return '<span class="layui-badge layui-badge-green">永久授权</span>';
+                            return '<span class="layui-badge layui-badge-green">'+authText.permanent+'</span>';
                         } else {
                             if(checkEndTime(d.endtime) == false){
-                                return '<span class="layui-badge layui-badge-orange">授权已到期</span>';
+                                return '<span class="layui-badge layui-badge-orange">'+authText.expired+'</span>';
                             }else{
-                                return '<span class="layui-badge layui-badge-blue">'+d.endtime+'</span>';
+                                return '<span class="layui-badge layui-badge-blue">'+escapeHtml(d.endtime)+'</span>';
                             }
                         }
                     }, sort: true, minWidth: 180
                 },
-                {field: 'authcode', title: '授权码', minWidth: 100, templet: function (d) {
-                        return '<a class="layui-btn layui-btn-xs" lay-event="seeAuthcode">点击查看</a>';
+                {field: 'authcode', title: authText.authCode, minWidth: 100, templet: function (d) {
+                        return '<a class="layui-btn layui-btn-xs" lay-event="seeAuthcode">'+authText.view+'</a>';
                     }
                 },
-                {field: 'sign', title: '特征码', sort: true, minWidth: 100},
-                {field: 'addtime', title: '添加时间', sort: true, minWidth: 180},
-                {field: 'status', title: '状态', templet: '#SF_TbState', minWidth: 100},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {field: 'sign', title: authText.featureCode, sort: true, minWidth: 100},
+                {field: 'addtime', title: authText.addTime, sort: true, minWidth: 180},
+                {field: 'status', title: authText.status, templet: '#SF_TbState', minWidth: 100},
+                {title: authText.operation, toolbar: '#SF_TbBar', align: 'center', minWidth: 390}
             ]]
         });
         function checkEndTime(date){
@@ -203,16 +360,16 @@
             if (diy == "1") {
                 $("#diy").css("display", "inherit");
                 if(data.value == ''){
-                    $('#input_price').val('请先输入到期时间！');
+                    $('#input_price').val(authText.enterExpire);
                 }else{
                     $('#input_price').val('￥0');
                 }
             }else{
                 $("#diy").css("display", "none");
                 if(data.value == ''){
-                    $('#input_price').val('请先选择授权时间！');
+                    $('#input_price').val(authText.selectDuration);
                 }else{
-                    $('#input_price').val('￥' + price * {$userInfo['addauth_discount']});
+                    $('#input_price').val('￥' + discountedMoney(price, 1));
                 }
             }
         });
@@ -250,15 +407,21 @@
 
         /* 表格工具条点击事件 */
         table.on('tool(SF_Table)', function (obj) {
-            if (obj.event === 'edit') { // 修改
-                showEditModel(obj.data);
+            if (obj.event === 'editManage') {
+                showEditModel(obj.data, 'manage');
+            } else if (obj.event === 'editBinding') {
+                showEditModel(obj.data, 'binding');
             } else if (obj.event === 'del') { // 删除
                 doDel(obj);
+            } else if (obj.event === 'unbind') {
+                doUnbind(obj);
+            } else if (obj.event === 'offlineIssueRow') {
+                openOfflineDialog(obj.data.authcode || '');
             } else if (obj.event === 'seeAuthcode') {
                 admin.open({
-                    title: '查看授权 '+obj.data.auth_info+' 授权码',
+                    title: authText.authCode + ' - ' + escapeHtml(obj.data.auth_info),
                     type: 1,
-                    content: '<div class="layui-card"><div class="layui-card-body"><div class="layui-form layui-form-pane"><div class="layui-form-item"><label class="layui-form-label">授权码</label><div class="layui-input-block"><input type="text" id="copy" class="layui-input layui-disabled" value="'+obj.data.authcode+'"/></div></div></div><a class="layui-btn layui-btn-fluid" onclick="copy()">点击复制</a></div></div>'
+                    content: '<div class="layui-card"><div class="layui-card-body"><div class="layui-form layui-form-pane"><div class="layui-form-item"><label class="layui-form-label">'+authText.authCode+'</label><div class="layui-input-block"><input type="text" id="copy" class="layui-input layui-disabled" value="'+escapeHtml(obj.data.authcode)+'"/></div></div></div><a class="layui-btn layui-btn-fluid" onclick="copy()">'+authText.copyCode+'</a></div></div>'
                 });
             }
             laydate.render({
@@ -272,36 +435,47 @@
                     let price = $("#auth_price_list option:selected").attr('price');
                     let day = $("#auth_price_list option:selected").attr('day');
                     if(value == ''){
-                        $('#input_price').val('请先输入到期时间！');
+                        $('#input_price').val(authText.enterExpire);
                     }else{
-                        $('#input_price').val('￥' + (DateDiff(value, obj.data.endtime) * Math.ceil((price / day) * 100) / 100) * {$userInfo['addauth_discount']});
+                        $('#input_price').val('￥' + dailyDiscountedMoney(price, day, DateDiff(value, obj.data.endtime)));
                     }
                 }
             });
         });
         window.copy = function (){
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(authText.processing, {icon: 4, close: true});
             var e = document.getElementById("copy");
             e.select();
             document.execCommand("Copy");//执行复制
             notice.destroy();
-            notice.msg('复制成功！', {icon: 1, audio:'1'});
+            notice.msg(authText.copied, {icon: 1, audio:'1'});
         }
         /* 表格头工具栏点击事件 */
         table.on('toolbar(SF_Table)', function (obj) {
             if (obj.event === 'add') { // 添加
-                showEditModel();
+                showEditModel(null, 'manage');
+            } else if (obj.event === 'bind') {
+                binding();
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
-                if (checkRows.data.length === 0) {
-                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                var managedRows = checkRows.data.filter(function (row) { return row.can_manage == 1; });
+                if (managedRows.length === 0) {
+                    notice.msg(authText.selectManaged, {icon: 3, audio:'1'});
                     return;
                 }
-                var ids = checkRows.data.map(function (d) {
+                var ids = managedRows.map(function (d) {
                     return d.id;
                 });
-                console.log(ids)
                 doDel({ids: ids});
+            } else if (obj.event === 'unbind') {
+                var boundRows = table.checkStatus('SF_Table').data.filter(function (row) { return row.can_unbind == 1; });
+                if (boundRows.length === 0) {
+                    notice.msg(authText.selectBound, {icon: 3, audio:'1'});
+                    return;
+                }
+                doUnbind({ids: boundRows.map(function (row) { return row.id; })});
+            } else if (obj.event === 'offlineIssue') {
+                openOfflineDialog('');
             }
             laydate.render({
                 elem: '#test', //指定元素
@@ -314,24 +488,171 @@
                     let price = $("#auth_price_list option:selected").attr('price');
                     let day = $("#auth_price_list option:selected").attr('day');
                     if(value == ''){
-                        $('#input_price').val('请先输入到期时间！');
+                        $('#input_price').val(authText.enterExpire);
                     }else{
-                        $('#input_price').val('￥' + (DateDiff(value, null) * Math.ceil((price / day) * 100) / 100) * {$userInfo['addauth_discount']});
+                        $('#input_price').val('￥' + dailyDiscountedMoney(price, day, DateDiff(value, null)));
                     }
                 }
             });
         });
 
+        var qqAuthProofToken = '';
+        function authEscape(value){ return $('<div>').text(value == null ? '' : String(value)).html(); }
+        function handleAuthOauthResult(result){
+            notice.destroy();
+            if(!result || result.code != 0 || !result.data || result.data.status !== 'verified'){
+                notice.msg((result && result.msg) || authText.qqVerifyFailed, {icon:2});
+                return;
+            }
+            qqAuthProofToken = result.data.proof_token || '';
+            $.ajax({type:'POST',url:'/api.php/Social/legacyAuth',data:{action:'list',proof_token:qqAuthProofToken},dataType:'json',success:function(res){
+                if(res.code != 0){ notice.msg(res.msg,{icon:2}); return; }
+                var rows=(res.data&&res.data.list)||[],content='<div class="layui-card"><div class="layui-card-body"><form class="layui-form"><div class="layui-form-item"><label class="layui-form-label layui-form-required">'+authText.dataList+'</label><div class="layui-input-block"><input type="checkbox" value="checkall" lay-skin="primary" lay-filter="allChoose" title="'+authText.selectAll+'">';
+                $.each(rows,function(_,row){content+='<input type="checkbox" name="list[]" value="'+parseInt(row.id,10)+'" lay-skin="primary" title="'+authEscape(row.auth_info)+'">';});
+                content+='</div></div><div class="layui-form-item text-right"><button type="button" class="layui-btn" lay-filter="BindingSubmit" lay-submit>'+authText.bind+'</button></div></form></div></div>';
+                admin.open({type:1,title:authText.selectBindData,content:content,success:function(){form.render();}});
+            },error:function(){notice.msg(authText.listLoadFailed,{icon:2});}});
+        }
+        function binding(){
+            notice.msg(authText.openingQq,{icon:4,close:true});
+            SfQqOauth.start({
+                url:'/api.php/Social/verify',
+                data:{scene:'auth_binding',return_to:location.pathname+location.search},
+                onResult:handleAuthOauthResult,
+                onError:function(message){notice.destroy();notice.msg(message,{icon:2});}
+            });
+        }
+        SfQqOauth.resume(handleAuthOauthResult,function(message){notice.msg(message,{icon:2});});
+
+        form.on('checkbox(allChoose)', function (data) {
+            $(data.elem).closest('form').find("input[name='list[]']").each(function () {
+                this.checked = data.elem.checked;
+            });
+            form.render('checkbox');
+            return false;
+        });
+
+        form.on('submit(BindingSubmit)', function (data) {
+            data.field.action = 'bind';
+            data.field.proof_token = qqAuthProofToken;
+            notice.msg(authText.processing, {icon: 4, close: true});
+            $.ajax({
+                type: 'POST',
+                url: '/api.php/Social/legacyAuth',
+                data: data.field,
+                dataType: 'json',
+                success: function (result) {
+                    notice.destroy();
+                    if (result.code == 0) {
+                        layer.closeAll();
+                        table.reload('SF_Table');
+                        notice.msg(result.msg, {icon: 1, audio:'1'});
+                    } else {
+                        notice.msg(result.msg, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function () {
+                    notice.destroy();
+                    notice.msg(authText.serverError, {icon: 2, audio:'1'});
+                }
+            });
+            return false;
+        });
+
+        function openOfflineDialog(authcode) {
+            offlineSubmitting = false;
+            admin.open({
+                type: 1,
+                title: authText.offlineTitle,
+                area: ['680px', '600px'],
+                content: $('#SF_OfflineDialog').html(),
+                success: function () {
+                    form.render();
+                    if (authcode) {
+                        form.val('SF_OfflineForm', {authcode: authcode});
+                    }
+                }
+            });
+        }
+
+        form.on('submit(SF_OfflineSubmit)', function (data) {
+            if (offlineSubmitting) {
+                return false;
+            }
+            offlineSubmitting = true;
+            var formElem = $(data.form);
+            var submitButton = formElem.find('.sf-offline-submit');
+            submitButton.prop('disabled', true).addClass('layui-btn-disabled').text(authText.issuing);
+            formElem.find('.sf-offline-result').hide();
+            formElem.find('.sf-offline-copy').hide();
+            formElem.find('.sf-offline-code').val('');
+
+            $.ajax({
+                type: 'POST',
+                url: '{:url("/Auth/offlineIssue")}',
+                data: data.field,
+                dataType: 'json',
+                success: function (res) {
+                    if (res && res.code == 0 && res.data && typeof res.data.activation_code === 'string') {
+                        formElem.find('.sf-offline-code').val(res.data.activation_code);
+                        formElem.find('.sf-offline-result').show();
+                        formElem.find('.sf-offline-copy').show();
+                        notice.msg(res.msg || authText.issueSuccess, {icon: 1, audio:'1'});
+                    } else {
+                        notice.msg((res && res.msg) || authText.issueFailed, {icon: 2, audio:'1'});
+                    }
+                },
+                error: function (xhr) {
+                    var msg = authText.networkError;
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        msg = xhr.responseJSON.msg;
+                    }
+                    notice.msg(msg, {icon: 2, audio:'1'});
+                },
+                complete: function () {
+                    offlineSubmitting = false;
+                    submitButton.prop('disabled', false).removeClass('layui-btn-disabled').text(authText.issueCredential);
+                }
+            });
+            return false;
+        });
+
+        $(document).on('click', '.sf-offline-copy', function () {
+            var codeField = $(this).closest('form').find('.sf-offline-code').get(0);
+            if (!codeField || !codeField.value) {
+                notice.msg(authText.noCredential, {icon: 3});
+                return;
+            }
+            function copied() {
+                notice.msg(authText.credentialCopied, {icon: 1, audio:'1'});
+            }
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(codeField.value).then(copied, function () {
+                    codeField.select();
+                    document.execCommand('copy');
+                    copied();
+                });
+            } else {
+                codeField.select();
+                document.execCommand('copy');
+                copied();
+            }
+        });
+
         /* 显示表单弹窗 */
-        function showEditModel(mData) {
+        function showEditModel(mData, mode) {
+            var bindingMode = mode === 'binding';
             admin.popupRight({
                 type: 1,
-                title: (mData ? '修改' : '添加') + '授权',
+                title: bindingMode ? authText.editBinding : (mData ? authText.editAuth : authText.addAuthTitle),
                 content: $('#SF_EditDialog').html(),
                 success: function (layero, dIndex) {
+                    var formRoot = $(layero).find('#SF_EditForm');
+                    formRoot.find('.sf-manager-only').toggle(!bindingMode);
+                    formRoot.find('.sf-binding-only').toggle(bindingMode);
                     // 回显表单数据
                     if(mData){
-                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        notice.msg(authText.listLoading, {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/Auth/getAuthPriceList")}',
@@ -339,8 +660,8 @@
                             success: function(data) {
                                 notice.destroy();
                                 if (data.code == 0) {
-                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                                    var content = '<option value="-1" diy="0" day="0" price="0">不续费</option>';
+                                    notice.msg(authText.listSuccess, {icon: 1, audio:'1'});
+                                    var content = '<option value="-1" diy="0" day="0" price="0">'+authText.noRenewal+'</option>';
                                     $.each(data.data,function(index, value){
                                         $.each(value,function(index, value){
                                             if(value.diy_switch == 1){
@@ -359,11 +680,11 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg(authText.serverError, {icon: 2, audio:'1'});
                             }
                         });
                     }else{
-                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        notice.msg(authText.listLoading, {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/Auth/getAuthPriceList")}',
@@ -371,8 +692,8 @@
                             success: function(data) {
                                 notice.destroy();
                                 if (data.code == 0) {
-                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                                    var content = '<option value="">请选择授权时间</option>';
+                                    notice.msg(authText.listSuccess, {icon: 1, audio:'1'});
+                                    var content = '<option value="">'+authText.selectDuration+'</option>';
                                     $.each(data.data,function(index, value){
                                         $.each(value,function(index, value){
                                             if(value.diy_switch == 1){
@@ -390,19 +711,22 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg(authText.serverError, {icon: 2, audio:'1'});
                             }
                         });
                         form.render();
-                        $("#diy").css("display", "none");
+                        $("#diy").hide();
                     }
 
                     // 表单提交事件
                     form.on('submit(SF_EditSubmit)', function (data) {
-                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        notice.msg(authText.processing, {icon: 4, close: true});
+                        if (bindingMode) {
+                            data.field.bindingType = 'auth';
+                        }
                         $.ajax({
                             type: "POST",
-                            url: '{:url("/Auth/edit")}',
+                            url: bindingMode ? '{:url("/MyList/editBinding")}' : '{:url("/Auth/edit")}',
                             data: data.field,
                             dataType: "json",
                             success: function(data) {
@@ -416,7 +740,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg(authText.serverError, {icon: 2, audio:'1'});
                             }
                         });
                         return false;
@@ -429,13 +753,13 @@
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm(authText.confirmDelete, {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg(authText.processing, {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/Auth/drop")}' : '{:url("/Auth/batchDrop")}',
@@ -452,7 +776,41 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg(authText.serverError, {icon: 2, audio:'1'});
+                    }
+                });
+            });
+        }
+
+        /* 取绑只会提交服务端标记为当前账号已绑定的记录，服务端仍会再次校验。 */
+        function doUnbind(obj) {
+            layer.confirm(authText.confirmUnbind, {
+                skin: 'layui-layer-admin',
+                icon: 3,
+                shade: .1
+            }, function (i) {
+                layer.close(i);
+                notice.msg(authText.processing, {icon: 4, close: true});
+                $.ajax({
+                    type: 'POST',
+                    url: obj.data ? '{:url("/MyList/unbind")}' : '{:url("/MyList/batchUnbind")}',
+                    data: {
+                        id: obj.data ? obj.data.id : obj.ids.join(','),
+                        type: 'auth'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            table.reload('SF_Table');
+                            notice.msg(data.msg, {icon: 1, audio:'1'});
+                        } else {
+                            notice.msg(data.msg, {icon: 2, audio:'1'});
+                        }
+                    },
+                    error: function () {
+                        notice.destroy();
+                        notice.msg(authText.serverError, {icon: 2, audio:'1'});
                     }
                 });
             });
@@ -460,7 +818,7 @@
 
         /* 修改用户状态 */
         form.on('switch(SF_TbStateCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(authText.processing, {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/Auth/setStatus")}',
@@ -477,7 +835,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(authText.serverError, {icon: 2, audio:'1'});
                 }
             });
         });

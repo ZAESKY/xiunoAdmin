@@ -35,6 +35,10 @@ class SetService extends BaseService
     }
 
     public static function getGroupList(){
-        return config('site.groupList');
+        $groupList = config('site.groupList');
+        foreach ($groupList as $name => $translationKey) {
+            $groupList[$name] = t($translationKey);
+        }
+        return $groupList;
     }
 }

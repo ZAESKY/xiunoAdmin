@@ -1,361 +1,32 @@
 /** EasyWeb iframe v3.1.8 date:2020-05-04 License By http://easyweb.vip */
 (function (window) {
-    var messages = {
-        'zh-cn': {
-            'common.save': '保存',
-            'common.cancel': '取消',
-            'common.confirm': '确定',
-            'common.reset': '重置',
-            'common.submit': '提交',
-            'common.search': '搜索',
-            'common.delete': '删除',
-            'common.edit': '修改',
-            'common.add': '添加',
-            'common.upload': '上传',
-            'common.close': '关闭',
-            'common.copy': '复制',
-            'common.preview': '预览',
-            'common.select': '选择',
-            'common.remove': '移除',
-            'common.loading': '正在执行中...',
-            'common.loading_list': '正在获取列表中...',
-            'common.list_success': '获取列表成功！',
-            'common.server_error': '服务器错误！',
-            'common.no_data': '暂无数据',
-            'common.please_select': '请选择',
-            'common.operation': '操作',
-            'common.status': '状态',
-            'common.add_time': '添加时间',
-            'common.normal': '正常',
-            'common.ban': '封禁',
-            'common.show': '显示',
-            'common.hide': '隐藏',
-            'common.all': '全部',
-            'common.enable': '启用',
-            'common.disable': '禁用',
-            'common.open': '开启',
-            'common.closed': '关闭',
-            'common.more': '更多',
-            'common.home': '首页',
-            'common.detail': '详情',
-            'common.importance': '重要程度',
-            'common.current_safety': '当前安全等级',
-            'common.refresh': '刷新',
-            'common.export': '导出',
-            'common.print': '打印',
-            'common.filter': '筛选',
-            'common.export_selected': '导出选中数据',
-            'common.export_current_page': '导出当前页数据',
-            'common.export_all': '导出全部数据',
-            'common.please_select_export': '请选择要导出的数据',
-            'common.ie_export_not_supported': '不支持ie导出',
-            'common.load_more': '加载更多',
-            'common.no_more_data': '没有更多数据了~',
-            'common.load_failed_retry': '加载失败，请重试',
-            'common.select_file': '选择文件',
-            'common.confirm_selection': '完成选择',
-            'common.max_select': '最多只能选择{n}个',
-            'common.nothing_selected': '请选择',
-            'common.upload_failed': '上传失败',
-            'common.no_file': '没有文件',
-            'common.load_failed': '加载失败',
-            'common.search_placeholder': '输入关键字按回车键搜索',
-            'common.search_by_id_or_app_name': '输入 ID 或应用名称',
-            'common.search_by_id_or_auth_content_or_qq': '输入 ID、授权内容或 QQ',
-            'common.search_by_id_or_log_title_or_ip': '输入 ID、日志标题或 IP',
-            'common.search_by_id_or_order_no': '输入 ID 或订单号',
-            'common.search_by_id_or_version': '输入 ID、版本或版本号',
-            'common.search_by_id_or_name': '输入 ID 或名称',
-            'common.search_by_id_or_username_or_qq': '输入 ID、用户名或 QQ',
-            'common.search_by_id_or_pirate_content': '输入 ID 或盗版内容',
-            'common.search_by_power_name': '输入权限名称',
-            'common.enter_auth_holder_qq': '请输入授权持有者 QQ',
-            'common.searching': '搜索中..',
-            'common.refresh_current': '刷新当前',
-            'common.close_current': '关闭当前',
-            'common.close_other': '关闭其他',
-            'common.close_all': '关闭全部',
-            'common.nice_tips': '温馨提示',
-            'common.go_back': '返回上一页',
-            'common.go_home': '返回首页',
-            'common.home_page': '主页',
-            'common.home_cannot_close': '主页不能关闭',
-            'common.system_busy': '系统繁忙，请稍候再试',
-            'common.invalid_id': '请选择有效的数据！',
-            'common.expand': '展开',
-            'common.collapse': '收起',
-            'common.back': '返回',
-            'common.loading_text': '加载中',
-            'common.success': '成功',
-            'common.failed': '失败',
-            'common.yes': '确认',
-            'common.no': '取消',
-            'dashboard.welcome': '欢迎使用',
-            'dashboard.subtitle': '综合验证授权系统',
-            'install.agree_service': '请先同意服务协议',
-            'install.check_option': '请勾选此项',
-            'install.env_check': '环境检测',
-            'install.env_not_compatible': '当前环境不兼容，是否继续安装？',
-            'install.create_table': '创建数据表',
-            'install.db_info': '数据库信息',
-            'install.db_connected': '数据库连接成功',
-            'install.fill_db_info': '请填写数据库信息',
-            'install.complete': '安装完成',
-            'install.install_success': '安装成功',
-            'install.lock_not_created': '安装锁创建失败',
-            'install.clear_all_data': '此操作会清空所有数据，确定继续吗？',
-            'install.admin_info': '管理员信息',
-            'install.retry': '重试',
-            'validation.required': '请填写必填项！',
-            'validation.not_empty': '请勿留空！',
-            'validation.email': '邮箱格式不正确',
-            'validation.url': '链接格式不正确',
-            'validation.number': '只能填写数字',
-            'validation.date': '日期格式不正确',
-            'validation.identity': '请输入正确的身份证号',
-            'validation.password': '密码必须5到12位，且不能出现空格',
-            'validation.equal_to': '两次输入不一致',
-            'validation.digits': '只能输入整数',
-            'validation.digits_positive': '只能输入正整数',
-            'validation.digits_negative': '只能输入负整数',
-            'validation.digits_positive_zero': '只能输入正整数和0',
-            'validation.digits_negative_zero': '只能输入负整数和0',
-            'validation.minlength': '最少输入{minlength}个字符',
-            'validation.maxlength': '最多输入{maxlength}个字符',
-            'validation.min': '值不能小于{min}',
-            'validation.max': '值不能大于{max}',
-            'validation.max_tabs': '最多打开{maxTabNum}个选项卡',
-            'validation.params_missing': '参数不能为空！',
-            'login.logout_confirm': '确定要退出登录吗？',
-            'login.logout_success': '退出登录成功！',
-            'login.logging_out': '正在退出登录中..',
-            'password.modify': '修改密码',
-            'layout.choose_location': '选择位置',
-            'layout.search_keyword': '输入关键字搜索',
-            'layout.crop_image': '裁剪图片',
-            'layout.done': '完成',
-            'layout.crop_failed': '裁剪失败',
-            'layout.close_current_tab': '关闭当前标签页',
-            'layout.close_other_tabs': '关闭其它标签页',
-            'layout.close_all_tabs': '关闭全部标签页',
-            'confirm.delete_selected': '确定要删除选中数据吗？',
-            'confirm.please_select_data': '请选择要删除的数据！',
-            'confirm.not_image_preview': '这不是图片类型，可能需要下载才能预览，确定要打开吗？',
-            'notify.copy_success': '复制成功！',
-            'notify.copy_failed': '复制失败！',
-            'notify.please_select_position': '请点击位置列表选择',
-            'table_ui.loading': '加载中..',
-            'table_ui.status_code_error': '返回的数据不符合规范，正确的成功状态码 ({statusName}) 应为：{statusCode}',
-            'table_ui.ajax_error': '数据接口请求异常：{error}',
-            'datagrid_ui.template_error': 'DataGrid Error: Template [{template}] not found',
-            'treeTable.add': '添加',
-            'treeTable.edit': '修改',
-            'treeTable.delete': '删除',
-            'treeTable.filter': '筛选',
-            'treeTable.export': '导出',
-            'treeTable.print': '打印',
-            'treeTable.load_failed': '加载失败',
-            'treeTable.no_data': '暂无数据'
-        },
-        'en-us': {
-            'common.save': 'Save',
-            'common.cancel': 'Cancel',
-            'common.confirm': 'OK',
-            'common.reset': 'Reset',
-            'common.submit': 'Submit',
-            'common.search': 'Search',
-            'common.delete': 'Delete',
-            'common.edit': 'Edit',
-            'common.add': 'Add',
-            'common.upload': 'Upload',
-            'common.close': 'Close',
-            'common.copy': 'Copy',
-            'common.preview': 'Preview',
-            'common.select': 'Select',
-            'common.remove': 'Remove',
-            'common.loading': 'Processing...',
-            'common.loading_list': 'Loading list...',
-            'common.list_success': 'List loaded successfully.',
-            'common.server_error': 'Server error.',
-            'common.no_data': 'No data available.',
-            'common.please_select': 'Please select',
-            'common.operation': 'Operation',
-            'common.status': 'Status',
-            'common.add_time': 'Add time',
-            'common.normal': 'Normal',
-            'common.ban': 'Banned',
-            'common.show': 'Show',
-            'common.hide': 'Hide',
-            'common.all': 'All',
-            'common.enable': 'Enable',
-            'common.disable': 'Disable',
-            'common.open': 'Open',
-            'common.closed': 'Closed',
-            'common.more': 'More',
-            'common.home': 'Home',
-            'common.detail': 'Details',
-            'common.importance': 'Importance',
-            'common.current_safety': 'Current safety level',
-            'common.refresh': 'Refresh',
-            'common.export': 'Export',
-            'common.print': 'Print',
-            'common.filter': 'Filter',
-            'common.export_selected': 'Export selected',
-            'common.export_current_page': 'Export current page',
-            'common.export_all': 'Export all',
-            'common.please_select_export': 'Please select data to export',
-            'common.ie_export_not_supported': 'IE export not supported',
-            'common.load_more': 'Load more',
-            'common.no_more_data': 'No more data.',
-            'common.load_failed_retry': 'Failed to load. Please retry.',
-            'common.select_file': 'Select file',
-            'common.confirm_selection': 'Confirm selection',
-            'common.max_select': 'Max {n} items allowed.',
-            'common.nothing_selected': 'Please select',
-            'common.upload_failed': 'Upload failed',
-            'common.no_file': 'No file',
-            'common.load_failed': 'Failed to load',
-            'common.search_placeholder': 'Enter keyword and press Enter',
-            'common.search_by_id_or_app_name': 'Enter ID or app name',
-            'common.search_by_id_or_auth_content_or_qq': 'Enter ID, auth content, or QQ',
-            'common.search_by_id_or_log_title_or_ip': 'Enter ID, log title, or IP',
-            'common.search_by_id_or_order_no': 'Enter ID or order number',
-            'common.search_by_id_or_version': 'Enter ID, version, or version number',
-            'common.search_by_id_or_name': 'Enter ID or name',
-            'common.search_by_id_or_username_or_qq': 'Enter ID, username or QQ',
-            'common.search_by_id_or_pirate_content': 'Enter ID or pirate content',
-            'common.search_by_power_name': 'Enter permission name',
-            'common.enter_auth_holder_qq': 'Enter authorization holder QQ',
-            'common.searching': 'Searching...',
-            'common.refresh_current': 'Refresh current',
-            'common.close_current': 'Close current',
-            'common.close_other': 'Close others',
-            'common.close_all': 'Close all',
-            'common.nice_tips': 'Tips',
-            'common.go_back': 'Go back',
-            'common.go_home': 'Go home',
-            'common.home_page': 'Home',
-            'common.home_cannot_close': 'Home page cannot be closed.',
-            'common.system_busy': 'System is busy. Please try again later.',
-            'common.invalid_id': 'Please select valid data.',
-            'common.expand': 'Expand',
-            'common.collapse': 'Collapse',
-            'common.back': 'Back',
-            'common.loading_text': 'Loading',
-            'common.success': 'Success',
-            'common.failed': 'Failed',
-            'common.yes': 'Yes',
-            'common.no': 'No',
-            'dashboard.welcome': 'Welcome',
-            'dashboard.subtitle': 'Integrated Verification Authorization System',
-            'install.agree_service': 'Please agree to the service agreement first.',
-            'install.check_option': 'Please check this option.',
-            'install.env_check': 'Environment Check',
-            'install.env_not_compatible': 'The current environment is incompatible. Continue installation?',
-            'install.create_table': 'Create Tables',
-            'install.db_info': 'Database Info',
-            'install.db_connected': 'Database connected successfully.',
-            'install.fill_db_info': 'Please fill in database information.',
-            'install.complete': 'Installation Complete',
-            'install.install_success': 'Installation successful.',
-            'install.lock_not_created': 'Failed to create install lock.',
-            'install.clear_all_data': 'This will clear all data. Continue?',
-            'install.admin_info': 'Admin Info',
-            'install.retry': 'Retry',
-            'validation.required': 'Please fill in required fields.',
-            'validation.not_empty': 'This field cannot be empty.',
-            'validation.email': 'Invalid email format.',
-            'validation.url': 'Invalid URL format.',
-            'validation.number': 'Only numbers are allowed.',
-            'validation.date': 'Invalid date format.',
-            'validation.identity': 'Please enter a valid ID number.',
-            'validation.password': 'Password must be 5-12 characters without spaces.',
-            'validation.equal_to': 'The two entries do not match.',
-            'validation.digits': 'Only integers are allowed.',
-            'validation.digits_positive': 'Only positive integers are allowed.',
-            'validation.digits_negative': 'Only negative integers are allowed.',
-            'validation.digits_positive_zero': 'Only positive integers and zero are allowed.',
-            'validation.digits_negative_zero': 'Only negative integers and zero are allowed.',
-            'validation.minlength': 'At least {minlength} characters required.',
-            'validation.maxlength': 'At most {maxlength} characters allowed.',
-            'validation.min': 'Value cannot be less than {min}.',
-            'validation.max': 'Value cannot be greater than {max}.',
-            'validation.max_tabs': 'Max {maxTabNum} tabs allowed.',
-            'validation.params_missing': 'Parameters cannot be empty.',
-            'login.logout_confirm': 'Are you sure you want to log out?',
-            'login.logout_success': 'Logged out successfully.',
-            'login.logging_out': 'Logging out...',
-            'password.modify': 'Change Password',
-            'layout.choose_location': 'Choose Location',
-            'layout.search_keyword': 'Search by keyword',
-            'layout.crop_image': 'Crop Image',
-            'layout.done': 'Done',
-            'layout.crop_failed': 'Crop failed',
-            'layout.close_current_tab': 'Close current tab',
-            'layout.close_other_tabs': 'Close other tabs',
-            'layout.close_all_tabs': 'Close all tabs',
-            'confirm.delete_selected': 'Are you sure you want to delete the selected data?',
-            'confirm.please_select_data': 'Please select data to delete.',
-            'confirm.not_image_preview': 'This is not an image. Preview may download it. Open anyway?',
-            'notify.copy_success': 'Copied successfully.',
-            'notify.copy_failed': 'Copy failed.',
-            'notify.please_select_position': 'Please select a location from the list.',
-            'table_ui.loading': 'Loading...',
-            'table_ui.status_code_error': 'Response does not match specification. Expected status code ({statusName}): {statusCode}',
-            'table_ui.ajax_error': 'Request error: {error}',
-            'datagrid_ui.template_error': 'DataGrid Error: Template [{template}] not found',
-            'treeTable.add': 'Add',
-            'treeTable.edit': 'Edit',
-            'treeTable.delete': 'Delete',
-            'treeTable.filter': 'Filter',
-            'treeTable.export': 'Export',
-            'treeTable.print': 'Print',
-            'treeTable.load_failed': 'Failed to load',
-            'treeTable.no_data': 'No data'
+    var parentMessages = null;
+    var parentLocale = null;
+    try {
+        if (window.parent && window.parent !== window) {
+            parentMessages = window.parent.SF_I18N_MESSAGES || null;
+            parentLocale = window.parent.SF_I18N_LOCALE || null;
         }
-    };
+    } catch (e) {}
 
-    function getBrowserLang() {
-        if (navigator.language) {
-            var lang = navigator.language.toLowerCase();
-            if (lang.indexOf('zh') === 0) return 'zh-cn';
-            if (lang.indexOf('en') === 0) return 'en-us';
-        }
-        return 'en-us';
-    }
-
-    function getCookieLang() {
-        var match = document.cookie.match(/(?:^|;\s*)think_lang=([^;]+)/);
-        return match ? decodeURIComponent(match[1]).toLowerCase() : null;
-    }
-
-    function setCookieLang(lang) {
-        document.cookie = 'think_lang=' + encodeURIComponent(lang) + ';path=/;max-age=' + (365 * 24 * 60 * 60);
-    }
-
-    function getLang() {
-        var cookie = getCookieLang();
-        if (cookie && (cookie === 'zh-cn' || cookie === 'en-us')) return cookie;
-        var browser = getBrowserLang();
-        setCookieLang(browser);
-        return browser;
-    }
+    var messages = window.SF_I18N_MESSAGES || parentMessages || {};
+    var locale = window.SF_I18N_LOCALE || parentLocale || (window.SF_LANG && window.SF_LANG.current) || 'en-us';
 
     window.SF_I18N = {
         messages: messages,
-        lang: getLang,
+        lang: function () {
+            return locale;
+        },
         t: function (key, vars) {
-            var lang = getLang();
-            var text = (messages[lang] && messages[lang][key]) ? messages[lang][key] : ((messages['en-us'] && messages['en-us'][key]) ? messages['en-us'][key] : key);
+            var text = Object.prototype.hasOwnProperty.call(messages, key) ? messages[key] : key;
             vars = vars || {};
-            return text.replace(/\{(\w+)\}/g, function (match, name) {
+            return String(text).replace(/\{:?([\w]+)\}/g, function (match, name) {
                 return vars[name] === undefined ? match : vars[name];
             });
         },
         switchLang: function (lang) {
-            if (lang === 'zh-cn' || lang === 'en-us') {
-                setCookieLang(lang);
-                location.reload();
+            if (window.SF_LANG) {
+                window.SF_LANG.set(lang);
             }
         }
     };
@@ -400,11 +71,58 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
     citypicker: 'city-picker/city-picker',
     introJs: 'introJs/introJs',
     zTree: 'zTree/zTree'
-}).use(['layer', 'admin'], function () {
+}).use(['layer', 'admin', 'form'], function () {
     var $ = layui.jquery;
     var layer = layui.layer;
     var admin = layui.admin;
+    var form = layui.form;
     var rawModelForm = admin.modelForm;
+
+    form.verify({
+        required: [/[^\s]+/, t('validation.required')],
+        phone: [/^1\d{10}$/, t('validation.phone')],
+        email: [/^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/, t('validation.email')],
+        url: [/(^#)|(^http(s*):\/\/[^\s]+\.[^\s]+)/, t('validation.url')],
+        number: function (value) {
+            if (!value || isNaN(value)) {
+                return t('validation.number');
+            }
+        },
+        date: [/^(\d{4})[-\/](\d{1}|0\d{1}|1[0-2])([-\/](\d{1}|0\d{1}|[1-2][0-9]|3[0-1]))*$/, t('validation.date')],
+        identity: [/(^\d{15}$)|(^\d{17}(x|X|\d)$)/, t('validation.identity')]
+    });
+
+    function translateRenderedSelects(scope) {
+        var $scope = scope ? $(scope) : $(document);
+        $scope.find('.layui-form-select .layui-select-title input').each(function () {
+            var $input = $(this);
+            var placeholder = $input.attr('placeholder');
+            if (placeholder === '请选择' || placeholder === '璇烽€夋嫨') {
+                $input.attr('placeholder', t('common.please_select'));
+            }
+        });
+        $scope.find('.layui-select-none').text(t('common.no_data'));
+        $scope.find('.layui-form-select dd.layui-disabled').each(function () {
+            var $option = $(this);
+            if ($option.text() === '没有选项' || $option.text() === '娌℃湁閫夐」') {
+                $option.text(t('common.no_data'));
+            }
+        });
+    }
+
+    var rawFormRender = form.render;
+    form.render = function () {
+        var result = rawFormRender.apply(this, arguments);
+        translateRenderedSelects(document);
+        return result;
+    };
+    translateRenderedSelects(document);
+    $(document).off('keyup.sfFormI18n', '.layui-form-select .layui-select-title input')
+        .on('keyup.sfFormI18n', '.layui-form-select .layui-select-title input', function () {
+            setTimeout(function () {
+                translateRenderedSelects(document);
+            }, 0);
+        });
 
     function getSubmitScope($layer) {
         var $scope = $layer.find('form.layui-form').first();
@@ -504,3 +222,99 @@ function getProjectUrl() {
     }
     return layuiDir.substring(0, layuiDir.indexOf('Assets'));
 }
+
+/**
+ * Keep every Layui row toolbar on one line and size its column to the widest
+ * rendered action group. Layui 2.x only accepts numeric column widths and
+ * cannot derive an "auto" width from toolbar templates by itself.
+ */
+(function (window, document) {
+    if (!window.layui || !window.MutationObserver) {
+        return;
+    }
+
+    layui.use(['jquery'], function () {
+        var $ = layui.jquery;
+        var resizeTimer = null;
+
+        function measureCell(cell) {
+            var clone = cell.cloneNode(true);
+            clone.removeAttribute('id');
+            clone.setAttribute('data-sf-action-measure', '1');
+            clone.style.setProperty('position', 'absolute', 'important');
+            clone.style.setProperty('left', '-100000px', 'important');
+            clone.style.setProperty('top', '-100000px', 'important');
+            clone.style.setProperty('display', 'inline-block', 'important');
+            clone.style.setProperty('visibility', 'hidden', 'important');
+            clone.style.setProperty('width', 'auto', 'important');
+            clone.style.setProperty('min-width', '0', 'important');
+            clone.style.setProperty('max-width', 'none', 'important');
+            clone.style.setProperty('height', 'auto', 'important');
+            clone.style.setProperty('overflow', 'visible', 'important');
+            clone.style.setProperty('white-space', 'nowrap', 'important');
+            clone.style.setProperty('pointer-events', 'none', 'important');
+            document.body.appendChild(clone);
+            var width = Math.ceil(clone.getBoundingClientRect().width);
+            document.body.removeChild(clone);
+            return width;
+        }
+
+        function fitActionColumns(view) {
+            var $view = $(view);
+            var columns = {};
+
+            $view.find('.layui-table-main td[data-off="true"]').each(function () {
+                var key = $(this).attr('data-key');
+                if (!key) {
+                    return;
+                }
+                var cell = $(this).children('.layui-table-cell')[0];
+                if (!cell) {
+                    return;
+                }
+                var minWidth = parseInt($(this).attr('data-minwidth'), 10) || 0;
+                var contentWidth = measureCell(cell);
+                columns[key] = Math.max(columns[key] || 0, minWidth, contentWidth + 4, 70);
+            });
+
+            var hasActionColumn = false;
+            $.each(columns, function (key, width) {
+                hasActionColumn = true;
+                var selector = '[data-key="' + key + '"] > .layui-table-cell';
+                $view.find(selector).css('width', width + 'px');
+            });
+
+            if (hasActionColumn && $view.find('.layui-table-fixed-r td[data-off="true"]').length) {
+                $view.addClass('sf-action-columns-scroll');
+            }
+        }
+
+        function fitAllActionColumns() {
+            $('.layui-table-view').each(function () {
+                fitActionColumns(this);
+            });
+        }
+
+        function scheduleFit() {
+            window.clearTimeout(resizeTimer);
+            resizeTimer = window.setTimeout(fitAllActionColumns, 20);
+        }
+
+        var observer = new MutationObserver(function (mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+                var addedNodes = mutations[i].addedNodes || [];
+                for (var j = 0; j < addedNodes.length; j++) {
+                    var node = addedNodes[j];
+                    if (node.nodeType === 1 && node.getAttribute('data-sf-action-measure') === '1') {
+                        continue;
+                    }
+                    scheduleFit();
+                    return;
+                }
+            }
+        });
+        observer.observe(document.body, {childList: true, subtree: true});
+        $(window).off('resize.sfActionColumns').on('resize.sfActionColumns', scheduleFit);
+        $(scheduleFit);
+    });
+})(window, document);

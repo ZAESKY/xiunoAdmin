@@ -58,8 +58,8 @@ class LogModel extends BaseModel
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|title|ip', 'text', '');
             $data[] = ['is_admin', '=', 0];
             $data[] = ['username', '=', $userInfo['id']];

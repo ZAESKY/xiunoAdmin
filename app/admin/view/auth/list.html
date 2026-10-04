@@ -5,15 +5,27 @@
         <div class="layui-card-body">
             <!-- 表格工具栏 -->
             <form class="layui-form toolbar">
+                {if $userid > 0}
+                <input type="hidden" name="userid" value="{$userid}"/>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('auth_portal.current_user')}</label>
+                        <div class="layui-input-inline">
+                            <span class="layui-badge layui-badge-blue" style="margin-top: 10px;">UID: {$userid}</span>
+                            <a href="{:url('/Auth/list')}" style="margin-left: 10px;">{:t('auth_portal.view_all')}</a>
+                        </div>
+                    </div>
+                </div>
+                {/if}
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_auth_content_or_qq')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状&emsp;态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
                                 <option value="">{:t('common_ui.select_used_status')}</option>
@@ -30,7 +42,7 @@
                 </div>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">应&emsp;用</label>
+                        <label class="layui-form-label">{:t('common_ui.belong_app')}</label>
                         <div class="layui-input-inline">
                             <select class="layui-input ew-select-fixed" lay-filter="app" lay-search>
                                 <option value="">{:t('common_ui.select_all_apps')}</option>
@@ -50,21 +62,21 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
 <script type="text/html" id="SF_TbState">
     <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="正常|封禁" {{d.status==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common_ui.normal_separator')}" {{d.status==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_TbPermanent_Switch">
     <input type="checkbox" lay-filter="SF_TbPermanent_SwitchCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="开启|关闭" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common.open')}|{:t('common.close')}" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_Beta_Switch">
     <input type="checkbox" lay-filter="SF_Beta_SwitchCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="开启|关闭" {{d.beta==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common.open')}|{:t('common.close')}" {{d.beta==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_Tbid">
     <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
@@ -74,10 +86,10 @@
     <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">所属应用:</label>
+            <label class="layui-form-label layui-form-required">{:t('common_ui.belong_app_label')}</label>
             <div class="layui-input-block">
                 <select name="appid" class="layui-input ew-select-fixed" lay-filter="appid" lay-search>
-                    <option value="">请选择所属的应用</option>
+                    <option value="">{:t('auth_portal.select_app')}</option>
                     {volist name="app_list.data.data" id="res"}
                     <option value="{$res.id}">{$res.name}</option>
                     {/volist}
@@ -86,58 +98,58 @@
         </div>
         <div id="form_data" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">授权内容:</label>
+                <label class="layui-form-label layui-form-required">{:t('auth_portal.auth_content_label')}</label>
                 <div class="layui-input-block">
-                    <input type="text" name="auth_info" placeholder="请输入授权的内容" class="layui-input"
+                    <input type="text" name="auth_info" placeholder="{:t('auth_portal.auth_content_placeholder')}" class="layui-input"
                            lay-verType="tips" lay-verify="required"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">QQ:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.auth_qq')}:</label>
                 <div class="layui-input-block">
-                    <input type="number" name="qq" placeholder="请输入授权者QQ" class="layui-input"
+                    <input type="number" name="qq" placeholder="{:t('auth_portal.auth_qq_placeholder')}" class="layui-input"
                            lay-verType="tips" lay-verify="required"/>
                 </div>
             </div>
             <div class="layui-form-item layui-form-text">
-                <label class="layui-form-label">授权IP:</label>
+                <label class="layui-form-label">{:t('auth_portal.auth_ip_label')}</label>
                 <div class="layui-input-block">
-                    <textarea name="ip" class="layui-textarea" style="height:100px" placeholder="多个用 “|” 隔开，留空则不检测" ></textarea>
+                    <textarea name="ip" class="layui-textarea" style="height:100px" placeholder="{:t('common_ui.ip_placeholder_hint')}" ></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">授权时间:</label>
+                <label class="layui-form-label layui-form-required">{:t('auth_portal.auth_duration_label')}</label>
                 <div class="layui-input-block">
                     <select id="auth_price_list" name="type" class="layui-input ew-select-fixed" lay-filter="type">
-                        <option value="">请选择授权时间</option>
+                        <option value="">{:t('auth_portal.select_duration')}</option>
                     </select>
                 </div>
             </div>
             <div id="diy" style="display: none">
                 <div class="layui-form-item">
-                    <label class="layui-form-label layui-form-required">到期时间:</label>
+                    <label class="layui-form-label layui-form-required">{:t('auth_portal.expire_time_label')}</label>
                     <div class="layui-input-block">
-                        <input type="text" id="test" name="endtime" placeholder="请选择到期时间" class="icon-date layui-input"
+                        <input type="text" id="test" name="endtime" placeholder="{:t('auth_portal.select_expire_time')}" class="icon-date layui-input"
                                lay-verType="tips"/>
                     </div>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">内测资格:</label>
+                <label class="layui-form-label layui-form-required">{:t('auth_portal.beta_access')}</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="beta" value="1" lay-skin="switch"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">状态:</label>
+                <label class="layui-form-label layui-form-required">{:t('common.status')}:</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
                 </div>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -152,18 +164,27 @@
         var admin = layui.admin;
         var notice = layui.notice;
         var laydate = layui.laydate;
+        var selectedUserId = parseInt('{$userid}', 10) || 0;
+        var initialWhere = {};
+        if (selectedUserId > 0) {
+            initialWhere.userid = selectedUserId;
+        }
+        {if $appid != ''}
+        initialWhere.appid = {$appid};
+        {/if}
 
         /* 渲染表格 */
         var insTb = table.render({
             elem: '#SF_Table',
             url: '{:url("/Auth/list")}',
             method: 'post',
+            where: initialWhere,
             page: true,
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>'+t('common.add')+'</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>'+t('common.delete')+'</button>',
                 '</p>'].join(''),
             cellMinWidth: 100,
             request: {
@@ -181,42 +202,42 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
-                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                {field: 'appName', title: t('common_ui.belong_app'), sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
                     }},
-                {field: 'userid', title: '上级ID', sort: true, minWidth: 100, templet: function (d) {
+                {field: 'userid', title: t('auth_portal.parent_id'), sort: true, minWidth: 100, templet: function (d) {
                         if(d.userid == 0){
-                            return '<span class="layui-badge layui-badge-green">站长</span>';
+                            return '<span class="layui-badge layui-badge-green">'+t('auth_portal.site_owner')+'</span>';
                         }else{
                             return '<span class="layui-badge layui-badge-blue">UID:'+d.userid+'</span>';
                         }
                     },
                 },
-                {field: 'auth_info', title: '授权内容', sort: true, minWidth: 160},
-                {field: 'qq', title: '授权者QQ', sort: true, minWidth: 120},
-                {field: 'permanent_switch', title: '永久授权', templet: '#SF_TbPermanent_Switch', minWidth: 100},
+                {field: 'auth_info', title: t('common_ui.auth_content'), sort: true, minWidth: 160},
+                {field: 'qq', title: t('common_ui.auth_qq'), sort: true, minWidth: 120},
+                {field: 'permanent_switch', title: t('auth_portal.permanent'), templet: '#SF_TbPermanent_Switch', minWidth: 100},
                 {
-                    field: 'endtime', title: '到期时间', align: 'right', templet: function (d) {
+                    field: 'endtime', title: t('common_ui.expire_time'), align: 'right', templet: function (d) {
                         if (d.permanent_switch == '1') {
-                            return '<span class="layui-badge layui-badge-green">永久授权</span>';
+                            return '<span class="layui-badge layui-badge-green">'+t('auth_portal.permanent')+'</span>';
                         } else {
                             if(checkEndTime(d.endtime) == false){
-                                return '<span class="layui-badge layui-badge-orange">授权已到期</span>';
+                                return '<span class="layui-badge layui-badge-orange">'+t('auth_portal.expired')+'</span>';
                             }else{
                                 return '<span class="layui-badge layui-badge-blue">'+d.endtime+'</span>';
                             }
                         }
                     }, sort: true, minWidth: 180
                 },
-                {field: 'authcode', title: '授权码', minWidth: 100, templet: function (d) {
-                        return '<a class="layui-btn layui-btn-xs" lay-event="seeAuthcode">点击查看</a>';
+                {field: 'authcode', title: t('common_ui.auth_code'), minWidth: 100, templet: function (d) {
+                        return '<a class="layui-btn layui-btn-xs" lay-event="seeAuthcode">'+t('auth_portal.view')+'</a>';
                     }
                 },
-                {field: 'beta', title: '内测资格', templet: '#SF_Beta_Switch', minWidth: 100},
-                {field: 'sign', title: '特征码', sort: true, minWidth: 100},
-                {field: 'addtime', title: '添加时间', sort: true, minWidth: 180},
-                {field: 'status', title: '状态', templet: '#SF_TbState', minWidth: 100},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {field: 'beta', title: t('auth_portal.beta_access'), templet: '#SF_Beta_Switch', minWidth: 100},
+                {field: 'sign', title: t('common_ui.feature_code'), sort: true, minWidth: 100},
+                {field: 'addtime', title: t('common.add_time'), sort: true, minWidth: 180},
+                {field: 'status', title: t('common.status'), templet: '#SF_TbState', minWidth: 100},
+                {title: t('common.operation'), toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
             ]]
         });
 
@@ -237,7 +258,7 @@
                 $("#form_data").css("display", "none");
                 $("#diy").css("display", "none");
             }else{
-                notice.msg('正在获取列表中..', {icon: 4, close: true});
+                notice.msg(t('common.loading_list'), {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: '{:url("/Auth/getAuthPriceList")}',
@@ -246,8 +267,8 @@
                     success: function(data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                            var content = '<option value="">请选择授权时间</option>';
+                            notice.msg(t('common.list_success'), {icon: 1, audio:'1'});
+                            var content = '<option value="">'+t('auth_portal.select_duration')+'</option>';
                             $.each(data.data,function(index, value){
                                 $.each(value,function(index, value){
                                     if(value.diy_switch == 1){
@@ -265,7 +286,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                     }
                 });
                 $("#form_data").css("display","inherit");
@@ -287,16 +308,13 @@
         });
 
         form.on('select(app)', function (data) {
-            if(data.value == ''){
-                insTb.reload({where: {appid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true}, {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
-            }else{
-                insTb.reload({where: {appid:data.value}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+            var where = {appid: data.value};
+            if (selectedUserId > 0) {
+                where.userid = selectedUserId;
             }
+            insTb.reload({where: where, page: {curr: 1}});
             return false;
         });
-        {if $appid != ''}
-        insTb.reload({where: {appid:{$appid}}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
-        {/if}
         /* 表格工具条点击事件 */
         table.on('tool(SF_Table)', function (obj) {
             if (obj.event === 'edit') { // 修改
@@ -305,9 +323,9 @@
                 doDel(obj);
             } else if (obj.event === 'seeAuthcode') {
                 admin.open({
-                    title: '查看授权 '+obj.data.auth_info+' 授权码',
+                    title: t('auth_portal.view_code_title') + ' - ' + obj.data.auth_info,
                     type: 1,
-                    content: '<div class="layui-card"><div class="layui-card-body"><div class="layui-form layui-form-pane"><div class="layui-form-item"><label class="layui-form-label">授权码</label><div class="layui-input-block"><input type="text" id="copy" class="layui-input layui-disabled" value="'+obj.data.authcode+'"/></div></div></div><a class="layui-btn layui-btn-fluid" onclick="copy()">点击复制</a></div></div>'
+                    content: '<div class="layui-card"><div class="layui-card-body"><div class="layui-form layui-form-pane"><div class="layui-form-item"><label class="layui-form-label">'+t('common_ui.auth_code')+'</label><div class="layui-input-block"><input type="text" id="copy" class="layui-input layui-disabled" value="'+obj.data.authcode+'"/></div></div></div><a class="layui-btn layui-btn-fluid" onclick="copy()">'+t('auth_portal.copy_code')+'</a></div></div>'
                 });
             }
             laydate.render({
@@ -320,12 +338,12 @@
             });
         });
         window.copy = function (){
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(t('common.loading'), {icon: 4, close: true});
             var e = document.getElementById("copy");
             e.select();
             document.execCommand("Copy");//执行复制
             notice.destroy();
-            notice.msg('复制成功！', {icon: 1, audio:'1'});
+            notice.msg(t('notify.copy_success'), {icon: 1, audio:'1'});
         }
         /* 表格头工具栏点击事件 */
         table.on('toolbar(SF_Table)', function (obj) {
@@ -334,13 +352,12 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
                 if (checkRows.data.length === 0) {
-                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    notice.msg(t('confirm.please_select_data'), {icon: 3, audio:'1'});
                     return;
                 }
                 var ids = checkRows.data.map(function (d) {
                     return d.id;
                 });
-                console.log(ids)
                 doDel({ids: ids});
             }
             laydate.render({
@@ -357,13 +374,13 @@
         function showEditModel(mData) {
             admin.popupRight({
                 type: 1,
-                title: (mData ? '修改' : '添加') + '授权',
+                title: mData ? t('auth_portal.edit_auth') : t('auth_portal.add_auth_title'),
                 content: $('#SF_EditDialog').html(),
                 success: function (layero, dIndex) {
                     // 回显表单数据
                     if(mData){
                         $("#form_data").css("display", "inherit");
-                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        notice.msg(t('common.loading_list'), {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/Auth/getAuthPriceList")}',
@@ -372,8 +389,8 @@
                             success: function(data) {
                                 notice.destroy();
                                 if (data.code == 0) {
-                                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                                    var content = '<option value="-1">不续费</option>';
+                                    notice.msg(t('common.list_success'), {icon: 1, audio:'1'});
+                                    var content = '<option value="-1">'+t('auth_portal.no_renewal')+'</option>';
                                     $.each(data.data,function(index, value){
                                         $.each(value,function(index, value){
                                             if(value.diy_switch == 1){
@@ -394,7 +411,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                             }
                         });
                         if (mData.permanent_switch != 1) {
@@ -412,7 +429,7 @@
 
                     // 表单提交事件
                     form.on('submit(SF_EditSubmit)', function (data) {
-                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        notice.msg(t('common.loading'), {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/Auth/edit")}',
@@ -429,7 +446,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                             }
                         });
                         return false;
@@ -442,13 +459,13 @@
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm(t('confirm.delete_selected'), {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg(t('common.loading'), {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/Auth/drop")}' : '{:url("/Auth/batchDrop")}',
@@ -465,7 +482,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                     }
                 });
             });
@@ -473,7 +490,7 @@
 
         /* 修改用户状态 */
         form.on('switch(SF_TbStateCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(t('common.loading'), {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/Auth/setStatus")}',
@@ -490,13 +507,13 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
         });
 
         form.on('switch(SF_TbPermanent_SwitchCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(t('common.loading'), {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/Auth/setPermanentSwitch")}',
@@ -513,13 +530,13 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
         });
 
         form.on('switch(SF_Beta_SwitchCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg(t('common.loading'), {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/Auth/setBetaSwitch")}',
@@ -536,7 +553,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
                 }
             });
         });

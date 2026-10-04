@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 
 return [
-    'default'     => 'redis',
+    'default'     => env('queue.default', 'sync'),
     'connections' => [
         'sync'     => [
             'type' => 'sync',
@@ -23,11 +23,11 @@ return [
         ],
         'redis'    => [
             'type'       => 'redis',
-            'queue'      => 'default',
-            'host'       => '127.0.0.1',
-            'port'       => 6379,
-            'password'   => '',
-            'select'     => 0,
+            'queue'      => env('queue.name', 'sf_admin_default'),
+            'host'       => env('redis.host', '127.0.0.1'),
+            'port'       => (int) env('redis.port', 6379),
+            'password'   => env('redis.password', ''),
+            'select'     => (int) env('redis.queue_database', 2),
             'timeout'    => 0,
             'persistent' => false,
         ],

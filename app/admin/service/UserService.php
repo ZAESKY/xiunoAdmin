@@ -50,6 +50,9 @@ class UserService extends BaseService
             $cdkeyCounts = $this->countByUser('cdkey', $userIds);
             $userCounts = $this->countByUser('user', $userIds);
             $authCounts = $this->countByUser('auth', $userIds);
+            $phoneIdentityIds = empty($userIds)
+                ? []
+                : array_fill_keys(array_map('intval', Db::name('user_phone_identity')->whereIn('user_id', $userIds)->column('user_id')), true);
             foreach($result as $res){
                 $res['powerSpan'] = 'gray';
                 $res['powerName'] = t('user.power_error');
@@ -78,6 +81,10 @@ class UserService extends BaseService
                 $res['cdkeyCount'] = $cdkeyCounts[$userId] ?? 0;
                 $res['userCount'] = $userCounts[$userId] ?? 0;
                 $res['authCount'] = $authCounts[$userId] ?? 0;
+                $res['phone'] = \app\common\service\PhoneVerificationService::normalizePhone($res['phone'] ?? '');
+                $res['phone_verified'] = ($res['phone'] !== ''
+                    && !empty($res['phone_verified_at'])
+                    && isset($phoneIdentityIds[$userId])) ? 1 : 0;
             }
             return $result;
         }catch (\Exception $e){

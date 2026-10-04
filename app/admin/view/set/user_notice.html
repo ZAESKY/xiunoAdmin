@@ -1,10 +1,10 @@
 {include file="/public/header"}
 <div class="layui-fluid">
     <div class="layui-card">
-        <div class="layui-card-header">用户公告管理</div>
+        <div class="layui-card-header">{:t('set_ui.announcement_management')}</div>
         <div class="layui-card-body">
             <div class="layui-btn-container" style="margin-bottom:12px;">
-                <button class="layui-btn layui-btn-sm icon-btn" id="noticeAdd"><i class="layui-icon">&#xe654;</i>新增公告</button>
+                <button class="layui-btn layui-btn-sm icon-btn" id="noticeAdd"><i class="layui-icon">&#xe654;</i>{:t('set_ui.add_announcement')}</button>
             </div>
             <table id="noticeTable" lay-filter="noticeTable"></table>
         </div>
@@ -12,30 +12,30 @@
 </div>
 
 <script type="text/html" id="noticeBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <script type="text/html" id="noticeState">
-    <input type="checkbox" lay-filter="noticeStateCk" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" {{d.status==1?'checked':''}}>
+    <input type="checkbox" lay-filter="noticeStateCk" value="{{d.id}}" lay-skin="switch" lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}}>
 </script>
 <script type="text/html" id="noticeDialog">
     <form id="noticeForm" lay-filter="noticeForm" class="layui-form model-form">
         <input name="id" type="hidden"/><input name="action" type="hidden" value="edit"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">标题</label>
-            <div class="layui-input-block"><input type="text" name="title" placeholder="公告标题" class="layui-input" lay-verType="tips" lay-verify="required"/></div>
+            <label class="layui-form-label layui-form-required">{:t('feedback.title')}</label>
+            <div class="layui-input-block"><input type="text" name="title" placeholder="{:t('set_ui.announcement_title')}" class="layui-input" lay-verType="tips" lay-verify="required"/></div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">内容</label>
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.content')}</label>
             <div class="layui-input-block"><textarea id="noticeContentEditor" name="content" class="layui-textarea" style="min-height:220px;resize:vertical;"></textarea></div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">排序</label>
-            <div class="layui-input-block"><input type="number" name="sort" value="0" placeholder="数字越小越靠前" class="layui-input" style="width:120px;"/></div>
+            <label class="layui-form-label">{:t('set_ui.sort')}</label>
+            <div class="layui-input-block"><input type="number" name="sort" value="0" placeholder="{:t('set_ui.sort_hint')}" class="layui-input" style="width:120px;"/></div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="noticeSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="noticeSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -49,11 +49,11 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 60},
-            {field: 'title', title: '标题', minWidth: 200},
-            {field: 'sort', title: '排序', width: 70},
-            {field: 'status', title: '状态', templet: '#noticeState', width: 90},
-            {field: 'created_at', title: '创建时间', width: 160},
-            {title: '操作', toolbar: '#noticeBar', width: 160}
+            {field: 'title', title: '{:t("feedback.title")}', minWidth: 200},
+            {field: 'sort', title: '{:t("set_ui.sort")}', width: 70},
+            {field: 'status', title: '{:t("common.status")}', templet: '#noticeState', width: 90},
+            {field: 'created_at', title: '{:t("payment_ui.create_time")}', width: 160},
+            {title: '{:t("common.operation")}', toolbar: '#noticeBar', width: 160}
         ]]
     });
     function reloadTb() { insTb.reload(); }
@@ -61,8 +61,8 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
     table.on('tool(noticeTable)', function(obj) {
         if (obj.event === 'edit') showEdit(obj.data);
         else if (obj.event === 'del') {
-            layer.confirm('确定删除该公告吗？', {icon:3, shade:.1}, function(i) {
-                layer.close(i); notice.msg('删除中...', {icon:4, close:true});
+            layer.confirm('{:t("set_ui.announcement_delete_confirm")}', {icon:3, shade:.1}, function(i) {
+                layer.close(i); notice.msg('{:t("set_ui.deleting")}', {icon:4, close:true});
                 $.ajax({ type:'POST', url:'{:url("/Set/userNotice")}', data:{action:'drop', id:obj.data.id}, dataType:'json',
                     success:function(r){ notice.destroy(); reloadTb(); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
             });
@@ -73,14 +73,14 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
             success:function(r){ reloadTb(); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
     });
     function showEdit(mData) {
-        admin.open({ type: 1, area: ['700px', '520px'], maxmin: true, title: (mData?'修改':'新增')+'公告', content: $('#noticeDialog').html(),
+        admin.open({ type: 1, area: ['700px', '520px'], maxmin: true, title: (mData?'{:t("set_ui.edit_announcement")}':'{:t("set_ui.add_announcement")}'), content: $('#noticeDialog').html(),
             success: function(layero, dIndex) {
                 form.render();
                 editIndex = layedit.build('noticeContentEditor', { height: 240, tool: ['strong','italic','underline','del','|','left','center','right','|','link','unlink','image','face','code'] });
                 if (mData) { form.val('noticeForm', mData); layedit.setContent(editIndex, mData.content||''); }
                 form.on('submit(noticeSubmit)', function(data) {
                     layedit.sync(editIndex); data.field.content = $('#noticeContentEditor').val();
-                    notice.msg('保存中...', {icon:4, close:true});
+                    notice.msg('{:t("set_ui.saving")}', {icon:4, close:true});
                     $.ajax({ type:'POST', url:'{:url("/Set/userNotice")}', data: data.field, dataType:'json',
                         success: function(r) { notice.destroy(); if (r.code == 0) { reloadTb(); admin.closeDialog(dIndex); notice.msg(r.msg, {icon:1}); } else { notice.msg(r.msg, {icon:2}); } } });
                     return false;

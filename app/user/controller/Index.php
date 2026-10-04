@@ -9,6 +9,7 @@ use app\user\service\MenuService;
 use app\common\controller\UserBackend;
 use think\facade\View;
 use think\facade\Db;
+use think\facade\Log;
 /**
  * 用户行为-控制器
  * @author 陌上花开
@@ -42,9 +43,16 @@ class Index extends UserBackend
                 'layoutRole' => 'user',
                 'layoutAvatar' => $this->userInfo['img'],
                 'layoutUsername' => $this->userInfo['username'],
+                'layoutAdminQqOauthBound' => false,
                 'menuList' => $menuList,
             ]);
-        }catch (\Exception $e){
+        }catch (\Throwable $e){
+            Log::error(sprintf(
+                'User menu load failed [user_id=%d, exception=%s]: %s',
+                intval($this->userId),
+                get_class($e),
+                $e->getMessage()
+            ));
             return $this->render('/public/error', ['msg' => t('common.server_error').'[errorCode:GetMenuListError]']);
         }
         return View::fetch(APP_PATH . DS . 'common' . DS . 'view' . DS . 'layout' . DS . 'main_layout.html');
@@ -79,6 +87,10 @@ class Index extends UserBackend
             'list_rows'=> 10,
             'page' => 1,
         ]);
+        $powerTierMap = $this->getPowerTierMap();
+        $agentUsers = $this->getRandomAgentUsers(intval($this->userInfo['appid']), $powerTierMap);
+        $currentPowerTier = $powerTierMap[intval($this->userInfo['power'])] ?? 'agent-tier-standard';
+        $showPowerBadge = intval($this->myPowerInfo['default_power'] ?? 0) !== 1;
 
         // Hot & latest plugins
         $hotPlugins = Db::name('plugin')->where('status', 1)->where('is_hot', 1)->order('sort', 'desc')->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
@@ -130,25 +142,17 @@ class Index extends UserBackend
 
         // Emotional value data
         $hour = (int)date('H');
-        $greeting = $hour < 6 ? '夜深了' : ($hour < 9 ? '早上好' : ($hour < 12 ? '上午好' : ($hour < 14 ? '中午好' : ($hour < 18 ? '下午好' : '晚上好'))));
+        $greeting = $hour < 6
+            ? t('user_home.greeting_late_night')
+            : ($hour < 9
+                ? t('user_home.greeting_morning')
+                : ($hour < 12
+                    ? t('user_home.greeting_forenoon')
+                    : ($hour < 14
+                        ? t('user_home.greeting_noon')
+                        : ($hour < 18 ? t('user_home.greeting_afternoon') : t('user_home.greeting_evening')))));
         $greetingEmoji = $hour < 6 ? '🌙' : ($hour < 9 ? '☀️' : ($hour < 12 ? '🌤' : ($hour < 14 ? '🌞' : ($hour < 18 ? '🌈' : '🌆'))));
         $memberDays = max(1, (int)((time() - strtotime($this->userInfo['addtime'])) / 86400));
-
-        // Power color theme: higher discount = higher tier → more premium colors
-        $discountRate = floatval($this->userInfo['addauth_discount']);
-        if ($discountRate <= 0) {
-            $powerTheme = 'legend'; // 免费 = 传说级
-        } elseif ($discountRate <= 0.3) {
-            $powerTheme = 'diamond';
-        } elseif ($discountRate <= 0.5) {
-            $powerTheme = 'gold';
-        } elseif ($discountRate <= 0.7) {
-            $powerTheme = 'silver';
-        } elseif ($discountRate < 1) {
-            $powerTheme = 'bronze';
-        } else {
-            $powerTheme = 'standard';
-        }
 
         try {
             $checkinService = new CheckinService(intval($this->userId), $this->userInfo['username']);
@@ -170,9 +174,11 @@ class Index extends UserBackend
             'greeting' => $greeting,
             'greeting_emoji' => $greetingEmoji,
             'member_days' => $memberDays,
-            'power_theme' => $powerTheme,
+            'current_power_tier' => $currentPowerTier,
+            'show_power_badge' => $showPowerBadge,
             'balance_ranking' => $balanceRanking,
             'integral_ranking' => $integralRanking,
+            'agent_users' => $agentUsers,
             'auth_count' => $authCount,
             'auth_increase' => $authIncrease,
             'today_auths' => $authToday,
@@ -194,6 +200,101 @@ class Index extends UserBackend
         return $this->render();
     }
 
+    /**
+     * Build the shared badge palette from the current application's complete
+     * active power hierarchy so the same power always gets the same colour.
+     *
+     * @return array<int, string>
+     */
+    private function getPowerTierMap(): array
+    {
+        $powerIds = Db::name('power_price')
+            ->where([
+                'tid' => intval($this->myAppInfo['power_template']),
+                'status' => 1,
+                'default_power' => 0,
+            ])
+            ->order('money', 'asc')
+            ->order('id', 'asc')
+            ->column('id');
+
+        $tierMap = [];
+        foreach (array_values($powerIds) as $index => $powerId) {
+            $tierMap[intval($powerId)] = 'agent-tier-' . (($index % 10) + 1);
+        }
+
+        return $tierMap;
+    }
+
+    /**
+     * Randomly showcase up to ten active agents from the current application.
+     *
+     * @param int $appId
+     * @param array<int, string> $tierMap
+     * @return array
+     */
+    private function getRandomAgentUsers(int $appId, array $tierMap = []): array
+    {
+        if (empty($tierMap)) {
+            $tierMap = $this->getPowerTierMap();
+        }
+
+        try {
+            $agents = Db::name('user')->alias('u')
+                ->join('power_price p', 'p.id = u.power')
+                ->leftJoin('user_social_identity usi', 'usi.user_id = u.id')
+                ->leftJoin('social_identity si', "si.id = usi.identity_id AND si.provider = 'qq'")
+                ->where([
+                    'u.appid' => $appId,
+                    'u.status' => 1,
+                    'p.status' => 1,
+                    'p.default_power' => 0,
+                ])
+                ->whereRaw('u.qq REGEXP ?', ['^[1-9][0-9]{4,11}$'])
+                ->field('u.id,u.username,u.qq,u.power,p.name AS power_name,si.nickname AS social_nickname,si.avatar AS social_avatar')
+                ->orderRaw('RAND()')
+                ->limit(10)
+                ->select()
+                ->toArray();
+        } catch (\Throwable $e) {
+            // Backward compatibility for installations without OAuth identity tables.
+            $agents = Db::name('user')->alias('u')
+                ->join('power_price p', 'p.id = u.power')
+                ->where([
+                    'u.appid' => $appId,
+                    'u.status' => 1,
+                    'p.status' => 1,
+                    'p.default_power' => 0,
+                ])
+                ->whereRaw('u.qq REGEXP ?', ['^[1-9][0-9]{4,11}$'])
+                ->field('u.id,u.username,u.qq,u.power,p.name AS power_name')
+                ->orderRaw('RAND()')
+                ->limit(10)
+                ->select()
+                ->toArray();
+        }
+
+        foreach ($agents as &$agent) {
+            $nickname = trim((string)($agent['social_nickname'] ?? ''));
+            $agent['display_name'] = $nickname !== '' ? $nickname : (string)$agent['username'];
+
+            $avatar = trim((string)($agent['social_avatar'] ?? ''));
+            if ($avatar !== '' && !preg_match('#^(?:https?:)?//#i', $avatar)) {
+                $avatar = '';
+            }
+            if ($avatar === '' && preg_match('/^[1-9][0-9]{4,11}$/', (string)($agent['qq'] ?? ''))) {
+                $avatar = 'https://q1.qlogo.cn/g?b=qq&nk=' . rawurlencode((string)$agent['qq']) . '&s=100';
+            }
+            $agent['avatar'] = $avatar !== '' ? $avatar : '/Assets/img/logo.png';
+
+            $powerId = intval($agent['power']);
+            $agent['tier_class'] = $tierMap[$powerId] ?? ('agent-tier-' . (($powerId % 10) + 1));
+        }
+        unset($agent);
+
+        return $agents;
+    }
+
     public function editPassword(){
         if(IS_POST){
             $post = $this->request->post();
@@ -206,7 +307,8 @@ class Index extends UserBackend
             if(empty($oldPassword)){
                 return message(t('user.old_password_empty'), false);
             }
-            if(get_password($oldPassword) != $this->userInfo['password']){
+            $needsRehash = false;
+            if(!sf_password_verify($oldPassword, $this->userInfo['password'], $needsRehash)){
                 return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->userInfo['username']){
@@ -222,14 +324,14 @@ class Index extends UserBackend
                 try{
                     Db::name('user')
                         ->where('id', $this->userId)
-                        ->data(['password' => get_password($newPassword)])
+                        ->data(['password' => sf_password_make($newPassword)])
                         ->update();
                     return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
                     return message($e->getMessage(), false);
                 }
             }else{
-                $row = Db::name('user')->where(['username' => $username, 'appid' => $this->userInfo['appid']])->find();
+                $row = Db::name('user')->where('username', $username)->find();
                 if($row){
                     return message(t('user.username_exists'), false);
                 }
@@ -240,14 +342,14 @@ class Index extends UserBackend
                     if(strlen($newPassword) < 6){
                         return message(t('user.new_password_short'), false);
                     }
-                    $password = $newPassword;
+                    $password = sf_password_make($newPassword);
                 }else{
                     $password = $this->userInfo['password'];
                 }
                 try{
                     Db::name('user')
                         ->where('id', $this->userId)
-                        ->data(['username' => $username, 'password' => get_password($password)])
+                        ->data(['username' => $username, 'password' => $password])
                         ->update();
                     return message(t('user.username_change_success'), true);
                 }catch (\Exception $e){

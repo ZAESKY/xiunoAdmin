@@ -14,9 +14,9 @@
                         <div class="layui-col-xs2">
                             <div style="border-radius: 0.5em;width: 3em;text-align: center;height: 3em;line-height: 3em;color:white;margin: 0.8em;box-shadow: 3px 3px 16px #eee">
                                 {if !$userInfo}
-                                <img src="{__IMG__}pays.png" alt="SF{:t('common_ui.auth_type')}系统" width="35">
+                                <img src="{__IMG__}pays.png" alt="{$title}" width="35">
                                 {else}
-                                <img src="{$userInfo['img']}" alt="SF{:t('common_ui.auth_type')}系统" width="35">
+                                <img src="{$userInfo['img']}" alt="{$title}" width="35">
                                 {/if}
                             </div>
                         </div>
@@ -27,9 +27,9 @@
                             <div class="layui-card-body information">
                                 {switch name="$row['type']" }
                                     {case value="recharge"}
-                                        <div>{:t('common_ui.recharge')}{:t('codepay_ui.label_amount')}：{$row['money']} 元</div>
+                                        <div>{:t('order_ui.recharge_amount', ['amount' => $row['money']])}</div>
                                     {/case}
-                                    {default /}<div>{:t('common_ui.recharge')}{:t('codepay_ui.label_amount')}：{$row['money']} 元</div>
+                                    {default /}<div>{:t('order_ui.recharge_amount', ['amount' => $row['money']])}</div>
                                 {/switch}
                             </div>
                         </div>
@@ -55,16 +55,16 @@
                                 <div class="layui-card-body information layui-text" style="line-height: 2em">
                                     <p>
                                         <span onclick="layer.msg('份数×{:t('common_ui.quantity_field')}={:t('order_ui.quantity')}')">{:t('order_ui.quantity')}</span>
-                                        <span style="float: right;">1个</span>
+                                        <span style="float: right;">{:t('order_ui.quantity_value', ['count' => 1])}</span>
                                     </p>
                                     <p>
                                         {:t('order_ui.product_price')}
                                         <span style="float: right;">
-                                           {$row['money']} 元
+                                           {:t('order_ui.money_amount', ['amount' => $row['money']])}
                                         </span>
                                     </p>
                                     <p style="float: right;margin-top: 0.8em;font-size: 1.05em">
-                                        共 {$row['num']} 份 小计：{$row['money'] * $row['num']} 元
+                                        {:t('order_ui.subtotal', ['count' => $row['num'], 'amount' => $row['money'] * $row['num']])}
                                         <div style="color:#ff4500;font-size: 1.1em">
                                             ￥ {$row['money'] * $row['num']}
                                         </div>
@@ -91,7 +91,7 @@
                             {/if}
                             {if !empty($qqpay_api)}
                             <div style="padding: 0.3em;border-radius: 0.3em;line-height: 2em;height: 2.5em;">
-                                <input type="radio" name="pay"  value="3" title="<p style='width:100%'><img src='{__IMG__}qqpay.png' width='13px' /> QQ钱包</p>">
+                                <input type="radio" name="pay"  value="3" title="<p style='width:100%'><img src='{__IMG__}qqpay.png' width='13px' /> {:t('order_ui.qq_wallet')}</p>">
                             </div>
                             {/if}
                         </div>
@@ -105,10 +105,10 @@
                             </button>
                             <span style="font-size: 1.2em;float: right;text-indent: 0.5em">
                                 <span style="color: #A6A6A6;font-size: 1em">
-                                    共 {$row['num']} 份，
+                                    {:t('order_ui.quantity_value', ['count' => $row['num']])}，
                                 </span>
                                 <span>
-                                    合计：<span style="color:#ff4500">{$row['num'] * $row['money']} 元</span>
+                                    {:t('order_ui.total_label')}<span style="color:#ff4500">{:t('order_ui.money_amount', ['amount' => $row['num'] * $row['money']])}</span>
                                 </span>
 
                             </span>
@@ -128,7 +128,7 @@
         var notice = layui.notice;
 
         window.custom_close =  function (){
-            layer.confirm('确定要关闭此页面吗？', {
+            layer.confirm(window.t('confirm.close_window'), {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
@@ -140,21 +140,21 @@
         $(function(){
             var orderid = $("input[name='orderid']").val();
             if(orderid==''){
-                notice.msg('参数不全,请返回重新提交！',{icon:2, audio:'1'});
+                notice.msg(window.t('order_ui.params_incomplete'),{icon:2, audio:'1'});
                 return false;
             }
             $("#btnSubmit").click(function(){
                 var pay = $('input:radio[name="pay"]:checked').val();
                 if(pay == null){
-                    notice.msg('请选择支付方式！',{icon:2, audio:'1'});
+                    notice.msg(window.t('order_ui.select_payment'),{icon:2, audio:'1'});
                 }else if(pay == 1){
-                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    notice.msg(window.t('order_ui.redirecting_pay'), {icon: 4, close: true});
                     window.location.href="{:url('/Index/submit')}?type=alipay&orderid="+orderid;
                 }else if(pay == 2){
-                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    notice.msg(window.t('order_ui.redirecting_pay'), {icon: 4, close: true});
                     window.location.href="{:url('/Index/submit')}?type=wxpay&orderid="+orderid;
                 }else if(pay == 3){
-                    notice.msg('正在跳转支付页面...', {icon: 4, close: true});
+                    notice.msg(window.t('order_ui.redirecting_pay'), {icon: 4, close: true});
                     window.location.href="{:url('/Index/submit')}?type=qqpay&orderid="+orderid;
                 }
             });

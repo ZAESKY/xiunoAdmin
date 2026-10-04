@@ -5,9 +5,12 @@ namespace app\pay\controller;
 use app\common\controller\PayBackend;
 use app\pay\service\CommonService;
 use app\pay\library\alipay\AlipayTradeService;
+use app\pay\library\alipay\model\builder\AlipayTradePrecreateContentBuilder;
+use app\pay\library\alipay\model\builder\AlipayTradeQueryContentBuilder;
 use app\pay\library\epay\EpayNotify;
 use think\facade\Config;
 use think\facade\Db;
+use think\facade\Log;
 
 class AliPay extends PayBackend
 {
@@ -17,96 +20,181 @@ class AliPay extends PayBackend
         $this->service = new CommonService();
     }
 
-    public function alipayReturn(){
-        $get = request()->get();
-        $config = Config::get('payconfig.zfb.alipay_config') ?: [];
-        //异步通知地址
-        $config['notify_url'] = SITE_URL . url('/AliPay/alipayNotify');
-        //同步通知地址
-        $config['return_url'] = SITE_URL . url('/AliPay/alipayReturn.php');
-        //计算得出通知验证结果
-        try {
-            $alipaySevice = new AlipayTradeService($config);
-        } catch (\Throwable $e) {
-            return $this->render('public/error', ['msg' => '支付配置缺失: ' . $e->getMessage(),'time' => 5, 'url' => '/']);
+    /**
+     * 支付宝当面付：预下单并展示支付宝二维码。
+     */
+    public function index()
+    {
+        if ((int)conf('alipay_api') !== 3) {
+            return $this->render('public/error', ['msg' => t('pay.alipay_face_disabled'), 'time' => 5, 'url' => '/']);
         }
-        //$alipaySevice->writeLog(var_export($_POST,true));
-        $verify_result = $alipaySevice->check($get);
 
-        if($verify_result && (conf('alipay_api') == 1 || conf('alipay_api') == 3)) {//验证成功
-            //商户订单号
-            $out_trade_no = isset($get['out_trade_no'])?$get['out_trade_no']:null;
-            //支付宝交易号
-            $trade_no = isset($get['trade_no'])?$get['trade_no']:null;
-            //交易金额
-            $total_amount = isset($get['total_amount'])?$get['total_amount']:null;
-            if(empty($out_trade_no)) return $this->render('public/error', ['msg' => '订单号不能为空！[errorCode:PayOrderIdEmpty]','time' => 5, 'url' => '/']);
-            if(empty($trade_no)) return $this->render('public/error', ['msg' => '订单交易号不能为空！[errorCode:PayOrderApiIdEmpty]','time' => 5, 'url' => '/']);
-            if(empty($total_amount)) return $this->render('public/error', ['msg' => '订单交易金额不能为空！[errorCode:PayOrderMoneyEmpty]','time' => 5, 'url' => '/']);
-            $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
+        $tradeNo = trim((string)request()->get('trade_no', ''));
+        if ($tradeNo === '' || !preg_match('/^[A-Za-z0-9_-]{6,64}$/', $tradeNo)) {
+            return $this->render('public/error', ['msg' => t('pay.order_no_invalid'), 'time' => 5, 'url' => '/']);
+        }
 
-            if ($srow['status'] == 0) {
-                //付款完成后，支付宝系统发送该交易状态通知
-                $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                if($result){
-                    Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                    $this->service->processOrder($srow);
-                }
-                return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
-            }else{
-                return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
+        $row = Db::name('pay')->where('trade_no', $tradeNo)->find();
+        if (!$row) {
+            return $this->render('public/error', ['msg' => t('pay.payment_order_not_found'), 'time' => 5, 'url' => '/']);
+        }
+        if (!$this->ownsPaymentOrder($row)) {
+            return $this->render('public/error', ['msg' => t('pay.order_access_denied'), 'time' => 5, 'url' => '/']);
+        }
+        if ((int)$row['status'] >= 1) {
+            return $this->render('public/success', ['msg' => t('pay.already_paid_short'), 'time' => 3, 'url' => '/']);
+        }
+        if (!$this->validAmount($row['money'] ?? null)) {
+            return $this->render('public/error', ['msg' => t('pay.amount_invalid_short'), 'time' => 5, 'url' => '/']);
+        }
+
+        try {
+            $service = new AlipayTradeService($this->alipayConfig());
+            $builder = new AlipayTradePrecreateContentBuilder();
+            $builder->setOutTradeNo($tradeNo);
+            $builder->setTotalAmount(number_format((float)$row['money'], 2, '.', ''));
+            $builder->setSubject($this->paymentSubject((string)$row['name']));
+            $builder->setBody($this->paymentSubject((string)$row['name']));
+            $builder->setTimeExpress('10m');
+
+            $result = $service->qrPay($builder);
+            $response = $result->getResponse();
+            $qrCode = is_object($response) ? (string)($response->qr_code ?? '') : '';
+            if ($result->getTradeStatus() !== 'SUCCESS' || $qrCode === '') {
+                return $this->render('public/error', [
+                    'msg' => t('pay.alipay_preorder_failed'),
+                    'time' => 8,
+                    'url' => '/',
+                ]);
             }
 
-        } else {
-            //验证失败
-            return $this->render('public/error', ['msg' => '验证订单交易状态失败！[errorCode:CheckPayStatusError]','time' => 5, 'url' => '/']);
+            Db::name('pay')->where('trade_no', $tradeNo)->update([
+                'type' => 'alipay',
+                'channel' => 'alipay_f2f',
+            ]);
+
+            return $this->render('ali_pay/index', [
+                'row' => $row,
+                'code_url_json' => json_encode($qrCode, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('支付宝当面付预下单失败', ['order' => $tradeNo, 'error' => $e->getMessage()]);
+            return $this->render('public/error', ['msg' => t('pay.alipay_create_failed'), 'time' => 8, 'url' => '/']);
         }
+    }
+
+    /**
+     * 当面付页面轮询。仅在支付宝查询接口确认成功后处理订单。
+     */
+    public function f2fQuery()
+    {
+        if (!IS_POST || (int)conf('alipay_api') !== 3) {
+            return json(message(t('pay.method_unavailable'), false));
+        }
+
+        $tradeNo = trim((string)request()->post('trade_no', ''));
+        if ($tradeNo === '' || !preg_match('/^[A-Za-z0-9_-]{6,64}$/', $tradeNo)) {
+            return json(message(t('pay.order_no_invalid'), false));
+        }
+
+        $row = Db::name('pay')->where('trade_no', $tradeNo)->find();
+        if (!$row) {
+            return json(message(t('pay.payment_order_not_found'), false));
+        }
+        if (!$this->ownsPaymentOrder($row)) {
+            return json(message(t('pay.order_query_denied'), false));
+        }
+        if ((int)$row['status'] >= 1) {
+            return json(message(t('pay.success'), true, ['paid' => true, 'backurl' => '/']));
+        }
+
+        try {
+            $service = new AlipayTradeService($this->alipayConfig());
+            $builder = new AlipayTradeQueryContentBuilder();
+            $builder->setOutTradeNo($tradeNo);
+            $result = $service->queryTradeResult($builder);
+            $response = $result->getResponse();
+
+            if ($result->getTradeStatus() !== 'SUCCESS') {
+                return json(message(t('pay.waiting'), false, ['paid' => false]));
+            }
+
+            $paidAmount = is_object($response) ? ($response->total_amount ?? null) : null;
+            $apiTradeNo = is_object($response) ? (string)($response->trade_no ?? '') : '';
+            if (!$this->amountMatches($row['money'], $paidAmount) || $apiTradeNo === '') {
+                Log::warning('支付宝当面付查询金额或交易号异常', ['order' => $tradeNo]);
+                return json(message(t('pay.result_verify_failed'), false));
+            }
+
+            if (!$this->completeOrder($row, $apiTradeNo)) {
+                return json(message(t('pay.crediting'), false));
+            }
+            return json(message(t('pay.success'), true, ['paid' => true, 'backurl' => '/']));
+        } catch (\Throwable $e) {
+            Log::error('支付宝当面付查询失败', ['order' => $tradeNo, 'error' => $e->getMessage()]);
+            return json(message(t('pay.status_query_failed'), false, ['paid' => false]));
+        }
+    }
+
+    public function alipayReturn(){
+        $get = request()->get();
+        try {
+            $alipayService = new AlipayTradeService($this->alipayConfig());
+        } catch (\Throwable $e) {
+            return $this->render('public/error', ['msg' => t('pay.alipay_config_incomplete'), 'time' => 5, 'url' => '/']);
+        }
+
+        $outTradeNo = trim((string)($get['out_trade_no'] ?? ''));
+        $apiTradeNo = trim((string)($get['trade_no'] ?? ''));
+        $row = $outTradeNo !== '' ? Db::name('pay')->where('trade_no', $outTradeNo)->find() : null;
+        try {
+            $valid = in_array((int)conf('alipay_api'), [1, 3], true)
+                && $row
+                && $apiTradeNo !== ''
+                && $this->amountMatches($row['money'], $get['total_amount'] ?? null)
+                && $alipayService->check($get);
+        } catch (\Throwable $e) {
+            $valid = false;
+        }
+
+        if (!$valid || !$this->completeOrder($row, $apiTradeNo)) {
+            return $this->render('public/error', ['msg' => t('pay.result_verify_failed'), 'time' => 5, 'url' => '/']);
+        }
+        return $this->render('public/success', ['msg' => t('pay.credited_success'), 'time' => 3, 'url' => '/']);
     }
 
     public function alipayNotify(){
         $post = request()->post();
-        $config = Config::get('payconfig.zfb.alipay_config') ?: [];
-        //异步通知地址
-        $config['notify_url'] = SITE_URL . url('/AliPay/alipayNotify');
-        //同步通知地址
-        $config['return_url'] = SITE_URL . url('/AliPay/alipayReturn.php');
-        //计算得出通知验证结果
         try {
-            $alipaySevice = new AlipayTradeService($config);
+            $config = $this->alipayConfig();
+            $alipayService = new AlipayTradeService($config);
         } catch (\Throwable $e) {
             echo "fail";
             return;
         }
-//$alipaySevice->writeLog(var_export($_POST,true));
-        $verify_result = $alipaySevice->check($post);
 
-        if($verify_result && (conf('alipay_api') == 1 || conf('alipay_api') == 3)) {//验证成功
-            //商户订单号
-            $out_trade_no = isset($post['out_trade_no'])?$post['out_trade_no']:null;
-            //支付宝交易号
-            $trade_no = isset($post['trade_no'])?$post['trade_no']:null;
-            //交易金额
-            $total_amount = isset($post['total_amount'])?$post['total_amount']:null;
-            //交易状态
-            $trade_status = isset($post['trade_status'])?$post['trade_status']:null;
-            //买家支付宝
-            $buyer_id = isset($post['buyer_id'])?$post['buyer_id']:null;
+        $outTradeNo = trim((string)($post['out_trade_no'] ?? ''));
+        $apiTradeNo = trim((string)($post['trade_no'] ?? ''));
+        $tradeStatus = (string)($post['trade_status'] ?? '');
+        $row = $outTradeNo !== '' ? Db::name('pay')->where('trade_no', $outTradeNo)->find() : null;
 
-            $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
-
-            if ($trade_status == 'TRADE_SUCCESS' && $srow['status']==0) {
-                //付款完成后，支付宝系统发送该交易状态通知
-                $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                if($result){
-                    Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                    $this->service->processOrder($srow);
-                }
-            }
-            echo "success";
-        } else {
-            //验证失败
-            echo "fail";
+        try {
+            $valid = in_array((int)conf('alipay_api'), [1, 3], true)
+                && $row
+                && $apiTradeNo !== ''
+                && in_array($tradeStatus, ['TRADE_SUCCESS', 'TRADE_FINISHED'], true)
+                && $this->amountMatches($row['money'], $post['total_amount'] ?? null)
+                && (empty($post['app_id']) || hash_equals((string)$config['app_id'], (string)$post['app_id']))
+                && $alipayService->check($post);
+        } catch (\Throwable $e) {
+            $valid = false;
         }
+
+        if ($valid && $this->completeOrder($row, $apiTradeNo)) {
+            echo "success";
+            return;
+        }
+        echo "fail";
     }
 
     public function kayixinNotify(){
@@ -121,30 +209,20 @@ class AliPay extends PayBackend
             return;
         }
 
-        if($verify_result && conf('alipay_api') == 7) {//验证成功
-            //商户订单号
-            $out_trade_no = isset($post['out_trade_no'])?$post['out_trade_no']:null;
-            //支付宝交易号
-            $trade_no = isset($post['trade_no'])?$post['trade_no']:null;
-            //交易金额
-            $total_fee = isset($post['total_fee'])?$post['total_fee']:null;
-            //交易状态
-            $trade_status = isset($post['trade_status'])?$post['trade_status']:null;
-            //买家支付宝
-            $buyer_id = isset($post['buyer_id'])?$post['buyer_id']:null;
+        $out_trade_no = trim((string)($post['out_trade_no'] ?? ''));
+        $trade_no = trim((string)($post['trade_no'] ?? ''));
+        $total_fee = $post['total_fee'] ?? null;
+        $trade_status = (string)($post['trade_status'] ?? '');
+        $srow = $out_trade_no !== '' ? Db::name('pay')->where('trade_no', $out_trade_no)->find() : null;
 
-            $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
-
-            if($trade_status == 'TRADE_FINISHED') {
-                //退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
-            } else if ($trade_status == 'TRADE_SUCCESS' && $srow['status'] == 0) {
-                //付款完成后，支付宝系统发送该交易状态通知
-                $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                if($result){
-                    Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                    $this->service->processOrder($srow);
-                }
-            }
+        if ($verify_result
+            && (int)conf('alipay_api') === 7
+            && $srow
+            && $trade_no !== ''
+            && in_array($trade_status, ['TRADE_SUCCESS', 'TRADE_FINISHED'], true)
+            && $this->amountMatches($srow['money'], $total_fee)
+            && $this->completeOrder($srow, $trade_no)
+        ) {
             echo "success";
         } else {
             //验证失败
@@ -160,37 +238,91 @@ class AliPay extends PayBackend
             $alipayNotify = new EpayNotify($config);
             $verify_result = $alipayNotify->verifyReturn();
         } catch (\Throwable $e) {
-            return $this->render('public/error', ['msg' => '支付配置缺失: ' . $e->getMessage(),'time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.config_missing'),'time' => 5, 'url' => '/']);
         }
-        if($verify_result && conf('alipay_api') == 7) {
-            //商户订单号
-            $out_trade_no = isset($post['out_trade_no'])?$post['out_trade_no']:null;
-            //支付宝交易号
-            $trade_no = isset($post['trade_no'])?$post['trade_no']:null;
-            //交易金额
-            $total_fee = isset($post['total_fee'])?$post['total_fee']:null;
-            //交易状态
-            $trade_status = isset($post['trade_status'])?$post['trade_status']:null;
+        $out_trade_no = trim((string)($post['out_trade_no'] ?? ''));
+        $trade_no = trim((string)($post['trade_no'] ?? ''));
+        $total_fee = $post['total_fee'] ?? null;
+        $trade_status = (string)($post['trade_status'] ?? '');
+        $srow = $out_trade_no !== '' ? Db::name('pay')->where('trade_no', $out_trade_no)->find() : null;
+        $valid = $verify_result
+            && (int)conf('alipay_api') === 7
+            && $srow
+            && $trade_no !== ''
+            && in_array($trade_status, ['TRADE_SUCCESS', 'TRADE_FINISHED'], true)
+            && $this->amountMatches($srow['money'], $total_fee);
+        if (!$valid || !$this->completeOrder($srow, $trade_no)) {
+            return $this->render('public/error', ['msg' => t('pay.status_verify_failed').' [errorCode:CheckPayStatusError]','time' => 5, 'url' => '/']);
+        }
+        return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => sf_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
+    }
 
-            $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
+    private function alipayConfig(): array
+    {
+        $config = Config::get('payconfig.zfb.alipay_config') ?: [];
+        $config['notify_url'] = SITE_URL . url('/AliPay/alipayNotify');
+        $config['return_url'] = SITE_URL . url('/AliPay/alipayReturn');
+        return $config;
+    }
 
-            if($trade_status == 'TRADE_FINISHED' || $trade_status == 'TRADE_SUCCESS') {
-                if($srow['status'] == 0){
-                    $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                    if($result){
-                        Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                        $this->service->processOrder($srow);
-                    }
-                    return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
-                }else{
-                    return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
+    private function validAmount($amount): bool
+    {
+        return is_numeric($amount) && (float)$amount > 0 && (float)$amount <= 99999999.99;
+    }
+
+    private function amountMatches($expected, $actual): bool
+    {
+        if (!$this->validAmount($expected) || !$this->validAmount($actual)) {
+            return false;
+        }
+        return sf_money_to_cents($expected) === sf_money_to_cents($actual);
+    }
+
+    private function paymentSubject(string $subject): string
+    {
+        $subject = trim(strip_tags($subject));
+        if ($subject === '') {
+            $subject = t('pay.recharge_subject');
+        }
+        return function_exists('mb_substr') ? mb_substr($subject, 0, 128, 'UTF-8') : substr($subject, 0, 128);
+    }
+
+    /**
+     * 支付回调与主动查询共用的幂等入账逻辑。
+     */
+    private function completeOrder(array $row, string $apiTradeNo): bool
+    {
+        try {
+            return (bool)Db::transaction(function () use ($row, $apiTradeNo) {
+                $current = Db::name('pay')->where('trade_no', $row['trade_no'])->lock(true)->find();
+                if (!$current) {
+                    return false;
                 }
-            } else {
-                return $this->render('public/error', ['msg' => '该订单未支付！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
-            }
-        } else {
-            //验证失败
-            return $this->render('public/error', ['msg' => '验证订单交易状态失败！[errorCode:CheckPayStatusError]','time' => 5, 'url' => '/']);
+                if ((int)$current['status'] >= 1) {
+                    return true;
+                }
+
+                $updated = Db::name('pay')
+                    ->where('trade_no', $current['trade_no'])
+                    ->where('status', 0)
+                    ->update([
+                        'status' => 1,
+                        'endtime' => datetime(),
+                        'api_trade_no' => $apiTradeNo,
+                    ]);
+                if (!$updated) {
+                    return false;
+                }
+
+                $this->service->processOrder($current);
+                return true;
+            });
+        } catch (\Throwable $e) {
+            Log::error('支付宝订单入账失败', [
+                'order' => (string)($row['trade_no'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
+            return false;
         }
     }
 

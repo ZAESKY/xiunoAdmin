@@ -18,5 +18,5 @@ CREATE TABLE IF NOT EXISTS `SF_checkin_record` (
 INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
 ('checkin_enabled', 'checkin', '启用打卡功能', '开启后用户可在面板首页进行每日打卡获取积分', 'bool', '1', '', '', '', ''),
 ('checkin_base_points', 'checkin', '单次打卡积分', '用户每次打卡获得的基础积分', 'number', '5', '', 'required', '', ''),
-('checkin_consecutive_days', 'checkin', '连续打卡天数阈值', '达到指定连续天数时发放额外奖励，与下方奖励积分一一对应', 'array', '{"field":["3","7","15","30"]}', '', '', '', ''),
-('checkin_consecutive_bonus', 'checkin', '连续打卡奖励积分', '达到对应连续天数时额外奖励的积分，与上方天数阈值一一对应', 'array', '{"field":["3","7","15","30"]}', '', '', '', '');
+('checkin_consecutive_days', 'checkin', '连续打卡天数阈值', '使用英文逗号分隔，并与奖励积分逐项对应，例如：3,7,15,30', 'string', '3,7,15,30', '', 'required', '', ''),
+('checkin_consecutive_bonus', 'checkin', '连续打卡奖励积分', '使用英文逗号分隔，并与天数阈值逐项对应，例如：3,7,15,30', 'string', '3,7,15,30', '', 'required', '', '');

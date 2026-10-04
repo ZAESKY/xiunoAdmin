@@ -4,9 +4,12 @@ namespace app\user\controller;
 use app\common\controller\CommonBase;
 use app\user\model\ActionLog;
 use app\user\service\LoginService;
+use app\common\service\RateLimitService;
+use app\common\service\PasswordRecoveryService;
 use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Event;
+use think\facade\Log;
 use think\facade\View;
 
 /**
@@ -41,17 +44,36 @@ class Login extends CommonBase
         if (!is_array($loginSwitch)) {
             $loginSwitch = array_filter(explode(',', (string)$loginSwitch));
         }
-        $loginSwitch = array_values(array_intersect($loginSwitch, ['qq', 'qrcode', 'wechat_mp']));
+        // 旧扫码仅保留给一次性历史身份迁移，不再作为登录入口展示。
+        $loginSwitch = array_values(array_intersect($loginSwitch, ['qq']));
         View::assign(array(
             'captcha_open' => conf('captcha_open'),
             'captcha_id' => conf('captcha_id'),
             'login_switch' => $loginSwitch,
         ));
         $get = request()->get();
-        $code = isset($get['code'])?$get['code']:'';
-        $state = isset($get['state'])?$get['state']:'';
+        $code = trim((string)($get['code'] ?? ''));
+        $state = trim((string)($get['state'] ?? ''));
+        $oauthError = trim((string)($get['error'] ?? ''));
+        if (strlen($code) > 2048) {
+            $code = '';
+        }
+        if (!preg_match('/^[a-f0-9]{64}$/D', $state)) {
+            $state = '';
+        }
+        if (strlen($oauthError) > 128) {
+            $oauthError = '';
+        }
+        $oauthCallbackJson = json_encode([
+            'code' => $code,
+            'state' => $state,
+            'oauth_error' => $oauthError,
+            'userType' => '',
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         View::assign('code',$code);
         View::assign('state',$state);
+        View::assign('oauth_error',$oauthError);
+        View::assign('oauth_callback_json', $oauthCallbackJson ?: '{}');
         return $this->render('login/index');
 
     }
@@ -90,72 +112,38 @@ class Login extends CommonBase
     /**
      * 注册用户
      */
+    public function appNotice()
+    {
+        if (!IS_POST) {
+            return message('common.illegal_request', false);
+        }
+        $appid = intval(input('post.appid'));
+        if ($appid <= 0) {
+            return message('login.select_registration_app', false);
+        }
+        $appInfo = Db::name('app')->where([
+            'id' => $appid,
+            'status' => 2,
+            'register_switch' => 1,
+        ])->field('register_notice')->find();
+        if (!$appInfo) {
+            return message('login.registration_closed', false);
+        }
+        return message('success', true, [
+            'register_notice' => clean_rich_text($appInfo['register_notice'] ?? ''),
+        ]);
+    }
+
     public function reg()
     {
         if (IS_POST) {
-            try {
-                $post = request()->post();
-                $appid = !empty($post['appid']) ? intval($post['appid']) : 0;
-                $username = !empty($post['username']) ? trim($post['username']) : '';
-                $qq = !empty($post['qq']) ? trim($post['qq']) : '';
-                $email = !empty($post['email']) ? trim($post['email']) : '';
-                $password = !empty($post['password']) ? $post['password'] : '';
-                $confirmPassword = !empty($post['confirmPassword']) ? $post['confirmPassword'] : '';
-                $code = !empty($post['code']) ? trim($post['code']) : '';
-
-                if (empty($appid)) return message('请选择注册的应用', false);
-                if (empty($username) || strlen($username) < 6) return message('用户名至少6位', false);
-                if (empty($password) || strlen($password) < 6) return message('密码至少6位', false);
-                if ($password !== $confirmPassword) return message('两次密码不一致', false);
-                if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) return message('请输入正确的邮箱', false);
-                if (empty($code)) return message('请输入验证码', false);
-
-                $cachedCode = Cache::get('reg_code_' . $email);
-                if (empty($cachedCode) || (string)$cachedCode !== (string)$code) {
-                    return message('验证码错误或已过期', false);
-                }
-                Cache::delete('reg_code_' . $email);
-
-                $appInfo = Db::name('app')->where(['id' => $appid])->find();
-                if (empty($appInfo)) return message('不存在此应用！', false);
-                if ($appInfo['status'] != 2) return message('该应用已停止运营或维护中！', false);
-                if ($appInfo['register_switch'] != 1) return message('该应用未开放自助注册！', false);
-
-                if (Db::name('user')->where(['username' => $username])->find()) {
-                    return message('平台已存在该用户名！', false);
-                }
-                if (!empty($qq)) {
-                    if (Db::name('user')->where(['qq' => $qq, 'appid' => $appid])->find()) {
-                        return message('该QQ号在此应用下已被注册！', false);
-                    }
-                }
-
-                $powerPriceModel = new \app\admin\model\PowerPriceModel();
-                $power = $powerPriceModel->getDefaultPower(intval($appInfo['power_template']));
-
-                Db::name('user')->insert([
-                    'username' => $username,
-                    'password' => get_password($password),
-                    'phone' => '',
-                    'qq' => $qq,
-                    'email' => $email,
-                    'appid' => $appid,
-                    'status' => 1,
-                    'balance' => 0,
-                    'integral' => 0,
-                    'power' => $power,
-                    'addtime' => datetime(),
-                    'userid' => 0,
-                ]);
-
-                return message('注册成功！', true);
-            } catch (\Exception $e) {
-                return message('注册失败：' . $e->getMessage(), false);
-            }
+            return message('login.qq_registration_only', false);
         }
-
-        $appList = Db::name('app')->where(['status' => 2, 'register_switch' => 1])->field('id,name')->select()->toArray();
-        View::assign('appList', $appList);
+        $loginSwitch = conf('login_switch');
+        if (!is_array($loginSwitch)) {
+            $loginSwitch = array_filter(array_map('trim', explode(',', (string)$loginSwitch)));
+        }
+        View::assign('qq_register_enabled', in_array('qq', $loginSwitch, true));
         return $this->render('reg');
     }
 
@@ -166,30 +154,18 @@ class Login extends CommonBase
     {
         if (IS_POST) {
             $post = $this->request->post();
-            $username = !empty($post['username']) ? $post['username'] : null;
-            $email = !empty($post['email']) ? $post['email'] : null;
-            $code = !empty($post['code']) ? $post['code'] : null;
-            $newPassword = !empty($post['newPassword']) ? $post['newPassword'] : null;
-
-            if (empty($username) || empty($email) || empty($newPassword)) {
-                return message('请填写完整信息', false);
-            }
-
-            $user = Db::name('user')->where(['username' => $username, 'email' => $email])->find();
-            if (empty($user)) {
-                return message('用户名与邮箱不匹配', false);
-            }
-
-            $cachedCode = Cache::get('reset_code_' . $user['id']);
-            if (empty($cachedCode) || (string)$cachedCode !== (string)$code) {
-                return message('验证码错误或已过期', false);
-            }
-            Cache::delete('reset_code_' . $user['id']);
-
-            Db::name('user')->where('id', $user['id'])->update(['password' => get_password($newPassword)]);
-
-            return message('密码重置成功！', true);
+            return PasswordRecoveryService::reset(
+                (string)($post['username'] ?? ''),
+                (string)($post['contact'] ?? $post['email'] ?? $post['phone'] ?? ''),
+                (string)($post['code'] ?? ''),
+                (string)($post['newPassword'] ?? '')
+            );
         }
+        $channel = PasswordRecoveryService::channel();
+        View::assign([
+            'recovery_channel' => $channel,
+            'recovery_is_sms' => $channel === 'sms',
+        ]);
         return $this->render('forgot');
     }
 
@@ -199,25 +175,20 @@ class Login extends CommonBase
     public function sendRegCode()
     {
         if (IS_POST) {
-            $email = input('post.email');
-            if (empty($email)) return message('请输入邮箱', false);
+            $email = strtolower(trim((string)input('post.email')));
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return message('login.valid_email_required', false);
+            if ($limited = $this->mailRateLimit('reg', $email)) return $limited;
 
-            $code = sprintf('%06d', mt_rand(0, 999999));
-            Cache::set('reg_code_' . $email, $code, 180);
+            $code = sprintf('%06d', random_int(0, 999999));
 
             $param = [
                 'to' => $email,
-                'title' => conf('title') . ' - 注册验证码',
+                'title' => conf('title') . ' - ' . t('mail.register_code_subject'),
                 'from_name' => conf('title'),
-                'content' => '验证码: ' . $code . '（6位数字）。此验证码用于注册账号，请妥善保管。如非本人操作请忽略。'
+                'content' => t('mail.register_code_body', ['code' => $code])
             ];
 
-            try {
-                $result = Event::trigger('ChangeBindingMailNotice', $param);
-                return $result[0] ?? message('验证码已发送', true);
-            } catch (\Exception $e) {
-                return message('邮件发送失败: ' . $e->getMessage(), false);
-            }
+            return $this->dispatchMailCode($param, $this->mailCodeCacheKey('reg', $email), $code);
         }
     }
 
@@ -227,31 +198,61 @@ class Login extends CommonBase
     public function sendResetCode()
     {
         if (IS_POST) {
-            $username = input('post.username');
-            $email = input('post.email');
-            if (empty($username) || empty($email)) return message('请输入用户名和邮箱', false);
+            return PasswordRecoveryService::send(
+                trim((string)input('post.username')),
+                (string)(input('post.contact') ?: input('post.email') ?: input('post.phone'))
+            );
+        }
+    }
 
-            $user = Db::name('user')->where(['username' => $username, 'email' => $email])->find();
-            if (empty($user)) {
-                return message('用户名与邮箱不匹配', false);
+    private function mailCodeCacheKey(string $purpose, string $email): string
+    {
+        return $purpose . '_code_' . hash('sha256', strtolower(trim($email)));
+    }
+
+    private function mailRateLimit(string $purpose, string $email): ?array
+    {
+        $recipientHash = hash('sha256', strtolower(trim($email)));
+        $cooldownKey = 'mail_code_cooldown:' . $purpose . ':' . $recipientHash;
+        if (Cache::get($cooldownKey)) {
+            return message('login.send_too_frequent', false);
+        }
+
+        $ipHash = hash('sha256', (string)get_client_ip());
+        $hourKey = 'mail_code_hour:' . $purpose . ':' . $ipHash . ':' . date('YmdH');
+        $hourCount = (int)Cache::get($hourKey, 0);
+        if ($hourCount >= 20) {
+            return message('login.network_send_limited', false);
+        }
+
+        Cache::set($cooldownKey, 1, 60);
+        Cache::set($hourKey, $hourCount + 1, 3600);
+        return null;
+    }
+
+    private function dispatchMailCode(array $param, string $cacheKey, string $code): array
+    {
+        try {
+            $results = Event::trigger('ChangeBindingMailNotice', $param);
+            $result = $results[0] ?? null;
+            if (is_string($result)) {
+                $decoded = json_decode($result, true);
+                $result = is_array($decoded) ? $decoded : null;
+            }
+            if (!is_array($result) || (int)($result['code'] ?? -1) !== 0) {
+                Log::warning('Mail verification code dispatch failed', [
+                    'purpose' => str_starts_with($cacheKey, 'reset_code_') ? 'reset' : 'registration',
+                    'provider_response' => is_array($result) ? ($result['msg'] ?? 'invalid response') : 'invalid response',
+                ]);
+                return message('login.email_send_failed', false);
             }
 
-            $code = sprintf('%06d', mt_rand(0, 999999));
-            Cache::set('reset_code_' . $user['id'], $code, 180);
-
-            $param = [
-                'to' => $email,
-                'title' => conf('title') . ' - 找回密码验证码',
-                'from_name' => conf('title'),
-                'content' => '验证码: ' . $code . '（6位数字）。此验证码用于重置密码，请妥善保管。如非本人操作请忽略。'
-            ];
-
-            try {
-                $result = Event::trigger('ChangeBindingMailNotice', $param);
-                return $result[0] ?? message('验证码已发送', true);
-            } catch (\Exception $e) {
-                return message('邮件发送失败: ' . $e->getMessage(), false);
-            }
+            Cache::set($cacheKey, $code, 180);
+            Cache::delete($cacheKey . ':attempts');
+            return message('login.code_sent', true);
+        } catch (\Throwable $e) {
+            Log::error('Mail verification code dispatch exception: ' . $e->getMessage(), ['exception' => $e]);
+            return message('login.email_send_failed', false);
         }
     }
 

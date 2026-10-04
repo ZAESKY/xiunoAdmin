@@ -5,6 +5,7 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use app\admin\service\SetService;
+use app\common\service\CheckinConfigService;
 use think\facade\Db;
 use think\facade\View;
 
@@ -13,7 +14,7 @@ class Checkin extends Backend
     public function initialize()
     {
         parent::initialize();
-        $this->request->filter(['trim', 'addslashes']);
+        $this->request->filter(['trim']);
     }
 
     /**
@@ -24,15 +25,30 @@ class Checkin extends Backend
         if ($this->request->isPost()) {
             $row = $this->request->post("row/a", [], 'trim,html_entity_decode');
             if ($row) {
+                try {
+                    [$days, $bonuses] = CheckinConfigService::normalizeMilestones(
+                        $row['checkin_consecutive_days'] ?? '',
+                        $row['checkin_consecutive_bonus'] ?? ''
+                    );
+                    $row['checkin_consecutive_days'] = implode(',', $days);
+                    $row['checkin_consecutive_bonus'] = implode(',', $bonuses);
+                } catch (\InvalidArgumentException $e) {
+                    return json(message($e->getMessage(), false));
+                }
+
                 $setService = new SetService();
                 $configList = [];
                 foreach ($setService->all() as $v) {
                     if ($v['group'] !== 'checkin') continue;
 
                     if ($v['type'] == 'bool') {
-                        $value = isset($row[$v['name']]) ? intval($row[$v['name']]) : 0;
+                        if (!array_key_exists($v['name'], $row)) continue;
+                        $value = (int)$row[$v['name']] === 1 ? 1 : 0;
                     } else {
                         $value = $row[$v['name']] ?? $v['value'];
+                    }
+                    if (in_array($v['name'], ['checkin_consecutive_days', 'checkin_consecutive_bonus'], true)) {
+                        $v['type'] = 'string';
                     }
                     $v['value'] = $value;
                     $configList[] = $v->toArray();
@@ -55,6 +71,19 @@ class Checkin extends Backend
             if ($res['type'] != 'config') {
                 $res['content'] = json_decode($res['content'], true);
             }
+            if ($res['name'] === 'checkin_consecutive_days') {
+                try {
+                    $res['value'] = CheckinConfigService::canonicalize($res['value'], 1);
+                } catch (\InvalidArgumentException $e) {
+                    $res['value'] = '';
+                }
+            } elseif ($res['name'] === 'checkin_consecutive_bonus') {
+                try {
+                    $res['value'] = CheckinConfigService::canonicalize($res['value'], 0);
+                } catch (\InvalidArgumentException $e) {
+                    $res['value'] = '';
+                }
+            }
             $configList[] = $res;
         }
         View::assign('configList', $configList);
@@ -68,8 +97,8 @@ class Checkin extends Backend
     {
         if (!IS_POST) return $this->render();
 
-        $page = intval(input('page', 1));
-        $limit = intval(input('limit', 15));
+        $page = sf_page_number(input('page', null));
+        $limit = sf_page_limit(input('limit', null), 15);
         $username = input('username', '');
 
         $query = Db::name('checkin_record')

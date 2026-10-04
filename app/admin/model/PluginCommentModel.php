@@ -29,11 +29,11 @@ class PluginCommentModel extends BaseModel
     {
         try {
             if (empty($id)) {
-                throw new Exception('评论ID不能为空');
+                throw new Exception(t('plugin_action.comment_id_required'));
             }
             $row = $this->getInfo($id);
             if (!$row) {
-                throw new Exception('评论不存在');
+                throw new Exception(t('plugin_action.comment_not_found'));
             }
 
             self::where('id', $id)->delete();
@@ -56,11 +56,11 @@ class PluginCommentModel extends BaseModel
             $status = isset($post['status']) ? intval($post['status']) : 0;
 
             if (empty($id)) {
-                throw new Exception('评论ID不能为空');
+                throw new Exception(t('plugin_action.comment_id_required'));
             }
             $row = $this->getInfo($id);
             if (!$row) {
-                throw new Exception('评论不存在');
+                throw new Exception(t('plugin_action.comment_not_found'));
             }
 
             self::where('id', $id)->data(['status' => $status, 'updated_at' => datetime()])->update();
@@ -74,15 +74,23 @@ class PluginCommentModel extends BaseModel
             try {
                 if (!empty($row['user_id'])) {
                     $plugin = \think\facade\Db::name('plugin')->where('id', $row['plugin_id'])->find();
-                    $pluginName = $plugin ? $plugin['name'] : '未知插件';
-                    $statusMap = [0 => '待审核', 1 => '已通过', 2 => '已拒绝'];
-                    $statusLabel = $statusMap[$status] ?? '未知';
+                    $pluginName = $plugin ? $plugin['name'] : t('plugin_admin.unknown_plugin');
+                    $statusMap = [
+                        0 => t('plugin_admin.status_pending'),
+                        1 => t('plugin_admin.status_approved'),
+                        2 => t('plugin_admin.status_rejected'),
+                    ];
+                    $statusLabel = $statusMap[$status] ?? t('plugin_admin.status_unknown');
                     NotificationModel::add([
                         'user_id'    => intval($row['user_id']),
-                        'title'      => '评论审核通知',
-                        'content'    => '您对插件「' . $pluginName . '」的评论审核状态已更新为：' . $statusLabel,
+                        'title'      => t('plugin_admin.comment_audit_title'),
+                        'content'    => t('plugin_admin.comment_audit_content', [
+                            'plugin' => $pluginName,
+                            'status' => $statusLabel,
+                        ]),
                         'type'       => 'comment_audit',
                         'link'       => '/UserPlugin/detail.html?id=' . $row['plugin_id'],
+                        'variables'  => ['plugin_name' => $pluginName, 'review_status' => $statusLabel],
                         'is_read'    => 0,
                         'created_at' => datetime(),
                     ]);
@@ -99,8 +107,8 @@ class PluginCommentModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = !empty($post['limit']) ? $post['limit'] : 10;
-            $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $plugin_id = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
 
             $where = [];

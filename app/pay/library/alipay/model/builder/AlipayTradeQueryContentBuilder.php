@@ -6,7 +6,7 @@ namespace app\pay\library\alipay\model\builder;
  * Date: 16/5/19
  * Time: 下午2:09
  */
-require_once 'ContentBuilder.php';
+require_once __DIR__ . '/ContentBuilder.php';
 
 class AlipayTradeQueryContentBuilder extends ContentBuilder
 {

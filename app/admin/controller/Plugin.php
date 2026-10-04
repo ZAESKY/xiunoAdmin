@@ -5,6 +5,8 @@ namespace app\admin\controller;
 use app\common\controller\Backend;
 use app\admin\service\PluginService;
 use app\admin\model\PluginModel;
+use app\common\service\PluginCommissionService;
+use app\common\service\PluginRewardService;
 use think\facade\Db;
 use think\facade\View;
 
@@ -20,15 +22,16 @@ class Plugin extends Backend
         parent::initialize();
         $this->denyIfClosed();
         $this->service = new PluginService();
+        View::assign('pluginRewardConfig', PluginRewardService::config());
     }
 
     private function denyIfClosed()
     {
         if (!feature_enabled('feature_admin_plugin_enabled')) {
             if (IS_POST) {
-                exit(json_encode(message('插件管理功能已关闭', false), JSON_UNESCAPED_UNICODE));
+                exit(json_encode(message('plugin_action.management_closed', false), JSON_UNESCAPED_UNICODE));
             }
-            exit($this->render('/public/error', ['msg' => '插件管理功能已关闭']));
+            exit($this->render('/public/error', ['msg' => t('plugin_action.management_closed')]));
         }
     }
 
@@ -50,7 +53,7 @@ class Plugin extends Backend
             }
         }
         View::assign('plugin', $plugin);
-        View::assign('commissionRate', conf('plugin_commission_rate') ?? 10);
+        View::assign('commissionConfig', PluginCommissionService::config());
         return $this->render();
     }
 
@@ -62,7 +65,7 @@ class Plugin extends Backend
         if (IS_POST) {
             $file = request()->file('file');
             if (!$file) {
-                return json(message('请选择要上传的插件文件', false));
+                return json(message('plugin_action.select_plugin_file', false));
             }
             return json($this->service->uploadFile($file));
         }
@@ -76,7 +79,7 @@ class Plugin extends Backend
         if (IS_POST) {
             $file = request()->file('file');
             if (!$file) {
-                return json(message('请选择要上传的资源文件', false));
+                return json(message('plugin_action.select_resource_file', false));
             }
             return json($this->service->uploadResource($file));
         }
@@ -90,7 +93,7 @@ class Plugin extends Backend
         if (IS_POST) {
             $file = request()->file('file');
             if (!$file) {
-                return json(message('请先上传插件文件', false));
+                return json(message('plugin_ui.upload_package_first', false));
             }
             return json($this->service->saveWithFile($file));
         }
@@ -119,8 +122,8 @@ class Plugin extends Backend
             try {
                 $post = $this->request->post();
                 $pluginId = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
-                $limit = !empty($post['limit']) ? intval($post['limit']) : 10;
-                $currentPage = !empty($post['current_page']) ? intval($post['current_page']) : 1;
+                $limit = sf_page_limit($post['limit'] ?? null, 10);
+                $currentPage = sf_page_number($post['current_page'] ?? null);
                 $query = Db::name('plugin_download')
                     ->alias('d')
                     ->leftJoin('plugin p', 'd.plugin_id = p.id')
@@ -141,6 +144,55 @@ class Plugin extends Backend
                 return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false, ['data' => []]));
+            }
+        }
+    }
+
+    public function rewardRecords()
+    {
+        if (IS_POST) {
+            try {
+                $post = $this->request->post();
+                $pluginId = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
+                $limit = sf_page_limit($post['limit'] ?? null, 10);
+                $currentPage = sf_page_number($post['current_page'] ?? null);
+                $query = Db::name('plugin_reward')
+                    ->alias('r')
+                    ->leftJoin('user u', 'r.user_id = u.id')
+                    ->leftJoin('admin a', 'r.approved_by = a.id')
+                    ->field('r.*, u.username, a.username as admin_username');
+                if ($pluginId > 0) {
+                    $query->where('r.plugin_id', $pluginId);
+                }
+                $result = $query->order('r.id', 'desc')->paginate([
+                    'list_rows' => $limit,
+                    'page' => $currentPage,
+                ]);
+                return json(message(t('common.list_success'), true, ['data' => $result]));
+            } catch (\Exception $e) {
+                return json(message($e->getMessage(), false, ['data' => []]));
+            }
+        }
+    }
+
+    public function setStatus()
+    {
+        if (IS_POST) {
+            try {
+                $result = $this->service->setStatus();
+                $reward = is_array($result) ? ($result['reward'] ?? null) : null;
+                $msg = t('user.status_change_success');
+                if (is_array($reward)) {
+                    $rewardText = PluginRewardService::rewardText($reward);
+                    if ($rewardText !== '') {
+                        $msg .= t('plugin_admin.reward_granted', ['reward' => $rewardText]);
+                    } elseif (!empty($reward['reason'])) {
+                        $msg .= t('plugin_admin.reward_not_granted', ['reason' => $reward['reason']]);
+                    }
+                }
+                return json(message($msg, true, ['reward' => $reward]));
+            } catch (\Exception $e) {
+                return json(message($e->getMessage(), false));
             }
         }
     }

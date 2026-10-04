@@ -45,7 +45,7 @@ class JsApiPay
 		//通过code获得openid
 		if (!isset($_GET['code'])){
 			//触发微信返回code码
-			$baseUrl = urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+				$baseUrl = urlencode(rtrim(SITE_URL, '/') . '/' . ltrim((string)($_SERVER['REQUEST_URI'] ?? ''), '/'));
 			$url = $this->__CreateOauthUrlForCode($baseUrl);
 			Header("Location: $url");
 			exit();
@@ -100,8 +100,8 @@ class JsApiPay
 		//设置超时
 		curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,FALSE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,FALSE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_HEADER, FALSE);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		if(WxPayConfig::CURL_PROXY_HOST != "0.0.0.0" 
@@ -151,7 +151,7 @@ class JsApiPay
 		$getData = $this->data;
 		$data = array();
 		$data["appid"] = WxPayConfig::APPID;
-		$data["url"] = "http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			$data["url"] = rtrim(SITE_URL, '/') . '/' . ltrim((string)($_SERVER['REQUEST_URI'] ?? ''), '/');
 		$time = time();
 		$data["timestamp"] = "$time";
 		$data["noncestr"] = "1234568";

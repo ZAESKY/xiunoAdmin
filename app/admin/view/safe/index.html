@@ -4,36 +4,38 @@
         <div class="layui-card-body">
             <form class="layui-form" lay-filter="safe-form">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">二级密码</label>
+                    <label class="layui-form-label">{:t('safe_ui.secondary_password')}</label>
                     <div class="layui-input-inline">
-                        <input type="password" name="second_pwd" required lay-verify="required" placeholder="请输入二级密码" autocomplete="off" class="layui-input">
+                        <input type="password" name="second_pwd" required lay-verify="required" placeholder="{:t('safe_ui.secondary_password_placeholder')}" autocomplete="off" class="layui-input">
                     </div>
-                    <div class="layui-form-mid layui-word-aux">敏感操作时需输入的二级密码</div>
+                    <div class="layui-form-mid layui-word-aux">{:t('safe_ui.secondary_password_help')}</div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">客服 QQ</label>
+                    <label class="layui-form-label">{:t('set_ui.customer_qq')}</label>
                     <div class="layui-input-inline">
-                        <input type="text" name="kfqq" placeholder="请输入客服 QQ" autocomplete="off" class="layui-input">
+                        <input type="text" name="kfqq" placeholder="{:t('safe_ui.customer_qq_placeholder')}" autocomplete="off" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <div class="layui-input-block">
-                        <button type="button" class="layui-btn" lay-submit lay-filter="safe-submit">保存</button>
+                        <button type="button" class="layui-btn" lay-submit lay-filter="safe-submit">{:t('common.save')}</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+{include file="/public/footer"}
 <script>
-layui.use(['form'], function(){
+layui.use(['form', 'jquery', 'layer'], function(){
     var form = layui.form;
+    var $ = layui.$;
+    var layer = layui.layer;
     form.on('submit(safe-submit)', function(data){
         $.post('/admin.php/Safe/check', data.field, function(res){
-            layer.msg(res.msg || '保存成功', {icon: res.code === 0 ? 1 : 2});
+            layer.msg(res.msg || '{:t("safe_ui.save_success")}', {icon: res.code === 0 ? 1 : 2});
         });
         return false;
     });
 });
 </script>
-{include file="/public/footer"}

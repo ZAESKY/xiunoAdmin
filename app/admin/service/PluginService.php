@@ -4,6 +4,7 @@ namespace app\admin\service;
 
 use app\admin\model\PluginModel;
 use app\common\service\BaseService;
+use app\common\service\PluginPackageUploadService;
 use app\common\service\PluginStorageService;
 use think\Exception;
 
@@ -14,6 +15,11 @@ class PluginService extends BaseService
         $this->model = new PluginModel();
     }
 
+    public function setStatus()
+    {
+        return $this->model->setStatus();
+    }
+
     /**
      * 上传插件文件
      * @param mixed $file 上传的文件(若为空则从 request 中取)
@@ -22,7 +28,7 @@ class PluginService extends BaseService
     {
         try {
             if (!$file) $file = request()->file('file');
-            if (!$file) return message('请先选择插件文件', false, ['status' => 0]);
+            if (!$file) return message('plugin_action.select_plugin_file', false, ['status' => 0]);
 
             // 验证文件
             try {
@@ -34,12 +40,12 @@ class PluginService extends BaseService
                     ]
                 ])->check(['File' => $file]);
             } catch (\Exception $e) {
-                return message('文件验证失败: ' . $e->getMessage(), false, ['status' => 0]);
+                return message(t('plugin_action.file_validation_failed', ['error' => $e->getMessage()]), false, ['status' => 0]);
             }
 
             $originalName = $file->getOriginalName();
             if (preg_match('/[\x{4e00}-\x{9fff}]/u', $originalName)) {
-                return message('压缩包名称不能包含中文，请重命名后再上传', false, ['status' => 0]);
+                return message('plugin_action.archive_name_ascii', false, ['status' => 0]);
             }
 
             // 尝试解析压缩包内的 conf.json 和 icon.png
@@ -82,8 +88,9 @@ class PluginService extends BaseService
             } catch (\Throwable $e) {}
 
             $stored = (new PluginStorageService())->storeUploadedFile($file, 'package', ['zip'], 410241024);
+            $uploadToken = PluginPackageUploadService::issue('admin', intval(session('adminId')), $stored);
 
-            return message('上传成功', true, [
+            return message('plugin_action.upload_success', true, [
                 'status' => 1,
                 'file_path' => $stored['path'],
                 'file_hash' => $stored['file_hash'],
@@ -93,10 +100,11 @@ class PluginService extends BaseService
                 'package_object_key' => $stored['object_key'],
                 'package_file_name' => $stored['file_name'],
                 'package_mime_type' => $stored['mime_type'],
+                'upload_token' => $uploadToken,
                 'auto' => $autoData,
             ]);
         } catch (\Exception $e) {
-            return message('上传失败: ' . $e->getMessage(), false, ['status' => 0]);
+            return message(t('plugin_action.upload_failed', ['error' => $e->getMessage()]), false, ['status' => 0]);
         }
     }
 
@@ -109,9 +117,9 @@ class PluginService extends BaseService
         $type = in_array($type, ['icon', 'cover'], true) ? $type : 'icon';
         try {
             if (!$file) $file = request()->file('file');
-            if (!$file) return message('请先选择资源文件', false, ['status' => 0]);
+            if (!$file) return message('plugin_action.select_resource_file', false, ['status' => 0]);
             $stored = (new PluginStorageService())->storeUploadedFile($file, $type, ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
-            return message('上传成功', true, [
+            return message('plugin_action.upload_success', true, [
                 'status' => 1,
                 'path' => $stored['url'],
                 'url' => $stored['url'],
@@ -123,7 +131,7 @@ class PluginService extends BaseService
                 'mime_type' => $stored['mime_type'],
             ]);
         } catch (\Throwable $e) {
-            return message('上传失败: ' . $e->getMessage(), false, ['status' => 0]);
+            return message(t('plugin_action.upload_failed', ['error' => $e->getMessage()]), false, ['status' => 0]);
         }
     }
 
@@ -161,7 +169,7 @@ class PluginService extends BaseService
 
             return $result;
         } catch (\Exception $e) {
-            return message('保存失败: ' . $e->getMessage(), false);
+            return message(t('plugin_action.save_failed', ['error' => $e->getMessage()]), false);
         }
     }
 }

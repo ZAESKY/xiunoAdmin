@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="{:t('common.lang_code')}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{:t('payment_ui.alipay_face')} - {$title}</title>
+    <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css">
+    <link rel="stylesheet" href="/Assets/css/payment.css?v=20261004">
+</head>
+<body class="payment-page alipay-f2f">
+<main class="pay-card">
+    <div class="brand">{:t('payment_ui.alipay_face')}</div>
+    <div class="amount">￥{$row['money']}</div>
+    <div class="subject">{$row['name']}</div>
+    <div id="qrcode" aria-label="{:t('payment_ui.alipay_qr_aria')}"></div>
+    <div id="status" class="status">{:t('payment_ui.alipay_scan')}</div>
+    <div class="meta">
+        <div>{:t('payment_ui.qr_valid_minutes')}</div>
+        <div>{:t('payment_ui.auto_confirm_note')}</div>
+    </div>
+    <div class="actions"><a href="/">{:t('payment_ui.cancel_return')}</a></div>
+</main>
+
+<script src="{__LIBS__}layui/layui.js"></script>
+<script src="{__JS__}common.js?v=328"></script>
+<script>
+layui.use(['jquery', 'QRCode'], function () {
+    var $ = layui.jquery;
+    var QRCode = layui.QRCode;
+    var statusBox = $('#status');
+    var stopped = false;
+    var startedAt = Date.now();
+
+    new QRCode(document.getElementById('qrcode'), {
+        text: {$code_url_json|raw},
+        width: 230,
+        height: 230,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    function schedule(delay) {
+        if (!stopped) window.setTimeout(checkPayment, delay);
+    }
+
+    function checkPayment() {
+        if (Date.now() - startedAt > 10 * 60 * 1000) {
+            stopped = true;
+            statusBox.text({:json_encode(t('payment_ui.qr_expired'), 271)});
+            return;
+        }
+        $.ajax({
+            type: 'POST',
+            url: '{:url("/AliPay/f2fQuery")}',
+            dataType: 'json',
+            timeout: 15000,
+            data: {trade_no: "{$row['trade_no']}"},
+            success: function (data) {
+                if (data && data.code === 0 && data.data && data.data.paid) {
+                    stopped = true;
+                    statusBox.text({:json_encode(t('payment_ui.pay_success_returning'), 271)});
+                    window.setTimeout(function () {
+                        window.location.replace(data.data.backurl || '/');
+                    }, 900);
+                    return;
+                }
+                statusBox.text({:json_encode(t('payment_ui.waiting_confirm'), 271)});
+                schedule(3500);
+            },
+            error: function () {
+                statusBox.text({:json_encode(t('payment_ui.retrying_status'), 271)});
+                schedule(5000);
+            }
+        });
+    }
+
+    schedule(2000);
+});
+</script>
+</body>
+</html>

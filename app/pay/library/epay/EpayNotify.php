@@ -5,6 +5,8 @@ namespace app\pay\library\epay;
 class EpayNotify
 {
     public $epay_config;
+    public $http_verify_url;
+    public $epayCommon;
 
     function __construct($epay_config){
         $this->epay_config = is_array($epay_config) ? $epay_config : [];

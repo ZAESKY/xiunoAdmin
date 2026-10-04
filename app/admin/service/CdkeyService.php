@@ -4,6 +4,7 @@ namespace app\admin\service;
 use app\admin\model\AppModel;
 use app\admin\model\CdkeyModel;
 use app\common\service\BaseService;
+use think\Exception;
 
 class CdkeyService extends BaseService
 {

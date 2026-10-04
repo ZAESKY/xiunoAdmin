@@ -1,36 +1,7 @@
 <?php
 
 return [
-    'hooks' => [
-        'adminConfigNav' => [
-            'mail',
-            'wxpush',
-        ],
-        'mailAdminConfig' => [
-            'mail',
-        ],
-        'cs' => [
-            'mail',
-        ],
-        'mailNotifyUser' => [
-            'mail',
-        ],
-        'testhook' => [
-            'test',
-            'cs',
-            'cache',
-        ],
-        'userConfigNav' => [
-            'wxpush',
-        ],
-        'wxpushAdminConfig' => [
-            'wxpush',
-        ],
-        'wxpushUserConfig' => [
-            'wxpush',
-        ],
-        'wxPushNotifyUser' => [
-            'wxpush',
-        ],
-    ],
+    // Hooks are discovered from installed Plugin classes at startup. Keeping
+    // removed legacy addons here creates cached listeners with an empty class.
+    'hooks' => [],
 ];

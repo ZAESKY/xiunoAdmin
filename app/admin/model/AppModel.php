@@ -23,6 +23,11 @@ class AppModel extends BaseModel
         try{
             $result = self::where('id', $id)->find();
             if($result){
+                foreach (['app_notice', 'cdkey_notice', 'pay_notice', 'register_notice', 'replace_notice'] as $field) {
+                    if (isset($result[$field])) {
+                        $result[$field] = clean_rich_text($result[$field]);
+                    }
+                }
                 return $result;
             }
             return false;
@@ -68,9 +73,9 @@ class AppModel extends BaseModel
         $auth_template = !empty($post['auth_template'])?intval($post['auth_template']):0;
         $power_template = !empty($post['power_template'])?intval($post['power_template']):0;
         $pirate_switch = !empty($post['pirate_switch'])?intval($post['pirate_switch']):0;
-        $pirate_money = !empty($post['pirate_money'])?floatval($post['pirate_money']):0;
-        $replace_money = !empty($post['replace_money'])?floatval($post['replace_money']):0;
-        $give_money = !empty($post['give_money'])?floatval($post['give_money']):0;
+        $pirate_money = !empty($post['pirate_money'])?$post['pirate_money']:'0.00';
+        $replace_money = !empty($post['replace_money'])?$post['replace_money']:'0.00';
+        $give_money = !empty($post['give_money'])?$post['give_money']:'0.00';
         $public_key = !empty($post['public_key'])?$post['public_key']:null;
         $private_key = !empty($post['private_key'])?$post['private_key']:null;
         $authcode_file = !empty($post['authcode_file'])?$post['authcode_file']:'';
@@ -96,6 +101,13 @@ class AppModel extends BaseModel
         } catch (ValidateException $e) {
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
+        }
+        try {
+            $pirate_money = sf_money_format($pirate_money);
+            $replace_money = sf_money_format($replace_money);
+            $give_money = sf_money_format($give_money);
+        } catch (\InvalidArgumentException $e) {
+            return message('validation.amount_format', false);
         }
         $authcode_file = str_replace('\\\\', '/', $authcode_file);
         if(substr($authcode_file, 0, 1) == '/'){
@@ -158,12 +170,15 @@ class AppModel extends BaseModel
                 return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
-            $download_file = md5(time() . 'SF2129876388');
+            $download_file = sf_secure_token(16) /* A-15: 原 md5(time().常量) 可预测 */;
             try {
-                mkdir(APP_PATH . '/common/download/' . $download_file);
-                mkdir(APP_PATH . '/common/download/' . $download_file . '/release');
-                mkdir(APP_PATH . '/common/download/' . $download_file . '/update');
+                $downloadPath = APP_PATH . DS . 'common' . DS . 'download' . DS . $download_file;
+                if (!mkdir($downloadPath . DS . 'release', 0755, true)
+                    || !mkdir($downloadPath . DS . 'update', 0755, true)) {
+                    throw new \RuntimeException(t('app.download_directory_create_failed'));
+                }
             } catch (\Exception $e) {
+                $this->deleteDownloadPath($download_file);
                 return message(t('app.create_dir_failed') . $e->getMessage(), false);
             }
             $data = [
@@ -258,18 +273,27 @@ class AppModel extends BaseModel
 
     private function deleteDownloadPath($downloadFile)
     {
-        if (empty($downloadFile)) {
+        $downloadFile = trim((string)$downloadFile);
+        if (!preg_match('/^[A-Za-z0-9_-]{1,120}$/D', $downloadFile)) {
             return;
         }
-        $path = APP_PATH . DS . 'common' . DS . 'download' . DS . $downloadFile;
-        if (!file_exists($path)) {
+
+        $root = APP_PATH . DS . 'common' . DS . 'download';
+        $path = $root . DS . $downloadFile;
+        if (is_link($path) || !is_dir($path)) {
             return;
         }
-        if (is_dir($path)) {
-            rmdirs($path);
+
+        $realRoot = realpath($root);
+        $realPath = realpath($path);
+        if ($realRoot === false || $realPath === false) {
             return;
         }
-        unlink($path);
+        $prefix = rtrim($realRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (!str_starts_with($realPath . DIRECTORY_SEPARATOR, $prefix) || dirname($realPath) !== $realRoot) {
+            return;
+        }
+        rmdirs($realPath);
     }
 
     /**
@@ -279,13 +303,16 @@ class AppModel extends BaseModel
     {
         $downloadRoot = APP_PATH . DS . 'common' . DS . 'download';
         if (!is_dir($downloadRoot)) return;
-        $activeFiles = self::column('download_file');
+        $activeFiles = array_map('strval', self::column('download_file'));
         $handle = opendir($downloadRoot);
         while (($entry = readdir($handle)) !== false) {
             if ($entry === '.' || $entry === '..' || $entry === 'release' || $entry === 'update' || $entry === 'AuthInfo.php') continue;
-            if (!in_array($entry, $activeFiles)) {
+            if (!in_array($entry, $activeFiles, true)
+                && preg_match('/^[A-Za-z0-9_-]{1,120}$/D', $entry)) {
                 $path = $downloadRoot . DS . $entry;
-                if (is_dir($path)) rmdirs($path);
+                if (is_dir($path) && !is_link($path)) {
+                    $this->deleteDownloadPath($entry);
+                }
             }
         }
         closedir($handle);
@@ -317,8 +344,8 @@ class AppModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|name');
             $list = self::order('id' ,'desc')->where($data)->paginate([
                 'list_rows'=> $limit,

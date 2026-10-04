@@ -28,9 +28,9 @@
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">{:t('download_ui.captcha_label')}</label>
-                    <div class="layui-input-block" style="padding-right: 135px;">
+                    <div class="layui-input-block sf-code-field">
                         <input type="text" name="code" class="layui-input" placeholder="{:t('download_ui.captcha_placeholder')}"/>
-                        <button id="SF_CodeBtn" type="button" lay-filter="SF_GetCode" class="layui-btn" style="width: 120px;cursor: pointer;position: absolute;right: 0;top: 0;"  lay-submit/>
+                        <button id="SF_CodeBtn" type="button" lay-filter="SF_GetCode" class="layui-btn sf-code-button" lay-submit/>
                         {:t('download_ui.get_captcha')}
                         </button>
                     </div>
@@ -65,7 +65,7 @@
                     admin.removeLoading('#divLoading', true, true);
                     if (data.code == 0) {
                         parent.layui.notice.success({
-                            title: '获取通知',
+                            title: "{:t('download_ui.notice_title')}",
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -76,7 +76,7 @@
                         });
                     } else {
                         parent.layui.notice.error({
-                            title: '获取通知',
+                            title: "{:t('download_ui.notice_title')}",
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -91,8 +91,8 @@
                     admin.btnLoading('#SF_CodeBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     parent.layui.notice.error({
-                        title: '获取通知',
-                        message: '服务器错误',
+                        title: "{:t('download_ui.notice_title')}",
+                        message: "{:t('common.server_error')}",
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',
@@ -117,7 +117,7 @@
                     admin.removeLoading('#divLoading', true, true);
                     if (data.code == 0) {
                         parent.layui.notice.success({
-                            title: '获取通知',
+                            title: "{:t('download_ui.notice_title')}",
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -129,7 +129,7 @@
                         window.open(data.data.url);
                     } else {
                         parent.layui.notice.error({
-                            title: '获取通知',
+                            title: "{:t('download_ui.notice_title')}",
                             message: data.msg,
                             animateInside:true,
                             position:'topCenter',
@@ -144,8 +144,8 @@
                     admin.btnLoading('#SF_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     parent.layui.notice.error({
-                        title: '获取通知',
-                        message: '服务器错误',
+                        title: "{:t('download_ui.notice_title')}",
+                        message: "{:t('common.server_error')}",
                         animateInside:true,
                         position:'topCenter',
                         transitionOut:'flipOutX',

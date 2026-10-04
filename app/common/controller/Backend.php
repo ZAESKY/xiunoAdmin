@@ -55,7 +55,11 @@ class Backend extends CommonBase
             // 登录用户信息
             $adminModel = new \app\admin\model\Admin();
             $adminInfo = $adminModel->getInfo($adminId);
-            if(!empty($adminId) && $sign != data_auth_sign($adminInfo['username'].$adminInfo['password'].sf_password_hash())){
+            if (!$adminInfo) {
+                throw new Exception(t('login.session_expired'));
+            }
+            $expectedSign = data_auth_sign($adminInfo['username'].$adminInfo['password'].sf_password_hash());
+            if(!empty($adminId) && !hash_equals((string)$expectedSign, (string)$sign)){
                 session('adminId',null);
                 session('adminSign',null);
                 throw new Exception(t('login.session_expired'));
@@ -221,6 +225,8 @@ class Backend extends CommonBase
         $post = request()->post();
         $tid = !empty($post['tid'])?intval($post['tid']):null;
         $appid = !empty($post['appid'])?intval($post['appid']):null;
+        $excludeId = !empty($post['exclude_id']) ? intval($post['exclude_id']) : 0;
+        $includeDisabled = !empty($post['include_disabled']);
         if(empty($tid) && empty($appid)){
             return message(t('app.appid_empty'), false);
         }
@@ -234,10 +240,7 @@ class Backend extends CommonBase
                 $tid = $appInfo['power_template'];
             }
             $powerPriceModel = new \app\admin\model\PowerPriceModel();
-            $result = $powerPriceModel->getPowerList($tid);
-            if(!$result){
-                return message(t('power.get_list_failed'), false);
-            }
+            $result = $powerPriceModel->getPowerList($tid, $excludeId, $includeDisabled);
             return message(t('common.list_success'), true, ['data' => $result]);
         } catch (\Exception $e) {
             return message(t('common.server_error').$e->getMessage(), false);
@@ -303,6 +306,9 @@ class Backend extends CommonBase
                 $ids = array_values(array_filter(array_unique(array_map('intval', explode(',', (string)input('post.id'))))));
                 if (empty($ids)) {
                     return json(message(t('common.invalid_id'), false));
+                }
+                if (count($ids) > 100) {
+                    return json(message(t('batch.delete_limit', ['limit' => 100]), false));
                 }
                 //批量删除
                 $num = 0;

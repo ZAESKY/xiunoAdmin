@@ -1,7 +1,7 @@
 {include file="/public/header"}
 <div class="layui-fluid">
   <div class="layui-card">
-    <div class="layui-card-header">打卡配置</div>
+    <div class="layui-card-header">{:t('checkin_ui.config_title')}</div>
     <div class="layui-card-body">
       <form class="layui-form" lay-filter="checkinForm">
         {foreach $configList as $item}
@@ -10,8 +10,8 @@
           <div class="layui-input-block">
             {switch $item.type}
             {case bool}
-            <input type="radio" name="row[{$item.name}]" value="1" title="开启" {if $item.value==1}checked{/if}>
-            <input type="radio" name="row[{$item.name}]" value="0" title="关闭" {if $item.value==0}checked{/if}>
+            <input type="radio" name="row[{$item.name}]" value="1" title="{:t('common.open')}" {if $item.value==1}checked{/if}>
+            <input type="radio" name="row[{$item.name}]" value="0" title="{:t('common.close')}" {if $item.value==0}checked{/if}>
             {/case}
             {case number}
             <input type="number" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="layui-input" lay-verify="required" lay-tips="{$item.tip}">
@@ -27,7 +27,7 @@
         {/foreach}
         <div class="layui-form-item">
           <div class="layui-input-block">
-            <button type="button" class="layui-btn" lay-submit lay-filter="saveCheckin">保存设置</button>
+            <button type="button" class="layui-btn" lay-submit lay-filter="saveCheckin">{:t('checkin_ui.save_settings')}</button>
           </div>
         </div>
       </form>

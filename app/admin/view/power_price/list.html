@@ -7,7 +7,7 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_power_name')}"/>
                         </div>
@@ -16,9 +16,9 @@
 <!--                        <label class="layui-form-label">状&emsp;态</label>-->
 <!--                        <div class="layui-input-inline">-->
 <!--                            <select name="status" class="ew-select-fixed">-->
-<!--                                <option value="">选择状态</option>-->
-<!--                                <option value="1">显示</option>-->
-<!--                                <option value="0">隐藏</option>-->
+<!--                                <option value="">{:t('common_ui.select_status')}</option>-->
+<!--                                <option value="1">{:t('common.show')}</option>-->
+<!--                                <option value="0">{:t('common.hide')}</option>-->
 <!--                            </select>-->
 <!--                        </div>-->
 <!--                    </div>-->
@@ -30,7 +30,7 @@
                 </div>
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">模&emsp;板</label>
+                        <label class="layui-form-label">{:t('price_ui.template')}</label>
                         <div class="layui-input-inline">
                             <select id="select_template_list" class="layui-input ew-select-fixed" lay-filter="template" lay-search>
                                 <option value="">{:t('common.all')}{:t('common_ui.power_type')}</option>
@@ -46,28 +46,28 @@
     </div>
 </div>
 <script type="text/html" id="SF_PowerBar">
-<a lay-event="setPowerTop" lay-tips="移到顶部" lay-direction="4" lay-bg="#4facfe">
+<a lay-event="setPowerTop" lay-tips="{:t('price_ui.move_top')}" lay-direction="4" lay-bg="#4facfe">
     <img src="{__IMG__}top.svg" style="width: 25px;">
 </a>
-<a lay-event="setPowerUp" lay-tips="移到上一行" lay-direction="1" lay-bg="#4facfe">
+<a lay-event="setPowerUp" lay-tips="{:t('price_ui.move_up')}" lay-direction="1" lay-bg="#4facfe">
     <img src="{__IMG__}up.svg" style="width: 25px;">
 </a>
-<a lay-event="setPowerDown" lay-tips="移到下一行" lay-direction="3" lay-bg="#4facfe">
+<a lay-event="setPowerDown" lay-tips="{:t('price_ui.move_down')}" lay-direction="3" lay-bg="#4facfe">
     <img src="{__IMG__}down.svg" style="width: 25px;">
 </a>
-<a lay-event="setPowerBottom" lay-tips="移到底部" lay-direction="2" lay-bg="#4facfe">
+<a lay-event="setPowerBottom" lay-tips="{:t('price_ui.move_bottom')}" lay-direction="2" lay-bg="#4facfe">
     <img src="{__IMG__}bottom.svg" style="width: 25px;">
 </a>
 </script>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
 <script type="text/html" id="SF_TbState">
     <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="显示|隐藏" {{d.status==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_TbAddAuthPower">
     <input type="checkbox" lay-filter="SF_TbAddAuthPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addauth_power==1?'checked':''}} style="display: none;"/>
@@ -86,93 +86,93 @@
     <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">模板:</label>
+            <label class="layui-form-label layui-form-required">{:t('price_ui.template_label')}</label>
             <div class="layui-input-block">
                 <select id="tid" name="tid" class="layui-input ew-select-fixed" lay-search lay-filter="tid">
-                    <option value="">请选择所属模板</option>
+                    <option value="">{:t('app_ui.select_template')}</option>
                 </select>
             </div>
         </div>
         <div id="form_data" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">权限名称:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.name_label')}</label>
                 <div class="layui-input-block">
-                    <input type="text" name="name" placeholder="请输入价格的名称" class="layui-input"
+                    <input type="text" name="name" placeholder="{:t('power_price.name_placeholder')}" class="layui-input"
                            lay-verType="tips" lay-verify="required" required/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">授权折扣:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.auth_discount_label')}</label>
                 <div class="layui-input-block">
-                    <input type="number" name="addauth_discount" placeholder="购买授权折扣百分比，0元为免费" class="layui-input" step="0.01" min="0" max="100"/>
+                    <input type="number" name="addauth_discount" placeholder="{:t('power_price.auth_discount_placeholder')}" class="layui-input" step="1" min="0" max="100"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">代理折扣:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.agent_discount_label')}</label>
                 <div class="layui-input-block">
-                    <input type="number" name="adduser_discount" placeholder="添加代理折扣百分比，0元为免费" class="layui-input" step="0.01" min="0" max="100"/>
+                    <input type="number" name="adduser_discount" placeholder="{:t('power_price.agent_discount_placeholder')}" class="layui-input" step="1" min="0" max="100"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">启用折扣码:</label>
+                <label class="layui-form-label">{:t('power_price.enable_discount_code')}</label>
                 <div class="layui-input-block">
-                    <input type="checkbox" name="discount_code_enabled" value="1" lay-skin="switch" title="允许用户生成专属折扣码"/>
+                    <input type="checkbox" name="discount_code_enabled" value="1" lay-skin="switch" title="{:t('power_price.discount_code_help')}"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">启用返利:</label>
+                <label class="layui-form-label">{:t('power_price.enable_rebate')}</label>
                 <div class="layui-input-block">
-                    <input type="checkbox" name="rebate_enabled" value="1" lay-skin="switch" title="他人使用折扣码付款时按比例返利"/>
+                    <input type="checkbox" name="rebate_enabled" value="1" lay-skin="switch" title="{:t('power_price.rebate_help')}"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">返利比例(%):</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.rebate_rate_label')}</label>
                 <div class="layui-input-block">
-                    <input type="number" name="rebate_rate" placeholder="例如5.0表示5%，支持小数" class="layui-input" step="0.01" min="0" max="100"/>
+                    <input type="number" name="rebate_rate" placeholder="{:t('power_price.rebate_rate_placeholder')}" class="layui-input" step="0.01" min="0" max="100"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">上级ID:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.parent_id_label')}</label>
                 <div class="layui-input-block">
                     <select id="parentid" name="parentid" class="layui-input ew-select-fixed" lay-search>
-                        <option value="">请选择上级权限ID</option>
+                        <option value="">{:t('power_price.select_parent')}</option>
                     </select>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">权限价格:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.price_label')}</label>
                 <div class="layui-input-block">
-                    <input type="number" name="money" placeholder="请输入售卖价格，留空为0元" class="layui-input" step="0.01" min="0" max="999999"/>
+                    <input type="number" name="money" placeholder="{:t('price_ui.sale_price_placeholder')}" class="layui-input" step="0.01" min="0" max="999999"/>
                 </div>
             </div>
             <div class="layui-form-item layui-form-text">
-                <label class="layui-form-label">权限介绍</label>
+                <label class="layui-form-label">{:t('power_price.introduction')}</label>
                 <div class="layui-input-block">
-                    <textarea name="introduce" class="layui-textarea" style="height:100px" placeholder="该权限的介绍,可留空"></textarea>
+                    <textarea name="introduce" class="layui-textarea" style="height:100px" placeholder="{:t('power_price.introduction_placeholder')}"></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">添加授权:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.add_auth_label')}</label>
                 <div class="layui-input-block">
-                    <input type="checkbox" name="addauth_power" value="0" lay-skin="switch"/>
+                    <input type="checkbox" name="addauth_power" value="1" lay-skin="switch"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">添加下级:</label>
+                <label class="layui-form-label layui-form-required">{:t('power_price.add_subordinate_label')}</label>
                 <div class="layui-input-block">
-                    <input type="checkbox" name="adduser_power" value="0" lay-skin="switch"/>
+                    <input type="checkbox" name="adduser_power" value="1" lay-skin="switch"/>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">状态:</label>
+                <label class="layui-form-label layui-form-required">{:t('auth_portal.status_label')}</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
                 </div>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -194,8 +194,8 @@
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>{:t('common.add')}</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>',
                 '</p>'].join(''),
             tree: {
                 idName: 'id',                                // id的字段名
@@ -207,56 +207,56 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
-                {field: 'templateName', title: '所属模板', sort: true, minWidth: 120, templet: function (d) {
+                {field: 'templateName', title: '{:t("price_ui.owned_template")}', sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+d.templateName+'</span>';
                     }},
-                {field: 'name', title: '权限名称', sort: true, minWidth: 250},
-                {field: 'power', title: '购买折扣', align: 'right', templet: function (d) {
+                {field: 'name', title: '{:t("power_price.name")}', sort: true, minWidth: 250},
+                {field: 'power', title: '{:t("power_price.purchase_discount")}', align: 'right', templet: function (d) {
                     if (d.addauth_discount >= '100') {
-                        var addauth = '<span class="layui-badge layui-badge-red">授权:无折扣</span> ';
+                        var addauth = '<span class="layui-badge layui-badge-red">{:t("power_price.auth_no_discount")}</span> ';
                     } else {
                         var discount = parseInt(d.addauth_discount) / 10;
                         if(discount == '0'){
-                            var addauth = '<span class="layui-badge layui-badge-green">授权:免费</span> ';
+                            var addauth = '<span class="layui-badge layui-badge-green">{:t("power_price.auth_free")}</span> ';
                         }else{
-                            var addauth = '<span class="layui-badge layui-badge-blue">授权:'+discount+'折</span> ';
+                            var addauth = '<span class="layui-badge layui-badge-blue">'+t('power_price.auth_discount', {discount:discount,rate:parseInt(d.addauth_discount)})+'</span> ';
                         }
                     }
                     if (d.adduser_discount >= '100') {
-                        var adduser = '<span class="layui-badge layui-badge-red">代理:无折扣</span>';
+                        var adduser = '<span class="layui-badge layui-badge-red">{:t("power_price.agent_no_discount")}</span>';
                     } else {
                         var discount = parseInt(d.adduser_discount) / 10;
                         if(discount == '0'){
-                            var adduser = '<span class="layui-badge layui-badge-green">代理:免费</span> ';
+                            var adduser = '<span class="layui-badge layui-badge-green">{:t("power_price.agent_free")}</span> ';
                         }else{
-                            var adduser = '<span class="layui-badge layui-badge-blue">代理:'+discount+'折</span> ';
+                            var adduser = '<span class="layui-badge layui-badge-blue">'+t('power_price.agent_discount', {discount:discount,rate:parseInt(d.adduser_discount)})+'</span> ';
                         }
                     }
                     return addauth + adduser;
                     }, sort: true, minWidth: 352
                 },
-                {field: 'addauth_power', title: '添加授权', templet: '#SF_TbAddAuthPower', sort: true, minWidth: 110},
-                {field: 'adduser_power', title: '添加下级', templet: '#SF_TbAddUserPower', sort: true, minWidth: 110},
-                {field: 'discount_code_enabled', title: '折扣码', templet: function(d){
+                {field: 'addauth_power', title: '{:t("auth_portal.add_auth")}', templet: '#SF_TbAddAuthPower', sort: true, minWidth: 110},
+                {field: 'adduser_power', title: '{:t("power_price.add_subordinate")}', templet: '#SF_TbAddUserPower', sort: true, minWidth: 110},
+                {field: 'discount_code_enabled', title: '{:t("recharge.discount_code")}', templet: function(d){
                     return d.discount_code_enabled==1
-                        ? '<span class="layui-badge layui-badge-green">开启</span>'
-                        : '<span class="layui-badge layui-badge-gray">关闭</span>';
+                        ? '<span class="layui-badge layui-badge-green">{:t('common.open')}</span>'
+                        : '<span class="layui-badge layui-badge-gray">{:t('common.close')}</span>';
                 }, sort: true, minWidth: 90},
-                {field: 'rebate_enabled', title: '返利', templet: function(d){
+                {field: 'rebate_enabled', title: '{:t("power_price.rebate")}', templet: function(d){
                     return d.rebate_enabled==1
-                        ? '<span class="layui-badge layui-badge-blue">开启('+d.rebate_rate+'%)</span>'
-                        : '<span class="layui-badge layui-badge-gray">关闭</span>';
+                        ? '<span class="layui-badge layui-badge-blue">'+t('power_price.enabled_rate', {rate:d.rebate_rate})+'</span>'
+                        : '<span class="layui-badge layui-badge-gray">{:t('common.close')}</span>';
                 }, sort: true, minWidth: 130},
-                {field: 'introduce', title: '权限介绍', sort: true, minWidth: 120},
-                {field: 'money', title: '权限价格', sort: true, minWidth: 100},
-                {field: 'default_power', title: '默认权限', templet: '#SF_TbDefaultPower', sort: true, minWidth: 100},
-                {field: 'addtime', title: '添加时间', sort: true, minWidth: 200},
-                {field: 'status', title: '状态', templet: '#SF_TbState', sort: true, minWidth: 100},
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', width: 200, minWidth: 200}
+                {field: 'introduce', title: '{:t("power_price.introduction")}', sort: true, minWidth: 120},
+                {field: 'money', title: '{:t("common_ui.power_price")}', sort: true, minWidth: 100},
+                {field: 'default_power', title: '{:t("user_home.default_permission")}', templet: '#SF_TbDefaultPower', sort: true, minWidth: 100},
+                {field: 'addtime', title: '{:t("common.add_time")}', sort: true, minWidth: 200},
+                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, minWidth: 100},
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 200, minWidth: 200}
             ]]
         });
 
-        notice.msg('正在获取列表中..', {icon: 4, close: true});
+        notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",
             url: '{:url("/PowerTemplate/getList")}',
@@ -264,7 +264,7 @@
             success: function(data) {
                 notice.destroy();
                 if (data.code == 0) {
-                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                    notice.msg("{:t('common.list_success')}", {icon: 1, audio:'1'});
                     var content = '';
                     $.each(data.data.data,function(index, value){
                         content += '<option value="'+value.id+'">'+value.name+'</option>';
@@ -277,7 +277,7 @@
             },
             error: function() {
                 notice.destroy();
-                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
             }
         });
 
@@ -285,19 +285,23 @@
             if (data.value == "") {
                 $("#form_data").css("display","none");
             }else{
-                notice.msg('正在获取列表中..', {icon: 4, close: true});
+                notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: '{:url("/PowerPrice/getPowerList")}',
-                    data: {"tid":data.value},
+                    data: {
+                        "tid": data.value,
+                        "exclude_id": $("#SF_EditForm input[name='id']").val() || 0,
+                        "include_disabled": 1
+                    },
                     dataType: "json",
                     success: function(data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            notice.msg('获取列表成功！', {icon: 1, audio:'1'});
-                            var content = '<option value="">请选择上级权限ID</option><option value="0">无上级</option>';
+                            notice.msg('{:t("common.list_success")}', {icon: 1, audio:'1'});
+                            var content = '<option value="">{:t("power_price.select_parent")}</option><option value="0">{:t("power_price.no_parent")}</option>';
                             $.each(data.data.data, function(index, value) {
-                                content +='<option value="'+value.id+'">'+value.name+'</option>';
+                                content +='<option value="'+value.id+'">'+value.name+(value.status==1?'':'{:t("power_price.disabled_suffix")}')+'</option>';
                             });
                             $("#parentid").html(content);
                         } else {
@@ -307,7 +311,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
                 $("#form_data").css("display","inherit");
@@ -355,7 +359,7 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = insTb.checkStatus();
                 if (checkRows.length === 0) {
-                    layer.msg('请选择要删除的数据', {icon: 2});
+                    layer.msg('{:t("confirm.please_select_data")}', {icon: 2});
                     return;
                 }
                 var ids = checkRows.map(function (d) {
@@ -369,10 +373,10 @@
         function showEditModel(mData) {
             admin.popupRight({
                 type: 1,
-                title: (mData ? '修改' : '添加') + '权限',
+                title: (mData ? '{:t("common.edit")}' : '{:t("common.add")}') + '{:t("common_ui.power_type")}',
                 content: $('#SF_EditDialog').html(),
                 success: function (layero, dIndex) {
-                    notice.msg('正在获取列表中..', {icon: 4, close: true});
+                    notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
                     $.ajax({
                         type: "POST",
                         url: '{:url("/PowerTemplate/getList")}',
@@ -380,8 +384,8 @@
                         success: function(data) {
                             notice.destroy();
                             if (data.code == 0) {
-                                notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                                var content = '<option value="">请选择所属模板</option>';
+                                notice.msg("{:t('common.list_success')}", {icon: 1, audio:'1'});
+                                var content = '<option value="">{:t('app_ui.select_template')}</option>';
                                 $.each(data.data.data,function(index, value){
                                     content += '<option value="'+value.id+'">'+value.name+'</option>';
                                 });
@@ -393,25 +397,25 @@
                         },
                         error: function() {
                             notice.destroy();
-                            notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                            notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                         }
                     });
                     // 回显表单数据
                     if(mData){
                         $("#form_data").css("display", "inherit");
-                        notice.msg('正在获取列表中..', {icon: 4, close: true});
+                        notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/PowerPrice/getPowerList")}',
-                            data: {"tid":mData.tid},
+                            data: {"tid":mData.tid,"exclude_id":mData.id,"include_disabled":1},
                             dataType: "json",
                             success: function(data) {
                                 notice.destroy();
                                 if (data.code == 0) {
                                     notice.msg(data.msg, {icon: 1, audio:'1'});
-                                    var content = '<option value="">请选择上级权限ID</option><option value="0">无上级</option>';
+                                    var content = '<option value="">{:t("power_price.select_parent")}</option><option value="0">{:t("power_price.no_parent")}</option>';
                                     $.each(data.data.data, function(index, value) {
-                                        content +='<option value="'+value.id+'">'+value.name+'</option>';
+                                        content +='<option value="'+value.id+'">'+value.name+(value.status==1?'':'{:t("power_price.disabled_suffix")}')+'</option>';
                                     });
                                     $("#parentid").html(content);
                                 } else {
@@ -422,7 +426,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                             }
                         });
                     }else{
@@ -432,7 +436,7 @@
 
                     // 表单提交事件
                     form.on('submit(SF_EditSubmit)', function (data) {
-                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/PowerPrice/edit")}',
@@ -449,7 +453,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                             }
                         });
                         return false;
@@ -462,13 +466,13 @@
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm('{:t("auth_portal.confirm_delete")}', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/PowerPrice/drop")}' : '{:url("/PowerPrice/batchDrop")}',
@@ -485,7 +489,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                     }
                 });
             });
@@ -493,7 +497,7 @@
 
         /* 修改用户状态 */
         form.on('switch(SF_TbStateCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/PowerPrice/setStatus")}',
@@ -505,18 +509,19 @@
                         insTb.refresh();
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
+                        insTb.refresh();
                         notice.msg(data.msg, {icon: 2, audio:'1'});
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });
 
         form.on('switch(SF_TbAddAuthPowerCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/PowerPrice/setPower")}',
@@ -528,12 +533,13 @@
                         insTb.refresh();
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
+                        insTb.refresh();
                         notice.msg(data.msg, {icon: 2, audio:'1'});
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });
@@ -541,7 +547,7 @@
 
 
         form.on('switch(SF_TbAddUserPowerCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/PowerPrice/setPower")}',
@@ -553,18 +559,19 @@
                         insTb.refresh();
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
+                        insTb.refresh();
                         notice.msg(data.msg, {icon: 2, audio:'1'});
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });
 
         form.on('switch(SF_TbDefaultPowerCk)', function (obj) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url:'{:url("/PowerPrice/setDefaultPower")}',
@@ -576,12 +583,13 @@
                         insTb.refresh();
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
+                        insTb.refresh();
                         notice.msg(data.msg, {icon: 2, audio:'1'});
                     }
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
         });

@@ -28,12 +28,13 @@ class Index extends PayBackend
         if(empty($trade_no))return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdEmpty]']);
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
         if(!$row)return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdError]']);
+        if (!$this->ownsPaymentOrder($row)) return $this->render('public/error', ['msg' => t('pay.order_access_denied')]);
 
         $alipay_api = conf('alipay_api');
         $wxpay_api = conf('wxpay_api');
         $qqpay_api = conf('qqpay_api');
         if (empty($alipay_api) && empty($wxpay_api) && empty($qqpay_api)) {
-            return $this->render('public/error', ['msg' => '暂无可用支付方式，请联系管理员！']);
+            return $this->render('public/error', ['msg' => t('pay.no_methods')]);
         }
 
         View::assign([
@@ -47,16 +48,25 @@ class Index extends PayBackend
 
     public function submit(){
         $param = request()->param();
-        $type = !empty($param['type'])?$param['type']:null;
-        $orderid = !empty($param['orderid'])?$param['orderid']:null;
+        $type = isset($param['type']) && is_string($param['type']) ? trim($param['type']) : '';
+        $orderid = isset($param['orderid']) && is_scalar($param['orderid']) ? trim((string)$param['orderid']) : '';
         View::assign('time', 5);
         View::assign('url', '/');
-        if(empty($type))return $this->render('public/error', ['msg' => t('pay.type_error').'[errorCode:PayTypeEmpty]']);
-        if(empty($orderid))return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdEmpty]']);
-        View::assign([
-            'type' => $type,
-            'orderid' =>$orderid
-        ]);
+        if (!in_array($type, ['alipay', 'wxpay', 'qqpay'], true)) {
+            return $this->render('public/error', ['msg' => t('pay.type_error').'[errorCode:PayTypeError]']);
+        }
+        if (!preg_match('/^[0-9]{17,23}$/D', $orderid)) {
+            return $this->render('public/error', ['msg' => t('pay.order_not_exist').'[errorCode:PayOrderIdError]']);
+        }
+        $row = Db::name('pay')->where('trade_no', $orderid)->find();
+        if (!$row || !$this->ownsPaymentOrder($row)) {
+            return $this->render('public/error', ['msg' => t('pay.order_access_denied')]);
+        }
+        $paymentPayload = json_encode(
+            ['type' => $type, 'orderid' => $orderid],
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        );
+        View::assign('payment_payload', $paymentPayload);
 
         return $this->render();
     }
@@ -64,16 +74,23 @@ class Index extends PayBackend
     public function check(){
         if(IS_POST) {
             $post = request()->post();
-            $type = !empty($post['type']) ? $post['type'] : null;
-            $orderid = !empty($post['orderid']) ? $post['orderid'] : null;
+            $type = isset($post['type']) && is_string($post['type']) ? trim($post['type']) : '';
+            $orderid = isset($post['orderid']) && is_scalar($post['orderid']) ? trim((string)$post['orderid']) : '';
             try {
                 validate(IndexValidate::class)->check($post);
             } catch (ValidateException $e) {
                 // 验证失败 输出错误信息
-                return message($e->getError(), false);
+                return message(t((string)$e->getError()), false);
+            }
+            if (!in_array($type, ['alipay', 'wxpay', 'qqpay'], true)) {
+                return message(t('pay.type_error'), false);
+            }
+            if (!preg_match('/^[0-9]{17,23}$/D', $orderid)) {
+                return message(t('pay.order_not_exist'), false);
             }
             $row = Db::name('pay')->where('trade_no', $orderid)->find();
-            if (!$row['trade_no']) return message(t('pay.order_not_exist'), false);
+            if (!$row || empty($row['trade_no'])) return message(t('pay.order_not_exist'), false);
+            if (!$this->ownsPaymentOrder($row)) return message(t('pay.order_operation_denied'), false);
             if ($row['money'] == '0' || !preg_match('/^[0-9.]+$/', $row['money'])) return message(t('pay.amount_invalid'), false);
             if ($row['status'] >= 1) return message(t('pay.already_paid'), false);
             switch ($type) {
@@ -113,6 +130,7 @@ class Index extends PayBackend
                             if(empty($payConfig['apiurl']))return message(t('pay.config_api_empty'), false);
                             if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
                             if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
+                            if (!$this->isSecureGatewayUrl($payConfig['apiurl'])) return message(t('pay.epay_https_required'), false);
                             $parameter = array(
                                 "pid" => trim($payConfig['partner']),
                                 "type" => $type,
@@ -133,7 +151,7 @@ class Index extends PayBackend
                                 return message('success', true, ['html' => $html_text]);
                             }
                         case 3://当面付
-                            Db::name('pay')->where('trade_no', $orderid)->update(['type' => $type, 'channel' => 'alipay']);
+                            Db::name('pay')->where('trade_no', $orderid)->update(['type' => $type, 'channel' => 'alipay_f2f']);
                             $jump_url = url('/AliPay') . '?trade_no=' . $orderid;
                             return message('success', true, ['url' => $jump_url]);
                         case 5://码支付
@@ -191,6 +209,7 @@ class Index extends PayBackend
                             if(empty($payConfig['apiurl']))return message(t('pay.config_api_empty'), false);
                             if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
                             if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
+                            if (!$this->isSecureGatewayUrl($payConfig['apiurl'])) return message(t('pay.epay_https_required'), false);
                             $parameter = array(
                                 "pid" => trim($payConfig['partner']),
                                 "type" => $type,
@@ -234,6 +253,7 @@ class Index extends PayBackend
                             if(empty($payConfig['apiurl']))return message(t('pay.config_api_empty'), false);
                             if(empty($payConfig['partner']))return message(t('pay.config_partner_empty'), false);
                             if(empty($payConfig['key']))return message(t('pay.config_key_empty'), false);
+                            if (!$this->isSecureGatewayUrl($payConfig['apiurl'])) return message(t('pay.epay_https_required'), false);
                             $parameter = array(
                                 "pid" => trim(Config::get('payconfig.qq.epay_config.partner')),
                                 "type" => $type,
@@ -271,11 +291,24 @@ class Index extends PayBackend
         $post = request()->post();
         $trade_no = isset($post['trade_no'])?$post['trade_no']:null;
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
-        if (!$row['trade_no']) return message(t('pay.order_not_exist'), false);
+        if (!$row || empty($row['trade_no'])) return json(message(t('pay.order_not_exist'), false));
+        if (!$this->ownsPaymentOrder($row)) return json(message(t('pay.order_query_denied'), false));
         if($row['status'] >= 1){
-            return message(t('pay.order_not_exist'), true, ['backurl' => '/']);
+            return json(message(t('pay.success'), true, ['backurl' => '/']));
         }else{
-            return message(t('pay.not_paid'), false);
+            return json(message(t('pay.not_paid'), false));
         }
+    }
+
+    private function isSecureGatewayUrl($url): bool
+    {
+        $url = trim((string)$url);
+        $parts = parse_url($url);
+        return filter_var($url, FILTER_VALIDATE_URL) !== false
+            && is_array($parts)
+            && strtolower((string)($parts['scheme'] ?? '')) === 'https'
+            && !empty($parts['host'])
+            && !isset($parts['user'])
+            && !isset($parts['pass']);
     }
 }

@@ -6,6 +6,7 @@ use app\common\controller\PayBackend;
 use app\pay\service\CommonService;
 use think\facade\Config;
 use think\facade\Db;
+use think\facade\Log;
 use think\facade\View;
 
 class CodePay extends PayBackend
@@ -21,12 +22,13 @@ class CodePay extends PayBackend
         $get = request()->get();
         $trade_no = isset($get['trade_no'])?$get['trade_no']:null;
         $type = isset($get['type'])?$get['type']:null;
-        if(!is_numeric($trade_no)) return $this->render('public/error', ['msg' => '订单号格式错误！[errorCode:PayOrderApiIdError]','time' => 5, 'url' => '/']);
+        if(!is_numeric($trade_no)) return $this->render('public/error', ['msg' => t('pay.order_no_invalid').' [errorCode:PayOrderApiIdError]','time' => 5, 'url' => '/']);
         if (conf('alipay_api') != 5 && conf('qqpay_api') != 5 && conf('wxpay_api') !=5 ) {
-            return $this->render('public/error', ['msg' => '当前支付接口未开启！','time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.interface_disabled'),'time' => 5, 'url' => '/']);
         }
         $row = Db::name('pay')->where('trade_no', $trade_no)->find();
-        if(!$row) return $this->render('public/error', ['msg' => '该订单号不存在，请返回来源地重新发起请求！','time' => 5, 'url' => '/']);
+        if(!$row) return $this->render('public/error', ['msg' => t('pay.order_not_exist'),'time' => 5, 'url' => '/']);
+        if (!$this->ownsPaymentOrder($row)) return $this->render('public/error', ['msg' => t('pay.order_access_denied'),'time' => 5, 'url' => '/']);
 
         if(!is_file('/Assets/pay/codepay/qrcode.php')){ //如果存在这个文件 表示codepay目录上传 使用本地资源否则用远程资源
             $codepay_path = "https://codepay.fateqq.com";
@@ -151,13 +153,16 @@ class CodePay extends PayBackend
         $codepay_json='';
         if ($parameter['page'] != 3) { //只要不为3 返回JS 就去服务器加载资源
             $parameter['page'] = "4"; //设置返回JSON
-            $back = $this->create_link($parameter, $key, 'http://api4.xiuxiu888.com/creat_order/?'); //生成支付URL
+            $back = $this->create_link($parameter, $key, 'https://api4.xiuxiu888.com/creat_order/?'); //生成支付URL
             $timeout = 5; //超时设置 5秒
             if (function_exists('curl_init')) {
                 $ch = curl_init(); //使用curl请求
                 curl_setopt($ch, CURLOPT_URL, $back['url']);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+                curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
                 $codepay_json = curl_exec($ch);
                 curl_close($ch);
             }else if(function_exists('file_get_contents')){
@@ -174,10 +179,15 @@ class CodePay extends PayBackend
             $back = $this->create_link($parameter, $key, 'https://api.xiuxiu888.com/creat_order/?');
             $codepay_html = '<script src="' . $back['url'] . '"></script>'; //JS数据
         } else { //获取到了JSON
-            $codepay_data = json_decode($codepay_json);
-            $qr = $codepay_data ? $codepay_data->qrcode : '';
-            $money = $codepay_data && $codepay_data->money ? $codepay_data->money : $parameter['price'];
-            $codepay_html = "<script>callback({$codepay_json})</script>"; //JSON数据
+            $codepay_data = json_decode($codepay_json, true);
+            if (!is_array($codepay_data)) {
+                return array('codepay_html' => '', 'qr' => '', 'money' => $parameter['price']);
+            }
+            $qrCandidate = trim((string)($codepay_data['qrcode'] ?? ''));
+            $qr = preg_match('#^https://#i', $qrCandidate) ? $qrCandidate : '';
+            $money = $parameter['price'];
+            $safeJson = json_encode($codepay_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            $codepay_html = '<script>callback(' . $safeJson . ')</script>';
         }
         return array("codepay_html" => $codepay_html, "qr" => $qr, "money" => $money);
     }
@@ -209,7 +219,7 @@ class CodePay extends PayBackend
 
         $key = md5($sign . $codepay_key);
         $query = $urls . '&sign=' . $key; //创建订单所需的参数
-        $apiHost = $host ? $host : "http://api2.fateqq.com:52888/api/orders/?";
+        $apiHost = $host ? $host : "https://api2.fateqq.com/api/orders/?";
         $url = $apiHost . $query; //支付页面
         return array("url" => $url, "query" => $query, "sign" => $sign, "param" => $urls);
     }
@@ -219,6 +229,11 @@ class CodePay extends PayBackend
         注意：千万不要监控太快或使用多节点监控！！！否则会被支付接口自动屏蔽IP地址
         */
     public function cron(){
+        // 旧补单协议只对 nonce 签名，不覆盖返回的订单数据；即使改成
+        // HTTPS，也无法从协议层可靠证明订单列表未被篡改。正常异步回调
+        // 已校验完整参数签名与金额，因此这里必须失败关闭。
+        return json(message(t('pay.legacy_supplement_disabled'), false), 410);
+
         $get = request()->get();
         $order_type = 0;//补单支付方式 0全部 1支付宝 2QQ 3微信
         $order_status = 1;//状态0为全部 1为通知失败  2成功状态
@@ -270,7 +285,7 @@ class CodePay extends PayBackend
             "type" => $order_type,//支付方式 0全部 1支付宝 2QQ 3微信
             "status" => $order_status,//状态0为全部 1为通知失败  2成功状态
         );
-        $api_url = $this->create_link2($api_data, $key, 'http://api2.fateqq.com:52888/api/orders/?'); //生成API请求地址
+        $api_url = $this->create_link2($api_data, $key, 'https://api2.fateqq.com/api/orders/?'); //生成API请求地址
 
         $back_data = curl_get($api_url['url']);
 
@@ -284,15 +299,15 @@ class CodePay extends PayBackend
             if (!$arr['nonce_str'] || md5($arr['nonce_str'] . $key) != $arr['sign']) $this->codepayMsg('{"error":"fail"}');
             $sign = '';
             $urls = '';
-            foreach ($get AS $key => $val) {
+            foreach ($get AS $paramKey => $val) {
                 if ($val == '') continue;
-                if ($key != 'sign') {
+                if ($paramKey != 'sign') {
                     if ($sign != '') {
                         $sign .= "&";
                         $urls .= "&";
                     }
-                    $sign .= "$key=$val"; //拼接为url参数形式
-                    $urls .= "$key=" . urlencode($val); //拼接为url参数形式
+                    $sign .= "$paramKey=$val"; //拼接为url参数形式
+                    $urls .= "$paramKey=" . urlencode($val); //拼接为url参数形式
                 }
             }
             foreach ($arr['data'] as $row) {
@@ -305,13 +320,13 @@ class CodePay extends PayBackend
                         Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1, 'endtime' => datetime()]);
                         $this->service->processOrder($srow);
                         $api_data['count'] += 1;
-                        if ($row['trade_no']) $api_data['trade_no'] += $row['trade_no'] + ',';
+                        if ($row['trade_no']) $api_data['trade_no'] .= $row['trade_no'] . ',';
                     }
                 }
             }
             echo '{"code":1,"success":' . (int)$api_data['count'] . '}';
             if (!empty($api_data['trade_no'])) {
-                $api_url = $this->create_link2($api_data, conf('codepay_key'), 'http://api2.fateqq.com:52888/api/up_orders/?'); //生成API请求地址
+                $api_url = $this->create_link2($api_data, $key, 'https://api2.fateqq.com/api/up_orders/?'); //生成API请求地址
                 curl_get($api_url['url']);
             }
             exit(0);
@@ -322,6 +337,7 @@ class CodePay extends PayBackend
 
     public function return(){
         $get = request()->get();
+        $codepay_config = $this->codePayConfig($get['type'] ?? null);
         ksort($get); //排序get参数
         reset($get); //内部指针指向数组中的第一个元素
         $sign = '';
@@ -338,34 +354,38 @@ class CodePay extends PayBackend
             }
         }
         if (conf('alipay_api') != 5 && conf('qqpay_api') != 5 && conf('wxpay_api') !=5) {
-            return $this->render('public/error', ['msg' => '当前支付接口未开启！','time' => 5, 'url' => '/']);
-        } elseif (empty($codepay_config['key']) || !$get['pay_no'] || md5($sign . $codepay_config['key']) != $get['sign']) { //不合法的数据 KEY密钥为你的密钥
-            return $this->render('public/error', ['msg' => '验证订单交易状态失败！[errorCode:CheckPayStatusError]','time' => 5, 'url' => '/']);
+            return $this->render('public/error', ['msg' => t('pay.interface_disabled'),'time' => 5, 'url' => '/']);
+        } elseif (empty($codepay_config['key']) || empty($get['pay_no']) || empty($get['sign'])
+            || !hash_equals(md5($sign . $codepay_config['key']), (string)$get['sign'])) { //不合法的数据 KEY密钥为你的密钥
+            return $this->render('public/error', ['msg' => t('pay.status_verify_failed').' [errorCode:CheckPayStatusError]','time' => 5, 'url' => '/']);
         } else { //合法的数据
             //订单号
             $out_trade_no = isset($get['param'])?$get['param']:null;
             //交易号
             $trade_no = isset($get['pay_no'])?$get['pay_no']:null;
 
-            if(empty($out_trade_no)) return $this->render('public/error', ['msg' => '请提交订单号！[errorCode:PayOrderIdEmpty]','time' => 5, 'url' => '/']);
-            if(empty($trade_no)) return $this->render('public/error', ['msg' => '请提交交易号！[errorCode:PayOrderApiIdEmpty]','time' => 5, 'url' => '/']);
+            if(empty($out_trade_no)) return $this->render('public/error', ['msg' => t('pay.order_no_required').' [errorCode:PayOrderIdEmpty]','time' => 5, 'url' => '/']);
+            if(empty($trade_no)) return $this->render('public/error', ['msg' => t('pay.trade_no_required').' [errorCode:PayOrderApiIdEmpty]','time' => 5, 'url' => '/']);
 
             $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
+            $paidAmount = $get['price'] ?? $get['money'] ?? null;
+            if (!$srow || $paidAmount === null || sf_money_to_cents($srow['money']) !== sf_money_to_cents($paidAmount)) {
+                return $this->render('public/error', ['msg' => t('pay.amount_verify_failed'),'time' => 5, 'url' => '/']);
+            }
             if($srow['status']==0){
-                $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                if($result) {
-                    Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                    $this->service->processOrder($srow);
+                if (!$this->completeOrder($srow, (string)$trade_no)) {
+                    return $this->render('public/error', ['msg' => t('pay.credit_failed'),'time' => 5, 'url' => '/']);
                 }
-                return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
+                return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => sf_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
             }else{
-                return $this->render('public/success', ['msg' => '您所购买的商品已付款成功，感谢购买！<br><br> 订单号：'.$out_trade_no,'time' => 5, 'url' => '/']);
+                return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => sf_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
             }
         }
     }
 
     public function notify(){
         $post = request()->post();
+        $codepay_config = $this->codePayConfig($post['type'] ?? null);
         ksort($post); //排序post参数
         reset($post); //内部指针指向数组中的第一个元素
         $sign = '';
@@ -384,23 +404,82 @@ class CodePay extends PayBackend
 
         if (conf('alipay_api') != 5 && conf('qqpay_api') != 5 && conf('wxpay_api') !=5) {
             exit('fail');
-        } elseif (empty($codepay_config['key']) || !$_POST['pay_no'] || md5($sign . $codepay_config['key']) != $_POST['sign']) { //不合法的数据 KEY密钥为你的密钥
+        } elseif (empty($codepay_config['key']) || empty($post['pay_no']) || empty($post['sign'])
+            || !hash_equals(md5($sign . $codepay_config['key']), (string)$post['sign'])) { //不合法的数据 KEY密钥为你的密钥
             exit('fail');
         } else { //合法的数据
             //订单号
-            $out_trade_no = isset($get['param'])?$get['param']:exit('fail');
+            $out_trade_no = isset($post['param'])?$post['param']:exit('fail');
             //交易号
-            $trade_no = isset($get['pay_no'])?$get['pay_no']:exit('fail');
+            $trade_no = isset($post['pay_no'])?$post['pay_no']:exit('fail');
 
             $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
+            $paidAmount = $post['price'] ?? $post['money'] ?? null;
+            if (!$srow || $paidAmount === null || sf_money_to_cents($srow['money']) !== sf_money_to_cents($paidAmount)) {
+                exit('fail');
+            }
             if($srow['status']==0) {
-                $result = Db::name('pay')->where('trade_no', $out_trade_no)->update(['status' => 1]);
-                if($result) {
-                    Db::name('pay')->where('trade_no', $out_trade_no)->update(['endtime' => datetime(), 'api_trade_no' => $trade_no]);
-                    $this->service->processOrder($srow);
+                if (!$this->completeOrder($srow, (string)$trade_no)) {
+                    exit('fail');
                 }
             }
             exit('success');
+        }
+    }
+
+    private function codePayConfig($type): array
+    {
+        switch (strtolower(trim((string)$type))) {
+            case '1':
+            case 'alipay':
+            case 'zfb':
+                return (array)(Config::get('payconfig.zfb.codepay_config') ?: []);
+            case '2':
+            case 'qqpay':
+            case 'tenpay':
+                return (array)(Config::get('payconfig.qq.codepay_config') ?: []);
+            case '3':
+            case 'wxpay':
+            case 'wechat':
+                return (array)(Config::get('payconfig.wx.codepay_config') ?: []);
+            default:
+                return [];
+        }
+    }
+
+    private function completeOrder(array $row, string $apiTradeNo): bool
+    {
+        try {
+            return (bool)Db::transaction(function () use ($row, $apiTradeNo) {
+                $current = Db::name('pay')->where('trade_no', $row['trade_no'])->lock(true)->find();
+                if (!$current) {
+                    return false;
+                }
+                if ((int)$current['status'] >= 1) {
+                    return true;
+                }
+                Db::name('pay')->where('trade_no', $current['trade_no'])->update([
+                    'endtime' => datetime(),
+                    'api_trade_no' => $apiTradeNo,
+                ]);
+                if ($this->service->processOrder($current) !== true) {
+                    throw new \RuntimeException('码支付订单入账失败');
+                }
+                $updated = Db::name('pay')
+                    ->where('trade_no', $current['trade_no'])
+                    ->where('status', 0)
+                    ->update(['status' => 1]);
+                if (!$updated) {
+                    throw new \RuntimeException('码支付订单状态更新失败');
+                }
+                return true;
+            });
+        } catch (\Throwable $e) {
+            Log::error('码支付订单入账失败', [
+                'order' => (string)($row['trade_no'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
+            return false;
         }
     }
 }

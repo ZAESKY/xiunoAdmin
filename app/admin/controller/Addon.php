@@ -55,7 +55,8 @@ class Addon extends Backend
                 try {
                     //更新配置文件
                     $result = set_addons_fullconfig($name, $config);
-                    Service::refresh();
+                    // think-addons 2.x 会在 hooks 缓存为空时重新扫描插件。
+                    Cache::delete('hooks');
                     if($result){
                         return message(t('addon.config_update_success'), true);
                     }else{
@@ -139,6 +140,9 @@ class Addon extends Backend
      */
     public function local()
     {
+        if (!IS_POST) {
+            return message('common.illegal_request', false);
+        }
         $file = $this->request->file('file');
         try {
             // think\addons\Service::local 不存在,改用 addons Service::localInstall 方式:
@@ -159,10 +163,16 @@ class Addon extends Backend
      */
     public function update()
     {
+        if (!IS_POST) {
+            return message('common.illegal_request', false);
+        }
         $name = $this->request->post('name');
         $file = $this->request->file('file');
         if (!$name) {
             return message(t('validation.missing_name'), false);
+        }
+        if (!is_string($name) || !preg_match('/^[A-Za-z0-9]{1,64}$/D', $name)) {
+            return message(t('addon.name_illegal'), false);
         }
         try {
             // think\addons\Service::update 不存在,改为通过 get_addons_instance 处理
@@ -199,6 +209,9 @@ class Addon extends Backend
      */
     public function unInstall()
     {
+        if (!IS_POST) {
+            return message('common.illegal_request', false);
+        }
         $name = $this->request->post("name");
         $droptables = (int)$this->request->post("droptables");
         if (!$name) {
@@ -222,8 +235,12 @@ class Addon extends Backend
                 $prefix = Config::get('database.prefix');
                 //删除插件关联表
                 foreach ($tables as $index => $table) {
-                    //忽略非插件标识的表名
-                    if (!preg_match("/^{$prefix}{$name}/", $table)) {
+                    // 动态标识符不能使用参数绑定，必须先限制为普通表名，
+                    // 再确认它确实属于当前插件的命名空间。
+                    if (!is_string($table)
+                        || !preg_match('/^[A-Za-z0-9_]{1,64}$/D', $table)
+                        || !preg_match('/^' . preg_quote($prefix . $name, '/') . '/', $table)
+                    ) {
                         continue;
                     }
                     Db::execute("DROP TABLE IF EXISTS `{$table}`");

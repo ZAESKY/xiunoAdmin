@@ -21,10 +21,7 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">{:t('common_ui.auth_type')}QQ</label>
-                    <div class="layui-input-block">
-                        <input type="number" name="qq" class="layui-input" placeholder="{:t('common.enter_auth_holder_qq')}" lay-verify="required"/>
-                    </div>
+                    <div class="layui-input-block sf-form-help sf-download-help">{:t('download_ui.qq_oauth_help')}</div>
                 </div>
                 <div class="layui-form-item text-right">
                     <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>{:t('download_ui.get_btn')}</button>
@@ -35,6 +32,7 @@
     </div>
 </div>
 {include file="/public/footer"}
+<script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
 <script>
     layui.use(['layer', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;
@@ -46,62 +44,33 @@
         form.on('submit(SF_DownloadSubmit)', function (info) {
             admin.btnLoading('#SF_DownloadBtn');
             admin.showLoading('#divLoading', 3, '.8');
-            $.ajax({
-                type: "POST",
-                url: '{:url("/DownloadQrCode/verification")}',
-                data: info.field,
-                dataType: "json",
-                success: function(data) {
+            SfQqOauth.start({
+                url:'/api.php/Social/verify',
+                data:{scene:'download',appid:info.field.appid,auth_info:info.field.auth_info,return_to:location.pathname+location.search},
+                onResult:function(data){
                     admin.btnLoading('#SF_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
-                    if (data.code == 0) {
-                        parent.layui.notice.success({
-                            title: '获取通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
-                        info.field.type = 'download';
-                        parent.layui.admin.open({
-                            type: 2,
-                            title: '扫码登录',
-                            content: '/qrlogin/qrlogin.html',
-                            area: ['400px', '300px'],
-                            data: info.field
-                        });
-                    } else {
-                        parent.layui.notice.error({
-                            title: '获取通知',
-                            message: data.msg,
-                            animateInside:true,
-                            position:'topCenter',
-                            transitionOut:'flipOutX',
-                            transitionOutMobile: 'flipOutX',
-                            displayMode:'2',
-                            audio:'1'
-                        });
+                    if(data && data.code == 0 && data.data && data.data.status === 'download'){
+                        parent.layui.notice.msg(data.msg,{icon:1});
+                        (parent.top || parent).location.href=data.data.url;
+                    }else{
+                        parent.layui.notice.msg((data&&data.msg)||"{:t('download_ui.qq_verification_failed')}",{icon:2});
                     }
                 },
-                error: function() {
+                onError:function(message){
                     admin.btnLoading('#SF_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
-                    parent.layui.notice.error({
-                        title: '获取通知',
-                        message: '服务器错误',
-                        animateInside:true,
-                        position:'topCenter',
-                        transitionOut:'flipOutX',
-                        transitionOutMobile: 'flipOutX',
-                        displayMode:'2',
-                        audio:'1'
-                    });
+                    parent.layui.notice.msg(message,{icon:2});
                 }
             });
             return false;
         });
+        SfQqOauth.resume(function(data){
+            if(data && data.code == 0 && data.data && data.data.status === 'download'){
+                (parent.top || parent).location.href=data.data.url;
+            }else{
+                parent.layui.notice.msg((data&&data.msg)||"{:t('download_ui.qq_verification_failed')}",{icon:2});
+            }
+        },function(message){parent.layui.notice.msg(message,{icon:2});});
     });
 </script>

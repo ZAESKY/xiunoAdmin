@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{:t('common.lang_code')}">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset={$codepay_config['chart']}">
-  <meta http-equiv="Content-Language" content="zh-cn">
+  <meta http-equiv="Content-Language" content="{:t('common.lang_code')}">
   <meta name="apple-mobile-web-app-capable" content="no"/>
   <meta name="apple-touch-fullscreen" content="yes"/>
   <meta name="format-detection" content="telephone=no,email=no"/>
@@ -42,15 +42,15 @@
     <!--        这里加一些自己的提示-->
     <div class="time-item" id="msg">
       <h1>{:t('payment_ui.qr_expire_time')}</h1>
-      <strong id="hour_show">0时</strong>
-      <strong id="minute_show">0分</strong>
-      <strong id="second_show">0秒</strong>
+      <strong id="hour_show">0{:t('time.hour')}</strong>
+      <strong id="minute_show">0{:t('time.minute')}</strong>
+      <strong id="second_show">0{:t('time.second')}</strong>
     </div>
 
     <div class="tip">
       <div class="ico-scan"></div>
       <div class="tip-text">
-        <p>请使用{$typeName}扫一扫</p>
+        <p>{:t('payment_ui.use_scan_app', ['app' => $typeName])}</p>
         <p>{:t('payment_ui.scan_pay')}</p>
         <p><div id="kf" ></div></p>
       </div>
@@ -72,7 +72,7 @@
   <div class="foot">
     <div class="inner">
       <p>{:t('payment_ui.save_qr_mobile')}</p>
-      <p>在{$typeName}扫一扫中{:t('common_ui.choose')}“相册”即可</p>
+      <p>{:t('payment_ui.choose_album_app', ['app' => $typeName])}</p>
 
     </div>
   </div>
@@ -100,7 +100,7 @@
   check_pay = function () {
     $.get("getshop.php?trade_no=" + user_data.out_trade_no + "&r=" + Math.random(1), function (result) {
       if (result.code == 1) {
-        alert('您所购买的商品已付款成功，感谢购买！');
+        alert({:json_encode(t('payment_ui.pay_success_thanks'), 271)});
         window.location.href = result.backurl;
       } else {
         setTimeout(function () {
@@ -112,12 +112,12 @@
   check_pay();
   var clipboard = new Clipboard('.copy');
   clipboard.on('success', function (e) {
-    toastr.success("复制成功,可扫码付款时候粘贴到金额栏付款");
+    toastr.success({:json_encode(t('payment_ui.copy_success_amount'), 271)});
 
   });
   clipboard.on('error', function(e) {
     document.querySelector('.copy');
-    toastr.warning("复制失败,请记住下必须付款的金额 不能多不能少否则不能成功");
+    toastr.warning({:json_encode(t('payment_ui.copy_fail_remember'), 271)});
   });
 
 </script>

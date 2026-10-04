@@ -59,10 +59,10 @@ class Plugin extends Addons	// 需继承think\Addons类
                     $appToken = conf('wxpush_wxpusher_apptoken');
                     return $this->wxPusher($appToken, $param['title'], $param['content'], $param['contentType'], 1, $param['to']);
                 default:
-                    return json_encode(message('站点未开启微信推送！', false));
+                    return json_encode(message(t('wxpush.disabled'), false));
             }
         }catch (\Exception $e){
-            return json_encode(message('发送失败！[errorCode:SendMailError]', false));
+            return json_encode(message(t('wxpush.send_failed').' [errorCode:SendMailError]', false));
         }
     }
 
@@ -75,7 +75,7 @@ class Plugin extends Addons	// 需继承think\Addons类
      */
     private function serverSauce($text, $desp = '', $key = '') {
         //conf('wxpush_server_key');
-        if(empty($key)) return json_encode(message('您未配置ServerKey！', false));
+        if(empty($key)) return json_encode(message(t('wxpush.server_key_missing'), false));
         $postData = [
             'text' => $text,
             'desp' => $desp
@@ -83,13 +83,13 @@ class Plugin extends Addons	// 需继承think\Addons类
         $header = [
             'Content-type: application/x-www-form-urlencoded',
         ];
-        $result = get_curl('https://sc.ftqq.com/'.$key.'.send', $postData, 0, 0, $header, 0, 0, 0, 1);
-        $result = json_decode($result['body'], true);
+        $result = get_curl('https://sc.ftqq.com/'.rawurlencode((string)$key).'.send', $postData, 0, 0, $header, 0, 0, 0, 1);
+        $result = json_decode((string)($result['body'] ?? ''), true);
 
-        if($result['code'] == 0){
-            return json_encode(message('消息已推送，请注意查看！', true));
+        if(is_array($result) && ($result['code'] ?? -1) == 0){
+            return json_encode(message(t('wxpush.send_success'), true));
         }else{
-            return json_encode(message('消息推送失败！[errorCode:WxPushServerSauceError]', false));
+            return json_encode(message(t('wxpush.send_failed').' [errorCode:WxPushServerSauceError]', false));
         }
     }
 
@@ -130,10 +130,13 @@ class Plugin extends Addons	// 需继承think\Addons类
      */
     private function wxPusher($appToken, $summary = null, $content = null,$contentType = 1,$isUids = true,$array_id = [],$url = '',$getMessageId = false){
         if(empty($appToken)){
-            return json_encode(message('消息推送失败！[errorCode:WxPushWxPusherAppTokenEmpty]', false));
+            return json_encode(message(t('wxpush.send_failed').' [errorCode:WxPushWxPusherAppTokenEmpty]', false));
         }
         $wx = new WxPusher($appToken);
         $result = $wx->send($content, $summary, $contentType, $isUids, $array_id, $url, $getMessageId);
-        dump($result);
+        if ($result === true || ($getMessageId && is_array($result) && empty($result['error']))) {
+            return json_encode(message(t('wxpush.send_success'), true), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode(message(t('wxpush.send_failed').' [errorCode:WxPushWxPusherError]', false), JSON_UNESCAPED_UNICODE);
     }
 }

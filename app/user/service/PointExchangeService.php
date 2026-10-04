@@ -20,7 +20,7 @@ class PointExchangeService extends UserBaseService
             throw new Exception(t('user.info_error'));
         }
         $this->model->exchange((int)$userInfo['id'], (int)$userInfo['appid']);
-        return message('兑换成功', true);
+        return message('point_exchange.exchange_success', true);
     }
 
     public function myRecords()

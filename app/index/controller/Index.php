@@ -12,7 +12,7 @@ class Index extends Frontend
     {
         parent::initialize();
         $this->background = new Background();
-        View::config(['view_path' => '../public/template/modules/home/SF3.0/']);
+        View::config(['view_path' => app()->getRootPath() . 'public/template/modules/home/SF3.0/']);
         View::assign('user_login', parent::isUserLogin());
         View::assign('app_list', parent::getAppList());
         View::assign('background_image',$this->background->image());
@@ -39,10 +39,11 @@ class Index extends Frontend
 
     public function download(){
         View::config(['view_path' => '']);
-        if(conf('download') == '0'){
-            return $this->render('/public/error', ['msg' => '站点未开启源码下载']);
+        $mode = sf_download_mode();
+        if($mode === '0'){
+            return $this->render('/public/error', ['msg' => t('common_ui.download_disabled')]);
         }
-        return $this->render(conf('download'));
+        return $this->render($mode);
     }
 
     public function register(){

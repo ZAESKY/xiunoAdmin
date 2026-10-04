@@ -43,8 +43,8 @@ class AuthPriceModel extends BaseModel
         $id = !empty($post['id'])?intval($post['id']):null;
         $tid = !empty($post['tid'])?intval($post['tid']):null;
         $name = !empty($post['name'])?$post['name']:null;
-        $money = !empty($post['money'])?floatval($post['money']):'0.00';
-        $all_money = !empty($post['all_money'])?floatval($post['all_money']):'0.00';
+        $money = !empty($post['money'])?$post['money']:'0.00';
+        $all_money = !empty($post['all_money'])?$post['all_money']:'0.00';
         $day = !empty($post['day'])?intval($post['day']):'0';
         $permanent_switch = !empty($post['permanent_switch'])?1:0;
         if($permanent_switch == 1){
@@ -59,6 +59,12 @@ class AuthPriceModel extends BaseModel
         } catch (ValidateException $e) {
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
+        }
+        try {
+            $money = sf_money_format($money);
+            $all_money = sf_money_format($all_money);
+        } catch (\InvalidArgumentException $e) {
+            return message('validation.amount_format', false);
         }
         if($permanent_switch != 1){
             if($day == '0'){
@@ -223,8 +229,8 @@ class AuthPriceModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $tid = !empty($post['tid'])?intval($post['tid']):null;
             $data = $this->buildSearchWhere('id|name');
 

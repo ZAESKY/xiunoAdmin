@@ -29,6 +29,7 @@
         <input type="hidden" name="package_object_key" id="package_object_key" value="{$plugin.package_object_key|default=''}">
         <input type="hidden" name="package_file_name" id="package_file_name" value="{$plugin.package_file_name|default=''}">
         <input type="hidden" name="package_mime_type" id="package_mime_type" value="{$plugin.package_mime_type|default=''}">
+        <input type="hidden" name="upload_token" id="upload_token" value="">
         <input type="hidden" name="icon_object_key" id="icon_object_key" value="{$plugin.icon_object_key|default=''}">
         <input type="hidden" name="icon_storage_driver" id="icon_storage_driver" value="{$plugin.storage_driver|default='local'}">
         <input type="hidden" name="icon_file_name" id="icon_file_name" value="">
@@ -43,15 +44,15 @@
 
         <!-- 文件上传 -->
         <div class="layui-card" style="border:1px solid #d0e8ff;">
-            <div class="layui-card-header" style="background:#f0f9ff;border-left-color:#1890ff;"><i class="layui-icon layui-icon-upload-drag"></i> 上传插件包 — 上传后自动解析填充</div>
+            <div class="layui-card-header" style="background:#f0f9ff;border-left-color:#1890ff;"><i class="layui-icon layui-icon-upload-drag"></i> {:t('plugin_ui.upload_header')}</div>
             <div class="layui-card-body">
-                <p class="section-desc"><i class="layui-icon layui-icon-tips"></i> ZIP 内包含 <code>conf.json</code> 和 <code>icon.png</code> 即可自动填充名称、简介、版本和图标</p>
+                <p class="section-desc"><i class="layui-icon layui-icon-tips"></i> {:t('plugin_ui.upload_help')}</p>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">插件文件 <span style="color:red">*</span></label>
+                    <label class="layui-form-label">{:t('plugin_ui.plugin_file')} <span style="color:red">*</span></label>
                     <div class="layui-input-block">
-                        <button type="button" class="layui-btn layui-btn-warm" id="uploadPlugin"><i class="layui-icon">&#xe681;</i>上传插件包 (ZIP)</button>
-                        <span id="fileInfo" style="margin-left:12px;color:{if condition='!empty($plugin.file_path)'}#5FB878{else/}#ff5722{/if};font-size:13px;">
-                            {if condition="!empty($plugin.file_path)"}<i class="layui-icon layui-icon-ok-circle"></i> 已上传{else/}<i class="layui-icon layui-icon-close-fill"></i> 请上传插件文件 (*.zip){/if}
+                        <button type="button" class="layui-btn layui-btn-warm" id="uploadPlugin"><i class="layui-icon">&#xe681;</i>{:t('plugin_ui.upload_package')}</button>
+                        <span id="fileInfo" style="margin-left:12px;color:{if condition='!empty($plugin.file_path) || !empty($plugin.package_object_key)'}#5FB878{else/}#ff5722{/if};font-size:13px;">
+                            {if condition="!empty($plugin.file_path) || !empty($plugin.package_object_key)"}<i class="layui-icon layui-icon-ok-circle"></i> {:t('plugin_ui.uploaded')}{else/}<i class="layui-icon layui-icon-close-fill"></i> {:t('plugin_ui.upload_file_required')}{/if}
                         </span>
                     </div>
                 </div>
@@ -60,22 +61,22 @@
 
         <!-- 基本信息 -->
         <div class="layui-card">
-            <div class="layui-card-header"><i class="layui-icon layui-icon-about"></i> 基本信息</div>
+            <div class="layui-card-header"><i class="layui-icon layui-icon-about"></i> {:t('plugin_ui.basic_info')}</div>
             <div class="layui-card-body">
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md6">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">插件名称 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.name')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
-                                <input type="text" name="name" value="{$plugin.name|default=''}" class="layui-input" placeholder="请输入插件名称" required>
+                                <input type="text" name="name" value="{$plugin.name|default=''}" class="layui-input" placeholder="{:t('plugin_ui.name_placeholder')}" required>
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md6">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">插件标识 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.slug')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
-                                <input type="text" name="slug" id="slugInput" value="{$plugin.slug|default=''}" class="layui-input" placeholder="小写字母、数字、下划线、连字符" required>
+                                <input type="text" name="slug" id="slugInput" value="{$plugin.slug|default=''}" class="layui-input" placeholder="{:t('plugin_ui.slug_placeholder')}" required>
                             </div>
                         </div>
                     </div>
@@ -83,7 +84,7 @@
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md3">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">版本号 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.version_number')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
                                 <input type="text" name="version" value="{$plugin.version|default='1.0.0'}" class="layui-input" placeholder="1.0.0">
                             </div>
@@ -91,51 +92,53 @@
                     </div>
                     <div class="layui-col-md3">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">分类 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.category')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
                                 <select name="category">
-                                    <option value="">请选择分类</option>
-                                    <option value="feature" {if condition="($plugin.category??'')=='feature'"}selected{/if}>功能增强</option>
-                                    <option value="security" {if condition="($plugin.category??'')=='security'"}selected{/if}>安全防护</option>
-                                    <option value="content" {if condition="($plugin.category??'')=='content'"}selected{/if}>内容管理</option>
-                                    <option value="ui" {if condition="($plugin.category??'')=='ui'"}selected{/if}>界面美化</option>
-                                    <option value="payment" {if condition="($plugin.category??'')=='payment'"}selected{/if}>支付集成</option>
-                                    <option value="dev" {if condition="($plugin.category??'')=='dev'"}selected{/if}>开发工具</option>
-                                    <option value="analytics" {if condition="($plugin.category??'')=='analytics'"}selected{/if}>数据分析</option>
-                                    <option value="social" {if condition="($plugin.category??'')=='social'"}selected{/if}>社交互动</option>
-                                    <option value="other" {if condition="($plugin.category??'')=='other'"}selected{/if}>其他</option>
+                                    <option value="">{:t('plugin_ui.select_category')}</option>
+                                    <option value="feature" {if condition="($plugin.category??'')=='feature'"}selected{/if}>{:t('plugin_ui.category_feature')}</option>
+                                    <option value="security" {if condition="($plugin.category??'')=='security'"}selected{/if}>{:t('plugin_ui.category_security')}</option>
+                                    <option value="content" {if condition="($plugin.category??'')=='content'"}selected{/if}>{:t('plugin_ui.category_content')}</option>
+                                    <option value="ui" {if condition="($plugin.category??'')=='ui'"}selected{/if}>{:t('plugin_ui.category_ui')}</option>
+                                    <option value="payment" {if condition="($plugin.category??'')=='payment'"}selected{/if}>{:t('plugin_ui.category_payment')}</option>
+                                    <option value="dev" {if condition="($plugin.category??'')=='dev'"}selected{/if}>{:t('plugin_ui.category_dev')}</option>
+                                    <option value="analytics" {if condition="($plugin.category??'')=='analytics'"}selected{/if}>{:t('plugin_ui.category_analytics')}</option>
+                                    <option value="social" {if condition="($plugin.category??'')=='social'"}selected{/if}>{:t('plugin_ui.category_social')}</option>
+                                    <option value="other" {if condition="($plugin.category??'')=='other'"}selected{/if}>{:t('feedback.type_other')}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md3">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">来源类型 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.origin_type')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
                                 <select name="origin_type" lay-filter="originType">
-                                    <option value="1" {if condition="($plugin.origin_type ?? 1) == 1"}selected{/if}>原创</option>
-                                    <option value="2" {if condition="($plugin.origin_type ?? 1) == 2"}selected{/if}>转载</option>
+                                    <option value="1" {if condition="($plugin.origin_type ?? 1) == 1"}selected{/if}>{:t('plugin_ui.original')}</option>
+                                    <option value="2" {if condition="($plugin.origin_type ?? 1) == 2"}selected{/if}>{:t('plugin_ui.repost')}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md3">
                         <div class="layui-form-item" id="priceItem">
-                            <label class="layui-form-label">价格</label>
+                            <label class="layui-form-label">{:t('plugin_ui.price')}</label>
                             <div class="layui-input-block">
-                                <input type="number" name="price" id="priceInput" value="{$plugin.price|default='0'}" class="layui-input" placeholder="0为免费" step="0.01" min="0" {if condition="($plugin.origin_type ?? 1) == 2"}disabled{/if}>
-                                <span id="priceTip" style="color:#FF5722;font-size:12px;{if condition="($plugin.origin_type ?? 1) != 2"}display:none;{/if}">转载不能付费</span>
-                                <span style="color:#999;font-size:12px;display:block;margin-top:4px;">余额支付平台抽成 {:conf('plugin_commission_rate') ?? 10}%，积分支付不抽成</span>
+                                <input type="number" name="price" id="priceInput" value="{$plugin.price|default='0'}" class="layui-input" placeholder="{:t('plugin_ui.free_price_placeholder')}" step="0.01" min="0" {if condition="($plugin.origin_type ?? 1) == 2"}disabled{/if}>
+                                <span id="priceTip" style="color:#FF5722;font-size:12px;{if condition="($plugin.origin_type ?? 1) != 2"}display:none;{/if}">{:t('plugin_ui.repost_no_charge')}</span>
+                                <span style="color:#999;font-size:12px;display:block;margin-top:4px;">
+                                    {if condition="$commissionConfig.enabled"}{:t('plugin_ui.commission_enabled', ['rate' => $commissionConfig.rate])}{else/}{:t('plugin_ui.commission_disabled')}{/if}
+                                </span>
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md3">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">支付方式</label>
+                            <label class="layui-form-label">{:t('common_ui.payment_method')}</label>
                             <div class="layui-input-block">
                                 <select name="pay_type" lay-filter="payType">
-                                    <option value="balance" {if condition="($plugin.pay_type??'balance')=='balance'"}selected{/if}>余额支付</option>
-                                    <option value="points" {if condition="($plugin.pay_type??'balance')=='points'"}selected{/if}>积分支付</option>
+                                    <option value="balance" {if condition="($plugin.pay_type??'balance')=='balance'"}selected{/if}>{:t('plugin_ui.balance_pay')}</option>
+                                    <option value="points" {if condition="($plugin.pay_type??'balance')=='points'"}selected{/if}>{:t('plugin_ui.points_pay')}</option>
                                 </select>
                             </div>
                         </div>
@@ -144,15 +147,15 @@
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md6">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">作者</label>
+                            <label class="layui-form-label">{:t('plugin_ui.author')}</label>
                             <div class="layui-input-block">
-                                <input type="text" name="author" value="{$plugin.author|default=''}" class="layui-input" placeholder="留空则取发布者用户名">
+                                <input type="text" name="author" value="{$plugin.author|default=''}" class="layui-input" placeholder="{:t('plugin_ui.author_placeholder')}">
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md6">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">作者网址</label>
+                            <label class="layui-form-label">{:t('plugin_ui.author_website')}</label>
                             <div class="layui-input-block">
                                 <input type="text" name="author_url" value="{$plugin.author_url|default=''}" class="layui-input" placeholder="https://...">
                             </div>
@@ -160,15 +163,15 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">关联插件</label>
+                    <label class="layui-form-label">{:t('plugin_ui.related_plugin')}</label>
                     <div class="layui-input-block">
                         <input type="hidden" name="related_plugin_id" id="relatedPluginId" value="{$plugin.related_plugin_id|default='0'}">
                         <div class="related-search">
-                            <input type="text" id="relatedPluginSearch" class="layui-input" autocomplete="off" placeholder="输入插件名实时搜索，可不选" value="{if condition='!empty($plugin.related_plugin)'}{$plugin.related_plugin.name}{/if}">
+                            <input type="text" id="relatedPluginSearch" class="layui-input" autocomplete="off" placeholder="{:t('plugin_ui.related_search')}" value="{if condition='!empty($plugin.related_plugin)'}{$plugin.related_plugin.name}{/if}">
                             <div class="related-search-list" id="relatedPluginList"></div>
                         </div>
-                        <span class="related-clear" id="relatedPluginClear">清空关联</span>
-                        <div style="font-size:12px;color:#999;margin-top:6px;">用户下载时会看到关联提示；关联插件为付费时，需先购买关联插件。</div>
+                        <span class="related-clear" id="relatedPluginClear">{:t('plugin_ui.clear_related')}</span>
+                        <div style="font-size:12px;color:#999;margin-top:6px;">{:t('plugin_ui.related_help')}</div>
                     </div>
                 </div>
             </div>
@@ -176,31 +179,31 @@
 
         <!-- 转载信息 -->
         <div class="layui-card" id="originBlock" style="{if condition="($plugin.origin_type ?? 1) != 2"}display:none;{/if}">
-            <div class="layui-card-header" style="border-left-color:#FF9800;"><i class="layui-icon layui-icon-tips"></i> 转载信息</div>
+            <div class="layui-card-header" style="border-left-color:#FF9800;"><i class="layui-icon layui-icon-tips"></i> {:t('plugin_ui.repost_info')}</div>
             <div class="layui-card-body">
-                <p class="section-desc"><i class="layui-icon layui-icon-about"></i> 转载插件不能设置为付费，平台不承担转载内容的侵权责任</p>
+                <p class="section-desc"><i class="layui-icon layui-icon-about"></i> {:t('plugin_ui.repost_help')}</p>
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md6">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">来源地址 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.source_url')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
-                                <input type="text" name="origin_url" value="{$plugin.origin_url|default=''}" class="layui-input" placeholder="https://原始发布地址">
+                                <input type="text" name="origin_url" value="{$plugin.origin_url|default=''}" class="layui-input" placeholder="{:t('plugin_ui.source_url_placeholder')}">
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md6">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">原作者 <span style="color:red">*</span></label>
+                            <label class="layui-form-label">{:t('plugin_ui.original_author')} <span style="color:red">*</span></label>
                             <div class="layui-input-block">
-                                <input type="text" name="origin_author" value="{$plugin.origin_author|default=''}" class="layui-input" placeholder="原始作者名称">
+                                <input type="text" name="origin_author" value="{$plugin.origin_author|default=''}" class="layui-input" placeholder="{:t('plugin_ui.original_author_placeholder')}">
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">转载声明</label>
+                    <label class="layui-form-label">{:t('plugin_ui.repost_note')}</label>
                     <div class="layui-input-block">
-                        <textarea name="origin_note" class="layui-textarea" rows="2" placeholder="转载授权说明">{$plugin.origin_note|default=''}</textarea>
+                        <textarea name="origin_note" class="layui-textarea" rows="2" placeholder="{:t('plugin_ui.repost_note_placeholder')}">{$plugin.origin_note|default=''}</textarea>
                     </div>
                 </div>
             </div>
@@ -208,43 +211,43 @@
 
         <!-- 描述与介绍 -->
         <div class="layui-card">
-            <div class="layui-card-header"><i class="layui-icon layui-icon-read"></i> 描述与介绍</div>
+            <div class="layui-card-header"><i class="layui-icon layui-icon-read"></i> {:t('plugin_ui.description_section')}</div>
             <div class="layui-card-body">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">插件图标 <span style="color:red">*</span></label>
+                    <label class="layui-form-label">{:t('plugin_ui.icon')} <span style="color:red">*</span></label>
                     <div class="layui-input-block">
-                        <button type="button" class="layui-btn layui-btn-sm" id="uploadIcon"><i class="layui-icon">&#xe67c;</i>上传图标</button>
+                        <button type="button" class="layui-btn layui-btn-sm" id="uploadIcon"><i class="layui-icon">&#xe67c;</i>{:t('plugin_ui.upload_icon')}</button>
                         <input type="hidden" name="icon" id="iconInput" value="{$plugin.icon|default=''}">
                         <div style="margin-top:10px;">
                             <img id="iconPreview" src="{$plugin.icon|default=''}" class="plugin-icon-preview" style="{if condition='empty($plugin.icon)'}display:none;{/if}">
-                            <span id="iconEmpty" style="{if condition='!empty($plugin.icon)'}display:none;{/if}color:#ff5722;font-size:13px;">请上传图标</span>
+                            <span id="iconEmpty" style="{if condition='!empty($plugin.icon)'}display:none;{/if}color:#ff5722;font-size:13px;">{:t('plugin_ui.icon_required')}</span>
                         </div>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">插件封面</label>
+                    <label class="layui-form-label">{:t('plugin_ui.cover')}</label>
                     <div class="layui-input-block">
-                        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="uploadCover"><i class="layui-icon">&#xe67c;</i>上传封面</button>
+                        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="uploadCover"><i class="layui-icon">&#xe67c;</i>{:t('plugin_ui.upload_cover')}</button>
                         <div style="margin-top:10px;">
                             <img id="coverPreview" src="{$plugin.cover|default=''}" class="cover-preview" style="{if condition='empty($plugin.cover)'}display:none;{/if}">
                         </div>
-                        <div style="font-size:12px;color:#999;margin-top:6px;">支持 jpg、jpeg、png、webp，单张不超过 5MB</div>
+                        <div style="font-size:12px;color:#999;margin-top:6px;">{:t('plugin_ui.image_help')}</div>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">简介 <span style="color:red">*</span></label>
+                    <label class="layui-form-label">{:t('plugin_ui.summary')} <span style="color:red">*</span></label>
                     <div class="layui-input-block">
-                        <textarea name="description" class="layui-textarea" rows="2" placeholder="插件简介（纯文本）">{$plugin.description|default=''}</textarea>
+                        <textarea name="description" class="layui-textarea" rows="2" placeholder="{:t('plugin_ui.summary_placeholder')}">{$plugin.description|default=''}</textarea>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">更新说明</label>
+                    <label class="layui-form-label">{:t('plugin_ui.update_notes')}</label>
                     <div class="layui-input-block">
-                        <textarea name="update_description" class="layui-textarea" rows="3" placeholder="本版本改动说明，可为空">{$plugin.update_description|default=''}</textarea>
+                        <textarea name="update_description" class="layui-textarea" rows="3" placeholder="{:t('plugin_ui.update_notes_placeholder')}">{$plugin.update_description|default=''}</textarea>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">详细介绍</label>
+                    <label class="layui-form-label">{:t('plugin_ui.details')}</label>
                     <div class="layui-input-block">
                         <textarea name="content" id="pluginContent">{$plugin.content|default=''}</textarea>
                     </div>
@@ -254,66 +257,66 @@
 
         <!-- 管理设置 -->
         <div class="layui-card">
-            <div class="layui-card-header"><i class="layui-icon layui-icon-set"></i> 管理设置</div>
+            <div class="layui-card-header"><i class="layui-icon layui-icon-set"></i> {:t('plugin_ui.admin_settings')}</div>
             <div class="layui-card-body">
                 <div class="layui-row layui-col-space15">
                     <div class="layui-col-md4">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">排序</label>
+                            <label class="layui-form-label">{:t('plugin_ui.sort')}</label>
                             <div class="layui-input-block">
-                                <input type="number" name="sort" value="{$plugin.sort|default='0'}" class="layui-input" placeholder="越大越靠前">
+                                <input type="number" name="sort" value="{$plugin.sort|default='0'}" class="layui-input" placeholder="{:t('plugin_ui.sort_help')}">
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md4">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">状态</label>
+                            <label class="layui-form-label">{:t('common.status')}</label>
                             <div class="layui-input-block">
                                 <select name="status">
-                                    <option value="0" {if condition="($plugin.status ?? 0) == 0"}selected{/if}>待审核</option>
-                                    <option value="1" {if condition="($plugin.status ?? 0) == 1"}selected{/if}>已上架</option>
-                                    <option value="2" {if condition="($plugin.status ?? 0) == 2"}selected{/if}>已下架</option>
-                                    <option value="3" {if condition="($plugin.status ?? 0) == 3"}selected{/if}>审核拒绝</option>
+                                    <option value="0" {if condition="($plugin.status ?? 0) == 0"}selected{/if}>{:t('plugin_ui.pending_review')}</option>
+                                    <option value="1" {if condition="($plugin.status ?? 0) == 1"}selected{/if}>{:t('user_home.published')}</option>
+                                    <option value="2" {if condition="($plugin.status ?? 0) == 2"}selected{/if}>{:t('plugin_ui.off_shelf')}</option>
+                                    <option value="3" {if condition="($plugin.status ?? 0) == 3"}selected{/if}>{:t('plugin_ui.review_rejected')}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="layui-col-md4">
                         <div class="layui-form-item">
-                            <label class="layui-form-label">推荐设置</label>
+                            <label class="layui-form-label">{:t('plugin_ui.recommend_settings')}</label>
                             <div class="layui-input-block" style="padding-top:9px;">
-                                <input type="checkbox" name="is_hot" lay-skin="switch" lay-text="热门|普通" {if condition="($plugin.is_hot ?? 0) == 1"}checked{/if}>
-                                <input type="checkbox" name="is_recommend" lay-skin="switch" lay-text="推荐|普通" {if condition="($plugin.is_recommend ?? 0) == 1"}checked{/if}>
+                                <input type="checkbox" name="is_hot" lay-skin="switch" lay-text="{:t('plugin_ui.hot_normal')}" {if condition="($plugin.is_hot ?? 0) == 1"}checked{/if}>
+                                <input type="checkbox" name="is_recommend" lay-skin="switch" lay-text="{:t('plugin_ui.recommend_normal')}" {if condition="($plugin.is_recommend ?? 0) == 1"}checked{/if}>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">发布方式 <span style="color:red">*</span></label>
+                    <label class="layui-form-label">{:t('plugin_ui.publish_method')} <span style="color:red">*</span></label>
                     <div class="layui-input-block">
-                        <input type="radio" name="publish_type" value="0" title="立即发布" lay-filter="publish_type" {if condition="!isset($plugin.publish_type) || $plugin.publish_type==0"}checked{/if}>
-                        <input type="radio" name="publish_type" value="1" title="定时发布" lay-filter="publish_type" {if condition="isset($plugin.publish_type) && $plugin.publish_type==1"}checked{/if}>
+                        <input type="radio" name="publish_type" value="0" title="{:t('plugin_ui.publish_now')}" lay-filter="publish_type" {if condition="!isset($plugin.publish_type) || $plugin.publish_type==0"}checked{/if}>
+                        <input type="radio" name="publish_type" value="1" title="{:t('plugin_ui.publish_scheduled')}" lay-filter="publish_type" {if condition="isset($plugin.publish_type) && $plugin.publish_type==1"}checked{/if}>
                     </div>
                 </div>
                 <div class="layui-form-item" id="publishTimeRow" style="display:{if condition='isset($plugin.publish_type) && $plugin.publish_type==1'}block{else/}none{/if};">
-                    <label class="layui-form-label">发布时间</label>
+                    <label class="layui-form-label">{:t('plugin_ui.publish_time')}</label>
                     <div class="layui-input-block">
-                        <input type="text" name="publish_time" id="publish_time" value="{$plugin.publish_time|default=''}" class="layui-input" placeholder="点击选择定时发布时间" readonly autocomplete="off" style="max-width:260px;cursor:pointer;background:#fff;">
-                        <div style="font-size:12px;color:#999;margin-top:6px;" id="publishTimeHint">{if condition='!empty($plugin.publish_time)'}将于 {$plugin.publish_time} 开放下载{else/}立即发布不需要设置时间{/if}</div>
+                        <input type="text" name="publish_time" id="publish_time" value="{$plugin.publish_time|default=''}" class="layui-input" placeholder="{:t('plugin_ui.publish_time_placeholder')}" readonly autocomplete="off" style="max-width:260px;cursor:pointer;background:#fff;">
+                        <div style="font-size:12px;color:#999;margin-top:6px;" id="publishTimeHint">{if condition='!empty($plugin.publish_time)'}{:t('plugin_ui.opens_at', ['time' => $plugin.publish_time])}{else/}{:t('plugin_ui.publish_now_no_time')}{/if}</div>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">审核备注</label>
+                    <label class="layui-form-label">{:t('plugin_ui.review_note')}</label>
                     <div class="layui-input-block">
-                        <textarea name="audit_note" class="layui-textarea" rows="2" placeholder="审核备注（可选）">{$plugin.audit_note|default=''}</textarea>
+                        <textarea name="audit_note" class="layui-textarea" rows="2" placeholder="{:t('plugin_ui.review_note_placeholder')}">{$plugin.audit_note|default=''}</textarea>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="layui-form-item" style="text-align:center;padding-top:20px;">
-            <button class="layui-btn layui-btn-lg" lay-submit lay-filter="submitPlugin"><i class="layui-icon layui-icon-ok"></i> 保存</button>
-            <button type="reset" class="layui-btn layui-btn-primary layui-btn-lg" id="btnReset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
+            <button class="layui-btn layui-btn-lg" lay-submit lay-filter="submitPlugin"><i class="layui-icon layui-icon-ok"></i> {:t('common.save')}</button>
+            <button type="reset" class="layui-btn layui-btn-primary layui-btn-lg" id="btnReset"><i class="layui-icon layui-icon-refresh"></i> {:t('common.reset')}</button>
         </div>
     </form>
 </div>
@@ -347,20 +350,20 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
         return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
     }
     function updatePublishTimeHint() {
-        $('#publishTimeHint').text('请选择 ' + formatDate(minPublishDate) + ' 至 ' + formatDate(maxPublishDate) + ' 之间的时间');
+        $('#publishTimeHint').text('{:t("plugin_ui.select_time_prefix")} ' + formatDate(minPublishDate) + ' {:t("plugin_ui.select_time_between")} ' + formatDate(maxPublishDate) + ' {:t("plugin_ui.select_time_suffix")}');
     }
     function validatePublishDate(value, showMsg) {
         var publishDate = parseDateTime(value);
         if (!publishDate) {
-            if (showMsg) notice.msg('发布时间格式不正确，请使用时间选择器选择', {icon: 2});
+            if (showMsg) notice.msg('{:t("plugin_ui.invalid_time")}', {icon: 2});
             return false;
         }
         if (publishDate.getTime() < minPublishDate.getTime()) {
-            if (showMsg) notice.msg('发布时间必须选择当前时间的10分钟后', {icon: 2});
+            if (showMsg) notice.msg('{:t("plugin_ui.time_too_early")}', {icon: 2});
             return false;
         }
         if (publishDate.getTime() > maxPublishDate.getTime()) {
-            if (showMsg) notice.msg('发布时间不得大于6个月', {icon: 2});
+            if (showMsg) notice.msg('{:t("plugin_ui.time_too_late")}', {icon: 2});
             return false;
         }
         return true;
@@ -375,7 +378,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
             max: formatDate(maxPublishDate),
             trigger: 'click',
             done: function(value) {
-                if (value) $('#publishTimeHint').text('将于 ' + value + ' 开放下载');
+                if (value) $('#publishTimeHint').text('{:t("plugin_ui.opens_at_prefix")} ' + value + ' {:t("plugin_ui.opens_at_suffix")}');
             }
         });
     }
@@ -393,7 +396,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
             });
         } else {
             $('#publish_time').val('');
-            $('#publishTimeHint').text('立即发布不需要设置时间');
+            $('#publishTimeHint').text('{:t("plugin_ui.publish_now_no_time")}');
             $('#publishTimeRow').slideUp(200);
         }
     });
@@ -405,8 +408,8 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
     var relatedTimer = null;
     function priceText(item) {
         var price = parseFloat(item.price || 0);
-        if (price <= 0) return '免费';
-        return item.pay_type === 'points' ? parseInt(price, 10) + ' 积分' : '¥' + price.toFixed(2);
+        if (price <= 0) return '{:t("upgrade.free")}';
+        return item.pay_type === 'points' ? parseInt(price, 10) + ' {:t("accounting.point_unit")}' : '¥' + price.toFixed(2);
     }
     function escHtml(s) {
         var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
@@ -425,7 +428,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
     }
     function renderRelatedList(list) {
         if (!list || !list.length) {
-            $('#relatedPluginList').html('<div class="related-search-item"><div class="meta">暂无匹配插件</div></div>').show();
+            $('#relatedPluginList').html('<div class="related-search-item"><div class="meta">{:t('plugin_ui.no_matching')}</div></div>').show();
             return;
         }
         var html = '';
@@ -472,7 +475,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
 
     form.on('select(payType)', function(data) {
         var isPoints = data.value === 'points';
-        $('#priceInput').attr('step', isPoints ? '1' : '0.01').attr('placeholder', isPoints ? '整数积分' : '0为免费');
+        $('#priceInput').attr('step', isPoints ? '1' : '0.01').attr('placeholder', isPoints ? '{:t("plugin_ui.integer_points")}' : '{:t("plugin_ui.free_price_placeholder")}');
         if (isPoints) {
             var v = parseInt($('#priceInput').val()) || 0;
             $('#priceInput').val(v);
@@ -499,7 +502,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
             var fd = new FormData(); fd.append('file', blobInfo.blob(), blobInfo.filename());
             $.ajax({ url:'{:url("/Upload/image")}', type:'POST', data:fd, processData:false, contentType:false,
                 success:function(r){ if(r.code==0) success(r.data.path); else failure(r.msg); },
-                error:function(){ failure('上传失败'); } });
+                error:function(){ failure('{:t("common.upload_failed")}'); } });
         }
     });
 
@@ -507,12 +510,12 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
         done:function(r){
             if(r.code==0){
                 var url = resourceUrl(r.data);
-                if(!url){ notice.msg('图标上传成功但返回地址为空',{icon:2}); return; }
+                if(!url){ notice.msg('{:t("plugin_ui.icon_url_missing")}',{icon:2}); return; }
                 $('#iconInput').val(url);
                 setResourceMeta('icon', r.data);
                 $('#iconPreview').attr('src',url).show();
                 $('#iconEmpty').hide();
-                notice.msg('图标上传成功',{icon:1});
+                notice.msg('{:t("plugin_ui.icon_uploaded")}',{icon:1});
             } else notice.msg(r.msg,{icon:2});
         } });
 
@@ -520,11 +523,11 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
         done:function(r){
             if(r.code==0){
                 var url = resourceUrl(r.data);
-                if(!url){ notice.msg('封面上传成功但返回地址为空',{icon:2}); return; }
+                if(!url){ notice.msg('{:t("plugin_ui.cover_url_missing")}',{icon:2}); return; }
                 $('#coverInput').val(url);
                 setResourceMeta('cover', r.data);
                 $('#coverPreview').attr('src',url).show();
-                notice.msg('封面上传成功',{icon:1});
+                notice.msg('{:t("plugin_ui.cover_uploaded")}',{icon:1});
             } else notice.msg(r.msg,{icon:2});
         } });
 
@@ -536,7 +539,8 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
                 $('#package_object_key').val(r.data.package_object_key || '');
                 $('#package_file_name').val(r.data.package_file_name || r.data.original_name || '');
                 $('#package_mime_type').val(r.data.package_mime_type || 'application/zip');
-                $('#fileInfo').html('<i class="layui-icon layui-icon-ok-circle"></i> 已上传 ('+(r.data.file_size/1024).toFixed(1)+' KB)');
+                $('#upload_token').val(r.data.upload_token || '');
+                $('#fileInfo').html('<i class="layui-icon layui-icon-ok-circle"></i> {:t("plugin_ui.uploaded")} ('+(r.data.file_size/1024).toFixed(1)+' KB)');
                 var slugInput = $('#slugInput');
                 if (!slugInput.val()) {
                     var fn = (r.data.original_name || r.data.file_path.split(/[\\/]/).pop()).replace(/\.zip$/i,'');
@@ -545,9 +549,9 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
                 var a = r.data.auto;
                 if (a) {
                     var f = [];
-                    if (a.name) { $('input[name=name]').val(a.name); f.push('名称'); }
-                    if (a.description) { $('textarea[name=description]').val(a.description); f.push('简介'); }
-                    if (a.version) { $('input[name=version]').val(a.version); f.push('版本'); }
+                    if (a.name) { $('input[name=name]').val(a.name); f.push('{:t("plugin_ui.name")}'); }
+                    if (a.description) { $('textarea[name=description]').val(a.description); f.push('{:t("plugin_ui.summary")}'); }
+                    if (a.version) { $('input[name=version]').val(a.version); f.push('{:t("version_ui.version_suffix")}'); }
                     if (a.icon) {
                         $('#iconInput').val(a.icon);
                         $('#iconPreview').attr('src',a.icon).show();
@@ -557,12 +561,12 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
                         $('#icon_file_name').val(a.icon_file_name || 'icon.png');
                         $('#icon_file_size').val(a.icon_file_size || 0);
                         $('#icon_mime_type').val(a.icon_mime_type || 'image/png');
-                        f.push('图标');
+                        f.push('{:t("plugin_ui.icon")}');
                     }
-                    if (f.length) notice.msg('已自动填充：'+f.join('、'),{icon:1});
+                    if (f.length) notice.msg('{:t("plugin_ui.autofilled")}：'+f.join('{:t("plugin_ui.list_separator")}'),{icon:1});
                 }
-                notice.msg('上传成功',{icon:1});
-            } else notice.msg(r.msg||'上传失败',{icon:2});
+                notice.msg('{:t("version_ui.upload_success")}',{icon:1});
+            } else notice.msg(r.msg||'{:t("common.upload_failed")}',{icon:2});
         } });
 
     $('#btnReset').click(function(){
@@ -573,29 +577,30 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
             $('#icon_object_key').val(''); $('#icon_storage_driver').val('local'); $('#icon_file_name').val(''); $('#icon_file_size').val('0'); $('#icon_mime_type').val('');
             $('#cover_object_key').val(''); $('#cover_storage_driver').val('local'); $('#cover_file_name').val(''); $('#cover_file_size').val('0'); $('#cover_mime_type').val('');
             $('#storage_driver').val('local'); $('#package_object_key').val(''); $('#package_file_name').val(''); $('#package_mime_type').val('');
-            $('#fileInfo').html('<i class="layui-icon layui-icon-close-fill"></i> 请上传插件文件 (*.zip)').css('color','#ff5722');
+            $('#upload_token').val('');
+            $('#fileInfo').html('<i class="layui-icon layui-icon-close-fill"></i> {:t("plugin_ui.upload_file_required")}').css('color','#ff5722');
             $('#slugInput').val('');
         },50);
     });
 
     form.on('submit(submitPlugin)', function(data) {
         var isEdit = !!data.field.id;
-        if (!isEdit && !$('#file_path').val()) { notice.msg('请先上传插件文件',{icon:2}); return false; }
-        if (!$.trim(data.field.description)) { notice.msg('请填写插件简介',{icon:2}); return false; }
-        if (!$('#iconInput').val()) { notice.msg('请上传插件图标',{icon:2}); return false; }
-        if (!data.field.category) { notice.msg('请选择插件分类',{icon:2}); return false; }
-        if (typeof data.field.publish_type === 'undefined') { notice.msg('请选择发布方式',{icon:2}); return false; }
-        if (data.field.publish_type == '1' && !data.field.publish_time) { notice.msg('请选择定时发布时间',{icon:2}); return false; }
+        if (!isEdit && !$('#upload_token').val()) { notice.msg('{:t("plugin_ui.upload_package_first")}',{icon:2}); return false; }
+        if (!$.trim(data.field.description)) { notice.msg('{:t("plugin_ui.summary_required")}',{icon:2}); return false; }
+        if (!$('#iconInput').val()) { notice.msg('{:t("plugin_ui.icon_upload_required")}',{icon:2}); return false; }
+        if (!data.field.category) { notice.msg('{:t("plugin_ui.category_required")}',{icon:2}); return false; }
+        if (typeof data.field.publish_type === 'undefined') { notice.msg('{:t("plugin_ui.publish_method_required")}',{icon:2}); return false; }
+        if (data.field.publish_type == '1' && !data.field.publish_time) { notice.msg('{:t("plugin_ui.publish_time_required")}',{icon:2}); return false; }
         if (data.field.publish_type == '1' && !validatePublishDate(data.field.publish_time, true)) { return false; }
         if (data.field.publish_type != '1') data.field.publish_time = '';
         if (!$.trim($('#relatedPluginSearch').val()) || !data.field.related_plugin_id) data.field.related_plugin_id = '0';
         data.field.content = tinymce.get('pluginContent').getContent();
         if (data.field.origin_type == '2') data.field.price = '0';
         if (!data.field.price) data.field.price = '0';
-        notice.msg('正在保存...',{icon:4,close:true});
+        notice.msg('{:t("plugin_ui.saving")}',{icon:4,close:true});
         $.ajax({ type:'POST', url:'{:url("/Plugin/edit")}', data:data.field, dataType:'json',
             success:function(r){ notice.destroy(); if(r.code==0){ notice.msg(r.msg,{icon:1}); var idx=parent.layer.getFrameIndex(window.name); if(idx) parent.layer.close(idx); } else notice.msg(r.msg,{icon:2}); },
-            error:function(){ notice.destroy(); notice.msg('服务器错误',{icon:2}); } });
+            error:function(){ notice.destroy(); notice.msg('{:t("common.server_error")}',{icon:2}); } });
         return false;
     });
 });

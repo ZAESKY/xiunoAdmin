@@ -5,6 +5,7 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use app\admin\service\UserService;
+use app\common\service\AccountingLogService;
 use think\facade\View;
 
 class User extends Backend
@@ -19,13 +20,18 @@ class User extends Backend
         try{
             if(IS_POST){
                 $userId = request()->post('user_id/d');
-                $limit = request()->post('limit/d', 15);
-                $page = request()->post('current_page/d', 1);
-                if(empty($userId)) return json(message('缺少用户ID', false));
+                $limit = sf_page_limit(request()->post('limit', null), 15);
+                $page = sf_page_number(request()->post('current_page', null));
+                if(empty($userId)) return json(message(t('validation.missing_id'), false));
                 $list = \app\common\model\BalanceLogModel::where('user_id', $userId)
                     ->order('id', 'desc')
                     ->paginate(['list_rows' => $limit, 'page' => $page]);
-                return json(message('ok', true, ['data' => $list]));
+                $data = $list->toArray();
+                $data['data'] = AccountingLogService::decorateItems(
+                    $data['data'] ?? [],
+                    AccountingLogService::LEDGER_BALANCE
+                );
+                return json(message('ok', true, ['data' => $data]));
             }
         }catch (\Exception $e){
             return json(message($e->getMessage(), false));
@@ -36,13 +42,18 @@ class User extends Backend
         try{
             if(IS_POST){
                 $userId = request()->post('user_id/d');
-                $limit = request()->post('limit/d', 15);
-                $page = request()->post('current_page/d', 1);
-                if(empty($userId)) return json(message('缺少用户ID', false));
+                $limit = sf_page_limit(request()->post('limit', null), 15);
+                $page = sf_page_number(request()->post('current_page', null));
+                if(empty($userId)) return json(message(t('validation.missing_id'), false));
                 $list = \app\common\model\PointLogModel::where('user_id', $userId)
                     ->order('id', 'desc')
                     ->paginate(['list_rows' => $limit, 'page' => $page]);
-                return json(message('ok', true, ['data' => $list]));
+                $data = $list->toArray();
+                $data['data'] = AccountingLogService::decorateItems(
+                    $data['data'] ?? [],
+                    AccountingLogService::LEDGER_POINT
+                );
+                return json(message('ok', true, ['data' => $data]));
             }
         }catch (\Exception $e){
             return json(message($e->getMessage(), false));
@@ -55,7 +66,7 @@ class User extends Backend
             if (IS_POST) {
                 return json($this->service->edit());
             }
-            return json(message('非法请求', false));
+            return json(message('common.illegal_request', false));
         } catch (\Exception $e) {
             return json(message($e->getMessage(), false));
         }
@@ -90,7 +101,9 @@ class User extends Backend
             return json(message($e->getMessage(), false));
         }
         try{
+            $userid = max(0, (int)$this->request->get('userid', 0));
             View::assign('appid', $appid);
+            View::assign('userid', $userid);
             View::assign('app_list', parent::getAppList());
             View::assign('power_list', (new \app\admin\model\PowerPriceModel())->field('id,name')->select()->toArray());
             return $this->render();

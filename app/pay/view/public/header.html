@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="{:t('common.lang_code')}">
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<title>{$title}|支付中心</title>
+	<title>{$title}|{:t('payment_ui.pay_center')}</title>
 	<meta name="keywords" content="{$keywords}"/>
 	<meta name="description" content="{$description}"/>
 	<link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
@@ -15,3 +15,5 @@
 	<![endif]-->
 </head>
 <body>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script type="text/javascript" src="{__JS__}lang.js?v=20261004"></script>

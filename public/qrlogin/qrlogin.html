@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>QQ扫码验证</title>
+    <title>QQ Verification</title>
     <link rel="stylesheet" href="/Assets/libs/layui/css/layui.css"/>
     <link rel="stylesheet" href="/Assets/module/admin.css?v=318"/>
     <!--[if lt IE 9]>
@@ -16,7 +16,7 @@
 <div class="text-center" style="padding: 25px 25px 15px 25px;">
     <div class="layui-text">
         <div style="margin-top:1rem;margin-bottom:1rem;color:#666" id="login">
-            <span id="loginmsg">请使用QQ手机版扫描二维码</span><span id="loginload" style="color: #790909;">.</span>
+            <span id="loginmsg"></span><span id="loginload" style="color: #790909;">.</span>
             <div id="qrimg" style="height: 100px"></div>
         </div>
     </div>
@@ -25,8 +25,18 @@
 
 <!-- js部分 -->
 <script type="text/javascript" src="/Assets/libs/layui/layui.js"></script>
+<script>
+    try {
+        window.SF_I18N_LOCALE = parent.SF_I18N_LOCALE;
+        window.SF_I18N_MESSAGES = parent.SF_I18N_MESSAGES;
+    } catch (e) {}
+</script>
 <script type="text/javascript" src="/Assets/js/common.js?v=318"></script>
 <script>
+    document.title = t('qrlogin.title');
+    document.documentElement.lang = window.SF_I18N ? window.SF_I18N.lang() : 'en-us';
+    document.getElementById('loginmsg').textContent = t('qrlogin.scan_mobile');
+
     layui.use(['layer', 'admin', 'form', 'notice', 'jquery'], function () {
         var $ = layui.jquery;
         var layer = layui.layer;
@@ -63,7 +73,7 @@
             var qrimg = getCookie('qrimg');
             if(qrsig!=null && qrimg!=null && force==false){
                 $('#qrimg').attr('qrsig',qrsig);
-                $('#qrimg').html('<img id="qrcodeimg" onclick="getqrpic(true)" src="data:image/png;base64,'+qrimg+'" title="点击刷新">');
+                $('#qrimg').html('<img id="qrcodeimg" onclick="getqrpic(true)" src="data:image/png;base64,'+qrimg+'" title="'+t('qrlogin.click_refresh')+'">');
                 if( /Android|SymbianOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Midp/i.test(navigator.userAgent) && navigator.userAgent.indexOf("QQ/") == -1) {
                     $('#mobile').show();
                 }
@@ -78,7 +88,7 @@
                             setCookie('qrsig',data.data.qrsig);
                             setCookie('qrimg',data.data.data);
                             $('#qrimg').attr('qrsig',data.data.qrsig);
-                            $('#qrimg').html('<img id="qrcodeimg" onclick="getqrpic(true)" src="data:image/png;base64,'+data.data.data+'" title="点击刷新">');
+                            $('#qrimg').html('<img id="qrcodeimg" onclick="getqrpic(true)" src="data:image/png;base64,'+data.data.data+'" title="'+t('qrlogin.click_refresh')+'">');
                             if( /Android|SymbianOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Midp/i.test(navigator.userAgent) && navigator.userAgent.indexOf("QQ/") == -1) {
                                 $('#mobile').show();
                             }
@@ -87,7 +97,7 @@
                         }
                     },
                     error: function() {
-                        $('#loginmsg').html("服务器错误！");
+                        $('#loginmsg').html(t('common.server_error'));
                     }
                 });
             }
@@ -105,7 +115,7 @@
                 data: layerData,
                 dataType: "json",
                 success: function(data) {
-                    var msg='请扫描二维码';
+                    var msg=t('qrlogin.scan_qr');
 
                     switch(data.data.code) {
                         case 0:
@@ -113,12 +123,15 @@
                             $('#login').attr("data-lock", "true");
                             switch (layerData.type){
                                 case 'replaceAuth':
-                                    var i = parent.layui.layer.confirm('确定要将<span class="layui-badge layui-badge-orange">'+layerData.auth_info+'</span>更换成<span class="layui-badge layui-badge-green">'+layerData.replace_info+'</span>吗？', {
+                                    var i = parent.layui.layer.confirm(t('qrlogin.replace_confirm', {
+                                        current: '<span class="layui-badge layui-badge-orange">'+layerData.auth_info+'</span>',
+                                        replacement: '<span class="layui-badge layui-badge-green">'+layerData.replace_info+'</span>'
+                                    }), {
                                         skin: 'layui-layer-admin',
                                         shade: .1
                                     }, function (i) {
                                         parent.layui.layer.close(i);
-                                        notice.msg('正在执行中..', {icon: 4, close: true});
+                                        notice.msg(t('common_ui.processing'), {icon: 4, close: true});
                                         $.ajax({
                                             type: "POST",
                                             url: '/api.php/Qrlogin/replaceAuth',
@@ -129,13 +142,13 @@
                                                 if (data.code == 0) {
                                                     var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                                                     parent.layer.close(index);
-                                                    parent.layui.layer.alert('更换授权成功！',{icon:1,skin: 'layui-layer-admin',closeBtn:0});
+                                                    parent.layui.layer.alert(t('qrlogin.replace_success'),{icon:1,skin: 'layui-layer-admin',closeBtn:0});
                                                 } else {
                                                     if(data.data.replace == 1){
                                                         var i = parent.layui.layer.alert(data.msg,{icon:2,closeBtn:0},function(){
                                                             parent.layui.layer.close(i);
                                                             var i2 = parent.layer.prompt({
-                                                                title:'修改更换的授权',
+                                                                title:t('qrlogin.edit_replacement'),
                                                                 value: layerData.replace_info,
                                                                 skin: 'layui-layer-admin',
                                                                 btn2:function(index){
@@ -144,7 +157,7 @@
                                                             },function(value,index){
                                                                 layerData.replace_info = value;
                                                                 parent.layui.layer.close(i2);
-                                                                parent.layui.layer.alert('修改成功，请再次点击更换授权按钮！',{icon:1,skin: 'layui-layer-admin',closeBtn:0});
+                                                                parent.layui.layer.alert(t('qrlogin.edit_success_retry'),{icon:1,skin: 'layui-layer-admin',closeBtn:0});
                                                             })
                                                         });
                                                     }else{
@@ -155,8 +168,8 @@
                                             error: function() {
                                                 notice.destroy();
                                                 notice.error({
-                                                    title: '更换通知',
-                                                    message: '服务器错误',
+                                                    title: t('common_ui.replace_notice'),
+                                                    message: t('common.server_error'),
                                                     animateInside:true,
                                                     position:'topCenter',
                                                     transitionOut:'flipOutX',
@@ -169,7 +182,7 @@
                                     });
                                     break;
                                 case 'userLogin':
-                                    notice.msg('正在执行中..', {icon: 4, close: true});
+                                    notice.msg(t('common_ui.processing'), {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '/api.php/Qrlogin/userLogin',
@@ -192,20 +205,20 @@
                                                         content += '<a onclick="qrcodeLogin(\''+value.username+'\',\''+value.appid+'\')"><div style="'+(index==0?'':'border-top:1px solid #e6e6e6;')+'border-radius: 4px;height: 60px;line-height:60px;position: relative">' +
                                                             '<img style="margin-left:10px;width: 40px;height: 40px;border-radius: 50%;border: 3px solid #fff;" src="//q1.qlogo.cn/g?b=qq&nk=2129876388&s=100">' +
                                                             '<div style="font-size:16px;color:#030718;position: absolute;top:-10px;left:60px">'+value.username+'</div>' +
-                                                            '<div style="font-size:10px;color:#878b97;position: absolute;top:10px;left:60px">所属应用：'+value.appname+'</div>' +
+                                                            '<div style="font-size:10px;color:#878b97;position: absolute;top:10px;left:60px">'+t('qrlogin.application_label')+value.appname+'</div>' +
                                                             '</div></a>';
                                                     });
                                                     content += '</div></div>';
                                                     parent.layui.admin.open({
                                                         type: 1,
-                                                        title: '选择要登录的账号',
+                                                        title: t('qrlogin.choose_account'),
                                                         content: content
                                                     });
                                                 }
                                             } else {
                                                 getqrpic();
                                                 notice.error({
-                                                    title: '登录通知',
+                                                    title: t('qrlogin.login_notice'),
                                                     message: data.msg,
                                                     animateInside:true,
                                                     position:'topCenter',
@@ -220,8 +233,8 @@
                                             notice.destroy();
                                             getqrpic();
                                             notice.error({
-                                                title: '登录通知',
-                                                message: '服务器错误',
+                                                title: t('qrlogin.login_notice'),
+                                                message: t('common.server_error'),
                                                 animateInside:true,
                                                 position:'topCenter',
                                                 transitionOut:'flipOutX',
@@ -233,7 +246,7 @@
                                     });
                                     break;
                                 case 'adminLogin':
-                                    parent.layui.notice.msg('正在验证管理员身份..', {icon: 4, close: true});
+                                    parent.layui.notice.msg(t('qrlogin.verifying_admin'), {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '/api.php/Qrlogin/adminLogin',
@@ -243,7 +256,7 @@
                                             parent.layui.notice.destroy();
                                             if (data.code == 0) {
                                                 var redirectUrl = (data.data && data.data.url) ? data.data.url : '/admin.php/Index/index.html';
-                                                parent.layui.notice.msg('登录成功，正在进入后台...', {icon: 1});
+                                                parent.layui.notice.msg(t('qrlogin.login_success_redirect'), {icon: 1});
                                                 try {
                                                     (parent.top || parent).location.replace(redirectUrl);
                                                 } catch (e) {
@@ -256,7 +269,7 @@
                                                 $('#login').attr("data-lock", "false");
                                                 getqrpic();
                                                 parent.layui.notice.error({
-                                                    title: '登录通知',
+                                                    title: t('qrlogin.login_notice'),
                                                     message: data.msg,
                                                     animateInside:true, position:'topCenter',
                                                     transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
@@ -271,8 +284,8 @@
                                             $('#login').attr("data-lock", "false");
                                             getqrpic();
                                             parent.layui.notice.error({
-                                                title: '登录通知',
-                                                message: '服务器错误',
+                                                title: t('qrlogin.login_notice'),
+                                                message: t('common.server_error'),
                                                 animateInside:true, position:'topCenter',
                                                 transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
                                                 displayMode:'2', audio:'1'
@@ -280,8 +293,76 @@
                                         }
                                     });
                                     break;
+                                case 'oauthMigrate':
+                                    parent.layui.notice.msg(t('qrlogin.migrating_legacy'), {icon: 4, close: true});
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '/api.php/Social/migrateLegacy',
+                                        data: {pending_token: layerData.pending_token},
+                                        dataType: "json",
+                                        success: function(data) {
+                                            parent.layui.notice.destroy();
+                                            if (data.code == 0) {
+                                                var index = parent.layer.getFrameIndex(window.name);
+                                                parent.layer.close(index);
+                                                if (typeof parent.handleQqOauthResult === 'function') {
+                                                    parent.handleQqOauthResult(data);
+                                                } else {
+                                                    (parent.top || parent).location.replace('/user.php/Index/index.html');
+                                                }
+                                            } else {
+                                                cleartime();
+                                                $('#login').show().attr("data-lock", "false");
+                                                getqrpic(true);
+                                                parent.layui.notice.error({
+                                                    title: t('qrlogin.migration_notice'), message: data.msg, position:'topCenter',
+                                                    displayMode:'2', audio:'1'
+                                                });
+                                            }
+                                        },
+                                        error: function() {
+                                            parent.layui.notice.destroy();
+                                            cleartime();
+                                            $('#login').show().attr("data-lock", "false");
+                                            getqrpic(true);
+                                            parent.layui.notice.error({
+                                                title: t('qrlogin.migration_notice'), message: t('common.server_error'), position:'topCenter',
+                                                displayMode:'2', audio:'1'
+                                            });
+                                        }
+                                    });
+                                    break;
+                                case 'oauthClaim':
+                                    parent.layui.notice.msg(t('qrlogin.saving_legacy_relation'), {icon: 4, close: true});
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '/api.php/Social/claimLegacy',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            parent.layui.notice.destroy();
+                                            if (data.code == 0) {
+                                                var index = parent.layer.getFrameIndex(window.name);
+                                                parent.layer.close(index);
+                                                parent.layui.notice.msg(data.msg, {icon:1});
+                                                setTimeout(function(){ parent.location.reload(); }, 900);
+                                            } else {
+                                                cleartime();
+                                                $('#login').show().attr('data-lock', 'false');
+                                                getqrpic(true);
+                                                parent.layui.notice.error({title:t('qrlogin.migration_notice'), message:data.msg, position:'topCenter'});
+                                            }
+                                        },
+                                        error: function() {
+                                            parent.layui.notice.destroy();
+                                            cleartime();
+                                            $('#login').show().attr('data-lock', 'false');
+                                            getqrpic(true);
+                                            parent.layui.notice.error({title:t('qrlogin.migration_notice'), message:t('common.server_error'), position:'topCenter'});
+                                        }
+                                    });
+                                    break;
                                 case 'bindQQ':
-                                    parent.layui.notice.msg('正在执行中..', {icon: 4, close: true});
+                                    parent.layui.notice.msg(t('common_ui.processing'), {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '/api.php/Qrlogin/bindQQ',
@@ -292,7 +373,7 @@
                                             if (data.code == 0) {
                                                 var index = parent.layer.getFrameIndex(window.name);
                                                 parent.layer.close(index);
-                                                parent.layui.notice.msg('QQ绑定成功！', {icon: 1});
+                                                parent.layui.notice.msg(t('qrlogin.bind_success'), {icon: 1});
                                                 setTimeout(function(){ parent.location.reload(); }, 1500);
                                             } else {
                                                 cleartime();
@@ -300,7 +381,7 @@
                                                 $('#login').attr("data-lock", "false");
                                                 getqrpic();
                                                 parent.layui.notice.error({
-                                                    title: '绑定通知',
+                                                    title: t('qrlogin.bind_notice'),
                                                     message: data.msg,
                                                     animateInside:true,
                                                     position:'topCenter',
@@ -318,8 +399,8 @@
                                             $('#login').attr("data-lock", "false");
                                             getqrpic();
                                             parent.layui.notice.error({
-                                                title: '绑定通知',
-                                                message: '服务器错误',
+                                                title: t('qrlogin.bind_notice'),
+                                                message: t('common.server_error'),
                                                 animateInside:true,
                                                 position:'topCenter',
                                                 transitionOut:'flipOutX',
@@ -331,7 +412,7 @@
                                     });
                                     break;
                                 case 'adminBindQQ':
-                                    parent.layui.notice.msg('正在绑定管理员QQ..', {icon: 4, close: true});
+                                    parent.layui.notice.msg(t('qrlogin.binding_admin'), {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '/api.php/Qrlogin/adminBindQQ',
@@ -342,7 +423,7 @@
                                             if (data.code == 0) {
                                                 var index = parent.layer.getFrameIndex(window.name);
                                                 parent.layer.close(index);
-                                                parent.layui.notice.msg('QQ绑定成功！', {icon: 1});
+                                                parent.layui.notice.msg(t('qrlogin.bind_success'), {icon: 1});
                                                 setTimeout(function(){ parent.location.reload(); }, 1500);
                                             } else {
                                                 cleartime();
@@ -350,7 +431,7 @@
                                                 $('#login').attr("data-lock", "false");
                                                 getqrpic();
                                                 parent.layui.notice.error({
-                                                    title: '绑定通知',
+                                                    title: t('qrlogin.bind_notice'),
                                                     message: data.msg,
                                                     animateInside:true, position:'topCenter',
                                                     transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
@@ -365,8 +446,8 @@
                                             $('#login').attr("data-lock", "false");
                                             getqrpic();
                                             parent.layui.notice.error({
-                                                title: '绑定通知',
-                                                message: '服务器错误',
+                                                title: t('qrlogin.bind_notice'),
+                                                message: t('common.server_error'),
                                                 animateInside:true, position:'topCenter',
                                                 transitionOut:'flipOutX', transitionOutMobile: 'flipOutX',
                                                 displayMode:'2', audio:'1'
@@ -375,7 +456,7 @@
                                     });
                                     break;
                                 case 'binding':
-                                    parent.layui.notice.msg('正在执行中..', {icon: 4, close: true});
+                                    parent.layui.notice.msg(t('common_ui.processing'), {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '/api.php/Qrlogin/binding',
@@ -387,18 +468,18 @@
                                                 var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                                                 parent.layer.close(index);
                                                 var content = '<div class="layui-card"><div class="layui-card-body"><form class="layui-form"><div class="layui-form-item">\n' +
-                                                    '            <label class="layui-form-label layui-form-required">数据列表:</label>\n' +
-                                                    '            <div class="layui-input-block"><input type="checkbox" name="type" value="checkall" lay-skin="primary" lay-filter="allChoose" title="全选">';
+                                                    '            <label class="layui-form-label layui-form-required">'+t('qrlogin.data_list')+':</label>\n' +
+                                                    '            <div class="layui-input-block"><input type="checkbox" name="type" value="checkall" lay-skin="primary" lay-filter="allChoose" title="'+t('qrlogin.select_all')+'">';
                                                 $.each(data.data, function(index, value){
                                                     content += '<input type="checkbox" name="list[]" value="'+value.id+'" lay-skin="primary" title="'+value.auth_info+'">';
                                                 });
                                                 content += '</div></div><div class="layui-form-item text-right">\n' +
-                                                    '            <button class="layui-btn layui-btn-primary" type="button" lay-filter="selectAll" lay-submit>全选</button>\n' +
-                                                    '            <button type="button" class="layui-btn" lay-filter="BindingSubmit" lay-submit>绑定</button>\n' +
+                                                    '            <button class="layui-btn layui-btn-primary" type="button" lay-filter="selectAll" lay-submit>'+t('qrlogin.select_all')+'</button>\n' +
+                                                    '            <button type="button" class="layui-btn" lay-filter="BindingSubmit" lay-submit>'+t('qrlogin.bind')+'</button>\n' +
                                                     '        </div></form></div></div>';
                                                 parent.layui.admin.open({
                                                     type: 1,
-                                                    title: '选择要绑定的数据',
+                                                    title: t('qrlogin.select_binding_data'),
                                                     content: content,
                                                     success: function (layero, dIndex) {
                                                         parent.layui.form.render();
@@ -410,7 +491,7 @@
                                                 $('#login').show();
                                                 $('#login').attr("data-lock", "false");
                                                 getqrpic();
-                                                parent.layer.alert(data.msg, {title:'绑定通知',icon:3,skin: 'layui-layer-admin',shade: .1,closeBtn:0});
+                                                parent.layer.alert(data.msg, {title:t('qrlogin.bind_notice'),icon:3,skin: 'layui-layer-admin',shade: .1,closeBtn:0});
                                             }
                                         },
                                         error: function() {
@@ -419,12 +500,12 @@
                                             $('#login').show();
                                             $('#login').attr("data-lock", "false");
                                             getqrpic();
-                                            parent.layer.alert('服务器错误', {title:'绑定通知',icon:2,skin: 'layui-layer-admin',shade: .1,closeBtn:0});
+                                            parent.layer.alert(t('common.server_error'), {title:t('qrlogin.bind_notice'),icon:2,skin: 'layui-layer-admin',shade: .1,closeBtn:0});
                                         }
                                     });
                                     break;
                                 case 'download':
-                                    parent.layui.notice.msg('正在执行中..', {icon: 4, close: true});
+                                    parent.layui.notice.msg(t('common_ui.processing'), {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
                                         url: '/api.php/Qrlogin/download',
@@ -435,7 +516,7 @@
                                             if (data.code == 0) {
                                                 parent.layui.layer.closeAll();
                                                 parent.layui.notice.success({
-                                                    title: '获取通知',
+                                                    title: t('common_ui.get_notice'),
                                                     message: data.msg,
                                                     animateInside:true,
                                                     position:'topCenter',
@@ -451,7 +532,7 @@
                                                 $('#login').attr("data-lock", "false");
                                                 getqrpic();
                                                 parent.layui.notice.error({
-                                                    title: '获取通知',
+                                                    title: t('common_ui.get_notice'),
                                                     message: data.msg,
                                                     animateInside:true,
                                                     position:'topCenter',
@@ -469,8 +550,8 @@
                                             $('#login').attr("data-lock", "false");
                                             getqrpic();
                                             parent.layui.notice.error({
-                                                title: '获取通知',
-                                                message: '服务器错误',
+                                                title: t('common_ui.get_notice'),
+                                                message: t('common.server_error'),
                                                 animateInside:true,
                                                 position:'topCenter',
                                                 transitionOut:'flipOutX',
@@ -485,23 +566,23 @@
                             break;
                         case 1:
                             getqrpic();
-                            msg = '请重新扫描二维码';
+                            msg = t('qrlogin.rescan');
                             break;
                         case 2:
-                            msg = '使用QQ手机版扫描二维码';
+                            msg = t('qrlogin.scan_mobile_short');
                             break;
                         case 3:
-                            msg = '扫码成功，请在手机上确认授权登录';
+                            msg = t('qrlogin.scanned_confirm');
                             break;
                         case 4:
                             cleartime();
                             getqrpic();
-                            msg = 'QQ' + data.data.qq + '未通过验证，请使用购买授权的QQ扫码！';
+                            msg = t('qrlogin.qq_not_verified', {qq: data.data.qq});
                             break;
                         case 5:
                             cleartime();
                             getqrpic();
-                            msg = 'QQ验证失败，请解除登录异常后重试！';
+                            msg = t('qrlogin.verification_failed');
                             break;
                         case 6:
                             cleartime();
@@ -515,7 +596,7 @@
                     $('#loginmsg').html(msg);
                 },
                 error: function() {
-                    $('#loginmsg').html("服务器错误！");
+                    $('#loginmsg').html(t('common.server_error'));
                 }
             });
         }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="{:t('common.lang_code')}">
 <head>
     <meta charset="utf-8">
     <title>{$title}</title>
@@ -29,13 +29,14 @@
             <span>{$title}</span>
         </a>
         <ul class="vp-nav-links" id="navLinks">
-            <li><a href="/">首页</a></li>
-            <li><a href="#query">授权查询</a></li>
-            <li><a href="javascript:;" id="btn-download">源码下载</a></li>
-            <li><a href="{:url('/Index/pluginMarket')}">插件市场</a></li>
-            <li><a href="/user.php/Index/index" class="vp-nav-login">登录后台</a></li>
+            <li><a href="/">{:t('home.home')}</a></li>
+            <li><a href="#query">{:t('home.auth_query')}</a></li>
+            <li><a href="javascript:;" id="btn-download">{:t('home.source_download')}</a></li>
+            <li><a href="{:url('/Index/pluginMarket')}">{:t('home.plugin_market')}</a></li>
+            <li><a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}">{:t('common.lang_toggle')}</a></li>
+            <li><a href="/user.php/Index/index" class="vp-nav-login">{:t('home.backend_login')}</a></li>
         </ul>
-        <button class="vp-nav-toggle" id="navToggle" aria-label="菜单">
+        <button class="vp-nav-toggle" id="navToggle" aria-label="{:t('home.menu')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
     </div>
@@ -49,9 +50,9 @@
         <h1 class="vp-hero-title">{$title}</h1>
         <p class="vp-hero-desc">{$description}</p>
         <div class="vp-hero-actions">
-            <a href="#query" class="vp-btn vp-btn-brand">开始查询</a>
-            <a href="{:url('/Index/pluginMarket')}" class="vp-btn vp-btn-outline">插件市场</a>
-            <a href="/user.php/Index/index" class="vp-btn vp-btn-outline">登录后台</a>
+            <a href="#query" class="vp-btn vp-btn-brand">{:t('home.start_query')}</a>
+            <a href="{:url('/Index/pluginMarket')}" class="vp-btn vp-btn-outline">{:t('home.plugin_market')}</a>
+            <a href="/user.php/Index/index" class="vp-btn vp-btn-outline">{:t('home.backend_login')}</a>
         </div>
     </div>
 </section>
@@ -59,42 +60,42 @@
 <!-- ====== FEATURES ====== -->
 <section class="vp-features">
     <div class="vp-container">
-        <h2 class="vp-section-title">核心功能</h2>
+        <h2 class="vp-section-title">{:t('home.core_features')}</h2>
         <div class="vp-features-grid">
             <a href="#query" class="vp-feature-card" data-type="auth">
                 <div class="vp-feature-icon">
-                    <i class="layui-icon layui-icon-vercode" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                    <i class="layui-icon layui-icon-vercode"></i>
                 </div>
-                <h3>授权查询</h3>
-                <p>快速查询软件授权状态与有效期限</p>
+                <h3>{:t('home.auth_query')}</h3>
+                <p>{:t('home.auth_query_help')}</p>
             </a>
             <a href="#query" class="vp-feature-card" data-type="user">
                 <div class="vp-feature-icon">
-                    <i class="layui-icon layui-icon-user" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                    <i class="layui-icon layui-icon-user"></i>
                 </div>
-                <h3>代理查询</h3>
-                <p>查询代理身份信息与权限范围</p>
+                <h3>{:t('home.agent_query')}</h3>
+                <p>{:t('home.agent_query_help')}</p>
             </a>
             <a href="javascript:;" class="vp-feature-card" id="card-download">
                 <div class="vp-feature-icon">
-                    <i class="layui-icon layui-icon-download-circle" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                    <i class="layui-icon layui-icon-download-circle"></i>
                 </div>
-                <h3>源码下载</h3>
-                <p>获取最新版本程序源代码</p>
+                <h3>{:t('home.source_download')}</h3>
+                <p>{:t('home.source_download_help')}</p>
             </a>
             <a href="/user.php/UserPlugin/market" class="vp-feature-card">
                 <div class="vp-feature-icon">
-                    <i class="layui-icon layui-icon-template-1" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                    <i class="layui-icon layui-icon-template-1"></i>
                 </div>
-                <h3>插件下载</h3>
-                <p>丰富的插件市场，扩展更多功能</p>
+                <h3>{:t('home.plugin_download')}</h3>
+                <p>{:t('home.plugin_download_help')}</p>
             </a>
             <a href="/user.php/Index/index" class="vp-feature-card">
                 <div class="vp-feature-icon">
-                    <i class="layui-icon layui-icon-set" style="font-size:22px;color:var(--vp-c-brand);"></i>
+                    <i class="layui-icon layui-icon-set"></i>
                 </div>
-                <h3>后台管理</h3>
-                <p>进入系统后台进行综合管理</p>
+                <h3>{:t('home.backend_management')}</h3>
+                <p>{:t('home.backend_management_help')}</p>
             </a>
         </div>
     </div>
@@ -104,34 +105,34 @@
 <section id="query" class="vp-section">
     <div class="vp-container">
         <div class="vp-card" id="divLoading">
-            <h2 class="vp-card-title">授权查询</h2>
+            <h2 class="vp-card-title">{:t('home.auth_query')}</h2>
             <form class="layui-form">
                 <div class="layui-form-item">
-                    <label class="vp-label">选择应用</label>
+                    <label class="vp-label">{:t('home.select_app')}</label>
                     <select name="appid" lay-filter="app" lay-search lay-verify="required">
-                        <option value="">请选择应用</option>
+                        <option value="">{:t('home.select_app_placeholder')}</option>
                         {volist name="app_list.data.data" id="res"}
                         <option value="{$res.id}">{$res.name}</option>
                         {/volist}
                     </select>
                 </div>
                 <div class="layui-form-item">
-                    <label class="vp-label">查询内容</label>
-                    <input type="text" name="auth_info" placeholder="请输入需要查询的内容" class="layui-input" lay-verify="required"/>
+                    <label class="vp-label">{:t('home.query_content')}</label>
+                    <input type="text" name="auth_info" placeholder="{:t('home.query_content_placeholder')}" class="layui-input" lay-verify="required"/>
                 </div>
                 <div class="layui-form-item">
-                    <label class="vp-label">查询类型</label>
+                    <label class="vp-label">{:t('home.query_type')}</label>
                     <div class="vp-query-types">
-                        <input type="radio" name="query_type" value="auth" title="授权" checked>
-                        <input type="radio" name="query_type" value="user" title="代理">
+                        <input type="radio" name="query_type" value="auth" title="{:t('home.authorization')}" checked>
+                        <input type="radio" name="query_type" value="user" title="{:t('home.agent')}">
                     </div>
                 </div>
-                <div id="introduce" class="vp-introduce" style="display:none">
+                <div id="introduce" class="vp-introduce">
                     <div id="introduceContent"></div>
                 </div>
                 <div class="vp-form-actions">
-                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_Query" lay-submit>查询</button>
-                    <button type="button" class="vp-btn vp-btn-ghost" id="SF_Query_Reset">重置</button>
+                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_Query" lay-submit>{:t('home.query')}</button>
+                    <button type="button" class="vp-btn vp-btn-ghost" id="SF_Query_Reset">{:t('home.reset')}</button>
                 </div>
             </form>
         </div>
@@ -148,6 +149,8 @@
 {$background_notice|raw}
 {$background_music|raw}
 
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script type="text/javascript" src="{__JS__}lang.js?v=20261004"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
 <script type="text/javascript" src="{__JS__}common.js?v=318"></script>
 
@@ -188,14 +191,14 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
         $('#introduce').hide();
         form.render('select');
         form.render('radio');
-        notice.msg('已重置查询表单', {icon: 1, audio:'1'});
+        notice.msg(t('home.query_reset'), {icon: 1, audio:'1'});
     });
 
     /* ---- Download ---- */
     $('#btn-download, #card-download').click(function () {
         admin.open({
             type: 2,
-            title: '源码下载',
+            title: t('home.source_download'),
             shade: .1,
             area: ['600px', '460px'],
             content: '{:url("/Index/download")}'
@@ -216,15 +219,15 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
             dataType: "json",
             success: function (res) {
                 if (res.code == 0) {
-                    notice.msg("获取信息成功", {icon: 1, audio:'1'});
-                    $('#introduceContent').html(res.data.introduce || '暂无介绍');
+                    notice.msg(t('home.info_loaded'), {icon: 1, audio:'1'});
+                    $('#introduceContent').html(res.data.introduce || t('home.no_introduction'));
                     $('#introduce').show();
                     if (res.data.app_notice) {
                         admin.open({
                             type: 1,
-                            title: '应用公告',
+                            title: t('home.app_announcement'),
                             shade: .1,
-                            content: '<div style="padding:20px;line-height:1.8;">' + res.data.app_notice + '</div>'
+                            content: '<div class="vp-notice-content">' + res.data.app_notice + '</div>'
                         });
                     }
                     $('#logo').attr('src', res.data.logo);
@@ -233,7 +236,7 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
                 }
             },
             error: function () {
-                notice.msg("服务器错误", {icon: 2, audio:'1'});
+                notice.msg(t('common.server_error'), {icon: 2, audio:'1'});
             }
         });
     });
@@ -243,8 +246,8 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
         admin.showLoading('#divLoading', 3, '.8');
         if (data.appid == '') {
             notice.error({
-                title: '消息通知',
-                message: '请选择需要查询的应用',
+                title: t('home.message_notice'),
+                message: t('home.select_app_required'),
                 animateInside: true,
                 position: 'topCenter',
                 transitionOut: 'flipOutX',
@@ -256,8 +259,8 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
         }
         if (data.auth_info == '') {
             notice.error({
-                title: '消息通知',
-                message: '请输入需要查询的内容',
+                title: t('home.message_notice'),
+                message: t('home.query_content_required'),
                 animateInside: true,
                 position: 'topCenter',
                 transitionOut: 'flipOutX',
@@ -278,7 +281,7 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
                 if (res.code == 0) {
                     if (res.data.status == 1) {
                         notice.warning({
-                            title: '查询通知',
+                            title: t('home.query_notice'),
                             message: res.msg,
                             animateInside: true,
                             position: 'topCenter',
@@ -288,7 +291,7 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
                         });
                     } else {
                         notice.success({
-                            title: '查询通知',
+                            title: t('home.query_notice'),
                             message: res.msg,
                             animateInside: true,
                             position: 'topCenter',
@@ -299,7 +302,7 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
                     }
                 } else {
                     notice.error({
-                        title: '查询通知',
+                        title: t('home.query_notice'),
                         message: res.msg,
                         animateInside: true,
                         position: 'topCenter',
@@ -312,8 +315,8 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
             error: function () {
                 admin.removeLoading('#divLoading', true, true);
                 notice.error({
-                    title: '查询通知',
-                    message: '服务器错误',
+                    title: t('home.query_notice'),
+                    message: t('common.server_error'),
                     animateInside: true,
                     position: 'topCenter',
                     transitionOut: 'flipOutX',

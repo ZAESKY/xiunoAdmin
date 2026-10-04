@@ -8,7 +8,7 @@ return [
     // cookie 保存路径
     'path'      => '/',
     // cookie 有效域名
-    'domain'    => '',
+    'domain'    => env('cookie.domain', ''),
     //  cookie 启用安全传输（线上请配合 HTTPS 设为 true）
     'secure'    => env('cookie.secure', false),
     // httponly设置（防止 JS 读取 cookie，降低 XSS 风险）

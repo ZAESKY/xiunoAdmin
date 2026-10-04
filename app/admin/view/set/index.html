@@ -20,7 +20,7 @@
                                 <div class="layui-input-block">
                                     {switch $item.type}
                                     {case string}
-                                    <input {$item.extend} type="text" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="layui-input"
+                                    <input {$item.extend} type="{$item.is_secret?'password':'text'}" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="layui-input"
                                            lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} lay-direction="1"/>
                                     {/case}
                                     {case text}
@@ -34,10 +34,10 @@
                                         <table class="layui-table" id="addField{$item.name}">
                                             <tr>
                                                 <td>
-                                                    <input type="text" id="key{$item.name}" class="layui-input" lay-tips="请输入键名"/>
+                                                    <input type="text" id="key{$item.name}" class="layui-input" lay-tips="{:t('set_ui.key_placeholder')}"/>
                                                 </td>
                                                 <td>
-                                                    <input type="text" id="value{$item.name}" class="layui-input" lay-tips="请输入键值"/>
+                                                    <input type="text" id="value{$item.name}" class="layui-input" lay-tips="{:t('set_ui.value_placeholder')}"/>
                                                 </td>
                                                 <td>
                                                     <a class="layui-btn layui-btn-sm layui-icon layui-icon-add-1" onclick="AddField('{$item.name}')"></a>
@@ -51,8 +51,14 @@
                                                            lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} lay-direction="1"/>
                                                 </td>
                                                 <td>
+                                                    {if $item.name == 'alipay_config' && ($k == 'publickey' || $k == 'privatekey')}
+                                                    <textarea {$item.extend} name="row[{$item.name}][value][{$i}]" class="layui-textarea"
+                                                              style="min-height:120px;font-family:monospace;word-break:break-all;"
+                                                              placeholder="{:t('set_ui.private_key_placeholder')}">{$v|htmlentities}</textarea>
+                                                    {else/}
                                                     <input {$item.extend} type="text" name="row[{$item.name}][value][{$i}]" value="{$v|htmlentities}" class="layui-input"
                                                            lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} lay-direction="1"/>
+                                                    {/if}
                                                 </td>
                                                 <td>
                                                     <a class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete" onclick="DeleteField('{$item.name}','{$i}')"></a>
@@ -75,7 +81,6 @@
                                                 tr.remove();
                                                 delete data[key];
                                                 textarea.val(JSON.stringify(data));
-                                                console.log(data)
 
                                             }
 
@@ -86,11 +91,11 @@
                                                 var value = $('#value' + id).val();
                                                 var length = new Date().valueOf();
                                                 if (key == '') {
-                                                    notice.msg('请填写键名！', {icon: 2});
+                                                    notice.msg('{:t("notify.config_key_empty")}', {icon: 2});
                                                     return false;
                                                 }
                                                 if (value == '') {
-                                                    notice.msg('请填写键值！', {icon: 2});
+                                                    notice.msg('{:t("notify.config_value_empty")}', {icon: 2});
                                                     return false;
                                                 }
                                                 $('#addField' + id).append('<tr id="tr' + id + length + '"><td><input type="text" name="row[' + id + '][' + length + '][key]" value="' + key + '" class="layui-input"/></td><td><input type="text" name="row[' + id + '][' + length + '][value]" value="' + value + '" class="layui-input"/></td><td><a class="layui-btn layui-btn-sm layui-btn-danger layui-icon layui-icon-delete" onclick="DeleteField(\'' + id + '\',\'' + length + '\')"></a></td></tr>');
@@ -98,7 +103,6 @@
                                                 $('#value' + id).val('');
                                                 data[key] = value;
                                                 textarea.val(JSON.stringify(data));
-                                                console.log(length);
                                             }
                                         });
                                     </script>
@@ -193,10 +197,10 @@
                                     <div class="layui-form-item">
                                         <div class="layui-upload-drag" id="image{$item.name}">
                                             <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                            <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
+                                            <p>{:t('set_ui.drop_upload')}</p>
                                             <div class="layui-hide" id="uploadImage{$item.name}">
                                                 <hr>
-                                                <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="img{$item.name}" style="max-width: 196px">
+                                                <img src="" alt="{:t('set_ui.upload_preview_alt')}" id="img{$item.name}" style="max-width: 196px">
                                             </div>
                                         </div>
                                     </div>
@@ -214,16 +218,16 @@
                                                     obj.preview(function(index, file, result){
                                                         $('#img{$item.name}').attr('src', result); //图片链接（base64）
                                                     });
-                                                    notice.msg('上传中...', {icon: 4, close: true});
+                                                    notice.msg('{:t("app_ui.uploading")}', {icon: 4, close: true});
                                                 }
                                                 ,done: function(res){
                                                     notice.destroy();
                                                     if(res.code == 0){
-                                                        notice.msg('上传成功！', {icon: 1, audio:'1'});
+                                                        notice.msg('{:t("upload.upload_success")}', {icon: 1, audio:'1'});
                                                         $("input[name='row[{$item.name}]']").val(res.data.path);
                                                         layui.$('#uploadImage{$item.name}').removeClass('layui-hide').find('img').attr('src', res.files.file);
                                                     }else{
-                                                        notice.msg('上传失败！', {icon: 2, audio:'1'});
+                                                        notice.msg('{:t("common.upload_failed")}', {icon: 2, audio:'1'});
                                                     }
                                                 }
                                             });
@@ -242,14 +246,14 @@
                                         <input type="hidden" id="status" value="0"/>
                                         <div class="layui-upload-drag" id="fileUpload{$item.name}">
                                             <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                            <p>点击{:t('common.upload')}，或将文件拖拽到此处</p>
+                                            <p>{:t('set_ui.drop_upload')}</p>
                                             <div class="layui-hide" id="uploadFile{$item.name}">
                                                 <hr>
                                                 <div class="layui-form-item">
-                                                    <img src="" alt="{:t('common.upload')}{:t('common.success')}后渲染" id="fileImg{$item.name}" style="max-width: 196px">
+                                                    <img src="" alt="{:t('set_ui.upload_preview_alt')}" id="fileImg{$item.name}" style="max-width: 196px">
                                                 </div>
                                                 <div class="layui-form-item">
-                                                    <label class="layui-form-label">文件名</label>
+                                                    <label class="layui-form-label">{:t('version_ui.file_name')}</label>
                                                     <div class="layui-input-block">
                                                         <input type="text" name="name" id="name" value="" lay-verify="title" autocomplete="off" readonly="true" class="layui-input">
                                                     </div>
@@ -322,7 +326,6 @@
                                                             var totalPage = parseInt($('#totalPage').val());
                                                             element.progress('uploadProgress{$item.name}', Math.ceil(page * 100 / totalPage) + '%');
                                                             page = page + 1;
-                                                            console.log(page);
                                                             $('#page').val(page);
                                                             $('#status').val('1');
                                                         } else if (res.data.status == 2) { //上传完成
@@ -330,14 +333,13 @@
                                                             $('#status').val('2');
                                                             $('#downUrl').val(res.data.downUrl);
                                                             layui.$('#uploadFile{$item.name}').removeClass('layui-hide').find('img').attr('src', '{__MODULE__}fileChoose/img/file.png');
-                                                            notice.msg('上传成功', {icon: 1,audio: '1',onOpening: function () {
+                                                            notice.msg('{:t("version_ui.upload_success")}', {icon: 1,audio: '1',onOpening: function () {
                                                                     $('.mask').hide();
                                                                     $('.loading').hide();}
                                                             });
                                                         } else { //上传错误
                                                             $('#status').val('-1');
                                                             element.progress('uploadProgress{$item.name}', '0%');
-                                                            console.log(!typeof (res.data.downUrl) == "undefined");
                                                             if (typeof (res.data.downUrl) == "undefined") {
                                                             } else {
                                                                 $('#downUrl').val(res.data.downUrl);
@@ -350,7 +352,6 @@
                                                     }else{
                                                         $('#status').val('-1');
                                                         element.progress('uploadProgress{$item.name}', '0%');
-                                                        console.log(!typeof (res.data.downUrl) == "undefined");
                                                         if (typeof (res.data.downUrl) == "undefined") {
                                                         } else {
                                                             $('#downUrl').val(res.data.downUrl);
@@ -362,14 +363,14 @@
                                                     }
                                                 },
                                                 error: function(){
-                                                    notice.msg('服务器错误', {icon: 2,audio: '1',onOpening: function () {
+                                                    notice.msg('{:t("common.server_error")}', {icon: 2,audio: '1',onOpening: function () {
                                                             $('.mask').hide();
                                                             $('.loading').hide();}
                                                     });
                                                 }
                                             });
                                             form.on('submit(SF_DeleteFile{$item.name})', function () {
-                                                notice.msg('正在执行中...', {icon: 4, close: true});
+                                                notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                                                 $.ajax({
                                                     type: "POST",
                                                     url: '{$item.upload.delete.url}',
@@ -386,7 +387,7 @@
                                                     },
                                                     error: function() {
                                                         notice.destroy();
-                                                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                                        notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                                                     }
                                                 });
                                             });
@@ -394,8 +395,8 @@
                                     </script>
                                     {/case}
                                     {case bool}
-                                    <input type="radio" name="row[{$item.name}]" value="1" title="开启" {if $item.value==1}checked{/if}/>
-                                    <input type="radio" name="row[{$item.name}]" value="0" title="关闭" {if $item.value!=1}checked{/if}/>
+                                    <input type="radio" name="row[{$item.name}]" value="1" title="{:t('common.open')}" {if $item.value==1}checked{/if}/>
+                                    <input type="radio" name="row[{$item.name}]" value="0" title="{:t('common.close')}" {if $item.value!=1}checked{/if}/>
                                     {/case}
                                     {case custom}
                                     {$item.extend_html}
@@ -485,48 +486,48 @@
 
 
 <script type="text/html" id="noticeBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <script type="text/html" id="noticeState">
-    <input type="checkbox" lay-filter="noticeStateCk" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" {{d.status==1?'checked':''}}>
+    <input type="checkbox" lay-filter="noticeStateCk" value="{{d.id}}" lay-skin="switch" lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}}>
 </script>
 <script type="text/html" id="noticeDialog">
     <form id="noticeForm" lay-filter="noticeForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <input name="action" type="hidden" value="edit"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">标题</label>
+            <label class="layui-form-label layui-form-required">{:t('feedback.title')}</label>
             <div class="layui-input-block">
-                <input type="text" name="title" placeholder="公告标题" class="layui-input" lay-verType="tips" lay-verify="required"/>
+                <input type="text" name="title" placeholder="{:t('set_ui.announcement_title')}" class="layui-input" lay-verType="tips" lay-verify="required"/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">内容</label>
+            <label class="layui-form-label layui-form-required">{:t('auth_portal.content')}</label>
             <div class="layui-input-block">
                 <textarea id="noticeContentEditor" name="content" class="layui-textarea" style="min-height:220px;resize:vertical;"></textarea>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">排序</label>
+            <label class="layui-form-label">{:t('plugin_ui.sort')}</label>
             <div class="layui-input-block">
-                <input type="number" name="sort" value="0" placeholder="数字越小越靠前" class="layui-input" style="width:120px;"/>
+                <input type="number" name="sort" value="0" placeholder="{:t('set_ui.sort_hint')}" class="layui-input" style="width:120px;"/>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="noticeSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="noticeSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
 
 <script type="text/html" id="carouselBar">
-    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>修改</a>
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 
 <script type="text/html" id="carouselState">
-    <input type="checkbox" lay-filter="carouselStateCk" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" {{d.status==1?'checked':''}}>
+    <input type="checkbox" lay-filter="carouselStateCk" value="{{d.id}}" lay-skin="switch" lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}}>
 </script>
 
 <script type="text/html" id="carouselDialog">
@@ -534,36 +535,36 @@
         <input name="id" type="hidden"/>
         <input name="action" type="hidden" value="edit"/>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">标题</label>
+            <label class="layui-form-label layui-form-required">{:t('feedback.title')}</label>
             <div class="layui-input-block">
-                <input type="text" name="title" placeholder="轮播图标题" class="layui-input" lay-verType="tips" lay-verify="required"/>
+                <input type="text" name="title" placeholder="{:t('set_ui.carousel_title')}" class="layui-input" lay-verType="tips" lay-verify="required"/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">图片</label>
+            <label class="layui-form-label layui-form-required">{:t('set_ui.image')}</label>
             <div class="layui-input-block">
-                <input type="text" name="image" id="carouselImageInput" placeholder="请上传图片" class="layui-input" lay-verType="tips" lay-verify="required"/>
-                <button type="button" class="layui-btn layui-btn-normal" id="carouselUploadBtn" style="margin-top:8px;"><i class="layui-icon layui-icon-upload"></i> 上传图片</button>
+                <input type="text" name="image" id="carouselImageInput" placeholder="{:t('set_ui.upload_image_placeholder')}" class="layui-input" lay-verType="tips" lay-verify="required"/>
+                <button type="button" class="layui-btn layui-btn-normal" id="carouselUploadBtn" style="margin-top:8px;"><i class="layui-icon layui-icon-upload"></i> {:t('set_ui.upload_image')}</button>
                 <div id="carouselImgPreview" style="margin-top:8px;display:none;">
                     <img src="" style="max-width:260px;border-radius:6px;border:1px solid #eee;">
                 </div>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">跳转地址</label>
+            <label class="layui-form-label">{:t('set_ui.target_url')}</label>
             <div class="layui-input-block">
-                <input type="text" name="url" placeholder="点击跳转的URL地址，留空不跳转" class="layui-input"/>
+                <input type="text" name="url" placeholder="{:t('set_ui.target_url_hint')}" class="layui-input"/>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">排序</label>
+            <label class="layui-form-label">{:t('plugin_ui.sort')}</label>
             <div class="layui-input-block">
-                <input type="number" name="sort" value="0" placeholder="数字越小越靠前" class="layui-input" style="width:120px;"/>
+                <input type="number" name="sort" value="0" placeholder="{:t('set_ui.sort_hint')}" class="layui-input" style="width:120px;"/>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="carouselSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="carouselSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -600,7 +601,7 @@
             $.each($('#formBasForm').serializeArray(), function (_, item) {
                 data.field[item.name] = item.value;
             });
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: '{:url("/Set/edit")}',
@@ -616,7 +617,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
             return false;
@@ -645,16 +646,16 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 60},
-            {field: 'image', title: '图片', width: 100, templet: function(d) {
+            {field: 'image', title: '{:t("set_ui.image")}', width: 100, templet: function(d) {
                 return '<img src="'+d.image+'" style="width:60px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #eee;" onerror="this.style.display=\'none\'">';
             }},
-            {field: 'title', title: '标题', minWidth: 140},
-            {field: 'url', title: '跳转地址', minWidth: 180, templet: function(d) {
+            {field: 'title', title: '{:t("feedback.title")}', minWidth: 140},
+            {field: 'url', title: '{:t("set_ui.target_url")}', minWidth: 180, templet: function(d) {
                 return d.url ? '<span style="color:#3a6fd8;">'+d.url+'</span>' : '<span style="color:#bbb;">-</span>';
             }},
-            {field: 'sort', title: '排序', width: 70},
-            {field: 'status', title: '状态', templet: '#carouselState', width: 90},
-            {title: '操作', toolbar: '#carouselBar', width: 160}
+            {field: 'sort', title: '{:t("plugin_ui.sort")}', width: 70},
+            {field: 'status', title: '{:t("common.status")}', templet: '#carouselState', width: 90},
+            {title: '{:t("common.operation")}', toolbar: '#carouselBar', width: 160}
         ]]
     });
 
@@ -665,9 +666,9 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
     table.on('tool(carouselTable)', function(obj) {
         if (obj.event === 'edit') showCarouselEdit(obj.data);
         else if (obj.event === 'del') {
-            layer.confirm('确定删除该轮播图吗？', {icon:3, shade:.1}, function(i) {
+            layer.confirm('{:t("set_ui.carousel_delete_confirm")}', {icon:3, shade:.1}, function(i) {
                 layer.close(i);
-                notice.msg('删除中...', {icon:4, close:true});
+                notice.msg('{:t("set_ui.deleting")}', {icon:4, close:true});
                 $.ajax({
                     type:'POST', url:'{:url("/Set/carousel")}',
                     data:{action:'drop', id:obj.data.id}, dataType:'json',
@@ -688,7 +689,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
     function showCarouselEdit(mData) {
         admin.open({
             type: 1, area: ['600px', '420px'],
-            title: (mData ? '修改' : '添加') + '轮播图',
+            title: mData ? '{:t("set_ui.edit_carousel")}' : '{:t("set_ui.add_carousel")}',
             content: $('#carouselDialog').html(),
             success: function(layero, dIndex) {
                 form.render();
@@ -699,14 +700,14 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                 upload.render({
                     elem: '#carouselUploadBtn',
                     url: '{:url("/Upload/image")}',
-                    before: function() { notice.msg('上传中...', {icon:4, close:true}); },
+                    before: function() { notice.msg('{:t("app_ui.uploading")}', {icon:4, close:true}); },
                     done: function(res) {
                         notice.destroy();
                         if (res.code == 0) {
                             $('#carouselImageInput').val(res.data.path);
                             $('#carouselImgPreview').show().find('img').attr('src', res.data.path);
-                            notice.msg('上传成功', {icon:1});
-                        } else { notice.msg(res.msg || '上传失败', {icon:2}); }
+                            notice.msg('{:t("version_ui.upload_success")}', {icon:1});
+                        } else { notice.msg(res.msg || '{:t("common.upload_failed")}', {icon:2}); }
                     }
                 });
                 $('#carouselImageInput').on('input', function() {
@@ -714,7 +715,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                     v ? $('#carouselImgPreview').show().find('img').attr('src', v) : $('#carouselImgPreview').hide();
                 });
                 form.on('submit(carouselSubmit)', function(data) {
-                    notice.msg('保存中...', {icon:4, close:true});
+                    notice.msg('{:t("set_ui.saving")}', {icon:4, close:true});
                     $.ajax({
                         type:'POST', url:'{:url("/Set/carousel")}',
                         data: data.field, dataType:'json',
@@ -754,11 +755,11 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 60},
-            {field: 'title', title: '标题', minWidth: 200},
-            {field: 'sort', title: '排序', width: 70},
-            {field: 'status', title: '状态', templet: '#noticeState', width: 90},
-            {field: 'created_at', title: '创建时间', width: 160},
-            {title: '操作', toolbar: '#noticeBar', width: 160}
+            {field: 'title', title: '{:t("feedback.title")}', minWidth: 200},
+            {field: 'sort', title: '{:t("plugin_ui.sort")}', width: 70},
+            {field: 'status', title: '{:t("common.status")}', templet: '#noticeState', width: 90},
+            {field: 'created_at', title: '{:t("payment_ui.create_time")}', width: 160},
+            {title: '{:t("common.operation")}', toolbar: '#noticeBar', width: 160}
         ]]
     });
 
@@ -769,9 +770,9 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
     table.on('tool(noticeTable)', function(obj) {
         if (obj.event === 'edit') showNoticeEdit(obj.data);
         else if (obj.event === 'del') {
-            layer.confirm('确定删除该公告吗？', {icon:3, shade:.1}, function(i) {
+            layer.confirm('{:t("set_ui.announcement_delete_confirm")}', {icon:3, shade:.1}, function(i) {
                 layer.close(i);
-                admin.msg('删除中...', {icon:4, close:true});
+                admin.msg('{:t("set_ui.deleting")}', {icon:4, close:true});
                 $.ajax({
                     type:'POST', url:'{:url("/Set/userNotice")}',
                     data:{action:'drop', id:obj.data.id}, dataType:'json',
@@ -792,7 +793,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
     function showNoticeEdit(mData) {
         admin.open({
             type: 1, area: ['700px', '520px'], maxmin: true,
-            title: (mData ? '修改' : '新增') + '公告',
+            title: mData ? '{:t("set_ui.edit_announcement")}' : '{:t("set_ui.add_announcement")}',
             content: $('#noticeDialog').html(),
             success: function(layero, dIndex) {
                 form.render();
@@ -807,7 +808,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'layedit'], function () 
                 form.on('submit(noticeSubmit)', function(data) {
                     layedit.sync(editIndex);
                     data.field.content = $('#noticeContentEditor').val();
-                    notice.msg('保存中...', {icon:4, close:true});
+                    notice.msg('{:t("set_ui.saving")}', {icon:4, close:true});
                     $.ajax({
                         type:'POST', url:'{:url("/Set/userNotice")}',
                         data: data.field, dataType:'json',

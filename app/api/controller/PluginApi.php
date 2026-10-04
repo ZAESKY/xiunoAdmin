@@ -19,6 +19,17 @@ class PluginApi extends Frontend
     }
 
     /**
+     * 签发用户令牌（插件中心登录）
+     *
+     * 配合 A-05 修复：validateUser() 现在强制校验 user_token，
+     * 客户端需先调用本接口取得令牌。
+     */
+    public function authUser()
+    {
+        return $this->service->authUser();
+    }
+
+    /**
      * 获取插件列表
      */
     public function getList()

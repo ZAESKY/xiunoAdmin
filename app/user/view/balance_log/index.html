@@ -2,7 +2,7 @@
 <div class="layui-fluid">
     <div class="layui-card">
         <div class="layui-card-header">
-            <i class="layui-icon layui-icon-rmb"></i> 余额明细
+            <i class="layui-icon layui-icon-rmb"></i> {:t('accounting.balance_detail')}
         </div>
         <div class="layui-card-body">
             <table id="SF_BalanceTable" lay-filter="SF_BalanceTable"></table>
@@ -11,16 +11,15 @@
 </div>
 
 <script type="text/html" id="SF_TypeTpl">
-    {{# var types = {recharge:'充值',rebate:'返利',cdkey_exchange:'卡密兑换',deduct:'消费扣款',admin_edit:'管理员操作',refund:'退款',deduct_plugin:'购买插件',plugin_income:'插件收入',withdraw_apply:'提现申请',withdraw_cancel:'提现撤回',withdraw_reject:'提现驳回',withdraw_reject_refund:'提现驳回返还'}; }}
     <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">
-        {{types[d.type] || d.type}}
+        {{d.type_label}}
     </span>
 </script>
 <script type="text/html" id="SF_AmountTpl">
     {{# if(d.amount > 0){ }}
-    <span style="color:#5cb85c;font-weight:bold;">+{{d.amount}} 元</span>
+    <span class="text-success">+{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } else { }}
-    <span style="color:#d9534f;">{{d.amount}} 元</span>
+    <span class="text-danger">{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } }}
 </script>
 
@@ -34,11 +33,11 @@ layui.use(['table'], function(){
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 70},
-            {field: 'type', title: '类型', width: 100, templet: '#SF_TypeTpl'},
-            {field: 'amount', title: '金额', width: 120, templet: '#SF_AmountTpl'},
-            {field: 'balance', title: '余额', width: 120, templet: function(d){ return (d.balance||'0.00') + ' 元'; }},
-            {field: 'description', title: '说明', minWidth: 200},
-            {field: 'created_at', title: '时间', width: 170}
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_TypeTpl'},
+            {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: '#SF_AmountTpl'},
+            {field: 'balance', title: '{:t("accounting.balance")}', width: 130, templet: function(d){ return (d.balance||'0.00') + ' {:t("accounting.currency_unit")}'; }},
+            {field: 'description', title: '{:t("accounting.description")}', minWidth: 200},
+            {field: 'created_at', title: '{:t("accounting.time")}', width: 170}
         ]]
     });
 });

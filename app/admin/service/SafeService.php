@@ -80,69 +80,67 @@ class SafeService extends BaseService
     }
     private function checkSafeMsg()
     {
-        /***********************压缩包检测区 开始***********************/
-        $SF_zip_arr = array('readme.txt.zip', 'SF_auth.sql.zip', 'think.zip', 'README.md.zip', 'wwwroot.zip', 'www.zip', 'web.zip', 'bf.zip', 'beifen.zip', 'backup.zip', 'yuanma.zip', '1.zip', '2.zip', 'shouquan.zip', 'sq.zip', 'sf.zip', 'wz.zip', '1.zip', '2.zip', '123.zip');
-        foreach ($SF_zip_arr as $SF_zip) {
-            if (file_exists(ROOT_PATH . $SF_zip)) {
-                unlink(ROOT_PATH . $SF_zip);
-            }
-        }
-        $SF_ALL = glob(ROOT_PATH . 'SF授权系统*');
-        foreach ($SF_ALL as $SF_all) {
-            unlink($SF_all);
-        }
-        /***********************压缩包检测区 结束***********************/
+        // 安全检测必须保持只读。旧实现会在页面检测时直接删除命中特定名称的压缩包，
+        // 既不可回滚，也可能误删部署备份；下方仅报告压缩包风险，不再改动文件。
 
         /***********************系统环境检测区 开始***********************/
         $SF_danger = array();
         $SF_warning = array();
         $SF_info = array();
         if (strpos($_SERVER['SERVER_SOFTWARE'], 'kangle') !== false && function_exists('pcntl_exec')) {
-            $SF_danger[] = '当前主机为kangle且开启了php的pcntl组件，会被黑客入侵，请联系主机商修复或更换主机';
+            $SF_danger[] = t('safe_report.kangle_pcntl');
         }
         if (strpos($_SERVER['SERVER_SOFTWARE'], 'kangle') !== false && count(glob('/vhs/kangle/etc/*')) > 1) {
-            $SF_danger[] = '当前主机为kangle且未设置open_basedir防跨站，会被黑客入侵，请联系主机商修复或更换主机';
+            $SF_danger[] = t('safe_report.kangle_open_basedir');
         }
         /***********************系统环境检测区 结束***********************/
 
         /***********************密码强度检测区 开始***********************/
-        if (conf('second_pwd') === '123456') {
-            $SF_warning[] = '请及时修改默认二级密码 <a ew-href="'.url('/Set/index').'" class="layui-btn layui-btn-xs">修改密码</a>';
+        $secondPwd = (string) (conf('second_pwd') ?? '');
+        $kfqq = (string) (conf('kfqq') ?? '');
+        $adminUsername = (string) ($this->adminInfo['username'] ?? '');
+        $adminPassword = (string) ($this->adminInfo['password'] ?? '');
+        $adminQq = (string) ($this->adminInfo['qq'] ?? '');
+
+        if ($secondPwd === '123456') {
+            $SF_warning[] = t('safe_report.default_secondary_password', ['url' => url('/Set/index')]);
         } else {
-            if (strlen(conf('second_pwd')) < 6 || is_numeric(conf('second_pwd')) && strlen(conf('second_pwd')) <= 10 || conf('second_pwd') === conf('kfqq')) {
-                $SF_warning[] = '二级密码过于简单，请不要使用较短的纯数字或自己的QQ号当做密码';
+            if (strlen($secondPwd) < 6 || is_numeric($secondPwd) && strlen($secondPwd) <= 10 || $secondPwd === $kfqq) {
+                $SF_warning[] = t('safe_report.secondary_password_weak');
             } else {
-                if ($this->adminInfo['username'] === conf('second_pwd')) {
-                    $SF_warning[] = '网站管理员用户名与二级密码相同，极易被黑客破解，请及时修改密码';
+                if ($adminUsername === $secondPwd) {
+                    $SF_warning[] = t('safe_report.secondary_password_matches_username');
                 }
             }
         }
 
-        if ($this->adminInfo['password'] === '123456') {
-            $SF_warning[] = '请及时修改默认管理员密码 <a ew-href="'.url('/Index/EditPassword').'" class="layui-btn layui-btn-xs">修改密码</a>';
+        if ($adminPassword === '123456') {
+            $SF_warning[] = t('safe_report.default_admin_password', ['url' => url('/Index/EditPassword')]);
         } else {
-            if (strlen($this->adminInfo['password']) < 6 || is_numeric($this->adminInfo['password']) && strlen($this->adminInfo['password']) <= 10 || $this->adminInfo['password'] === conf('kfqq') || $this->adminInfo['password'] === $this->adminInfo['qq']) {
-                $SF_warning[] = '网站管理员密码过于简单，请不要使用较短的纯数字或自己的QQ号当做密码';
+            if (strlen($adminPassword) < 6 || is_numeric($adminPassword) && strlen($adminPassword) <= 10 || $adminPassword === $kfqq || $adminPassword === $adminQq) {
+                $SF_warning[] = t('safe_report.admin_password_weak');
             } else {
-                if ($this->adminInfo['username'] === $this->adminInfo['password']) {
-                    $SF_warning[] = '网站管理员用户名与密码相同，极易被黑客破解，请及时修改密码';
+                if ($adminUsername === $adminPassword) {
+                    $SF_warning[] = t('safe_report.admin_password_matches_username');
                 }
             }
         }
-        if ($this->checkPassword($this->adminInfo['password']) >0 && $this->checkPassword($this->adminInfo['password']) <= 4 ) {
-            $SF_warning[] = '<b style="color:red">弱</b> 建议使用复杂一点管理员密码';
-        }else if ($this->checkPassword($this->adminInfo['password']) >=5 && $this->checkPassword($this->adminInfo['password']) <= 7 ) {
-            $SF_info[] = '<b style="color:orange">中</b> 当前密码等级较强，可适当加些符号提高管理员密码难度';
+        if ($this->checkPassword($adminPassword) >0 && $this->checkPassword($adminPassword) <= 4 ) {
+            $SF_warning[] = t('safe_report.password_strength_weak');
+        }else if ($this->checkPassword($adminPassword) >=5 && $this->checkPassword($adminPassword) <= 7 ) {
+            $SF_info[] = t('safe_report.password_strength_medium');
         }
         /***********************密码强度检测区 结束***********************/
 
         /***********************数据库密码强度检测区 开始***********************/
         $dbconfig = config('database.connections.mysql');
-        if (strlen($dbconfig['password']) < 5 || is_numeric($dbconfig['password']) && strlen($dbconfig['password']) <= 10 || $dbconfig['password'] === conf('kfqq')) {
-            $SF_warning[] = '当前主机的数据库密码过于简单，请不要使用较短的纯数字或自己的QQ号当做数据库密码';
+        $dbPassword = (string) ($dbconfig['password'] ?? '');
+        $dbUsername = (string) ($dbconfig['username'] ?? '');
+        if (strlen($dbPassword) < 5 || is_numeric($dbPassword) && strlen($dbPassword) <= 10 || $dbPassword === $kfqq) {
+            $SF_warning[] = t('safe_report.database_password_weak');
         } else {
-            if ($dbconfig['password'] === $dbconfig['username']) {
-                $SF_warning[] = '当前主机的数据库用户名与密码相同，极易被黑客破解，请及时修改数据库密码';
+            if ($dbPassword === $dbUsername) {
+                $SF_warning[] = t('safe_report.database_password_matches_username');
             }
         }
         /***********************数据库密码强度检测区 结束***********************/
@@ -152,7 +150,7 @@ class SafeService extends BaseService
         $SF_all_7z = glob(ROOT_PATH . '*.7z');
         $SF_all_rar = glob(ROOT_PATH . '*.rar');
         if ($SF_all_zip && count($SF_all_zip) > 0 || $SF_all_7z && count($SF_all_7z) > 0 || $SF_all_rar && count($SF_all_rar) > 0) {
-            $SF_info[] = '网站根目录存在压缩包文件，可能会被人恶意获取并泄露数据库密码，请及时删除';
+            $SF_info[] = t('safe_report.archive_in_root');
         }
         /***********************压缩包检测区 结束***********************/
         $SF_msg = array("danger" => $SF_danger, "warning" => $SF_warning, "info" => $SF_info);

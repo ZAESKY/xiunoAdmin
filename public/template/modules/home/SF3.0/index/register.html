@@ -1,44 +1,51 @@
 {include file="index/header"}
 {$background_image|raw}
 <div class="vp-card" style="max-width:520px;margin:0 auto;">
-    <h2 class="vp-card-title">用户注册</h2>
+    <h2 class="vp-card-title">{:t('registration.page_title')}</h2>
     <form class="layui-form" id="registerForm">
         <div class="layui-form-item">
-            <label class="vp-label">选择应用</label>
+            <label class="vp-label">{:t('home.select_app')}</label>
             <select name="appid" lay-filter="register_app" lay-search lay-verify="required">
-                <option value="">请选择应用</option>
+                <option value="">{:t('home.select_app_placeholder')}</option>
                 {volist name="app_list.data.data" id="res"}
                 <option value="{$res.id}">{$res.name}</option>
                 {/volist}
             </select>
         </div>
         <div class="layui-form-item">
-            <label class="vp-label">用户名</label>
-            <input type="text" name="username" placeholder="请输入用户名" class="layui-input" lay-verify="required"/>
+            <label class="vp-label">{:t('registration.username')}</label>
+            <input type="text" name="username" placeholder="{:t('registration.username_placeholder')}" class="layui-input" lay-verify="required"/>
         </div>
         <div class="vp-form-row vp-register-grid">
             <div class="layui-form-item">
-                <label class="vp-label">密码</label>
-                <input type="password" name="password" placeholder="请输入密码" class="layui-input" lay-verify="required"/>
+                <label class="vp-label">{:t('registration.password')}</label>
+                <input type="password" name="password" placeholder="{:t('registration.password_placeholder')}" class="layui-input" lay-verify="required"/>
             </div>
             <div class="layui-form-item">
-                <label class="vp-label">确认密码</label>
-                <input type="password" name="confirmPassword" placeholder="请确认密码" class="layui-input" lay-verify="required"/>
+                <label class="vp-label">{:t('registration.confirm_password')}</label>
+                <input type="password" name="confirmPassword" placeholder="{:t('registration.confirm_password_placeholder')}" class="layui-input" lay-verify="required"/>
             </div>
         </div>
         <div class="vp-form-row vp-register-grid">
             <div class="layui-form-item">
-                <label class="vp-label">QQ</label>
-                <input type="number" name="qq" placeholder="请输入要绑定的QQ" class="layui-input" lay-verify="required"/>
+                <label class="vp-label">{:t('registration.qq')}</label>
+                <input type="number" name="qq" placeholder="{:t('registration.qq_placeholder')}" class="layui-input" lay-verify="required"/>
             </div>
             <div class="layui-form-item">
-                <label class="vp-label">邮箱</label>
-                <input type="text" name="email" placeholder="请输入要绑定的邮箱" class="layui-input" lay-verify="required"/>
+                <label class="vp-label">{:t('registration.email')}</label>
+                <input type="text" name="email" placeholder="{:t('registration.email_placeholder')}" class="layui-input" lay-verify="required"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="vp-label">{:t('registration.email_code')}</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <input type="text" name="code" inputmode="numeric" maxlength="6" placeholder="{:t('registration.email_code_placeholder')}" class="layui-input" lay-verify="required" style="flex:1;"/>
+                <button type="button" class="vp-btn vp-btn-ghost" id="SF_Send_Reg_Code" style="white-space:nowrap;">{:t('registration.send_code')}</button>
             </div>
         </div>
         <div class="vp-form-actions">
-            <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_RegisterSubmit" lay-submit>注册</button>
-            <button type="button" class="vp-btn vp-btn-ghost" id="SF_Register_Reset">重置</button>
+            <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_RegisterSubmit" lay-submit>{:t('registration.submit')}</button>
+            <button type="button" class="vp-btn vp-btn-ghost" id="SF_Register_Reset">{:t('common.reset')}</button>
         </div>
     </form>
 </div>
@@ -58,10 +65,46 @@ layui.use(['form', 'admin', 'notice'], function () {
     var admin = layui.admin;
     var notice = layui.notice;
 
+    function startMailCooldown(button) {
+        var seconds = 60;
+        button.prop('disabled', true).text(seconds + '{:t("password_recovery.retry_suffix")}');
+        var timer = setInterval(function () {
+            seconds--;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                button.prop('disabled', false).text('{:t("registration.send_code")}');
+            } else {
+                button.text(seconds + '{:t("password_recovery.retry_suffix")}');
+            }
+        }, 1000);
+    }
+
+    $('#SF_Send_Reg_Code').on('click', function () {
+        var button = $(this);
+        var email = $.trim($('#registerForm input[name="email"]').val());
+        if (!email) {
+            notice.msg('{:t("registration.enter_email")}', {icon: 2, audio:'1'});
+            return;
+        }
+        button.prop('disabled', true);
+        $.post('{:url("/Ajax/sendRegCode")}', {email: email}, function (res) {
+            if (res.code == 0) {
+                notice.msg(res.msg, {icon: 1, audio:'1'});
+                startMailCooldown(button);
+            } else {
+                button.prop('disabled', false);
+                notice.msg(res.msg, {icon: 2, audio:'1'});
+            }
+        }, 'json').fail(function () {
+            button.prop('disabled', false);
+            notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
+        });
+    });
+
     $("#SF_Register_Reset").click(function(){
         document.getElementById("registerForm").reset();
         form.render('select');
-        notice.msg('已重置表单', {icon: 1, audio:'1'});
+        notice.msg('{:t("registration.reset_success")}', {icon: 1, audio:'1'});
     });
 
     form.on('select(register_app)', function (data) {
@@ -75,7 +118,7 @@ layui.use(['form', 'admin', 'notice'], function () {
                 if (res.code == 0 && res.data.register_notice) {
                     admin.open({
                         type: 1,
-                        title: '注册公告',
+                        title: '{:t("registration.notice")}',
                         shade: .1,
                         content: '<div style="padding:20px;line-height:1.8;">'+res.data.register_notice+'</div>'
                     });
@@ -85,7 +128,7 @@ layui.use(['form', 'admin', 'notice'], function () {
     });
 
     form.on('submit(SF_RegisterSubmit)', function (data) {
-        notice.msg('正在提交...', {icon: 4, close: true});
+        notice.msg('{:t("registration.submitting")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",
             url: '{:url("/Ajax/register")}',
@@ -95,13 +138,13 @@ layui.use(['form', 'admin', 'notice'], function () {
                 notice.destroy();
                 if (res.code == 0) {
                     notice.success({
-                        title: '注册通知', message: res.msg,
+                        title: '{:t("registration.notice")}', message: res.msg,
                         animateInside:true, position:'topCenter',
                         transitionOut:'flipOutX', displayMode:'2', audio:'1'
                     });
                 } else {
                     notice.error({
-                        title: '注册通知', message: res.msg,
+                        title: '{:t("registration.notice")}', message: res.msg,
                         animateInside:true, position:'topCenter',
                         transitionOut:'flipOutX', displayMode:'2', audio:'1'
                     });
@@ -110,7 +153,7 @@ layui.use(['form', 'admin', 'notice'], function () {
             error: function() {
                 notice.destroy();
                 notice.error({
-                    title: '注册通知', message: '服务器错误',
+                    title: '{:t("registration.notice")}', message: '{:t("common.server_error")}',
                     animateInside:true, position:'topCenter',
                     transitionOut:'flipOutX', displayMode:'2', audio:'1'
                 });

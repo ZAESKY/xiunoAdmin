@@ -15,7 +15,7 @@ class Checkin extends UserBackend
     public function status()
     {
         if (!IS_POST) {
-            return json(message('非法请求', false));
+            return json(message('common.illegal_request', false));
         }
 
         $service = new CheckinService($this->userId, $this->userInfo['username']);
@@ -29,7 +29,7 @@ class Checkin extends UserBackend
     public function doCheckin()
     {
         if (!IS_POST) {
-            return json(message('非法请求', false));
+            return json(message('common.illegal_request', false));
         }
 
         $service = new CheckinService($this->userId, $this->userInfo['username']);
@@ -77,11 +77,11 @@ class Checkin extends UserBackend
     public function myRecords()
     {
         if (!IS_POST) {
-            return json(message('非法请求', false));
+            return json(message('common.illegal_request', false));
         }
 
-        $page = max(1, intval(input('current_page', input('page', 1))));
-        $limit = intval(input('limit', 15));
+        $page = sf_page_number(input('current_page', input('page', 1)));
+        $limit = sf_page_limit(input('limit', null), 15);
 
         try {
             $total = Db::name('checkin_record')

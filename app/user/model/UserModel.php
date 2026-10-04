@@ -69,9 +69,9 @@ class UserModel extends BaseModel
         $username = !empty($post['username'])?$post['username']:null;
         $password = !empty($post['password'])?$post['password']:null;
         $power = !empty($post['power'])?$post['power']:null;
-        $qq = !empty($post['qq'])?intval($post['qq']):null;
+        $qq = !empty($post['qq']) ? trim((string)$post['qq']) : null;
         $email = !empty($post['email'])?$post['email']:'';
-        $balance = !empty($post['balance'])?round($post['balance'],2):0;
+        $balance = !empty($post['balance']) ? sf_money_format($post['balance']) : '0.00';
         $integral = !empty($post['integral'])?intval($post['integral']):0;
         $ip = !empty($post['ip'])?$post['ip']:'';
         $status = !empty($post['status'])?1:0;
@@ -99,6 +99,12 @@ class UserModel extends BaseModel
                     return message(t('user.username_exists') ,false);
                 }
             }
+            if (!empty($qq) && $qq != $row['qq']) {
+                $rowQq = self::where('qq', $qq)->where('id', '<>', $id)->find();
+                if ($rowQq) {
+                    return message('user_action.qq_already_bound', false);
+                }
+            }
             if($power != intval($row['power'])) {
                 if(parent::getPowerPriceInfo($power) == false){
                     return message(t('power.not_exist') ,false);
@@ -115,11 +121,18 @@ class UserModel extends BaseModel
                 if (!$newPowerPriceInfo) {
                     return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]', false);
                 }
-                $price = round(max(floatval($newPowerPriceInfo['money']) - floatval($nowPowerPriceInfo['money']), 0) * floatval($userPowerPriceInfo['adduser_discount'] / 100) ,2);
+                $upgradeCents = max(
+                    sf_money_to_cents($newPowerPriceInfo['money']) - sf_money_to_cents($nowPowerPriceInfo['money']),
+                    0
+                );
+                $price = sf_money_apply_rate(
+                    sf_money_from_cents($upgradeCents),
+                    $userPowerPriceInfo['adduser_discount']
+                );
             }else{
-                $price = 0;
+                $price = '0.00';
             }
-            $allmoney = $price + $balance;
+            $allmoney = sf_money_add($price, $balance);
 
             if($allmoney > $userInfo['balance']){
                 return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
@@ -130,34 +143,40 @@ class UserModel extends BaseModel
                     return message(t('user.integral_insufficient').'<br> '.t('common_ui.integral_field').$userInfo['integral'].' '.t('common_ui.cdkey_type_label').'<br>'.t('common_ui.integral_field').$integral.' '.t('common_ui.cdkey_type_label') ,false);
                 }
             }
-            $remainderBalance = $userInfo['balance'] - $allmoney;
+            $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
             $remainderIntegral = $userInfo['integral'] - $integral;
-            try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral], '代理操作 -'.$allmoney.' 元');
-                if(!$result){
-                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
-                }
-            } catch (\Exception $e) {
-                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-            }
-
             $data = [
                 "power" => $power,
                 "username" => $username,
-                "password" => !empty($password) ? get_password($password) : $row['password'],
+                "password" => !empty($password) ? sf_password_make($password) : $row['password'],
                 "qq" => $qq,
                 "email" => $email,
                 "ip" => $ip,
                 "status" => $status,
             ];
             try{
-                self::where('id', $id)
-                    ->data($data)
-                    ->inc('balance', $balance)
-                    ->inc('integral', $integral)
-                    ->update();
-                if ($balance > 0) {
-                    \app\common\model\BalanceLogModel::add($id, 'admin_edit', $balance, '管理员赠送余额 +'.$balance.' 元');
+                $result = parent::updateUserInfoAnd(
+                    ['balance' => $remainderBalance, 'integral' => $remainderIntegral],
+                    t('user_action.agent_operation', ['amount' => $allmoney]),
+                    static function () use ($id, $userInfo, $data, $balance, $integral) {
+                        $affected = self::where(['id' => $id, 'userid' => $userInfo['id']])
+                            ->data($data)
+                            ->inc('balance', $balance)
+                            ->inc('integral', $integral)
+                            ->update();
+                        if ($affected === false) {
+                            return false;
+                        }
+                        if ($balance > 0) {
+                            \app\common\model\BalanceLogModel::add($id, 'admin_edit', $balance, t('user_action.admin_balance_gift', [
+                                'amount' => $balance,
+                            ]));
+                        }
+                        return true;
+                    }
+                );
+                if (!$result) {
+                    throw new \RuntimeException(t('user_action.edit_subordinate_transaction_failed'));
                 }
                 $content = [
                     'Title' => '编辑用户',
@@ -187,7 +206,7 @@ class UserModel extends BaseModel
             }
         }else{
             if (empty($password)) {
-                return message('请填写密码', false);
+                return message('validation.password_required', false);
             }
             try{
                 $appInfo = parent::getAppInfo($userInfo['appid']);
@@ -197,6 +216,9 @@ class UserModel extends BaseModel
             $row = self::where(['username' => $username, 'appid' => $appid])->find();
             if($row){
                 return message(t('user.username_exists') ,false);
+            }
+            if (!empty($qq) && self::where('qq', $qq)->find()) {
+                return message('user_action.qq_already_bound', false);
             }
             if(parent::getPowerPriceInfo($power) == false){
                 return message(t('power.not_exist') ,false);
@@ -209,8 +231,8 @@ class UserModel extends BaseModel
             if (!$powerPriceInfo) {
                 return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]', false);
             }
-            $price = round($powerPriceInfo['money'] * floatval($userPowerPriceInfo['adduser_discount'] / 100), 2);
-            $allmoney = $price + $balance;
+            $price = sf_money_apply_rate($powerPriceInfo['money'], $userPowerPriceInfo['adduser_discount']);
+            $allmoney = sf_money_add($price, $balance);
 
             if($allmoney > $userInfo['balance']){
                 return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
@@ -221,26 +243,17 @@ class UserModel extends BaseModel
                     return message(t('user.integral_insufficient').'<br> '.t('common_ui.integral_field').$userInfo['integral'].' '.t('common_ui.cdkey_type_label').'<br>'.t('common_ui.integral_field').$integral.' '.t('common_ui.cdkey_type_label') ,false);
                 }
             }
-            $remainderBalance = $userInfo['balance'] - $allmoney;
+            $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
             $remainderIntegral = $userInfo['integral'] - $integral;
-            try{
-                $result = parent::updateUserInfo(['balance' => $remainderBalance, 'integral' => $remainderIntegral], '代理操作 -'.$allmoney.' 元');
-                if(!$result){
-                    return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]' ,false);
-                }
-            } catch (\Exception $e) {
-                return message(t('user.update_info_failed').'[errorCode:ReduceUserBalanceError]',false);
-            }
-
             $data = [
                 "power" => $power,
                 "username" => $username,
-                "password" => get_password($password),
+                "password" => sf_password_make($password),
                 "qq" => $qq,
                 "phone" => '',
                 "wechat_openid" => '',
                 "email" => $email,
-                "balance" => $balance + $appInfo['give_money'],
+                "balance" => sf_money_add($balance, $appInfo['give_money']),
                 "integral" => $integral,
                 "ip" => $ip,
                 "addtime" => datetime(),
@@ -249,10 +262,26 @@ class UserModel extends BaseModel
                 "userid" => $userInfo['id'],
             ];
             try{
-                $newUserId = self::insertGetId($data);
-                if ($balance > 0 || $appInfo['give_money'] > 0) {
-                    $giftAmount = round($balance + $appInfo['give_money'], 2);
-                    \app\common\model\BalanceLogModel::add($newUserId, 'admin_edit', $giftAmount, '新用户初始余额 +'.$giftAmount.' 元');
+                $newUserId = 0;
+                $result = parent::updateUserInfoAnd(
+                    ['balance' => $remainderBalance, 'integral' => $remainderIntegral],
+                    t('user_action.agent_operation', ['amount' => $allmoney]),
+                    static function () use ($data, $balance, $appInfo, &$newUserId) {
+                        $newUserId = intval(self::insertGetId($data));
+                        if ($newUserId <= 0) {
+                            return false;
+                        }
+                        if ($balance > 0 || $appInfo['give_money'] > 0) {
+                            $giftAmount = sf_money_add($balance, $appInfo['give_money']);
+                            \app\common\model\BalanceLogModel::add($newUserId, 'admin_edit', $giftAmount, t('user_action.initial_balance', [
+                                'amount' => $giftAmount,
+                            ]));
+                        }
+                        return true;
+                    }
+                );
+                if (!$result) {
+                    throw new \RuntimeException(t('user_action.add_subordinate_transaction_failed'));
                 }
                 $content = [
                     'Title' => '添加用户',
@@ -374,8 +403,8 @@ class UserModel extends BaseModel
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
-            $limit = !empty($post['limit'])?$post['limit']:10;
-            $current_page = !empty($post['current_page'])?$post['current_page']:1;
+            $limit = sf_page_limit($post['limit'] ?? null, 10);
+            $current_page = sf_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             if(!empty($appid)){
                 $order = 'id';

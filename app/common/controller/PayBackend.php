@@ -2,6 +2,7 @@
 
 namespace app\common\controller;
 
+use think\Exception;
 use think\facade\Cookie;
 use think\facade\View;
 
@@ -49,12 +50,13 @@ class PayBackend extends CommonBase
             $userModel = new \app\user\model\User();
             $userInfo = $userModel->getInfo();
             $this->userInfo = $userInfo;
-            if(!empty($userId) && $sign != data_auth_sign($this->userInfo['appid'].$this->userInfo['username'].$this->userInfo['password'].sf_password_hash())){
-                throw new Exception(t('login.user_session_expired'));
-            }
             if(!$this->userInfo){
                 $this->logOut();
                 return;
+            }
+            $expectedSign = data_auth_sign($this->userInfo['appid'].$this->userInfo['username'].$this->userInfo['password'].sf_password_hash());
+            if(!empty($userId) && !hash_equals((string)$expectedSign, (string)$sign)){
+                throw new Exception(t('login.user_session_expired'));
             }
             
             if(empty($this->userInfo['appid'])){
@@ -70,7 +72,7 @@ class PayBackend extends CommonBase
                 return;
             }
             if(!empty($this->userInfo['ip'])){
-                if(!in_array(get_client_ip(),unserialize($userInfo['ip']))){
+                if(!in_array(get_client_ip(), sf_safe_unserialize_array($userInfo['ip']), true)){
                     $this->logOut();
                     return;
                 }
@@ -101,5 +103,17 @@ class PayBackend extends CommonBase
         Cookie::delete('userSign');
         Cookie::save();
         return message(t('login.logout_success'), false);
+    }
+
+    /**
+     * Payment initiation/status pages must only expose the current user's order.
+     * Gateway callbacks remain public and authenticate with provider signatures.
+     */
+    protected function ownsPaymentOrder($row): bool
+    {
+        return !empty($row)
+            && !empty($this->userInfo)
+            && (int)($row['userid'] ?? 0) > 0
+            && (int)($row['userid'] ?? 0) === (int)($this->userInfo['id'] ?? 0);
     }
 }

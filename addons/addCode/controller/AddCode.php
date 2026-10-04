@@ -2,6 +2,7 @@
 namespace addons\addCode\controller;
 
 use app\common\controller\Backend;
+use app\common\service\SafeZipService;
 use PhpZip\Exception\ZipException;
 use PhpZip\ZipFile;
 use think\facade\Db;
@@ -19,10 +20,14 @@ class AddCode extends Backend
             $appid = !empty($post['appid'])?intval($post['appid']):null;
             $filename = !empty($post['name'])?$post['name']:null;
             if(empty($appid)){
-                return message('请选择所属应用！', false);
+                return message(t('auth.select_app'), false);
             }
             if(empty($filename)){
-                return message('请先上传文件！', false);
+                return message(t('upload.select_file'), false);
+            }
+            $filename = trim((string)$filename);
+            if ($filename !== basename($filename) || !preg_match('/^[^\x00\/\\\\]{1,180}\.zip$/iu', $filename)) {
+                return message(t('upload.filename_invalid'), false);
             }
             try{
                 $appInfo = Db::name('app')
@@ -48,13 +53,18 @@ class AddCode extends Backend
                     @mkdir($filePath, 0755, true);
                 }
                 $fname = $filePath . $filename;
+                $zipProblem = SafeZipService::validate($fname, [], 20000, 1073741824);
+                if ($zipProblem !== null) {
+                    @unlink($fname);
+                    return message($zipProblem, false);
+                }
                 // 打开插件压缩包
                 try {
                     $zip->openFile($fname);
                 } catch (ZipException $e) {
                     $zip->close();
                     @unlink($fname);
-                    return message('无法打开压缩文件！' ,false);
+                    return message(t('archive.open_failed') ,false);
                 }
 
                 $tempDir = $filePath . 'temp';
@@ -69,7 +79,7 @@ class AddCode extends Backend
                     $zip->close();
                     rmdirs($tempDir, false);
                     @unlink($fname);
-                    return message('解压文件失败！' ,false);
+                    return message(t('archive.extract_failed') ,false);
                 }
                 $pathInfo = getDirContent($tempDir);
                 $caihong = 0;
@@ -136,7 +146,7 @@ class AddCode extends Backend
                     case $caihong:
                         $file = $tempDir . DS . 'includes' . DS . 'common.php';
                         if(!is_file($file)){
-                            return message('系统检测到您上传的是彩虹系统，但未发现includes目录，请稍后上传源码重试！' ,false);
+                            return message(t('source_package.rainbow_includes_missing') ,false);
                         }
                         $this->delLastLine($file);
                         $handle = fopen($file, 'a');
@@ -148,7 +158,7 @@ class AddCode extends Backend
                     case $jiuyan:
                         $file = $tempDir . DS . 'includes' . DS . 'common.php';
                         if(!is_file($file)){
-                            return message('系统检测到您上传的是旧言系统，但未发现includes目录，请稍后上传源码重试！' ,true);
+                            return message(t('source_package.jiuyan_includes_missing') ,true);
                         }
                         $this->delLastLine($file);
                         $handle = fopen($file, 'a');
@@ -160,7 +170,7 @@ class AddCode extends Backend
                     case $thinkphp5:
                         $file = $tempDir . DS . 'application' . DS . 'common.php';
                         if(!is_file($file)){
-                            return message('系统检测到您上传的是TP5系统，但未发现application/common.php，请稍后上传源码重试！' ,false);
+                            return message(t('source_package.tp5_application_missing') ,false);
                         }
                         $this->delLastLine($file);
                         $handle = fopen($file, 'a');
@@ -172,7 +182,7 @@ class AddCode extends Backend
                     case $thinkphp6:
                         $file = $tempDir . DS . 'app' . DS . 'common.php';
                         if(!is_file($file)){
-                            return message('系统检测到您上传的是TP5系统，但未发现app/common.php，请稍后上传源码重试！' ,false);
+                            return message(t('source_package.tp5_app_missing') ,false);
                         }
                         $this->delLastLine($file);
                         $handle = fopen($file, 'a');
@@ -201,10 +211,10 @@ class AddCode extends Backend
                     }
                     unset($files);
                 } catch (\Exception $e) {
-                    return message('打包源码出错'.$e->getMessage(),false);
+                    return message(t('source_package.pack_failed'),false);
                 }
                 return message($msg,true, $zip_name);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return message($e->getMessage() ,false);
             } finally {
                 $zip->close();
@@ -214,13 +224,16 @@ class AddCode extends Backend
     }
 
     public function download(){
-        $name = $this->request->get('name');
+        $name = trim((string)$this->request->get('name'));
         if(empty($name)){
-            return $this->render('/public/error', ['msg' => '压缩包名不能为空！']);
+            return $this->render('/public/error', ['msg' => t('archive.name_required')]);
+        }
+        if ($name !== basename($name) || !preg_match('/^[^\x00\/\\\\]{1,180}\.zip$/iu', $name)) {
+            return $this->render('/public/error', ['msg' => t('archive.name_invalid')]);
         }
         $filePath = RUNTIME_PATH . DS . 'temp' . DS . 'upload' . DS . $name;
         if(!is_file($filePath)){
-            return $this->render('/public/error', ['msg' => '不存在此压缩包！']);
+            return $this->render('/public/error', ['msg' => t('archive.not_found')]);
         }
         return download($filePath, $name);
     }

@@ -1,0 +1,53 @@
+body { background: #f7f8fb; }
+.rebate-page { padding: 16px; }
+.rebate-layout { display: grid; grid-template-columns: minmax(360px, 520px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.rebate-panel { background: #fff; border: 1px solid #e8ebf0; border-radius: 14px; box-shadow: 0 10px 28px rgba(30, 45, 70, .06); overflow: hidden; }
+.rebate-left { min-height: 600px; padding: 12px; box-sizing: border-box; }
+.reward-title { display: flex; align-items: center; gap: 12px; padding: 0 0 14px; }
+.reward-icon { width: 32px; height: 32px; border-radius: 50%; background: #67cf79; color: #fff; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.reward-title b { display: block; color: #262d36; font-size: 15px; line-height: 1.2; }
+.reward-title span { display: block; color: #7a8491; font-size: 12px; margin-top: 4px; }
+.income-card { position: relative; overflow: hidden; border-radius: 8px; padding: 18px 16px 16px; color: #fff; background: linear-gradient(120deg, rgba(0,82,82,.98), rgba(0,106,105,.9)); }
+.income-card:before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 22% 18%, rgba(70, 224, 187, .28), transparent 30%), radial-gradient(circle at 70% 20%, rgba(17, 130, 150, .42), transparent 32%), linear-gradient(135deg, rgba(5, 34, 49, .2), rgba(6, 53, 58, .88)); }
+.income-card:after { content: ""; position: absolute; right: -80px; bottom: -80px; width: 280px; height: 210px; background: rgba(255,255,255,.08); transform: rotate(-22deg); border-radius: 42%; filter: blur(1px); }
+.income-inner { position: relative; z-index: 1; }
+.income-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.income-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+.transfer-btn { height: 28px; border: 0; border-radius: 14px; padding: 0 14px; background: rgba(255,255,255,.9); color: #8a8f98; font-size: 12px; cursor: default; white-space: nowrap; }
+.income-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.income-stat { min-height: 64px; padding: 0 14px; border-left: 1px solid rgba(255,255,255,.18); box-sizing: border-box; }
+.income-stat:nth-child(odd) { border-left: 0; padding-left: 0; }
+.income-stat:nth-child(n+3) { margin-top: 16px; }
+.income-stat strong { display: block; font-size: 25px; line-height: 1.2; font-weight: 800; letter-spacing: 0; }
+.income-stat span { display: flex; align-items: center; gap: 5px; margin-top: 9px; font-size: 12px; color: rgba(255,255,255,.78); }
+.invite-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 9px 10px; background: #f5f5f6; border: 1px solid #eceef2; border-radius: 0 0 8px 8px; }
+.invite-label { color: #8b8f98; font-size: 13px; white-space: nowrap; }
+.invite-link { flex: 1; min-width: 0; color: #202733; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-btn { height: 34px; min-width: 74px; border: 0; border-radius: 8px; background: #0b6cff; color: #fff; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.copy-btn.is-disabled { background: #cbd3df; cursor: not-allowed; }
+.rule-card { margin-top: 10px; border: 1px solid #e9ecf1; border-radius: 12px; overflow: hidden; }
+.rule-title { height: 40px; line-height: 40px; padding: 0 14px; border-bottom: 1px solid #edf0f4; color: #7b838f; font-size: 14px; }
+.rule-list { padding: 13px 15px 14px; }
+.rule-list p { margin: 0 0 12px; color: #7b838f; font-size: 13px; line-height: 1.7; display: flex; gap: 9px; }
+.rule-list p:last-child { margin-bottom: 0; }
+.rule-list i { width: 6px; height: 6px; border-radius: 50%; background: #4ac36a; margin-top: 8px; flex: 0 0 auto; }
+.rebate-table-card { padding: 0; }
+.rebate-table-head { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #eef1f5; }
+.rebate-table-head h3 { margin: 0; color: #262d36; font-size: 16px; font-weight: 700; }
+.rebate-table-head span { color: #8b94a1; font-size: 12px; }
+.rebate-table-body { padding: 14px; }
+.empty-code { padding: 24px 16px; text-align: center; color: #7b838f; }
+.empty-code b { display: block; color: #262d36; font-size: 15px; margin-bottom: 12px; }
+.generate-btn { height: 34px; border: 0; border-radius: 8px; padding: 0 16px; background: #0b6cff; color: #fff; cursor: pointer; }
+@media (max-width: 980px) {
+    .rebate-layout { grid-template-columns: 1fr; }
+    .rebate-left { min-height: 0; }
+}
+@media (max-width: 560px) {
+    .rebate-page { padding: 10px; }
+    .income-stats { grid-template-columns: 1fr; gap: 14px; }
+    .income-stat { border-left: 0; padding: 0; }
+    .invite-row { align-items: stretch; flex-wrap: wrap; }
+    .invite-link { flex-basis: 100%; }
+    .copy-btn { flex: 1; }
+}

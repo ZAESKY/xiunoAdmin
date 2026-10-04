@@ -7,6 +7,9 @@ use app\common\service\UserBaseService;
 use think\Exception;
 class CdkeyService extends UserBaseService
 {
+    /** @var AppModel */
+    protected $appModel;
+
     public function __construct(){
         $this->model = new CdkeyModel();
         $this->appModel = new AppModel();

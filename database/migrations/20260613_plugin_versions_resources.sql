@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_versions` (
   `package_file_name` varchar(255) DEFAULT '' COMMENT '插件包原始文件名',
   `package_file_size` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '插件包大小',
   `package_mime_type` varchar(100) DEFAULT '' COMMENT '插件包MIME类型',
-  `package_hash` varchar(64) DEFAULT '' COMMENT '插件包MD5哈希',
+  `package_hash` varchar(64) DEFAULT '' COMMENT '插件包SHA-256哈希',
   `update_description` text COMMENT '更新说明',
   `created_by` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建人用户ID',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',

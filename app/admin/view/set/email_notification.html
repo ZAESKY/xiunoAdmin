@@ -1,0 +1,314 @@
+{include file="/public/header"}
+{include file="/public/footer"}
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">{:t('notification_email.transport.title')}</div>
+                <div class="layui-card-body">
+                    <blockquote class="layui-elem-quote layui-quote-nm">
+                        {:t('notification_email.transport.current')}: {$mailTransportStatus.mode_name}
+                        &nbsp;&nbsp;
+                        {if $mailTransportStatus.configured}
+                        <span class="layui-badge layui-bg-green">{:t('notification_email.transport.ready')}</span>
+                        {else/}
+                        <span class="layui-badge layui-bg-orange">{:t('notification_email.transport.incomplete')}</span>
+                        {/if}
+                        {if $mailTransportStatus.recipient_masked}
+                        &nbsp;&nbsp;{:t('notification_email.transport.test_recipient')}: {$mailTransportStatus.recipient_masked}
+                        {/if}
+                    </blockquote>
+                    <button type="button" class="layui-btn layui-btn-primary" id="emailTransportConfigBtn">
+                        <i class="layui-icon layui-icon-set"></i> {:t('notification_email.transport.configure')}
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="emailTransportTestBtn"
+                            {if !$mailTransportStatus.configured||!$mailTransportStatus.recipient_valid}disabled{/if}>
+                        <i class="layui-icon layui-icon-release"></i> {:t('notification_email.transport.send_test')}
+                    </button>
+                    <div class="layui-form-mid layui-word-aux">{:t('notification_email.transport.help')}</div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">{:t('notification_email.admin_title')}</div>
+                <div class="layui-card-body">
+                    <blockquote class="layui-elem-quote">{:t('notification_email.admin_help')}</blockquote>
+                    <form class="layui-form" lay-filter="emailNotificationSettings">
+                        <input type="hidden" name="action" value="save_settings">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{:t('notification_email.master_switch')}</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="global_enabled" value="1" lay-skin="switch"
+                                       lay-text="{:t('common_ui.enabled')}|{:t('common_ui.disabled')}" {$emailNotificationEnabled?'checked':''}>
+                                <div class="layui-form-mid layui-word-aux">{:t('notification_email.master_help')}</div>
+                            </div>
+                        </div>
+                        <fieldset class="layui-elem-field layui-field-title">
+                            <legend>{:t('notification_email.admin_preferences')}</legend>
+                        </fieldset>
+                        {foreach $adminEmailEvents as $event}
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$event.name}</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="events[]" value="{$event.event_code}" lay-skin="switch"
+                                       lay-text="{:t('common_ui.enabled')}|{:t('common_ui.disabled')}" {$event.enabled?'checked':''}>
+                                <div class="layui-form-mid layui-word-aux">{$event.description}</div>
+                            </div>
+                        </div>
+                        {/foreach}
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="emailNotificationSettingsSubmit">
+                                    <i class="layui-icon layui-icon-ok"></i> {:t('common_ui.save')}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">{:t('notification_email.template_management')}</div>
+                <div class="layui-card-body">
+                    <blockquote class="layui-elem-quote layui-quote-nm">{:t('notification_email.template_help')}</blockquote>
+                    <table id="emailTemplateTable" lay-filter="emailTemplateTable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="emailTemplateStatus">
+    {{# if (d.enabled == 1) { }}
+    <span class="layui-badge layui-bg-green">{:t('common_ui.enabled')}</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-gray">{:t('common_ui.disabled')}</span>
+    {{# } }}
+    {{# if (d.is_custom == 1) { }}
+    <span class="layui-badge layui-bg-blue">{:t('notification_email.customized')}</span>
+    {{# } else { }}
+    <span class="layui-badge-rim">{:t('notification_email.default_template')}</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="emailTemplateActions">
+    <a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common_ui.edit')}</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="preview"><i class="layui-icon layui-icon-eye"></i>{:t('notification_email.preview')}</a>
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="test"><i class="layui-icon layui-icon-release"></i>{:t('notification_email.send_test')}</a>
+</script>
+
+<script type="text/html" id="emailTemplateDialog">
+    <form class="layui-form model-form" lay-filter="emailTemplateForm">
+        <input type="hidden" name="event_code">
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:t('notification_email.event')}</label>
+            <div class="layui-input-block"><div class="layui-form-mid" id="emailTemplateEventName"></div></div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">{:t('notification_email.subject')}</label>
+            <div class="layui-input-block">
+                <input type="text" name="subject" maxlength="255" class="layui-input" lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">{:t('notification_email.html_body')}</label>
+            <div class="layui-input-block">
+                <textarea name="html_body" class="layui-textarea" rows="13" lay-verify="required"></textarea>
+                <div class="layui-form-mid layui-word-aux">{:t('notification_email.html_security_help')}</div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:t('notification_email.variables')}</label>
+            <div class="layui-input-block" id="emailTemplateVariables"></div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:t('common_ui.status')}</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="enabled" value="1" lay-skin="switch"
+                       lay-text="{:t('common_ui.enabled')}|{:t('common_ui.disabled')}">
+            </div>
+        </div>
+        <div class="layui-form-item text-right">
+            <button type="button" class="layui-btn layui-btn-normal" id="emailTemplatePreviewBtn">{:t('notification_email.preview')}</button>
+            <button class="layui-btn" lay-submit lay-filter="emailTemplateSave">{:t('common_ui.save')}</button>
+            <button type="button" class="layui-btn layui-btn-primary" id="emailTemplateResetBtn">{:t('notification_email.restore_default')}</button>
+        </div>
+    </form>
+</script>
+
+<script>
+layui.use(['table', 'form', 'layer', 'notice', 'admin'], function () {
+    var $ = layui.jquery;
+    var table = layui.table;
+    var form = layui.form;
+    var layer = layui.layer;
+    var notice = layui.notice;
+    var admin = layui.admin;
+    var endpoint = '{:url("/Set/emailNotification")}';
+    var mailConfigEndpoint = '{:url("/Addon/config")}?name=mail';
+    var adminEmail = {$adminEmailJson|raw};
+    var dialogIndex = null;
+
+    $('#emailTransportConfigBtn').on('click', function () {
+        admin.open({
+            type: 2,
+            title: '{:t("notification_email.transport.configure")}',
+            area: ['720px', '680px'],
+            maxmin: true,
+            content: mailConfigEndpoint
+        });
+    });
+
+    $('#emailTransportTestBtn').on('click', function () {
+        if (this.disabled) return;
+        layer.confirm('{:t("notification_email.transport.test_confirm")}', {icon:3, shade:.1}, function (index) {
+            layer.close(index);
+            notice.msg('{:t("notification_email.sending")}', {icon:4, close:true});
+            $.post(endpoint, {action:'transport_test'}, function (res) {
+                notice.destroy();
+                notice.msg(res.msg, {icon:res.code === 0 ? 1 : 2});
+            }, 'json').fail(function () {
+                notice.destroy();
+                notice.msg('{:t("notification_email.test_failed")}', {icon:2});
+            });
+        });
+    });
+
+    var templateTable = table.render({
+        elem: '#emailTemplateTable',
+        url: endpoint,
+        method: 'post',
+        where: {action: 'template_list'},
+        page: false,
+        skin: 'line',
+        size: 'lg',
+        cols: [[
+            {field: 'event_name', title: '{:t("notification_email.event")}', minWidth: 150},
+            {field: 'audience', title: '{:t("notification_email.recipient")}', width: 100, templet: function (d) {
+                return d.audience === 'admin' ? '{:t("notification_email.admin")}' : '{:t("notification_email.user")}';
+            }},
+            {field: 'subject', title: '{:t("notification_email.subject")}', minWidth: 240},
+            {field: 'enabled', title: '{:t("common_ui.status")}', width: 160, templet: '#emailTemplateStatus'},
+            {title: '{:t("common_ui.operation")}', toolbar: '#emailTemplateActions', width: 270, fixed: 'right'}
+        ]]
+    });
+
+    form.on('submit(emailNotificationSettingsSubmit)', function (data) {
+        notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
+        $.post(endpoint, data.field, function (res) {
+            notice.destroy();
+            notice.msg(res.msg, {icon: res.code === 0 ? 1 : 2});
+        }, 'json').fail(function () {
+            notice.destroy();
+            notice.msg('{:t("notification_email.operation_failed")}', {icon: 2});
+        });
+        return false;
+    });
+
+    table.on('tool(emailTemplateTable)', function (obj) {
+        if (obj.event === 'edit') openEditor(obj.data);
+        if (obj.event === 'preview') previewTemplate(obj.data.event_code, obj.data.subject, obj.data.html_body);
+        if (obj.event === 'test') sendTest(obj.data.event_code);
+    });
+
+    function openEditor(row) {
+        admin.open({
+            type: 1,
+            title: '{:t("notification_email.edit_template")}',
+            area: ['860px', '720px'],
+            maxmin: true,
+            content: $('#emailTemplateDialog').html(),
+            success: function (layero, index) {
+                dialogIndex = index;
+                $('#emailTemplateEventName', layero).text(row.event_name + ' (' + row.event_code + ')');
+                form.val('emailTemplateForm', {
+                    event_code: row.event_code,
+                    subject: row.subject,
+                    html_body: row.html_body,
+                    enabled: row.enabled == 1
+                });
+                var $variables = $('#emailTemplateVariables', layero).empty();
+                $.each(row.variables || [], function (_, name) {
+                    $('<button type="button" class="layui-btn layui-btn-primary layui-btn-xs"></button>')
+                        .text('{{' + name + '}}')
+                        .on('click', function () { insertVariable(layero, '{{' + name + '}}'); })
+                        .appendTo($variables);
+                });
+                $('#emailTemplatePreviewBtn', layero).on('click', function () {
+                    previewTemplate(row.event_code, $('input[name="subject"]', layero).val(), $('textarea[name="html_body"]', layero).val());
+                });
+                $('#emailTemplateResetBtn', layero).on('click', function () {
+                    layer.confirm('{:t("notification_email.restore_confirm")}', {icon: 3, shade: .1}, function (confirmIndex) {
+                        layer.close(confirmIndex);
+                        $.post(endpoint, {action:'template_reset', event_code:row.event_code}, function (res) {
+                            notice.msg(res.msg, {icon:res.code === 0 ? 1 : 2});
+                            if (res.code === 0) {
+                                layer.close(dialogIndex);
+                                templateTable.reload();
+                            }
+                        }, 'json');
+                    });
+                });
+                form.render();
+            }
+        });
+    }
+
+    function insertVariable(layero, value) {
+        var field = $('textarea[name="html_body"]', layero).get(0);
+        var start = field.selectionStart || 0;
+        var end = field.selectionEnd || 0;
+        field.value = field.value.substring(0, start) + value + field.value.substring(end);
+        field.focus();
+        field.selectionStart = field.selectionEnd = start + value.length;
+    }
+
+    form.on('submit(emailTemplateSave)', function (data) {
+        data.field.action = 'template_save';
+        data.field.enabled = data.field.enabled ? 1 : 0;
+        notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
+        $.post(endpoint, data.field, function (res) {
+            notice.destroy();
+            notice.msg(res.msg, {icon:res.code === 0 ? 1 : 2});
+            if (res.code === 0) {
+                layer.close(dialogIndex);
+                templateTable.reload();
+            }
+        }, 'json').fail(function () {
+            notice.destroy();
+            notice.msg('{:t("notification_email.operation_failed")}', {icon: 2});
+        });
+        return false;
+    });
+
+    function previewTemplate(eventCode, subject, htmlBody) {
+        $.post(endpoint, {action:'preview', event_code:eventCode, subject:subject, html_body:htmlBody}, function (res) {
+            if (res.code !== 0) { notice.msg(res.msg, {icon:2}); return; }
+            var iframe = $('<iframe sandbox="" class="layui-border" width="100%" height="540" frameborder="0"></iframe>');
+            iframe.attr('srcdoc', res.data.html);
+            layer.open({type:1, title:res.data.subject, area:['760px','650px'], maxmin:true, content:iframe});
+        }, 'json');
+    }
+
+    function sendTest(eventCode) {
+        if (!adminEmail) {
+            notice.msg('{:t("notification_email.admin_email_missing")}', {icon:2});
+            return;
+        }
+        layer.confirm('{:t("notification_email.test_confirm")} ' + adminEmail, {icon:3, shade:.1}, function (index) {
+            layer.close(index);
+            notice.msg('{:t("notification_email.sending")}', {icon:4, close:true});
+            $.post(endpoint, {action:'test', event_code:eventCode, email:adminEmail}, function (res) {
+                notice.destroy();
+                notice.msg(res.msg, {icon:res.code === 0 ? 1 : 2});
+            }, 'json').fail(function () {
+                notice.destroy();
+                notice.msg('{:t("notification_email.test_failed")}', {icon:2});
+            });
+        });
+    }
+});
+</script>

@@ -10,18 +10,18 @@
                 <ul class="layui-tab-title">
                     <li class="layui-this">
                         <i class="layui-icon layui-icon-ok">1</i>
-                        <span class="layui-steps-title">第一步</span>
-                        <span class="layui-steps-content">填写卡密内容</span>
+                        <span class="layui-steps-title">{:t('cdkey.step1')}</span>
+                        <span class="layui-steps-content">{:t('cdkey.step1_content')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">2</i>
-                        <span class="layui-steps-title">第二步</span>
-                        <span class="layui-steps-content">填写兑换信息</span>
+                        <span class="layui-steps-title">{:t('cdkey.step2')}</span>
+                        <span class="layui-steps-content">{:t('cdkey.step2_content')}</span>
                     </li>
                     <li>
                         <i class="layui-icon layui-icon-ok">3</i>
-                        <span class="layui-steps-title">第三步</span>
-                        <span class="layui-steps-content">兑换成功</span>
+                        <span class="layui-steps-title">{:t('cdkey.step3')}</span>
+                        <span class="layui-steps-content">{:t('cdkey.exchange_success_short')}</span>
                     </li>
                 </ul>
                 <div class="layui-tab-content">
@@ -29,15 +29,15 @@
                         <!-- 表单一 -->
                         <form class="layui-form" style="max-width: 460px;margin: 0 auto;padding: 40px 30px 0 0;">
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label layui-form-required">卡密:</label>
+                                <label class="layui-form-label layui-form-required">{:t('common_ui.cdkey_label')}</label>
                                 <div class="layui-input-block">
-                                    <input name="cdkey" placeholder="请输入卡密内容" value="" class="layui-input"
+                                    <input name="cdkey" placeholder="{:t('cdkey.step_enter_cdkey')}" value="" class="layui-input"
                                            lay-verType="tips" lay-verify="required" required/>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <div class="layui-input-block">
-                                    <button type="button" class="layui-btn" lay-filter="formStepSubmit1" lay-submit>&emsp;下一步&emsp;
+                                    <button type="button" class="layui-btn" lay-filter="formStepSubmit1" lay-submit>&emsp;{:t('cdkey.next_step')}&emsp;
                                     </button>
                                 </div>
                             </div>
@@ -49,9 +49,9 @@
                             <div id="SF_Info_Input"></div>
 
                                 <div style="text-align: center;">
-                                    <button type="button" class="layui-btn layui-btn-primary" data-steps="prev"> 上 一 步&nbsp;
+                                    <button type="button" class="layui-btn layui-btn-primary" data-steps="prev"> {:t('cdkey.previous_step')}&nbsp;
                                     </button>
-                                    <button class="layui-btn" lay-filter="formStepSubmit2" lay-submit>&emsp;提交&emsp;
+                                    <button class="layui-btn" lay-filter="formStepSubmit2" lay-submit>&emsp;{:t('common.submit')}&emsp;
                                     </button>
                                 </div>
 
@@ -61,11 +61,11 @@
                         <!-- 表单三 -->
                         <i class="layui-icon layui-icon-ok layui-circle"
                            style="background: #52C41A;color: #fff;font-size:30px;font-weight:bold;padding: 20px;line-height: 80px;"></i>
-                        <div style="font-size: 24px;color: #333;margin-top: 30px;">兑换成功</div>
-                        <div style="font-size: 14px;color: #666;margin-top: 20px;">兑换奖励已到账</div>
+                        <div style="font-size: 24px;color: #333;margin-top: 30px;">{:t('cdkey.exchange_success_short')}</div>
+                        <div style="font-size: 14px;color: #666;margin-top: 20px;">{:t('cdkey.exchange_reward')}</div>
                         <div style="text-align: center;margin: 50px 0 25px 0;">
-                            <button class="layui-btn" lay-filter="formStepSubmit3" lay-submit>继续兑换</button>
-                            <button class="layui-btn layui-btn-primary">查看记录</button>
+                            <button class="layui-btn" lay-filter="formStepSubmit3" lay-submit>{:t('cdkey.continue_exchange')}</button>
+                            <button class="layui-btn layui-btn-primary">{:t('cdkey.view_record')}</button>
                         </div>
                     </div>
                 </div>
@@ -85,16 +85,16 @@
     <form class="layui-form" lay-filter="SF_Auth">
         <input type="hidden" name="cdkey">
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">授权内容:</label>
+            <label class="layui-form-label layui-form-required">{:t('common_ui.auth_content')}:</label>
             <div class="layui-input-block">
-                <input type="text" name="auth_info" placeholder="请输入授权内容"
+                <input type="text" name="auth_info" placeholder="{:t('auth_portal.auth_content_placeholder')}"
                        class="layui-input" lay-verType="tips" lay-verify="required" required>
             </div>
         </div>
         <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label layui-form-required">授权者QQ:</label>
+            <label class="layui-form-label layui-form-required">{:t('common_ui.auth_qq')}:</label>
             <div class="layui-input-block">
-                <input type="number" name="qq" placeholder="请输入授权者QQ" class="layui-input"
+                <input type="number" name="qq" placeholder="{:t('cdkey.step_enter_auth_qq')}" class="layui-input"
                        lay-verType="tips" lay-verify="required" required/>
             </div>
         </div>
@@ -111,7 +111,7 @@
 
         /* 表单一提交事件 */
         form.on('submit(formStepSubmit1)', function (res) {
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: '{:url("/Cdkey/exchange")}',
@@ -133,7 +133,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
             return false;
@@ -144,7 +144,7 @@
             data.field.step = 1;
             data.field.cdkey_type = 'auth';
             data.field.cdkey = $("input[name='cdkey']").val();
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: '{:url("/Cdkey/exchange")}',
@@ -161,7 +161,7 @@
                 },
                 error: function() {
                     notice.destroy();
-                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                    notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
                 }
             });
             return false;

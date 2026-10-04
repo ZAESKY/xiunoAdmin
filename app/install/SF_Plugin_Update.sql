@@ -3,6 +3,51 @@
 -- 说明: 该脚本需要同时兼容旧库升级和新库初始化后的重复执行。
 
 DROP PROCEDURE IF EXISTS SF_ADD_COLUMN_IF_MISSING;
+
+CREATE TABLE IF NOT EXISTS `SF_plugin_package_upload` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '上传记录ID',
+  `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '一次性上传凭证SHA-256',
+  `actor_type` varchar(10) NOT NULL COMMENT 'user/admin',
+  `actor_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '上传者ID',
+  `storage_driver` varchar(20) NOT NULL DEFAULT 'local' COMMENT 'local/oss',
+  `file_path` varchar(500) NOT NULL DEFAULT '' COMMENT '本地私有文件路径',
+  `package_object_key` varchar(500) NOT NULL DEFAULT '' COMMENT 'OSS对象Key',
+  `package_file_name` varchar(255) NOT NULL DEFAULT '' COMMENT '原始文件名',
+  `package_file_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '文件字节数',
+  `package_mime_type` varchar(100) NOT NULL DEFAULT '' COMMENT 'MIME类型',
+  `package_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '' COMMENT 'SHA-256',
+  `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT 'pending/cleaning/cleaned/consumed',
+  `consumed_plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '最终关联插件ID',
+  `expires_at` datetime NOT NULL COMMENT '凭证过期时间',
+  `consumed_at` datetime DEFAULT NULL COMMENT '提交发布时间',
+  `cleaned_at` datetime DEFAULT NULL COMMENT '孤儿文件清理时间',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_token_hash` (`token_hash`),
+  KEY `idx_actor_status` (`actor_type`,`actor_id`,`status`),
+  KEY `idx_status_expires` (`status`,`expires_at`),
+  KEY `idx_consumed_plugin` (`consumed_plugin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件包待提交上传记录';
+
+INSERT INTO `SF_config` (`name`,`group`,`title`,`tip`,`type`,`value`,`content`,`rule`,`extend`,`tip_type`)
+SELECT 'plugin_commission_enabled','plugin_market','启用插件销售平台抽成','开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。','bool','1','','','',''
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name`='plugin_commission_enabled');
+
+INSERT INTO `SF_config` (`name`,`group`,`title`,`tip`,`type`,`value`,`content`,`rule`,`extend`,`tip_type`)
+SELECT 'plugin_commission_rate','plugin_market','插件销售平台抽成比例（%）','仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。','number','10.00','','required','min="0" max="100" step="0.01"',''
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name`='plugin_commission_rate');
+
+UPDATE `SF_config`
+SET `group`='plugin_market', `title`='启用插件销售平台抽成',
+    `tip`='开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', `type`='bool'
+WHERE `name`='plugin_commission_enabled';
+
+UPDATE `SF_config`
+SET `group`='plugin_market', `title`='插件销售平台抽成比例（%）',
+    `tip`='仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。',
+    `type`='number', `rule`='required', `extend`='min="0" max="100" step="0.01"'
+WHERE `name`='plugin_commission_rate';
 DELIMITER $$
 CREATE PROCEDURE SF_ADD_COLUMN_IF_MISSING(
   IN p_table_name VARCHAR(64),

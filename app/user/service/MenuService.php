@@ -75,8 +75,8 @@ class MenuService extends UserBaseService
                 }
             });
             return $list;
-        }catch (\Exception $e){
-            throw new Exception($e->getMessage());
+        }catch (\Throwable $e){
+            throw new Exception($e->getMessage(), (int)$e->getCode(), $e);
         }
 
     }

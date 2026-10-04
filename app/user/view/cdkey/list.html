@@ -7,18 +7,18 @@
             <form class="layui-form toolbar">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">内&emsp;容</label>
+                        <label class="layui-form-label">{:t('auth_portal.content')}</label>
                         <div class="layui-input-inline">
                             <input name="text" class="layui-input" placeholder="{:t('common.search_by_id_or_auth_content_or_qq')}"/>
                         </div>
                     </div>
                     <div class="layui-inline">
-                        <label class="layui-form-label">状&emsp;态</label>
+                        <label class="layui-form-label">{:t('common.status')}</label>
                         <div class="layui-input-inline">
                             <select name="status" class="ew-select-fixed">
                                 <option value="">{:t('common_ui.select_used_status')}</option>
-                                <option value="1">已使用</option>
-                                <option value="0">未使用</option>
+                                <option value="1">{:t('common_ui.used')}</option>
+                                <option value="0">{:t('common_ui.unused')}</option>
                             </select>
                         </div>
                     </div>
@@ -37,16 +37,16 @@
 </div>
 <!-- 表格操作列 -->
 <script type="text/html" id="SF_TbBar">
-    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
 <script type="text/html" id="SF_TbState">
     <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="已使用|未使用" {{d.status==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common_ui.used_unused')}" {{d.status==1?'checked':''}} style="display: none;"/>
 </script>
 <script type="text/html" id="SF_TbPermanent_Switch">
     <input type="checkbox" lay-filter="SF_TbPermanent_SwitchCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="正常|封禁" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
+           lay-text="{:t('common_ui.normal_separator')}" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
 </script>
 
 <script type="text/html" id="SF_Tbid">
@@ -58,26 +58,26 @@
         <input name="id" type="hidden"/>
 
         <div class="layui-form-item">
-            <label class="layui-form-label layui-form-required">卡密类型:</label>
+            <label class="layui-form-label layui-form-required">{:t('common_ui.cdkey_type_label')}</label>
             <div class="layui-input-block">
-                <input type="radio" name="cdkey_type" value="auth" title="授权" lay-filter="cdkey_type">
-                <input type="radio" name="cdkey_type" value="user" title="权限" lay-filter="cdkey_type">
+                <input type="radio" name="cdkey_type" value="auth" title="{:t('common_ui.auth_type')}" lay-filter="cdkey_type">
+                <input type="radio" name="cdkey_type" value="user" title="{:t('common_ui.power_type')}" lay-filter="cdkey_type">
             </div>
         </div>
         <div id="auth_data" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">授权时间:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.auth_time_label')}</label>
                 <div class="layui-input-block">
                     <select id="auth_price_list" name="type" class="layui-input ew-select-fixed" lay-filter="type">
-                        <option value="">请选择授权时间</option>
+                        <option value="">{:t('auth_portal.select_duration')}</option>
                     </select>
                 </div>
             </div>
             <div id="diy" style="display: none">
                 <div class="layui-form-item">
-                    <label class="layui-form-label layui-form-required">到期时间:</label>
+                    <label class="layui-form-label layui-form-required">{:t('common_ui.expire_time_label')}</label>
                     <div class="layui-input-block">
-                        <input type="text" id="test" name="endtime" placeholder="请选择到期时间" class="icon-date layui-input"
+                        <input type="text" id="test" name="endtime" placeholder="{:t('auth_portal.select_expire_time')}" class="icon-date layui-input"
                                lay-verType="tips"/>
                     </div>
                 </div>
@@ -85,35 +85,35 @@
         </div>
         <div id="user_data" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">权限:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.power_label')}</label>
                 <div class="layui-input-block">
                     <select id="power" name="power" class="layui-input ew-select-fixed" lay-search lay-filter="power">
-                        <option value="">请选择权限</option>
+                        <option value="">{:t('common.please_select')} {:t('common_ui.power_type')}</option>
                     </select>
                 </div>
             </div>
         </div>
         <div id="number" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">生成数量:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.generate_count')}</label>
                 <div class="layui-input-block">
-                    <input type="number" name="number" id="input_number" placeholder="请输入生成该类型卡密的数量" class="layui-input"
+                    <input type="number" name="number" id="input_number" placeholder="{:t('cdkey.generate_count_placeholder')}" class="layui-input"
                            lay-verType="tips"/>
                 </div>
             </div>
         </div>
         <div id="cdkey" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">卡密:</label>
+                <label class="layui-form-label layui-form-required">{:t('common_ui.cdkey_label')}</label>
                 <div class="layui-input-block">
-                    <input type="text" name="cdkey" placeholder="卡密" class="layui-input"
+                    <input type="text" name="cdkey" placeholder="{:t('common_ui.cdkey')}" class="layui-input"
                            lay-verType="tips"/>
                 </div>
             </div>
         </div>
         <div id="price" style="display: none">
             <div class="layui-form-item">
-                <label class="layui-form-label">价格:</label>
+                <label class="layui-form-label">{:t('common_ui.price_label')}</label>
                 <div class="layui-input-block">
                     <input type="text" id="input_price" name="price" value="￥0" class="layui-input layui-disabled"
                            lay-verType="tips" disabled/>
@@ -121,8 +121,8 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>保存</button>
-            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
@@ -137,6 +137,21 @@
         var admin = layui.admin;
         var notice = layui.notice;
         var laydate = layui.laydate;
+        var authDiscountRate = Number({$userInfo['addauth_discount']});
+        var userDiscountRate = Number({$userInfo['adduser_discount']});
+
+        function discountedMoney(unitPrice, quantity, discountRate) {
+            var unitCents = Math.round(Number(unitPrice || 0) * 100);
+            var totalCents = Math.round(unitCents * Math.max(0, Number(quantity || 0)) * Number(discountRate || 0));
+            return (totalCents / 100).toFixed(2);
+        }
+
+        function dailyDiscountedMoney(totalPrice, days, quantity, discountRate) {
+            var dayCount = Math.max(1, parseInt(days, 10) || 1);
+            var dailyCents = Math.ceil(Math.round(Number(totalPrice || 0) * 100) / dayCount);
+            var totalCents = Math.round(dailyCents * Math.max(0, Number(quantity || 0)) * Number(discountRate || 0));
+            return (totalCents / 100).toFixed(2);
+        }
 
         /* 渲染表格 */
         var insTb = table.render({
@@ -147,8 +162,8 @@
             skin: 'line',
             size: 'lg',
             toolbar: ['<p>',
-                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
-                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>{:t("common.add")}</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>{:t("common.delete")}</button>',
                 '</p>'].join(''),
             cellMinWidth: 100,
             request: {
@@ -166,48 +181,48 @@
             cols: [[
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
-                {field: 'appName', title: '所属应用', sort: true, minWidth: 120, templet: function (d) {
+                {field: 'appName', title: '{:t("common_ui.belong_app")}', sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+d.appName+'</span>';
                     }},
-                {field: 'cdkey_type', title: '卡密类型', sort: true, minWidth: 80, templet: function (d) {
+                {field: 'cdkey_type', title: '{:t("common_ui.cdkey_type")}', sort: true, minWidth: 80, templet: function (d) {
                         if(d.cdkey_type == 'auth'){
-                            return '<span class="layui-badge layui-badge-red">授权</span>';
+                            return '<span class="layui-badge layui-badge-red">{:t("common_ui.auth_type")}</span>';
                         }else if(d.cdkey_type == 'user'){
-                            return '<span class="layui-badge layui-badge-blue">权限</span>';
+                            return '<span class="layui-badge layui-badge-blue">{:t("common_ui.power_type")}</span>';
                         }else if(d.cdkey_type == 'balance'){
-                            return '<span class="layui-badge layui-badge-green">余额</span>';
+                            return '<span class="layui-badge layui-badge-green">{:t("common_ui.balance_type")}</span>';
                         }else if(d.cdkey_type == 'integral'){
-                            return '<span class="layui-badge layui-badge-yellow">积分</span>';
+                            return '<span class="layui-badge layui-badge-yellow">{:t("common_ui.integral_type")}</span>';
                         }
                     },
                 },
-                {field: 'cdkey', title: '卡密', minWidth: 240},
-                {field: 'info', title: '详情', sort: true, minWidth: 150, templet: function (d) {
+                {field: 'cdkey', title: '{:t("common_ui.cdkey")}', minWidth: 240},
+                {field: 'info', title: '{:t("common.detail")}', sort: true, minWidth: 150, templet: function (d) {
                     if (!d.info) return '-';
                     try {
                         var info = typeof d.info === 'string' ? JSON.parse(d.info) : d.info;
                         if (d.cdkey_type === 'balance') {
-                            return '<span class="layui-badge layui-badge-green">余额 +' + (info.balance || 0) + ' 元</span>';
+                            return '<span class="layui-badge layui-badge-green">{:t("accounting.balance")} +' + (info.balance || 0) + ' {:t("accounting.currency_unit")}</span>';
                         } else if (d.cdkey_type === 'integral') {
-                            return '<span class="layui-badge layui-badge-yellow">积分 +' + (info.integral || 0) + '</span>';
+                            return '<span class="layui-badge layui-badge-yellow">{:t("accounting.point_unit")} +' + (info.integral || 0) + '</span>';
                         } else if (d.cdkey_type === 'user') {
-                            return '<span class="layui-badge layui-badge-blue">' + (info.power_name || ('权限ID:' + info.power) || '?') + '</span>';
+                            return '<span class="layui-badge layui-badge-blue">' + (info.power_name || ('{:t("cdkey.power_id")}: ' + info.power) || '?') + '</span>';
                         } else if (d.cdkey_type === 'auth') {
-                            var p = info.permanent_switch == 1 ? '永久' : (info.endtime || '?');
+                            var p = info.permanent_switch == 1 ? '{:t("common_ui.permanent_auth")}' : (info.endtime || '?');
                             return '<span class="layui-badge layui-badge-red">' + p + '</span>';
                         }
                     } catch(e) {}
                     return d.info;
                 }},
-                {field: 'addtime', title: '添加时间/使用时间', sort: true, minWidth: 290, templet: function (d) {
+                {field: 'addtime', title: '{:t("common_ui.use_time")}', sort: true, minWidth: 290, templet: function (d) {
                         if(d.usetime == null){
-                            return '<span class="layui-badge layui-badge-blue">'+d.addtime+'</span> <span class="layui-badge layui-badge-green">未使用</span>';
+                            return '<span class="layui-badge layui-badge-blue">'+d.addtime+'</span> <span class="layui-badge layui-badge-green">{:t("common_ui.unused")}</span>';
                         }else{
                             return '<span class="layui-badge layui-badge-blue">'+d.addtime+'</span> <span class="layui-badge layui-badge-red">'+d.usetime+'</span>';
                         }
                     }
                 },
-                {title: '操作', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
             ]]
         });
 
@@ -219,16 +234,16 @@
             if (diy == "1") {
                 $("#diy").css("display", "inherit");
                 if(data.value == ''){
-                    $('#input_price').val('请先输入到期时间！');
+                    $('#input_price').val('{:t("common_ui.enter_expire_first")}');
                 }else{
                     $('#input_price').val('￥0');
                 }
             }else{
                 $("#diy").css("display", "none");
                 if(data.value == ''){
-                    $('#input_price').val('请先选择授权时间！');
+                    $('#input_price').val('{:t("common_ui.select_time_first")}');
                 }else{
-                    $('#input_price').val('￥' + (price * input_number * {$userInfo['addauth_discount']}).toFixed(2));
+                    $('#input_price').val('￥' + discountedMoney(price, input_number, authDiscountRate));
                 }
             }
         });
@@ -237,9 +252,9 @@
             let price = $("#power option:selected").attr('price');
             let input_number = $("#input_number").val();
             if (data.value == "") {
-                $('#input_price').val('请先选择权限！');
+                $('#input_price').val('{:t("common_ui.select_power_first")}');
             }else{
-                $('#input_price').val('￥' + (price * input_number * {$userInfo['adduser_discount']}).toFixed(2));
+                $('#input_price').val('￥' + discountedMoney(price, input_number, userDiscountRate));
             }
         });
         /* 表格搜索 */
@@ -262,13 +277,12 @@
             } else if (obj.event === 'del') { // 删除
                 var checkRows = table.checkStatus('SF_Table');
                 if (checkRows.data.length === 0) {
-                    notice.msg('请选择要删除的数据！', {icon: 3, audio:'1'});
+                    notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                     return;
                 }
                 var ids = checkRows.data.map(function (d) {
                     return d.id;
                 });
-                console.log(ids)
                 doDel({ids: ids});
             }
             laydate.render({
@@ -283,9 +297,9 @@
                     let day = $("#auth_price_list option:selected").attr('day');
                     let input_number = $("#input_number").val();
                     if(value == ''){
-                        $('#input_price').val('请先输入到期时间！');
+                        $('#input_price').val('{:t("common_ui.enter_expire_first")}');
                     }else{
-                        $('#input_price').val('￥' + ((DateDiff(value) * input_number * Math.ceil((price / day) * 100) / 100) * {$userInfo['addauth_discount']}).toFixed(2));
+                        $('#input_price').val('￥' + dailyDiscountedMoney(price, day, DateDiff(value) * input_number, authDiscountRate));
                     }
                 }
             });
@@ -312,21 +326,20 @@
         function showEditModel(mData) {
             admin.popupRight({
                 type: 1,
-                title: (mData ? '修改' : '添加') + '卡密',
+                title: (mData ? '{:t("common.edit")}' : '{:t("common.add")}') + ' {:t("common_ui.cdkey")}',
                 content: $('#SF_EditDialog').html(),
                 success: function (layero, dIndex) {
                     form.on('radio(cdkey_type)', function (data) {
                         if (data.value == 'auth') {
-                            notice.msg('正在获取列表中..', {icon: 4, close: true});
+                            notice.msg('{:t("common.loading_list")}', {icon: 4, close: true});
                             $.ajax({
                                 type: "POST",
                                 url: '{:url("/Auth/getAuthPriceList")}',
                                 dataType: "json",
                                 success: function(data) {
                                     notice.destroy();
-                                    console.log(data)
                                     if (data.code == 0) {
-                                        var content = '<option value="">请选择授权时间</option>';
+                                        var content = '<option value="">{:t("auth_portal.select_duration")}</option>';
                                         $.each(data.data,function(index, value){
                                             $.each(value,function(index, value){
                                                 if(value.diy_switch == 1){
@@ -338,7 +351,7 @@
                                         });
 
                                         $("#auth_price_list").html(content);
-                                        notice.msg("获取列表成功！", {icon: 1, audio:'1'});
+                                        notice.msg('{:t("common.list_success")}', {icon: 1, audio:'1'});
                                     } else {
                                         notice.msg(data.msg, {icon: 2, audio:'1'});
                                     }
@@ -346,7 +359,7 @@
                                 },
                                 error: function() {
                                     notice.destroy();
-                                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                                 }
                             });
                             $("#auth_data").css("display", "inherit");
@@ -361,24 +374,23 @@
                                 let day = $("#auth_price_list option:selected").attr('day');
                                 let diy = $("#auth_price_list option:selected").attr('diy');
                                 if(auth_price_list == ''){
-                                    $('#input_price').val('请先选择授权时间！');
+                                    $('#input_price').val('{:t("common_ui.select_time_first")}');
                                 }else{
                                     if(diy == '1'){
                                         let endtime = $("input[name='endtime']").val();
                                         if(endtime == ''){
-                                            $('#input_price').val('请先输入到期时间！');
+                                            $('#input_price').val('{:t("common_ui.enter_expire_first")}');
                                         }else{
-                                            console.log(DateDiff(endtime))
-                                            $('#input_price').val('￥' + ((DateDiff(endtime) * input_number * Math.ceil((price / day) * 100) / 100) * {$userInfo['addauth_discount']}).toFixed(2));
+                                            $('#input_price').val('￥' + dailyDiscountedMoney(price, day, DateDiff(endtime) * input_number, authDiscountRate));
                                         }
                                     }else{
-                                        $('#input_price').val('￥' + (price * input_number * {$userInfo['addauth_discount']}).toFixed(2));
+                                        $('#input_price').val('￥' + discountedMoney(price, input_number, authDiscountRate));
                                     }
                                 }
                             });
                         }else if (data.value == 'user'){
                             let appid = $("select[name='appid']").val();
-                            notice.msg('正在获取列表中..', {icon: 4, close: true});
+                            notice.msg('{:t("common.loading_list")}', {icon: 4, close: true});
                             $.ajax({
                                 type: "POST",
                                 url: '{:url("/Cdkey/getPowerList")}',
@@ -388,7 +400,7 @@
                                     notice.destroy();
                                     if (data.code == 0) {
                                         notice.msg(data.msg, {icon: 1, audio:'1'});
-                                        var content = '<option value="">请选择权限</option>';
+                                        var content = '<option value="">{:t("common.please_select")} {:t("common_ui.power_type")}</option>';
                                         $.each(data.data.data, function(index, value) {
                                             content +='<option value="'+value.id+'" price="'+value.money+'">'+value.name+'</option>';
                                         });
@@ -400,7 +412,7 @@
                                 },
                                 error: function() {
                                     notice.destroy();
-                                    notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                                 }
                             });
                             $("#auth_data").css("display", "none");
@@ -413,9 +425,9 @@
                                 let input_number = $('#input_number').val();
                                 let price = $("#power option:selected").attr('price');
                                 if(power == ''){
-                                    $('#input_price').val('请先选择权限！');
+                                    $('#input_price').val('{:t("common_ui.select_power_first")}');
                                 }else{
-                                    $('#input_price').val('￥' + (price * input_number * {$userInfo['adduser_discount']}).toFixed(2));
+                                    $('#input_price').val('￥' + discountedMoney(price, input_number, userDiscountRate));
                                 }
                             });
                         }
@@ -428,7 +440,7 @@
 
                     // 表单提交事件
                     form.on('submit(SF_EditSubmit)', function (data) {
-                        notice.msg('正在执行中..', {icon: 4, close: true});
+                        notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
                             url: '{:url("/Cdkey/edit")}',
@@ -445,7 +457,7 @@
                             },
                             error: function() {
                                 notice.destroy();
-                                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                                notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                             }
                         });
                         return false;
@@ -458,13 +470,13 @@
 
         /* 删除 */
         function doDel(obj) {
-            layer.confirm('确定要删除选中数据吗？', {
+            layer.confirm('{:t("confirm.delete_selected")}', {
                 skin: 'layui-layer-admin',
                 icon: 3,
                 shade: .1
             }, function (i) {
                 layer.close(i);
-                notice.msg('正在执行中..', {icon: 4, close: true});
+                notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
                     url: obj.data ? '{:url("/Cdkey/drop")}' : '{:url("/Cdkey/batchDrop")}',
@@ -481,7 +493,7 @@
                     },
                     error: function() {
                         notice.destroy();
-                        notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                        notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                     }
                 });
             });

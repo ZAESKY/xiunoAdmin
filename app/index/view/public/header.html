@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="{:t('common.lang_code')}">
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -14,35 +14,6 @@
 	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
 </head>
-<style>
-	.img{
-		width: 96px;
-		height: 96px;
-		margin:auto;
-		display: block;
-		border-radius: 50%;
-		border: 3px solid #fff;
-		position: relative;
-		margin-top: -50px;
-	}
-	.bgimg{
-		background-image: url('{__IMG__}bg1.png');
-		border-radius: 4px 4px 0px 0px;
-		background-size:100% 100%;
-		background-repeat:no-repeat;
-		height: 96px;
-		padding: 15px;
-	}
-	#footer {
-		height: 40px;
-		line-height: 40px;
-		bottom: 0;
-		width: 100%;
-		text-align: center;
-		color: #fff;
-		font-family: Arial;
-		font-size: 12px;
-		letter-spacing: 1px;
-	}
-</style>
 <body>
+<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script type="text/javascript" src="{__JS__}lang.js?v=20261004"></script>

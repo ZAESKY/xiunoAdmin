@@ -21,7 +21,7 @@ class InitApp
     public function handle($request, Closure $next)
     {
         // 初始化系统常量
-        $this->initSystemConstant();
+        $this->initSystemConstant($request);
 
         // 初始化消息中间件RabbitMQ常量
         $this->initRabbitMQ();
@@ -46,7 +46,7 @@ class InitApp
      * @author 陌上花开
      * @since 2022-01-21
      */
-    public function initSystemConstant()
+    public function initSystemConstant($request)
     {
         // 基础常量
         define('ROOT_PATH', app()->getRootPath());
@@ -65,7 +65,7 @@ class InitApp
 
         // 附件常量
         // 文件上传路径
-        $upload_parh = \think\facade\Filesystem::getDiskConfig(config('filesystem.default'), 'root');
+        $upload_parh = (new \app\common\service\LocalFilesystemService())->root();
         define('ATTACHMENT_PATH', $upload_parh);
         define('IMG_PATH', ATTACHMENT_PATH . DS . 'images');
         define('UPLOAD_TEMP_PATH', IMG_PATH . DS . '/temp');
@@ -77,10 +77,52 @@ class InitApp
         define('NICK_NAME', env('system_nickname'));
         define('SYSTEM_VERSION', env('system_version'));
 
-        // 系统域名
+        // 系统域名。生产环境优先使用受信任的 app_host，避免 Host 头
+        // 被用于污染支付回调、下载地址等对外绝对 URL。
+        $siteUrl = $this->resolveSiteUrl($request);
+        $siteParts = parse_url($siteUrl);
+        $domain = (string)($siteParts['host'] ?? '');
+        if (isset($siteParts['port'])) {
+            $domain .= ':' . (int)$siteParts['port'];
+        }
         define('IMG_URL', env('domain_img_url'));
-        define('DOMAIN', getenv('HTTP_HOST'));
-        define('SITE_URL', (getenv('SERVER_PORT') == '443' ? 'https://' : 'http://').DOMAIN);
+        define('DOMAIN', $domain);
+        define('SITE_URL', $siteUrl);
+    }
+
+    private function resolveSiteUrl($request): string
+    {
+        $configured = rtrim(trim((string)config('app.app_host')), '/');
+        if ($configured !== '') {
+            $parts = parse_url($configured);
+            $scheme = strtolower((string)($parts['scheme'] ?? ''));
+            $path = (string)($parts['path'] ?? '');
+            if (is_array($parts)
+                && in_array($scheme, ['http', 'https'], true)
+                && !empty($parts['host'])
+                && ($path === '' || $path === '/')
+                && !isset($parts['user'], $parts['pass'], $parts['query'], $parts['fragment'])
+            ) {
+                $origin = $scheme . '://' . strtolower((string)$parts['host']);
+                if (isset($parts['port'])) {
+                    $origin .= ':' . (int)$parts['port'];
+                }
+                return $origin;
+            }
+            throw new \RuntimeException(t('system.app_host_invalid'));
+        }
+
+        $scheme = $request->isSsl() ? 'https' : 'http';
+        $serverName = trim((string)($_SERVER['SERVER_NAME'] ?? ''));
+        if ($serverName === '' || !preg_match('/^(?:[A-Za-z0-9.-]+|\[[A-Fa-f0-9:]+\])$/D', $serverName)) {
+            throw new \RuntimeException(t('system.server_host_invalid'));
+        }
+        $port = (int)($_SERVER['SERVER_PORT'] ?? ($scheme === 'https' ? 443 : 80));
+        $origin = $scheme . '://' . strtolower($serverName);
+        if (($scheme === 'https' && $port !== 443) || ($scheme === 'http' && $port !== 80)) {
+            $origin .= ':' . $port;
+        }
+        return $origin;
     }
 
     /**

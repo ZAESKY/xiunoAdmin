@@ -7,48 +7,49 @@
                 <input name="id" type="hidden"/>
                 <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">应用配置</li>
-                        <li>系统配置</li>
-                        <li>价格配置</li>
-                        <li>授权配置</li>
-                        <li>盗版配置</li>
-                        <li>公告配置</li>
+                        <li class="layui-this">{:t('app_ui.app_config')}</li>
+                        <li>{:t('app_ui.system_config')}</li>
+                        <li>{:t('app_ui.price_config')}</li>
+                        <li>{:t('app_ui.auth_config')}</li>
+                        <li>{:t('app_ui.pirate_config')}</li>
+                        <li>{:t('app_ui.notice_config')}</li>
+                        <li>{:t('app_ui.public_installer')}</li>
                     </ul>
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show">
                             <div class="layui-form-item">
-                                <label class="layui-form-label" style="height: 32px;border-radius: 4px;">应用名称</label>
+                                <label class="layui-form-label" style="height: 32px;border-radius: 4px;">{:t('app_ui.app_name')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" style="border-radius: 0px 4px 4px 0px;" name="name" class="layui-input" placeholder="应用的名称"/>
+                                    <input type="text" style="border-radius: 0px 4px 4px 0px;" name="name" class="layui-input" placeholder="{:t('app_ui.app_name_placeholder')}"/>
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">应用LOGO</label>
+                                <label class="layui-form-label">{:t('app_ui.app_logo')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" class="layui-input" name="logo" placeholder="填写图片URL，没有默认为系统LOGO">
+                                    <input type="text" class="layui-input" name="logo" placeholder="{:t('app_ui.app_logo_placeholder')}">
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <div class="layui-upload-drag" id="upload">
                                     <i class="layui-icon layui-icon-upload-drag" style="color:#2d8cf0;"></i>
-                                    <p>点击上传，或将文件拖拽到此处</p>
+                                    <p>{:t('version_ui.drag_upload')}</p>
                                     <div class="layui-hide" id="uploadDemoView">
                                         <hr>
-                                        <img src="" alt="上传成功后渲染" id="demo1" style="max-width: 196px">
+                                        <img src="" alt="{:t('app_ui.upload_preview_alt')}" id="demo1" style="max-width: 196px">
                                     </div>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">应用简介</label>
+                                <label class="layui-form-label">{:t('app_ui.app_desc')}</label>
                                 <div class="layui-input-block">
-                                    <textarea name="introduce" class="layui-textarea" style="height:100px" placeholder="该应用的简单介绍,可留空"></textarea>
+                                    <textarea name="introduce" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.app_desc_placeholder')}"></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">判断规则</label>
+                                <label class="layui-form-label">{:t('app_ui.judge_rule')}</label>
                                 <div class="layui-input-block">
                                     <select class="layui-input" name="check_type" lay-filter="check_type" lay-search>
-                                        <option value="">请选择判断规则</option>
+                                        <option value="">{:t('app_ui.select_judge_rule')}</option>
                                         {volist name="check_type_list" id="res"}
                                         <option value="{$res.type}">{$res.name}</option>
                                         {/volist}
@@ -56,138 +57,138 @@
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">应用状态</label>
+                                <label class="layui-form-label">{:t('app_ui.app_status')}</label>
                                 <div class="layui-input-block">
-                                    <input type="radio" name="status" value="2" title="正常运营" checked>
-                                    <input type="radio" name="status" value="1" title="系统维护">
-                                    <input type="radio" name="status" value="0" title="停止运营">
+                                    <input type="radio" name="status" value="2" title="{:t('app_ui.normal_run')}" checked>
+                                    <input type="radio" name="status" value="1" title="{:t('app_ui.system_maintain')}">
+                                    <input type="radio" name="status" value="0" title="{:t('app_ui.stop_run')}">
                                 </div>
                             </div>
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">授权查询</label>
+                                <label class="layui-form-label">{:t('app_ui.auth_query')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="auth_query_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">代理查询</label>
+                                <label class="layui-form-label">{:t('app_ui.proxy_query')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="user_query_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">自助注册</label>
+                                <label class="layui-form-label">{:t('app_ui.self_register')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="register_switch" value="1" lay-filter="register_switch" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">自助授权</label>
+                                <label class="layui-form-label">{:t('app_ui.self_auth')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="auth_query_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">卡密兑换</label>
+                                <label class="layui-form-label">{:t('app_ui.cdkey_exchange')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="cdkey_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">更换授权</label>
+                                <label class="layui-form-label">{:t('app_ui.replace_auth')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="replace_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">更换次数</label>
+                                <label class="layui-form-label">{:t('app_ui.replace_count')}</label>
                                 <div class="layui-input-block">
-                                    <input type="number" name="free_replace_number" class="layui-input" placeholder="免费更换授权的次数"/>
+                                    <input type="number" name="free_replace_number" class="layui-input" placeholder="{:t('app_ui.free_replace_count')}"/>
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">API接口</label>
+                                <label class="layui-form-label">{:t('app_ui.api_interface')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="api_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">认证易支付</label>
+                                <label class="layui-form-label">{:t('app_ui.auth_epay')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="pay_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">绑定授权</label>
+                                <label class="layui-form-label">{:t('auth_portal.bind')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="binding_auth_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">API密钥</label>
+                                <label class="layui-form-label">{:t('app_ui.api_key')}</label>
                                 <div class="layui-input-block">
-                                    <input type="number" name="API_KEY" class="layui-input" placeholder="调用本应用API时的密钥"/>
+                                    <input type="number" name="API_KEY" class="layui-input" placeholder="{:t('app_ui.api_key_placeholder')}"/>
                                 </div>
                             </div>
                             <div id="register_blacklist">
                                 <div class="layui-form-item layui-form-text">
-                                    <label class="layui-form-label">注册黑名单</label>
+                                    <label class="layui-form-label">{:t('app_ui.register_blacklist')}</label>
                                     <div class="layui-input-block">
-                                        <textarea name="register_blacklist" class="layui-textarea" style="height:100px" placeholder="多个IP用|隔开"></textarea>
+                                        <textarea name="register_blacklist" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.ip_placeholder')}"></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="layui-tab-item">
                             <fieldset class="layui-elem-field layui-field-title">
-                                <legend>授权价格配置</legend>
+                                <legend>{:t('app_ui.auth_price_config')}</legend>
                                 <div class="layui-field-box">
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">价格模板</label>
+                                        <label class="layui-form-label">{:t('app_ui.price_template')}</label>
                                         <div class="layui-input-block">
                                             <select id="auth_template" class="layui-input" name="auth_template" lay-search>
-                                                <option value="">请选择价格模板</option>
-                                                <option value="1">默认模板</option>
+                                                <option value="">{:t('app_ui.select_price_template')}</option>
+                                                <option value="1">{:t('app_ui.default_template')}</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                             </fieldset>
                             <fieldset class="layui-elem-field layui-field-title">
-                                <legend>权限价格配置</legend>
+                                <legend>{:t('app_ui.power_price_config')}</legend>
                                 <div class="layui-field-box">
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">价格模板</label>
+                                        <label class="layui-form-label">{:t('app_ui.price_template')}</label>
                                         <div class="layui-input-block">
                                             <select id="power_template" class="layui-input" name="power_template" lay-search>
-                                                <option value="">请选择权限模板</option>
-                                                <option value="1">默认模板</option>
+                                                <option value="">{:t('app_ui.select_power_template')}</option>
+                                                <option value="1">{:t('app_ui.default_template')}</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                             </fieldset>
                             <fieldset class="layui-elem-field layui-field-title">
-                                <legend>其他价格配置</legend>
+                                <legend>{:t('app_ui.other_price_config')}</legend>
                                 <div class="layui-field-box">
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">查看盗版</label>
+                                        <label class="layui-form-label">{:t('app_ui.view_pirate')}</label>
                                         <div class="layui-input-block">
-                                            <input type="number" name="pirate_money" class="layui-input" placeholder="代理查看盗版站点信息时扣除的价格" step="0.01" min="0" max="999999"/>
+                                            <input type="number" name="pirate_money" class="layui-input" placeholder="{:t('app_ui.pirate_deduct_price')}" step="0.01" min="0" max="999999"/>
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">赠送余额</label>
+                                        <label class="layui-form-label">{:t('app_ui.gift_balance')}</label>
                                         <div class="layui-input-block">
-                                            <input type="number" name="give_money" class="layui-input" placeholder="该应用的代理添加下级代理时,下级代理初始的余额" step="0.01" min="0" max="999999"/>
+                                            <input type="number" name="give_money" class="layui-input" placeholder="{:t('app_ui.sub_agent_balance')}" step="0.01" min="0" max="999999"/>
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">更换价格</label>
+                                        <label class="layui-form-label">{:t('app_ui.replace_price')}</label>
                                         <div class="layui-input-block">
-                                            <input type="number" name="replace_money" class="layui-input" placeholder="免费更换次数用完的更换价格" step="0.01" min="0" max="999999"/>
+                                            <input type="number" name="replace_money" class="layui-input" placeholder="{:t('app_ui.free_replace_price')}" step="0.01" min="0" max="999999"/>
                                         </div>
                                     </div>
                                 </div>
@@ -195,114 +196,114 @@
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">公钥</label>
+                                <label class="layui-form-label">{:t('app_ui.public_key')}</label>
                                 <div class="layui-input-block">
-                                    <textarea name="public_key" class="layui-textarea" style="height:100px" placeholder="这里填写生成后的公钥"></textarea>
+                                    <textarea name="public_key" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.public_key_placeholder')}"></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">私钥</label>
+                                <label class="layui-form-label">{:t('app_ui.private_key')}</label>
                                 <div class="layui-input-block">
-                                    <textarea name="private_key" class="layui-textarea" style="height:100px" placeholder="这里填写生成后的私钥"></textarea>
+                                    <textarea name="private_key" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.private_key_placeholder')}"></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <div class="sf-tips">
-                                    公钥私钥生成地址：<a href="https://www.bejson.com/enc/rsa/" target="_blank">https://www.bejson.com/enc/rsa/</a>
+                                    {:t('app_ui.key_generation_url')}：<a href="https://www.bejson.com/enc/rsa/" target="_blank">https://www.bejson.com/enc/rsa/</a>
                                 </div>
                             </div>
 
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">在线更新</label>
+                                <label class="layui-form-label">{:t('app_ui.online_update')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="update_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">盗版入库</label>
+                                <label class="layui-form-label">{:t('app_ui.pirate_save')}</label>
                                 <div class="layui-input-block">
-                                    <input type="radio" name="pirate_switch" value="0" title="关闭" checked>
-                                    <input type="radio" name="pirate_switch" value="1" title="盗版入库">
-                                    <input type="radio" name="pirate_switch" value="2" title="全部入库">
+                                    <input type="radio" name="pirate_switch" value="0" title="{:t('common.close')}" checked>
+                                    <input type="radio" name="pirate_switch" value="1" title="{:t('app_ui.pirate_save')}">
+                                    <input type="radio" name="pirate_switch" value="2" title="{:t('app_ui.pirate_save_all')}">
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">检测IP</label>
+                                <label class="layui-form-label">{:t('app_ui.detect_ip')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="ip_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">检测授权码</label>
+                                <label class="layui-form-label">{:t('app_ui.detect_auth_code')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="authcode_switch" value="1" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item" pane>
-                                <label class="layui-form-label">提交方式</label>
+                                <label class="layui-form-label">{:t('app_ui.submit_method')}</label>
                                 <div class="layui-input-block">
                                     <input type="checkbox" name="check_auth_method" value="1" lay-text="POST|GET" lay-skin="switch" />
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">验证文件</label>
+                                <label class="layui-form-label">{:t('app_ui.verify_file')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="authcode_file" class="layui-input" placeholder="请填写您应用authcode.php的位置，例如includes/authcode.php" />
+                                    <input type="text" name="authcode_file" class="layui-input" placeholder="{:t('app_ui.authcode_file_placeholder')}" />
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label">更新SQL</label>
+                                <label class="layui-form-label">{:t('app_ui.update_sql')}</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="sql_file" class="layui-input" placeholder="请填写您应用update.sql的位置，例如install/update.sql"/>
+                                    <input type="text" name="sql_file" class="layui-input" placeholder="{:t('app_ui.sql_file_placeholder')}"/>
                                 </div>
                             </div>
                         </div>
                         <div class="layui-tab-item">
                             <div id="blocktext">
                                 <div class="layui-form-item layui-form-text">
-                                    <label class="layui-form-label">盗版提示</label>
+                                    <label class="layui-form-label">{:t('code_view.pirate_tip')}</label>
                                     <div class="layui-input-block">
-                                        <textarea name="pirate_msg" class="layui-textarea" style="height:100px" placeholder="该应用的盗版提示 例如 您当前未授权，请联系xxx授权" ></textarea>
+                                        <textarea name="pirate_msg" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.pirate_msg_placeholder')}" ></textarea>
                                     </div>
                                 </div>
                                 <div class="layui-form-item layui-form-text">
-                                    <label class="layui-form-label">授权到期提示</label>
+                                    <label class="layui-form-label">{:t('app_ui.auth_expired_notice')}</label>
                                     <div class="layui-input-block">
-                                        <textarea name="endtime_msg" class="layui-textarea" style="height:100px" placeholder="该应用的到期提示 例如 您当前授权已到期，请联系xxx续费" ></textarea>
+                                        <textarea name="endtime_msg" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.endtime_msg_placeholder')}" ></textarea>
                                     </div>
                                 </div>
                                 <div class="layui-form-item layui-form-text">
-                                    <label class="layui-form-label">授权封禁提示</label>
+                                    <label class="layui-form-label">{:t('app_ui.auth_blocked_notice')}</label>
                                     <div class="layui-input-block">
-                                        <textarea name="status_msg" class="layui-textarea" style="height:100px" placeholder="该应用的封禁提示 例如 您当前授权已被封禁，请联系xxx解封" ></textarea>
+                                        <textarea name="status_msg" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.status_msg_placeholder')}" ></textarea>
                                     </div>
                                 </div>
                                 <div class="layui-form-item layui-form-text">
-                                    <label class="layui-form-label">授权码错误提示</label>
+                                    <label class="layui-form-label">{:t('app_ui.authcode_error_notice')}</label>
                                     <div class="layui-input-block">
-                                        <textarea name="authcode_msg" class="layui-textarea" style="height:100px" placeholder="该应用的授权码错误提示 例如 您当前授权码错误，请联系xxx获取" ></textarea>
+                                        <textarea name="authcode_msg" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.authcode_msg_placeholder')}" ></textarea>
                                     </div>
                                 </div>
                                 <div class="layui-form-item layui-form-text">
-                                    <label class="layui-form-label">IP错误提示</label>
+                                    <label class="layui-form-label">{:t('app_ui.ip_error_notice')}</label>
                                     <div class="layui-input-block">
-                                        <textarea name="ip_msg" class="layui-textarea" style="height:100px" placeholder="该应用的IP错误提示 例如 您当前IP与授权IP不符，请联系xxx更改" ></textarea>
+                                        <textarea name="ip_msg" class="layui-textarea" style="height:100px" placeholder="{:t('app_ui.ip_msg_placeholder')}" ></textarea>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">后门地址</label>
+                                    <label class="layui-form-label">{:t('app_ui.backdoor_url')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="hacker_file" class="layui-input" placeholder="请填写您应用的后门访问地址"/>
+                                        <input type="text" name="hacker_file" class="layui-input" placeholder="{:t('app_ui.backdoor_url_placeholder')}"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">后门密码</label>
+                                    <label class="layui-form-label">{:t('app_ui.backdoor_password')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="hacker_key" class="layui-input" placeholder="请填写您应用的后门访问密码"/>
+                                        <input type="text" name="hacker_key" class="layui-input" placeholder="{:t('app_ui.backdoor_password_placeholder')}"/>
                                     </div>
                                 </div>
                                 <div class="layui-form-item" pane>
-                                    <label class="layui-form-label">盗版提示</label>
+                                    <label class="layui-form-label">{:t('code_view.pirate_tip')}</label>
                                     <div class="layui-input-block">
                                         <input type="checkbox" name="pirate_msg_switch" value="1" lay-skin="switch" />
                                     </div>
@@ -311,33 +312,56 @@
                         </div>
                         <div class="layui-tab-item">
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">应用公告</label>
+                                <label class="layui-form-label">{:t('app_ui.app_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="app_notice_editor" name="app_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用的公告，可留空" ></textarea>
+                                    <textarea id="app_notice_editor" name="app_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.app_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">卡密兑换公告</label>
+                                <label class="layui-form-label">{:t('app_ui.cdkey_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用卡密兑换时的公告" ></textarea>
+                                    <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.cdkey_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">余额充值公告</label>
+                                <label class="layui-form-label">{:t('app_ui.recharge_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用余额充值时的公告" ></textarea>
+                                    <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.pay_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">用户自助注册公告</label>
+                                <label class="layui-form-label">{:t('app_ui.register_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="register_notice_editor" name="register_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用用户自助注册时的公告" ></textarea>
+                                    <textarea id="register_notice_editor" name="register_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.register_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
-                                <label class="layui-form-label">更换授权公告</label>
+                                <label class="layui-form-label">{:t('app_ui.replace_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="该应用更换授权时的公告" ></textarea>
+                                    <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.replace_notice_placeholder')}" ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <blockquote class="layui-elem-quote-sf-info" style="text-align:left;">
+                                {:t('app_ui.public_installer_help')}
+                            </blockquote>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">{:t('app_ui.current_file')}</label>
+                                <div class="layui-input-block" style="line-height:38px;"><span id="sfInstallerName">{:t('app_ui.not_uploaded')}</span></div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">{:t('app_ui.file_info')}</label>
+                                <div class="layui-input-block" style="line-height:26px;word-break:break-all;">
+                                    <div>{:t('app_ui.file_size')}：<span id="sfInstallerSize">-</span></div>
+                                    <div>SHA-256：<span id="sfInstallerHash">-</span></div>
+                                    <div>{:t('app_ui.upload_time')}：<span id="sfInstallerTime">-</span></div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="button" class="layui-btn" id="sfInstallerUpload"><i class="layui-icon layui-icon-upload"></i>{:t('app_ui.upload_zip_installer')}</button>
+                                    <p id="sfInstallerHint" style="color:#999;margin-top:8px;">{:t('app_ui.installer_upload_help')}</p>
                                 </div>
                             </div>
                         </div>
@@ -345,8 +369,8 @@
                     <hr style="width:0px"><hr>
                     <div class="layui-form-item">
                         <div class="layui-btn-container">
-                            <button type="button" class="layui-btn" id="noticeBtn" lay-filter="submitBtn" lay-submit>&emsp;提交&emsp;</button>
-                            <button type="reset" id="formreset" class="layui-btn layui-btn-primary">&emsp;重置&emsp;</button>
+                            <button type="button" class="layui-btn" id="noticeBtn" lay-filter="submitBtn" lay-submit>&emsp;{:t('common.submit')}&emsp;</button>
+                            <button type="reset" id="formreset" class="layui-btn layui-btn-primary">&emsp;{:t('common.reset')}&emsp;</button>
                         </div>
                     </div>
                 </div>
@@ -395,7 +419,7 @@
         }
         initRichEditors();
 
-        notice.msg('正在获取列表中..', {icon: 4, close: true});
+        notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",
             url: '{:url("/AuthTemplate/getList")}',
@@ -403,8 +427,8 @@
             success: function(data) {
                 notice.destroy();
                 if (data.code == 0) {
-                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                    var content = '<option value="">请选择所属模板</option>';
+                    notice.msg("{:t('common.list_success')}", {icon: 1, audio:'1'});
+                    var content = '<option value="">{:t('app_ui.select_template')}</option>';
                     $.each(data.data,function(index, value){
                         $.each(value,function(index, value){
                             content += '<option value="'+value.id+'">'+value.name+'</option>';
@@ -421,11 +445,11 @@
             },
             error: function() {
                 notice.destroy();
-                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
             }
         });
 
-        notice.msg('正在获取列表中..', {icon: 4, close: true});
+        notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",
             url: '{:url("/PowerTemplate/getList")}',
@@ -433,8 +457,8 @@
             success: function(data) {
                 notice.destroy();
                 if (data.code == 0) {
-                    notice.msg("获取列表成功！", {icon: 1, audio:'1'});
-                    var content = '<option value="">请选择所属模板</option>';
+                    notice.msg("{:t('common.list_success')}", {icon: 1, audio:'1'});
+                    var content = '<option value="">{:t('app_ui.select_template')}</option>';
                     $.each(data.data,function(index, value){
                         $.each(value,function(index, value){
                             content += '<option value="'+value.id+'">'+value.name+'</option>';
@@ -451,7 +475,7 @@
             },
             error: function() {
                 notice.destroy();
-                notice.msg("服务器错误！", {icon: 2, audio:'1'});
+                notice.msg("{:t('common.server_error')}", {icon: 2, audio:'1'});
             }
         });
 
@@ -463,7 +487,7 @@
                 obj.preview(function(index, file, result){
                     $('#demo1').attr('src', result); //图片链接（base64）
                 });
-                notice.msg('上传中...', {icon: 4, close: true});
+                notice.msg('{:t("app_ui.uploading")}', {icon: 4, close: true});
             }
             ,done: function(res){
                 notice.destroy();
@@ -471,12 +495,60 @@
                 if(res.code == 0){
                     $("input[name='logo']").val(res.data.path);
                     layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', res.files.file);
-                    notice.msg('上传成功！', {icon: 1, audio:'1'});
+                    notice.msg('{:t("upload.upload_success")}', {icon: 1, audio:'1'});
                 }else{
-                    notice.msg('上传失败！', {icon: 2, audio:'1'});
+                    notice.msg('{:t("common.upload_failed")}', {icon: 2, audio:'1'});
                 }
             }
         });
+        function installerSize(bytes) {
+            bytes = parseInt(bytes || 0, 10);
+            if (bytes <= 0) return '-';
+            return bytes >= 1048576 ? (bytes / 1048576).toFixed(2) + ' MB' : (bytes / 1024).toFixed(2) + ' KB';
+        }
+        function showInstallerMeta(meta) {
+            meta = meta || {};
+            $('#sfInstallerName').text(meta.file_name || meta.installer_file_name || '{:t("app_ui.not_uploaded")}');
+            $('#sfInstallerSize').text(installerSize(meta.size || meta.installer_size));
+            var hash = meta.sha256 || meta.installer_sha256 || '';
+            $('#sfInstallerHash').text(hash ? hash.substr(0, 20) + '…' : '-').attr('title', hash);
+            $('#sfInstallerTime').text(meta.uploaded_at || meta.installer_uploaded_at || '-');
+        }
+        showInstallerMeta(appInfoData || {});
+        var installerButton = $('#sfInstallerUpload');
+        if (!appInfoData || appInfoData.sf || !appInfoData.id) {
+            installerButton.addClass('layui-btn-disabled').prop('disabled', true);
+            $('#sfInstallerHint').text('{:t("app_ui.save_before_installer")}');
+        } else {
+            upload.render({
+                elem: '#sfInstallerUpload',
+                url: '{:url("/App/uploadInstaller")}',
+                data: {id: appInfoData.id},
+                accept: 'file',
+                exts: 'zip',
+                acceptMime: '.zip,application/zip',
+                size: 419922,
+                before: function () {
+                    installerButton.addClass('layui-btn-disabled').prop('disabled', true);
+                    notice.msg('{:t("app_ui.installer_uploading")}', {icon: 4, close: true});
+                },
+                done: function (res) {
+                    notice.destroy();
+                    installerButton.removeClass('layui-btn-disabled').prop('disabled', false);
+                    if (res.code == 0) {
+                        showInstallerMeta(res.data || {});
+                        notice.msg(res.msg || '{:t("app_ui.installer_upload_success")}', {icon: 1, audio:'1'});
+                    } else {
+                        notice.msg(res.msg || '{:t("app_ui.installer_upload_failed")}', {icon: 2, audio:'1'});
+                    }
+                },
+                error: function () {
+                    notice.destroy();
+                    installerButton.removeClass('layui-btn-disabled').prop('disabled', false);
+                    notice.msg('{:t("app_ui.upload_request_failed")}', {icon: 2, audio:'1'});
+                }
+            });
+        }
         form.on('submit(submitBtn)', function (data) {
             syncRichEditors();
             data.field = {};
@@ -484,34 +556,34 @@
                 data.field[item.name] = item.value;
             });
             if (data.field.name == "") {
-                notice.msg('请输入应用名称！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_app_name")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.public_key == "") {
-                notice.msg('请填写授权公钥！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_public_key")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.private_key == "") {
-                notice.msg('请填写授权私钥！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_private_key")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.pirate_msg == "") {
-                notice.msg('请填写盗版提示内容！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_pirate_tip")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.endtime_msg == "") {
-                notice.msg('请填写授权到期提示内容！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_auth_expire_tip")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.status_msg == "") {
-                notice.msg('请填写授权封禁提示内容！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_auth_block_tip")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.authcode_msg=="") {
-                notice.msg('请填写授权码不正确提示内容！', {icon: 3, audio:'1'});
+                notice.msg('{:t("app_ui.enter_auth_code_tip")}', {icon: 3, audio:'1'});
                 return false;
             }
-            notice.msg('正在执行中..', {icon: 4, close: true});
+            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
                 url: "{:url('/App/edit')}",
@@ -537,7 +609,7 @@
         });
         $('#formreset').click(function () {
             $("#formBasForm")[0].reset();
-            notice.msg('重置表单成功！', {icon: 1, audio:'1'});
+            notice.msg('{:t("notify.form_reset_success")}', {icon: 1, audio:'1'});
         });
     });
 </script>

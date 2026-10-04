@@ -262,7 +262,7 @@
                                 <div id="sf_introduce">{:t('notify.no_update_content')}</div>
                             </div>
                             <div class="sf-set-more">
-                                <a lay-filter="uplog" lay-submit>了解{:t('common.more')}...</a>
+                                <a lay-filter="uplog" lay-submit>{:t('update_ui.learn_more')}...</a>
                             </div>
                         </div>
                     </div>
@@ -290,7 +290,7 @@
             </div>
             <div id="sf_new_version" class="sf-loading" style="display: none">
                 <div class="sf-new-font">MOS <span id="sf_current_edition">{$edition}</span></div>
-                <div class="sf-new-font2">MOS已是最新{:t('common_ui.version')}</div>
+                <div class="sf-new-font2">{:t('update_ui.latest_version')}</div>
             </div>
         </div>
     </div>
@@ -318,7 +318,7 @@
                             $("#sf_update").show();
                             $("#sf_edition").text(data.data.edition);
                             $("#sf_msg").text(data.data.filesize + ' MB');
-                            $("#sf_introduce").text('本次更新' + data.data.introduce);
+                            $("#sf_introduce").text('{:t("update_ui.this_update")} ' + data.data.introduce);
                             var html = '<div class="layui-card layui-card-body"><ul class="layui-timeline">';
                             $.each(data.data.uplog, function(index, value){
                                 html += '<li class="layui-timeline-item">\n' +
@@ -345,14 +345,14 @@
                 },
                 error: function() {
                     $("#sf_loading").hide();
-                    notice.msg('服务器错误！', {icon: 2, audio:'1'});
+                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                 }
             });
         });
 
         form.on('submit(uplog)', function (data) {
             admin.open({
-                title: '关于本更新',
+                title: '{:t("update_ui.about_update")}',
                 type: 1,
                 shade: .1,
                 area:['100%','100%'],
@@ -365,13 +365,13 @@
         function updateStatus(type = false){
             if(type){
                 $("sf_msg").css('display','none');
-                $("#sf_msg").text('正在准备下载...');
+                $("#sf_msg").text('{:t("notify.wait_download")}');
                 $("#sf_update_btn").css('color','#8B8B8D');
-                $("#sf_update_btn").text('正在下载...');
+                $("#sf_update_btn").text('{:t("notify.downloading")}');
                 $("#sf_set").addClass('sf-loop');
             }else{
                 $("#sf_update_btn").css('color','#007aff');
-                $("#sf_update_btn").text('下载并安装');
+                $("#sf_update_btn").text('{:t("notify.download_install")}');
                 $("#sf_set").removeClass('sf-loop');
             }
         }
@@ -407,7 +407,7 @@
                     },
                     error: function() {
                         $("#sf_loading").hide();
-                        notice.msg('服务器错误！', {icon: 2, audio:'1'});
+                        notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                         updateStatus();
                     }
                 });

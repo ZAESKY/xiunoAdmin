@@ -30,7 +30,7 @@ class DiscountCodeModel extends BaseModel
 
         // 生成唯一 12 位码
         for ($i = 0; $i < 5; $i++) {
-            $code = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 12));
+            $code = strtoupper(bin2hex(random_bytes(6)));
             $row = self::where('code', $code)->find();
             if (!$row) {
                 break;
@@ -38,7 +38,7 @@ class DiscountCodeModel extends BaseModel
             $code = ''; // 碰撞，重试
         }
         if (empty($code)) {
-            throw new Exception('生成折扣码失败，请重试');
+            throw new Exception(t('discount_code.generate_failed'));
         }
 
         self::insert([
@@ -54,8 +54,8 @@ class DiscountCodeModel extends BaseModel
     public function list()
     {
         $post = request()->post();
-        $limit = !empty($post['limit']) ? $post['limit'] : 10;
-        $current_page = !empty($post['current_page']) ? $post['current_page'] : 1;
+        $limit = sf_page_limit($post['limit'] ?? null, 10);
+        $current_page = sf_page_number($post['current_page'] ?? null);
 
         $data = $this->buildSearchWhere('id|code');
         return self::order('id', 'desc')->where($data)->paginate([

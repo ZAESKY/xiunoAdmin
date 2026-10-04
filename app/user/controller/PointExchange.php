@@ -18,9 +18,9 @@ class PointExchange extends UserBackend
     {
         if (!feature_enabled('feature_point_exchange_enabled')) {
             if (IS_POST) {
-                exit(json_encode(message('积分兑换功能已关闭', false), JSON_UNESCAPED_UNICODE));
+                exit(json_encode(message('point_exchange.feature_closed', false), JSON_UNESCAPED_UNICODE));
             }
-            exit($this->render('/public/error', ['msg' => '积分兑换功能已关闭']));
+            exit($this->render('/public/error', ['msg' => t('point_exchange.feature_closed')]));
         }
     }
 

@@ -5,19 +5,22 @@
 .wd-balance-tip { padding: 12px 18px; margin-bottom: 14px; background: #f9fafb; border-radius: 8px; border: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
 .wd-balance-tip .wd-bal { font-size: 18px; font-weight: 700; color: #ff5722; }
 .wd-balance-tip .wd-label { font-size: 13px; color: #8c8c8c; }
+.wd-balance-note { margin: -8px 4px 14px; color: #8c8c8c; font-size: 12px; line-height: 1.6; }
 .wd-form-upload { display: flex; align-items: center; gap: 10px; }
 .wd-form-upload img { width: 120px; height: 120px; object-fit: contain; border-radius: 6px; border: 1px solid #e6e6e6; }
 </style>
 <div class="layui-fluid">
     <div class="wd-balance-tip">
-        <span class="wd-label">可提现余额：</span>
-        <span class="wd-bal">¥<b id="wdBalance">{$userInfo['balance']}</b></span>
-        <span class="wd-label">| 最低提现：¥<b id="wdMin">--</b></span>
+        <span class="wd-label">{:t('withdraw.available_earnings')}：</span>
+        <span class="wd-bal">¥<b id="wdBalance">--</b></span>
+        <span class="wd-label">| {:t('withdraw.minimum')}：¥<b id="wdMin">--</b></span>
+        <span class="wd-label">| {:t('withdraw.account_balance')}：¥<b id="wdAccountBalance">{$userInfo['balance']}</b></span>
     </div>
+    <div class="wd-balance-note">{:t('withdraw.balance_note')}</div>
     <div class="layui-card">
         <div class="layui-card-header wd-card-header">
-            <span class="wd-title">提现记录</span>
-            <button class="layui-btn layui-btn-normal layui-btn-sm" id="btnApply"><i class="layui-icon layui-icon-export"></i> 申请提现</button>
+            <span class="wd-title">{:t('withdraw.records')}</span>
+            <button class="layui-btn layui-btn-normal layui-btn-sm" id="btnApply"><i class="layui-icon layui-icon-export"></i> {:t('user_home.request_withdrawal')}</button>
         </div>
         <div class="layui-card-body">
             <table id="SF_Table" lay-filter="SF_Table"></table>
@@ -29,62 +32,80 @@
 <script type="text/html" id="applyFormTpl">
 <form class="layui-form model-form layui-row" lay-filter="applyForm" style="padding:10px;">
     <div class="layui-form-item">
-        <label class="layui-form-label layui-form-required">提现金额</label>
+        <label class="layui-form-label layui-form-required">{:t('withdraw.amount')}</label>
         <div class="layui-input-block">
-            <input type="number" name="amount" placeholder="请输入提现金额" class="layui-input" lay-verify="required|number" lay-verType="tips" step="0.01" min="0" autocomplete="off"/>
+            <input type="number" name="amount" placeholder="{:t('withdraw.amount_placeholder')}" class="layui-input" lay-verify="required|number" lay-verType="tips" step="0.01" min="0" autocomplete="off"/>
             <div class="sf-tips" id="amountTip" style="margin-top:4px;"></div>
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label layui-form-required">收款方式</label>
+        <label class="layui-form-label layui-form-required">{:t('withdraw.payment_method')}</label>
         <div class="layui-input-block">
-            <input type="radio" name="pay_method" value="alipay" title="支付宝" lay-verify="required" checked/>
-            <input type="radio" name="pay_method" value="wechat" title="微信"/>
+            <input type="radio" name="pay_method" value="alipay" title="{:t('order_ui.alipay')}" lay-verify="required" checked/>
+            <input type="radio" name="pay_method" value="wechat" title="{:t('order_ui.wechat')}"/>
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label layui-form-required">收款码</label>
+        <label class="layui-form-label layui-form-required">{:t('withdraw.payment_qr')}</label>
         <div class="layui-input-block">
             <div class="wd-form-upload">
-                <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnUploadQr"><i class="layui-icon layui-icon-upload"></i> 上传收款码</button>
-                <img id="qrPreview" src="" style="display:none;" alt="收款码预览"/>
+                <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnUploadQr"><i class="layui-icon layui-icon-upload"></i> {:t('withdraw.upload_qr')}</button>
+                <img id="qrPreview" src="" style="display:none;" alt="{:t('withdraw.qr_preview')}"/>
             </div>
             <input type="hidden" name="qr_image" id="qrImageVal" value="" lay-verify="required" lay-verType="tips"/>
-            <div class="sf-tips">支持 jpg/png/gif，建议上传清晰的收款码图片</div>
+            <div class="sf-tips">{:t('withdraw.qr_help')}</div>
+        </div>
+    </div>
+    <div class="layui-form-item" id="normalPhoneField">
+        <label class="layui-form-label layui-form-required">{:t('withdraw.phone')}</label>
+        <div class="layui-input-block">
+            <input type="text" name="phone" placeholder="{:t('withdraw.phone_placeholder')}" class="layui-input" lay-verify="required|phone" lay-verType="tips" autocomplete="off" maxlength="11"/>
+        </div>
+    </div>
+    <div class="layui-form-item" id="verifiedPhoneField" style="display:none;">
+        <label class="layui-form-label layui-form-required">{:t('profile.security_phone')}</label>
+        <div class="layui-input-block">
+            <input type="text" id="verifiedPhoneText" class="layui-input" readonly/>
+            <div class="sf-tips">{:t('withdraw.verified_phone_help')}</div>
+        </div>
+    </div>
+    <div class="layui-form-item" id="withdrawSmsCodeField" style="display:none;">
+        <label class="layui-form-label layui-form-required">{:t('withdraw.sms_code')}</label>
+        <div class="layui-input-block layui-col-space5">
+            <div class="layui-col-xs7">
+                <input type="text" name="sms_code" placeholder="{:t('withdraw.sms_placeholder')}" class="layui-input" autocomplete="one-time-code" inputmode="numeric" maxlength="6"/>
+            </div>
+            <div class="layui-col-xs5">
+                <button type="button" class="layui-btn layui-btn-primary layui-btn-fluid" id="sendWithdrawSms">{:t('password_recovery.send_code')}</button>
+            </div>
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label layui-form-required">手机号</label>
+        <label class="layui-form-label layui-form-required">{:t('withdraw.real_name')}</label>
         <div class="layui-input-block">
-            <input type="text" name="phone" placeholder="请输入11位手机号" class="layui-input" lay-verify="required|phone" lay-verType="tips" autocomplete="off" maxlength="11"/>
+            <input type="text" name="real_name" placeholder="{:t('withdraw.real_name_placeholder')}" class="layui-input" lay-verify="required" lay-verType="tips" autocomplete="off" maxlength="50"/>
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label layui-form-required">真实姓名</label>
+        <label class="layui-form-label">{:t('withdraw.remark')}</label>
         <div class="layui-input-block">
-            <input type="text" name="real_name" placeholder="请输入真实姓名" class="layui-input" lay-verify="required" lay-verType="tips" autocomplete="off" maxlength="50"/>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <label class="layui-form-label">备注</label>
-        <div class="layui-input-block">
-            <textarea name="remark" placeholder="选填，如有特殊要求可在此说明" class="layui-textarea" maxlength="200"></textarea>
+            <textarea name="remark" placeholder="{:t('withdraw.remark_placeholder')}" class="layui-textarea" maxlength="200"></textarea>
         </div>
     </div>
     <div class="layui-form-item text-right">
-        <button type="button" class="layui-btn" lay-filter="submitApply" lay-submit>提交申请</button>
-        <button type="button" class="layui-btn layui-btn-primary" id="btnCancelApply">取消</button>
+        <button type="button" class="layui-btn" lay-filter="submitApply" lay-submit>{:t('withdraw.submit')}</button>
+        <button type="button" class="layui-btn layui-btn-primary" id="btnCancelApply">{:t('common.cancel')}</button>
     </div>
 </form>
 </script>
 
 <script type="text/html" id="SF_TbBar">
     {{# if(d.status === 'pending'){ }}
-    <a class="layui-btn layui-btn-warm layui-btn-sm" lay-event="cancel"><i class="layui-icon layui-icon-close"></i>撤回</a>
+    <a class="layui-btn layui-btn-warm layui-btn-sm" lay-event="cancel"><i class="layui-icon layui-icon-close"></i>{:t('withdraw.cancel')}</a>
     {{# } }}
 </script>
 <script type="text/html" id="SF_TbStatus">
-    {{# var m = {pending:'<span class="layui-badge layui-bg-orange">待处理</span>', approved:'<span class="layui-badge layui-badge-green">已处理</span>', rejected:'<span class="layui-badge layui-badge-red">已驳回</span>', withdrawn:'<span class="layui-badge layui-bg-gray">已撤回</span>'}; }}
+    {{# var m = {pending:'<span class="layui-badge layui-bg-orange">{:t('common_ui.status_pending')}</span>', approved:'<span class="layui-badge layui-badge-green">{:t('withdraw.status_approved')}</span>', rejected:'<span class="layui-badge layui-badge-red">{:t('feedback.status_rejected')}</span>', withdrawn:'<span class="layui-badge layui-bg-gray">{:t('withdraw.status_withdrawn')}</span>'}; }}
     {{# return m[d.status] || d.status; }}
 </script>
 
@@ -94,18 +115,26 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
     var $ = layui.jquery, layer = layui.layer, form = layui.form, table = layui.table,
         admin = layui.admin, notice = layui.notice, upload = layui.upload;
 
-    var BALANCE = parseFloat('{$userInfo["balance"]}') || 0;
+    var BALANCE = 0;
     var MIN_AMOUNT = 0;
+    var SMS_REQUIRED = false;
+    var PHONE_VERIFIED = false;
+    var PHONE_MASKED = '';
     var applyIndex = null;
 
     // 加载提现条件
     function loadCheckInfo() {
         $.ajax({ type:'POST', url:'{:url("/Withdraw/check")}', dataType:'json',
             success: function(res) {
-                if (res && res.code == 0 && res.data) {
+                if (res && res.data) {
                     MIN_AMOUNT = parseFloat(res.data.min) || 10;
-                    $('#wdBalance').text(res.data.balance);
+                    BALANCE = parseFloat(res.data.withdrawable_balance || res.data.balance) || 0;
+                    $('#wdBalance').text(BALANCE.toFixed(2));
+                    $('#wdAccountBalance').text(parseFloat(res.data.account_balance || 0).toFixed(2));
                     $('#wdMin').text(MIN_AMOUNT.toFixed(2));
+                    SMS_REQUIRED = !!res.data.sms_required;
+                    PHONE_VERIFIED = !!res.data.phone_verified;
+                    PHONE_MASKED = res.data.phone_masked || '';
                 }
             }
         });
@@ -119,27 +148,27 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.data.total, data: res.data.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 70, sort: true},
-            {field: 'amount', title: '提现金额', width: 110, templet: '<span style="color:#ff5722;font-weight:700;">¥{{d.amount}}</span>'},
-            {field: 'pay_method', title: '收款方式', width: 90, templet: function(d) { var m={alipay:'支付宝',wechat:'微信',bank:'银行卡'}; return m[d.pay_method]||d.pay_method||'-'; }},
-            {field: 'qr_image', title: '收款码', width: 80, templet: function(d) { return d.qr_image ? '<a href="'+d.qr_image+'" target="_blank"><span class="layui-badge layui-badge-blue">查看</span></a>' : '-'; }},
-            {field: 'phone', title: '手机号', width: 120},
-            {field: 'real_name', title: '姓名', width: 90},
-            {field: 'user_remark', title: '备注', minWidth: 120},
-            {field: 'status', title: '状态', width: 100, templet: '#SF_TbStatus'},
-            {field: 'applied_at', title: '申请时间', width: 160},
-            {field: 'admin_remark', title: '管理员备注', minWidth: 150, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
-            {field: 'transfer_image', title: '转账凭证', width: 100, templet: function(d) {
-                return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">查看</span></a>' : '<span style="color:#bbb;">-</span>';
+            {field: 'amount', title: '{:t("withdraw.amount")}', width: 110, templet: '<span style="color:#ff5722;font-weight:700;">¥{{d.amount}}</span>'},
+            {field: 'pay_method', title: '{:t("withdraw.payment_method")}', width: 90, templet: function(d) { var m={alipay:'{:t("order_ui.alipay")}',wechat:'{:t("order_ui.wechat")}',bank:'{:t("withdraw.bank_card")}'}; return m[d.pay_method]||d.pay_method||'-'; }},
+            {field: 'qr_image', title: '{:t("withdraw.payment_qr")}', width: 80, templet: function(d) { return d.qr_image ? '<a href="'+d.qr_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '-'; }},
+            {field: 'phone', title: '{:t("withdraw.phone")}', width: 120},
+            {field: 'real_name', title: '{:t("withdraw.name")}', width: 90},
+            {field: 'user_remark', title: '{:t("withdraw.remark")}', minWidth: 120},
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#SF_TbStatus'},
+            {field: 'applied_at', title: '{:t("withdraw.applied_at")}', width: 160},
+            {field: 'admin_remark', title: '{:t("withdraw.admin_remark")}', minWidth: 150, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
+            {field: 'transfer_image', title: '{:t("withdraw.transfer_proof")}', width: 100, templet: function(d) {
+                return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '<span style="color:#bbb;">-</span>';
             }},
-            {title: '操作', toolbar: '#SF_TbBar', width: 80}
+            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', width: 80}
         ]]
     });
 
     table.on('tool(SF_Table)', function(obj) {
         if (obj.event === 'cancel') {
-            layer.confirm('确定撤回该提现申请吗？撤回后金额将返还余额', {icon:3, shade:.1}, function(i) {
+            layer.confirm(t('withdraw.cancel_confirm'), {icon:3, shade:.1}, function(i) {
                 layer.close(i);
-                notice.msg('撤回中...', {icon:4, close:true});
+                notice.msg(t('withdraw.cancelling'), {icon:4, close:true});
                 $.ajax({ type:'POST', url:'{:url("/Withdraw/cancel")}', data:{id:obj.data.id}, dataType:'json',
                     success:function(r) { notice.destroy(); insTb.reload(); loadCheckInfo(); notice.msg(r.msg, {icon: r.code==0?1:2}); } });
             });
@@ -157,59 +186,82 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
             if (res.code == 0 && res.data && res.data.path) {
                 $('#qrImageVal').val(res.data.path);
                 $('#qrPreview').attr('src', res.data.path).show();
-                notice.msg('收款码上传成功', {icon: 1});
+                notice.msg(t('withdraw.qr_uploaded'), {icon: 1});
             } else {
-                notice.msg(res.msg || '上传失败', {icon: 2});
+                notice.msg(res.msg || '{:t("common.upload_failed")}', {icon: 2});
             }
         },
         error: function() {
-            notice.msg('上传失败，请重试', {icon: 2});
+            notice.msg(t('withdraw.upload_retry'), {icon: 2});
         }
     });
 
     // 打开申请弹窗
     $('#btnApply').on('click', function() {
         // 先检查条件
-        notice.msg('正在检查提现条件...', {icon: 4, close: true});
+        notice.msg('{:t("user_home.checking_withdrawal")}', {icon: 4, close: true});
         $.ajax({ type:'POST', url:'{:url("/Withdraw/check")}', dataType:'json',
             success: function(res) {
                 notice.destroy();
                 if (res && res.code == 0) {
                     MIN_AMOUNT = parseFloat(res.data.min) || 10;
-                    BALANCE = parseFloat(res.data.balance) || 0;
+                    BALANCE = parseFloat(res.data.withdrawable_balance || res.data.balance) || 0;
+                    SMS_REQUIRED = !!res.data.sms_required;
+                    PHONE_VERIFIED = !!res.data.phone_verified;
+                    PHONE_MASKED = res.data.phone_masked || '';
                     $('#wdBalance').text(BALANCE.toFixed(2));
+                    $('#wdAccountBalance').text(parseFloat(res.data.account_balance || 0).toFixed(2));
                     $('#wdMin').text(MIN_AMOUNT.toFixed(2));
                     openApplyForm();
                 } else {
-                    notice.msg((res && res.msg) || '暂不满足提现条件', {icon: 2, audio: '1'});
+                    if (res && res.reason === 'phone_unverified') {
+                        layer.confirm(t('withdraw.bind_phone_required'), {
+                            title:t('withdraw.phone_verification_required'), icon:3, btn:[t('withdraw.go_bind'),'{:t("common.cancel")}']
+                        }, function(index){
+                            layer.close(index);
+                            window.location.href = '/user.php/MyInfo/index.html';
+                        });
+                        return;
+                    }
+                    notice.msg((res && res.msg) || '{:t("user_home.withdrawal_not_available")}', {icon: 2, audio: '1'});
                 }
             },
-            error: function() { notice.destroy(); notice.msg('检查失败，请稍后再试', {icon: 2}); }
+            error: function() { notice.destroy(); notice.msg(t('withdraw.check_failed'), {icon: 2}); }
         });
     });
 
     function openApplyForm() {
         applyIndex = layer.open({
             type: 1,
-            title: '申请提现',
-            area: ['550px', '520px'],
+            title: '{:t("user_home.request_withdrawal")}',
+            area: ['550px', SMS_REQUIRED ? '610px' : '520px'],
             content: $('#applyFormTpl').html(),
             success: function(layero, dIndex) {
                 form.render(null, 'applyForm');
+                var $normalPhone = $(layero).find('#normalPhoneField');
+                var $normalPhoneInput = $normalPhone.find('input[name="phone"]');
+                var $verifiedPhone = $(layero).find('#verifiedPhoneField');
+                var $smsCodeField = $(layero).find('#withdrawSmsCodeField');
+                if (SMS_REQUIRED) {
+                    $normalPhone.hide();
+                    $normalPhoneInput.prop('disabled', true).removeAttr('lay-verify');
+                    $verifiedPhone.show().find('#verifiedPhoneText').val(PHONE_MASKED);
+                    $smsCodeField.show();
+                }
                 // 默认填写全部余额
                 $(layero).find('input[name="amount"]').val(BALANCE.toFixed(2));
-                $('#amountTip').html('<span style="color:#5cb85c;">可提现，当前余额 ¥' + BALANCE.toFixed(2) + '</span>');
+                $('#amountTip').html('<span style="color:#5cb85c;">' + t('withdraw.current_available', {amount:BALANCE.toFixed(2)}) + '</span>');
                 // 金额提示
                 var $amount = $(layero).find('input[name="amount"]');
                 $amount.on('input', function() {
                     var v = parseFloat(this.value);
                     if (!isNaN(v) && v > 0) {
                         if (v < MIN_AMOUNT) {
-                            $('#amountTip').html('<span style="color:#d9534f;">最低提现金额为 ¥' + MIN_AMOUNT.toFixed(2) + '</span>');
+                            $('#amountTip').html('<span style="color:#d9534f;">' + t('withdraw.minimum_amount', {amount:MIN_AMOUNT.toFixed(2)}) + '</span>');
                         } else if (v > BALANCE) {
-                            $('#amountTip').html('<span style="color:#d9534f;">提现金额不能超过账户余额 ¥' + BALANCE.toFixed(2) + '</span>');
+                            $('#amountTip').html('<span style="color:#d9534f;">' + t('withdraw.exceeds_available_amount', {amount:BALANCE.toFixed(2)}) + '</span>');
                         } else {
-                            $('#amountTip').html('<span style="color:#5cb85c;">可提现，当前余额 ¥' + BALANCE.toFixed(2) + '</span>');
+                            $('#amountTip').html('<span style="color:#5cb85c;">' + t('withdraw.current_available', {amount:BALANCE.toFixed(2)}) + '</span>');
                         }
                     } else {
                         $('#amountTip').html('');
@@ -226,41 +278,80 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                         if (res.code == 0 && res.data && res.data.path) {
                             $(layero).find('#qrImageVal').val(res.data.path);
                             $(layero).find('#qrPreview').attr('src', res.data.path).show();
-                            notice.msg('收款码上传成功', {icon: 1});
+                            notice.msg(t('withdraw.qr_uploaded'), {icon: 1});
                         } else {
-                            notice.msg(res.msg || '上传失败', {icon: 2});
+                            notice.msg(res.msg || '{:t("common.upload_failed")}', {icon: 2});
                         }
                     },
                     error: function() {
-                        notice.msg('上传失败，请重试', {icon: 2});
+                        notice.msg(t('withdraw.upload_retry'), {icon: 2});
                     }
                 });
                 // 取消按钮
                 $(layero).find('#btnCancelApply').on('click', function() {
                     layer.close(applyIndex);
                 });
+                var $sendSms = $(layero).find('#sendWithdrawSms');
+                var smsSending = false;
+                $sendSms.on('click', function() {
+                    if (!SMS_REQUIRED || smsSending || $sendSms.prop('disabled')) return;
+                    smsSending = true;
+                    notice.msg('{:t("profile.sms_sending")}', {icon:4, close:true});
+                    $.ajax({
+                        type:'POST',
+                        url:'{:url("/Phone/sendCode")}',
+                        data:{scene:'withdraw'},
+                        dataType:'json',
+                        success:function(res){
+                            notice.destroy();
+                            smsSending = false;
+                            notice.msg(res.msg || (res.code == 0 ? '{:t("password_recovery.code_sent")}' : '{:t("profile.send_failed")}'), {icon:res.code == 0 ? 1 : 2});
+                            if (res.code == 0) {
+                                var left = 60;
+                                $sendSms.prop('disabled', true).addClass('layui-disabled').text(t('withdraw.retry_seconds', {seconds:left}));
+                                var timer = setInterval(function(){
+                                    left--;
+                                    if (left <= 0 || !document.body.contains($sendSms[0])) {
+                                        clearInterval(timer);
+                                        $sendSms.prop('disabled', false).removeClass('layui-disabled').text('{:t("password_recovery.send_code")}');
+                                    } else {
+                                        $sendSms.text(t('withdraw.retry_seconds', {seconds:left}));
+                                    }
+                                }, 1000);
+                            }
+                        },
+                        error:function(){
+                            notice.destroy();
+                            smsSending = false;
+                            notice.msg('{:t("profile.sms_send_failed")}', {icon:2});
+                        }
+                    });
+                });
                 // 表单提交
                 form.on('submit(submitApply)', function(data) {
                     var amount = parseFloat(data.field.amount);
                     if (isNaN(amount) || amount <= 0) {
-                        notice.msg('请输入有效的提现金额', {icon: 2}); return false;
+                        notice.msg(t('withdraw.invalid_amount'), {icon: 2}); return false;
                     }
                     if (amount < MIN_AMOUNT) {
-                        notice.msg('提现金额不能低于 ¥' + MIN_AMOUNT.toFixed(2), {icon: 2}); return false;
+                        notice.msg(t('withdraw.below_minimum', {amount:MIN_AMOUNT.toFixed(2)}), {icon: 2}); return false;
                     }
                     if (amount > BALANCE) {
-                        notice.msg('提现金额不能超过账户余额', {icon: 2}); return false;
+                        notice.msg(t('withdraw.exceeds_available'), {icon: 2}); return false;
                     }
-                    if (!data.field.phone || data.field.phone.length < 11) {
-                        notice.msg('请填写正确的11位手机号', {icon: 2}); return false;
+                    if (!SMS_REQUIRED && (!data.field.phone || data.field.phone.length < 11)) {
+                        notice.msg(t('withdraw.invalid_phone'), {icon: 2}); return false;
+                    }
+                    if (SMS_REQUIRED && !/^[0-9]{6}$/.test(data.field.sms_code || '')) {
+                        notice.msg(t('withdraw.invalid_sms'), {icon: 2}); return false;
                     }
                     if (!data.field.real_name) {
-                        notice.msg('请填写真实姓名', {icon: 2}); return false;
+                        notice.msg(t('withdraw.real_name_required'), {icon: 2}); return false;
                     }
                     if (!data.field.qr_image) {
-                        notice.msg('请上传收款码', {icon: 2}); return false;
+                        notice.msg(t('withdraw.qr_required'), {icon: 2}); return false;
                     }
-                    notice.msg('正在提交...', {icon: 4, close: true});
+                    notice.msg('{:t("registration.submitting")}', {icon: 4, close: true});
                     $.ajax({ type:'POST', url:'{:url("/Withdraw/apply")}', data:data.field, dataType:'json',
                         success: function(r) {
                             notice.destroy();
@@ -275,7 +366,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                         },
                         error: function() {
                             notice.destroy();
-                            notice.msg('提交失败，请稍后再试', {icon: 2});
+                            notice.msg(t('withdraw.submit_failed'), {icon: 2});
                         }
                     });
                     return false;

@@ -1,7 +1,7 @@
 <?php
 namespace addons\mail\library\AliYun;
 
-class Aliyun {
+class AliYun {
     private $AccessKeyId;
     private $AccessKeySecret;
 
@@ -50,20 +50,24 @@ class Aliyun {
             'SignatureNonce' => random(8));
         $data['Signature'] = $this->aliyunSignature($data, $this->AccessKeySecret, 'POST');
         $ch=curl_init($url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         $json=curl_exec($ch);
+        if ($json === false) {
+            curl_close($ch);
+            return false;
+        }
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         $arr=json_decode($json,true);
         if($httpCode==200){
             return true;
         }else{
-            return $arr['Message'];
+            return is_array($arr) ? (string)($arr['Message'] ?? 'unknown response') : false;
         }
     }
 }

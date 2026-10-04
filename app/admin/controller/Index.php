@@ -45,6 +45,7 @@ class Index extends Backend
                 'layoutAvatar' => '//q4.qlogo.cn/headimg_dl?dst_uin='.$this->adminInfo['qq'].'&spec=100',
                 'layoutUsername' => t('common_ui.admin_label'),
                 'layoutAdminQQ' => $this->adminInfo['qq'] ?: '',
+                'layoutAdminQqOauthBound' => !empty($this->adminInfo['access_token']),
                 'menuList' => $menuList,
             ]);
             return View::fetch(APP_PATH . DS . 'common' . DS . 'view' . DS . 'layout' . DS . 'main_layout.html');
@@ -168,7 +169,8 @@ class Index extends Backend
             if(empty($oldPassword)){
                 return message(t('user.old_password_empty'), false);
             }
-            if(get_password($oldPassword) != $this->adminInfo['password']){
+            $needsRehash = false;
+            if(!sf_password_verify($oldPassword, $this->adminInfo['password'], $needsRehash)){
                 return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->adminInfo['username']){
@@ -184,7 +186,7 @@ class Index extends Backend
                 try{
                     Db::name('admin')
                         ->where('id', $this->adminId)
-                        ->data(['password' => get_password($newPassword)])
+                        ->data(['password' => sf_password_make($newPassword)])
                         ->update();
                     return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
@@ -202,14 +204,14 @@ class Index extends Backend
                     if(strlen($newPassword) < 6){
                         return message(t('user.new_password_short'), false);
                     }
-                    $password = $newPassword;
+                    $password = sf_password_make($newPassword);
                 }else{
                     $password = $this->adminInfo['password'];
                 }
                 try{
                     Db::name('admin')
                         ->where('id', $this->adminId)
-                        ->data(['username' => $username, 'password' => get_password($password)])
+                        ->data(['username' => $username, 'password' => $password])
                         ->update();
                     return message(t('user.username_change_success'), true);
                 }catch (\Exception $e){
@@ -223,13 +225,13 @@ class Index extends Backend
     public function unbindWechatMp()
     {
         if (!IS_POST) {
-            return message('非法请求', false);
+            return message('common.illegal_request', false);
         }
         try {
             Db::name('admin')->where('id', $this->adminId)->data(['wechat_openid' => ''])->update();
-            return message('微信公众号解绑成功', true);
+            return message('profile.wechat_unbind_success', true);
         } catch (\Exception $e) {
-            return message('微信公众号解绑失败', false);
+            return message('profile.wechat_unbind_failed', false);
         }
     }
 }

@@ -231,7 +231,7 @@ class AjaxService extends BaseService
         }
 
         $stmt = $db->prepare("update SF_admin set `username` = ?, `password` = ?, `qq` = ?, `email` = ? where `id` = 1");
-        $stmt->execute([$admin_username, $admin_password, $admin_qq, $admin_email]);
+        $stmt->execute([$admin_username, sf_password_make($admin_password), $admin_qq, $admin_email]);
         $stmt = $db->prepare("update SF_config set `value` = ? where `name` = 'title'");
         $stmt->execute([$sitename]);
         $stmt = $db->prepare("update SF_config set `value` = ? where `name` = 'login_key'");

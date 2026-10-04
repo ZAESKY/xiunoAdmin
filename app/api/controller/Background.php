@@ -29,8 +29,10 @@ class Background
         } elseif ($type === 'user') {
             $notice_content = clean_rich_text(conf('notice_user'));
         }
-        $content = json_encode($notice_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $options = json_encode($info, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+        $content = json_encode($notice_content, $jsonFlags);
+        $options = json_encode($info, $jsonFlags);
         $notice = '<script>if(!getCookie("gonggao")){layui.use([\'layer\'],function(){var layer=layui.layer;layer.ready(function(){setTimeout(function(){var content=' . $content . ';var options=' . $options . ';';
         if ($method === 'default') {
             $notice .= 'layer.msg(content,options);';
@@ -44,57 +46,6 @@ class Background
         $notice .= '},500);});});}</script>';
         Cache::tag('SF_Set')->set($cacheKey, $notice);
         return $notice;
-        if(!empty(Cache::get('notice'))){
-            return Cache::get('notice');
-        }else {
-            if (conf('notice_' . $type) != 1) {
-                Cache::tag('SF_Set')->set('notice', '');
-                return '';
-            }
-            $info = '';
-            if (conf('notice_icon') != -1) {
-                $info .= 'icon:' . conf('notice_icon') . ',';
-            }
-            $info .= 'anim:' . conf('notice_anim') . ',';
-            $info .= 'shade:' . conf('notice_shade') . ',';
-            $info .= 'time:' . conf('notice_time') . '';
-            $star = '<script>if(!getCookie("gonggao")){layui.use([\'layer\'], function () { var layer = layui.layer;layer.ready(function(){ setTimeout(function (){';
-            $end = '';
-            switch (conf('notice_template')) {
-                case 'default':
-                    $star .= 'layer.msg("';
-                    $end .= '",{' . $info . '});';
-                    break;
-                case 'alert':
-                    $star .= 'layer.alert("';
-                    $end .= '",{' . $info . '});';
-                    break;
-                case 'black':
-                    $star .= 'layer.open({type: 1,title: false,closeBtn: 0,area: "300px",btn: ["好的了解", "<div style=\\"color:#4FC3F7\\">不再提醒</div>"],btnAlign: "c",moveOut: true,moveType: 0,btn2: function (layero, index) {setCookie("gonggao","SF2129876388",1);},content: "<div style=\\"background-color:#393D49;color:#eeeeee;padding:0.5em\\"><h2 style=\\"text-align:center;padding-top:0.5em\\">平台公告</h2><hr>';
-                    $end .= '</div>",' . $info . '});';
-                    break;
-                default:
-                    $notice = str_replace("[cookie]", 'setCookie("gonggao","SF2129876388",1);', conf('notice_diy'));
-                    $notice = explode('[notice]', $notice);
-                    $star .= !empty($notice[0]) ? $notice[0] : '';
-                    $star .= '"';
-                    $end .= '"';
-                    $end .= '"' . !empty($notice[1]) ? $notice[1] : '';
-                    break;
-            }
-            $end .= '},500);});});}</script>';
-            switch ($type) {
-                case 'home':
-                    $notice_content = conf('notice_home');
-                    break;
-                case 'user':
-                    $notice_content = conf('notice_user');
-                    break;
-            }
-            $notice = $star . $notice_content . $end;
-            Cache::tag('SF_Set')->set('notice', $notice);
-            return $notice;
-        }
     }
     public function css(){
         if(!empty(Cache::get('css'))){
@@ -137,10 +88,12 @@ class Background
                     $site_background = 'https://bing.ioliu.cn/v1/rand?w=1920&h=1080';
                     break;
                 case 2:
-                    $url = 'http://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1';
+                    $url = 'https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1';
                     $bing_data = curl_get($url);
                     $bing_arr = json_decode($bing_data, true);
-                    $site_background = '//cn.bing.com' . $bing_arr['images'][0]['url'];
+                    $site_background = !empty($bing_arr['images'][0]['url'])
+                        ? 'https://cn.bing.com' . $bing_arr['images'][0]['url']
+                        : '';
                     break;
                 case 3:
                     $site_background = 'https://api.uomg.com/api/rand.img1?sort=美女&format=images';
@@ -167,6 +120,7 @@ class Background
                     $site_background = '';
                     break;
             }
+            $site_background = sf_safe_url($site_background, true);
             $site_background = '<style>body{ background:#ecedf0 url("' . $site_background . '") fixed;' . $repeat . '}</style>';
             Cache::tag('SF_Set')->set('image', $site_background);
             return $site_background;
@@ -183,7 +137,7 @@ class Background
                 case 2:
                 case 4:
                 case 5:
-                    $music = '<script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script><script type="text/javascript" src="/Assets/js/SF_Music.js"></script>';
+                    $music = '<script src="https://lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script><script type="text/javascript" src="/Assets/js/SF_Music.js"></script>';
                     break;
                 case 3:
                     $music = $this->baiduSpeechSounds(conf('background_text'), conf('background_text_per'), conf('background_text_spd'), 1);

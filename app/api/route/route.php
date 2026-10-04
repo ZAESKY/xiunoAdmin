@@ -47,6 +47,14 @@ Route::group('v2', function () {
         Route::post('report', 'UpdateV2/report');
     });
 
+    // ---------- 授权站点插件市场（只读 + 免费包下载） ----------
+    Route::group('plugin', function () {
+        Route::post('list', 'PluginV2/list');
+        Route::post('detail', 'PluginV2/detail');
+        Route::post('free-ticket', 'PluginV2/freeTicket');
+        Route::get('download', 'PluginV2/download');
+    });
+
     // 旧独立补丁通道已并入主题签名完整包。保留稳定的 410 墓碑响应，避免
     // 老客户端被框架兜底页误导为可继续使用的接口。
     Route::group('patch', function () {

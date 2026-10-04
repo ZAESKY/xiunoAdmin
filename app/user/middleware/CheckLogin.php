@@ -24,6 +24,17 @@ class CheckLogin
             if(request()->isPost()){
                 exit(json_encode(message(t("login.not_logged_in") ,false)));
             }else{
+                $redirect = '';
+                $path = '/' . ltrim((string)$request->pathinfo(), '/');
+                if (in_array($path, ['/UserPlugin/detail', '/UserPlugin/detail.html'], true)) {
+                    $redirect = sf_plugin_detail_redirect(
+                        '/UserPlugin/detail.html?id=' . (int)$request->get('id', 0)
+                    );
+                }
+                if ($redirect !== '') {
+                    \think\facade\Session::set('user_login_redirect', $redirect);
+                    return redirect((string)url('/login/index', ['redirect' => $redirect]));
+                }
                 return redirect((string)url('/login/index'));
             }
         }

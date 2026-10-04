@@ -1986,6 +1986,34 @@ if (!function_exists('plugin_category_label')) {
     }
 }
 
+if (!function_exists('sf_plugin_detail_redirect')) {
+    /**
+     * 只允许登录后回到本站插件详情页，拒绝协议相对地址和开放重定向。
+     */
+    function sf_plugin_detail_redirect($value): string
+    {
+        $value = trim(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8'));
+        if ($value === '' || strlen($value) > 160 || str_contains($value, "\\")
+            || preg_match('/[\x00-\x1F\x7F]/', $value)) {
+            return '';
+        }
+        $parts = parse_url($value);
+        if (!is_array($parts) || isset($parts['scheme']) || isset($parts['host']) || isset($parts['user'])) {
+            return '';
+        }
+        $path = '/' . ltrim((string)($parts['path'] ?? ''), '/');
+        if (!in_array($path, ['/UserPlugin/detail', '/UserPlugin/detail.html'], true)) {
+            return '';
+        }
+        parse_str((string)($parts['query'] ?? ''), $query);
+        $id = isset($query['id']) && is_scalar($query['id']) ? (int)$query['id'] : 0;
+        if ($id <= 0) {
+            return '';
+        }
+        return '/UserPlugin/detail.html?id=' . $id;
+    }
+}
+
 if (!function_exists('format_num')) {
 
     /**

@@ -141,7 +141,11 @@ class LoginService extends UserBaseService
             'Result' => 'success'
         ];
         event('UserLogin', $content);
-        return message(t('login.success').' '.$username.', '.t('common.home').t('common.back').'~', true);
+        $redirect = sf_plugin_detail_redirect((string)($param['redirect'] ?? Session::get('user_login_redirect', '')));
+        Session::delete('user_login_redirect');
+        return message(t('login.success').' '.$username.', '.t('common.home').t('common.back').'~', true, [
+            'url' => $redirect !== '' ? '/user.php' . $redirect : '/user.php/Index/index.html',
+        ]);
     }
 
     private function post_request($url, $postdata) {

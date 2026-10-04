@@ -28,9 +28,10 @@ class UserPluginService extends BaseService
     /**
      * 插件市场列表（所有已上架的插件）
      */
-    public function marketList()
+    public function marketList(?array $params = null)
     {
-        $post = request()->post();
+        // v2 主题市场接口与授权中心页面共用同一套查询，避免筛选和字段口径分叉。
+        $post = $params ?? request()->post();
         $limit = sf_page_limit($post['limit'] ?? null, 10);
         $current_page = sf_page_number($post['current_page'] ?? null);
         $keyword = !empty($post['text']) ? trim($post['text']) : '';
@@ -57,7 +58,7 @@ class UserPluginService extends BaseService
 
         $query = \think\facade\Db::name('plugin')
             ->where($where)
-            ->field('id,user_id,name,slug,category,version,author,icon,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time,updated_at');
+            ->field('id,user_id,name,slug,category,version,author,icon,cover,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time,updated_at');
 
         if ($sort === 'downloads') {
             $query->order('download_count', 'desc');
@@ -81,6 +82,126 @@ class UserPluginService extends BaseService
             return $item;
         });
         return $list;
+    }
+
+    /**
+     * 已上架插件的公共详情。只返回市场展示需要的字段，不包含私有存储路径。
+     */
+    public function publicMarketDetail(int $pluginId): ?array
+    {
+        if ($pluginId <= 0) {
+            return null;
+        }
+
+        $plugin = \think\facade\Db::name('plugin')
+            ->where('id', $pluginId)
+            ->where('status', 1)
+            ->field('id,user_id,name,slug,category,version,author,author_url,description,content,icon,cover,images,origin_type,origin_url,origin_author,origin_note,related_plugin_id,package_file_name,file_size,file_hash,update_description,price,pay_type,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,created_at,updated_at')
+            ->find();
+        if (!$plugin) {
+            return null;
+        }
+
+        if (!empty($plugin['images'])) {
+            $images = json_decode((string)$plugin['images'], true);
+            $plugin['images'] = is_array($images)
+                ? array_values(array_filter(array_map(static function ($url) {
+                    return sf_safe_url($url, true);
+                }, $images)))
+                : [];
+        } else {
+            $plugin['images'] = [];
+        }
+
+        $this->enrichPluginDetail($plugin);
+
+        $versions = \think\facade\Db::name('plugin_versions')
+            ->where('plugin_id', $pluginId)
+            ->field('id,plugin_id,version,package_file_name,package_file_size,package_hash,update_description,created_by,created_at,updated_at,storage_driver,package_path,package_object_key')
+            ->order('created_at', 'desc')
+            ->order('id', 'desc')
+            ->select()
+            ->toArray();
+        $storage = new PluginStorageService();
+        foreach ($versions as &$version) {
+            $this->decorateVersionAuthor($version);
+            $version['is_latest'] = (string)$version['version'] === (string)$plugin['version'];
+            try {
+                $storage->assertValidPackageRecord($version);
+                $version['is_available'] = true;
+            } catch (\Throwable $e) {
+                $version['is_available'] = false;
+            }
+            $version['update_description'] = sf_plain_text(
+                $version['update_description'] ?? '',
+                2000
+            );
+            unset(
+                $version['plugin_id'],
+                $version['created_by'],
+                $version['storage_driver'],
+                $version['package_path'],
+                $version['package_object_key']
+            );
+        }
+        unset($version);
+        $plugin['versions'] = $versions;
+
+        $plugin['related_plugin'] = null;
+        if (!empty($plugin['related_plugin_id'])) {
+            $related = \think\facade\Db::name('plugin')
+                ->where('id', intval($plugin['related_plugin_id']))
+                ->where('status', 1)
+                ->field('id,user_id,name,slug,version,author,icon,cover,price,pay_type,description,updated_at')
+                ->find();
+            if ($related) {
+                $this->sanitizePublicPlugin($related);
+                $this->decorateAuthor($related);
+                unset($related['user_id']);
+                $plugin['related_plugin'] = $related;
+            }
+        }
+
+        $authorPlugins = [];
+        if (!empty($plugin['user_id'])) {
+            $authorPlugins = \think\facade\Db::name('plugin')
+                ->where('user_id', intval($plugin['user_id']))
+                ->where('id', '<>', $pluginId)
+                ->where('status', 1)
+                ->field('id,user_id,name,slug,version,author,icon,cover,price,pay_type,description,updated_at')
+                ->order('published_at', 'desc')
+                ->order('id', 'desc')
+                ->limit(3)
+                ->select()
+                ->toArray();
+        }
+        foreach ($authorPlugins as &$item) {
+            $this->sanitizePublicPlugin($item);
+            $this->decorateAuthor($item);
+            unset($item['user_id']);
+        }
+        unset($item);
+        $plugin['author_plugins'] = $authorPlugins;
+
+        $referencing = \think\facade\Db::name('plugin')
+            ->where('related_plugin_id', $pluginId)
+            ->where('status', 1)
+            ->field('id,user_id,name,slug,version,author,icon,cover,price,pay_type,description,updated_at')
+            ->order('sort', 'desc')
+            ->order('id', 'desc')
+            ->limit(6)
+            ->select()
+            ->toArray();
+        foreach ($referencing as &$item) {
+            $this->sanitizePublicPlugin($item);
+            $this->decorateAuthor($item);
+            unset($item['user_id']);
+        }
+        unset($item);
+        $plugin['referencing_plugins'] = $referencing;
+
+        unset($plugin['user_id']);
+        return $plugin;
     }
 
     /**

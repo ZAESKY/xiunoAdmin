@@ -10,6 +10,7 @@ use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Event;
 use think\facade\Log;
+use think\facade\Session;
 use think\facade\View;
 
 /**
@@ -46,10 +47,20 @@ class Login extends CommonBase
         }
         // 旧扫码仅保留给一次性历史身份迁移，不再作为登录入口展示。
         $loginSwitch = array_values(array_intersect($loginSwitch, ['qq']));
+        $loginRedirect = sf_plugin_detail_redirect((string)request()->get('redirect', ''));
+        if ($loginRedirect !== '') {
+            Session::set('user_login_redirect', $loginRedirect);
+        } else {
+            $loginRedirect = sf_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
+        }
         View::assign(array(
             'captcha_open' => conf('captcha_open'),
             'captcha_id' => conf('captcha_id'),
             'login_switch' => $loginSwitch,
+            'login_redirect_json' => json_encode(
+                $loginRedirect,
+                JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+            ) ?: '""',
         ));
         $get = request()->get();
         $code = trim((string)($get['code'] ?? ''));

@@ -835,10 +835,12 @@ class Social extends ApiBackend
         }
 
         $this->setUserLogin($users[0]);
+        $redirect = sf_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
+        Session::delete('user_login_redirect');
         return message($registered ? t('qq.registration_login_success') : t('login.success'), true, [
             'status' => 'success',
             'registered' => $registered,
-            'url' => '/user.php/Index/index.html',
+            'url' => $redirect !== '' ? '/user.php' . $redirect : '/user.php/Index/index.html',
         ]);
     }
 

@@ -38,34 +38,9 @@ EXECUTE qh_stmt;
 DEALLOCATE PREPARE qh_stmt;
 SET SESSION group_concat_max_len = @qh_old_group_concat_max_len;
 
-DROP TRIGGER IF EXISTS `QH_user_withdrawable_before_insert`;
-DROP TRIGGER IF EXISTS `QH_user_withdrawable_before_update`;
-
-DELIMITER $$
-CREATE TRIGGER `QH_user_withdrawable_before_insert`
-BEFORE INSERT ON `QH_user`
-FOR EACH ROW
-BEGIN
-  IF NEW.`withdrawable_balance` < 0 THEN
-    SET NEW.`withdrawable_balance` = 0.00;
-  END IF;
-  IF NEW.`withdrawable_balance` > NEW.`balance` THEN
-    SET NEW.`withdrawable_balance` = GREATEST(NEW.`balance`, 0.00);
-  END IF;
-END$$
-
-CREATE TRIGGER `QH_user_withdrawable_before_update`
-BEFORE UPDATE ON `QH_user`
-FOR EACH ROW
-BEGIN
-  IF NEW.`withdrawable_balance` < 0 THEN
-    SET NEW.`withdrawable_balance` = 0.00;
-  END IF;
-  IF NEW.`withdrawable_balance` > NEW.`balance` THEN
-    SET NEW.`withdrawable_balance` = GREATEST(NEW.`balance`, 0.00);
-  END IF;
-END$$
-DELIMITER ;
+-- 同库 RENAME TABLE 会保留原表触发器并把 EVENT_OBJECT_TABLE 自动更新为新表名。
+-- 不在这里重建触发器：启用 binary log 且关闭
+-- log_bin_trust_function_creators 的生产库会要求 SUPER 权限，应用迁移账号不应持有该权限。
 
 -- 同步迁移安装时写入的品牌默认值，避免表名已更新但页面仍显示旧名称。
 -- 只处理明确的系统配置项，不触碰应用密钥、私钥和历史日志。

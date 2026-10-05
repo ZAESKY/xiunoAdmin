@@ -124,16 +124,21 @@ mysql_run(){ mysql --defaults-extra-file="$MY_CNF" "$DB_NAME" < "$1" 2>&1; }
 
 legacy_table_prefix() { printf '\123\106\137'; }
 
-drop_legacy_balance_triggers() {
-  local prefix; prefix="$(legacy_table_prefix)"
-  mysql_q "DROP TRIGGER IF EXISTS \`${prefix}user_withdrawable_before_insert\`; DROP TRIGGER IF EXISTS \`${prefix}user_withdrawable_before_update\`;" >/dev/null \
-    || die "无法移除旧余额保护触发器"
-}
-
-create_legacy_balance_triggers() {
-  local prefix; prefix="$(legacy_table_prefix)"
-  mysql_q "CREATE TRIGGER \`${prefix}user_withdrawable_before_insert\` BEFORE INSERT ON \`${prefix}user\` FOR EACH ROW SET NEW.withdrawable_balance=LEAST(GREATEST(NEW.withdrawable_balance,0.00),GREATEST(NEW.balance,0.00)); CREATE TRIGGER \`${prefix}user_withdrawable_before_update\` BEFORE UPDATE ON \`${prefix}user\` FOR EACH ROW SET NEW.withdrawable_balance=LEAST(GREATEST(NEW.withdrawable_balance,0.00),GREATEST(NEW.balance,0.00));" >/dev/null \
-    || die "无法恢复旧余额保护触发器"
+migration_already_applied() {
+  local migration="$1"
+  case "$migration" in
+    20261002_rebate_withdrawal_hardening.sql)
+      # 线上启用 binary log 且关闭 log_bin_trust_function_creators 时，应用账号即使
+      # 拥有 TRIGGER 权限也不能重复 DROP/CREATE。必须确认该迁移的字段、索引、配置
+      # 与两类触发器全部齐全，才允许跳过，避免仅凭单一字段误判为已完成。
+      local structure_ready insert_trigger update_trigger
+      structure_ready="$(mysql_q "SELECT IF((SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user' AND COLUMN_NAME='withdrawable_balance')=1 AND (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_rebate_record' AND COLUMN_NAME IN ('rebate_base_amount','settle_at','settled_at','risk_reason'))=4 AND EXISTS(SELECT 1 FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_rebate_record' AND INDEX_NAME='idx_status_settle_at') AND EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_rebate_record' AND COLUMN_NAME='status' AND DATA_TYPE='varchar' AND CHARACTER_MAXIMUM_LENGTH>=20 AND COLUMN_DEFAULT='pending') AND (SELECT COUNT(*) FROM QH_config WHERE name IN ('rebate_hold_days','rebate_pair_daily_count','rebate_daily_limit','rebate_monthly_limit'))=4,1,0);")"
+      insert_trigger="$(mysql_q "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='QH_user' AND ACTION_TIMING='BEFORE' AND EVENT_MANIPULATION='INSERT';")"
+      update_trigger="$(mysql_q "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='QH_user' AND ACTION_TIMING='BEFORE' AND EVENT_MANIPULATION='UPDATE';")"
+      [ "$structure_ready" = "1" ] && [ "$insert_trigger" -ge 1 ] && [ "$update_trigger" -ge 1 ]
+      ;;
+    *) return 1 ;;
+  esac
 }
 
 # ---------- 前置检查 ----------
@@ -283,10 +288,14 @@ do_run() {
   fi
 
   hd "执行迁移"
-  drop_legacy_balance_triggers
   local i=1
   for m in "${MIGRATIONS[@]}"; do
     echo "  [$i/${#MIGRATIONS[@]}] $m"
+    if migration_already_applied "$m"; then
+      warn "结构与触发器已存在，跳过重复执行"
+      i=$((i+1))
+      continue
+    fi
     local out; out="$(mysql_run "$MIG_DIR/$m")"
     if echo "$out" | grep -qiE "^ERROR|ERROR [0-9]+"; then
       err "$out"
@@ -460,7 +469,6 @@ do_rollback() {
     local out; out="$(mysql_run "$MIG_DIR/$m")"
     echo "$out" | sed 's/^/      /'
   done
-  create_legacy_balance_triggers
   echo
   echo "${C_YEL}若此前有客户兑换过旧码，还需执行：${C_RST}"
   echo "  UPDATE \`QH_auth_legacy\` SET \`redeemed_at\`=NULL, \`redeemed_license_id\`=NULL;"

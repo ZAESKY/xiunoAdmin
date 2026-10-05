@@ -3,9 +3,6 @@
 SET @qh_legacy_prefix = CONVERT(FROM_BASE64('U0Zf') USING utf8mb4);
 SET @qh_target_prefix = 'QH_';
 
-DROP TRIGGER IF EXISTS `QH_user_withdrawable_before_insert`;
-DROP TRIGGER IF EXISTS `QH_user_withdrawable_before_update`;
-
 -- 与前向迁移成对恢复系统默认品牌值；旧文本仍只通过编码常量生成。
 SET @qh_legacy_upper = CONVERT(FROM_BASE64('U0Y=') USING utf8mb4) COLLATE utf8mb4_unicode_ci;
 SET @qh_legacy_lower = CONVERT(FROM_BASE64('c2Y=') USING utf8mb4) COLLATE utf8mb4_unicode_ci;

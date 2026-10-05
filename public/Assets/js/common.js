@@ -94,6 +94,11 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
     var form = layui.form;
     var rawModelForm = admin.modelForm;
 
+    // The authorization center has one fixed visual identity. Persist the
+    // original blue QH theme so stale theme-green/default Layui preferences
+    // from older releases cannot override it on the next page load.
+    admin.changeTheme('theme-qh');
+
     form.verify({
         required: [/[^\s]+/, t('validation.required')],
         phone: [/^1\d{10}$/, t('validation.phone')],

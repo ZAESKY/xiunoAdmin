@@ -46,6 +46,7 @@ DROP TABLE IF EXISTS `QH_offline_activation`;
 DROP TABLE IF EXISTS `QH_trial`;
 DROP TABLE IF EXISTS `QH_license`;
 DROP TABLE IF EXISTS `QH_patch`;
+DROP TABLE IF EXISTS `QH_release_delta`;
 DROP TABLE IF EXISTS `QH_release`;
 
 DROP PROCEDURE IF EXISTS qh_drop_column_if_exists;

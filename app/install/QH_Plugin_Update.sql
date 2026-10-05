@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `QH_plugin_package_upload` (
   `file_path` varchar(500) NOT NULL DEFAULT '' COMMENT '本地私有文件路径',
   `package_object_key` varchar(500) NOT NULL DEFAULT '' COMMENT 'OSS对象Key',
   `package_file_name` varchar(255) NOT NULL DEFAULT '' COMMENT '原始文件名',
+  `plugin_dir` varchar(64) NOT NULL DEFAULT '' COMMENT 'ZIP唯一顶层插件目录',
   `package_file_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '文件字节数',
   `package_mime_type` varchar(100) NOT NULL DEFAULT '' COMMENT 'MIME类型',
   `package_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '' COMMENT 'SHA-256',
@@ -72,6 +73,8 @@ DELIMITER ;
 
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'user_id', '`user_id` int(11) unsigned NOT NULL DEFAULT ''0'' COMMENT ''发布者用户ID'' AFTER `id`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'category', '`category` varchar(30) DEFAULT '''' COMMENT ''分类'' AFTER `slug`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'plugin_dir', '`plugin_dir` varchar(64) NOT NULL DEFAULT '''' COMMENT ''Xiuno插件安装目录'' AFTER `slug`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin_package_upload', 'plugin_dir', '`plugin_dir` varchar(64) NOT NULL DEFAULT '''' COMMENT ''ZIP唯一顶层插件目录'' AFTER `package_file_name`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'origin_type', '`origin_type` tinyint(1) unsigned NOT NULL DEFAULT ''1'' COMMENT ''来源:1=原创,2=转载'' AFTER `images`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'origin_url', '`origin_url` varchar(255) DEFAULT '''' COMMENT ''转载来源地址'' AFTER `origin_type`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'origin_author', '`origin_author` varchar(100) DEFAULT '''' COMMENT ''转载原作者'' AFTER `origin_url`');
@@ -85,5 +88,17 @@ CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin_order', 'commission_amount', '`commissi
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin_order', 'developer_income', '`developer_income` decimal(10,2) unsigned NOT NULL DEFAULT ''0.00'' COMMENT ''开发者收入'' AFTER `commission_amount`');
 
 CALL QH_ADD_COLUMN_IF_MISSING('QH_notification', 'link', '`link` varchar(255) DEFAULT '''' COMMENT ''跳转链接'' AFTER `type`');
+
+-- Backfill legacy packages that followed the historical {directory}_v{version}.zip convention.
+UPDATE `QH_plugin`
+SET `plugin_dir` = LEFT(`package_file_name`, CHAR_LENGTH(`package_file_name`) - CHAR_LENGTH(CONCAT('_v', `version`, '.zip')))
+WHERE `plugin_dir` = ''
+  AND CHAR_LENGTH(`package_file_name`) > CHAR_LENGTH(CONCAT('_v', `version`, '.zip'))
+  AND LOWER(RIGHT(`package_file_name`, CHAR_LENGTH(CONCAT('_v', `version`, '.zip')))) = LOWER(CONCAT('_v', `version`, '.zip'))
+  AND LEFT(`package_file_name`, CHAR_LENGTH(`package_file_name`) - CHAR_LENGTH(CONCAT('_v', `version`, '.zip'))) REGEXP '^[A-Za-z0-9_]{1,64}$';
+
+UPDATE `QH_plugin`
+SET `plugin_dir` = `slug`
+WHERE `plugin_dir` = '' AND `slug` REGEXP '^[A-Za-z0-9_]{1,64}$';
 
 DROP PROCEDURE IF EXISTS QH_ADD_COLUMN_IF_MISSING;

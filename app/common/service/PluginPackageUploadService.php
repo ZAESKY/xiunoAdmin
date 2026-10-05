@@ -34,6 +34,7 @@ class PluginPackageUploadService
                 'file_path' => $package['file_path'],
                 'package_object_key' => $package['package_object_key'],
                 'package_file_name' => $package['package_file_name'],
+                'plugin_dir' => $package['plugin_dir'],
                 'package_file_size' => $package['file_size'],
                 'package_mime_type' => $package['package_mime_type'],
                 'package_hash' => $package['file_hash'],
@@ -179,8 +180,10 @@ class PluginPackageUploadService
         $driver = (string)($stored['storage_driver'] ?? 'local');
         $hash = strtolower((string)($stored['file_hash'] ?? ''));
         $size = intval($stored['file_size'] ?? 0);
+        $pluginDir = trim((string)($stored['plugin_dir'] ?? ''));
         if (!in_array($driver, ['local', 'oss'], true)
             || !preg_match('/^[a-f0-9]{64}$/D', $hash)
+            || !PluginPackageIdentityService::isValid($pluginDir)
             || $size <= 0
             || $size > 1073741824
         ) {
@@ -191,6 +194,7 @@ class PluginPackageUploadService
             'file_path' => (string)($stored['path'] ?? $stored['file_path'] ?? ''),
             'package_object_key' => (string)($stored['object_key'] ?? $stored['package_object_key'] ?? ''),
             'package_file_name' => basename(str_replace('\\', '/', (string)($stored['file_name'] ?? $stored['package_file_name'] ?? 'plugin.zip'))),
+            'plugin_dir' => $pluginDir,
             'package_mime_type' => (string)($stored['mime_type'] ?? $stored['package_mime_type'] ?? 'application/zip'),
             'file_hash' => $hash,
             'file_size' => $size,
@@ -204,6 +208,7 @@ class PluginPackageUploadService
             'file_path' => (string)($row['file_path'] ?? ''),
             'package_object_key' => (string)($row['package_object_key'] ?? ''),
             'package_file_name' => (string)($row['package_file_name'] ?? ''),
+            'plugin_dir' => (string)($row['plugin_dir'] ?? ''),
             'package_mime_type' => (string)($row['package_mime_type'] ?? ''),
             'file_hash' => strtolower((string)($row['package_hash'] ?? '')),
             'file_size' => intval($row['package_file_size'] ?? 0),

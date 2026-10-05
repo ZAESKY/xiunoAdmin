@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `QH_plugin_package_upload` (
   `file_path` varchar(500) NOT NULL DEFAULT '' COMMENT '本地私有文件路径',
   `package_object_key` varchar(500) NOT NULL DEFAULT '' COMMENT 'OSS对象Key',
   `package_file_name` varchar(255) NOT NULL DEFAULT '' COMMENT '原始文件名',
+  `plugin_dir` varchar(64) NOT NULL DEFAULT '' COMMENT 'ZIP唯一顶层插件目录',
   `package_file_size` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT '文件字节数',
   `package_mime_type` varchar(100) NOT NULL DEFAULT '' COMMENT 'MIME类型',
   `package_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '' COMMENT 'SHA-256',

@@ -172,7 +172,7 @@ class SecureTicketService
     {
         $allow = [
             'version_id', 'auth_id', 'appid', 'type', 'download_catalogue', 'version', 'edition',
-            'kind', 'release_id', 'patch_id', 'plugin_id', 'site_id',
+            'kind', 'release_id', 'release_delta_id', 'patch_id', 'plugin_id', 'site_id',
         ];
         $out   = [];
         foreach ($allow as $key) {

@@ -612,7 +612,7 @@ layui.use(['layer', 'form', 'upload', 'notice', 'laydate'], function () {
                 $('#fileInfo').html('<i class="layui-icon layui-icon-ok-circle"></i> {:t("plugin_ui.uploaded")} ('+(res.data.file_size/1024).toFixed(1)+' KB)').removeClass('no').addClass('ok');
                 var slugInput = $('#slugInput');
                 if (!isEdit) {
-                    var fileName = (res.data.original_name || res.data.file_path.split(/[\\/]/).pop()).replace(/\.zip$/i,'');
+                    var fileName = res.data.plugin_dir || (res.data.original_name || res.data.file_path.split(/[\\/]/).pop()).replace(/\.zip$/i,'');
                     var slug = fileName.toLowerCase().replace(/[^a-z0-9_-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
                     slugInput.val(slug);
                 }

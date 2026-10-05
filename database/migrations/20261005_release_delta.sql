@@ -1,0 +1,26 @@
+-- 自动差分发布物：完整包仍是权威版本，差分包只绑定精确 from_build。
+CREATE TABLE IF NOT EXISTS `QH_release_delta` (
+  `id`                 bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `product_id`         varchar(64)  NOT NULL DEFAULT '',
+  `from_build`         int(11)      NOT NULL DEFAULT 0,
+  `build_no`           int(11)      NOT NULL DEFAULT 0,
+  `edition`            varchar(32)  NOT NULL DEFAULT '',
+  `channel`            varchar(16)  NOT NULL DEFAULT 'stable',
+  `package_file`       varchar(160) NOT NULL DEFAULT '',
+  `storage_driver`     varchar(20)  NOT NULL DEFAULT 'local',
+  `package_object_key` varchar(500) NOT NULL DEFAULT '',
+  `package_sha256`     char(64)     NOT NULL DEFAULT '',
+  `package_size`       bigint(20)   NOT NULL DEFAULT 0,
+  `manifest_json`      mediumtext   NULL,
+  `manifest_sig`       varchar(255) NULL DEFAULT NULL,
+  `sig_key_id`         varchar(64)  NOT NULL DEFAULT '',
+  `download_count`     int(11)      NOT NULL DEFAULT 0,
+  `status`             tinyint(1)   NOT NULL DEFAULT 0,
+  `published_at`       datetime     NULL DEFAULT NULL,
+  `created_at`         datetime     NOT NULL,
+  `updated_at`         datetime     NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_product_channel_range` (`product_id`,`channel`,`from_build`,`build_no`),
+  KEY `idx_target_status` (`product_id`,`channel`,`build_no`,`status`),
+  KEY `idx_source_status` (`product_id`,`channel`,`from_build`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='签名差分发布物 v2';

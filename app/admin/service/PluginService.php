@@ -5,6 +5,7 @@ namespace app\admin\service;
 use app\admin\model\PluginModel;
 use app\common\service\BaseService;
 use app\common\service\PluginPackageUploadService;
+use app\common\service\PluginPackageIdentityService;
 use app\common\service\PluginStorageService;
 use think\Exception;
 
@@ -48,6 +49,9 @@ class PluginService extends BaseService
                 return message('plugin_action.archive_name_ascii', false, ['status' => 0]);
             }
 
+            // The install directory is the ZIP's sole top-level directory, not its file name or market slug.
+            $pluginDir = PluginPackageIdentityService::inspectArchive($file->getPathname());
+
             // 尝试解析压缩包内的 conf.json 和 icon.png
             $autoData = [];
             try {
@@ -88,6 +92,7 @@ class PluginService extends BaseService
             } catch (\Throwable $e) {}
 
             $stored = (new PluginStorageService())->storeUploadedFile($file, 'package', ['zip'], 410241024);
+            $stored['plugin_dir'] = $pluginDir;
             $uploadToken = PluginPackageUploadService::issue('admin', intval(session('adminId')), $stored);
 
             return message('plugin_action.upload_success', true, [
@@ -99,6 +104,7 @@ class PluginService extends BaseService
                 'storage_driver' => $stored['storage_driver'],
                 'package_object_key' => $stored['object_key'],
                 'package_file_name' => $stored['file_name'],
+                'plugin_dir' => $pluginDir,
                 'package_mime_type' => $stored['mime_type'],
                 'upload_token' => $uploadToken,
                 'auto' => $autoData,

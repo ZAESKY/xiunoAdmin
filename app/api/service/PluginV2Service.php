@@ -8,6 +8,7 @@ use app\common\service\LicenseAuthService;
 use app\common\service\LicenseService;
 use app\common\service\LicenseSignatureService;
 use app\common\service\PluginStorageService;
+use app\common\service\PluginPackageIdentityService;
 use app\common\service\RateLimitService;
 use app\common\service\SecureTicketService;
 use app\user\service\UserPluginService;
@@ -213,6 +214,10 @@ class PluginV2Service extends BaseService
             return $this->out('4503', '插件安装包缺少完整性校验信息');
         }
         $size = (int)($record['package_file_size'] ?? $record['file_size'] ?? 0);
+        $pluginDir = PluginPackageIdentityService::resolveRecord($plugin);
+        if ($pluginDir === '') {
+            return $this->out('4503', '插件安装包缺少有效的安装目录标识，请管理员重新上传该版本');
+        }
         $fileName = $this->safePackageName(
             (string)($record['package_file_name'] ?? ''),
             (string)$plugin['slug'],
@@ -245,6 +250,7 @@ class PluginV2Service extends BaseService
             'plugin_id' => $pluginId,
             'version_id' => $versionId,
             'version' => $version,
+            'plugin_dir' => $pluginDir,
             'package_file_name' => $fileName,
             'package_size' => $size,
             'package_sha256' => $hash,
@@ -374,6 +380,7 @@ class PluginV2Service extends BaseService
 
     private function normalizePlugin(array &$plugin, bool $detail = false): void
     {
+        $plugin['plugin_dir'] = PluginPackageIdentityService::resolveRecord($plugin);
         unset($plugin['user_id'], $plugin['publish_type'], $plugin['publish_time']);
         foreach (['id', 'download_count', 'rating_count', 'comment_count', 'is_hot', 'is_recommend'] as $field) {
             if (array_key_exists($field, $plugin)) {

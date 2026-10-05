@@ -8,6 +8,7 @@ use app\common\model\PointLogModel;
 use app\common\service\BaseService;
 use app\common\service\PluginCommissionService;
 use app\common\service\PluginPackageUploadService;
+use app\common\service\PluginPackageIdentityService;
 use app\common\service\PluginStorageService;
 use app\common\service\RebateRiskService;
 use app\common\service\WithdrawableBalanceService;
@@ -58,7 +59,7 @@ class UserPluginService extends BaseService
 
         $query = \think\facade\Db::name('plugin')
             ->where($where)
-            ->field('id,user_id,name,slug,category,version,author,icon,cover,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time,updated_at');
+            ->field('id,user_id,name,slug,plugin_dir,category,version,author,icon,cover,price,pay_type,description,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,publish_type,publish_time,updated_at');
 
         if ($sort === 'downloads') {
             $query->order('download_count', 'desc');
@@ -96,7 +97,7 @@ class UserPluginService extends BaseService
         $plugin = \think\facade\Db::name('plugin')
             ->where('id', $pluginId)
             ->where('status', 1)
-            ->field('id,user_id,name,slug,category,version,author,author_url,description,content,icon,cover,images,origin_type,origin_url,origin_author,origin_note,related_plugin_id,package_file_name,file_size,file_hash,update_description,price,pay_type,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,created_at,updated_at')
+            ->field('id,user_id,name,slug,plugin_dir,category,version,author,author_url,description,content,icon,cover,images,origin_type,origin_url,origin_author,origin_note,related_plugin_id,package_file_name,file_size,file_hash,update_description,price,pay_type,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,created_at,updated_at')
             ->find();
         if (!$plugin) {
             return null;
@@ -152,7 +153,7 @@ class UserPluginService extends BaseService
             $related = \think\facade\Db::name('plugin')
                 ->where('id', intval($plugin['related_plugin_id']))
                 ->where('status', 1)
-                ->field('id,user_id,name,slug,version,author,icon,cover,price,pay_type,description,updated_at')
+                ->field('id,user_id,name,slug,plugin_dir,version,author,icon,cover,price,pay_type,description,updated_at')
                 ->find();
             if ($related) {
                 $this->sanitizePublicPlugin($related);
@@ -168,7 +169,7 @@ class UserPluginService extends BaseService
                 ->where('user_id', intval($plugin['user_id']))
                 ->where('id', '<>', $pluginId)
                 ->where('status', 1)
-                ->field('id,user_id,name,slug,version,author,icon,cover,price,pay_type,description,updated_at')
+                ->field('id,user_id,name,slug,plugin_dir,version,author,icon,cover,price,pay_type,description,updated_at')
                 ->order('published_at', 'desc')
                 ->order('id', 'desc')
                 ->limit(3)
@@ -186,7 +187,7 @@ class UserPluginService extends BaseService
         $referencing = \think\facade\Db::name('plugin')
             ->where('related_plugin_id', $pluginId)
             ->where('status', 1)
-            ->field('id,user_id,name,slug,version,author,icon,cover,price,pay_type,description,updated_at')
+            ->field('id,user_id,name,slug,plugin_dir,version,author,icon,cover,price,pay_type,description,updated_at')
             ->order('sort', 'desc')
             ->order('id', 'desc')
             ->limit(6)
@@ -233,7 +234,7 @@ class UserPluginService extends BaseService
      */
     public function marketShowcase(): array
     {
-        $fields = 'id,user_id,name,slug,category,version,author,icon,cover,price,pay_type,description,'
+        $fields = 'id,user_id,name,slug,plugin_dir,category,version,author,icon,cover,price,pay_type,description,'
             . 'download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,sort,'
             . 'published_at,publish_type,publish_time,updated_at';
 
@@ -521,6 +522,7 @@ class UserPluginService extends BaseService
                 $packageObjectKey = $package['package_object_key'];
                 $packageFileName = $package['package_file_name'];
                 $packageMimeType = $package['package_mime_type'];
+                $pluginDir = (string)$package['plugin_dir'];
             } else {
                 // Never accept forged hashes or object keys for an existing package.
                 $file_path = '';
@@ -530,6 +532,20 @@ class UserPluginService extends BaseService
                 $packageObjectKey = '';
                 $packageFileName = '';
                 $packageMimeType = '';
+                $pluginDir = PluginPackageIdentityService::resolveRecord($row);
+            }
+            $currentPluginDir = PluginPackageIdentityService::resolveRecord($row);
+            if ($hasNewPackage && $currentPluginDir !== '' && !hash_equals($currentPluginDir, $pluginDir)) {
+                return message('新版本安装目录与现有插件不一致，请保持 ZIP 顶层目录为 ' . $currentPluginDir, false);
+            }
+            if ($pluginDir !== '') {
+                $dirExists = \think\facade\Db::name('plugin')
+                    ->where('plugin_dir', $pluginDir)
+                    ->where('id', '<>', $id)
+                    ->find();
+                if ($dirExists) {
+                    return message('插件安装目录已被其他市场插件使用：' . $pluginDir, false);
+                }
             }
 
             $exists = \think\facade\Db::name('plugin')->where('slug', $slug)->where('id', '<>', $id)->find();
@@ -544,6 +560,7 @@ class UserPluginService extends BaseService
             $data = [
                 'name' => $name,
                 'slug' => $slug,
+                'plugin_dir' => $pluginDir,
                 'category' => $category,
                 'version' => $version,
                 'author' => $author,
@@ -658,6 +675,7 @@ class UserPluginService extends BaseService
             $packageObjectKey = $package['package_object_key'];
             $packageFileName = $package['package_file_name'];
             $packageMimeType = $package['package_mime_type'];
+            $pluginDir = (string)$package['plugin_dir'];
             $exists = \think\facade\Db::name('plugin')->where('slug', $slug)->find();
             if ($exists) {
                 return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
@@ -665,6 +683,10 @@ class UserPluginService extends BaseService
             $nameExists = \think\facade\Db::name('plugin')->where('name', $name)->find();
             if ($nameExists) {
                 return message(t('plugin_action.name_exists', ['name' => $name]), false);
+            }
+            $dirExists = \think\facade\Db::name('plugin')->where('plugin_dir', $pluginDir)->find();
+            if ($dirExists) {
+                return message('插件安装目录已被其他市场插件使用：' . $pluginDir, false);
             }
 
             $data = [
@@ -676,6 +698,7 @@ class UserPluginService extends BaseService
                 'related_plugin_id' => $related_plugin_id,
                 'name' => $name,
                 'slug' => $slug,
+                'plugin_dir' => $pluginDir,
                 'category' => $category,
                 'version' => $version,
                 'author' => $author,
@@ -782,6 +805,8 @@ class UserPluginService extends BaseService
                 return message('plugin_action.archive_name_ascii', false, ['status' => 0]);
             }
 
+            $pluginDir = PluginPackageIdentityService::inspectArchive($file->getPathname());
+
             // 尝试解析压缩包内的 conf.json 和 icon.png（支持根目录和单层子目录）
             $autoData = [];
             try {
@@ -853,6 +878,7 @@ class UserPluginService extends BaseService
             }
 
             $stored = (new PluginStorageService())->storeUploadedFile($file, 'package', ['zip'], 200 * 1024 * 1024);
+            $stored['plugin_dir'] = $pluginDir;
             $uploadToken = PluginPackageUploadService::issue('user', intval($userId), $stored);
 
             return message('plugin_action.upload_success', true, [
@@ -864,6 +890,7 @@ class UserPluginService extends BaseService
                 'storage_driver' => $stored['storage_driver'],
                 'package_object_key' => $stored['object_key'],
                 'package_file_name' => $stored['file_name'],
+                'plugin_dir' => $pluginDir,
                 'package_mime_type' => $stored['mime_type'],
                 'upload_token' => $uploadToken,
                 'auto' => $autoData,

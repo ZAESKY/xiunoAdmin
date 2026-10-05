@@ -5,6 +5,7 @@ namespace app\admin\model;
 use app\common\model\BaseModel;
 use app\common\model\NotificationModel;
 use app\common\service\PluginPackageUploadService;
+use app\common\service\PluginPackageIdentityService;
 use app\common\service\PluginRewardService;
 use app\common\service\PluginStorageService;
 use think\Exception;
@@ -173,6 +174,7 @@ class PluginModel extends BaseModel
 
         $hasNewPackage = $upload_token !== '';
         $package = null;
+        $plugin_dir = '';
         if ($hasNewPackage) {
             try {
                 $package = PluginPackageUploadService::claim(
@@ -190,6 +192,7 @@ class PluginModel extends BaseModel
             $package_object_key = $package['package_object_key'];
             $package_file_name = $package['package_file_name'];
             $package_mime_type = $package['package_mime_type'];
+            $plugin_dir = (string)$package['plugin_dir'];
         }
 
         if (!empty($id)) {
@@ -199,6 +202,19 @@ class PluginModel extends BaseModel
             }
             if (!$hasNewPackage) {
                 $storage_driver = (string)($row['storage_driver'] ?? 'local');
+            }
+            $currentPluginDir = PluginPackageIdentityService::resolveRecord($row);
+            if ($hasNewPackage && $currentPluginDir !== '' && !hash_equals($currentPluginDir, $plugin_dir)) {
+                return message('新版本安装目录与现有插件不一致，请保持 ZIP 顶层目录为 ' . $currentPluginDir, false);
+            }
+            if (!$hasNewPackage) {
+                $plugin_dir = $currentPluginDir;
+            }
+            if ($plugin_dir !== '') {
+                $dirExists = self::where('plugin_dir', $plugin_dir)->where('id', '<>', $id)->find();
+                if ($dirExists) {
+                    return message('插件安装目录已被其他市场插件使用：' . $plugin_dir, false);
+                }
             }
 
             $exists = self::where('slug', $slug)->where('id', '<>', $id)->find();
@@ -212,6 +228,7 @@ class PluginModel extends BaseModel
 
             $data = [
                 'name' => $name, 'slug' => $slug, 'category' => $category,
+                'plugin_dir' => $plugin_dir,
                 'version' => $version, 'author' => $author, 'author_url' => $author_url,
                 'description' => $description, 'content' => $content,
                 'icon' => $icon, 'images' => $images, 'cover' => $cover, 'price' => $price, 'pay_type' => $pay_type,
@@ -307,9 +324,14 @@ class PluginModel extends BaseModel
             if ($nameExists) {
                 return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
+            $dirExists = self::where('plugin_dir', $plugin_dir)->find();
+            if ($dirExists) {
+                return message('插件安装目录已被其他市场插件使用：' . $plugin_dir, false);
+            }
 
             $data = [
                 'name' => $name, 'slug' => $slug, 'category' => $category,
+                'plugin_dir' => $plugin_dir,
                 'version' => $version, 'author' => $author, 'author_url' => $author_url,
                 'description' => $description, 'content' => $content,
                 'icon' => $icon, 'images' => $images, 'cover' => $cover, 'price' => $price, 'pay_type' => $pay_type,

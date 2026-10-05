@@ -5,6 +5,7 @@ namespace app\api\service;
 use app\common\service\ApiErrorService;
 use app\common\service\BaseService;
 use app\common\service\CryptoService;
+use app\common\service\DeltaReleaseService;
 use app\common\service\LicenseAuthService;
 use app\common\service\LicenseService;
 use app\common\service\LicenseSignatureService;
@@ -67,10 +68,19 @@ class UpdateV2Service extends BaseService
         $channel = (string)$license['channel'];
         $bbsVersion = (string)($in['bbs_version'] ?? '');
         $phpVersion = (string)($in['php_version'] ?? '');
+        $deltaSchema = (int)($in['delta_schema'] ?? 0);
 
         $latest = $this->latestRelease((string)$license['product_id'], $channel, $currentBuild, $bbsVersion, $phpVersion);
 
-        $latestManifest = $latest === null ? [] : (json_decode((string)$latest['manifest_json'], true) ?: []);
+        $selected = $latest;
+        $selectedManifest = $latest === null ? null : $this->releaseManifest($latest);
+        if ($latest !== null && $deltaSchema >= DeltaReleaseService::CLIENT_SCHEMA) {
+            $delta = $this->matchingDelta($latest, $currentBuild);
+            if ($delta !== null) {
+                $selected = $delta['row'];
+                $selectedManifest = $delta['manifest'];
+            }
+        }
         $data = [
             'has_update'    => $latest !== null,
             'current_build' => $currentBuild,
@@ -79,15 +89,16 @@ class UpdateV2Service extends BaseService
                 'build_no'         => (int)$latest['build_no'],
                 'edition'          => (string)$latest['edition'],
                 'release_note'     => (string)$latest['release_note'],
-                'package_size'     => (int)$latest['package_size'],
-                'package_sha256'   => (string)$latest['package_sha256'],
+                'package_size'     => (int)$selected['package_size'],
+                'package_sha256'   => (string)$selected['package_sha256'],
                 'min_bbs_version'  => (string)$latest['min_bbs_version'],
                 'max_bbs_version'  => (string)$latest['max_bbs_version'],
                 'min_php_version'  => (string)$latest['min_php_version'],
                 'is_security'      => (int)$latest['is_security'] === 1,
                 'published_at'     => strtotime((string)$latest['published_at']),
-                'package_type'     => (string)($latestManifest['package_type'] ?? 'full'),
-                'migration_count'  => count((array)($latestManifest['migrations'] ?? [])),
+                'package_type'     => (string)($selectedManifest['package_type'] ?? 'full'),
+                'from_build'       => (int)($selectedManifest['from_build'] ?? 0),
+                'migration_count'  => count((array)($selectedManifest['migrations'] ?? [])),
             ],
         ];
 
@@ -174,6 +185,8 @@ class UpdateV2Service extends BaseService
         }
 
         $buildNo = (int)($in['build_no'] ?? 0);
+        $currentBuild = max(0, (int)($in['current_build'] ?? 0));
+        $deltaSchema = (int)($in['delta_schema'] ?? 0);
         $release = Db::name('release')
             ->where('product_id', $license['product_id'])
             ->where('build_no', $buildNo)
@@ -195,8 +208,22 @@ class UpdateV2Service extends BaseService
             return $this->out('4204', '该版本完整包清单无效，暂不可下载');
         }
 
+        $selected = $release;
+        $selectedManifest = $releaseManifest;
+        $ticketKind = 'release';
+        $ticketIdField = 'release_id';
+        if ($deltaSchema >= DeltaReleaseService::CLIENT_SCHEMA && $currentBuild > 0 && $buildNo > $currentBuild) {
+            $delta = $this->matchingDelta($release, $currentBuild);
+            if ($delta !== null) {
+                $selected = $delta['row'];
+                $selectedManifest = $delta['manifest'];
+                $ticketKind = 'release_delta';
+                $ticketIdField = 'release_delta_id';
+            }
+        }
+
         $ticket = SecureTicketService::issue(
-            ['release_id' => (int)$release['id'], 'kind' => 'release'],
+            [$ticketIdField => (int)$selected['id'], 'kind' => $ticketKind],
             [
                 'appid'   => (int)$license['appid'],
                 'auth_id' => 0,
@@ -211,17 +238,18 @@ class UpdateV2Service extends BaseService
 
         LicenseService::event((string)$license['license_id'], 'ticket', 'success', [
             'build_no' => $buildNo,
-            'kind'     => 'release',
+            'from_build' => $currentBuild,
+            'kind'     => $ticketKind,
         ]);
 
         $data = [
             'ticket'         => $ticket,
             'expires_in'     => self::TICKET_TTL,
             'download_path'  => '/api/v2/update/download',
-            'package_sha256' => (string)$release['package_sha256'],
-            'manifest'       => $releaseManifest,
-            'manifest_sig'   => (string)$release['manifest_sig'],
-            'sig_key_id'     => (string)$release['sig_key_id'],
+            'package_sha256' => (string)$selected['package_sha256'],
+            'manifest'       => $selectedManifest,
+            'manifest_sig'   => (string)$selected['manifest_sig'],
+            'sig_key_id'     => (string)$selected['sig_key_id'],
         ];
 
         return $this->signedOut($data, $auth, '');
@@ -241,8 +269,16 @@ class UpdateV2Service extends BaseService
         }
 
         $kind = (string)($payload['kind'] ?? 'release');
-        $table = $kind === 'patch' ? 'patch' : 'release';
-        $id = (int)($payload[$kind === 'patch' ? 'patch_id' : 'release_id'] ?? 0);
+        $resources = [
+            'release' => ['table' => 'release', 'id' => 'release_id'],
+            'release_delta' => ['table' => 'release_delta', 'id' => 'release_delta_id'],
+            'patch' => ['table' => 'patch', 'id' => 'patch_id'],
+        ];
+        if (!isset($resources[$kind])) {
+            return $this->out('4301', '凭证资源类型异常');
+        }
+        $table = $resources[$kind]['table'];
+        $id = (int)($payload[$resources[$kind]['id']] ?? 0);
         if ($id <= 0) {
             return $this->out('4301', '凭证载荷异常');
         }
@@ -540,6 +576,41 @@ class UpdateV2Service extends BaseService
         return null;
     }
 
+    /**
+     * 只有客户端当前 build、目标完整包与签名差分三者精确匹配时才下发差分。
+     * 差分表尚未迁移、记录无效或基准完整包已删除时均静默回退完整包。
+     */
+    private function matchingDelta(array $targetRelease, int $currentBuild): ?array
+    {
+        if ($currentBuild <= 0 || (int)$targetRelease['build_no'] <= $currentBuild) {
+            return null;
+        }
+        try {
+            $baseRelease = Db::name('release')
+                ->where('product_id', (string)$targetRelease['product_id'])
+                ->where('channel', (string)$targetRelease['channel'])
+                ->where('build_no', $currentBuild)
+                ->find();
+            if (empty($baseRelease)) {
+                return null;
+            }
+            $row = Db::name('release_delta')
+                ->where('product_id', (string)$targetRelease['product_id'])
+                ->where('channel', (string)$targetRelease['channel'])
+                ->where('from_build', $currentBuild)
+                ->where('build_no', (int)$targetRelease['build_no'])
+                ->where('status', 1)
+                ->find();
+            if (empty($row)) {
+                return null;
+            }
+            $manifest = DeltaReleaseService::verifiedManifest($row, $baseRelease, $targetRelease);
+            return $manifest === null ? null : ['row' => $row, 'manifest' => $manifest];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     /** 发布记录必须是可由当前发布公钥验证的 schema 2/3 完整包。 */
     private function releaseManifest(array $row): ?array
     {
@@ -613,7 +684,8 @@ class UpdateV2Service extends BaseService
         if (($row['storage_driver'] ?? 'local') !== 'local') {
             return '';
         }
-        $base = APP_PATH . DS . 'common' . DS . 'download' . DS . ($kind === 'patch' ? 'patch' : 'v2') . DS;
+        $directory = $kind === 'patch' ? 'patch' : ($kind === 'release_delta' ? 'delta' : 'v2');
+        $base = APP_PATH . DS . 'common' . DS . 'download' . DS . $directory . DS;
         $name = (string)$row['package_file'];
         if (!preg_match('/^[A-Za-z0-9_.-]{1,160}$/', $name)) {
             return '';

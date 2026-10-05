@@ -159,12 +159,30 @@ class VersionReleaseService
             return ['ok' => false, 'published' => false, 'msg' => '安装包发布记录写入失败'];
         }
 
+        $deltaResult = ['generated' => false, 'msg' => '未生成差分包'];
+        try {
+            $savedRelease = Db::name('release')->where('id', $releaseId)->find();
+            if (is_array($savedRelease)) {
+                $deltaResult = DeltaReleaseService::buildForRelease($savedRelease, $zipPath);
+            }
+        } catch (\Throwable $e) {
+            // 差分只是传输优化，失败不得撤销已经完成签名和落库的完整包。
+            $deltaResult = ['generated' => false, 'msg' => '差分生成异常，本次使用完整包'];
+        }
+
+        $publishMessage = $status === 1 ? '安装包已签名并发布到授权下载通道' : '安装包已签名保存，版本启用后发布';
+        $deltaMessage = trim((string)($deltaResult['msg'] ?? ''));
+        if ($deltaMessage !== '') {
+            $publishMessage .= '；'.$deltaMessage;
+        }
+
         return [
             'ok'         => true,
             'published'  => $status === 1,
-            'msg'        => $status === 1 ? '安装包已签名并发布到授权下载通道' : '安装包已签名保存，版本启用后发布',
+            'msg'        => $publishMessage,
             'release_id' => $releaseId,
             'sha256'     => (string)$manifest['package_sha256'],
+            'delta'      => $deltaResult,
         ];
     }
 
@@ -187,6 +205,11 @@ class VersionReleaseService
                 'published_at' => $status ? date('Y-m-d H:i:s') : null,
                 'release_note' => (string)($version['update_log'] ?? ''),
             ]);
+        try {
+            DeltaReleaseService::syncStatus($productId, $buildNo, $status);
+        } catch (\Throwable $e) {
+            // 尚未执行差分表迁移的环境继续保持完整包通道可用。
+        }
     }
 
     public static function withdraw(array $version): void
@@ -200,6 +223,10 @@ class VersionReleaseService
             ->where('product_id', $productId)
             ->where('build_no', $buildNo)
             ->update(['status' => 0, 'published_at' => null]);
+        try {
+            DeltaReleaseService::syncStatus($productId, $buildNo, 0);
+        } catch (\Throwable $e) {
+        }
     }
 
     public static function deleteForVersion(array $version): void
@@ -217,6 +244,11 @@ class VersionReleaseService
             return;
         }
         Db::name('release')->where('id', (int)$row['id'])->delete();
+        try {
+            DeltaReleaseService::deleteForRelease($productId, $buildNo);
+        } catch (\Throwable $e) {
+            // 完整版本删除流程不能被缺失的增量迁移阻断。
+        }
         if (($row['storage_driver'] ?? 'local') === 'oss') {
             (new PluginStorageService())->deleteObject((string)($row['package_object_key'] ?? ''));
             return;

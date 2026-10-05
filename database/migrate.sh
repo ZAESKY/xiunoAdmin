@@ -224,6 +224,7 @@ do_backup() {
 
   echo "  正在导出到 $f ..."
   if ! mysqldump --defaults-extra-file="$MY_CNF" \
+        --no-tablespaces \
         --single-transaction --quick --routines --triggers --events \
         --default-character-set=utf8mb4 \
         "$DB_NAME" > "$f" 2>"$f.err"; then

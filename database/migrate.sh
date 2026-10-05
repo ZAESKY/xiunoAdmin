@@ -410,11 +410,17 @@ do_verify() {
 
   echo
   echo "  快照完整性（旧码换新的唯一依据）："
-  local a l; a="$(mysql_q "SELECT COUNT(*) FROM QH_auth;")"; l="$(mysql_q "SELECT COUNT(*) FROM QH_auth_legacy;")"
-  if [ "$a" = "$l" ]; then
-    ok "QH_auth $a 行 = QH_auth_legacy $l 行"
+  local a l historical_missing post_snapshot
+  a="$(mysql_q "SELECT COUNT(*) FROM QH_auth;")"
+  l="$(mysql_q "SELECT COUNT(*) FROM QH_auth_legacy;")"
+  # QH_auth_legacy 是一次性冻结快照；快照建立后新签发的授权只属于当前表，
+  # 不能因为当前总数增长就误判快照损坏。这里只要求快照时间点之前的授权无遗漏。
+  historical_missing="$(mysql_q "SELECT COUNT(*) FROM QH_auth a LEFT JOIN QH_auth_legacy l ON l.id=a.id WHERE l.id IS NULL AND a.addtime<=COALESCE((SELECT MIN(snapshot_at) FROM QH_auth_legacy),'9999-12-31 23:59:59');")"
+  post_snapshot="$(mysql_q "SELECT COUNT(*) FROM QH_auth a LEFT JOIN QH_auth_legacy l ON l.id=a.id WHERE l.id IS NULL AND a.addtime>COALESCE((SELECT MIN(snapshot_at) FROM QH_auth_legacy),'9999-12-31 23:59:59');")"
+  if { [ "$a" = "0" ] && [ "$l" = "0" ]; } || { [ "$l" -gt 0 ] && [ "$historical_missing" = "0" ]; }; then
+    ok "冻结快照 $l 行完整；当前授权 $a 行（快照后新增 ${post_snapshot:-0} 行）"
   else
-    err "行数不一致：QH_auth $a / QH_auth_legacy $l —— 请勿继续，联系排查"
+    err "冻结快照缺少 ${historical_missing:-未知} 条历史授权：QH_auth $a / QH_auth_legacy $l —— 请勿继续，联系排查"
     fail=1
   fi
 

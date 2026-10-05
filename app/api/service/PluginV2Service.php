@@ -18,7 +18,7 @@ use think\facade\Log;
  * 主题插件市场 v2 服务。
  *
  * 数据仍来自授权中心现有插件表和 UserPluginService；本服务只负责授权站点
- * 的 HMAC 身份、公开字段整形以及免费插件的一次性下载票据。
+ * 的 HMAC 身份、公开字段整形以及免费/已购插件的一次性下载票据。
  */
 class PluginV2Service extends BaseService
 {
@@ -43,6 +43,7 @@ class PluginV2Service extends BaseService
             return $this->out($guard['code'], $guard['msg'], $guard['data']);
         }
         $auth = $guard['auth'];
+        $license = $auth['license'];
         $in = $auth['body'];
 
         $page = qh_page_number($in['page'] ?? null);
@@ -80,8 +81,10 @@ class PluginV2Service extends BaseService
                 'sort' => $sort,
             ])->toArray();
             $items = is_array($paginator['data'] ?? null) ? $paginator['data'] : [];
+            $purchasedIds = $this->purchasedPluginIds($license, array_column($items, 'id'));
             foreach ($items as &$item) {
                 $this->normalizePlugin($item);
+                $item['can_download'] = !empty($item['is_free']) || isset($purchasedIds[(int)$item['id']]);
             }
             unset($item);
 
@@ -114,6 +117,7 @@ class PluginV2Service extends BaseService
             return $this->out($guard['code'], $guard['msg'], $guard['data']);
         }
         $auth = $guard['auth'];
+        $license = $auth['license'];
         $pluginId = (int)($auth['body']['plugin_id'] ?? 0);
         if ($pluginId <= 0) {
             return $this->out('4500', '插件 ID 无效');
@@ -125,6 +129,7 @@ class PluginV2Service extends BaseService
                 return $this->out('4501', '插件不存在或尚未上架');
             }
             $this->normalizePlugin($plugin, true);
+            $plugin['can_download'] = $this->downloadEntitlement($plugin, $license)['allowed'];
             foreach (['related_plugin'] as $field) {
                 if (isset($plugin[$field]) && is_array($plugin[$field])) {
                     $this->normalizePlugin($plugin[$field]);
@@ -137,6 +142,13 @@ class PluginV2Service extends BaseService
                     }
                     unset($item);
                 }
+            }
+            if (!empty($plugin['comments']) && is_array($plugin['comments'])) {
+                foreach ($plugin['comments'] as &$comment) {
+                    $comment['id'] = (int)($comment['id'] ?? 0);
+                    $comment['rating'] = max(1, min(5, (int)($comment['rating'] ?? 0)));
+                }
+                unset($comment);
             }
             return $this->signedOut([
                 'plugin' => $plugin,
@@ -170,7 +182,8 @@ class PluginV2Service extends BaseService
         if (!$plugin) {
             return $this->out('4501', '插件不存在或尚未上架');
         }
-        if ((float)$plugin['price'] > 0) {
+        $entitlement = $this->downloadEntitlement($plugin, $license);
+        if (!$entitlement['allowed']) {
             return $this->out('4502', '付费插件请前往轻鸿授权中心购买下载', [
                 'purchase_url' => rtrim((string)SITE_URL, '/')
                     . '/user.php/UserPlugin/detail.html?id=' . $pluginId,
@@ -264,8 +277,12 @@ class PluginV2Service extends BaseService
         $pluginId = (int)($payload['plugin_id'] ?? 0);
         $versionId = (int)($payload['version_id'] ?? 0);
         $plugin = Db::name('plugin')->where('id', $pluginId)->where('status', 1)->find();
-        if (!$plugin || (float)$plugin['price'] > 0) {
-            return $this->out('4302', '插件资源不存在、已下架或已调整为付费');
+        if (!$plugin) {
+            return $this->out('4302', '插件资源不存在或已下架');
+        }
+        $entitlement = $this->downloadEntitlement($plugin, $license);
+        if (!$entitlement['allowed']) {
+            return $this->out('4302', '当前授权账号尚未购买该付费插件');
         }
 
         $record = $plugin;
@@ -309,7 +326,7 @@ class PluginV2Service extends BaseService
                 'plugin_version' => $version,
                 'user_id' => 0,
                 'app_id' => (int)$license['appid'],
-                'order_id' => 0,
+                'order_id' => (int)$entitlement['order_id'],
                 'ip' => $this->ip(),
                 'created_at' => datetime(),
             ]);
@@ -384,6 +401,48 @@ class PluginV2Service extends BaseService
         if ($detail && isset($plugin['content'])) {
             $plugin['content'] = $this->absoluteHtmlUrls((string)$plugin['content']);
         }
+    }
+
+    /** 批量查询当前主题授权账号已经支付的插件，避免市场列表逐项查询。 */
+    private function purchasedPluginIds(array $license, array $pluginIds): array
+    {
+        $userId = (int)($license['user_id'] ?? 0);
+        $appId = (int)($license['appid'] ?? 0);
+        $pluginIds = array_values(array_unique(array_filter(array_map('intval', $pluginIds))));
+        if ($userId <= 0 || $appId <= 0 || empty($pluginIds)) {
+            return [];
+        }
+        $ids = Db::name('plugin_order')
+            ->where('user_id', $userId)
+            ->where('app_id', $appId)
+            ->where('status', 1)
+            ->whereIn('plugin_id', $pluginIds)
+            ->column('plugin_id');
+        $result = [];
+        foreach ($ids as $id) { $result[(int)$id] = true; }
+        return $result;
+    }
+
+    /** 付费包只授权给与主题授权同一账号、同一应用下的已支付订单。 */
+    private function downloadEntitlement(array $plugin, array $license): array
+    {
+        if ((float)($plugin['price'] ?? 0) <= 0) {
+            return ['allowed' => true, 'order_id' => 0];
+        }
+        $userId = (int)($license['user_id'] ?? 0);
+        $appId = (int)($license['appid'] ?? 0);
+        $pluginId = (int)($plugin['id'] ?? 0);
+        if ($userId <= 0 || $appId <= 0 || $pluginId <= 0) {
+            return ['allowed' => false, 'order_id' => 0];
+        }
+        $orderId = (int)Db::name('plugin_order')
+            ->where('plugin_id', $pluginId)
+            ->where('user_id', $userId)
+            ->where('app_id', $appId)
+            ->where('status', 1)
+            ->order('id', 'desc')
+            ->value('id');
+        return ['allowed' => $orderId > 0, 'order_id' => max(0, $orderId)];
     }
 
     private function absoluteUrl(string $url): string

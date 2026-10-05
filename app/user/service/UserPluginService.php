@@ -200,6 +200,30 @@ class UserPluginService extends BaseService
         unset($item);
         $plugin['referencing_plugins'] = $referencing;
 
+        // 主题端详情页只展示已经审核通过的最新评论。这里直接复用现有评论表，
+        // 不暴露用户 ID、审核状态等内部字段，也避免主题端另起一套评论接口。
+        $comments = \think\facade\Db::name('plugin_comment')
+            ->alias('c')
+            ->leftJoin('user u', 'c.user_id = u.id')
+            ->where('c.plugin_id', $pluginId)
+            ->where('c.status', 1)
+            ->field('c.id,c.content,c.rating,c.reply_content,c.reply_at,c.created_at,u.username')
+            ->order('c.id', 'desc')
+            ->limit(20)
+            ->select()
+            ->toArray();
+        foreach ($comments as &$comment) {
+            $comment['id'] = (int)($comment['id'] ?? 0);
+            $comment['rating'] = max(1, min(5, (int)($comment['rating'] ?? 0)));
+            $comment['username'] = qh_plain_text($comment['username'] ?? '匿名用户', 80);
+            $comment['content'] = qh_plain_text($comment['content'] ?? '', 500);
+            $comment['reply_content'] = qh_plain_text($comment['reply_content'] ?? '', 500);
+            $comment['reply_at'] = (string)($comment['reply_at'] ?? '');
+            $comment['created_at'] = (string)($comment['created_at'] ?? '');
+        }
+        unset($comment);
+        $plugin['comments'] = $comments;
+
         unset($plugin['user_id']);
         return $plugin;
     }

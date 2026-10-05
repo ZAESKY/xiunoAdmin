@@ -3,6 +3,23 @@
 // | 模板设置
 // +----------------------------------------------------------------------
 
+// Tie the browser cache key to the actual client-side i18n runtime. This keeps
+// translated templates and dynamically rendered table/button labels on the
+// same runtime after a deployment, without relying on a manually bumped value.
+$i18nVersionSource = '';
+$i18nRuntimeFiles = array(
+    dirname(__DIR__) . '/public/Assets/js/lang.js',
+    dirname(__DIR__) . '/public/Assets/js/common.js',
+);
+foreach ($i18nRuntimeFiles as $i18nRuntimeFile) {
+    $i18nVersionSource .= basename($i18nRuntimeFile) . ':';
+    $i18nVersionSource .= is_file($i18nRuntimeFile)
+        ? hash_file('sha256', $i18nRuntimeFile)
+        : 'missing';
+    $i18nVersionSource .= ';';
+}
+$i18nVersion = substr(hash('sha256', $i18nVersionSource), 0, 12);
+
 return [
     'tpl_cache' => false,
     // 模板引擎类型使用Think
@@ -26,10 +43,8 @@ return [
     'tpl_replace_string' => array(
         '{__CSS__}' => '/Assets/css/',
         '{__JS__}' => '/Assets/js/',
-        // Shared cache key for the runtime language loader and client translator.
-        // Keep these two files on the same version so an old embedded dictionary
-        // can never be mixed with newly rendered translation keys.
-        '{__I18N_VERSION__}' => '20261004.5',
+        // Shared content-derived cache key for the language loader and translator.
+        '{__I18N_VERSION__}' => $i18nVersion,
         '{__IMG__}' => '/Assets/img/',
         '{__MODULE__}' => '/Assets/module/',
         '{__LIBS__}' => '/Assets/libs/',

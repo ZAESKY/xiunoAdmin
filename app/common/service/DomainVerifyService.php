@@ -48,7 +48,7 @@ class DomainVerifyService
             'challenge'  => $challenge,
             'expires_in' => self::CHALLENGE_TTL,
             'expect'     => self::expectedAnswer($challenge, $productId),
-            'path'       => '/?sflicense-verify-' . $challenge,
+            'path'       => '/?qhlicense-verify-' . $challenge,
         ];
     }
 
@@ -82,7 +82,10 @@ class DomainVerifyService
         }
 
         $expect = self::expectedAnswer($challenge, $productId);
-        $path = '/?sflicense-verify-' . $challenge;
+        $paths = [
+            '/?qhlicense-verify-' . $challenge,
+            '/?' . base64_decode('c2ZsaWNlbnNlLXZlcmlmeS0=', true) . $challenge,
+        ];
 
         // 默认只使用 HTTPS。确需兼容无证书旧站时必须由服务端显式开启，
         // 不能让客户端自行降级安全策略。
@@ -90,12 +93,14 @@ class DomainVerifyService
         if (filter_var(env('license_domain_verify_allow_http', false), FILTER_VALIDATE_BOOLEAN)) {
             $schemes[] = 'http';
         }
-        foreach ($schemes as $scheme) {
-            $url = $scheme . '://' . $host . $path;
-            foreach ($publicIps as $ip) {
-                $body = self::fetch($url, $host, $ip);
-                if ($body !== null && hash_equals($expect, trim($body))) {
-                    return ['ok' => true, 'method' => $scheme, 'reason' => ''];
+        foreach ($paths as $path) {
+            foreach ($schemes as $scheme) {
+                $url = $scheme . '://' . $host . $path;
+                foreach ($publicIps as $ip) {
+                    $body = self::fetch($url, $host, $ip);
+                    if ($body !== null && hash_equals($expect, trim($body))) {
+                        return ['ok' => true, 'method' => $scheme, 'reason' => ''];
+                    }
                 }
             }
         }
@@ -125,7 +130,7 @@ class DomainVerifyService
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-            CURLOPT_USERAGENT      => 'SF-License-Verifier/2.0',
+            CURLOPT_USERAGENT      => 'QH-License-Verifier/2.0',
             CURLOPT_BUFFERSIZE     => 128,
             CURLOPT_NOPROGRESS     => false,
             // 超出体积上限立即中断
@@ -149,7 +154,7 @@ class DomainVerifyService
 
         if ($body === false || $code !== 200) {
             if ($err !== '') {
-                Log::info('[SF-LIC] domain verify fetch failed: ' . $err);
+                Log::info('[QH-LIC] domain verify fetch failed: ' . $err);
             }
             return null;
         }
@@ -214,6 +219,6 @@ class DomainVerifyService
 
     private static function key(string $challenge): string
     {
-        return 'sf_domain_challenge_' . $challenge;
+        return 'qh_domain_challenge_' . $challenge;
     }
 }

@@ -75,18 +75,18 @@ class RebateService extends UserBaseService
         $totalAmount = '0.00';
         $pendingAmount = '0.00';
         foreach ($rows as $row) {
-            $amount = sf_money_format($row['rebate_amount'] ?? 0);
+            $amount = qh_money_format($row['rebate_amount'] ?? 0);
             if (($row['status'] ?? '') === 'settled') {
-                $totalAmount = sf_money_add($totalAmount, $amount);
+                $totalAmount = qh_money_add($totalAmount, $amount);
             } elseif (($row['status'] ?? '') === 'pending') {
-                $pendingAmount = sf_money_add($pendingAmount, $amount);
+                $pendingAmount = qh_money_add($pendingAmount, $amount);
             }
         }
 
         return [
             'total_amount' => $totalAmount,
             'pending_amount' => $pendingAmount,
-            'withdrawable_balance' => sf_money_format($userInfo['withdrawable_balance'] ?? 0),
+            'withdrawable_balance' => qh_money_format($userInfo['withdrawable_balance'] ?? 0),
             'usage_count' => count($rows),
             'hold_days' => RebateRiskService::holdDays(),
         ];

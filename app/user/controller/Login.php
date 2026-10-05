@@ -47,11 +47,11 @@ class Login extends CommonBase
         }
         // 旧扫码仅保留给一次性历史身份迁移，不再作为登录入口展示。
         $loginSwitch = array_values(array_intersect($loginSwitch, ['qq']));
-        $loginRedirect = sf_plugin_detail_redirect((string)request()->get('redirect', ''));
+        $loginRedirect = qh_plugin_detail_redirect((string)request()->get('redirect', ''));
         if ($loginRedirect !== '') {
             Session::set('user_login_redirect', $loginRedirect);
         } else {
-            $loginRedirect = sf_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
+            $loginRedirect = qh_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
         }
         View::assign(array(
             'captcha_open' => conf('captcha_open'),

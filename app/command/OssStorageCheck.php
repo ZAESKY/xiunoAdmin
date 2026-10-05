@@ -15,7 +15,7 @@ class OssStorageCheck extends Command
 {
     protected function configure()
     {
-        $this->setName('sf:oss-check')
+        $this->setName('qh:oss-check')
             ->addOption('write-test', null, Option::VALUE_NONE, '上传临时图片和 ZIP，校验私有读写后立即删除')
             ->addOption('repair-urls', null, Option::VALUE_NONE, '把历史插件 OSS 图标/封面改为站内私有媒体网关 URL')
             ->setDescription('检查 OSS 配置；不会输出 AccessKey、Bucket 地址或签名 URL');

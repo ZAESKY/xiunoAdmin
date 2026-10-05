@@ -35,7 +35,7 @@ class QqPay extends PayBackend
         $params["fee_type"] = "CNY";
         $params["notify_url"] = SITE_URL.url('/QqPay/notify');
         $params["spbill_create_ip"] = get_client_ip();
-        $params["total_fee"] = sf_money_to_cents($row['money']);
+        $params["total_fee"] = qh_money_to_cents($row['money']);
         $params["trade_type"] = "NATIVE";
 
         //api调用
@@ -73,7 +73,7 @@ class QqPay extends PayBackend
         $params["fee_type"] = "CNY";
         $params["notify_url"] = SITE_URL.url('/QqPay/notify');
         $params["spbill_create_ip"] = get_client_ip();
-        $params["total_fee"] = sf_money_to_cents($row['money']);
+        $params["total_fee"] = qh_money_to_cents($row['money']);
         $params["trade_type"] = "NATIVE";
 
         //api调用
@@ -124,7 +124,7 @@ class QqPay extends PayBackend
                 //------------------------------
                 $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
                 if (!$srow || strtoupper((string)$fee_type) !== 'CNY'
-                    || sf_money_to_cents($srow['money']) !== (int)$total_fee) {
+                    || qh_money_to_cents($srow['money']) !== (int)$total_fee) {
                     echo "<xml><return_code>FAIL</return_code><return_msg>订单金额或币种校验失败</return_msg></xml>";
                     return;
                 }

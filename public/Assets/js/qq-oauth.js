@@ -43,7 +43,7 @@
         var height = Math.min(760, Math.max(620, window.screen.availHeight - 100));
         var left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
         var top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
-        return window.open('about:blank', 'sf_qq_oauth', 'popup=yes,width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
+        return window.open('about:blank', 'qh_qq_oauth', 'popup=yes,width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
     }
 
     function stop(flowId) {
@@ -209,7 +209,7 @@
     }
 
     window.addEventListener('message', function (event) {
-        if (event.origin !== window.location.origin || !event.data || event.data.type !== 'sf.qq.oauth.complete') return;
+        if (event.origin !== window.location.origin || !event.data || event.data.type !== 'qh.qq.oauth.complete') return;
         var flowId = String(event.data.flow_id || '');
         var item = active[flowId];
         if (!item || (item.popup && event.source !== item.popup)) return;
@@ -218,5 +218,5 @@
         readResult(flowId);
     });
 
-    window.SfQqOauth = {start: start, resume: resume};
+    window.QHQqOauth = {start: start, resume: resume};
 })(window, document);

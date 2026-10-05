@@ -17,8 +17,8 @@ case "$DEPLOYMENT_STAMP" in
 esac
 
 BACKUP_DIR="$BACKUP_ROOT/single_site_license_$DEPLOYMENT_STAMP"
-SNAP_LICENSE="SF_deploy_license_$DEPLOYMENT_STAMP"
-SNAP_SITE="SF_deploy_site_$DEPLOYMENT_STAMP"
+SNAP_LICENSE="QH_deploy_license_$DEPLOYMENT_STAMP"
+SNAP_SITE="QH_deploy_site_$DEPLOYMENT_STAMP"
 CLIENT_CNF=""
 FILES_CHANGED=0
 DATABASE_TOUCHED=0
@@ -66,18 +66,18 @@ rollback() {
 
     if [ "$DATABASE_TOUCHED" -eq 1 ] && [ "$SNAPSHOT_READY" -eq 1 ] && [ -n "$CLIENT_CNF" ]; then
       "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" <<SQL
-UPDATE \`SF_license\` AS live
+UPDATE \`QH_license\` AS live
 INNER JOIN \`$SNAP_LICENSE\` AS old ON old.id = live.id
 SET live.max_sites = old.max_sites,
     live.allow_cross_root = old.allow_cross_root,
     live.bound_host = old.bound_host,
     live.updated_at = old.updated_at;
-UPDATE \`SF_license_site\` AS live
+UPDATE \`QH_license_site\` AS live
 INNER JOIN \`$SNAP_SITE\` AS old ON old.id = live.id
 SET live.status = old.status,
     live.role = old.role,
     live.last_seen_at = old.last_seen_at;
-ALTER TABLE \`SF_license\`
+ALTER TABLE \`QH_license\`
   MODIFY \`max_sites\` tinyint(4) NOT NULL DEFAULT 2 COMMENT '旧版双站点授权上限',
   MODIFY \`allow_cross_root\` tinyint(1) NOT NULL DEFAULT 0 COMMENT '旧版跨根域控制字段';
 DROP TABLE \`$SNAP_LICENSE\`, \`$SNAP_SITE\`;
@@ -156,22 +156,22 @@ DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/my
   --routines --triggers --events --no-tablespaces --default-character-set=utf8mb4 \
   "$DB_NAME" > "$BACKUP_DIR/database.sql"
 [ "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024 ]
-grep -q 'Table structure for table `SF_license`' "$BACKUP_DIR/database.sql"
+grep -q 'Table structure for table `QH_license`' "$BACKUP_DIR/database.sql"
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 sha256sum "$BACKUP_DIR/database.sql" > "$BACKUP_DIR/database.sql.sha256"
 chmod 600 "$BACKUP_DIR/database.sql" "$BACKUP_DIR/database.sql.sha256"
 
 echo "[3/8] 统计影响范围并创建精确回滚快照"
-pre_licenses="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM SF_license')"
-pre_multi="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM (SELECT license_id FROM SF_license_site WHERE status=1 GROUP BY license_id HAVING COUNT(*)>1) AS grouped')"
-pre_secondary="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM SF_license_site WHERE status=1 AND role<>'primary'")"
+pre_licenses="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM QH_license')"
+pre_multi="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM (SELECT license_id FROM QH_license_site WHERE status=1 GROUP BY license_id HAVING COUNT(*)>1) AS grouped')"
+pre_secondary="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM QH_license_site WHERE status=1 AND role<>'primary'")"
 printf 'licenses=%s\nlicenses_with_multiple_active_rows=%s\nactive_secondary_rows=%s\n' \
   "$pre_licenses" "$pre_multi" "$pre_secondary" | tee "$BACKUP_DIR/pre_migration_counts.txt"
 "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" <<SQL
-CREATE TABLE \`$SNAP_LICENSE\` LIKE \`SF_license\`;
-INSERT INTO \`$SNAP_LICENSE\` SELECT * FROM \`SF_license\`;
-CREATE TABLE \`$SNAP_SITE\` LIKE \`SF_license_site\`;
-INSERT INTO \`$SNAP_SITE\` SELECT * FROM \`SF_license_site\`;
+CREATE TABLE \`$SNAP_LICENSE\` LIKE \`QH_license\`;
+INSERT INTO \`$SNAP_LICENSE\` SELECT * FROM \`QH_license\`;
+CREATE TABLE \`$SNAP_SITE\` LIKE \`QH_license_site\`;
+INSERT INTO \`$SNAP_SITE\` SELECT * FROM \`QH_license_site\`;
 SQL
 SNAPSHOT_READY=1
 
@@ -208,10 +208,10 @@ for rel in "${FILES[@]}"; do
   esac
 done
 "$PHP_BIN" think clear
-invalid_policy="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM SF_license WHERE max_sites<>1 OR allow_cross_root<>0')"
-multi_active="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM (SELECT license_id FROM SF_license_site WHERE status=1 GROUP BY license_id HAVING COUNT(*)>1) AS grouped')"
-active_secondary="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM SF_license_site WHERE status=1 AND role<>'primary'")"
-column_default="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_license' AND COLUMN_NAME='max_sites'")"
+invalid_policy="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM QH_license WHERE max_sites<>1 OR allow_cross_root<>0')"
+multi_active="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e 'SELECT COUNT(*) FROM (SELECT license_id FROM QH_license_site WHERE status=1 GROUP BY license_id HAVING COUNT(*)>1) AS grouped')"
+active_secondary="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM QH_license_site WHERE status=1 AND role<>'primary'")"
+column_default="$($MYSQL_BIN --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_license' AND COLUMN_NAME='max_sites'")"
 [ "$invalid_policy" = 0 ] && [ "$multi_active" = 0 ] && [ "$active_secondary" = 0 ] && [ "$column_default" = 1 ]
 grep -q 'MAX_SITES_PER_LICENSE = 1' app/common/service/LicenseService.php
 ! grep -q '第二个站点需与主域名同根域' app/common/service/LicenseService.php

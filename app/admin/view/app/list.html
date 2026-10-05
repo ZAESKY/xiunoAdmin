@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
@@ -32,26 +32,26 @@
             </form>
             <!-- 数据表格 -->
 
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-normal layui-btn-sm" lay-event="code"><i class="layui-icon layui-icon-senior"></i>{:t('app_ui.code')}</a>
     <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
-<script type="text/html" id="SF_TbState">
-    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_TbState">
+    <input type="checkbox" lay-filter="QH_TbStateCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('app_ui.normal_run')}|{:t('app_ui.system_maintain')}" {{d.status==2?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_TbState2">
-    <input type="checkbox" lay-filter="SF_TbStateCk2" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_TbState2">
+    <input type="checkbox" lay-filter="QH_TbStateCk2" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('app_ui.stop_run')}|{:t('common.normal')}" {{d.status==0?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_CodeDialog">
+<script type="text/html" id="QH_CodeDialog">
     <div class="layui-tab layui-tab-brief">
         <ul class="layui-tab-title">
             <li class="layui-this">{:t('app_ui.php_class_version')}</li>
@@ -81,7 +81,7 @@ class Authorization{
     // 队列查询最长等待时间
     const QUEUE_TIME = 60;
     // 缓存名称
-    const SESSION_NAME = 'SF_CheckAuthResult';
+    const SESSION_NAME = 'QH_CheckAuthResult';
     // 盗版提示
     private static function message($msg = ''){
         // 自定义盗版提示HTML代码
@@ -90,9 +90,9 @@ class Authorization{
     }
     // 检测授权
     public static function main(){
-        $SF_CheckAuthResult = self::getSession();
-        if(!empty($SF_CheckAuthResult)){
-            $result = $SF_CheckAuthResult;
+        $QH_CheckAuthResult = self::getSession();
+        if(!empty($QH_CheckAuthResult)){
+            $result = $QH_CheckAuthResult;
             if(is_array($result)){
                 if(self::verifySign(json_encode($result['data']['data']), $result['data']['sign'])){
                     if(($result['data']['data']['time'] + self::TIME) > time()){
@@ -127,9 +127,9 @@ class Authorization{
         }
     }
     // 在线更新
-    public static function updateMain($SF_Action = 'check'){
+    public static function updateMain($QH_Action = 'check'){
         $result = self::checkInfo('update');
-        switch ($SF_Action) {
+        switch ($QH_Action) {
             case 'check':
                 // 如果链接服务器失败
                 if(!$result){
@@ -145,7 +145,7 @@ class Authorization{
                 // 授权站下载更新包网址
                 $downloadUrl = $result['data']['data']['data']['url'];
                 // 下载到本地的压缩包名称
-                $ZipFile = 'SF.zip';
+                $ZipFile = 'QH.zip';
                 // 循环需要更新的版本
                 foreach ($result['data']['data']['data']['download'] as $res){
                     // 模拟用户
@@ -352,19 +352,19 @@ class Authorization{
     }
 }</pre>
                 <pre class="layui-code update"><button type="button" data-clipboard-target=".update" class="pull-right layui-btn layui-btn-xs btnCopy">{:t('common.copy')}</button>// 在线更新接口代码
-$SF_Action = isset($_POST['SF_Action']) ? $_POST['SF_Action'] : null;
-if(!empty($SF_Action)){
+$QH_Action = isset($_POST['QH_Action']) ? $_POST['QH_Action'] : null;
+if(!empty($QH_Action)){
     // 调用检测更新方法
-    $result = Authorization::updateMain($SF_Action);
+    $result = Authorization::updateMain($QH_Action);
     exit(json_encode($result));
 }
 </pre>
                 <pre class="layui-code authcode"><button type="button" data-clipboard-target=".authcode" class="pull-right layui-btn layui-btn-xs btnCopy">{:t('common.copy')}</button>// 授权代码
-define('SF_ROOT', dirname(__FILE__).'/');
-include(SF_ROOT . 'AuthInfo.php');
-include(SF_ROOT . 'Authorization.php');
+define('QH_ROOT', dirname(__FILE__).'/');
+include(QH_ROOT . 'AuthInfo.php');
+include(QH_ROOT . 'Authorization.php');
 session_start();
-if(md5_file(SF_ROOT . 'Authorization.php') === '该文件md5值'){
+if(md5_file(QH_ROOT . 'Authorization.php') === '该文件md5值'){
     Authorization::main();
 }else{
     exit('系统文件已损坏，请到授权站重新下载源码');
@@ -397,9 +397,9 @@ define('TIME', 86400);
 // 队列查询最长等待时间
 define('QUEUE_TIME', 60);
 // 缓存名称
-define('SESSION_NAME','SF_CheckAuthResult');
-define('SF_ROOT', dirname(__FILE__).'/');
-include(SF_ROOT . 'AuthInfo.php');
+define('SESSION_NAME','QH_CheckAuthResult');
+define('QH_ROOT', dirname(__FILE__).'/');
+include(QH_ROOT . 'AuthInfo.php');
 
 function verifySign($data, $sign){
     if(!class_exists('AuthInfo')){
@@ -530,12 +530,12 @@ if(!empty($_SESSION[SESSION_NAME])){
 }
 </pre>
                 <pre class="layui-code update2"><button type="button" data-clipboard-target=".update2" class="pull-right layui-btn layui-btn-xs btnCopy">{:t('common.copy')}</button>// 在线更新代码
-$SF_Action = isset($_POST['SF_Action']) ? $_POST['SF_Action'] : null;
-if(!empty($SF_Action)){
+$QH_Action = isset($_POST['QH_Action']) ? $_POST['QH_Action'] : null;
+if(!empty($QH_Action)){
     // 调用检测更新方法
-    function updateMain($SF_Action = 'check'){
+    function updateMain($QH_Action = 'check'){
         $result = checkInfo('update');
-        switch ($SF_Action) {
+        switch ($QH_Action) {
             case 'check':
                 // 如果链接服务器失败
                 if(!$result){
@@ -551,7 +551,7 @@ if(!empty($SF_Action)){
                 // 授权站下载更新包网址
                 $downloadUrl = $result['data']['data']['url'];
                 // 下载到本地的压缩包名称
-                $ZipFile = 'SF.zip';
+                $ZipFile = 'QH.zip';
                 // 循环需要更新的版本
                 foreach ($result['data']['data']['download'] as $res){
                     // 模拟用户
@@ -646,12 +646,12 @@ var TIME = 86400;
 // 队列查询最长等待时间
 var QUEUE_TIME = 60;
 // 缓存名称
-var SESSION_NAME = 'SF_CheckAuthResult';
+var SESSION_NAME = 'QH_CheckAuthResult';
 // 公玥
 var PUBLIC_KEY = <span class="js_public_key"></span>;
 //====配置信息结束====//
 //====自定义ajax函数开始====//
-var sfAjax={ajax:function(e){if((e=e||{}).cache=e.cache||!1,!e.url)throw new Error(&quot;参数不合法&quot;);e.dataType=(e.dataType||&quot;json&quot;).toLowerCase(),&quot;jsonp&quot;==e.dataType?this.ajaxJSONP(e):&quot;json&quot;==e.dataType&amp;&amp;this.ajaxJSON(e)},ajaxJSONP(e){e.data=e.data||{},e.jsonp=e.jsonp||&quot;callback&quot;;var t=&quot;jsonp_&quot;+(new Date).getTime();e.data[e.jsonp]=t;var a=this.formateParams(e.data,e.cache),s=document.getElementsByTagName(&quot;head&quot;)[0],r=document.createElement(&quot;script&quot;);s.appendChild(r),window[t]=function(a){s.removeChild(r),clearTimeout(r.timer),window[t]=null,e.success&amp;&amp;e.success(a)},r.src=a?e.url+&quot;?&quot;+a:e.url,e.time&amp;&amp;(r.timer=setTimeout(function(){window[t]=null,s.removeChild(r),e.error&amp;&amp;e.error({message:&quot;超时&quot;})},e.time))},ajaxJSON(e){e.type=(e.type||&quot;GET&quot;).toUpperCase(),e.data=e.data||{};var t,a=this.formateParams(e.data,e.cache);(t=window.XMLHttpRequest?new XMLHttpRequest:new ActiveXObject(&quot;Microsoft.XMLHTTP&quot;)).onreadystatechange=function(){4==t.readyState&amp;&amp;200==t.status?e.success&amp;&amp;(&quot;string&quot;==typeof t.responseText?e.success(JSON.parse(t.responseText)):e.success(t.responseText)):e.error&amp;&amp;e.error(status)},&quot;GET&quot;==e.type?(t.open(&quot;GET&quot;,a?e.url+&quot;?&quot;+a:e.url,!0),t.send(null)):(t.open(&quot;POST&quot;,e.url,!0),t.setRequestHeader(&quot;Content-Type&quot;,&quot;application/x-www-form-urlencoded&quot;),t.send(a))},formateParams:function(e,t){var a=[];for(var s in e)a.push(encodeURIComponent(s)+&quot;=&quot;+encodeURIComponent(e[s]));return t&amp;&amp;a.push(&quot;v=&quot;+(new Date).getTime()),a.join(&quot;&amp;&quot;)}};
+var qhAjax={ajax:function(e){if((e=e||{}).cache=e.cache||!1,!e.url)throw new Error(&quot;参数不合法&quot;);e.dataType=(e.dataType||&quot;json&quot;).toLowerCase(),&quot;jsonp&quot;==e.dataType?this.ajaxJSONP(e):&quot;json&quot;==e.dataType&amp;&amp;this.ajaxJSON(e)},ajaxJSONP(e){e.data=e.data||{},e.jsonp=e.jsonp||&quot;callback&quot;;var t=&quot;jsonp_&quot;+(new Date).getTime();e.data[e.jsonp]=t;var a=this.formateParams(e.data,e.cache),s=document.getElementsByTagName(&quot;head&quot;)[0],r=document.createElement(&quot;script&quot;);s.appendChild(r),window[t]=function(a){s.removeChild(r),clearTimeout(r.timer),window[t]=null,e.success&amp;&amp;e.success(a)},r.src=a?e.url+&quot;?&quot;+a:e.url,e.time&amp;&amp;(r.timer=setTimeout(function(){window[t]=null,s.removeChild(r),e.error&amp;&amp;e.error({message:&quot;超时&quot;})},e.time))},ajaxJSON(e){e.type=(e.type||&quot;GET&quot;).toUpperCase(),e.data=e.data||{};var t,a=this.formateParams(e.data,e.cache);(t=window.XMLHttpRequest?new XMLHttpRequest:new ActiveXObject(&quot;Microsoft.XMLHTTP&quot;)).onreadystatechange=function(){4==t.readyState&amp;&amp;200==t.status?e.success&amp;&amp;(&quot;string&quot;==typeof t.responseText?e.success(JSON.parse(t.responseText)):e.success(t.responseText)):e.error&amp;&amp;e.error(status)},&quot;GET&quot;==e.type?(t.open(&quot;GET&quot;,a?e.url+&quot;?&quot;+a:e.url,!0),t.send(null)):(t.open(&quot;POST&quot;,e.url,!0),t.setRequestHeader(&quot;Content-Type&quot;,&quot;application/x-www-form-urlencoded&quot;),t.send(a))},formateParams:function(e,t){var a=[];for(var s in e)a.push(encodeURIComponent(s)+&quot;=&quot;+encodeURIComponent(e[s]));return t&amp;&amp;a.push(&quot;v=&quot;+(new Date).getTime()),a.join(&quot;&amp;&quot;)}};
 //====自定义ajax函数结束====//
 // 自定义提示信息函数
 function message(msg = &#x27;&#x27;){
@@ -691,7 +691,7 @@ if(Object.keys(session).length > 0){
         }
     }
 }else{
-    sfAjax.ajax({
+    qhAjax.ajax({
         url: (IS_HTTPS?&#x27;https://&#x27;:&#x27;http://&#x27;)+AUTH_DOMAIN+&#x27;/api.php/Auth/checkAuth&#x27;,
         type: METHOD, //or post
         dataType: &#x27;json&#x27;, //or jsonp
@@ -722,7 +722,7 @@ if(Object.keys(session).length > 0){
     </div>
 
 </script>
-<script type="text/html" id="SF_EditDialog">
+<script type="text/html" id="QH_EditDialog">
     <form id="formBasForm" class="layui-form model-form no-padding text-center" style="max-width: 700px;margin: 30px auto;" lay-filter="formBasForm">
         <input name="id" type="hidden"/>
         <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
@@ -925,7 +925,7 @@ if(Object.keys(session).length > 0){
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block">
-                            <div class="sf-tips">
+                            <div class="qh-tips">
                                 {:t('app_ui.key_generation_url')}：<a href="https://www.bejson.com/enc/rsa/" target="_blank">https://www.bejson.com/enc/rsa/</a>
                             </div>
                         </div>
@@ -1026,56 +1026,56 @@ if(Object.keys(session).length > 0){
                     <div class="layui-form-item layui-form-text">
                         <label class="layui-form-label">{:t('app_ui.app_notice')}</label>
                         <div class="layui-input-block">
-                            <textarea id="app_notice_editor" name="app_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.app_notice_placeholder')}" ></textarea>
+                            <textarea id="app_notice_editor" name="app_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.app_notice_placeholder')}" ></textarea>
                         </div>
                     </div>
                     <div class="layui-form-item layui-form-text">
                         <label class="layui-form-label">{:t('app_ui.cdkey_notice')}</label>
                         <div class="layui-input-block">
-                            <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.cdkey_notice_placeholder')}" ></textarea>
+                            <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.cdkey_notice_placeholder')}" ></textarea>
                         </div>
                     </div>
                     <div class="layui-form-item layui-form-text">
                         <label class="layui-form-label">{:t('app_ui.recharge_notice')}</label>
                         <div class="layui-input-block">
-                            <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.pay_notice_placeholder')}" ></textarea>
+                            <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.pay_notice_placeholder')}" ></textarea>
                         </div>
                     </div>
                     <div class="layui-form-item layui-form-text">
                         <label class="layui-form-label">{:t('app_ui.register_notice')}</label>
                         <div class="layui-input-block">
-                            <textarea id="register_notice_editor" name="register_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.register_notice_placeholder')}" ></textarea>
+                            <textarea id="register_notice_editor" name="register_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.register_notice_placeholder')}" ></textarea>
                         </div>
                     </div>
                     <div class="layui-form-item layui-form-text">
                         <label class="layui-form-label">{:t('app_ui.replace_notice')}</label>
                         <div class="layui-input-block">
-                            <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.replace_notice_placeholder')}" ></textarea>
+                            <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.replace_notice_placeholder')}" ></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="layui-tab-item">
-                    <blockquote class="layui-elem-quote-sf-info" style="text-align:left;">
+                    <blockquote class="layui-elem-quote-qh-info" style="text-align:left;">
                         {:t('app_ui.public_installer_help')}
                     </blockquote>
                     <div class="layui-form-item">
                         <label class="layui-form-label">{:t('app_ui.current_file')}</label>
                         <div class="layui-input-block" style="text-align:left;line-height:38px;">
-                            <span id="sfInstallerName">{:t('app_ui.not_uploaded')}</span>
+                            <span id="qhInstallerName">{:t('app_ui.not_uploaded')}</span>
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <label class="layui-form-label">{:t('app_ui.file_info')}</label>
                         <div class="layui-input-block" style="text-align:left;line-height:26px;word-break:break-all;">
-                            <div>{:t('app_ui.file_size')}：<span id="sfInstallerSize">-</span></div>
-                            <div>SHA-256：<span id="sfInstallerHash">-</span></div>
-                            <div>{:t('app_ui.upload_time')}：<span id="sfInstallerTime">-</span></div>
+                            <div>{:t('app_ui.file_size')}：<span id="qhInstallerSize">-</span></div>
+                            <div>SHA-256：<span id="qhInstallerHash">-</span></div>
+                            <div>{:t('app_ui.upload_time')}：<span id="qhInstallerTime">-</span></div>
                         </div>
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block" style="text-align:left;">
-                            <button type="button" class="layui-btn" id="sfInstallerUpload"><i class="layui-icon layui-icon-upload"></i>{:t('app_ui.upload_zip_installer')}</button>
-                            <p id="sfInstallerHint" style="color:#999;margin-top:8px;">{:t('app_ui.installer_upload_help')}</p>
+                            <button type="button" class="layui-btn" id="qhInstallerUpload"><i class="layui-icon layui-icon-upload"></i>{:t('app_ui.upload_zip_installer')}</button>
+                            <p id="qhInstallerHint" style="color:#999;margin-top:8px;">{:t('app_ui.installer_upload_help')}</p>
                         </div>
                     </div>
                 </div>
@@ -1100,7 +1100,7 @@ if(Object.keys(session).length > 0){
 
         /* 渲染表格 */
         var insTb = table.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/App/list")}',
             method: 'post',
             page: true,
@@ -1127,11 +1127,11 @@ if(Object.keys(session).length > 0){
                 {type: 'checkbox', fixed: true},
                 {field: 'id', title: 'ID', sort: true, width: 80, fixed: true, templet: function (d) {
                         if (d.status == 2) {
-                            return '<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
+                            return '<span class="layui-badge-dot layui-bg-qh-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
                         } else if (d.status == 1) {
-                            return '<span class="layui-badge-dot layui-bg-sf-orange" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
+                            return '<span class="layui-badge-dot layui-bg-qh-orange" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
                         } else {
-                            return '<span class="layui-badge-dot layui-bg-sf-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
+                            return '<span class="layui-badge-dot layui-bg-qh-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id;
                         }
                     }
                 },
@@ -1149,13 +1149,13 @@ if(Object.keys(session).length > 0){
                     }
                 },
                 {field: 'addtime', title: window.t('common.add_time'), sort: true, minWidth: 170},
-                {field: 'status', title: window.t('app_ui.operating_status'), sort: true, templet: '#SF_TbState', minWidth: 110},
-                {field: 'status', title: window.t('app_ui.stop_status'), sort: true, templet: '#SF_TbState2', minWidth: 110},
-                {title: window.t('common.operation'), toolbar: '#SF_TbBar', align: 'center', minWidth: 270}
+                {field: 'status', title: window.t('app_ui.operating_status'), sort: true, templet: '#QH_TbState', minWidth: 110},
+                {field: 'status', title: window.t('app_ui.stop_status'), sort: true, templet: '#QH_TbState2', minWidth: 110},
+                {title: window.t('common.operation'), toolbar: '#QH_TbBar', align: 'center', minWidth: 270}
             ]]
         });
         $(document).off('click.tbImg').on('click.tbImg', '[tb-img]', function () {
-            var imgList = table.cache['SF_Table'].map(function (d) {
+            var imgList = table.cache['QH_Table'].map(function (d) {
                 return {
                     alt: d.username,
                     src: d.logo || '/Assets/img/logo.png'
@@ -1179,16 +1179,16 @@ if(Object.keys(session).length > 0){
         });
 
         /* 表格搜索 */
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
 
         {if $id != ''}
-        insTb.reload({where: {id:{$id}}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true}]]});
+        insTb.reload({where: {id:{$id}}, page: {curr: 1}, cols: [[{type: 'checkbox', fixed: true},{field: 'id', title: 'ID', templet: '#QH_Tbid', sort: true, width: 80, fixed: true}]]});
         {/if}
             /* 表格工具条点击事件 */
-            table.on('tool(SF_Table)', function (obj) {
+            table.on('tool(QH_Table)', function (obj) {
                 if (obj.event === 'edit') { // 修改
                     showEditModel(obj.data);
                 } else if (obj.event === 'del') { // 删除
@@ -1205,7 +1205,7 @@ if(Object.keys(session).length > 0){
                         title: window.t('app_ui.view_auth_code_title', {name: obj.data.name}),
                         type: 1,
                         area:['600px','700px'],
-                        content:$("#SF_CodeDialog").html(),
+                        content:$("#QH_CodeDialog").html(),
                         success: function (layero, dIndex) {
                             $(".public_key").text(obj.data.public_key);
                             if(obj.data.public_key == '' || obj.data.private_key == ''){
@@ -1222,7 +1222,7 @@ if(Object.keys(session).length > 0){
 
                             $(".js_public_key").text(js_public_key.slice(0,js_public_key.length-2));
                             layui.code({
-                                title: window.t('app_ui.sf_auth_system'),
+                                title: window.t('app_ui.qh_auth_system'),
                                 skin: 'notepad',
                                 about:false
                             });
@@ -1232,7 +1232,7 @@ if(Object.keys(session).length > 0){
                 laydate.render({
                     elem: '#test', //指定元素
                     mark: {
-                        '0-3-15': 'SF'
+                        '0-3-15': 'QH'
                     },
                     type: 'datetime',
                     trigger: 'click'
@@ -1250,11 +1250,11 @@ if(Object.keys(session).length > 0){
             });
 
             /* 表格头工具栏点击事件 */
-            table.on('toolbar(SF_Table)', function (obj) {
+            table.on('toolbar(QH_Table)', function (obj) {
                 if (obj.event === 'edit') { // 添加
                     showEditModel();
                 } else if (obj.event === 'del') { // 删除
-                    var checkRows = table.checkStatus('SF_Table');
+                    var checkRows = table.checkStatus('QH_Table');
                     if (checkRows.data.length === 0) {
                         notice.msg(window.t('confirm.please_select_data'), {icon: 3, audio:'1'});
                         return;
@@ -1267,7 +1267,7 @@ if(Object.keys(session).length > 0){
                 laydate.render({
                     elem: '#test', //指定元素
                     mark: {
-                        '0-3-15': 'SF'
+                        '0-3-15': 'QH'
                     },
                     type: 'datetime',
                     trigger: 'click'
@@ -1286,14 +1286,14 @@ if(Object.keys(session).length > 0){
                     shade: 0,
                     fixed: true,
                     offset: 'auto',
-                    content: $('#SF_EditDialog').html(),
+                    content: $('#QH_EditDialog').html(),
                     success: function (layero, dIndex) {
                         var richEditors = [];
                         function initRichEditors() {
                             if (richEditors.length) {
                                 return;
                             }
-                            $(layero).find('.sf-rich-editor').each(function () {
+                            $(layero).find('.qh-rich-editor').each(function () {
                                 richEditors.push(layedit.build($(this).attr('id'), {
                                     height: 220,
                                     tool: ['strong', 'italic', 'underline', 'del', '|', 'left', 'center', 'right', '|', 'link', 'unlink', 'face']
@@ -1400,17 +1400,17 @@ if(Object.keys(session).length > 0){
                         }
                         function showInstallerMeta(meta) {
                             meta = meta || {};
-                            $(layero).find('#sfInstallerName').text(meta.file_name || meta.installer_file_name || window.t('app_ui.not_uploaded'));
-                            $(layero).find('#sfInstallerSize').text(installerSize(meta.size || meta.installer_size));
+                            $(layero).find('#qhInstallerName').text(meta.file_name || meta.installer_file_name || window.t('app_ui.not_uploaded'));
+                            $(layero).find('#qhInstallerSize').text(installerSize(meta.size || meta.installer_size));
                             var hash = meta.sha256 || meta.installer_sha256 || '';
-                            $(layero).find('#sfInstallerHash').text(hash ? hash.substr(0, 20) + '…' : '-').attr('title', hash);
-                            $(layero).find('#sfInstallerTime').text(meta.uploaded_at || meta.installer_uploaded_at || '-');
+                            $(layero).find('#qhInstallerHash').text(hash ? hash.substr(0, 20) + '…' : '-').attr('title', hash);
+                            $(layero).find('#qhInstallerTime').text(meta.uploaded_at || meta.installer_uploaded_at || '-');
                         }
                         showInstallerMeta(mData || {});
-                        var installerButton = $(layero).find('#sfInstallerUpload');
+                        var installerButton = $(layero).find('#qhInstallerUpload');
                         if (!mData || !mData.id) {
                             installerButton.addClass('layui-btn-disabled').prop('disabled', true);
-                            $(layero).find('#sfInstallerHint').text(window.t('app_ui.save_before_installer'));
+                            $(layero).find('#qhInstallerHint').text(window.t('app_ui.save_before_installer'));
                         } else {
                             upload.render({
                                 elem: installerButton[0],
@@ -1552,7 +1552,7 @@ if(Object.keys(session).length > 0){
             }
 
             /* 修改用户状态 */
-            form.on('switch(SF_TbStateCk)', function (obj) {
+            form.on('switch(QH_TbStateCk)', function (obj) {
                 notice.msg(window.t('common.loading'), {icon: 4, close: true});
                 $.ajax({
                     type: "POST",
@@ -1574,7 +1574,7 @@ if(Object.keys(session).length > 0){
                     }
                 });
             });
-            form.on('switch(SF_TbStateCk2)', function (obj) {
+            form.on('switch(QH_TbStateCk2)', function (obj) {
                 notice.msg(window.t('common.loading'), {icon: 4, close: true});
                 $.ajax({
                     type: "POST",

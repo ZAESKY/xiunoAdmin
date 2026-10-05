@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # ═══════════════════════════════════════════════════════════════════
-#  SF 授权系统 · 服务器只读巡检
+#  QH 授权系统 · 服务器只读巡检
 #
 #  用途：迁移前查清旧生产环境与新环境的真实状态，不做任何猜测。
 #
@@ -42,7 +42,7 @@ redact() {
     -e 's/(mysql:\/\/[^:]+:)[^@]+@/\1***@/gi'
 }
 
-echo "SF 授权系统 · 服务器只读巡检报告"
+echo "QH 授权系统 · 服务器只读巡检报告"
 echo "生成时间: $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "主机: $(hostname)"
 echo "说明: 本次运行未对任何站点或数据库做出修改"
@@ -164,7 +164,7 @@ if [ -n "$OLD_CONF" ] && [ -f "$OLD_CONF" ]; then
     fi
 
     [ -f "$OLD_PROJ/composer.json" ] && kv "composer name" "$(grep -oP '"name"\s*:\s*"\K[^"]+' "$OLD_PROJ/composer.json" | head -1)"
-    [ -f "$OLD_PROJ/app/install/SF_Auth.Lock" ] && kv "安装锁" "存在" || kv "安装锁" "不存在"
+    [ -f "$OLD_PROJ/app/install/QH_Auth.Lock" ] && kv "安装锁" "存在" || kv "安装锁" "不存在"
 
     sub "ThinkPHP 版本"
     if [ -f "$OLD_PROJ/composer.lock" ]; then
@@ -330,7 +330,7 @@ if [ -n "${OLD_PROJ:-}" ] && [ -f "$OLD_PROJ/.env" ]; then
       | awk -F'\t' '{printf "  %-34s %-8s %-22s %10s %12s\n",$1,$2,$3,$4,$5}'
 
     sub "旧库：关键表精确行数（information_schema 的 TABLE_ROWS 是估算值）"
-    for t in SF_user SF_admin SF_auth SF_app SF_version SF_order SF_pay SF_config SF_menu SF_plugin; do
+    for t in QH_user QH_admin QH_auth QH_app QH_version QH_order QH_pay QH_config QH_menu QH_plugin; do
       exists="$(q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DBN' AND TABLE_NAME='$t';")"
       if [ "$exists" = "1" ]; then
         printf "  %-24s %s\n" "$t" "$(q "SELECT COUNT(*) FROM \`$DBN\`.\`$t\`;")"
@@ -340,12 +340,12 @@ if [ -n "${OLD_PROJ:-}" ] && [ -f "$OLD_PROJ/.env" ]; then
     done
 
     sub "旧库：是否已有 v2 迁移引入的表（判断生产版本进度）"
-    for t in SF_auth_legacy SF_license SF_license_site SF_license_event SF_download_ticket SF_release SF_patch SF_trial SF_offline_activation; do
+    for t in QH_auth_legacy QH_license QH_license_site QH_license_event QH_download_ticket QH_release QH_patch QH_trial QH_offline_activation; do
       printf "  %-28s %s\n" "$t" "$(q "SELECT IF(COUNT(*)=1,'已存在','不存在') FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DBN' AND TABLE_NAME='$t';")"
     done
 
-    sub "旧库：SF_auth / SF_app 是否已有 v2 新增列"
-    for pair in "SF_auth:authcode_hash" "SF_auth:authcode_last4" "SF_auth:must_rotate" "SF_app:auth_enforce"; do
+    sub "旧库：QH_auth / QH_app 是否已有 v2 新增列"
+    for pair in "QH_auth:authcode_hash" "QH_auth:authcode_last4" "QH_auth:must_rotate" "QH_app:auth_enforce"; do
       tb="${pair%%:*}"; col="${pair##*:}"
       printf "  %-16s.%-20s %s\n" "$tb" "$col" \
         "$(q "SELECT IF(COUNT(*)=1,'已存在','不存在') FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='$DBN' AND TABLE_NAME='$tb' AND COLUMN_NAME='$col';")"
@@ -368,15 +368,15 @@ if [ -n "${OLD_PROJ:-}" ] && [ -f "$OLD_PROJ/.env" ]; then
     kv "事件" "$(q "SELECT COUNT(*) FROM information_schema.EVENTS WHERE EVENT_SCHEMA='$DBN';")"
 
     sub "旧库：数据库中存储的绝对 URL / 路径（迁移换域名需要改）"
-    echo "  SF_config 中含 http 的配置项："
-    q "SELECT name, LEFT(value,80) FROM \`$DBN\`.SF_config WHERE value LIKE '%http%';" 2>/dev/null | redact | sed 's/^/    /'
+    echo "  QH_config 中含 http 的配置项："
+    q "SELECT name, LEFT(value,80) FROM \`$DBN\`.QH_config WHERE value LIKE '%http%';" 2>/dev/null | redact | sed 's/^/    /'
     echo
-    echo "  SF_config 中含 $OLD_DOMAIN 的配置项："
-    q "SELECT name, LEFT(value,80) FROM \`$DBN\`.SF_config WHERE value LIKE '%${OLD_DOMAIN}%';" 2>/dev/null | sed 's/^/    /'
+    echo "  QH_config 中含 $OLD_DOMAIN 的配置项："
+    q "SELECT name, LEFT(value,80) FROM \`$DBN\`.QH_config WHERE value LIKE '%${OLD_DOMAIN}%';" 2>/dev/null | sed 's/^/    /'
 
     sub "旧库：密码哈希格式抽样（不显示实际哈希，只看长度与前缀特征）"
-    q "SELECT LENGTH(password) AS len, COUNT(*) AS cnt FROM \`$DBN\`.SF_user GROUP BY LENGTH(password);" 2>/dev/null | sed 's/^/  用户表 password 长度分布: /'
-    q "SELECT LENGTH(password) AS len, COUNT(*) AS cnt FROM \`$DBN\`.SF_admin GROUP BY LENGTH(password);" 2>/dev/null | sed 's/^/  管理员表 password 长度分布: /'
+    q "SELECT LENGTH(password) AS len, COUNT(*) AS cnt FROM \`$DBN\`.QH_user GROUP BY LENGTH(password);" 2>/dev/null | sed 's/^/  用户表 password 长度分布: /'
+    q "SELECT LENGTH(password) AS len, COUNT(*) AS cnt FROM \`$DBN\`.QH_admin GROUP BY LENGTH(password);" 2>/dev/null | sed 's/^/  管理员表 password 长度分布: /'
     echo "  （长度 32 = md5(md5(pwd))，与本地 get_password() 实现一致）"
 
     # ── 新库 ──

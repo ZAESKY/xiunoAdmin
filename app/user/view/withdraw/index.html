@@ -23,7 +23,7 @@
             <button class="layui-btn layui-btn-normal layui-btn-sm" id="btnApply"><i class="layui-icon layui-icon-export"></i> {:t('user_home.request_withdrawal')}</button>
         </div>
         <div class="layui-card-body">
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
@@ -35,7 +35,7 @@
         <label class="layui-form-label layui-form-required">{:t('withdraw.amount')}</label>
         <div class="layui-input-block">
             <input type="number" name="amount" placeholder="{:t('withdraw.amount_placeholder')}" class="layui-input" lay-verify="required|number" lay-verType="tips" step="0.01" min="0" autocomplete="off"/>
-            <div class="sf-tips" id="amountTip" style="margin-top:4px;"></div>
+            <div class="qh-tips" id="amountTip" style="margin-top:4px;"></div>
         </div>
     </div>
     <div class="layui-form-item">
@@ -53,7 +53,7 @@
                 <img id="qrPreview" src="" style="display:none;" alt="{:t('withdraw.qr_preview')}"/>
             </div>
             <input type="hidden" name="qr_image" id="qrImageVal" value="" lay-verify="required" lay-verType="tips"/>
-            <div class="sf-tips">{:t('withdraw.qr_help')}</div>
+            <div class="qh-tips">{:t('withdraw.qr_help')}</div>
         </div>
     </div>
     <div class="layui-form-item" id="normalPhoneField">
@@ -66,7 +66,7 @@
         <label class="layui-form-label layui-form-required">{:t('profile.security_phone')}</label>
         <div class="layui-input-block">
             <input type="text" id="verifiedPhoneText" class="layui-input" readonly/>
-            <div class="sf-tips">{:t('withdraw.verified_phone_help')}</div>
+            <div class="qh-tips">{:t('withdraw.verified_phone_help')}</div>
         </div>
     </div>
     <div class="layui-form-item" id="withdrawSmsCodeField" style="display:none;">
@@ -99,12 +99,12 @@
 </form>
 </script>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     {{# if(d.status === 'pending'){ }}
     <a class="layui-btn layui-btn-warm layui-btn-sm" lay-event="cancel"><i class="layui-icon layui-icon-close"></i>{:t('withdraw.cancel')}</a>
     {{# } }}
 </script>
-<script type="text/html" id="SF_TbStatus">
+<script type="text/html" id="QH_TbStatus">
     {{# var m = {pending:'<span class="layui-badge layui-bg-orange">{:t('common_ui.status_pending')}</span>', approved:'<span class="layui-badge layui-badge-green">{:t('withdraw.status_approved')}</span>', rejected:'<span class="layui-badge layui-badge-red">{:t('feedback.status_rejected')}</span>', withdrawn:'<span class="layui-badge layui-bg-gray">{:t('withdraw.status_withdrawn')}</span>'}; }}
     {{# return m[d.status] || d.status; }}
 </script>
@@ -143,7 +143,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
 
     // 表格
     var insTb = table.render({
-        elem: '#SF_Table', url: '{:url("/Withdraw/index")}', method: 'post', page: true, skin: 'line', size: 'lg',
+        elem: '#QH_Table', url: '{:url("/Withdraw/index")}', method: 'post', page: true, skin: 'line', size: 'lg',
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.data.total, data: res.data.data }; },
         cols: [[
@@ -154,17 +154,17 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
             {field: 'phone', title: '{:t("withdraw.phone")}', width: 120},
             {field: 'real_name', title: '{:t("withdraw.name")}', width: 90},
             {field: 'user_remark', title: '{:t("withdraw.remark")}', minWidth: 120},
-            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#SF_TbStatus'},
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#QH_TbStatus'},
             {field: 'applied_at', title: '{:t("withdraw.applied_at")}', width: 160},
             {field: 'admin_remark', title: '{:t("withdraw.admin_remark")}', minWidth: 150, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
             {field: 'transfer_image', title: '{:t("withdraw.transfer_proof")}', width: 100, templet: function(d) {
                 return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '<span style="color:#bbb;">-</span>';
             }},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', width: 80}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', width: 80}
         ]]
     });
 
-    table.on('tool(SF_Table)', function(obj) {
+    table.on('tool(QH_Table)', function(obj) {
         if (obj.event === 'cancel') {
             layer.confirm(t('withdraw.cancel_confirm'), {icon:3, shade:.1}, function(i) {
                 layer.close(i);

@@ -17,15 +17,15 @@
                     </div>
                 </div>
                 
-                <div id="introduceDisplay" class="sf-toggle-section">
+                <div id="introduceDisplay" class="qh-toggle-section">
                     <div class="layui-form-item">
-                        <div class="sf-tips">
+                        <div class="qh-tips">
                             <div id="introduce"></div>
                         </div>
                     </div>
                 </div>       
                 
-                <div id="versionSelection" class="sf-toggle-section">
+                <div id="versionSelection" class="qh-toggle-section">
                     <div class="layui-form-item">
                         <label class="layui-form-label layui-form-required">{:t('encryption_ui.php_version')}:</label>
                         <div class="layui-input-block">
@@ -52,12 +52,12 @@
                     <label class="layui-form-label layui-form-required">{:t('add_code.upload_file')}:</label>
                     <div class="layui-input-block">
                         <div class="layui-upload-drag" id="fileUpload">
-                            <i class="layui-icon layui-icon-upload-drag sf-upload-icon"></i>
+                            <i class="layui-icon layui-icon-upload-drag qh-upload-icon"></i>
                             <p>{:t('version_ui.drag_upload')}</p>
                             <div class="layui-hide" id="uploadDemoView">
                                 <hr>
                                 <div class="layui-form-item">
-                                    <img src="" alt="{:t('app_ui.upload_preview_alt')}" id="demo1" class="sf-upload-preview">
+                                    <img src="" alt="{:t('app_ui.upload_preview_alt')}" id="demo1" class="qh-upload-preview">
                                 </div>
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">{:t('upload.file_name')}</label>
@@ -69,18 +69,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="sf-upload-mask mask"></div>
-                <div class="sf-upload-progress loading">
+                <div class="qh-upload-mask mask"></div>
+                <div class="qh-upload-progress loading">
                     <div class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="uploadProgress">
                         <div class="layui-progress-bar" lay-percent="0%"></div>
                     </div>
                 </div>
                 <div class="layui-form-item text-right">
-                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('add_code.start')}</button>
+                    <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('add_code.start')}</button>
                     <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.reset')}</button>
                 </div>
                 <div class="layui-form-item">
-                    <div class="sf-tips">
+                    <div class="qh-tips">
                         {:t('encryption_ui.help')}
                     </div>
                 </div>
@@ -232,7 +232,7 @@
             }
         });
         
-        form.on('submit(SF_EditSubmit)', function (data) {
+        form.on('submit(QH_EditSubmit)', function (data) {
             notice.msg(window.t('common.loading'), {icon: 4, close: true});
             $.ajax({
                 type: "POST",

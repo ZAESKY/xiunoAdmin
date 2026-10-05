@@ -154,7 +154,7 @@ class SecureTicketService
         $pepper = (string)env('security_pepper', '');
         if ($pepper === '') {
             // 退回到既有全局常量盐值，保证未配置 .env 的环境仍可运行
-            $pepper = function_exists('sf_password_hash') ? sf_password_hash() : 'SF_DEFAULT_PEPPER';
+            $pepper = function_exists('qh_password_hash') ? qh_password_hash() : 'QH_DEFAULT_PEPPER';
         }
         return $pepper;
     }

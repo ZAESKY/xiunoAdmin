@@ -1,7 +1,7 @@
 -- QQ OAuth identity mapping.
 -- Additive and safe to run repeatedly on MySQL 5.7+/8.0+.
 
-CREATE TABLE IF NOT EXISTS `SF_social_identity` (
+CREATE TABLE IF NOT EXISTS `QH_social_identity` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `provider` varchar(32) NOT NULL COMMENT 'qq/wechat/etc',
   `provider_appid` varchar(64) NOT NULL COMMENT '第三方平台应用ID',
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `SF_social_identity` (
   KEY `idx_unionid` (`provider`,`unionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='第三方登录身份';
 
-CREATE TABLE IF NOT EXISTS `SF_user_social_identity` (
+CREATE TABLE IF NOT EXISTS `QH_user_social_identity` (
   `identity_id` int(11) unsigned NOT NULL,
   `user_id` int(11) unsigned NOT NULL,
   `created_at` datetime NOT NULL,

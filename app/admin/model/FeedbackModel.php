@@ -18,7 +18,7 @@ class FeedbackModel extends BaseModel
     {
         try {
             $result = self::alias('f')
-                ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
+                ->join('QH_user u', 'f.user_id = u.id', 'LEFT')
                 ->field('f.*, u.username')
                 ->where('f.id', $id)
                 ->find();
@@ -37,8 +37,8 @@ class FeedbackModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
 
             $data = $this->buildSearchWhere('f.id|f.title', 'text', '');
             // 手动处理 status 筛选避免 join 后歧义
@@ -52,7 +52,7 @@ class FeedbackModel extends BaseModel
             }
 
             $list = self::alias('f')
-                ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
+                ->join('QH_user u', 'f.user_id = u.id', 'LEFT')
                 ->field('f.*, u.username')
                 ->order('f.id', 'desc')
                 ->where($data)

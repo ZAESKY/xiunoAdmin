@@ -13,7 +13,7 @@ use think\facade\View;
 
 /**
  * 用户插件管理控制器
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class UserPlugin extends UserBackend
@@ -239,7 +239,7 @@ class UserPlugin extends UserBackend
             $userInfo = \think\facade\Db::name('user')->where('id', intval($this->userId))->find();
             if ($userInfo) {
                 $app_id = intval($userInfo['appid']);
-                $userBalance = sf_money_format($userInfo['balance']);
+                $userBalance = qh_money_format($userInfo['balance']);
 
                 $myComment = \think\facade\Db::name('plugin_comment')
                     ->where('plugin_id', $id)

@@ -14,7 +14,7 @@ class DownloadQrCode extends Frontend
 
     public function verification(){
         if(IS_POST){
-            if (sf_download_mode() !== 'qrcode') {
+            if (qh_download_mode() !== 'qrcode') {
                 return message(t('download.qq_disabled'), false);
             }
             $post = $this->request->post();

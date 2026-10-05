@@ -2,13 +2,13 @@
 -- Non-destructive table bridge for a 4.2.9 database copied into the new environment.
 -- This file intentionally contains CREATE TABLE IF NOT EXISTS statements only.
 
-CREATE TABLE IF NOT EXISTS `SF_feedback` (
+CREATE TABLE IF NOT EXISTS `QH_feedback` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `title` varchar(255) NOT NULL COMMENT '反馈标题',
   `content` text NOT NULL COMMENT '反馈内容',
   `type` varchar(20) NOT NULL DEFAULT 'other' COMMENT '反馈类型：bug/feature/other',
-  `reply` text COMMENT '历史回复字段，新增回复请写入SF_feedback_reply',
+  `reply` text COMMENT '历史回复字段，新增回复请写入QH_feedback_reply',
   `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0待处理 1已受理 2已驳回 3已解决',
   `created_at` datetime NOT NULL COMMENT '提交时间',
   `updated_at` datetime DEFAULT NULL COMMENT '处理时间',
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `SF_feedback` (
   KEY `idx_user_status` (`user_id`, `status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `SF_feedback_reply` (
+CREATE TABLE IF NOT EXISTS `QH_feedback_reply` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `feedback_id` int(11) unsigned NOT NULL COMMENT '反馈ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '回复用户ID，0=管理员',
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `SF_feedback_reply` (
   KEY `idx_feedback_admin` (`feedback_id`, `is_admin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `SF_notification` (
+CREATE TABLE IF NOT EXISTS `QH_notification` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '接收用户ID，0=管理员',
   `title` varchar(255) NOT NULL COMMENT '通知标题',
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `SF_notification` (
   KEY `idx_user_read` (`user_id`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `SF_point_log` (
+CREATE TABLE IF NOT EXISTS `QH_point_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `type` varchar(30) NOT NULL COMMENT 'consume/recharge/exchange/refund',
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `SF_point_log` (
   KEY `idx_related` (`related_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `SF_wechat_mp_login` (
+CREATE TABLE IF NOT EXISTS `QH_wechat_mp_login` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `token` varchar(64) NOT NULL COMMENT '本地登录token',
   `scene` varchar(80) NOT NULL DEFAULT '' COMMENT '微信二维码场景值',
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `SF_wechat_mp_login` (
   KEY `idx_status_expire` (`status`, `expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='微信公众号扫码登录状态表';
 
-CREATE TABLE IF NOT EXISTS `SF_point_product` (
+CREATE TABLE IF NOT EXISTS `QH_point_product` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '商品名称',
   `image` varchar(255) DEFAULT '' COMMENT '商品图片',
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `SF_point_product` (
   KEY `idx_type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `SF_point_exchange_record` (
+CREATE TABLE IF NOT EXISTS `QH_point_exchange_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `product_id` int(11) unsigned NOT NULL COMMENT '商品ID',
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `SF_point_exchange_record` (
   KEY `idx_product` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `SF_point_product_reward` (
+CREATE TABLE IF NOT EXISTS `QH_point_product_reward` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int(11) unsigned NOT NULL COMMENT '商品ID',
   `reward_content` text NOT NULL COMMENT '奖品内容',
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS `SF_point_product_reward` (
   KEY `idx_record` (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `SF_balance_log` (
+CREATE TABLE IF NOT EXISTS `QH_balance_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `type` varchar(30) DEFAULT 'recharge' COMMENT '类型: recharge/consume/refund/adjust',
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS `SF_balance_log` (
   KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='余额变动日志';
 
-CREATE TABLE IF NOT EXISTS `SF_withdraw` (
+CREATE TABLE IF NOT EXISTS `QH_withdraw` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '申请人用户ID',
   `amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '提现金额',
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `SF_withdraw` (
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='提现记录';
 
-CREATE TABLE IF NOT EXISTS `SF_checkin_record` (
+CREATE TABLE IF NOT EXISTS `QH_checkin_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `checkin_date` date NOT NULL COMMENT '打卡日期',
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `SF_checkin_record` (
   KEY `idx_checkin_date` (`checkin_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='打卡记录表';
 
-CREATE TABLE IF NOT EXISTS `SF_carousel` (
+CREATE TABLE IF NOT EXISTS `QH_carousel` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(100) NOT NULL DEFAULT '' COMMENT '标题',
   `image` varchar(255) NOT NULL DEFAULT '' COMMENT '图片URL',
@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `SF_carousel` (
   KEY `sort` (`sort`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='轮播图管理';
 
-CREATE TABLE IF NOT EXISTS `SF_user_notice` (
+CREATE TABLE IF NOT EXISTS `QH_user_notice` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(200) NOT NULL DEFAULT '' COMMENT '公告标题',
   `content` text COMMENT '公告内容',
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS `SF_user_notice` (
   KEY `idx_sort` (`sort`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户公告';
 
-CREATE TABLE IF NOT EXISTS `SF_discount_code` (
+CREATE TABLE IF NOT EXISTS `QH_discount_code` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '所属用户ID',
   `code` varchar(32) NOT NULL COMMENT '唯一折扣码',
@@ -216,10 +216,10 @@ CREATE TABLE IF NOT EXISTS `SF_discount_code` (
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='折扣码表';
 
-CREATE TABLE IF NOT EXISTS `SF_rebate_record` (
+CREATE TABLE IF NOT EXISTS `QH_rebate_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) unsigned NOT NULL COMMENT 'SF_order.id',
-  `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'SF_pay.trade_no',
+  `order_id` int(11) unsigned NOT NULL COMMENT 'QH_order.id',
+  `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'QH_pay.trade_no',
   `payer_user_id` int(11) unsigned NOT NULL COMMENT '付款用户ID',
   `referrer_user_id` int(11) unsigned NOT NULL COMMENT '返利归属用户ID（折扣码所有者）',
   `discount_code` varchar(32) NOT NULL COMMENT '使用的折扣码',
@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS `SF_rebate_record` (
   KEY `idx_status_settle_at` (`status`,`settle_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='返利记录表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin` (
+CREATE TABLE IF NOT EXISTS `QH_plugin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '发布者用户ID',
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '插件名称',
@@ -297,7 +297,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin` (
   KEY `is_recommend` (`is_recommend`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_versions` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_versions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '版本记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `version` varchar(50) NOT NULL DEFAULT '' COMMENT '版本号',
@@ -318,7 +318,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_versions` (
   KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件版本历史表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_resources` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_resources` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '资源ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `version_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件版本ID',
@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_resources` (
   KEY `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件资源表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_order` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_order` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '订单ID',
   `order_no` varchar(64) NOT NULL DEFAULT '' COMMENT '订单号',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
@@ -368,7 +368,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_order` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件订单表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_comment` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_comment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '评论ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '用户ID',
@@ -389,7 +389,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_comment` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件评论表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_rating` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_rating` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '评分ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '用户ID',
@@ -404,7 +404,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_rating` (
   KEY `app_id` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件评分表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_download` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_download` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '下载记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `plugin_version` varchar(50) NOT NULL DEFAULT '' COMMENT '插件版本',
@@ -421,7 +421,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_download` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件下载记录表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_download_token` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_download_token` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Token ID',
   `token` varchar(64) NOT NULL DEFAULT '' COMMENT '下载凭证',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
@@ -442,7 +442,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_download_token` (
   KEY `expires_at` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='临时下载凭证表';
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_purchase` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_purchase` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '购买记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '用户ID',
@@ -458,7 +458,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_purchase` (
   KEY `order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件购买记录表';
 
-CREATE TABLE IF NOT EXISTS `SF_loginlog` (
+CREATE TABLE IF NOT EXISTS `QH_loginlog` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
   `username` varchar(100) NOT NULL DEFAULT '' COMMENT '登录名',

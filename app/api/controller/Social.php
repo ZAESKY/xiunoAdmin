@@ -103,7 +103,7 @@ class Social extends ApiBackend
             try {
                 parent::userLogin();
             } catch (\Throwable $e) {
-                return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+                return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
             }
         } elseif (!$this->validateAdminSession()) {
             return message(t('login.not_logged_in'), false);
@@ -138,13 +138,13 @@ class Social extends ApiBackend
             try {
                 parent::userLogin();
             } catch (\Throwable $e) {
-                return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+                return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
             }
             return $this->beginOauth('user', 'auth_binding', [], $returnTo);
         }
 
         if ($scene === 'download') {
-            if (sf_download_mode() !== 'qrcode') {
+            if (qh_download_mode() !== 'qrcode') {
                 return message(t('download.qq_disabled'), false);
             }
             $appId = intval(input('post.appid/d', 0));
@@ -234,7 +234,7 @@ class Social extends ApiBackend
         try {
             parent::userLogin();
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
         }
 
         $proof = $this->getOauthProof(trim((string)input('post.proof_token/s', '')));
@@ -288,7 +288,7 @@ class Social extends ApiBackend
             $this->deleteOauthProof((string)$proof['token']);
             return message(t('auth.bind_success'), true);
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('auth.bind_retry')), false);
+            return message(qh_public_exception_message($e, t('auth.bind_retry')), false);
         }
     }
 
@@ -301,7 +301,7 @@ class Social extends ApiBackend
         try {
             parent::userLogin();
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
         }
         $legacyQq = trim((string)session('get_qq'));
         $scanToken = trim((string)session('get_token'));
@@ -321,7 +321,7 @@ class Social extends ApiBackend
             Session::save();
             return message(t('qq.legacy_migration_success'), true);
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.legacy_migration_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.legacy_migration_failed')), false);
         }
     }
 
@@ -375,7 +375,7 @@ class Social extends ApiBackend
             Session::save();
             return $this->completeUserLogin($result['users'], $result['identity_id'], true);
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.auto_registration_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.auto_registration_failed')), false);
         }
     }
 
@@ -434,7 +434,7 @@ class Social extends ApiBackend
             Session::delete('get_token');
             Session::delete('get_qq');
             Session::save();
-            return message(sf_public_exception_message($e, t('qq.legacy_account_migration_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.legacy_account_migration_failed')), false);
         }
     }
 
@@ -460,7 +460,7 @@ class Social extends ApiBackend
         try {
             parent::userLogin();
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
         }
 
         $userId = intval(cookie('userId'));
@@ -535,7 +535,7 @@ class Social extends ApiBackend
                 'popup_enabled' => in_array($callback, [self::UNIFIED_CALLBACK, 'user.php/login/index.html'], true),
             ]);
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.initialization_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.initialization_failed')), false);
         }
     }
 
@@ -588,7 +588,7 @@ class Social extends ApiBackend
                 ? $this->finishAdminLogin($oauth)
                 : $this->finishUserOauthLogin($oauth, $oauthClient->getAppId());
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.login_retry')), false);
+            return message(qh_public_exception_message($e, t('qq.login_retry')), false);
         }
     }
 
@@ -644,7 +644,7 @@ class Social extends ApiBackend
             });
             return $this->completeUserLogin($result, intval($identity['id']), true);
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.registration_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.registration_failed')), false);
         }
     }
 
@@ -653,7 +653,7 @@ class Social extends ApiBackend
         try {
             parent::userLogin();
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
         }
         $currentUserId = intval(cookie('userId'));
         if ($currentUserId <= 0 || $currentUserId !== intval($context['user_id'] ?? 0)) {
@@ -680,7 +680,7 @@ class Social extends ApiBackend
         try {
             parent::userLogin();
         } catch (\Throwable $e) {
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')), false);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
         }
         $currentUserId = intval(cookie('userId'));
         if ($currentUserId <= 0 || $currentUserId !== intval($context['user_id'] ?? 0)) {
@@ -751,7 +751,7 @@ class Social extends ApiBackend
 
         Session::regenerate(true);
         session('adminId', $admin['id'], 86400);
-        session('adminSign', data_auth_sign($admin['username'] . $admin['password'] . sf_password_hash()), 86400);
+        session('adminSign', data_auth_sign($admin['username'] . $admin['password'] . qh_password_hash()), 86400);
         Session::save();
         return message('success', true, [
             'status' => 'success',
@@ -835,7 +835,7 @@ class Social extends ApiBackend
         }
 
         $this->setUserLogin($users[0]);
-        $redirect = sf_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
+        $redirect = qh_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
         Session::delete('user_login_redirect');
         return message($registered ? t('qq.registration_login_success') : t('login.success'), true, [
             'status' => 'success',
@@ -848,7 +848,7 @@ class Social extends ApiBackend
     {
         Session::regenerate(true);
         cookie('userId', $user['id']);
-        cookie('userSign', data_auth_sign($user['appid'] . $user['username'] . $user['password'] . sf_password_hash()));
+        cookie('userSign', data_auth_sign($user['appid'] . $user['username'] . $user['password'] . qh_password_hash()));
         event('UserLogin', [
             'Title' => '登录后台',
             '结果' => '登录成功[QQ快捷登录]',
@@ -873,7 +873,7 @@ class Social extends ApiBackend
             throw new \RuntimeException(t('qq.default_permission_missing'));
         }
 
-        $nickname = sf_plain_text($identity['nickname'] ?? '', 40);
+        $nickname = qh_plain_text($identity['nickname'] ?? '', 40);
         $base = preg_replace('/[^\p{L}\p{N}_-]+/u', '_', $nickname);
         $base = trim((string)$base, '_-');
         if ($base === '' || in_array(mb_strtolower($base, 'UTF-8'), ['admin', 'administrator', 'root', 'system', '官方', '管理员'], true)) {
@@ -891,7 +891,7 @@ class Social extends ApiBackend
 
         return intval(Db::name('user')->insertGetId([
             'username' => $username,
-            'password' => sf_password_make(bin2hex(random_bytes(32))),
+            'password' => qh_password_make(bin2hex(random_bytes(32))),
             'phone' => '',
             'qq' => null,
             'wechat_openid' => '',
@@ -1187,7 +1187,7 @@ class Social extends ApiBackend
             . '<link rel="stylesheet" href="/Assets/css/system-message.css"></head>'
             . '<body class="oauth-callback"><div class="system-message info"><h1 aria-hidden="true">●</h1><p>' . $message . '</p></div><script>(function(){'
             . 'var flow=' . $flowJson . ',target=' . $targetJson . ',needsFlow=' . $needsFlowJson . ';'
-            . 'var delivered=false;if(flow&&window.opener&&!window.opener.closed){try{window.opener.postMessage({type:"sf.qq.oauth.complete",flow_id:flow},window.location.origin);delivered=true;}catch(e){}}'
+            . 'var delivered=false;if(flow&&window.opener&&!window.opener.closed){try{window.opener.postMessage({type:"qh.qq.oauth.complete",flow_id:flow},window.location.origin);delivered=true;}catch(e){}}'
             . 'if(delivered){setTimeout(function(){window.close();},250);return;}'
             . 'if(needsFlow&&flow){target+=(target.indexOf("?")>=0?"&":"?")+"qq_oauth_flow="+encodeURIComponent(flow);}'
             . 'window.location.replace(target||"/");})();</script></body></html>';
@@ -1203,7 +1203,7 @@ class Social extends ApiBackend
         }
         $admin = Db::name('admin')->where(['id' => $adminId, 'status' => 1])->find();
         return $admin && hash_equals(
-            data_auth_sign($admin['username'] . $admin['password'] . sf_password_hash()),
+            data_auth_sign($admin['username'] . $admin['password'] . qh_password_hash()),
             $sign
         );
     }

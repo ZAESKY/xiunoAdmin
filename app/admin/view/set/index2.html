@@ -156,7 +156,7 @@
                                             <div class="layui-input-block">
                                                 <input type="text" name="diy_background_music" class="layui-input" placeholder="自定义背景音乐代码" lay-required/>
                                             </div>
-                                            <blockquote class="layui-elem-quote-sf-info">
+                                            <blockquote class="layui-elem-quote-qh-info">
                                                 https://music.clwl.online/可自己{:t('common.upload')}歌单<br><a class="layui-btn layui-btn-xs layui-btn-normal" href="https://music.clwl.online/" rel="noreferrer" target="_blank">点击前往{:t('download_ui.get_btn')}代码</a>
                                             </blockquote>
                                         </div>
@@ -167,7 +167,7 @@
                                             <div class="layui-input-block">
                                                 <textarea lay-tips="一行一首音乐" lay-direction="1" lay-bg="#4facfe" type="text" class="layui-input" style="height:100px" name="diy_background_music_id" placeholder="一行一首音乐" rows="4">002ejEdb4KTwBw|tencent</textarea>
                                             </div>
-                                            <blockquote class="layui-elem-quote-sf-info">
+                                            <blockquote class="layui-elem-quote-qh-info">
                                                 <div class="layui-collapse" lay-shrink="_all"  style="background-color:#fff">
                                                     <div class="layui-colla-item">
                                                         <h2 class="layui-colla-title">格式</h2>
@@ -270,7 +270,7 @@
                                             <div class="layui-input-block">
                                                 <input type="text" name="captcha_key" class="layui-input"/>
                                             </div>
-                                            <blockquote class="layui-elem-quote-sf-info">
+                                            <blockquote class="layui-elem-quote-qh-info">
                                                 用于登录,注册,{:t('common_ui.repair')}信息等等，<a class="layui-btn layui-btn-xs layui-btn-normal" href="http://www.geetest.com/apply.html" rel="noreferrer" target="_blank">注册极验{:t('download_ui.captcha_label')}</a>
                                             </blockquote>
                                         </div>
@@ -410,7 +410,7 @@
                                                 </div>
                                                 {volist name="notice_template_list" id="res"}
                                                 <div class="layui-col-xs12 layui-col-sm12 layui-col-md4">
-                                                    <img onclick="previewImg('/template/notice/{$res}/sf.png')" src="/template/notice/{$res}/sf.png" width="80px"  border="0" />
+                                                    <img onclick="previewImg('/template/notice/{$res}/qh.png')" src="/template/notice/{$res}/qh.png" width="80px"  border="0" />
                                                     <br>
                                                     <input type="radio" value="{$res}" name="notice_template" title="{$res}" lay-filter="notice_select" checked/>
                                                 </div>
@@ -424,7 +424,7 @@
                                                 <label class="layui-form-label">自定义模板</label>
                                                 <div class="layui-input-block">
                                                     <textarea name="notice_diy" class="layui-input" placeholder="自定义{:t('set_ui.notice_template')}" style="height:120px"></textarea>
-                                                    <blockquote class="layui-elem-quote-sf-info">
+                                                    <blockquote class="layui-elem-quote-qh-info">
                                                         参数说明：[notice]代表公告内容，[cookie]代表创建cookie
                                                     </blockquote>
                                                 </div>
@@ -435,13 +435,13 @@
                                                 <label class="layui-form-label">图标</label>
                                                 <div class="layui-input-block  inline-block">
                                                     <input type="radio" value="-1" name="notice_icon" title="{:t('set_ui.bg_closed')}" checked/>
-                                                    <input type="radio" value="0" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: 0px 0'></i>"/>
-                                                    <input type="radio" value="1" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -30px 0'></i>"/>
-                                                    <input type="radio" value="2" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -60px 0'></i>"/>
-                                                    <input type="radio" value="3" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -90px 0'></i>"/>
-                                                    <input type="radio" value="4" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -120px 0'></i>"/>
-                                                    <input type="radio" value="5" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -150px 0'></i>"/>
-                                                    <input type="radio" value="6" name="notice_icon" title="<i class='sf-layer-ico' style='background-position: -180px 0'></i>"/>
+                                                    <input type="radio" value="0" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: 0px 0'></i>"/>
+                                                    <input type="radio" value="1" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: -30px 0'></i>"/>
+                                                    <input type="radio" value="2" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: -60px 0'></i>"/>
+                                                    <input type="radio" value="3" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: -90px 0'></i>"/>
+                                                    <input type="radio" value="4" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: -120px 0'></i>"/>
+                                                    <input type="radio" value="5" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: -150px 0'></i>"/>
+                                                    <input type="radio" value="6" name="notice_icon" title="<i class='qh-layer-ico' style='background-position: -180px 0'></i>"/>
                                                 </div>
                                             </div>
                                             <div class="layui-form-item" pane>
@@ -590,7 +590,7 @@
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">{:t('set_ui.epay_api')}</label>
                                     <div class="layui-input-block">
-                                        <input type="text" name="epay_url" class="layui-input" placeholder="填写对接的易支付URL,例如：http://pay.sf-team.cn/">
+                                        <input type="text" name="epay_url" class="layui-input" placeholder="填写对接的易支付URL,例如：http://pay.qh-team.cn/">
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
@@ -730,7 +730,7 @@
                                     <input type="text" name="mail_recv" class="layui-input" placeholder="不填默认为发信邮箱"/>
                                 </div>
                             </div>
-                            <blockquote class="layui-elem-quote-sf-info">
+                            <blockquote class="layui-elem-quote-qh-info">
                                 <button type="button" class="layui-btn layui-btn-xs layui-btn-normal" id="mailtest">给 2129876388@qq.com 发一封测试邮件</button><br>
                                 此功能为用户下单时给自己发邮件提醒。<br/>使用普通模式发信时，建议使用QQ邮箱，SMTP服务器smtp.qq.com，端口465，密码不是QQ密码也不是邮箱独立密码，是QQ邮箱设置界面生成的<a class="layui-btn layui-btn-xs layui-btn-warm" ew-href="http://service.mail.qq.com/cgi-bin/help?subtype=1&&no=1001256&&id=28"  target="_blank" rel="noreferrer">{:t('download_ui.auth_code_label')}</a>。为确保发信{:t('common.success')}率，发信邮箱和{:t('set_ui.receive_email')}最好同一个
                             </blockquote>

@@ -46,8 +46,8 @@ class Login extends Backend
     public function index()
     {
         // 取消模板布局
-        if(($this->request->server('QUERY_STRING', '') ?: '') == conf('SF_LOGIN_KEY')){
-            session('SF_LOGIN_KEY',conf('SF_LOGIN_KEY'));
+        if(($this->request->server('QUERY_STRING', '') ?: '') == conf('QH_LOGIN_KEY')){
+            session('QH_LOGIN_KEY',conf('QH_LOGIN_KEY'));
         }
         $this->app->view->layout(false);
         $loginSwitch = conf('login_switch');
@@ -62,7 +62,7 @@ class Login extends Backend
             'captcha_id' => conf('captcha_id'),
             'login_switch' => $loginSwitch,
         ));
-        if(session('SF_LOGIN_KEY') != conf('SF_LOGIN_KEY')){
+        if(session('QH_LOGIN_KEY') != conf('QH_LOGIN_KEY')){
             return $this->render('safe');
         }else{
             $get = $this->request->get();
@@ -152,7 +152,7 @@ class Login extends Backend
     public function reg()
     {
         $this->app->view->layout(false);
-        if (session('SF_LOGIN_KEY') != conf('SF_LOGIN_KEY')) {
+        if (session('QH_LOGIN_KEY') != conf('QH_LOGIN_KEY')) {
             return $this->render('safe');
         }
         if (IS_POST) {
@@ -204,7 +204,7 @@ class Login extends Backend
 
                 Db::name('user')->insert([
                     'username' => $username,
-                    'password' => sf_password_make($password),
+                    'password' => qh_password_make($password),
                     'phone' => '',
                     'qq' => $qq,
                     'email' => $email,
@@ -237,7 +237,7 @@ class Login extends Backend
     public function forgot()
     {
         $this->app->view->layout(false);
-        if (session('SF_LOGIN_KEY') != conf('SF_LOGIN_KEY')) {
+        if (session('QH_LOGIN_KEY') != conf('QH_LOGIN_KEY')) {
             return $this->render('safe');
         }
         if (IS_POST) {
@@ -269,7 +269,7 @@ class Login extends Backend
                 return message('login.code_invalid_or_expired', false);
             }
 
-            Db::name('user')->where('id', $user['id'])->update(['password' => sf_password_make($newPassword)]);
+            Db::name('user')->where('id', $user['id'])->update(['password' => qh_password_make($newPassword)]);
             Cache::delete($codeCacheKey);
             Cache::delete($attemptCacheKey);
 

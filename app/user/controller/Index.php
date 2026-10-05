@@ -308,7 +308,7 @@ class Index extends UserBackend
                 return message(t('user.old_password_empty'), false);
             }
             $needsRehash = false;
-            if(!sf_password_verify($oldPassword, $this->userInfo['password'], $needsRehash)){
+            if(!qh_password_verify($oldPassword, $this->userInfo['password'], $needsRehash)){
                 return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->userInfo['username']){
@@ -324,7 +324,7 @@ class Index extends UserBackend
                 try{
                     Db::name('user')
                         ->where('id', $this->userId)
-                        ->data(['password' => sf_password_make($newPassword)])
+                        ->data(['password' => qh_password_make($newPassword)])
                         ->update();
                     return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
@@ -342,7 +342,7 @@ class Index extends UserBackend
                     if(strlen($newPassword) < 6){
                         return message(t('user.new_password_short'), false);
                     }
-                    $password = sf_password_make($newPassword);
+                    $password = qh_password_make($newPassword);
                 }else{
                     $password = $this->userInfo['password'];
                 }

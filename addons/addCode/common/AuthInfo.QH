@@ -1,8 +1,8 @@
 <?php
-// SF授权系统授权信息类
+// QH授权系统授权信息类
 class AuthInfo{
     const AUTHCODE = '1000';
     const VERSION = 1000;
     const EDITION = '1.0';
-    const PUBLIC_KEY = 'SF_PUBLIC_KEY';
+    const PUBLIC_KEY = 'QH_PUBLIC_KEY';
 }

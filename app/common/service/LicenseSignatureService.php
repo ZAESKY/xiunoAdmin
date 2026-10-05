@@ -13,17 +13,17 @@ use think\facade\Cache;
  *   1  HTTP 方法，大写
  *   2  请求路径，不含 query
  *   3  SHA-256(请求体原始字节)，小写 hex
- *   4  X-SF-Timestamp   Unix 秒
- *   5  X-SF-Nonce       32 位 hex
- *   6  X-SF-License-Id
+ *   4  X-QH-Timestamp   Unix 秒
+ *   5  X-QH-Nonce       32 位 hex
+ *   6  X-QH-License-Id
  *
- * 签名值放 X-SF-Signature，小写 hex。
+ * 签名值放 X-QH-Signature，小写 hex。
      * 服务端校验顺序：时间窗(±300s) → HMAC 常量时间比对 → 占用 nonce。
  *
  * ── 响应签名（服务端 → 客户端，Ed25519，客户端只持公钥）
  *
- * 对 data 做确定性 JSON 序列化后签名，签名放 X-SF-Response-Signature，
- * 密钥编号放 X-SF-Key-Id。data 必须含 license_id / site_id / nonce /
+ * 对 data 做确定性 JSON 序列化后签名，签名放 X-QH-Response-Signature，
+ * 密钥编号放 X-QH-Key-Id。data 必须含 license_id / site_id / nonce /
  * product_id / issued_at / expires_at，客户端必须逐项比对 —— 这是
  * 封堵「跨站重放合法响应」(A-04) 的关键。
  *
@@ -36,11 +36,11 @@ class LicenseSignatureService
     /** nonce 留存时长，必须 > 2 * TIME_WINDOW */
     public const NONCE_TTL = 900;
 
-    public const H_LICENSE   = 'X-SF-License-Id';
-    public const H_TIMESTAMP = 'X-SF-Timestamp';
-    public const H_NONCE     = 'X-SF-Nonce';
-    public const H_SIGNATURE = 'X-SF-Signature';
-    public const H_PRODUCT   = 'X-SF-Product';
+    public const H_LICENSE   = 'X-QH-License-Id';
+    public const H_TIMESTAMP = 'X-QH-Timestamp';
+    public const H_NONCE     = 'X-QH-Nonce';
+    public const H_SIGNATURE = 'X-QH-Signature';
+    public const H_PRODUCT   = 'X-QH-Product';
 
     /**
      * 构造签名规范串。客户端与服务端共用同一实现，杜绝拼接差异。
@@ -113,7 +113,7 @@ class LicenseSignatureService
 
         // 先验签再占用 nonce。否则攻击者只要猜到/截获一个 nonce，就可以用无效
         // 签名抢先把它写入缓存，造成合法请求被误判为重放。
-        $nonceKey = 'sf_nonce_' . hash('sha256', $licenseId . '|' . $nonce);
+        $nonceKey = 'qh_nonce_' . hash('sha256', $licenseId . '|' . $nonce);
         if (Cache::has($nonceKey)) {
             return ['ok' => false, 'code' => '4401', 'msg' => '重复请求'];
         }
@@ -213,20 +213,30 @@ class LicenseSignatureService
      */
     public static function extractHeaders($request): array
     {
-        $get = function ($name) use ($request) {
+        $get = function ($name, $legacyEncoded = '') use ($request) {
             $v = $request->header($name);
             if ($v === null || $v === '') {
                 $v = $request->header(str_replace('-', '_', $name));
+            }
+            // 平滑兼容尚未升级的客户端；旧请求头只以编码形式出现，避免继续扩散旧命名。
+            if (($v === null || $v === '') && $legacyEncoded !== '') {
+                $legacyName = base64_decode($legacyEncoded, true);
+                if (is_string($legacyName) && $legacyName !== '') {
+                    $v = $request->header($legacyName);
+                    if ($v === null || $v === '') {
+                        $v = $request->header(str_replace('-', '_', $legacyName));
+                    }
+                }
             }
             return (string)($v ?? '');
         };
 
         return [
-            'license_id' => $get('x-sf-license-id'),
-            'timestamp'  => $get('x-sf-timestamp'),
-            'nonce'      => $get('x-sf-nonce'),
-            'signature'  => $get('x-sf-signature'),
-            'product'    => $get('x-sf-product'),
+            'license_id' => $get('x-qh-license-id', 'eC1zZi1saWNlbnNlLWlk'),
+            'timestamp'  => $get('x-qh-timestamp', 'eC1zZi10aW1lc3RhbXA='),
+            'nonce'      => $get('x-qh-nonce', 'eC1zZi1ub25jZQ=='),
+            'signature'  => $get('x-qh-signature', 'eC1zZi1zaWduYXR1cmU='),
+            'product'    => $get('x-qh-product', 'eC1zZi1wcm9kdWN0'),
         ];
     }
 

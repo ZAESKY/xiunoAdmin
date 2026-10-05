@@ -317,7 +317,7 @@ class MusicAnalysis extends Frontend
     private function return_data($type, $data)
     {
         if (in_array($type, ['url', 'pic'])) {
-            $url = sf_safe_url((string)$data, false);
+            $url = qh_safe_url((string)$data, false);
             if ($url === '' || strtolower((string)parse_url($url, PHP_URL_SCHEME)) !== 'https') {
                 http_response_code(502);
                 return json_encode([

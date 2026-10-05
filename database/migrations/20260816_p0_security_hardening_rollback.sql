@@ -5,10 +5,10 @@
 --     A-06 授权判定绕过、A-07 下载凭证可重放、A-09 签名可省略、A-05 用户身份可冒充
 --
 -- 建议的「软回滚」顺序（优先尝试，无需删表删列）：
---     UPDATE `SF_config` SET `value` = '0' WHERE `name` = 'plugin_api_user_strict';
---     UPDATE `SF_config` SET `value` = '0' WHERE `name` = 'plugin_api_sign_required';
---     UPDATE `SF_config` SET `value` = '1' WHERE `name` = 'download_legacy_sign_enabled';
---     UPDATE `SF_app`    SET `auth_enforce` = 2;
+--     UPDATE `QH_config` SET `value` = '0' WHERE `name` = 'plugin_api_user_strict';
+--     UPDATE `QH_config` SET `value` = '0' WHERE `name` = 'plugin_api_sign_required';
+--     UPDATE `QH_config` SET `value` = '1' WHERE `name` = 'download_legacy_sign_enabled';
+--     UPDATE `QH_app`    SET `auth_enforce` = 2;
 -- 软回滚即可恢复到加固前的对外行为，且保留全部审计能力。
 --
 -- 以下为「硬回滚」——彻底移除本次迁移引入的结构。
@@ -16,8 +16,8 @@
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists $$
-CREATE PROCEDURE sf_drop_column_if_exists(
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists $$
+CREATE PROCEDURE qh_drop_column_if_exists(
     IN p_table VARCHAR(64),
     IN p_column VARCHAR(64)
 )
@@ -38,10 +38,10 @@ END $$
 DELIMITER ;
 
 -- 1. 移除授权判定模式列
-CALL sf_drop_column_if_exists('SF_app', 'auth_enforce');
+CALL qh_drop_column_if_exists('QH_app', 'auth_enforce');
 
 -- 2. 移除配置项
-DELETE FROM `SF_config` WHERE `name` IN (
+DELETE FROM `QH_config` WHERE `name` IN (
     'download_ticket_bind_ip',
     'download_legacy_sign_enabled',
     'plugin_api_sign_required',
@@ -53,6 +53,6 @@ DELETE FROM `SF_config` WHERE `name` IN (
 
 -- 3. 移除下载票据表
 --    注意：表中只有短时效票据，删除不会丢失业务数据。
-DROP TABLE IF EXISTS `SF_download_ticket`;
+DROP TABLE IF EXISTS `QH_download_ticket`;
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists;
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists;

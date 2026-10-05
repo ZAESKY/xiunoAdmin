@@ -4,17 +4,17 @@
 <div class="layui-fluid">
     <div class="layui-card">
         <div class="layui-card-body point-header">
-            <div>{:t('point_exchange.current_points')}：<span class="point-value" id="SF_MyPoints">{$userInfo.integral|default=0}</span></div>
+            <div>{:t('point_exchange.current_points')}：<span class="point-value" id="QH_MyPoints">{$userInfo.integral|default=0}</span></div>
             <div class="search-bar">
-                <input name="text" id="SF_SearchText" class="layui-input" placeholder="{:t('point_exchange.search_gifts')}" autocomplete="off"/>
-                <button class="layui-btn" id="SF_SearchBtn"><i class="layui-icon">&#xe615;</i></button>
-                <button class="layui-btn layui-btn-primary" id="SF_MyRecords"><i class="layui-icon layui-icon-list"></i> {:t('point_exchange.my_exchanges')}</button>
+                <input name="text" id="QH_SearchText" class="layui-input" placeholder="{:t('point_exchange.search_gifts')}" autocomplete="off"/>
+                <button class="layui-btn" id="QH_SearchBtn"><i class="layui-icon">&#xe615;</i></button>
+                <button class="layui-btn layui-btn-primary" id="QH_MyRecords"><i class="layui-icon layui-icon-list"></i> {:t('point_exchange.my_exchanges')}</button>
             </div>
         </div>
     </div>
 
-    <div class="card-grid" id="SF_CardGrid"></div>
-    <div class="card-pager" id="SF_Pager"></div>
+    <div class="card-grid" id="QH_CardGrid"></div>
+    <div class="card-pager" id="QH_Pager"></div>
 </div>
 
 {include file="/public/footer"}
@@ -49,7 +49,7 @@ layui.use(['layer', 'notice', 'laypage'], function(){
             var total = pageData.total || 0;
             renderCards(list);
             if(total > pageLimit) renderPager(total, page, keyword);
-            else $('#SF_Pager').html('');
+            else $('#QH_Pager').html('');
         }, 'json').fail(function(){
             notice.destroy();
             notice.msg(t('common.server_error'), {icon:2});
@@ -86,12 +86,12 @@ layui.use(['layer', 'notice', 'laypage'], function(){
             html += '</div></div>';
         });
         if(!list.length) html = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#999;">{:t("point_exchange.no_gifts")}</div>';
-        $('#SF_CardGrid').html(html);
+        $('#QH_CardGrid').html(html);
     }
 
     function renderPager(total, page, keyword){
         laypage.render({
-            elem: 'SF_Pager',
+            elem: 'QH_Pager',
             count: total,
             limit: pageLimit,
             curr: page,
@@ -109,8 +109,8 @@ layui.use(['layer', 'notice', 'laypage'], function(){
     }
 
     // 搜索
-    $('#SF_SearchBtn').on('click', function(){ currentPage = 1; loadData(1, $('#SF_SearchText').val().trim()); });
-    $('#SF_SearchText').on('keydown', function(e){ if(e.keyCode===13){ currentPage=1; loadData(1, $(this).val().trim()); } });
+    $('#QH_SearchBtn').on('click', function(){ currentPage = 1; loadData(1, $('#QH_SearchText').val().trim()); });
+    $('#QH_SearchText').on('keydown', function(e){ if(e.keyCode===13){ currentPage=1; loadData(1, $(this).val().trim()); } });
 
     // 点击卡片 → 详情弹窗（按钮除外）
     $(document).on('click', '.product-card', function(e){
@@ -135,8 +135,8 @@ layui.use(['layer', 'notice', 'laypage'], function(){
                 notice.msg(res.msg, {icon: res.code==0?1:2, audio:'1'});
                 if(res.code==0){
                     myPoints = res.data && res.data.points_after != null ? res.data.points_after : myPoints - points;
-                    $('#SF_MyPoints').text(myPoints);
-                    setTimeout(function(){ loadData(currentPage, $('#SF_SearchText').val().trim()); }, 800);
+                    $('#QH_MyPoints').text(myPoints);
+                    setTimeout(function(){ loadData(currentPage, $('#QH_SearchText').val().trim()); }, 800);
                 }
             }, 'json').fail(function(){
                 notice.destroy();
@@ -193,9 +193,9 @@ layui.use(['layer', 'notice', 'laypage'], function(){
                     notice.msg(res.msg, {icon: res.code==0?1:2, audio:'1'});
                     if(res.code==0){
                         myPoints = res.data && res.data.points_after != null ? res.data.points_after : myPoints - points;
-                        $('#SF_MyPoints').text(myPoints);
+                        $('#QH_MyPoints').text(myPoints);
                         layer.close(idx);
-                        setTimeout(function(){ loadData(currentPage, $('#SF_SearchText').val().trim()); }, 500);
+                        setTimeout(function(){ loadData(currentPage, $('#QH_SearchText').val().trim()); }, 500);
                     }
                 }, 'json').fail(function(){
                     notice.destroy();
@@ -206,13 +206,13 @@ layui.use(['layer', 'notice', 'laypage'], function(){
     }
 
     // 我的兑换记录
-    $('#SF_MyRecords').on('click', function(){
+    $('#QH_MyRecords').on('click', function(){
         layer.open({
             type: 1, title: t('point_exchange.my_exchanges'), area: [$(window).width()<860?'95%':'860px', $(window).width()<860?'85%':'620px'],
-            content: '<div style="padding:12px;overflow-x:auto;"><table id="SF_RecordTable" lay-filter="SF_RecordTable" style="min-width:600px;"></table></div>',
+            content: '<div style="padding:12px;overflow-x:auto;"><table id="QH_RecordTable" lay-filter="QH_RecordTable" style="min-width:600px;"></table></div>',
             success: function(){
                 layui.table.render({
-                    elem: '#SF_RecordTable',
+                    elem: '#QH_RecordTable',
                     url: '{:url("/PointExchange/myRecords")}',
                     method: 'post', page: true,
                     request: {pageName:'current_page', limitName:'limit'},
@@ -232,7 +232,7 @@ layui.use(['layer', 'notice', 'laypage'], function(){
     });
     layui.use('table', function(){
         var t = layui.table;
-        t.on('tool(SF_RecordTable)', function(obj){
+        t.on('tool(QH_RecordTable)', function(obj){
             if(obj.event === 'detail'){
                 showRewardDetail(obj.data);
             }
@@ -243,12 +243,12 @@ layui.use(['layer', 'notice', 'laypage'], function(){
         var name = d.product_name || t('point_exchange.gift');
         var points = d.cost_points || 0;
         var time = d.created_at || '';
-        var isCard = /^(SF_|[A-Z0-9]{12,})/.test(info);
+        var isCard = /^(QH_|[A-Z0-9]{12,})/.test(info);
         var html = '<div style="padding:12px 16px 8px;">'+
             // 1. 礼品内容
             '<div style="background:#fafbfc;border:1px solid #ebeef5;border-radius:10px;padding:16px;margin-bottom:16px;">'+
             '<div style="font-size:13px;color:#909399;margin-bottom:10px;"><i class="layui-icon layui-icon-tips"></i> {:t("point_exchange.gift_content")}</div>'+
-            '<div style="background:#fff;border:1px solid #e4e7ed;border-radius:8px;padding:14px;font-family:'+(isCard?"'SF Mono','Consolas','Courier New',":'')+'monospace;font-size:14px;line-height:1.8;word-break:break-all;color:#303133;">'+escapeHtml(info)+'</div>';
+            '<div style="background:#fff;border:1px solid #e4e7ed;border-radius:8px;padding:14px;font-family:'+(isCard?"'QH Mono','Consolas','Courier New',":'')+'monospace;font-size:14px;line-height:1.8;word-break:break-all;color:#303133;">'+escapeHtml(info)+'</div>';
         if (info && info.length > 1) {
             html += '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm layui-btn-primary" onclick="copyReward(this)" data-text="'+escapeHtml(info)+'"><i class="layui-icon layui-icon-upload-circle"></i> {:t("point_exchange.copy")}</button></div>';
         }

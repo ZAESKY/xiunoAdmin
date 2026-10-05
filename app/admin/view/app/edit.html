@@ -208,7 +208,7 @@
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <div class="sf-tips">
+                                <div class="qh-tips">
                                     {:t('app_ui.key_generation_url')}：<a href="https://www.bejson.com/enc/rsa/" target="_blank">https://www.bejson.com/enc/rsa/</a>
                                 </div>
                             </div>
@@ -314,54 +314,54 @@
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">{:t('app_ui.app_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="app_notice_editor" name="app_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.app_notice_placeholder')}" ></textarea>
+                                    <textarea id="app_notice_editor" name="app_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.app_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">{:t('app_ui.cdkey_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.cdkey_notice_placeholder')}" ></textarea>
+                                    <textarea id="cdkey_notice_editor" name="cdkey_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.cdkey_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">{:t('app_ui.recharge_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.pay_notice_placeholder')}" ></textarea>
+                                    <textarea id="pay_notice_editor" name="pay_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.pay_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">{:t('app_ui.register_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="register_notice_editor" name="register_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.register_notice_placeholder')}" ></textarea>
+                                    <textarea id="register_notice_editor" name="register_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.register_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-form-text">
                                 <label class="layui-form-label">{:t('app_ui.replace_notice')}</label>
                                 <div class="layui-input-block">
-                                    <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea sf-rich-editor" style="height:160px" placeholder="{:t('app_ui.replace_notice_placeholder')}" ></textarea>
+                                    <textarea id="replace_notice_editor" name="replace_notice" class="layui-textarea qh-rich-editor" style="height:160px" placeholder="{:t('app_ui.replace_notice_placeholder')}" ></textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="layui-tab-item">
-                            <blockquote class="layui-elem-quote-sf-info" style="text-align:left;">
+                            <blockquote class="layui-elem-quote-qh-info" style="text-align:left;">
                                 {:t('app_ui.public_installer_help')}
                             </blockquote>
                             <div class="layui-form-item">
                                 <label class="layui-form-label">{:t('app_ui.current_file')}</label>
-                                <div class="layui-input-block" style="line-height:38px;"><span id="sfInstallerName">{:t('app_ui.not_uploaded')}</span></div>
+                                <div class="layui-input-block" style="line-height:38px;"><span id="qhInstallerName">{:t('app_ui.not_uploaded')}</span></div>
                             </div>
                             <div class="layui-form-item">
                                 <label class="layui-form-label">{:t('app_ui.file_info')}</label>
                                 <div class="layui-input-block" style="line-height:26px;word-break:break-all;">
-                                    <div>{:t('app_ui.file_size')}：<span id="sfInstallerSize">-</span></div>
-                                    <div>SHA-256：<span id="sfInstallerHash">-</span></div>
-                                    <div>{:t('app_ui.upload_time')}：<span id="sfInstallerTime">-</span></div>
+                                    <div>{:t('app_ui.file_size')}：<span id="qhInstallerSize">-</span></div>
+                                    <div>SHA-256：<span id="qhInstallerHash">-</span></div>
+                                    <div>{:t('app_ui.upload_time')}：<span id="qhInstallerTime">-</span></div>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <div class="layui-input-block">
-                                    <button type="button" class="layui-btn" id="sfInstallerUpload"><i class="layui-icon layui-icon-upload"></i>{:t('app_ui.upload_zip_installer')}</button>
-                                    <p id="sfInstallerHint" style="color:#999;margin-top:8px;">{:t('app_ui.installer_upload_help')}</p>
+                                    <button type="button" class="layui-btn" id="qhInstallerUpload"><i class="layui-icon layui-icon-upload"></i>{:t('app_ui.upload_zip_installer')}</button>
+                                    <p id="qhInstallerHint" style="color:#999;margin-top:8px;">{:t('app_ui.installer_upload_help')}</p>
                                 </div>
                             </div>
                         </div>
@@ -395,7 +395,7 @@
             if (richEditors.length) {
                 return;
             }
-            $('.sf-rich-editor').each(function () {
+            $('.qh-rich-editor').each(function () {
                 richEditors.push(layedit.build($(this).attr('id'), {
                     height: 220,
                     tool: ['strong', 'italic', 'underline', 'del', '|', 'left', 'center', 'right', '|', 'link', 'unlink', 'face']
@@ -410,7 +410,7 @@
         }
 
         var appInfoData = JSON.parse(JSON.stringify(admin.getLayerData()));
-        if(!appInfoData.sf){
+        if(!appInfoData.qh){
             $("input[name='logo']").val(appInfoData.logo);
             layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', appInfoData.logo);
             form.val('formBasForm', appInfoData);
@@ -435,7 +435,7 @@
                         });
                     });
                     $("#auth_template").html(content);
-                    if(!appInfoData.sf) {
+                    if(!appInfoData.qh) {
                         form.val('formBasForm', appInfoData);
                     }
                 } else {
@@ -465,7 +465,7 @@
                         });
                     });
                     $("#power_template").html(content);
-                    if(!appInfoData.sf) {
+                    if(!appInfoData.qh) {
                         form.val('formBasForm', appInfoData);
                     }
                 } else {
@@ -508,20 +508,20 @@
         }
         function showInstallerMeta(meta) {
             meta = meta || {};
-            $('#sfInstallerName').text(meta.file_name || meta.installer_file_name || '{:t("app_ui.not_uploaded")}');
-            $('#sfInstallerSize').text(installerSize(meta.size || meta.installer_size));
+            $('#qhInstallerName').text(meta.file_name || meta.installer_file_name || '{:t("app_ui.not_uploaded")}');
+            $('#qhInstallerSize').text(installerSize(meta.size || meta.installer_size));
             var hash = meta.sha256 || meta.installer_sha256 || '';
-            $('#sfInstallerHash').text(hash ? hash.substr(0, 20) + '…' : '-').attr('title', hash);
-            $('#sfInstallerTime').text(meta.uploaded_at || meta.installer_uploaded_at || '-');
+            $('#qhInstallerHash').text(hash ? hash.substr(0, 20) + '…' : '-').attr('title', hash);
+            $('#qhInstallerTime').text(meta.uploaded_at || meta.installer_uploaded_at || '-');
         }
         showInstallerMeta(appInfoData || {});
-        var installerButton = $('#sfInstallerUpload');
-        if (!appInfoData || appInfoData.sf || !appInfoData.id) {
+        var installerButton = $('#qhInstallerUpload');
+        if (!appInfoData || appInfoData.qh || !appInfoData.id) {
             installerButton.addClass('layui-btn-disabled').prop('disabled', true);
-            $('#sfInstallerHint').text('{:t("app_ui.save_before_installer")}');
+            $('#qhInstallerHint').text('{:t("app_ui.save_before_installer")}');
         } else {
             upload.render({
-                elem: '#sfInstallerUpload',
+                elem: '#qhInstallerUpload',
                 url: '{:url("/App/uploadInstaller")}',
                 data: {id: appInfoData.id},
                 accept: 'file',

@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common.search')}
                         </button>
                         <button type="button" class="layui-btn layui-btn-normal" onclick="showEditDialog(0)">
@@ -34,14 +34,14 @@
                 </div>
             </form>
             <!-- 数据表格 -->
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 
 <style>
     /* 操作按钮必须保持单行；列宽不足时由表格主体横向滚动。 */
-    #SF_Table + .layui-table-view td[data-off="true"] > .layui-table-cell {
+    #QH_Table + .layui-table-view td[data-off="true"] > .layui-table-cell {
         height: 40px;
         overflow: hidden;
         white-space: nowrap;
@@ -54,7 +54,7 @@
 </style>
 
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <div class="plugin-table-actions">
         <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="edit"><i class="layui-icon">&#xe642;</i>{:t('common_ui.edit')}</a>
         <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="purchases"><i class="layui-icon layui-icon-rmb"></i>{:t('plugin_ui.purchase')}</a>
@@ -66,7 +66,7 @@
 </script>
 
 <!-- 状态模板 -->
-<script type="text/html" id="SF_TbStatus">
+<script type="text/html" id="QH_TbStatus">
     {{# if(d.status == 0){ }}
         <span class="layui-badge layui-badge-orange">{:t('plugin_ui.pending_review')}</span>
     {{# } else if(d.status == 1){ }}
@@ -79,7 +79,7 @@
 </script>
 
 <!-- 价格模板 -->
-<script type="text/html" id="SF_TbPrice">
+<script type="text/html" id="QH_TbPrice">
     {{# if(d.price == 0){ }}
         <span class="layui-badge layui-badge-green">{:t('upgrade.free')}</span>
     {{# } else if(d.pay_type == 'points') { }}
@@ -89,7 +89,7 @@
     {{# } }}
 </script>
 
-<script type="text/html" id="SF_TbPublish">
+<script type="text/html" id="QH_TbPublish">
     {{# if(d.publish_type == 1){ }}
         <span class="layui-badge layui-badge-blue">{:t('plugin_ui.publish_scheduled')}</span>
     {{# } else { }}
@@ -120,7 +120,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
 
     /* 渲染表格 */
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/Plugin/list")}',
         method: 'post',
         page: true,
@@ -158,8 +158,8 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             {field: 'user_id', title: '{:t("plugin_ui.publisher")}', width: 80, templet: function(d){
                 return d.user_id == 0 ? '{:t("feedback.admin_role")}' : 'UID:'+d.user_id;
             }},
-            {field: 'price', title: '{:t("plugin_ui.price")}', width: 100, templet: '#SF_TbPrice'},
-            {field: 'publish_type', title: '{:t("plugin_ui.publish_method")}', width: 105, templet: '#SF_TbPublish'},
+            {field: 'price', title: '{:t("plugin_ui.price")}', width: 100, templet: '#QH_TbPrice'},
+            {field: 'publish_type', title: '{:t("plugin_ui.publish_method")}', width: 105, templet: '#QH_TbPublish'},
             {field: 'publish_time', title: '{:t("plugin_ui.publish_time")}', minWidth: 160, templet: function(d){
                 return d.publish_type == 1 ? (d.publish_time || '-') : (d.published_at || '-');
             }},
@@ -174,7 +174,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 return d.rating_avg + ' (' + d.rating_count + ' {:t("plugin_ui.people_suffix")})';
             }},
             {field: 'comment_count', title: '{:t("plugin_ui.comment_count")}', width: 100},
-            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#SF_TbStatus'},
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#QH_TbStatus'},
             {field: 'reward_status', title: '{:t("plugin_ui.publish_reward")}', minWidth: 150, templet: function(d){
                 if (d.reward_status === 'issued') {
                     var parts = [];
@@ -189,18 +189,18 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             }},
             {field: 'sort', title: '{:t("plugin_ui.sort")}', width: 80, sort: true},
             {field: 'created_at', title: '{:t("payment_ui.create_time")}', minWidth: 160},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 480, unresize: true}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 480, unresize: true}
         ]]
     });
 
     /* 表格搜索 */
-    form.on('submit(SF_TbSearch)', function (data) {
+    form.on('submit(QH_TbSearch)', function (data) {
         insTb.reload({where: data.field, page: {curr: 1}});
         return false;
     });
 
     /* 表格工具条点击事件 */
-    table.on('tool(SF_Table)', function (obj) {
+    table.on('tool(QH_Table)', function (obj) {
         if (obj.event === 'edit') {
             showEditDialog(obj.data.id);
         } else if (obj.event === 'purchases') {
@@ -217,9 +217,9 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     });
 
     /* 表格头工具栏点击事件 */
-    table.on('toolbar(SF_Table)', function (obj) {
+    table.on('toolbar(QH_Table)', function (obj) {
         if (obj.event === 'del') {
-            var checkRows = table.checkStatus('SF_Table');
+            var checkRows = table.checkStatus('QH_Table');
             if (checkRows.data.length === 0) {
                 notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                 return;
@@ -248,7 +248,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 success: function(data) {
                     notice.destroy();
                     if (data.code == 0) {
-                        table.reload('SF_Table');
+                        table.reload('QH_Table');
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
                         notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -271,7 +271,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             area: ['90%', '90%'],
             maxmin: true,
             end: function() {
-                table.reload('SF_Table');
+                table.reload('QH_Table');
             }
         });
     };
@@ -442,7 +442,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                     success: function(res) {
                         if (res.code == 0) {
                             notice.msg(res.msg, {icon: 1, audio:'1'});
-                            table.reload('SF_Table');
+                            table.reload('QH_Table');
                             layer.close(index);
                         } else {
                             notice.msg(res.msg, {icon: 2, audio:'1'});

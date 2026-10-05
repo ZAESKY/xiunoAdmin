@@ -71,7 +71,7 @@ class DownloadService extends BaseService
          */
         if (!$this->authorizedToDownload($appInfo, $authData)) {
             Log::warning(sprintf(
-                '[SF-API][download-denied] appid=%s auth_id=%s',
+                '[QH-API][download-denied] appid=%s auth_id=%s',
                 $appId,
                 $authData['id'] ?? '0'
             ));
@@ -119,7 +119,7 @@ class DownloadService extends BaseService
                 }
             }
             $downloadZip = $sourceZip;
-            $downloadName = 'SF_' . bin2hex(random_bytes(8)) . '.zip';
+            $downloadName = 'QH_' . bin2hex(random_bytes(8)) . '.zip';
         }
 
         // 公开引导包保持原样下载，绝不注入授权码；旧版版本包继续兼容既有逻辑。
@@ -154,7 +154,7 @@ class DownloadService extends BaseService
 
         // 审计：只记录 ID 与授权码尾 4 位，不落完整授权码（需求 10）
         Log::info(sprintf(
-            '[SF-API][download] kind=%s appid=%s version_id=%s auth_id=%s code=%s',
+            '[QH-API][download] kind=%s appid=%s version_id=%s auth_id=%s code=%s',
             $kind,
             $appId,
             $versionData['id'] ?? '0',
@@ -165,7 +165,7 @@ class DownloadService extends BaseService
         ));
 
         if (preg_match('#^https://#i', $downloadZip)) {
-            $safeUrl = sf_safe_url($downloadZip, false);
+            $safeUrl = qh_safe_url($downloadZip, false);
             if ($safeUrl === '') {
                 return json(message(t('download.url_invalid'), false));
             }
@@ -277,7 +277,7 @@ class DownloadService extends BaseService
         // 老凭证一经使用即失效，避免继续被无限次重放
         cache($sign, null);
 
-        Log::info('[SF-API][download] legacy sign consumed, version_id=' . ($version['id'] ?? '0'));
+        Log::info('[QH-API][download] legacy sign consumed, version_id=' . ($version['id'] ?? '0'));
 
         return ['version' => $version, 'auth' => $auth];
     }
@@ -331,7 +331,7 @@ class DownloadService extends BaseService
         }
         $this->clearExpiredTempFiles($tempDir);
 
-        $tempFile = $tempDir . 'SF_' . uniqid('', true) . '.zip';
+        $tempFile = $tempDir . 'QH_' . uniqid('', true) . '.zip';
         $workDir = $tempDir . 'work_' . uniqid('', true) . DS;
         $zip = new \ZipArchive();
 
@@ -346,10 +346,10 @@ class DownloadService extends BaseService
                 return message(t('version.auth_template_read_failed'), false);
             }
 
-            $fileContent = str_replace('SF_AUTHCODE', (string)$authcode, $fileContent);
-            $fileContent = str_replace('SF_VERSION', (string)($versionData['version'] ?? ''), $fileContent);
-            $fileContent = str_replace('SF_EDITION', (string)($versionData['edition'] ?? ''), $fileContent);
-            $fileContent = str_replace('SF_PUBLIC_KEY', (string)($appInfo['public_key'] ?? ''), $fileContent);
+            $fileContent = str_replace('QH_AUTHCODE', (string)$authcode, $fileContent);
+            $fileContent = str_replace('QH_VERSION', (string)($versionData['version'] ?? ''), $fileContent);
+            $fileContent = str_replace('QH_EDITION', (string)($versionData['edition'] ?? ''), $fileContent);
+            $fileContent = str_replace('QH_PUBLIC_KEY', (string)($appInfo['public_key'] ?? ''), $fileContent);
 
             $targetFile = $workDir . str_replace('/', DS, $authCodeFile);
             if (!is_dir(dirname($targetFile))) {
@@ -401,7 +401,7 @@ class DownloadService extends BaseService
 
     private function clearExpiredTempFiles($tempDir)
     {
-        foreach (glob($tempDir . 'SF_*.zip') ?: [] as $file) {
+        foreach (glob($tempDir . 'QH_*.zip') ?: [] as $file) {
             if (is_file($file) && filemtime($file) < time() - 3600) {
                 @unlink($file);
             }

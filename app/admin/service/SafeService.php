@@ -33,10 +33,10 @@ class SafeService extends BaseService
 
     public function check(){
         $check_msg = $this->checkSafeMsg();
-        $SF_danger = count($check_msg['danger']);
-        $SF_warning = count($check_msg['warning']);
-        $SF_info = count($check_msg['info']);
-        $safenum = intval(100- $SF_danger*50 - $SF_warning*10 - $SF_info*1);
+        $QH_danger = count($check_msg['danger']);
+        $QH_warning = count($check_msg['warning']);
+        $QH_info = count($check_msg['info']);
+        $safenum = intval(100- $QH_danger*50 - $QH_warning*10 - $QH_info*1);
 
         return message(t('system.detect_success'), true, ['safe' => $safenum, 'check_msg' => $check_msg]);
     }
@@ -84,14 +84,14 @@ class SafeService extends BaseService
         // 既不可回滚，也可能误删部署备份；下方仅报告压缩包风险，不再改动文件。
 
         /***********************系统环境检测区 开始***********************/
-        $SF_danger = array();
-        $SF_warning = array();
-        $SF_info = array();
+        $QH_danger = array();
+        $QH_warning = array();
+        $QH_info = array();
         if (strpos($_SERVER['SERVER_SOFTWARE'], 'kangle') !== false && function_exists('pcntl_exec')) {
-            $SF_danger[] = t('safe_report.kangle_pcntl');
+            $QH_danger[] = t('safe_report.kangle_pcntl');
         }
         if (strpos($_SERVER['SERVER_SOFTWARE'], 'kangle') !== false && count(glob('/vhs/kangle/etc/*')) > 1) {
-            $SF_danger[] = t('safe_report.kangle_open_basedir');
+            $QH_danger[] = t('safe_report.kangle_open_basedir');
         }
         /***********************系统环境检测区 结束***********************/
 
@@ -103,32 +103,32 @@ class SafeService extends BaseService
         $adminQq = (string) ($this->adminInfo['qq'] ?? '');
 
         if ($secondPwd === '123456') {
-            $SF_warning[] = t('safe_report.default_secondary_password', ['url' => url('/Set/index')]);
+            $QH_warning[] = t('safe_report.default_secondary_password', ['url' => url('/Set/index')]);
         } else {
             if (strlen($secondPwd) < 6 || is_numeric($secondPwd) && strlen($secondPwd) <= 10 || $secondPwd === $kfqq) {
-                $SF_warning[] = t('safe_report.secondary_password_weak');
+                $QH_warning[] = t('safe_report.secondary_password_weak');
             } else {
                 if ($adminUsername === $secondPwd) {
-                    $SF_warning[] = t('safe_report.secondary_password_matches_username');
+                    $QH_warning[] = t('safe_report.secondary_password_matches_username');
                 }
             }
         }
 
         if ($adminPassword === '123456') {
-            $SF_warning[] = t('safe_report.default_admin_password', ['url' => url('/Index/EditPassword')]);
+            $QH_warning[] = t('safe_report.default_admin_password', ['url' => url('/Index/EditPassword')]);
         } else {
             if (strlen($adminPassword) < 6 || is_numeric($adminPassword) && strlen($adminPassword) <= 10 || $adminPassword === $kfqq || $adminPassword === $adminQq) {
-                $SF_warning[] = t('safe_report.admin_password_weak');
+                $QH_warning[] = t('safe_report.admin_password_weak');
             } else {
                 if ($adminUsername === $adminPassword) {
-                    $SF_warning[] = t('safe_report.admin_password_matches_username');
+                    $QH_warning[] = t('safe_report.admin_password_matches_username');
                 }
             }
         }
         if ($this->checkPassword($adminPassword) >0 && $this->checkPassword($adminPassword) <= 4 ) {
-            $SF_warning[] = t('safe_report.password_strength_weak');
+            $QH_warning[] = t('safe_report.password_strength_weak');
         }else if ($this->checkPassword($adminPassword) >=5 && $this->checkPassword($adminPassword) <= 7 ) {
-            $SF_info[] = t('safe_report.password_strength_medium');
+            $QH_info[] = t('safe_report.password_strength_medium');
         }
         /***********************密码强度检测区 结束***********************/
 
@@ -137,23 +137,23 @@ class SafeService extends BaseService
         $dbPassword = (string) ($dbconfig['password'] ?? '');
         $dbUsername = (string) ($dbconfig['username'] ?? '');
         if (strlen($dbPassword) < 5 || is_numeric($dbPassword) && strlen($dbPassword) <= 10 || $dbPassword === $kfqq) {
-            $SF_warning[] = t('safe_report.database_password_weak');
+            $QH_warning[] = t('safe_report.database_password_weak');
         } else {
             if ($dbPassword === $dbUsername) {
-                $SF_warning[] = t('safe_report.database_password_matches_username');
+                $QH_warning[] = t('safe_report.database_password_matches_username');
             }
         }
         /***********************数据库密码强度检测区 结束***********************/
 
         /***********************压缩包检测区 开始***********************/
-        $SF_all_zip = glob(ROOT_PATH . '*.zip');
-        $SF_all_7z = glob(ROOT_PATH . '*.7z');
-        $SF_all_rar = glob(ROOT_PATH . '*.rar');
-        if ($SF_all_zip && count($SF_all_zip) > 0 || $SF_all_7z && count($SF_all_7z) > 0 || $SF_all_rar && count($SF_all_rar) > 0) {
-            $SF_info[] = t('safe_report.archive_in_root');
+        $QH_all_zip = glob(ROOT_PATH . '*.zip');
+        $QH_all_7z = glob(ROOT_PATH . '*.7z');
+        $QH_all_rar = glob(ROOT_PATH . '*.rar');
+        if ($QH_all_zip && count($QH_all_zip) > 0 || $QH_all_7z && count($QH_all_7z) > 0 || $QH_all_rar && count($QH_all_rar) > 0) {
+            $QH_info[] = t('safe_report.archive_in_root');
         }
         /***********************压缩包检测区 结束***********************/
-        $SF_msg = array("danger" => $SF_danger, "warning" => $SF_warning, "info" => $SF_info);
-        return $SF_msg;
+        $QH_msg = array("danger" => $QH_danger, "warning" => $QH_warning, "info" => $QH_info);
+        return $QH_msg;
     }
 }

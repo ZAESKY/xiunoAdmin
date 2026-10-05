@@ -194,7 +194,7 @@ class LicenseService
     }
 
     /**
-     * 解析 v2 授权；若授权仍只存在于 SF_auth，则在严格产品/账号边界内按需迁移。
+     * 解析 v2 授权；若授权仍只存在于 QH_auth，则在严格产品/账号边界内按需迁移。
      *
      * 在线激活没有登录账号，必须让申请站点与旧授权域名一致；离线激活由登录
      * 管理账号或当前绑定账号提供归属证明，允许本地开发域名与旧授权域名不同。
@@ -335,7 +335,7 @@ class LicenseService
                 && AuthcodeService::verify($authcode, (string)$retry['authcode_hash'], (int)$retry['pepper_version'])) {
                 return self::resolved(self::syncSourceAuth($retry));
             }
-            Log::error('[SF-LIC] legacy authorization bridge failed', [
+            Log::error('[QH-LIC] legacy authorization bridge failed', [
                 'product_id' => $productId,
                 'source_auth_id' => (int)($source['id'] ?? 0),
                 'exception_type' => get_class($e),
@@ -389,7 +389,7 @@ class LicenseService
     /**
      * 登录用户是否仍是该授权的管理者或最终绑定者。
      *
-     * 对旧 SF_auth 桥接授权实时读取关系，解绑后立即失去离线签发权限；原生
+     * 对旧 QH_auth 桥接授权实时读取关系，解绑后立即失去离线签发权限；原生
      * v2 授权则继续以 user_id 为唯一账号归属。不能仅凭授权码通过此检查。
      */
     public static function operatorCanUseLicense(array $license, int $operatorUserId): bool
@@ -687,7 +687,7 @@ class LicenseService
             ]];
         } catch (\Throwable $e) {
             Db::rollback();
-            Log::error('[SF-LIC] bind verified site failed: ' . $e->getMessage());
+            Log::error('[QH-LIC] bind verified site failed: ' . $e->getMessage());
             return self::err('5000', '站点绑定失败，请稍后重试');
         }
     }
@@ -896,7 +896,7 @@ class LicenseService
     /**
      * 旧授权码换新
      *
-     * 从冻结快照 SF_auth_legacy 读取，继承原有权益，签发新 license。
+     * 从冻结快照 QH_auth_legacy 读取，继承原有权益，签发新 license。
      * 旧码本身不作废，但只能兑换一次（幂等：重复兑换返回同一 license）。
      */
     public static function redeem(array $in): array
@@ -949,7 +949,7 @@ class LicenseService
             return self::err('4005', '域名归属证明未通过，请改用离线兑换');
         }
 
-        $newCode = sf_generate_authcode();
+        $newCode = qh_generate_authcode();
         $licenseId = bin2hex(random_bytes(16));
         $permanent = (int)($legacy['permanent_switch'] ?? 0) === 1;
         $expiresAt = $permanent ? null : ($legacy['endtime'] ?? null);
@@ -990,7 +990,7 @@ class LicenseService
             Db::commit();
         } catch (\Throwable $e) {
             Db::rollback();
-            Log::error('[SF-LIC] redeem failed: ' . $e->getMessage());
+            Log::error('[QH-LIC] redeem failed: ' . $e->getMessage());
             return self::err('5000', '兑换失败，请稍后重试');
         }
 
@@ -1102,7 +1102,7 @@ class LicenseService
             Db::commit();
         } catch (\Throwable $e) {
             Db::rollback();
-            Log::error('[SF-LIC] rebind failed: ' . $e->getMessage());
+            Log::error('[QH-LIC] rebind failed: ' . $e->getMessage());
             return self::err('5000', '换绑失败，请稍后重试');
         }
 
@@ -1158,7 +1158,7 @@ class LicenseService
                 return self::err('4003', '该授权已被禁止加入测试通道');
             }
 
-            // 旧后台的“内测资格”仍以 SF_auth.beta 为准。已从旧授权桥接的记录
+            // 旧后台的“内测资格”仍以 QH_auth.beta 为准。已从旧授权桥接的记录
             // 必须在同一事务中同步，否则下次状态查询会把新版 channel 覆盖回去。
             $sourceAuthId = (int)($locked['source_auth_id'] ?? 0);
             if ($sourceAuthId > 0) {
@@ -1180,7 +1180,7 @@ class LicenseService
             Db::commit();
         } catch (\Throwable $e) {
             Db::rollback();
-            Log::error('[SF-LIC] channel switch failed', [
+            Log::error('[QH-LIC] channel switch failed', [
                 'license' => substr($licenseId, 0, 8),
                 'exception_type' => get_class($e),
             ]);
@@ -1276,7 +1276,7 @@ class LicenseService
                 'created_at' => datetime(),
             ]);
         } catch (\Throwable $e) {
-            Log::warning('[SF-LIC] audit write failed: ' . $e->getMessage());
+            Log::warning('[QH-LIC] audit write failed: ' . $e->getMessage());
         }
     }
 

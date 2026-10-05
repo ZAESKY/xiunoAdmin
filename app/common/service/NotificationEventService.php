@@ -5,7 +5,7 @@ namespace app\common\service;
 
 /**
  * Single source of truth for every business notification that can send email.
- * Event codes intentionally match SF_notification.type so station messages and
+ * Event codes intentionally match QH_notification.type so station messages and
  * email preferences cannot drift apart.
  */
 class NotificationEventService

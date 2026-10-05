@@ -26,7 +26,7 @@ return [
     'app_map'          => [],
     // 域名绑定（自动多应用模式有效）
     // 'admin'          =>  'admin', //  admin子域名绑定到admin后台
-    // 'api.sf-team.cn' =>  'api',   //  完整域名绑定
+    // 'api.qh-team.cn' =>  'api',   //  完整域名绑定
     // '*'              =>  'index', //  二级泛域名绑定到首页
     'domain_bind'      => [
         'www'          =>  'index',

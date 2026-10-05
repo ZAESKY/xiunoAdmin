@@ -3,9 +3,9 @@
 <div class="layui-fluid">
     <div class="layui-card">
         <div class="layui-card-body">
-            <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form formBasForm">
+            <form id="QH_EditForm" lay-filter="QH_EditForm" class="layui-form formBasForm">
                 {if $addon.tips}
-                <div class="sf-tag layui-badge-{$addon.tips.extend|default='blue'}" style="margin-bottom:10px;">
+                <div class="qh-tag layui-badge-{$addon.tips.extend|default='blue'}" style="margin-bottom:10px;">
                     <b>{$addon.tips.title}</b><br>
                     {$addon.tips.value|raw}
                 </div>
@@ -92,7 +92,7 @@
                                 laydate.render({
                                     elem: '#date{$item.name}',
                                     mark: {
-                                        '0-3-15': 'SF'
+                                        '0-3-15': 'QH'
                                     },
                                     type: 'date',
                                     trigger: 'click'
@@ -110,7 +110,7 @@
                                 laydate.render({
                                     elem: '#time{$item.name}',
                                     mark: {
-                                        '0-3-15': 'SF'
+                                        '0-3-15': 'QH'
                                     },
                                     type: 'time',
                                     trigger: 'click'
@@ -128,7 +128,7 @@
                                 laydate.render({
                                     elem: '#datetime{$item.name}',
                                     mark: {
-                                        '0-3-15': 'SF'
+                                        '0-3-15': 'QH'
                                     },
                                     type: 'datetime',
                                     trigger: 'click'
@@ -227,7 +227,7 @@
                             </div>
                         </div>
                         <div class="layui-form-item text-center">
-                            <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>
+                            <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="QH_DeleteFile"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>
                         </div>
                         <div class="mask"></div>
                         <div class="loading">
@@ -334,7 +334,7 @@
                                         });
                                     }
                                 });
-                                form.on('submit(SF_DeleteFile{$item.name})', function () {
+                                form.on('submit(QH_DeleteFile{$item.name})', function () {
                                     notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                                     $.ajax({
                                         type: "POST",
@@ -368,7 +368,7 @@
                 </div>
                 {/foreach}
                 <div class="layui-form-item text-right">
-                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+                    <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('common.save')}</button>
                     <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
                 </div>
             </form>
@@ -382,7 +382,7 @@
         var form = layui.form;
         var notice = layui.notice;
 
-        form.on('submit(SF_EditSubmit)', function (data) {
+        form.on('submit(QH_EditSubmit)', function (data) {
             notice.msg('{:t("common_ui.processing")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",

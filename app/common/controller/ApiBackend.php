@@ -48,7 +48,7 @@ class ApiBackend extends CommonBase
             if(!$userInfo){
                 throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
             }
-            $expectedSign = data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash());
+            $expectedSign = data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].qh_password_hash());
             if(!empty($userId) && !hash_equals((string)$expectedSign, (string)$sign)){
                 throw new Exception(t('login.user_session_expired'));
             }
@@ -63,7 +63,7 @@ class ApiBackend extends CommonBase
                 throw new Exception(t('user.account_blocked').'[errorCode:UserStatusBlocked]');
             }
             if(!empty($userInfo['ip'])){
-                if(!in_array(get_client_ip(), sf_safe_unserialize_array($userInfo['ip']), true)){
+                if(!in_array(get_client_ip(), qh_safe_unserialize_array($userInfo['ip']), true)){
                     throw new Exception(t('user.ip_not_whitelist'));
                 }
             }

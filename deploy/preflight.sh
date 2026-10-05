@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# SF 授权系统 —— 新服务器环境自检
+# QH 授权系统 —— 新服务器环境自检
 #
 # 用法：把本文件传到新服务器任意目录，执行
 #     bash preflight.sh
@@ -17,7 +17,7 @@ bad()  { echo "  ${C_RED}✗${C_RST} $*"; FAIL=$((FAIL+1)); }
 warn() { echo "  ${C_YEL}!${C_RST} $*"; WARN=$((WARN+1)); }
 hd()   { echo; echo "${C_BLU}══ $* ══${C_RST}"; }
 
-echo "${C_BLU}SF 授权系统 · 新服务器环境自检${C_RST}   $(date '+%Y-%m-%d %H:%M:%S')"
+echo "${C_BLU}QH 授权系统 · 新服务器环境自检${C_RST}   $(date '+%Y-%m-%d %H:%M:%S')"
 echo "  主机：$(hostname)   系统：$(uname -sr)"
 
 # ---------------------------------------------------------------

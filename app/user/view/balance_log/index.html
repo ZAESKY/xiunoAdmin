@@ -5,17 +5,17 @@
             <i class="layui-icon layui-icon-rmb"></i> {:t('accounting.balance_detail')}
         </div>
         <div class="layui-card-body">
-            <table id="SF_BalanceTable" lay-filter="SF_BalanceTable"></table>
+            <table id="QH_BalanceTable" lay-filter="QH_BalanceTable"></table>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_TypeTpl">
+<script type="text/html" id="QH_TypeTpl">
     <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">
         {{d.type_label}}
     </span>
 </script>
-<script type="text/html" id="SF_AmountTpl">
+<script type="text/html" id="QH_AmountTpl">
     {{# if(d.amount > 0){ }}
     <span class="text-success">+{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } else { }}
@@ -28,13 +28,13 @@
 layui.use(['table'], function(){
     var table = layui.table;
     table.render({
-        elem: '#SF_BalanceTable', url: '{:url("/BalanceLog/index")}', method: 'post', page: true, limit: 15,
+        elem: '#QH_BalanceTable', url: '{:url("/BalanceLog/index")}', method: 'post', page: true, limit: 15,
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 70},
-            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_TypeTpl'},
-            {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: '#SF_AmountTpl'},
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#QH_TypeTpl'},
+            {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: '#QH_AmountTpl'},
             {field: 'balance', title: '{:t("accounting.balance")}', width: 130, templet: function(d){ return (d.balance||'0.00') + ' {:t("accounting.currency_unit")}'; }},
             {field: 'description', title: '{:t("accounting.description")}', minWidth: 200},
             {field: 'created_at', title: '{:t("accounting.time")}', width: 170}

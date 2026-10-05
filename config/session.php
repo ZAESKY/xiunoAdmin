@@ -5,7 +5,7 @@
 
 return [
     // session name
-    'name'           => env('session.name', 'SFADMINSESSID'),
+    'name'           => env('session.name', 'QHADMINSESSID'),
     // SESSION_ID的提交变量,解决flash上传跨域
     'var_session_id' => '',
     // 驱动方式 支持file cache
@@ -15,5 +15,5 @@ return [
     // 过期时间
     'expire'         => 84600,
     // 前缀
-    'prefix'         => env('session.prefix', 'sf_admin_session:'),
+    'prefix'         => env('session.prefix', 'qh_admin_session:'),
 ];

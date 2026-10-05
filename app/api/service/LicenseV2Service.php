@@ -445,7 +445,7 @@ class LicenseV2Service extends BaseService
             || empty($body['nonce']) || !hash_equals($nonce, strtolower((string)$body['nonce']))) {
             return ['ok' => false, 'code' => '4400', 'msg' => '请求随机数无效'];
         }
-        $key = 'sf_unsigned_nonce_' . hash('sha256', $action.'|'.$this->ip().'|'.$nonce);
+        $key = 'qh_unsigned_nonce_' . hash('sha256', $action.'|'.$this->ip().'|'.$nonce);
         if (Cache::has($key)) {
             return ['ok' => false, 'code' => '4401', 'msg' => '重复请求'];
         }

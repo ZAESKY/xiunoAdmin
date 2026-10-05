@@ -86,7 +86,7 @@ class ActionLog extends BaseModel
             'action' => request()->url(),
             'method' => request()->method(),
             'url' => request()->url(true), // 获取完成URL
-            'param' => !empty(request()->param()) ? sf_action_log_params(request()->param()) : '',
+            'param' => !empty(request()->param()) ? qh_action_log_params(request()->param()) : '',
             'title' => !empty(self::$title) ? self::$title : '操作后台',
             'content' => !empty(self::$content) ? self::$content : '无',
             'ip' => request()->ip(),

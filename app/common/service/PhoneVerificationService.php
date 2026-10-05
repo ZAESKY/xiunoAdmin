@@ -363,13 +363,13 @@ final class PhoneVerificationService
         try {
             Db::name('sms_audit')->insert([
                 'user_id' => max(0, $userId),
-                'scene' => sf_plain_text($scene, 32),
+                'scene' => qh_plain_text($scene, 32),
                 'phone_hash' => self::phoneHash($phone),
                 'phone_masked' => self::maskPhone($phone),
-                'status' => sf_plain_text($status, 20),
-                'provider_request_id' => sf_plain_text($requestId, 128),
-                'error_code' => sf_plain_text($errorCode, 64),
-                'template_code' => sf_plain_text($templateCode, 32),
+                'status' => qh_plain_text($status, 20),
+                'provider_request_id' => qh_plain_text($requestId, 128),
+                'error_code' => qh_plain_text($errorCode, 64),
+                'template_code' => qh_plain_text($templateCode, 32),
                 'ip_hash' => hash_hmac('sha256', (string)get_client_ip(), CryptoService::pepper()),
                 'created_at' => datetime(),
             ]);

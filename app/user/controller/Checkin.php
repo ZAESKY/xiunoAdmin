@@ -80,8 +80,8 @@ class Checkin extends UserBackend
             return json(message('common.illegal_request', false));
         }
 
-        $page = sf_page_number(input('current_page', input('page', 1)));
-        $limit = sf_page_limit(input('limit', null), 15);
+        $page = qh_page_number(input('current_page', input('page', 1)));
+        $limit = qh_page_limit(input('limit', null), 15);
 
         try {
             $total = Db::name('checkin_record')

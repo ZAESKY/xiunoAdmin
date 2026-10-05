@@ -8,7 +8,7 @@ use think\Exception;
 
 /**
  * 插件评论-模型
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class PluginCommentModel extends BaseModel
@@ -107,8 +107,8 @@ class PluginCommentModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $plugin_id = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
 
             $where = [];

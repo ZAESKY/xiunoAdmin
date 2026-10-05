@@ -13,7 +13,7 @@ namespace app\common\service;
 class ReleasePackageService
 {
     /** 包文件固定名 */
-    public const PACKAGE_NAME = 'SF.zip';
+    public const PACKAGE_NAME = 'QH.zip';
 
     /**
      * 目录名清洗：只允许字母、数字、下划线、连字符，长度 1-120。

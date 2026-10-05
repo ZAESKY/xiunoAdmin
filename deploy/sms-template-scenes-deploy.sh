@@ -17,7 +17,7 @@ DB_CHANGED=0
 SCENE_CONFIGS_BEFORE=0
 AUDIT_COLUMN_BEFORE=0
 FILES=(
-  app/SF_Auth.sql
+  app/QH_Auth.sql
   app/admin/controller/Set.php
   app/common/service/AliyunSmsService.php
   app/common/service/PhoneVerificationService.php
@@ -99,8 +99,8 @@ MYSQL_BIN="$(command -v mysql || true)"; MYSQL_BIN="${MYSQL_BIN:-/www/server/mys
 DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/mysql/bin/mysqldump}"
 db_q() { "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "$1"; }
 
-SCENE_CONFIGS_BEFORE="$(db_q "SELECT COUNT(*) FROM SF_config WHERE name IN ('sms_template_login_register','sms_template_phone_change','sms_template_password_reset','sms_template_phone_bind','sms_template_phone_verify')")"
-AUDIT_COLUMN_BEFORE="$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_sms_audit' AND COLUMN_NAME='template_code'")"
+SCENE_CONFIGS_BEFORE="$(db_q "SELECT COUNT(*) FROM QH_config WHERE name IN ('sms_template_login_register','sms_template_phone_change','sms_template_password_reset','sms_template_phone_bind','sms_template_phone_verify')")"
+AUDIT_COLUMN_BEFORE="$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_sms_audit' AND COLUMN_NAME='template_code'")"
 
 echo "[2/7] 备份线上文件和数据库"
 [ ! -e "$BACKUP_DIR" ] || { echo "备份目录已存在" >&2; exit 73; }
@@ -156,8 +156,8 @@ echo "[5/7] 清缓存并验证模板映射"
 cd "$SITE_DIR"
 "$PHP_BIN" think clear
 for rel in "${FILES[@]}"; do cmp -s "$STAGE_DIR/$rel" "$SITE_DIR/$rel"; done
-[ "$(db_q "SELECT COUNT(*) FROM SF_config WHERE name IN ('sms_template_login_register','sms_template_phone_change','sms_template_password_reset','sms_template_phone_bind','sms_template_phone_verify') AND value REGEXP '^(SMS_[0-9]{6,24}|[0-9]{6,20})$'")" = "5" ]
-[ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_sms_audit' AND COLUMN_NAME='template_code'")" = "1" ]
+[ "$(db_q "SELECT COUNT(*) FROM QH_config WHERE name IN ('sms_template_login_register','sms_template_phone_change','sms_template_password_reset','sms_template_phone_bind','sms_template_phone_verify') AND value REGEXP '^(SMS_[0-9]{6,24}|[0-9]{6,20})$'")" = "5" ]
+[ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_sms_audit' AND COLUMN_NAME='template_code'")" = "1" ]
 "$PHP_BIN" -r 'require "vendor/autoload.php";$app=new \think\App();$app->initialize();$map=["login_register"=>"sms_template_login_register","phone_change"=>"sms_template_phone_change","password_reset"=>"sms_template_password_reset","phone_bind"=>"sms_template_phone_bind","phone_verify"=>"sms_template_phone_verify"];foreach($map as $purpose=>$name){$stored=trim((string)conf($name));if($stored===""||\app\common\service\AliyunSmsService::templateCodeForPurpose($purpose)!==$stored){exit(1);}}echo "sms template mapping self-check passed\n";'
 
 echo "[6/7] HTTP 健康检查"

@@ -51,11 +51,11 @@
                     </div>
                 </div>
                 <div class="layui-form-item text-right">
-                    <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('add_code.start')}</button>
+                    <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('add_code.start')}</button>
                     <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.reset')}</button>
                 </div>
                 <div class="layui-form-item">
-                    <div class="sf-tips">
+                    <div class="qh-tips">
                         {:t('add_code.support_notice')}
                     </div>
                 </div>
@@ -168,7 +168,7 @@
             }
         });
 
-        form.on('submit(SF_EditSubmit)', function (data) {
+        form.on('submit(QH_EditSubmit)', function (data) {
             notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",

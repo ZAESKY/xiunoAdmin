@@ -1,7 +1,7 @@
 {include file="/public/header"}
 <style>
     .feedback-content img, .layui-layer-content img { max-width: 60% !important; height: auto !important; vertical-align: middle; }
-    #LAY_layedit_SF_FeedbackContent { transition: height .3s; }
+    #LAY_layedit_QH_FeedbackContent { transition: height .3s; }
 </style>
 <div class="layui-fluid">
     <div class="layui-row layui-col-space15">
@@ -9,7 +9,7 @@
             <div class="layui-card">
                 <div class="layui-card-header">{:t('feedback.submit_title')}</div>
                 <div class="layui-card-body">
-                    <form id="SF_FeedbackForm" class="layui-form" lay-filter="SF_FeedbackForm">
+                    <form id="QH_FeedbackForm" class="layui-form" lay-filter="QH_FeedbackForm">
                         <div class="layui-form-item">
                             <label class="layui-form-label layui-form-required">{:t('feedback.type_label')}</label>
                             <div class="layui-input-block">
@@ -32,12 +32,12 @@
                         <div class="layui-form-item layui-form-text">
                             <label class="layui-form-label layui-form-required">{:t('feedback.content')}</label>
                             <div class="layui-input-block">
-                                <textarea id="SF_FeedbackContent" name="content" style="display:none;"></textarea>
+                                <textarea id="QH_FeedbackContent" name="content" style="display:none;"></textarea>
                             </div>
                         </div>
                         <div class="layui-form-item">
                             <div class="layui-input-block">
-                                <button class="layui-btn" lay-filter="SF_FeedbackSubmit" lay-submit id="SF_SubmitBtn">
+                                <button class="layui-btn" lay-filter="QH_FeedbackSubmit" lay-submit id="QH_SubmitBtn">
                                     <i class="layui-icon">&#xe605;</i>{:t('common.submit')}
                                 </button>
                             </div>
@@ -61,14 +61,14 @@
             <div class="layui-card">
                 <div class="layui-card-header">{:t('feedback.my_history')}</div>
                 <div class="layui-card-body" style="padding: 0;">
-                    <table id="SF_MyFeedbackTable" lay-filter="SF_MyFeedbackTable" style="margin: 0;"></table>
+                    <table id="QH_MyFeedbackTable" lay-filter="QH_MyFeedbackTable" style="margin: 0;"></table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_MyStatus">
+<script type="text/html" id="QH_MyStatus">
     {{# if(d.status == 0) { }}
     <span class="layui-badge layui-badge-orange">{:t('feedback.status_pending')}</span>
     {{# } else if(d.status == 1) { }}
@@ -78,7 +78,7 @@
     {{# } }}
 </script>
 
-<script type="text/html" id="SF_MyToolbar">
+<script type="text/html" id="QH_MyToolbar">
     <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view">{:t('common.view')}</a>
 </script>
 
@@ -104,7 +104,7 @@
             });
         }
 
-        var layeditIndex = layedit.build('SF_FeedbackContent', {
+        var layeditIndex = layedit.build('QH_FeedbackContent', {
             height: 600,
             uploadImage: { url: '{:url("/Feedback/uploadImage")}', type: 'post' }
         });
@@ -124,14 +124,14 @@
             success: function(res) {
                 if (res.code == 0 && res.data && res.data.has_pending) {
                     submitLocked = true;
-                    $('#SF_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
+                    $('#QH_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
                     notice.msg('{:t("feedback.has_pending")}', {icon: 3, audio:'1'});
                 }
             }
         });
 
         var myFeedbackTable = table.render({
-            elem: '#SF_MyFeedbackTable',
+            elem: '#QH_MyFeedbackTable',
             url: '{:url("/Feedback/myList")}',
             method: 'post', page: false, skin: 'line', size: 'sm', limit: 10,
             request: { pageName: 'current_page', limitName: 'limit' },
@@ -143,16 +143,16 @@
                 {field: 'title', title: '{:t("feedback.title")}', minWidth: 100, templet: function(d){
                     return (d.title || '').length > 15 ? d.title.substring(0,15) + '...' : (d.title || '');
                 }},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_MyStatus', width: 90},
-                {title: '', toolbar: '#SF_MyToolbar', width: 60}
+                {field: 'status', title: '{:t("common.status")}', templet: '#QH_MyStatus', width: 90},
+                {title: '', toolbar: '#QH_MyToolbar', width: 60}
             ]]
         });
 
-        table.on('tool(SF_MyFeedbackTable)', function(obj){
+        table.on('tool(QH_MyFeedbackTable)', function(obj){
             if (obj.event === 'view') showView(obj.data);
         });
 
-        form.on('submit(SF_FeedbackSubmit)', function (data) {
+        form.on('submit(QH_FeedbackSubmit)', function (data) {
             if (submitLocked) {
                 notice.msg('{:t("feedback.has_pending")}', {icon: 3}); return false;
             }
@@ -172,12 +172,12 @@
                     notice.destroy();
                     if (res.code == 0) {
                         notice.msg(res.msg, {icon: 1, audio:'1'});
-                        $('#SF_FeedbackForm')[0].reset();
+                        $('#QH_FeedbackForm')[0].reset();
                         layedit.setContent(layeditIndex, '');
                         submitLocked = true;
-                        $('#SF_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
-                        table.reload('SF_MyFeedbackTable');
-                        if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
+                        $('#QH_SubmitBtn').addClass('layui-btn-disabled').attr('disabled', true);
+                        table.reload('QH_MyFeedbackTable');
+                        if (parent && parent.QH_updateNotifyBadge) parent.QH_updateNotifyBadge();
                     } else { notice.msg(res.msg, {icon: 2, audio:'1'}); }
                 },
                 error: function() { notice.destroy(); notice.msg('{:t("common.server_error")}', {icon: 2}); }

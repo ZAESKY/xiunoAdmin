@@ -5,15 +5,15 @@
             <i class="layui-icon layui-icon-star"></i> {:t('accounting.point_detail')}
         </div>
         <div class="layui-card-body">
-            <table id="SF_PointTable" lay-filter="SF_PointTable"></table>
+            <table id="QH_PointTable" lay-filter="QH_PointTable"></table>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_PtType">
+<script type="text/html" id="QH_PtType">
     <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{d.type_label}}</span>
 </script>
-<script type="text/html" id="SF_PtAmount">
+<script type="text/html" id="QH_PtAmount">
     {{# if(d.amount > 0){ }}
     <span class="text-success">+{{d.amount}}</span>
     {{# } else { }}
@@ -26,13 +26,13 @@
 layui.use(['table'], function(){
     var table = layui.table;
     table.render({
-        elem: '#SF_PointTable', url: '{:url("/PointLog/index")}', method: 'post', page: true, limit: 15,
+        elem: '#QH_PointTable', url: '{:url("/PointLog/index")}', method: 'post', page: true, limit: 15,
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
             {field: 'id', title: 'ID', width: 70},
-            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_PtType'},
-            {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: '#SF_PtAmount'},
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#QH_PtType'},
+            {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: '#QH_PtAmount'},
             {field: 'integral_after', title: '{:t("accounting.remaining_points")}', width: 150, templet: function(d){ return (d.integral_after||0)+' {:t("accounting.point_unit")}'; }},
             {field: 'description', title: '{:t("accounting.description")}', minWidth: 200},
             {field: 'created_at', title: '{:t("accounting.time")}', width: 170}

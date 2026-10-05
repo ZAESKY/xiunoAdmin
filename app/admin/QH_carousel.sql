@@ -1,5 +1,5 @@
--- SF_carousel 轮播图表
-CREATE TABLE IF NOT EXISTS `SF_carousel` (
+-- QH_carousel 轮播图表
+CREATE TABLE IF NOT EXISTS `QH_carousel` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(100) NOT NULL DEFAULT '' COMMENT '标题',
   `image` varchar(255) NOT NULL DEFAULT '' COMMENT '图片URL',

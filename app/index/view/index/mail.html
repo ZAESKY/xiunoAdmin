@@ -28,15 +28,15 @@
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">{:t('download_ui.captcha_label')}</label>
-                    <div class="layui-input-block sf-code-field">
+                    <div class="layui-input-block qh-code-field">
                         <input type="text" name="code" class="layui-input" placeholder="{:t('download_ui.captcha_placeholder')}"/>
-                        <button id="SF_CodeBtn" type="button" lay-filter="SF_GetCode" class="layui-btn sf-code-button" lay-submit/>
+                        <button id="QH_CodeBtn" type="button" lay-filter="QH_GetCode" class="layui-btn qh-code-button" lay-submit/>
                         {:t('download_ui.get_captcha')}
                         </button>
                     </div>
                 </div>
                 <div class="layui-form-item text-right">
-                    <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>{:t('download_ui.get_btn')}</button>
+                    <button id="QH_DownloadBtn" type="button" class="layui-btn" lay-filter="QH_DownloadSubmit" lay-submit>{:t('download_ui.get_btn')}</button>
                     <button type="button" class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
                 </div>
             </form>
@@ -52,8 +52,8 @@
         var admin = layui.admin;
         var notice = layui.notice;
 
-        form.on('submit(SF_GetCode)', function (data) {
-            admin.btnLoading('#SF_CodeBtn');
+        form.on('submit(QH_GetCode)', function (data) {
+            admin.btnLoading('#QH_CodeBtn');
             admin.showLoading('#divLoading', 3, '.8');
             $.ajax({
                 type: "POST",
@@ -61,7 +61,7 @@
                 data: data.field,
                 dataType: "json",
                 success: function(data) {
-                    admin.btnLoading('#SF_CodeBtn', false);
+                    admin.btnLoading('#QH_CodeBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     if (data.code == 0) {
                         parent.layui.notice.success({
@@ -88,7 +88,7 @@
                     }
                 },
                 error: function() {
-                    admin.btnLoading('#SF_CodeBtn', false);
+                    admin.btnLoading('#QH_CodeBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     parent.layui.notice.error({
                         title: "{:t('download_ui.notice_title')}",
@@ -104,8 +104,8 @@
             });
             return false;
         });
-        form.on('submit(SF_DownloadSubmit)', function (info) {
-            admin.btnLoading('#SF_DownloadBtn');
+        form.on('submit(QH_DownloadSubmit)', function (info) {
+            admin.btnLoading('#QH_DownloadBtn');
             admin.showLoading('#divLoading', 3, '.8');
             $.ajax({
                 type: "POST",
@@ -113,7 +113,7 @@
                 data: info.field,
                 dataType: "json",
                 success: function(data) {
-                    admin.btnLoading('#SF_DownloadBtn', false);
+                    admin.btnLoading('#QH_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     if (data.code == 0) {
                         parent.layui.notice.success({
@@ -141,7 +141,7 @@
                     }
                 },
                 error: function() {
-                    admin.btnLoading('#SF_DownloadBtn', false);
+                    admin.btnLoading('#QH_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     parent.layui.notice.error({
                         title: "{:t('download_ui.notice_title')}",

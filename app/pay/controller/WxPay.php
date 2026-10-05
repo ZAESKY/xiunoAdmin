@@ -34,7 +34,7 @@ class WxPay extends PayBackend
         $input = new WxPayUnifiedOrder();
         $input->SetBody($ordername);
         $input->SetOut_trade_no($trade_no);
-        $input->SetTotal_fee(sf_money_to_cents($row['money']));
+        $input->SetTotal_fee(qh_money_to_cents($row['money']));
         $input->SetSpbill_create_ip(get_client_ip());
         $input->SetTime_start(date("YmdHis"));
         $input->SetTime_expire(date("YmdHis", time() + 600));
@@ -76,7 +76,7 @@ class WxPay extends PayBackend
         $input = new WxPayUnifiedOrder();
         $input->SetBody($ordername);
         $input->SetOut_trade_no($trade_no);
-        $input->SetTotal_fee(sf_money_to_cents($row['money']));
+        $input->SetTotal_fee(qh_money_to_cents($row['money']));
         $input->SetTime_start(date("YmdHis"));
         $input->SetTime_expire(date("YmdHis", time() + 600));
         $input->SetNotify_url(SITE_URL.url('/WxPay/notify'));
@@ -120,7 +120,7 @@ class WxPay extends PayBackend
             $input = new WxPayUnifiedOrder();
             $input->SetBody($ordername);
             $input->SetOut_trade_no($trade_no);
-            $input->SetTotal_fee(sf_money_to_cents($row['money']));
+            $input->SetTotal_fee(qh_money_to_cents($row['money']));
             $input->SetSpbill_create_ip(get_client_ip());
             $input->SetTime_start(date("YmdHis"));
             $input->SetTime_expire(date("YmdHis", time() + 600));

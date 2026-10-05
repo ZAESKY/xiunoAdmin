@@ -8,45 +8,45 @@
         background-color: #F2F2F4;
     }
     * {
-        font-family: 'SF-Medium';
+        font-family: 'QH-Medium';
     }
     @-webkit-keyframes rotation{
         from {-webkit-transform: rotate(0deg);}
         to {-webkit-transform: rotate(360deg);}
     }
-    .sf-loop{
+    .qh-loop{
         -webkit-transform: rotate(360deg);
         animation: rotation 3s linear infinite;
         -moz-animation: rotation 3s linear infinite;
         -webkit-animation: rotation 3s linear infinite;
         -o-animation: rotation 3s linear infinite;
     }
-    .sf-set{
+    .qh-set{
         position: relative;
     }
-    .sf-set img{
+    .qh-set img{
         position:absolute;
     }
-    .sf-set-1{
+    .qh-set-1{
         height: 80px;
         left:0;
         top:0;
         z-index:1;
     }
-    .sf-set-2{
+    .qh-set-2{
         height: 64px;
         left:8px;
         top:8px;
         z-index:2;
     }
-    .sf-group{
+    .qh-group{
         position: relative;
         margin-left: 10px;
         margin-top: 10px;
         color:#000000;
         height: 400px;
     }
-    .sf-group-btn{
+    .qh-group-btn{
         position: relative;
         height: 40px;
         font-size: 16px;
@@ -56,17 +56,17 @@
     .layui-fluid .layui-card{
         border-radius: 12px
     }
-    .sf-set-font{
+    .qh-set-font{
         position: absolute;
         left:100px;
         font-size: 17px;
         font-weight: 600;
     }
-    .sf-set-font .sf-text{
+    .qh-set-font .qh-text{
         font-weight: normal;
         font-size: 14px;
     }
-    .sf-set-introduce{
+    .qh-set-introduce{
         position: absolute;
         top:100px;
         font-size: 16px;
@@ -78,12 +78,12 @@
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
     }
-    .sf-set-more{
+    .qh-set-more{
         position: absolute;
         bottom:10px;
         font-size: 16px;
     }
-    .sf-group-btn .sf-download{
+    .qh-group-btn .qh-download{
         position: absolute;
         bottom:10px;
         left:10px;
@@ -202,34 +202,34 @@
         }
     }
 
-    .sf-loading{
+    .qh-loading{
         position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
         top:300px;
     }
-    .sf-loading .sf-loading-font{
+    .qh-loading .qh-loading-font{
         position: absolute;
         top:70px;
         font-size: 18px;
         color:#626166;
     }
     @font-face{
-        font-family: SF;
+        font-family: QH;
         src: url("{__FONT__}PingFang Bold.ttf");
     }
     @font-face{
-        font-family: SF-Medium;
+        font-family: QH-Medium;
         src: url("{__FONT__}PingFang Medium.ttf");
     }
-    .sf-loading .sf-new-font{
+    .qh-loading .qh-new-font{
         position: absolute;
         top:70px;
         font-size: 18px;
         color:#808A87;
     }
-    .sf-loading .sf-new-font2{
+    .qh-loading .qh-new-font2{
         position: absolute;
         top:92px;
         font-size: 15px;
@@ -240,42 +240,42 @@
 <div class="layui-row">
     <div class="layui-col-md6 layui-col-md-offset3 layui-col-sm8 layui-col-sm-offset2 layui-col-xs12">
         <div class="layui-fluid">
-            <div id="sf_update" class="layui-anim layui-anim-downbit" style="display: none">
+            <div id="qh_update" class="layui-anim layui-anim-downbit" style="display: none">
                 <div class="layui-card">
                     <div class="layui-card-body">
-                        <div id="sf_progress" style="display: none">
+                        <div id="qh_progress" style="display: none">
                             <div class="layui-progress" lay-filter="uploadProgress" style="height:3px;margin-left:110px;top:68px">
                                 <div class="layui-progress-bar" lay-percent="0%"></div>
                             </div>
                         </div>
-                        <div class="sf-group">
-                            <div class="sf-set">
-                                <img class="sf-set-1" src="{__IMG__}sf_set.png">
-                                <img id="sf_set" class="sf-set-2" src="{__IMG__}sf_set2.png">
+                        <div class="qh-group">
+                            <div class="qh-set">
+                                <img class="qh-set-1" src="{__IMG__}qh_set.png">
+                                <img id="qh_set" class="qh-set-2" src="{__IMG__}qh_set2.png">
                             </div>
-                            <div class="sf-set-font">
-                                MOS <span id="sf_edition">4.0</span>
-                                <div class="sf-text" style="padding-top: 2px">SF Inc.</div>
-                                <div class="sf-text" style="padding-top: 8px"><span id="sf_msg">3.3 GB</span></div>
+                            <div class="qh-set-font">
+                                MOS <span id="qh_edition">4.0</span>
+                                <div class="qh-text" style="padding-top: 2px">QH Inc.</div>
+                                <div class="qh-text" style="padding-top: 8px"><span id="qh_msg">3.3 GB</span></div>
                             </div>
-                            <div class="sf-set-introduce">
-                                <div id="sf_introduce">{:t('notify.no_update_content')}</div>
+                            <div class="qh-set-introduce">
+                                <div id="qh_introduce">{:t('notify.no_update_content')}</div>
                             </div>
-                            <div class="sf-set-more">
+                            <div class="qh-set-more">
                                 <a lay-filter="uplog" lay-submit>{:t('update_ui.learn_more')}...</a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div id="sf_update_btn_group" class="layui-card">
-                    <div class="sf-group-btn">
-                        <div class="sf-download">
-                            <a id="sf_update_btn" lay-filter="update" lay-submit>{:t('notify.download_install')}</a>
+                <div id="qh_update_btn_group" class="layui-card">
+                    <div class="qh-group-btn">
+                        <div class="qh-download">
+                            <a id="qh_update_btn" lay-filter="update" lay-submit>{:t('notify.download_install')}</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="sf_loading" class="sf-loading" style="display: none">
+            <div id="qh_loading" class="qh-loading" style="display: none">
                 <div class="loading">
                     <div></div>
                     <div></div>
@@ -286,16 +286,16 @@
                     <div></div>
                     <div></div>
                 </div>
-                <div class="sf-loading-font">{:t('notify.checking_update')}</div>
+                <div class="qh-loading-font">{:t('notify.checking_update')}</div>
             </div>
-            <div id="sf_new_version" class="sf-loading" style="display: none">
-                <div class="sf-new-font">MOS <span id="sf_current_edition">{$edition}</span></div>
-                <div class="sf-new-font2">{:t('update_ui.latest_version')}</div>
+            <div id="qh_new_version" class="qh-loading" style="display: none">
+                <div class="qh-new-font">MOS <span id="qh_current_edition">{$edition}</span></div>
+                <div class="qh-new-font2">{:t('update_ui.latest_version')}</div>
             </div>
         </div>
     </div>
 </div>
-<script type="text/html" id="SF_Uplog"></script>
+<script type="text/html" id="QH_Uplog"></script>
 {include file="/public/footer"}
 <script>
     layui.use(['element', 'form', 'notice', 'admin'], function () {
@@ -305,20 +305,20 @@
         var admin = layui.admin;
         var element = layui.element;
 
-        $("#sf_loading").show();
+        $("#qh_loading").show();
         $(function(){
             $.ajax({
                 type: "POST",
                 url: '{:url("/Set/checkUpdate")}',
                 dataType: "json",
                 success: function(data) {
-                    $("#sf_loading").hide();
+                    $("#qh_loading").hide();
                     if (data.code == 0) {
                         if(data.data.code == 1){
-                            $("#sf_update").show();
-                            $("#sf_edition").text(data.data.edition);
-                            $("#sf_msg").text(data.data.filesize + ' MB');
-                            $("#sf_introduce").text('{:t("update_ui.this_update")} ' + data.data.introduce);
+                            $("#qh_update").show();
+                            $("#qh_edition").text(data.data.edition);
+                            $("#qh_msg").text(data.data.filesize + ' MB');
+                            $("#qh_introduce").text('{:t("update_ui.this_update")} ' + data.data.introduce);
                             var html = '<div class="layui-card layui-card-body"><ul class="layui-timeline">';
                             $.each(data.data.uplog, function(index, value){
                                 html += '<li class="layui-timeline-item">\n' +
@@ -335,16 +335,16 @@
                                     '  </li>';
                             });
                             html += '</ul></div>';
-                            $("#SF_Uplog").html(html);
+                            $("#QH_Uplog").html(html);
                         }else{
-                            $("#sf_new_version").show();
+                            $("#qh_new_version").show();
                         }
                     } else {
                         notice.msg(data.msg, {icon: 2, audio:'1'});
                     }
                 },
                 error: function() {
-                    $("#sf_loading").hide();
+                    $("#qh_loading").hide();
                     notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                 }
             });
@@ -357,22 +357,22 @@
                 shade: .1,
                 area:['100%','100%'],
                 anim: 2,
-                content: $("#SF_Uplog").html()
+                content: $("#QH_Uplog").html()
             });
             return false;
         });
 
         function updateStatus(type = false){
             if(type){
-                $("sf_msg").css('display','none');
-                $("#sf_msg").text('{:t("notify.wait_download")}');
-                $("#sf_update_btn").css('color','#8B8B8D');
-                $("#sf_update_btn").text('{:t("notify.downloading")}');
-                $("#sf_set").addClass('sf-loop');
+                $("qh_msg").css('display','none');
+                $("#qh_msg").text('{:t("notify.wait_download")}');
+                $("#qh_update_btn").css('color','#8B8B8D');
+                $("#qh_update_btn").text('{:t("notify.downloading")}');
+                $("#qh_set").addClass('qh-loop');
             }else{
-                $("#sf_update_btn").css('color','#007aff');
-                $("#sf_update_btn").text('{:t("notify.download_install")}');
-                $("#sf_set").removeClass('sf-loop');
+                $("#qh_update_btn").css('color','#007aff');
+                $("#qh_update_btn").text('{:t("notify.download_install")}');
+                $("#qh_set").removeClass('qh-loop');
             }
         }
         var percentage = 100;
@@ -389,24 +389,24 @@
                             if(progressNum == 0){
                                 percentage = (100 / data.data.count);
                             }
-                            $("#sf_progress").css('display','inherit');
-                            $("#sf_msg").text(data.msg);
+                            $("#qh_progress").css('display','inherit');
+                            $("#qh_msg").text(data.msg);
                             progressNum = percentage + progressNum;
                             element.progress('uploadProgress', progressNum + '%');
                             updateVersion();
                         }else if(data.data.code == 2){
-                            $("#sf_msg").text(data.msg);
+                            $("#qh_msg").text(data.msg);
                             element.progress('uploadProgress', '100%');
-                            $("#sf_update_btn_group").css('display','none');
+                            $("#qh_update_btn_group").css('display','none');
                             updateStatus();
                         }else{
                             notice.msg(data.msg, {icon: 2, audio:'1'});
-                            $("#sf_msg").text(data.msg);
+                            $("#qh_msg").text(data.msg);
                             updateStatus();
                         }
                     },
                     error: function() {
-                        $("#sf_loading").hide();
+                        $("#qh_loading").hide();
                         notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
                         updateStatus();
                     }

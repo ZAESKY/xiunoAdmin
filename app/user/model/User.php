@@ -28,7 +28,7 @@ class User extends BaseModel
                 ->where('usi.user_id', intval($userId))
                 ->where('si.provider', 'qq')
                 ->value('si.avatar');
-            $oauthAvatar = sf_safe_url($oauthAvatar ?? '', false);
+            $oauthAvatar = qh_safe_url($oauthAvatar ?? '', false);
             if ($oauthAvatar !== '') {
                 $info['img'] = $oauthAvatar;
             } elseif ($info['qq']) {
@@ -115,7 +115,7 @@ class User extends BaseModel
             if(empty($userInfo['config'])){
                 $oldConfig = [];
             }else{
-                $oldConfig = sf_safe_unserialize_array($userInfo['config']);
+                $oldConfig = qh_safe_unserialize_array($userInfo['config']);
             }
             $newConfig = array_merge($oldConfig, $post);
             if(empty($newConfig)){
@@ -171,10 +171,10 @@ class User extends BaseModel
             $row = Db::name('power_price')->where('id',$power)->find();
             if(!$row) return message(t('power.not_exist') ,false);
             if(!$userPower) return message(t('user.power_error') ,false);
-            $upgradeCents = max(sf_money_to_cents($row['money']) - sf_money_to_cents($userPower['money']), 0);
-            $allmoney = sf_money_from_cents($upgradeCents);
+            $upgradeCents = max(qh_money_to_cents($row['money']) - qh_money_to_cents($userPower['money']), 0);
+            $allmoney = qh_money_from_cents($upgradeCents);
             if($allmoney > $userInfo['balance']) return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
-            $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
+            $remainderBalance = qh_money_subtract($userInfo['balance'], $allmoney);
             $data = [
                 "power" => $row['id']
             ];

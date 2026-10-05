@@ -22,7 +22,7 @@ FILES_CHANGED=0
 
 FILES=(
   .env.example
-  app/SF_Auth.sql
+  app/QH_Auth.sql
   app/common.php
   app/api/lib/Oauth.php
   app/api/controller/Social.php
@@ -82,7 +82,7 @@ rollback() {
       fi
     fi
     "$PHP_BIN" "$SITE_DIR/think" clear >/dev/null 2>&1 || true
-    echo "代码已回滚；新增的 SF_qq_identity_claim 表保留，避免删除部署期间可能写入的关系数据。" >&2
+    echo "代码已回滚；新增的 QH_qq_identity_claim 表保留，避免删除部署期间可能写入的关系数据。" >&2
   fi
   cleanup
   exit "$status"
@@ -170,7 +170,7 @@ DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/my
   --routines --triggers --events --no-tablespaces --default-character-set=utf8mb4 \
   "$DB_NAME" > "$BACKUP_DIR/database.sql"
 [ "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024 ]
-grep -q 'Table structure for table `SF_user`' "$BACKUP_DIR/database.sql"
+grep -q 'Table structure for table `QH_user`' "$BACKUP_DIR/database.sql"
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 sha256sum "$BACKUP_DIR/database.sql" > "$BACKUP_DIR/database.sql.sha256"
 chmod 600 "$BACKUP_DIR/database.sql" "$BACKUP_DIR/database.sql.sha256"
@@ -179,12 +179,12 @@ db_q() {
   "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "$1"
 }
 
-social_table="$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_social_identity'")"
-binding_table="$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user_social_identity'")"
-identity_unique="$(db_q "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user_social_identity' AND INDEX_NAME='uk_social_identity_once'")"
-user_unique="$(db_q "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user_social_identity' AND INDEX_NAME='uk_social_user_once'")"
-duplicate_qq="$(db_q "SELECT COUNT(*) FROM (SELECT qq FROM SF_user WHERE qq IS NOT NULL AND TRIM(qq)<>'' GROUP BY qq HAVING COUNT(*)>1) AS duplicate_rows")"
-duplicate_usernames="$(db_q "SELECT COUNT(*) FROM (SELECT username FROM SF_user GROUP BY username HAVING COUNT(*)>1) AS duplicate_rows")"
+social_table="$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_social_identity'")"
+binding_table="$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user_social_identity'")"
+identity_unique="$(db_q "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user_social_identity' AND INDEX_NAME='uk_social_identity_once'")"
+user_unique="$(db_q "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user_social_identity' AND INDEX_NAME='uk_social_user_once'")"
+duplicate_qq="$(db_q "SELECT COUNT(*) FROM (SELECT qq FROM QH_user WHERE qq IS NOT NULL AND TRIM(qq)<>'' GROUP BY qq HAVING COUNT(*)>1) AS duplicate_rows")"
+duplicate_usernames="$(db_q "SELECT COUNT(*) FROM (SELECT username FROM QH_user GROUP BY username HAVING COUNT(*)>1) AS duplicate_rows")"
 if [ "$social_table" != 1 ] || [ "$binding_table" != 1 ] || [ "$identity_unique" != 1 ] || [ "$user_unique" != 1 ]; then
   echo "线上 QQ OAuth 基础迁移不完整，拒绝只部署统一层" >&2
   exit 1
@@ -231,9 +231,9 @@ done
 "$PHP_BIN" think clear
 
 echo "[6/8] 验证数据库约束和运行配置"
-claim_table="$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_qq_identity_claim'")"
-claim_unique="$(db_q "SELECT COUNT(DISTINCT INDEX_NAME) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_qq_identity_claim' AND INDEX_NAME IN ('uk_qq_claim_identity','uk_qq_claim_user','uk_qq_claim_number')")"
-qq_enabled="$(db_q "SELECT COUNT(*) FROM SF_config WHERE name='login_switch' AND FIND_IN_SET('qq',REPLACE(value,' ',''))>0")"
+claim_table="$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_qq_identity_claim'")"
+claim_unique="$(db_q "SELECT COUNT(DISTINCT INDEX_NAME) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_qq_identity_claim' AND INDEX_NAME IN ('uk_qq_claim_identity','uk_qq_claim_user','uk_qq_claim_number')")"
+qq_enabled="$(db_q "SELECT COUNT(*) FROM QH_config WHERE name='login_switch' AND FIND_IN_SET('qq',REPLACE(value,' ',''))>0")"
 [ "$claim_table" = 1 ] && [ "$claim_unique" = 3 ] && [ "$qq_enabled" -ge 1 ]
 callback_path_after="$(env_value qq_oauth_callback_path)"
 [ "$callback_path_after" = "$qq_path" ]
@@ -254,9 +254,9 @@ for result in "$home_status" "$user_login_status" "$oauth_js_status"; do
 done
 
 echo "[8/8] 部署完成"
-claim_rows="$(db_q 'SELECT COUNT(*) FROM SF_qq_identity_claim')"
-identity_rows="$(db_q 'SELECT COUNT(*) FROM SF_social_identity')"
-binding_rows="$(db_q 'SELECT COUNT(*) FROM SF_user_social_identity')"
+claim_rows="$(db_q 'SELECT COUNT(*) FROM QH_qq_identity_claim')"
+identity_rows="$(db_q 'SELECT COUNT(*) FROM QH_social_identity')"
+binding_rows="$(db_q 'SELECT COUNT(*) FROM QH_user_social_identity')"
 printf 'backup=%s\nhome_http=%s\nuser_login_http=%s\noauth_js_http=%s\ncallback_mode=%s\nidentity_rows=%s\nbinding_rows=%s\nclaim_rows=%s\n' \
   "$BACKUP_DIR" "$home_status" "$user_login_status" "$oauth_js_status" \
   "$([ -n "$callback_path_after" ] && printf unified || printf legacy-compatible)" \

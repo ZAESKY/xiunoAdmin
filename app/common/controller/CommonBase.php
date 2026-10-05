@@ -94,7 +94,7 @@ class CommonBase extends BaseController
      */
     public function isInstall()
     {
-        if(!file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')){
+        if(!file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')){
             return false;
         }else{
             return true;
@@ -109,10 +109,10 @@ class CommonBase extends BaseController
     public function initConfig()
     {
         // 系统全称
-        View::assign("title", !empty(conf('title'))?conf('title'):'SF授权平台');
-        View::assign("keywords", !empty(conf('keywords'))?conf('keywords'):'SF授权平台');
-        View::assign("description", !empty(conf('description'))?conf('description'):'SF授权平台');
-        View::assign("foot", !empty(conf('foot'))?conf('foot'):'Copyright © SF-陌上花开');
+        View::assign("title", !empty(conf('title'))?conf('title'):'QH授权平台');
+        View::assign("keywords", !empty(conf('keywords'))?conf('keywords'):'QH授权平台');
+        View::assign("description", !empty(conf('description'))?conf('description'):'QH授权平台');
+        View::assign("foot", !empty(conf('foot'))?conf('foot'):'Copyright © QH-陌上花开');
         View::assign("ICP", !empty(conf('ICP'))?conf('ICP'):'');
         // 系统简称
         View::assign("year", date('Y'));
@@ -124,8 +124,8 @@ class CommonBase extends BaseController
 
         // 分页基础默认值
         // Clamp pagination inputs to avoid invalid offsets and oversized queries.
-        $perPage = sf_page_limit($this->param['limit'] ?? null, 20);
-        $page = sf_page_number($this->param['page'] ?? null);
+        $perPage = qh_page_limit($this->param['limit'] ?? null, 20);
+        $page = qh_page_number($this->param['page'] ?? null);
         defined('PERPAGE') or define('PERPAGE', $perPage);
         defined('PAGE') or define('PAGE', $page);
     }
@@ -181,7 +181,7 @@ class CommonBase extends BaseController
                     if ($money > 999999) {
                         return message(t('recharge.max_amount', ['amount' => 999999]), false);
                     }
-                    $money = sf_money_format($money);
+                    $money = qh_money_format($money);
 
                     // 折扣码验证
                     $discountCode = !empty($post['discount_code']) ? trim($post['discount_code']) : null;
@@ -213,7 +213,7 @@ class CommonBase extends BaseController
                         // 应用折扣：付款方享受返利比例的折扣
                         $discountRate = floatval($ownerPower['rebate_rate']);
                         if ($discountRate > 0) {
-                            $money = sf_money_apply_rate($money, 100 - $discountRate);
+                            $money = qh_money_apply_rate($money, 100 - $discountRate);
                             if ($money <= 0) {
                                 $money = '0.01';
                             }

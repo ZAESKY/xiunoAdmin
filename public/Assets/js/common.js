@@ -4,22 +4,22 @@
     var parentLocale = null;
     try {
         if (window.parent && window.parent !== window) {
-            parentMessages = window.parent.SF_I18N_MESSAGES || null;
-            parentLocale = window.parent.SF_I18N_LOCALE || null;
+            parentMessages = window.parent.QH_I18N_MESSAGES || null;
+            parentLocale = window.parent.QH_I18N_LOCALE || null;
         }
     } catch (e) {}
 
-    var messages = window.SF_I18N_MESSAGES || parentMessages || {};
-    var locale = window.SF_I18N_LOCALE || parentLocale || (window.SF_LANG && window.SF_LANG.current) || 'en-us';
+    var messages = window.QH_I18N_MESSAGES || parentMessages || {};
+    var locale = window.QH_I18N_LOCALE || parentLocale || (window.QH_LANG && window.QH_LANG.current) || 'en-us';
 
     function getMessage(key) {
-        var currentMessages = window.SF_I18N_MESSAGES || messages;
+        var currentMessages = window.QH_I18N_MESSAGES || messages;
         if (Object.prototype.hasOwnProperty.call(currentMessages, key)) {
             return currentMessages[key];
         }
         try {
             if (window.parent && window.parent !== window) {
-                var currentParentMessages = window.parent.SF_I18N_MESSAGES || parentMessages || {};
+                var currentParentMessages = window.parent.QH_I18N_MESSAGES || parentMessages || {};
                 if (Object.prototype.hasOwnProperty.call(currentParentMessages, key)) {
                     return currentParentMessages[key];
                 }
@@ -28,7 +28,7 @@
         return key;
     }
 
-    window.SF_I18N = {
+    window.QH_I18N = {
         messages: messages,
         lang: function () {
             return locale;
@@ -41,12 +41,12 @@
             });
         },
         switchLang: function (lang) {
-            if (window.SF_LANG) {
-                window.SF_LANG.set(lang);
+            if (window.QH_LANG) {
+                window.QH_LANG.set(lang);
             }
         }
     };
-    window.t = window.SF_I18N.t;
+    window.t = window.QH_I18N.t;
 })(window);
 
 // 全局金额输入校验：限制最大值和两位小数（原生JS，jQuery 加载前即生效）
@@ -67,14 +67,14 @@ document.addEventListener('blur', function(e){
 layui.config({  // common.js是配置layui扩展模块的目录，每个页面都需要引入
     version: '329',   // 更新组件缓存，设为true不缓存，也可以设一个固定值
     base: getProjectUrl() + 'Assets/module/',
-    defaultTheme: 'theme-sf',
+    defaultTheme: 'theme-qh',
     closeFooter: true,
     pageTabs: false,
     cacheTab: false,
     tabAutoRefresh: false,
     navArrow: 'arrow2',
     defaultLoading: 3,
-    tableName: 'SF-AUTH',
+    tableName: 'QH-AUTH',
 }).extend({
     steps: 'steps/steps',
     notice: 'notice/notice',
@@ -133,8 +133,8 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
         return result;
     };
     translateRenderedSelects(document);
-    $(document).off('keyup.sfFormI18n', '.layui-form-select .layui-select-title input')
-        .on('keyup.sfFormI18n', '.layui-form-select .layui-select-title input', function () {
+    $(document).off('keyup.qhFormI18n', '.layui-form-select .layui-select-title input')
+        .on('keyup.qhFormI18n', '.layui-form-select .layui-select-title input', function () {
             setTimeout(function () {
                 translateRenderedSelects(document);
             }, 0);
@@ -150,9 +150,9 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
 
     function ensureSubmitProxy($layer, filter) {
         var $scope = getSubmitScope($layer);
-        var $proxy = $scope.children('.sf-layer-submit-proxy[data-filter="' + filter + '"]');
+        var $proxy = $scope.children('.qh-layer-submit-proxy[data-filter="' + filter + '"]');
         if ($proxy.length === 0) {
-            $proxy = $('<button type="button" class="layui-hide sf-layer-submit-proxy"></button>');
+            $proxy = $('<button type="button" class="layui-hide qh-layer-submit-proxy"></button>');
             $scope.append($proxy);
         }
         $proxy.attr({
@@ -171,23 +171,23 @@ layui.config({  // common.js是配置layui扩展模块的目录，每个页面�
         var $proxy = ensureSubmitProxy($layer, filter);
         var proxyId = $proxy.attr('id');
         if (!proxyId) {
-            proxyId = 'sf_layer_submit_' + new Date().getTime() + '_' + Math.floor(Math.random() * 100000);
+            proxyId = 'qh_layer_submit_' + new Date().getTime() + '_' + Math.floor(Math.random() * 100000);
             $proxy.attr('id', proxyId);
         }
 
         // Form guard: route layer footer clicks through a hidden submit proxy first.
         // This prevents layer's default btn0 handler from closing the dialog before custom validation returns false.
-        $btn.removeAttr('lay-submit').removeAttr('lay-filter').attr('data-sf-submit-proxy', proxyId);
+        $btn.removeAttr('lay-submit').removeAttr('lay-filter').attr('data-qh-submit-proxy', proxyId);
         $btn.each(function () {
-            if (this.sfLayerSubmitProxyBound) {
+            if (this.qhLayerSubmitProxyBound) {
                 return;
             }
-            this.sfLayerSubmitProxyBound = true;
+            this.qhLayerSubmitProxyBound = true;
             this.addEventListener('click', function (event) {
-                var id = $(this).attr('data-sf-submit-proxy');
+                var id = $(this).attr('data-qh-submit-proxy');
                 var $target = id ? $('#' + id) : $();
                 var layerIndex = $(this).closest('.layui-layer').attr('times');
-                var ajaxNamespace = '.sfLayerSubmit' + layerIndex;
+                var ajaxNamespace = '.qhLayerSubmit' + layerIndex;
                 if ($target.length === 0) {
                     return;
                 }
@@ -256,7 +256,7 @@ function getProjectUrl() {
         function measureCell(cell) {
             var clone = cell.cloneNode(true);
             clone.removeAttribute('id');
-            clone.setAttribute('data-sf-action-measure', '1');
+            clone.setAttribute('data-qh-action-measure', '1');
             clone.style.setProperty('position', 'absolute', 'important');
             clone.style.setProperty('left', '-100000px', 'important');
             clone.style.setProperty('top', '-100000px', 'important');
@@ -301,7 +301,7 @@ function getProjectUrl() {
             });
 
             if (hasActionColumn && $view.find('.layui-table-fixed-r td[data-off="true"]').length) {
-                $view.addClass('sf-action-columns-scroll');
+                $view.addClass('qh-action-columns-scroll');
             }
         }
 
@@ -321,7 +321,7 @@ function getProjectUrl() {
                 var addedNodes = mutations[i].addedNodes || [];
                 for (var j = 0; j < addedNodes.length; j++) {
                     var node = addedNodes[j];
-                    if (node.nodeType === 1 && node.getAttribute('data-sf-action-measure') === '1') {
+                    if (node.nodeType === 1 && node.getAttribute('data-qh-action-measure') === '1') {
                         continue;
                     }
                     scheduleFit();
@@ -330,7 +330,7 @@ function getProjectUrl() {
             }
         });
         observer.observe(document.body, {childList: true, subtree: true});
-        $(window).off('resize.sfActionColumns').on('resize.sfActionColumns', scheduleFit);
+        $(window).off('resize.qhActionColumns').on('resize.qhActionColumns', scheduleFit);
         $(scheduleFit);
     });
 })(window, document);

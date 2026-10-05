@@ -52,7 +52,7 @@ class PayNotifyCallBack extends WxPayNotify
                 $out_trade_no = $data['out_trade_no'];
                 $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
                 if (!$srow || !isset($data['total_fee'])
-                    || sf_money_to_cents($srow['money']) !== (int)$data['total_fee']
+                    || qh_money_to_cents($srow['money']) !== (int)$data['total_fee']
                     || (string)($queryResult['out_trade_no'] ?? '') !== (string)$out_trade_no
                     || (string)($queryResult['transaction_id'] ?? '') !== (string)$data['transaction_id']
                     || (int)($queryResult['total_fee'] ?? -1) !== (int)$data['total_fee']) {

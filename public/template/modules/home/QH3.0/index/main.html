@@ -30,8 +30,8 @@
                     <div id="introduceContent"></div>
                 </div>
                 <div class="vp-form-actions">
-                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_QueryAuth" lay-submit>{:t('home.query')}</button>
-                    <button type="button" class="vp-btn vp-btn-ghost" id="SF_QueryAuth_Reset">{:t('home.reset')}</button>
+                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="QH_QueryAuth" lay-submit>{:t('home.query')}</button>
+                    <button type="button" class="vp-btn vp-btn-ghost" id="QH_QueryAuth_Reset">{:t('home.reset')}</button>
                 </div>
             </form>
         </div>
@@ -73,12 +73,12 @@
                     <label class="vp-label">{:t('registration.email_code')}</label>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <input type="text" name="code" inputmode="numeric" maxlength="6" placeholder="{:t('registration.email_code_placeholder')}" class="layui-input" lay-verify="required" style="flex:1;"/>
-                        <button type="button" class="vp-btn vp-btn-ghost" id="SF_Send_Reg_Code" style="white-space:nowrap;">{:t('registration.send_code')}</button>
+                        <button type="button" class="vp-btn vp-btn-ghost" id="QH_Send_Reg_Code" style="white-space:nowrap;">{:t('registration.send_code')}</button>
                     </div>
                 </div>
                 <div class="vp-form-actions">
-                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_RegisterSubmit" lay-submit>{:t('registration.submit')}</button>
-                    <button type="button" class="vp-btn vp-btn-ghost" id="SF_Register_Reset">{:t('common.reset')}</button>
+                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="QH_RegisterSubmit" lay-submit>{:t('registration.submit')}</button>
+                    <button type="button" class="vp-btn vp-btn-ghost" id="QH_Register_Reset">{:t('common.reset')}</button>
                 </div>
             </form>
         </div>
@@ -115,7 +115,7 @@ layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
         }, 1000);
     }
 
-    $('#SF_Send_Reg_Code').on('click', function () {
+    $('#QH_Send_Reg_Code').on('click', function () {
         var button = $(this);
         var email = $.trim($('#registerForm input[name="email"]').val());
         if (!email) {
@@ -137,14 +137,14 @@ layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
         });
     });
 
-    $("#SF_QueryAuth_Reset").click(function(){
+    $("#QH_QueryAuth_Reset").click(function(){
         document.getElementById("queryAuthForm").reset();
         $('#introduce').hide();
         form.render('select');
         form.render('radio');
         notice.msg('{:t("home.query_reset")}', {icon: 1, audio:'1'});
     });
-    $("#SF_Register_Reset").click(function(){
+    $("#QH_Register_Reset").click(function(){
         document.getElementById("registerForm").reset();
         form.render('select');
         notice.msg('{:t("registration.reset_success")}', {icon: 1, audio:'1'});
@@ -203,7 +203,7 @@ layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
         });
     });
 
-    form.on('submit(SF_QueryAuth)', function (data) {
+    form.on('submit(QH_QueryAuth)', function (data) {
         notice.msg('{:t("common.searching")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",
@@ -246,7 +246,7 @@ layui.use(['layer', 'form', 'admin', 'element', 'notice'], function () {
         return false;
     });
 
-    form.on('submit(SF_RegisterSubmit)', function (data) {
+    form.on('submit(QH_RegisterSubmit)', function (data) {
         notice.msg('{:t("registration.submitting")}', {icon: 4, close: true});
         $.ajax({
             type: "POST",

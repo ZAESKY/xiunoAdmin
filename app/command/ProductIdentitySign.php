@@ -13,7 +13,7 @@ class ProductIdentitySign extends Command
 {
     protected function configure()
     {
-        $this->setName('sf:product-sign')
+        $this->setName('qh:product-sign')
             ->addOption('app-id', null, Option::VALUE_REQUIRED, '授权系统应用 ID')
             ->addOption('product', null, Option::VALUE_REQUIRED, 'v2 产品标识')
             ->addOption('aliases', null, Option::VALUE_REQUIRED, '逗号分隔的历史产品标识（凭据平滑迁移用）', '')

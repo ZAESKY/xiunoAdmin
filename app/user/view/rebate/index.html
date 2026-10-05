@@ -34,13 +34,13 @@
                 <span>{:t('rebate.newest_first')}</span>
             </div>
             <div class="rebate-table-body">
-                <table id="SF_RebateTable" lay-filter="SF_RebateTable"></table>
+                <table id="QH_RebateTable" lay-filter="QH_RebateTable"></table>
             </div>
         </section>
     </div>
 </div>
 
-<script type="text/html" id="SF_RebateStatus">
+<script type="text/html" id="QH_RebateStatus">
     {{# if(d.status == 'settled'){ }}
     <span class="layui-badge layui-badge-green">{:t('rebate.status_settled')}</span>
     {{# } else if(d.status == 'pending'){ }}
@@ -277,7 +277,7 @@ layui.use(['table', 'layer', 'notice', 'admin'], function(){
     loadCode();
 
     var insTb = table.render({
-        elem: '#SF_RebateTable',
+        elem: '#QH_RebateTable',
         url: '{:url("/Rebate/myRebateList")}',
         method: 'post',
         page: true,
@@ -310,7 +310,7 @@ layui.use(['table', 'layer', 'notice', 'admin'], function(){
             {field: 'rebate_amount', title: '{:t("rebate.amount")}', width: 110, templet: function(d){
                 return '<span style="color:#36b368;font-weight:bold;">+'+d.rebate_amount+' {:t("accounting.currency_unit")}</span>';
             }},
-            {field: 'status', title: '{:t("common.status")}', width: 110, templet: '#SF_RebateStatus'},
+            {field: 'status', title: '{:t("common.status")}', width: 110, templet: '#QH_RebateStatus'},
             {field: 'settle_at', title: '{:t("rebate.estimated_settlement")}', minWidth: 165, templet: function(d){
                 if (d.status === 'settled') return d.settled_at || d.settle_at || '-';
                 if (d.status === 'pending') return d.settle_at || '-';

@@ -10,10 +10,10 @@ use think\console\Output;
 use think\facade\Db;
 
 /**
- * P1 回填：为存量 SF_auth 记录计算 authcode_hash
+ * P1 回填：为存量 QH_auth 记录计算 authcode_hash
  *
- *   php think sf:authcode-backfill --dry-run    先看影响面
- *   php think sf:authcode-backfill              实际回填
+ *   php think qh:authcode-backfill --dry-run    先看影响面
+ *   php think qh:authcode-backfill              实际回填
  *
  * 安全性：
  *   - 只写 authcode_hash / authcode_last4 / pepper_version 三列
@@ -26,7 +26,7 @@ class AuthcodeBackfill extends Command
 {
     protected function configure()
     {
-        $this->setName('sf:authcode-backfill')
+        $this->setName('qh:authcode-backfill')
             ->addOption('dry-run', null, Option::VALUE_NONE, '只统计不写入')
             ->addOption('batch', null, Option::VALUE_REQUIRED, '每批条数', '500')
             ->setDescription('为存量授权记录回填授权码哈希（P1）');

@@ -25,19 +25,19 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
             </form>
             <!-- 数据表格 -->
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-sm" data-dropdown="#userTbDrop{{d.LAY_INDEX}}" no-shade="true">
         {:t('common.more')}<i class="layui-icon layui-icon-drop" style="font-size: 12px;margin-right: 0;"></i></a>
     <!-- 下拉菜单 -->
@@ -65,7 +65,7 @@
 
         /* 渲染表格 */
         var insTb = table.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/Order/list")}',
             method: 'post',
             page: true,
@@ -89,18 +89,18 @@
             },
             cols: [[
                 {type: 'checkbox', fixed: true},
-                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true, templet: function (d) {
+                {field: 'id', title: 'ID', templet: '#QH_Tbid', sort: true, width: 80, fixed: true, templet: function (d) {
                         switch(d.status){
                             case 1:
-                                return '<span><span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                                return '<span><span class="layui-badge-dot layui-bg-qh-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
                             case 2:
-                                return '<span><span class="layui-badge-dot layui-bg-sf-yellow" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                                return '<span><span class="layui-badge-dot layui-bg-qh-yellow" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
                             case 3:
                                 return '<span><span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
                             case 4:
                                 return '<span><span class="layui-badge-dot layui-bg-gray" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
                             default:
-                                return '<span><span class="layui-badge-dot layui-bg-sf-purple" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
+                                return '<span><span class="layui-badge-dot layui-bg-qh-purple" style="height: 6px;width: 6px;position: relative;top: -2px"></span> '+d.id+'</span>';
                         }
                     }
                 },
@@ -145,7 +145,7 @@
                     }
                 },
                 {field: 'userid', title: '{:t("common_ui.user_id")}', minWidth: 100},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', minWidth: 100, templet: function (d) {
+                {field: 'status', title: '{:t("common.status")}', templet: '#QH_TbState', minWidth: 100, templet: function (d) {
                         switch(d.status){
                             case 1:
                                 return '<span class="layui-badge layui-badge-green">{:t('common_ui.status_completed')}</span>';
@@ -168,7 +168,7 @@
                         }
                     }
                 },
-                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', minWidth: 180}
             ]]
         });
 
@@ -181,22 +181,22 @@
             }
         }
         /* 表格搜索 */
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
 
         /* 表格工具条点击事件 */
-        table.on('tool(SF_Table)', function (obj) {
+        table.on('tool(QH_Table)', function (obj) {
             if (obj.event === 'del') { // 删除
                 doDel(obj);
             }
         });
 
         /* 表格头工具栏点击事件 */
-        table.on('toolbar(SF_Table)', function (obj) {
+        table.on('toolbar(QH_Table)', function (obj) {
             if (obj.event === 'del') { // 删除
-                var checkRows = table.checkStatus('SF_Table');
+                var checkRows = table.checkStatus('QH_Table');
                 if (checkRows.data.length === 0) {
                     notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                     return;
@@ -225,7 +225,7 @@
                     success: function(data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            table.reload('SF_Table');
+                            table.reload('QH_Table');
                             notice.msg(data.msg, {icon: 1, audio:'1'});
                         }else{
                             notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -260,7 +260,7 @@
                 success: function(data) {
                     notice.destroy();
                     if (data.code == 0) {
-                        table.reload('SF_Table');
+                        table.reload('QH_Table');
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
                         notice.msg(data.msg, {icon: 2, audio:'1'});

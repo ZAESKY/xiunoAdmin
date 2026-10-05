@@ -254,7 +254,7 @@ class AliPay extends PayBackend
         if (!$valid || !$this->completeOrder($srow, $trade_no)) {
             return $this->render('public/error', ['msg' => t('pay.status_verify_failed').' [errorCode:CheckPayStatusError]','time' => 5, 'url' => '/']);
         }
-        return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => sf_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
+        return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => qh_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
     }
 
     private function alipayConfig(): array
@@ -275,7 +275,7 @@ class AliPay extends PayBackend
         if (!$this->validAmount($expected) || !$this->validAmount($actual)) {
             return false;
         }
-        return sf_money_to_cents($expected) === sf_money_to_cents($actual);
+        return qh_money_to_cents($expected) === qh_money_to_cents($actual);
     }
 
     private function paymentSubject(string $subject): string

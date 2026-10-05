@@ -1,5 +1,5 @@
 -- ================================================================
--- SF授权系统 - 线上测试环境一键更新脚本
+-- QH授权系统 - 线上测试环境一键更新脚本
 -- 版本: 4.2.9 → 4.3.0
 -- 生成日期: 2026-05-04
 -- ================================================================
@@ -25,7 +25,7 @@ START TRANSACTION;
 
 -- 创建缺失的 balance_log 表（余额变动日志）
 -- 如果表已存在则跳过
-CREATE TABLE IF NOT EXISTS `SF_balance_log` (
+CREATE TABLE IF NOT EXISTS `QH_balance_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `type` varchar(30) DEFAULT 'recharge' COMMENT '类型: recharge/consume/refund/adjust',
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `SF_balance_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='余额变动日志';
 
 -- 创建缺失的 withdraw 表（提现记录）
-CREATE TABLE IF NOT EXISTS `SF_withdraw` (
+CREATE TABLE IF NOT EXISTS `QH_withdraw` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '申请人用户ID',
   `app_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '应用ID',
@@ -66,30 +66,30 @@ CREATE TABLE IF NOT EXISTS `SF_withdraw` (
 -- 第二部分：字段更新（可重复执行）
 -- ================================================================
 
--- 为 SF_user 增加 is_developer 字段（插件开发者标识）
+-- 为 QH_user 增加 is_developer 字段（插件开发者标识）
 -- 使用存储过程兼容不支持 IF NOT EXISTS 的 MySQL 版本
-DROP PROCEDURE IF EXISTS `sf_add_column`;
+DROP PROCEDURE IF EXISTS `qh_add_column`;
 DELIMITER $$
-CREATE PROCEDURE `sf_add_column`()
+CREATE PROCEDURE `qh_add_column`()
 BEGIN
   DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
 
-  -- SF_user.is_developer
+  -- QH_user.is_developer
   IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SF_user' AND COLUMN_NAME = 'is_developer') THEN
-    ALTER TABLE `SF_user` ADD COLUMN `is_developer` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为开发者' AFTER `appid`;
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QH_user' AND COLUMN_NAME = 'is_developer') THEN
+    ALTER TABLE `QH_user` ADD COLUMN `is_developer` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为开发者' AFTER `appid`;
   END IF;
 
-  -- SF_user.created_at
+  -- QH_user.created_at
   IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SF_user' AND COLUMN_NAME = 'created_at') THEN
-    ALTER TABLE `SF_user` ADD COLUMN `created_at` datetime DEFAULT NULL COMMENT '注册时间' AFTER `addtime`;
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QH_user' AND COLUMN_NAME = 'created_at') THEN
+    ALTER TABLE `QH_user` ADD COLUMN `created_at` datetime DEFAULT NULL COMMENT '注册时间' AFTER `addtime`;
   END IF;
 
 END$$
 DELIMITER ;
-CALL `sf_add_column`();
-DROP PROCEDURE IF EXISTS `sf_add_column`;
+CALL `qh_add_column`();
+DROP PROCEDURE IF EXISTS `qh_add_column`;
 
 -- ================================================================
 -- 第三部分：默认配置初始化（可重复执行）
@@ -97,20 +97,20 @@ DROP PROCEDURE IF EXISTS `sf_add_column`;
 
 -- 使用 INSERT ... ON DUPLICATE KEY UPDATE 确保幂等
 -- 插件销售平台抽成（默认开启，10%）
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
 SELECT 'plugin_commission_enabled', 'plugin_market', '启用插件销售平台抽成', '开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', 'bool', '1', '', '', '', ''
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_enabled');
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_config` WHERE `name` = 'plugin_commission_enabled');
 
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
 SELECT 'plugin_commission_rate', 'plugin_market', '插件销售平台抽成比例（%）', '仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。', 'number', '10.00', '', 'required', 'min="0" max="100" step="0.01"', ''
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_rate');
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_config` WHERE `name` = 'plugin_commission_rate');
 
-UPDATE `SF_config`
+UPDATE `QH_config`
 SET `group`='plugin_market', `title`='启用插件销售平台抽成',
     `tip`='开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', `type`='bool'
 WHERE `name`='plugin_commission_enabled';
 
-UPDATE `SF_config`
+UPDATE `QH_config`
 SET `group`='plugin_market', `title`='插件销售平台抽成比例（%）',
     `tip`='仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。',
     `type`='number', `rule`='required', `extend`='min="0" max="100" step="0.01"'
@@ -121,29 +121,29 @@ WHERE `name`='plugin_commission_rate';
 -- ================================================================
 
 -- 由于模板管理功能已废弃，删除已存在的模板配置菜单
-DELETE FROM `SF_menu` WHERE `url` = 'Set/template';
+DELETE FROM `QH_menu` WHERE `url` = 'Set/template';
 
 -- 确保插件市场菜单在用户端存在（如果不存在则插入）
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件市场', 'UserPlugin/market', 'layui-icon-template-1', 0, NOW(), 1, 1
 FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/market' AND `parentid` = 0);
+WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/market' AND `parentid` = 0);
 
 -- 确保用户端"我的插件"菜单存在
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '我的插件', 'UserPlugin/list', '',
-  (SELECT id FROM `SF_menu` WHERE `url` = 'UserPlugin/market' AND `parentid` = 0 LIMIT 1),
+  (SELECT id FROM `QH_menu` WHERE `url` = 'UserPlugin/market' AND `parentid` = 0 LIMIT 1),
   NOW(), 1, 1
 FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/list');
+WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/list');
 
 -- ================================================================
 -- 第五部分：数据修复
 -- ================================================================
 
--- 修复 SF_check_type 表数据（如果存在重复插入导致的不一致）
+-- 修复 QH_check_type 表数据（如果存在重复插入导致的不一致）
 -- 确保默认检查类型存在
-INSERT IGNORE INTO `SF_check_type` (`name`, `type`, `addtime`, `status`) VALUES
+INSERT IGNORE INTO `QH_check_type` (`name`, `type`, `addtime`, `status`) VALUES
 ('域名', 'domain', NOW(), 1),
 ('QQ', 'qq', NOW(), 1),
 ('机器码', 'machineCode', NOW(), 1);
@@ -156,31 +156,31 @@ INSERT IGNORE INTO `SF_check_type` (`name`, `type`, `addtime`, `status`) VALUES
 -- 第八部分：插件发布类型字段
 -- ================================================================
 
-DROP PROCEDURE IF EXISTS `sf_add_plugin_publish`;
+DROP PROCEDURE IF EXISTS `qh_add_plugin_publish`;
 DELIMITER $$
-CREATE PROCEDURE `sf_add_plugin_publish`()
+CREATE PROCEDURE `qh_add_plugin_publish`()
 BEGIN
   DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
 
-  -- SF_plugin.publish_type (0=立即发布, 1=定时发布)
+  -- QH_plugin.publish_type (0=立即发布, 1=定时发布)
   IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SF_plugin' AND COLUMN_NAME = 'publish_type') THEN
-    ALTER TABLE `SF_plugin` ADD COLUMN `publish_type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '发布类型:0=立即发布,1=定时发布' AFTER `published_at`;
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QH_plugin' AND COLUMN_NAME = 'publish_type') THEN
+    ALTER TABLE `QH_plugin` ADD COLUMN `publish_type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '发布类型:0=立即发布,1=定时发布' AFTER `published_at`;
   END IF;
 
-  -- SF_plugin.publish_time (定时发布时间)
+  -- QH_plugin.publish_time (定时发布时间)
   IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'SF_plugin' AND COLUMN_NAME = 'publish_time') THEN
-    ALTER TABLE `SF_plugin` ADD COLUMN `publish_time` datetime DEFAULT NULL COMMENT '定时发布时间' AFTER `publish_type`;
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'QH_plugin' AND COLUMN_NAME = 'publish_time') THEN
+    ALTER TABLE `QH_plugin` ADD COLUMN `publish_time` datetime DEFAULT NULL COMMENT '定时发布时间' AFTER `publish_type`;
   END IF;
 
 END$$
 DELIMITER ;
-CALL `sf_add_plugin_publish`();
-DROP PROCEDURE IF EXISTS `sf_add_plugin_publish`;
+CALL `qh_add_plugin_publish`();
+DROP PROCEDURE IF EXISTS `qh_add_plugin_publish`;
 
 -- 已上架的旧数据默认设为立即发布
-UPDATE `SF_plugin` SET `publish_type` = 0 WHERE `publish_type` IS NULL AND `status` = 1;
+UPDATE `QH_plugin` SET `publish_type` = 0 WHERE `publish_type` IS NULL AND `status` = 1;
 
 COMMIT;
 
@@ -191,18 +191,18 @@ COMMIT;
 -- 如需回滚，请执行以下 SQL：
 --
 -- -- 回滚新增字段
--- ALTER TABLE `SF_user` DROP COLUMN IF EXISTS `is_developer`;
--- ALTER TABLE `SF_user` DROP COLUMN IF EXISTS `created_at`;
+-- ALTER TABLE `QH_user` DROP COLUMN IF EXISTS `is_developer`;
+-- ALTER TABLE `QH_user` DROP COLUMN IF EXISTS `created_at`;
 --
 -- -- 恢复模板配置菜单（如果需要）
--- INSERT IGNORE INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+-- INSERT IGNORE INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 -- VALUES ('模板配置', 'Set/template', '',
---   (SELECT id FROM (SELECT id FROM `SF_menu` WHERE `url` = 'Set/index' LIMIT 1) AS t),
+--   (SELECT id FROM (SELECT id FROM `QH_menu` WHERE `url` = 'Set/index' LIMIT 1) AS t),
 --   NOW(), 1, 1);
 --
 -- -- 注意：balance_log 和 withdraw 表如果已有新数据请不要删除
--- -- DROP TABLE IF EXISTS `SF_balance_log`;
--- -- DROP TABLE IF EXISTS `SF_withdraw`;
+-- -- DROP TABLE IF EXISTS `QH_balance_log`;
+-- -- DROP TABLE IF EXISTS `QH_withdraw`;
 
 -- ================================================================
 -- 第七部分：验证查询
@@ -211,15 +211,15 @@ COMMIT;
 -- 执行以下查询验证更新成功：
 --
 -- 1. 检查表是否创建成功：
---    SHOW TABLES LIKE 'SF_balance_log';
---    SHOW TABLES LIKE 'SF_withdraw';
+--    SHOW TABLES LIKE 'QH_balance_log';
+--    SHOW TABLES LIKE 'QH_withdraw';
 --
 -- 2. 检查字段是否新增成功：
---    SHOW COLUMNS FROM `SF_user` LIKE 'is_developer';
---    SHOW COLUMNS FROM `SF_user` LIKE 'created_at';
+--    SHOW COLUMNS FROM `QH_user` LIKE 'is_developer';
+--    SHOW COLUMNS FROM `QH_user` LIKE 'created_at';
 --
 -- 3. 检查模板菜单是否已删除：
---    SELECT * FROM `SF_menu` WHERE `url` = 'Set/template';  -- 应返回空
+--    SELECT * FROM `QH_menu` WHERE `url` = 'Set/template';  -- 应返回空
 --
 -- 4. 检查配置是否存在：
---    SELECT * FROM `SF_config` WHERE `name` = 'plugin_commission_rate';
+--    SELECT * FROM `QH_config` WHERE `name` = 'plugin_commission_rate';

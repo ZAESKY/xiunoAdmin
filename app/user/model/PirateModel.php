@@ -74,12 +74,12 @@ class PirateModel extends BaseModel
         if(!$row){
             return message(t('pirate.not_exist') ,false);
         }
-        $allmoney = sf_money_apply_rate($userAppInfo['pirate_money'], $userPowerPriceInfo['pirate_discount']);
+        $allmoney = qh_money_apply_rate($userAppInfo['pirate_money'], $userPowerPriceInfo['pirate_discount']);
         if($allmoney > $userInfo['balance']){
             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
         }
 
-        $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
+        $remainderBalance = qh_money_subtract($userInfo['balance'], $allmoney);
 
         try{
             $result = parent::updateUserInfo(['balance' => $remainderBalance], '查看盗版信息 -'.$allmoney.' 元');
@@ -113,8 +113,8 @@ class PirateModel extends BaseModel
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
 
             $data = [];

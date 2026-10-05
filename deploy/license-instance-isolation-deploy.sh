@@ -14,8 +14,8 @@ DEPLOYMENT_STAMP="$2"
 case "$DEPLOYMENT_STAMP" in *[!0-9_]*|'') echo "invalid deployment stamp" >&2; exit 64 ;; esac
 
 BACKUP_DIR="$BACKUP_ROOT/license_instance_isolation_$DEPLOYMENT_STAMP"
-SNAP_LICENSE="SF_deploy_license_$DEPLOYMENT_STAMP"
-SNAP_SITE="SF_deploy_site_$DEPLOYMENT_STAMP"
+SNAP_LICENSE="QH_deploy_license_$DEPLOYMENT_STAMP"
+SNAP_SITE="QH_deploy_site_$DEPLOYMENT_STAMP"
 CLIENT_CNF=""
 FILES_CHANGED=0
 DATABASE_TOUCHED=0
@@ -55,12 +55,12 @@ rollback() {
     fi
     if [ "$DATABASE_TOUCHED" -eq 1 ] && [ "$SNAPSHOT_READY" -eq 1 ] && [ -n "$CLIENT_CNF" ]; then
       "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" <<SQL
-DELETE live FROM \`SF_license_site\` AS live
+DELETE live FROM \`QH_license_site\` AS live
 INNER JOIN \`$SNAP_LICENSE\` AS lic ON lic.license_id = live.license_id;
-INSERT INTO \`SF_license_site\` SELECT * FROM \`$SNAP_SITE\`;
-DELETE live FROM \`SF_license\` AS live
+INSERT INTO \`QH_license_site\` SELECT * FROM \`$SNAP_SITE\`;
+DELETE live FROM \`QH_license\` AS live
 INNER JOIN \`$SNAP_LICENSE\` AS old ON old.id = live.id;
-INSERT INTO \`SF_license\` SELECT * FROM \`$SNAP_LICENSE\`;
+INSERT INTO \`QH_license\` SELECT * FROM \`$SNAP_LICENSE\`;
 SQL
     fi
     if [ "$SNAPSHOT_READY" -eq 1 ] && [ -n "$CLIENT_CNF" ]; then
@@ -118,7 +118,7 @@ unset DB_PASS
 MYSQL_BIN="$(command -v mysql || true)"; MYSQL_BIN="${MYSQL_BIN:-/www/server/mysql/bin/mysql}"
 DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/mysql/bin/mysqldump}"
 "$DUMP_BIN" --defaults-extra-file="$CLIENT_CNF" --single-transaction --quick --no-tablespaces \
-  "$DB_NAME" SF_license SF_license_site SF_auth SF_license_event > "$BACKUP_DIR/affected_tables.sql"
+  "$DB_NAME" QH_license QH_license_site QH_auth QH_license_event > "$BACKUP_DIR/affected_tables.sql"
 [ "$(wc -c < "$BACKUP_DIR/affected_tables.sql")" -gt 1024 ]
 grep -q 'Dump completed' "$BACKUP_DIR/affected_tables.sql"
 sha256sum "$BACKUP_DIR/affected_tables.sql" > "$BACKUP_DIR/affected_tables.sql.sha256"
@@ -126,17 +126,17 @@ chmod 600 "$BACKUP_DIR/affected_tables.sql" "$BACKUP_DIR/affected_tables.sql.sha
 
 echo "[3/8] 验证错误合并记录的唯一性"
 license_rows="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license WHERE license_id LIKE '${LICENSE_PREFIX}%' AND source_auth_id=$LOCAL_SOURCE_ID AND bound_host='$ONLINE_HOST' AND secret_hash LIKE '${LOCAL_OLD_SECRET_PREFIX}%' AND previous_secret_hash LIKE '${ONLINE_SECRET_PREFIX}%'")"
+  "SELECT COUNT(*) FROM QH_license WHERE license_id LIKE '${LICENSE_PREFIX}%' AND source_auth_id=$LOCAL_SOURCE_ID AND bound_host='$ONLINE_HOST' AND secret_hash LIKE '${LOCAL_OLD_SECRET_PREFIX}%' AND previous_secret_hash LIKE '${ONLINE_SECRET_PREFIX}%'")"
 source_rows="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_auth WHERE (id=$ONLINE_SOURCE_ID AND LOWER(auth_info)='$ONLINE_HOST') OR (id=$LOCAL_SOURCE_ID AND LOWER(auth_info)='$LOCAL_HOST')")"
+  "SELECT COUNT(*) FROM QH_auth WHERE (id=$ONLINE_SOURCE_ID AND LOWER(auth_info)='$ONLINE_HOST') OR (id=$LOCAL_SOURCE_ID AND LOWER(auth_info)='$LOCAL_HOST')")"
 duplicate_code="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(DISTINCT authcode) FROM SF_auth WHERE id IN ($ONLINE_SOURCE_ID,$LOCAL_SOURCE_ID)")"
+  "SELECT COUNT(DISTINCT authcode) FROM QH_auth WHERE id IN ($ONLINE_SOURCE_ID,$LOCAL_SOURCE_ID)")"
 source_taken="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license WHERE source_auth_id=$ONLINE_SOURCE_ID")"
+  "SELECT COUNT(*) FROM QH_license WHERE source_auth_id=$ONLINE_SOURCE_ID")"
 previous_rows="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license WHERE previous_secret_hash<>'' OR previous_secret_enc<>'' OR previous_secret_expires_at IS NOT NULL")"
+  "SELECT COUNT(*) FROM QH_license WHERE previous_secret_hash<>'' OR previous_secret_enc<>'' OR previous_secret_expires_at IS NOT NULL")"
 stale_sites="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license_site s JOIN SF_license l ON l.license_id=s.license_id WHERE l.license_id LIKE '${LICENSE_PREFIX}%' AND LOWER(s.host)='$LOCAL_HOST' AND s.status=0")"
+  "SELECT COUNT(*) FROM QH_license_site s JOIN QH_license l ON l.license_id=s.license_id WHERE l.license_id LIKE '${LICENSE_PREFIX}%' AND LOWER(s.host)='$LOCAL_HOST' AND s.status=0")"
 [ "$license_rows" = 1 ] && [ "$source_rows" = 2 ] && [ "$duplicate_code" = 1 ] \
   && [ "$source_taken" = 0 ] && [ "$stale_sites" -ge 1 ] || {
     echo "线上数据与预期修复前状态不一致，拒绝自动修改" >&2; exit 1;
@@ -144,10 +144,10 @@ stale_sites="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B
 [ "$previous_rows" = 1 ] || { echo "存在预期外的兼容密钥记录，拒绝批量清理" >&2; exit 1; }
 
 "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" <<SQL
-CREATE TABLE \`$SNAP_LICENSE\` LIKE \`SF_license\`;
-INSERT INTO \`$SNAP_LICENSE\` SELECT * FROM \`SF_license\` WHERE license_id LIKE '${LICENSE_PREFIX}%';
-CREATE TABLE \`$SNAP_SITE\` LIKE \`SF_license_site\`;
-INSERT INTO \`$SNAP_SITE\` SELECT s.* FROM \`SF_license_site\` s INNER JOIN \`$SNAP_LICENSE\` l ON l.license_id=s.license_id;
+CREATE TABLE \`$SNAP_LICENSE\` LIKE \`QH_license\`;
+INSERT INTO \`$SNAP_LICENSE\` SELECT * FROM \`QH_license\` WHERE license_id LIKE '${LICENSE_PREFIX}%';
+CREATE TABLE \`$SNAP_SITE\` LIKE \`QH_license_site\`;
+INSERT INTO \`$SNAP_SITE\` SELECT s.* FROM \`QH_license_site\` s INNER JOIN \`$SNAP_LICENSE\` l ON l.license_id=s.license_id;
 SQL
 SNAPSHOT_READY=1
 
@@ -155,9 +155,9 @@ echo "[4/8] 拆分授权实例并撤销旧兼容密钥"
 DATABASE_TOUCHED=1
 "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" <<SQL
 START TRANSACTION;
-UPDATE \`SF_license\`
+UPDATE \`QH_license\`
 SET source_auth_id=$ONLINE_SOURCE_ID,
-    user_id=(SELECT userid FROM \`SF_auth\` WHERE id=$ONLINE_SOURCE_ID),
+    user_id=(SELECT userid FROM \`QH_auth\` WHERE id=$ONLINE_SOURCE_ID),
     secret_hash=previous_secret_hash,
     secret_enc=previous_secret_enc,
     previous_secret_hash='',
@@ -167,12 +167,12 @@ SET source_auth_id=$ONLINE_SOURCE_ID,
 WHERE license_id LIKE '${LICENSE_PREFIX}%'
   AND source_auth_id=$LOCAL_SOURCE_ID
   AND bound_host='$ONLINE_HOST';
-DELETE s FROM \`SF_license_site\` s
-INNER JOIN \`SF_license\` l ON l.license_id=s.license_id
+DELETE s FROM \`QH_license_site\` s
+INNER JOIN \`QH_license\` l ON l.license_id=s.license_id
 WHERE l.license_id LIKE '${LICENSE_PREFIX}%'
   AND LOWER(s.host)='$LOCAL_HOST'
   AND s.status=0;
-UPDATE \`SF_license\`
+UPDATE \`QH_license\`
 SET previous_secret_hash='', previous_secret_enc='', previous_secret_expires_at=NULL
 WHERE previous_secret_hash<>'' OR previous_secret_enc<>'' OR previous_secret_expires_at IS NOT NULL;
 COMMIT;
@@ -196,11 +196,11 @@ for rel in "${FILES[@]}"; do
 done
 "$PHP_BIN" think clear
 repaired="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license WHERE license_id LIKE '${LICENSE_PREFIX}%' AND source_auth_id=$ONLINE_SOURCE_ID AND bound_host='$ONLINE_HOST' AND secret_hash LIKE '${ONLINE_SECRET_PREFIX}%' AND previous_secret_hash=''")"
+  "SELECT COUNT(*) FROM QH_license WHERE license_id LIKE '${LICENSE_PREFIX}%' AND source_auth_id=$ONLINE_SOURCE_ID AND bound_host='$ONLINE_HOST' AND secret_hash LIKE '${ONLINE_SECRET_PREFIX}%' AND previous_secret_hash=''")"
 stale_after="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license_site s JOIN SF_license l ON l.license_id=s.license_id WHERE l.license_id LIKE '${LICENSE_PREFIX}%' AND LOWER(s.host)='$LOCAL_HOST'")"
+  "SELECT COUNT(*) FROM QH_license_site s JOIN QH_license l ON l.license_id=s.license_id WHERE l.license_id LIKE '${LICENSE_PREFIX}%' AND LOWER(s.host)='$LOCAL_HOST'")"
 previous_nonempty="$("$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e \
-  "SELECT COUNT(*) FROM SF_license WHERE previous_secret_hash<>'' OR previous_secret_enc<>'' OR previous_secret_expires_at IS NOT NULL")"
+  "SELECT COUNT(*) FROM QH_license WHERE previous_secret_hash<>'' OR previous_secret_enc<>'' OR previous_secret_expires_at IS NOT NULL")"
 [ "$repaired" = 1 ] && [ "$stale_after" = 0 ] && [ "$previous_nonempty" = 0 ]
 grep -q 'function selectActivationSource' app/common/service/LicenseService.php
 grep -q "'site_not_bound'" app/common/service/LicenseAuthService.php

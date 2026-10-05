@@ -12,8 +12,8 @@ class BalanceLog extends UserBackend
     {
         if (IS_POST) {
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 15);
-            $page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 15);
+            $page = qh_page_number($post['current_page'] ?? null);
             $list = BalanceLogModel::where('user_id', $this->userId)
                 ->order('id', 'desc')
                 ->paginate(['list_rows' => $limit, 'page' => $page]);

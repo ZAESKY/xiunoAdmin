@@ -1,9 +1,9 @@
 -- 返利/折扣码功能 — 数据库迁移
 -- 说明: 兼容旧库升级和新库初始化后的重复执行。
 
-DROP PROCEDURE IF EXISTS SF_ADD_COLUMN_IF_MISSING;
+DROP PROCEDURE IF EXISTS QH_ADD_COLUMN_IF_MISSING;
 DELIMITER $$
-CREATE PROCEDURE SF_ADD_COLUMN_IF_MISSING(
+CREATE PROCEDURE QH_ADD_COLUMN_IF_MISSING(
   IN p_table_name VARCHAR(64),
   IN p_column_name VARCHAR(64),
   IN p_column_definition TEXT
@@ -16,22 +16,22 @@ BEGIN
       AND TABLE_NAME = p_table_name
       AND COLUMN_NAME = p_column_name
   ) THEN
-    SET @sf_sql = CONCAT('ALTER TABLE `', p_table_name, '` ADD COLUMN ', p_column_definition);
-    PREPARE sf_stmt FROM @sf_sql;
-    EXECUTE sf_stmt;
-    DEALLOCATE PREPARE sf_stmt;
+    SET @qh_sql = CONCAT('ALTER TABLE `', p_table_name, '` ADD COLUMN ', p_column_definition);
+    PREPARE qh_stmt FROM @qh_sql;
+    EXECUTE qh_stmt;
+    DEALLOCATE PREPARE qh_stmt;
   END IF;
 END$$
 DELIMITER ;
 
 -- power_price 新增返利配置字段
-CALL SF_ADD_COLUMN_IF_MISSING('SF_power_price', 'rebate_enabled', '`rebate_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT ''启用返利 0=否 1=是''');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_power_price', 'rebate_rate', '`rebate_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT ''返利比例(%)，如5.00=5%''');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_power_price', 'discount_code_enabled', '`discount_code_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT ''启用折扣码功能 0=否 1=是''');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_user', 'withdrawable_balance', '`withdrawable_balance` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT ''可提现收益余额，为总余额的子集'' AFTER `balance`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_power_price', 'rebate_enabled', '`rebate_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT ''启用返利 0=否 1=是''');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_power_price', 'rebate_rate', '`rebate_rate` decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT ''返利比例(%)，如5.00=5%''');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_power_price', 'discount_code_enabled', '`discount_code_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT ''启用折扣码功能 0=否 1=是''');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_user', 'withdrawable_balance', '`withdrawable_balance` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT ''可提现收益余额，为总余额的子集'' AFTER `balance`');
 
 -- 折扣码表
-CREATE TABLE IF NOT EXISTS `SF_discount_code` (
+CREATE TABLE IF NOT EXISTS `QH_discount_code` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '所属用户ID',
   `code` varchar(32) NOT NULL COMMENT '唯一折扣码',
@@ -44,10 +44,10 @@ CREATE TABLE IF NOT EXISTS `SF_discount_code` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='折扣码表';
 
 -- 返利记录表
-CREATE TABLE IF NOT EXISTS `SF_rebate_record` (
+CREATE TABLE IF NOT EXISTS `QH_rebate_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) unsigned NOT NULL COMMENT 'SF_order.id',
-  `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'SF_pay.trade_no',
+  `order_id` int(11) unsigned NOT NULL COMMENT 'QH_order.id',
+  `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'QH_pay.trade_no',
   `payer_user_id` int(11) unsigned NOT NULL COMMENT '付款用户ID',
   `referrer_user_id` int(11) unsigned NOT NULL COMMENT '返利归属用户ID（折扣码所有者）',
   `discount_code` varchar(32) NOT NULL COMMENT '使用的折扣码',
@@ -68,13 +68,13 @@ CREATE TABLE IF NOT EXISTS `SF_rebate_record` (
   KEY `idx_status_settle_at` (`status`,`settle_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='返利记录表';
 
-CALL SF_ADD_COLUMN_IF_MISSING('SF_rebate_record', 'rebate_base_amount', '`rebate_base_amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT ''返利计算基数（充值面额）'' AFTER `paid_amount`');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_rebate_record', 'settle_at', '`settle_at` datetime DEFAULT NULL COMMENT ''预计结算时间'' AFTER `status`');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_rebate_record', 'settled_at', '`settled_at` datetime DEFAULT NULL COMMENT ''实际结算时间'' AFTER `settle_at`');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_rebate_record', 'risk_reason', '`risk_reason` varchar(255) NOT NULL DEFAULT '''' COMMENT ''内部风控原因'' AFTER `settled_at`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_rebate_record', 'rebate_base_amount', '`rebate_base_amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT ''返利计算基数（充值面额）'' AFTER `paid_amount`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_rebate_record', 'settle_at', '`settle_at` datetime DEFAULT NULL COMMENT ''预计结算时间'' AFTER `status`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_rebate_record', 'settled_at', '`settled_at` datetime DEFAULT NULL COMMENT ''实际结算时间'' AFTER `settle_at`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_rebate_record', 'risk_reason', '`risk_reason` varchar(255) NOT NULL DEFAULT '''' COMMENT ''内部风控原因'' AFTER `settled_at`');
 
 -- pay/order 表增加折扣码字段
-CALL SF_ADD_COLUMN_IF_MISSING('SF_pay', 'discount_code', '`discount_code` varchar(32) DEFAULT NULL COMMENT ''使用的折扣码''');
-CALL SF_ADD_COLUMN_IF_MISSING('SF_order', 'discount_code', '`discount_code` varchar(32) DEFAULT NULL COMMENT ''使用的折扣码''');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_pay', 'discount_code', '`discount_code` varchar(32) DEFAULT NULL COMMENT ''使用的折扣码''');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_order', 'discount_code', '`discount_code` varchar(32) DEFAULT NULL COMMENT ''使用的折扣码''');
 
-DROP PROCEDURE IF EXISTS SF_ADD_COLUMN_IF_MISSING;
+DROP PROCEDURE IF EXISTS QH_ADD_COLUMN_IF_MISSING;

@@ -27,7 +27,7 @@ class CheckLogin
                 $redirect = '';
                 $path = '/' . ltrim((string)$request->pathinfo(), '/');
                 if (in_array($path, ['/UserPlugin/detail', '/UserPlugin/detail.html'], true)) {
-                    $redirect = sf_plugin_detail_redirect(
+                    $redirect = qh_plugin_detail_redirect(
                         '/UserPlugin/detail.html?id=' . (int)$request->get('id', 0)
                     );
                 }

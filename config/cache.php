@@ -16,7 +16,7 @@ return [
             // 缓存保存目录
             'path'       => env('cache.path', ''),
             // 缓存前缀
-            'prefix'     => env('cache.prefix', 'sf_admin:'),
+            'prefix'     => env('cache.prefix', 'qh_admin:'),
             // 缓存有效期 0表示永久缓存
             'expire'     => 0,
             // 缓存标签前缀
@@ -33,7 +33,7 @@ return [
             'port'     => (int) env('redis.port', 6379),
             'password' => env('redis.password', ''),
             'select'   => (int) env('redis.cache_database', 1),
-            'prefix'   => env('cache.prefix', 'sf_admin:'),
+            'prefix'   => env('cache.prefix', 'qh_admin:'),
         ],
         // 更多的缓存连接
     ],

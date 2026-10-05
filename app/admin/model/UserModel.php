@@ -44,7 +44,7 @@ class UserModel extends BaseModel
         $email = !empty($post['email'])?$post['email']:'';
         $phone = trim((string)($post['phone'] ?? ''));
         $phoneVerified = !empty($post['phone_verified']);
-        $balance = !empty($post['balance']) ? sf_money_format($post['balance']) : '0.00';
+        $balance = !empty($post['balance']) ? qh_money_format($post['balance']) : '0.00';
         $integral = !empty($post['integral'])?intval($post['integral']):0;
         $ip = !empty($post['ip'])?serialize(explode('|',$post['ip'])):'';
         $status = !empty($post['status'])?1:0;
@@ -87,7 +87,7 @@ class UserModel extends BaseModel
             $data = [
                 'power' => $power,
                 'username' => $username,
-                'password' => !empty($password) ? sf_password_make($password) : $row['password'],
+                'password' => !empty($password) ? qh_password_make($password) : $row['password'],
                 'qq' => $qq,
                 'email' => $email,
                 'balance' => $balance,
@@ -97,7 +97,7 @@ class UserModel extends BaseModel
                 'appid' => $appid,
                 'userid' => $userid
             ];
-            $oldBalance = sf_money_format($row['balance']);
+            $oldBalance = qh_money_format($row['balance']);
             Db::startTrans();
             try{
                 self::where('id', $id)
@@ -109,7 +109,7 @@ class UserModel extends BaseModel
                     return message($phoneResult['message'], false);
                 }
                 if ($balance != $oldBalance) {
-                    $diff = sf_money_subtract($balance, $oldBalance);
+                    $diff = qh_money_subtract($balance, $oldBalance);
                     BalanceLogModel::add($id, 'admin_edit', $diff, t('user_action.admin_balance_adjustment', [
                         'amount' => ($diff >= 0 ? '+' : '') . $diff,
                     ]));
@@ -138,7 +138,7 @@ class UserModel extends BaseModel
             $data = [
                 'power' => $power,
                 'username' => $username,
-                'password' => sf_password_make($password),
+                'password' => qh_password_make($password),
                 'qq' => $qq,
                 'phone' => '',
                 'phone_verified_at' => null,
@@ -242,8 +242,8 @@ class UserModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($post['appid'])?$post['appid']:null;
             $userid = isset($post['userid']) && $post['userid'] !== '' ? intval($post['userid']) : null;
             $power = isset($post['power']) && $post['power'] !== '' ? intval($post['power']) : null;

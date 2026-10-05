@@ -10,7 +10,7 @@
 /tests/
 /vendor/
 /public/upload/
-/deploy/sf_admin_*.tar.gz
+/deploy/*_admin_*.tar.gz
 /forum.html
 .DS_Store
 **/.DS_Store

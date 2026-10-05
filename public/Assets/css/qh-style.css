@@ -1,4 +1,4 @@
-.sf-tag {
+.qh-tag {
     width: 100%;
     padding: 12px;
     font-size: 12px;
@@ -12,14 +12,14 @@
     box-sizing: border-box;
     word-break:break-all;
 }
-.sf-tag a {
+.qh-tag a {
     display: inline-block;
     font-size: 12px;
     font-weight: 400;
     color: #006FF6;
     line-height: 17px;
 }
-.sf-tips {
+.qh-tips {
     margin-top: 12px;
     padding: 14px 16px;
     font-size: 12px;
@@ -32,7 +32,7 @@
     box-sizing: border-box;
     word-break:break-all;
 }
-.sf-tips a {
+.qh-tips a {
     display: inline-block;
     font-size: 12px;
     font-weight: 400;
@@ -52,7 +52,7 @@
     cursor: pointer;
     margin: 0 auto;
 }
-.sf-layer-ico {
+.qh-layer-ico {
     background: url('/Assets/libs/layui/css/modules/layer/default/icon.png') no-repeat;
     width: 30px;
     height: 30px;
@@ -80,7 +80,7 @@
     width: 110px;
     height: 110px;
 }
-.sf-upload-logo {
+.qh-upload-logo {
     width: 80px;
     height: 80px;
     line-height: 80px;
@@ -93,7 +93,7 @@
     margin: 0 auto;
 }
 
-.sf-upload-logo:hover:after {
+.qh-upload-logo:hover:after {
     content: '\e681';
     position: absolute;
     top: 0;
@@ -110,7 +110,7 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-.sf-upload-logo img {
+.qh-upload-logo img {
     width: 80px;
     height: 80px;
 }
@@ -172,7 +172,7 @@
 .user-bd-list-item .user-bd-list-img + .user-bd-list-content {
     margin-left: 68px;
 }
-.sf-avatar {
+.qh-avatar {
     display: inline-block;
     text-align: center;
     background: #ccc;
@@ -186,22 +186,22 @@
     line-height: 32px;
     border-radius: 50%;
 }
-.sf-avatar.sf-avatar-icon {
+.qh-avatar.qh-avatar-icon {
     font-size: 18px;
 }
-.sf-avatar-small {
+.qh-avatar-small {
     width: 24px;
     height: 24px;
     line-height: 24px;
     border-radius: 50%;
 }
-.sf-avatar-small.ivu-avatar-icon {
+.qh-avatar-small.ivu-avatar-icon {
     font-size: 12px;
 }
-.sf-avatar-image {
+.qh-avatar-image {
     background: transparent;
 }
-.sf-avatar-large {
+.qh-avatar-large {
     width: 40px;
     height: 40px;
     line-height: 40px;
@@ -309,27 +309,27 @@
     font-size: 12px;
     padding-top: 6px;
 }
-.sf-avatar-blue{
+.qh-avatar-blue{
     color: rgb(64, 169, 255);
     background-color: rgb(230, 247, 255);
 }
-.sf-avatar-purple{
+.qh-avatar-purple{
     color: rgb(146, 84, 222);
     background-color: rgb(249, 240, 255);
 }
-.sf-avatar-orange{
+.qh-avatar-orange{
     color: rgb(255, 169, 64);
     background-color: rgb(255, 247, 230);
 }
-.sf-avatar-green{
+.qh-avatar-green{
     color: rgb(115, 209, 61);
     background-color: rgb(246, 255, 237);
 }
-.sf-avatar-pink{
+.qh-avatar-pink{
     color: rgb(235, 47, 150);
     background-color: rgb(255, 240, 246);
 }
-.sf-avatar-red{
+.qh-avatar-red{
     color: rgb(255, 77, 79);
     background-color: rgb(255, 241, 240);
 }
@@ -529,42 +529,42 @@
     margin-top: 6px;
 }
 /** 自定义样式2 */
-#SF_Progress .circle-progress-circle {
+#QH_Progress .circle-progress-circle {
     stroke-width: 6px;
     stroke: #ccc;
     stroke-dasharray: 1 5;
     stroke-dashoffset: 1.6;
 }
 
-#SF_Progress .circle-progress-value {
+#QH_Progress .circle-progress-value {
     stroke: #43A3FB;
 }
 
-#SF_Progress.circle-progress-success .circle-progress-value {
+#QH_Progress.circle-progress-success .circle-progress-value {
     stroke: #00CC00;
 }
-#SF_Progress.circle-progress-danger .circle-progress-value {
+#QH_Progress.circle-progress-danger .circle-progress-value {
     stroke: #ff5722;
 }
-#SF_Progress.circle-progress-warning .circle-progress-value {
+#QH_Progress.circle-progress-warning .circle-progress-value {
     stroke: #ffb800;
 }
-#SF_Progress.circle-progress-info .circle-progress-value {
+#QH_Progress.circle-progress-info .circle-progress-value {
     stroke: #43A3FB;
 }
-#SF_Progress.circle-progress-success .circle-progress-text {
+#QH_Progress.circle-progress-success .circle-progress-text {
     fill: #00CC00;
 }
-#SF_Progress.circle-progress-danger .circle-progress-text {
+#QH_Progress.circle-progress-danger .circle-progress-text {
     fill: #ff5722;
 }
-#SF_Progress.circle-progress-warning .circle-progress-text {
+#QH_Progress.circle-progress-warning .circle-progress-text {
     fill: #ffb800;
 }
-#SF_Progress.circle-progress-info .circle-progress-text {
+#QH_Progress.circle-progress-info .circle-progress-text {
     fill: #43A3FB;
 }
-.sf-table {
+.qh-table {
     height:auto;
     overflow:visible;
     text-overflow:inherit;
@@ -590,7 +590,7 @@
 
 /* A wide right-fixed toolbar would cover the table. Keep it in the normal
  * table flow so users can reach it with the standard horizontal scrollbar. */
-.layui-table-view.sf-action-columns-scroll > .layui-table-box > .layui-table-fixed-r {
+.layui-table-view.qh-action-columns-scroll > .layui-table-box > .layui-table-fixed-r {
     display: none !important;
 }
 /** 应用列表样式 */
@@ -766,21 +766,21 @@
 .sec-item .dot.info { background: #3a6fd8; }
 
 /* Circle progress overrides for dashboard */
-#SF_Progress .circle-progress-circle {
+#QH_Progress .circle-progress-circle {
   stroke-width: 5px;
   stroke: #e8eaed;
   stroke-dasharray: 1 4;
   stroke-dashoffset: 1.4;
 }
-#SF_Progress .circle-progress-value { stroke: #3a6fd8; }
-#SF_Progress.circle-progress-success .circle-progress-value { stroke: #34a853; }
-#SF_Progress.circle-progress-danger .circle-progress-value { stroke: #e8553d; }
-#SF_Progress.circle-progress-warning .circle-progress-value { stroke: #faad14; }
-#SF_Progress.circle-progress-info .circle-progress-value { stroke: #3a6fd8; }
-#SF_Progress.circle-progress-success .circle-progress-text { fill: #34a853; }
-#SF_Progress.circle-progress-danger .circle-progress-text { fill: #e8553d; }
-#SF_Progress.circle-progress-warning .circle-progress-text { fill: #faad14; }
-#SF_Progress.circle-progress-info .circle-progress-text { fill: #3a6fd8; }
+#QH_Progress .circle-progress-value { stroke: #3a6fd8; }
+#QH_Progress.circle-progress-success .circle-progress-value { stroke: #34a853; }
+#QH_Progress.circle-progress-danger .circle-progress-value { stroke: #e8553d; }
+#QH_Progress.circle-progress-warning .circle-progress-value { stroke: #faad14; }
+#QH_Progress.circle-progress-info .circle-progress-value { stroke: #3a6fd8; }
+#QH_Progress.circle-progress-success .circle-progress-text { fill: #34a853; }
+#QH_Progress.circle-progress-danger .circle-progress-text { fill: #e8553d; }
+#QH_Progress.circle-progress-warning .circle-progress-text { fill: #faad14; }
+#QH_Progress.circle-progress-info .circle-progress-text { fill: #3a6fd8; }
 
 /* Button reset for hero actions */
 .hero-actions button {
@@ -811,17 +811,17 @@
   white-space: nowrap;
 }
 
-.sf-admin-shell .layui-header .layui-layout-right .sf-header-message {
+.qh-admin-shell .layui-header .layui-layout-right .qh-header-message {
   position: relative;
   min-width: 46px;
   text-align: center;
 }
 
-.sf-admin-shell .layui-header .layui-layout-right .sf-header-message .layui-icon {
+.qh-admin-shell .layui-header .layui-layout-right .qh-header-message .layui-icon {
   font-size: 18px;
 }
 
-.sf-admin-shell .layui-header .sf-notify-badge {
+.qh-admin-shell .layui-header .qh-notify-badge {
   position: absolute;
   top: 13px;
   right: 8px;
@@ -848,30 +848,30 @@
   }
 }
 
-.sf-form-label-compact {
+.qh-form-label-compact {
   height: 32px;
   border-radius: 4px;
 }
 
-.sf-form-input-compact {
+.qh-form-input-compact {
   border-radius: 0 4px 4px 0;
 }
 
-.sf-form-help {
+.qh-form-help {
   margin-top: 6px;
   color: #999;
   font-size: 12px;
 }
 
-.sf-download-help {
+.qh-download-help {
   line-height: 1.7;
 }
 
-.sf-code-field {
+.qh-code-field {
   padding-right: 135px;
 }
 
-.sf-code-button {
+.qh-code-button {
   position: absolute;
   top: 0;
   right: 0;
@@ -879,7 +879,7 @@
   cursor: pointer;
 }
 
-.sf-upload-mask {
+.qh-upload-mask {
   position: fixed;
   z-index: 999;
   top: 0;
@@ -891,7 +891,7 @@
   opacity: .8;
 }
 
-.sf-upload-loading {
+.qh-upload-loading {
   position: fixed;
   z-index: 9999;
   top: 200px;
@@ -904,7 +904,7 @@
   background: #fff;
   border-radius: 10px;
 }
-.sf-upload-mask {
+.qh-upload-mask {
     position: fixed;
     z-index: 999;
     inset: 0;
@@ -912,7 +912,7 @@
     background: rgba(0, 0, 0, .8);
 }
 
-.sf-upload-progress {
+.qh-upload-progress {
     position: fixed;
     z-index: 9999;
     top: 200px;
@@ -926,14 +926,14 @@
     background: #fff;
 }
 
-.sf-upload-icon {
+.qh-upload-icon {
     color: #2d8cf0;
 }
 
-.sf-upload-preview {
+.qh-upload-preview {
     max-width: 196px;
 }
 
-.sf-toggle-section {
+.qh-toggle-section {
     display: none;
 }

@@ -11,13 +11,13 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
             </form>
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
@@ -28,7 +28,7 @@ layui.use(['table', 'form', 'layer'], function(){
     var form = layui.form;
     var layer = layui.layer;
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/PointProduct/records")}',
         method: 'post',
         page: true,
@@ -48,11 +48,11 @@ layui.use(['table', 'form', 'layer'], function(){
             {title:'{:t("point_product.reward_details")}', width:110, align:'center', templet:function(){return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">{:t('common.view')}</a>';}}
         ]]
     });
-    form.on('submit(SF_TbSearch)', function(data){
+    form.on('submit(QH_TbSearch)', function(data){
         insTb.reload({where:data.field, page:{curr:1}});
         return false;
     });
-    table.on('tool(SF_Table)', function(obj){
+    table.on('tool(QH_Table)', function(obj){
         if(obj.event === 'detail'){
             layer.open({
                 title: '{:t("point_product.reward_details")}',

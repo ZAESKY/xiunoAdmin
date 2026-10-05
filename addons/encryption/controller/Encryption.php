@@ -76,7 +76,7 @@ class Encryption extends Backend
             }
 
             try{
-                $zip_name = 'SF_Encryption_'.time().'.zip';
+                $zip_name = 'QH_Encryption_'.time().'.zip';
                 $filePath = RUNTIME_PATH . DS . 'temp' . DS . 'upload' . DS . $filename;
                 $completePath = RUNTIME_PATH . DS . 'temp' . DS . 'upload' . DS . $zip_name;
                 $class = '\\addons\\encryption\\library\\' . self::$config[$type]['method'];

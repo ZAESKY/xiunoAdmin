@@ -118,7 +118,7 @@ class AuthModel extends BaseModel
             $replace_number = $row['replace_number'];
         }else{
             if($row['replace_number'] >= $appInfo['free_replace_number']){
-                $allmoney = sf_money_format($appInfo['replace_money']);
+                $allmoney = qh_money_format($appInfo['replace_money']);
             }else{
                 $allmoney = '0.00';
             }
@@ -147,12 +147,12 @@ class AuthModel extends BaseModel
                     if($differDay <= 0){
                         return message(t('auth.correct_expire_time') ,false);
                     }else{
-                        $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
-                        $allmoney = sf_money_add($allmoney, sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay));
+                        $price = qh_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                        $allmoney = qh_money_add($allmoney, qh_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay));
                     }
                 }else{
                     $price = $authPriceInfo['money'];
-                    $allmoney = sf_money_add($allmoney, sf_money_apply_rate($price, $powerPriceInfo['addauth_discount']));
+                    $allmoney = qh_money_add($allmoney, qh_money_apply_rate($price, $powerPriceInfo['addauth_discount']));
 
                     if($authPriceInfo['permanent_switch'] == 1){
                         $endtime = $row['endtime'];
@@ -172,7 +172,7 @@ class AuthModel extends BaseModel
         if($allmoney > $userInfo['balance']){
             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
         }
-        $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
+        $remainderBalance = qh_money_subtract($userInfo['balance'], $allmoney);
         $data = [
             'auth_info' => $auth_info,
             'qq' => $qq,
@@ -293,15 +293,15 @@ class AuthModel extends BaseModel
                         if($differDay <= 0){
                             return message(t('auth.correct_expire_time') ,false);
                         }else{
-                            $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
-                            $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay);
+                            $price = qh_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                            $allmoney = qh_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay);
                         }
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
-                        $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount']);
+                        $allmoney = qh_money_apply_rate($price, $powerPriceInfo['addauth_discount']);
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                         }
@@ -315,10 +315,10 @@ class AuthModel extends BaseModel
                 } catch (\Exception $e) {
                     return message(t('auth.get_price_failed').'[errorCode:GetAuthPriceInfoError]' ,false);
                 }
-                $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
+                $remainderBalance = qh_money_subtract($userInfo['balance'], $allmoney);
             }else{
                 $allmoney = '0.00';
-                $remainderBalance = sf_money_format($userInfo['balance']);
+                $remainderBalance = qh_money_format($userInfo['balance']);
                 $endtime = $row['endtime'];
                 $permanent_switch = $row['permanent_switch'];
             }
@@ -402,15 +402,15 @@ class AuthModel extends BaseModel
                     if($differDay <= 0){
                         return message(t('auth.correct_expire_time') ,false);
                     }else{
-                        $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
-                        $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay);
+                        $price = qh_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                        $allmoney = qh_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay);
                     }
                     if($allmoney > $userInfo['balance']){
                         return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                     }
                 }else{
                     $price = $authPriceInfo['money'];
-                    $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount']);
+                    $allmoney = qh_money_apply_rate($price, $powerPriceInfo['addauth_discount']);
                     if($allmoney > $userInfo['balance']){
                         return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                     }
@@ -424,7 +424,7 @@ class AuthModel extends BaseModel
             } catch (\Exception $e) {
                 return message(t('auth.get_price_failed').'[errorCode:GetAuthPriceInfoError]' ,false);
             }
-            $remainderBalance = sf_money_subtract($userInfo['balance'], $allmoney);
+            $remainderBalance = qh_money_subtract($userInfo['balance'], $allmoney);
 
             $row = self::where('qq', $qq)->field('sign,authcode')->find();
             if(empty($row)){
@@ -434,7 +434,7 @@ class AuthModel extends BaseModel
                 }else{
                     $sign = $row['sign'] + 1;
                 }
-                $authcode = sf_generate_authcode(); // A-01: 原 md5(time().$qq.'SF') 可离线推导
+                $authcode = qh_generate_authcode(); // A-01: 原 md5(time().$qq.'QH') 可离线推导
             }else{
                 $sign = $row['sign'];
                 $authcode = $row['authcode'];
@@ -616,8 +616,8 @@ class AuthModel extends BaseModel
         }
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             $data = $this->buildSearchWhere('id|auth_info|qq');
             if(!empty($appid)){
@@ -666,8 +666,8 @@ class AuthModel extends BaseModel
 
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             $data = $this->buildSearchWhere('id|auth_info|qq');
             if(!empty($appid)){

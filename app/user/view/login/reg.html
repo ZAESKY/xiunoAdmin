@@ -25,7 +25,7 @@
     }
 </style>
 <body style="background-image:url('{__IMG__}background.svg');background-size:cover;">
-<a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}" style="position:absolute;right:24px;top:18px;color:#fff;z-index:3;">{:t('common.lang_toggle')}</a>
+<a href="javascript:QH_LANG.toggle();" title="{:t('common.language')}" style="position:absolute;right:24px;top:18px;color:#fff;z-index:3;">{:t('common.lang_toggle')}</a>
 <div class="login-wrapper layui-anim layui-anim-scale">
     <form class="layui-form layui-card-body" id="registerCard" style="opacity:.95;">
         <div class="layui-form-item">
@@ -54,7 +54,7 @@
 
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script>window.QH_I18N_LOCALE = "{:t('common.lang_code')}"; window.QH_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}common.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
@@ -98,9 +98,9 @@ layui.use(['layer', 'notice'], function () {
     }
 
     $button.on('click', function () {
-        if (busy || !window.SfQqOauth) return;
+        if (busy || !window.QHQqOauth) return;
         setBusy(true);
-        SfQqOauth.start({
+        QHQqOauth.start({
             url: '/api.php/Social/register',
             data: {},
             onResult: handleResult,
@@ -108,8 +108,8 @@ layui.use(['layer', 'notice'], function () {
         });
     });
 
-    if (window.SfQqOauth) {
-        if (SfQqOauth.resume(handleResult, handleError)) setBusy(true);
+    if (window.QHQqOauth) {
+        if (QHQqOauth.resume(handleResult, handleError)) setBusy(true);
     } else if ($button.length) {
         $button.prop('disabled', true);
         notice.msg(registerText.componentFailed, {icon: 2});

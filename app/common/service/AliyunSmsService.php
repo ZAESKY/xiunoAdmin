@@ -129,7 +129,7 @@ final class AliyunSmsService
         if (!is_array($data)) {
             return self::failure($status === 200 ? '短信服务返回格式异常' : '短信服务返回异常', 'INVALID_RESPONSE');
         }
-        $requestId = sf_plain_text($data['RequestId'] ?? '', 128);
+        $requestId = qh_plain_text($data['RequestId'] ?? '', 128);
         $providerCode = trim((string)($data['Code'] ?? ''));
         if ($status >= 200 && $status < 300 && strtoupper($providerCode) === 'OK') {
             return [

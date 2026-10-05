@@ -120,7 +120,7 @@ class CdkeyModel extends BaseModel
                             }else{
                                 $sign = $result['sign'] + 1;
                             }
-                            $authcode = sf_generate_authcode(); // A-01: 原 md5(time().$qq.'SF') 可离线推导
+                            $authcode = qh_generate_authcode(); // A-01: 原 md5(time().$qq.'QH') 可离线推导
                         }else{
                             $sign = $result['sign'];
                             $authcode = $result['authcode'];
@@ -234,7 +234,7 @@ class CdkeyModel extends BaseModel
                                 ->where('id', $userInfo['id'])
                                 ->inc('balance', $info['balance'])
                                 ->update();
-                            \app\common\model\BalanceLogModel::add($userInfo['id'], 'cdkey_exchange', sf_money_format($info['balance']), '卡密兑换余额 +'.$info['balance'].' 元');
+                            \app\common\model\BalanceLogModel::add($userInfo['id'], 'cdkey_exchange', qh_money_format($info['balance']), '卡密兑换余额 +'.$info['balance'].' 元');
                             // 提交事务
                             Db::commit();
                             return message(t('cdkey.exchange_balance_success'), true);
@@ -350,15 +350,15 @@ class CdkeyModel extends BaseModel
                         if($differDay <= 0){
                             return message(t('auth.correct_expire_time') ,false);
                         }else{
-                            $price = sf_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
-                            $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay * $number);
+                            $price = qh_money_daily_rate($authPriceInfo['money'], $authPriceInfo['day']);
+                            $allmoney = qh_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $differDay * $number);
                         }
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]) ,false);
                         }
                     }else{
                         $price = $authPriceInfo['money'];
-                        $allmoney = sf_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $number);
+                        $allmoney = qh_money_apply_rate($price, $powerPriceInfo['addauth_discount'], $number);
                         if($allmoney > $userInfo['balance']){
                             return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                         }
@@ -385,7 +385,7 @@ class CdkeyModel extends BaseModel
                         return message(t('power.get_info_failed').'[errorCode:GetPowerInfoError]' ,false);
                     }
                     $price = $powerInfo['money'];
-                    $allmoney = sf_money_apply_rate($price, $powerPriceInfo['adduser_discount'], $number);
+                    $allmoney = qh_money_apply_rate($price, $powerPriceInfo['adduser_discount'], $number);
                     if($allmoney > $userInfo['balance']){
                         return message(t('user.balance_insufficient').'<br> '.t('common_ui.balance_field').$userInfo['balance'].' '.t('order_ui.total', ['amount' => $allmoney]),false);
                     }
@@ -401,7 +401,7 @@ class CdkeyModel extends BaseModel
         Db::startTrans();
         try {
             $lockedUser = Db::name('user')->where('id', $userInfo['id'])->lock(true)->find();
-            if (!$lockedUser || sf_money_to_cents($lockedUser['balance']) < sf_money_to_cents($allmoney)) {
+            if (!$lockedUser || qh_money_to_cents($lockedUser['balance']) < qh_money_to_cents($allmoney)) {
                 throw new Exception(t('user.balance_insufficient'));
             }
             $currentUnused = self::where(['userid' => $userInfo['id'], 'status' => 0])->count('id');
@@ -409,12 +409,12 @@ class CdkeyModel extends BaseModel
                 throw new Exception(t('cdkey.limit_exceeded', ['limit' => conf('have_cdkey_max_number')]));
             }
 
-            $remainderBalance = sf_money_subtract($lockedUser['balance'], $allmoney);
+            $remainderBalance = qh_money_subtract($lockedUser['balance'], $allmoney);
             Db::name('user')->where('id', $userInfo['id'])->update(['balance' => $remainderBalance]);
-            BalanceLogModel::add($userInfo['id'], 'cdkey_create', sf_money_from_cents(-sf_money_to_cents($allmoney)), '生成卡密扣款 -'.$allmoney.' 元');
+            BalanceLogModel::add($userInfo['id'], 'cdkey_create', qh_money_from_cents(-qh_money_to_cents($allmoney)), '生成卡密扣款 -'.$allmoney.' 元');
 
             for ($i = 0; $i < $number; $i++) {
-                $cdkey = (conf('cdkey_head')??'SF').'_'.bin2hex(random_bytes(16));
+                $cdkey = (conf('cdkey_head')??'QH').'_'.bin2hex(random_bytes(16));
                 $data = [
                     'cdkey' => $cdkey,
                     'cdkey_type' => $cdkey_type,
@@ -493,8 +493,8 @@ class CdkeyModel extends BaseModel
                 throw new Exception(t('user.info_error').'[errorCode:UserInfoError]');
             }
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($userInfo['appid'])?intval($userInfo['appid']):null;
             if(!empty($appid)){
                 $order = 'id';

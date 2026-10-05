@@ -11,8 +11,8 @@ use think\console\Output;
 /**
  * 生成 Ed25519 密钥对
  *
- *   php think sf:keygen license    授权响应签名密钥
- *   php think sf:keygen release    发布物（更新包 / 补丁）签名密钥
+ *   php think qh:keygen license    授权响应签名密钥
+ *   php think qh:keygen release    发布物（更新包 / 补丁）签名密钥
  *
  * 输出只打印到终端，不写入任何文件 —— 私钥的落地位置由你决定。
  *
@@ -28,7 +28,7 @@ class KeyGen extends Command
 {
     protected function configure()
     {
-        $this->setName('sf:keygen')
+        $this->setName('qh:keygen')
             ->addArgument('purpose', Argument::OPTIONAL, 'license 或 release', 'license')
             ->setDescription('生成 Ed25519 签名密钥对');
     }
@@ -63,7 +63,7 @@ class KeyGen extends Command
 
         if ($purpose === CryptoService::PURPOSE_RELEASE) {
             $output->writeln('<comment>发布私钥请勿放在授权服务器上。</comment>');
-            $output->writeln('<comment>建议流程：离线机执行 php think sf:sign 生成签名，只把签名结果导入线上。</comment>');
+            $output->writeln('<comment>建议流程：离线机执行 php think qh:sign 生成签名，只把签名结果导入线上。</comment>');
         }
 
         $output->writeln('');

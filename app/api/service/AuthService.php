@@ -56,7 +56,7 @@ class AuthService extends BaseService
         }else{
             $isPushed = Queue::push($jobHandlerClassName, $jobDataArr, $jobQueueName);
             if ($isPushed !== false) {
-                Cache::tag('SF_CheckAuth')->set($queueKey, json_encode(message(t('login.waiting'),true, ['queue' => 1])));
+                Cache::tag('QH_CheckAuth')->set($queueKey, json_encode(message(t('login.waiting'),true, ['queue' => 1])));
                 return json(message(t('login.waiting_result'),true, ['queue' => 1]));
             }else{
                 // A-17：不再把内部任务类名回显给调用方
@@ -171,7 +171,7 @@ class AuthService extends BaseService
                     $this->pirateModel->edit($decoded);
                 }catch (\Throwable $e){
                     // 盗版记录失败不得影响授权判定本身
-                    Log::warning('[SF-API] pirate record failed: ' . $e->getMessage());
+                    Log::warning('[QH-API] pirate record failed: ' . $e->getMessage());
                 }
             }
         }
@@ -182,7 +182,7 @@ class AuthService extends BaseService
             if($enforce === self::ENFORCE_MONITOR){
                 // 监控模式：记录本应拦截的请求，但仍按放行返回，便于上线前评估影响面
                 Log::warning(sprintf(
-                    '[SF-API][auth-monitor] appid=%s reason=%s auth_info=%s',
+                    '[QH-API][auth-monitor] appid=%s reason=%s auth_info=%s',
                     $appid,
                     $verdict['reason'],
                     self::maskHost($auth_info)
@@ -219,7 +219,7 @@ class AuthService extends BaseService
         $data = $this->signPayload($appInfo, ['code' => 1, 'time' => time()]);
         $response = message(t('auth.genuine') ,true, $data);
         // A-25：缓存键改为哈希，不再以明文域名作为键
-        Cache::tag('SF_CheckAuth')->set(self::authCacheKey($appid, $auth_info), json_encode($response), 3600);
+        Cache::tag('QH_CheckAuth')->set(self::authCacheKey($appid, $auth_info), json_encode($response), 3600);
         return json($response);
     }
 
@@ -398,7 +398,7 @@ class AuthService extends BaseService
             $meta = Cache::get($metaKey);
             if(empty($meta) || !is_array($meta)){
                 $meta = $this->buildUpdateMeta($versionData, $version);
-                Cache::tag('SF_Version')->set($metaKey, $meta, 600);
+                Cache::tag('QH_Version')->set($metaKey, $meta, 600);
             }
 
             $allVersion = $meta;

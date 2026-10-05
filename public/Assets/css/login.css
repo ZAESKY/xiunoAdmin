@@ -80,7 +80,7 @@
         height: 15px !important;
     }
 
-    .login-wrapper > .layui-form .sf {
+    .login-wrapper > .layui-form .qh {
         display: inline-block;
         margin-bottom: 0;
         font-weight: 400;
@@ -105,7 +105,7 @@
         background-color: #2d8cf0;
         border-color: #2d8cf0;
     }
-    .login-wrapper > .layui-form .sf2 {
+    .login-wrapper > .layui-form .qh2 {
         display: inline-block;
         margin-bottom: 0;
         font-weight: 400;

@@ -173,7 +173,7 @@ class Oauth
             CURLOPT_URL => $url,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_USERAGENT => 'SF-QQ-OAuth/1.0',
+            CURLOPT_USERAGENT => 'QH-QQ-OAuth/1.0',
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_TIMEOUT => 10,
             CURLOPT_RETURNTRANSFER => true,

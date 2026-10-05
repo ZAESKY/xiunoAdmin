@@ -1,8 +1,8 @@
 <?php
 // 授权信息类
 class AuthInfo{
-    const AUTHCODE = 'SF_AUTHCODE';
-    const VERSION = 'SF_VERSION';
-    const EDITION = 'SF_EDITION';
-    const PUBLIC_KEY = 'SF_PUBLIC_KEY';
+    const AUTHCODE = 'QH_AUTHCODE';
+    const VERSION = 'QH_VERSION';
+    const EDITION = 'QH_EDITION';
+    const PUBLIC_KEY = 'QH_PUBLIC_KEY';
 }

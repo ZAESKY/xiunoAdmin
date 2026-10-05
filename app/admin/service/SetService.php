@@ -17,7 +17,7 @@ class SetService extends BaseService
     {
         try{
             $this->model->saveAll($data);
-            Cache::tag('SF_Set')->clear();
+            Cache::tag('QH_Set')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

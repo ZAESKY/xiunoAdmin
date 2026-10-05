@@ -27,7 +27,7 @@ class PayModel extends BaseModel
         $buy_type = !empty($wap['buy_type']) ? $wap['buy_type'] : null;
         $num = !empty($wap['num']) ? $wap['num'] : 1;
         $name = !empty($wap['name']) ? $wap['name'] : null;
-        $money = !empty($wap['money']) ? sf_money_format($wap['money']) : '0.00';
+        $money = !empty($wap['money']) ? qh_money_format($wap['money']) : '0.00';
         $input = !empty($wap['input']) ? $wap['input'] : '';
         $userId = !empty($wap['userid']) ? intval($wap['userid']) : null;
 
@@ -110,8 +110,8 @@ class PayModel extends BaseModel
     {
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('trade_no|name');
 
             $list = self::order('id', 'asc')->where($data)->paginate([

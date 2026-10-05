@@ -4,7 +4,7 @@ namespace app\common\service;
 
 /**
  * Encrypts administrator-entered provider credentials before they are stored
- * in SF_config. The encryption key stays in server environment configuration.
+ * in QH_config. The encryption key stays in server environment configuration.
  */
 final class SecretConfigService
 {
@@ -74,7 +74,7 @@ final class SecretConfigService
         foreach ($sources as $source) {
             $source = trim($source);
             if ($source !== '') {
-                $key = hash('sha256', "SF_CONFIG_SECRET_V1\0" . $source, true);
+                $key = hash('sha256', "QH_CONFIG_SECRET_V1\0" . $source, true);
                 $keys[bin2hex($key)] = $key;
             }
         }

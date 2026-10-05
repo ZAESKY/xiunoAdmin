@@ -177,7 +177,7 @@
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <form class="layui-form formBasForm" id="rechargeForm" lay-filter="rechargeForm" style="max-width:500px;">
                                 {notempty name="pay_notice"}
-                                <div class="layui-form-item"><div class="sf-tag layui-badge-blue">{$pay_notice|raw}</div></div>
+                                <div class="layui-form-item"><div class="qh-tag layui-badge-blue">{$pay_notice|raw}</div></div>
                                 {/notempty}
                                 <div class="layui-form-item">
                                     <label class="layui-form-label layui-form-required">{:t('recharge.amount')}</label>
@@ -217,45 +217,45 @@
                             </form>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
-                            <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form formBasForm">
+                            <form id="QH_EditForm" lay-filter="QH_EditForm" class="layui-form formBasForm">
                                 <div id="introduce">
                                     <!-- 顶部:当前等级 -->
-                                    <div class="sf-upgrade-header">
-                                        <div class="sf-uh-left">
-                                            <div class="sf-uh-eyebrow">{:t('upgrade.current_level')}</div>
-                                            <div class="sf-uh-name">
+                                    <div class="qh-upgrade-header">
+                                        <div class="qh-uh-left">
+                                            <div class="qh-uh-eyebrow">{:t('upgrade.current_level')}</div>
+                                            <div class="qh-uh-name">
                                                 <i class="layui-icon layui-icon-diamond"></i>
                                                 {if !empty($userInfo['power_name'])}{$userInfo['power_name']}{else/}{:t('upgrade.default_user')}{/if}
                                             </div>
-                                            <div class="sf-uh-sub">{:t('upgrade.choose_help')}</div>
+                                            <div class="qh-uh-sub">{:t('upgrade.choose_help')}</div>
                                         </div>
-                                        <div class="sf-uh-right">
-                                            <div class="sf-uh-balance-label">{:t('upgrade.account_balance')}</div>
-                                            <div class="sf-uh-balance">
+                                        <div class="qh-uh-right">
+                                            <div class="qh-uh-balance-label">{:t('upgrade.account_balance')}</div>
+                                            <div class="qh-uh-balance">
                                                 <span class="currency">¥</span>{$userInfo['balance']|default='0.00'}
                                             </div>
                                         </div>
                                     </div>
                                     <!-- 中部:卡片网格 -->
-                                    <div id="SF_UpgradeList" class="sf-upgrade-grid">
-                                        <div class="sf-upgrade-loading">
+                                    <div id="QH_UpgradeList" class="qh-upgrade-grid">
+                                        <div class="qh-upgrade-loading">
                                             <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> {:t('upgrade.loading')}
                                         </div>
                                     </div>
                                     <!-- 权益详情 + 升级按钮 (由 JS 填充) -->
-                                    <div id="SF_UpgradeDetail" class="sf-upgrade-detail" style="display:none;">
-                                        <div class="sf-ud-title">
+                                    <div id="QH_UpgradeDetail" class="qh-upgrade-detail" style="display:none;">
+                                        <div class="qh-ud-title">
                                             <i class="layui-icon layui-icon-gift"></i>
                                             <span>{:t('upgrade.selected_benefits')}</span>
-                                            <span class="sf-ud-target" id="SF_UDTarget"></span>
+                                            <span class="qh-ud-target" id="QH_UDTarget"></span>
                                         </div>
-                                        <div class="sf-ud-text" id="SF_UDText"></div>
+                                        <div class="qh-ud-text" id="QH_UDText"></div>
                                     </div>
-                                    <div id="SF_UpgradeAction" class="sf-upgrade-action" style="display:none;">
-                                        <div class="sf-ua-info">
-                                            {:t('upgrade.target_prefix')} <b id="SF_UATarget"></b> · {:t('upgrade.cost')} <span class="sf-ua-price" id="SF_UAPrice"></span>
+                                    <div id="QH_UpgradeAction" class="qh-upgrade-action" style="display:none;">
+                                        <div class="qh-ua-info">
+                                            {:t('upgrade.target_prefix')} <b id="QH_UATarget"></b> · {:t('upgrade.cost')} <span class="qh-ua-price" id="QH_UAPrice"></span>
                                         </div>
-                                        <button type="button" id="SF_UABtn" class="sf-ua-btn">
+                                        <button type="button" id="QH_UABtn" class="qh-ua-btn">
                                             {:t('upgrade.now')} <i class="layui-icon layui-icon-right"></i>
                                         </button>
                                     </div>
@@ -263,10 +263,10 @@
                             </form>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
-                            <table id="SF_BalanceTable" lay-filter="SF_BalanceTable" style="margin: 0;"></table>
+                            <table id="QH_BalanceTable" lay-filter="QH_BalanceTable" style="margin: 0;"></table>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
-                            <table id="SF_PointTable" lay-filter="SF_PointTable" style="margin: 0;"></table>
+                            <table id="QH_PointTable" lay-filter="QH_PointTable" style="margin: 0;"></table>
                         </div>
                         <div class="layui-tab-item" style="padding-bottom: 20px;">
                             <div class="ci-stat-cards">
@@ -283,7 +283,7 @@
                                     <div class="ci-info"><div class="ci-val" id="statMaxConsecutive">0</div><div class="ci-label">{:t('upgrade.max_consecutive')}</div></div>
                                 </div>
                             </div>
-                            <table id="SF_CheckinTable" lay-filter="SF_CheckinTable" style="margin: 0;"></table>
+                            <table id="QH_CheckinTable" lay-filter="QH_CheckinTable" style="margin: 0;"></table>
                         </div>
                         {if $emailNotificationEnabled}
                         <div class="layui-tab-item">
@@ -419,24 +419,24 @@
         </div>
     </form>
 </script>
-<script type="text/html" id="SF_BL_Amount">
+<script type="text/html" id="QH_BL_Amount">
     {{# if(d.amount > 0){ }}
     <span class="text-success">+{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } else { }}
     <span class="text-danger">{{d.amount}} {:t('accounting.currency_unit')}</span>
     {{# } }}
 </script>
-<script type="text/html" id="SF_BL_Type">
+<script type="text/html" id="QH_BL_Type">
     <span class="layui-badge {{d.amount > 0 ? 'layui-badge-green' : 'layui-badge-blue'}}">{{d.type_label}}</span>
 </script>
-<script type="text/html" id="SF_PtAmount">
+<script type="text/html" id="QH_PtAmount">
     {{# if(d.amount > 0){ }}
     <span class="text-success">+{{d.amount}}</span>
     {{# } else { }}
     <span class="text-danger">{{d.amount}}</span>
     {{# } }}
 </script>
-<script type="text/html" id="SF_PtType">
+<script type="text/html" id="QH_PtType">
     <span class="layui-badge {{d.amount>0?'layui-badge-green':'layui-badge-blue'}}">{{d.type_label}}</span>
 </script>
 {include file="/public/footer"}
@@ -451,7 +451,7 @@
         var admin = layui.admin;
         var notice = layui.notice;
         var cookie = layui.jQueryCookie;
-        function sfEscapeHtml(value) {
+        function qhEscapeHtml(value) {
             return String(value || '').replace(/[&<>"']/g, function(s){
                 return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
             });
@@ -472,13 +472,13 @@
                         renderUpgradeCards(res.data.data || []);
                     } else {
                         notice.msg(res.msg, {icon: 2, audio: '1'});
-                        $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">' + t('upgrade.list_failed') + sfEscapeHtml(res.msg || '') + '</div>');
+                        $('#QH_UpgradeList').html('<div class="qh-upgrade-empty">' + t('upgrade.list_failed') + qhEscapeHtml(res.msg || '') + '</div>');
                     }
                 },
                 error: function(){
                     notice.destroy();
                     notice.msg(t('common.server_error'), {icon: 2, audio: '1'});
-                    $('#SF_UpgradeList').html('<div class="sf-upgrade-empty">' + t('upgrade.server_error') + '</div>');
+                    $('#QH_UpgradeList').html('<div class="qh-upgrade-empty">' + t('upgrade.server_error') + '</div>');
                 }
             });
 
@@ -486,14 +486,14 @@
 
         // 渲染权限升级卡片
         function renderUpgradeCards(list){
-            var $box = $('#SF_UpgradeList');
+            var $box = $('#QH_UpgradeList');
             if (!list || list.length === 0) {
-                $box.html('<div class="sf-upgrade-empty">' +
+                $box.html('<div class="qh-upgrade-empty">' +
                     '<div class="ue-icon"><i class="layui-icon layui-icon-ok-circle"></i></div>' +
                     '<div>' + t('upgrade.highest') + '</div>' +
                     '<div class="ue-sub">' + t('upgrade.contact_admin') + '</div>' +
                     '</div>');
-                $('#SF_UpgradeDetail, #SF_UpgradeAction').hide();
+                $('#QH_UpgradeDetail, #QH_UpgradeAction').hide();
                 return;
             }
             var html = '';
@@ -505,7 +505,7 @@
                 if (introduce) {
                     introduce = introduce.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 }
-                html += '<div class="sf-upgrade-card"' +
+                html += '<div class="qh-upgrade-card"' +
                     ' data-id="' + value.id + '"' +
                     ' data-money="' + price + '"' +
                     ' data-name="' + name.replace(/"/g, '&quot;') + '"' +
@@ -523,16 +523,16 @@
             $box.html(html);
 
             // 默认选中第一张
-            selectCard($box.find('.sf-upgrade-card').first());
+            selectCard($box.find('.qh-upgrade-card').first());
 
             // 卡片点击 → 选中状态切换
-            $box.off('click', '.sf-upgrade-card').on('click', '.sf-upgrade-card', function(){
+            $box.off('click', '.qh-upgrade-card').on('click', '.qh-upgrade-card', function(){
                 selectCard($(this));
             });
 
             // 底部按钮 → 真正的升级流程
-            $('#SF_UABtn').off('click').on('click', function(){
-                var $sel = $box.find('.sf-upgrade-card.selected');
+            $('#QH_UABtn').off('click').on('click', function(){
+                var $sel = $box.find('.qh-upgrade-card.selected');
                 if ($sel.length === 0) {
                     notice.msg(t('upgrade.select_level'), {icon: 2, audio: '1'});
                     return;
@@ -547,30 +547,30 @@
         // 选中指定卡片(同步详情面板 + 底部按钮)
         function selectCard($card){
             if (!$card || $card.length === 0) return;
-            $('#SF_UpgradeList .sf-upgrade-card').removeClass('selected').find('.uc-check').remove();
+            $('#QH_UpgradeList .qh-upgrade-card').removeClass('selected').find('.uc-check').remove();
             $card.addClass('selected').prepend('<div class="uc-check"><i class="layui-icon layui-icon-ok"></i></div>');
 
             var name = $card.data('name');
             var price = parseFloat($card.data('money')) || 0;
             var introduce = ($card.data('introduce') || '').toString();
 
-            $('#SF_UDTarget').text('· ' + name);
+            $('#QH_UDTarget').text('· ' + name);
             if (introduce) {
-                $('#SF_UDText').removeClass('empty').text(introduce);
+                $('#QH_UDText').removeClass('empty').text(introduce);
             } else {
-                $('#SF_UDText').addClass('empty').text(t('upgrade.no_description'));
+                $('#QH_UDText').addClass('empty').text(t('upgrade.no_description'));
             }
 
-            $('#SF_UATarget').text(name);
+            $('#QH_UATarget').text(name);
             if (price > 0) {
-                $('#SF_UAPrice').html('<span style="font-size:12px;font-weight:600;">¥</span> ' + price);
-                $('#SF_UABtn').html(t('upgrade.now') + ' ¥' + price + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
+                $('#QH_UAPrice').html('<span style="font-size:12px;font-weight:600;">¥</span> ' + price);
+                $('#QH_UABtn').html(t('upgrade.now') + ' ¥' + price + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
             } else {
-                $('#SF_UAPrice').html(t('upgrade.free'));
-                $('#SF_UABtn').html(t('upgrade.now') + ' · ' + t('upgrade.free') + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
+                $('#QH_UAPrice').html(t('upgrade.free'));
+                $('#QH_UABtn').html(t('upgrade.now') + ' · ' + t('upgrade.free') + ' <i class="layui-icon layui-icon-right"></i>').prop('disabled', false);
             }
 
-            $('#SF_UpgradeDetail, #SF_UpgradeAction').show();
+            $('#QH_UpgradeDetail, #QH_UpgradeAction').show();
         }
 
         // 升级权限
@@ -580,7 +580,7 @@
             var priceText = parseFloat(price) > 0
                 ? '<span class="layui-badge layui-badge-yellow">' + price + ' ' + t('accounting.currency_unit') + '</span>'
                 : '<span class="layui-badge layui-badge-green">' + t('upgrade.free') + '</span>';
-            var targetName = '<span class="layui-badge layui-badge-orange">' + sfEscapeHtml(name) + '</span>';
+            var targetName = '<span class="layui-badge layui-badge-orange">' + qhEscapeHtml(name) + '</span>';
             layer.confirm(t('upgrade.confirm', {price: priceText, name: targetName}), {
                 skin: 'layui-layer-admin',
                 icon: 3,
@@ -664,8 +664,8 @@
                     success: function(res){
                         if (res.code == 0) {
                             rcDiscountRate = parseFloat(res.data.rate) || 0;
-                            $('#codePreview').show().html('<span class="layui-badge layui-badge-green">' + t('recharge.valid') + '</span> ' + t('recharge.discount_from', {discount: rcDiscountRate}) + ' <b>'+sfEscapeHtml(res.data.owner)+'</b><span id="savePreview" class="recharge-save-preview"></span>');
-                        } else { rcDiscountRate = 0; $('#codePreview').show().html('<span class="layui-badge layui-badge-red">' + t('recharge.invalid') + '</span> '+sfEscapeHtml(res.msg)); }
+                            $('#codePreview').show().html('<span class="layui-badge layui-badge-green">' + t('recharge.valid') + '</span> ' + t('recharge.discount_from', {discount: rcDiscountRate}) + ' <b>'+qhEscapeHtml(res.data.owner)+'</b><span id="savePreview" class="recharge-save-preview"></span>');
+                        } else { rcDiscountRate = 0; $('#codePreview').show().html('<span class="layui-badge layui-badge-red">' + t('recharge.invalid') + '</span> '+qhEscapeHtml(res.msg)); }
                         rcUpdatePreview();
                     }
                 });
@@ -780,7 +780,7 @@
                         };
                         var payMessageHandler = function(event) {
                             if (event.origin !== window.location.origin) return;
-                            if (event.data && event.data.type === 'sf-pay-success' && event.data.trade_no === res.data.trade_no) {
+                            if (event.data && event.data.type === 'qh-pay-success' && event.data.trade_no === res.data.trade_no) {
                                 finishPay();
                             }
                         };
@@ -1034,7 +1034,7 @@
 
         form.on('submit(bindingQqOauth)', function () {
             notice.msg(t('profile.qq_window_opening'), {icon: 4, close: true});
-            SfQqOauth.start({
+            QHQqOauth.start({
                 url:'/api.php/Social/binding',
                 data:{userType:'user',return_to:location.pathname+location.search},
                 onResult:function(res){
@@ -1050,7 +1050,7 @@
             return false;
         });
 
-        SfQqOauth.resume(function(res){
+        QHQqOauth.resume(function(res){
             notice.msg(res.msg || (res.code == 0 ? t('profile.qq_operation_success') : t('profile.qq_operation_failed')), {icon:res.code == 0 ? 1 : 2});
             if(res.code == 0) setTimeout(function(){ location.reload(); },700);
         }, function(message){ notice.msg(message,{icon:2}); });
@@ -1081,12 +1081,12 @@
 
     // 余额明细
     table.render({
-        elem: '#SF_BalanceTable', url: '{:url("/BalanceLog/index")}', method: 'post', page: true, limit: 10,
+        elem: '#QH_BalanceTable', url: '{:url("/BalanceLog/index")}', method: 'post', page: true, limit: 10,
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
-            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_BL_Type'},
-            {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: '#SF_BL_Amount'},
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#QH_BL_Type'},
+            {field: 'amount', title: '{:t("accounting.amount")}', width: 130, templet: '#QH_BL_Amount'},
             {field: 'balance', title: '{:t("accounting.balance")}', width: 130, templet: function(d){ return (d.balance||'0.00')+' {:t("accounting.currency_unit")}'; }},
             {field: 'description', title: '{:t("accounting.description")}', minWidth: 160},
             {field: 'created_at', title: '{:t("accounting.time")}', width: 160}
@@ -1094,12 +1094,12 @@
     });
     // 积分明细
     table.render({
-        elem: '#SF_PointTable', url: '{:url("/PointLog/index")}', method: 'post', page: true, limit: 10,
+        elem: '#QH_PointTable', url: '{:url("/PointLog/index")}', method: 'post', page: true, limit: 10,
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[
-            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#SF_PtType'},
-            {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: '#SF_PtAmount'},
+            {field: 'type_label', title: '{:t("accounting.type")}', width: 130, templet: '#QH_PtType'},
+            {field: 'amount', title: '{:t("accounting.point_change")}', width: 140, templet: '#QH_PtAmount'},
             {field: 'integral_after', title: '{:t("accounting.remaining_points")}', width: 150, templet: function(d){ return (d.integral_after||0)+' {:t("accounting.point_unit")}'; }},
             {field: 'description', title: '{:t("accounting.description")}', minWidth: 160},
             {field: 'created_at', title: '{:t("accounting.time")}', width: 160}
@@ -1115,7 +1115,7 @@
     }, 'json');
     // 打卡记录
     table.render({
-        elem: '#SF_CheckinTable', url: '{:url("/Checkin/myRecords")}', method: 'post', page: true, limit: 10,
+        elem: '#QH_CheckinTable', url: '{:url("/Checkin/myRecords")}', method: 'post', page: true, limit: 10,
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res){ return { code: res.code, msg: res.msg, count: res.count, data: res.data }; },
         cols: [[

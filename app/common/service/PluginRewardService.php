@@ -41,13 +41,13 @@ class PluginRewardService
         $minAccountDays = max(0, min(3650, intval($config['min_account_days'] ?? 7)));
 
         try {
-            $balance = sf_money_format($config['balance'] ?? '0.00');
+            $balance = qh_money_format($config['balance'] ?? '0.00');
         } catch (\Throwable $e) {
             $balance = '0.00';
         }
-        if (sf_money_to_cents($balance) < 0) {
+        if (qh_money_to_cents($balance) < 0) {
             $balance = '0.00';
-        } elseif (sf_money_to_cents($balance) > 100000000) {
+        } elseif (qh_money_to_cents($balance) > 100000000) {
             $balance = '1000000.00';
         }
 
@@ -94,14 +94,14 @@ class PluginRewardService
         }
         $status = $reason === '' ? 'issued' : 'skipped';
         $points = $status === 'issued' ? intval($config['points']) : 0;
-        $balance = $status === 'issued' ? sf_money_format($config['balance']) : '0.00';
+        $balance = $status === 'issued' ? qh_money_format($config['balance']) : '0.00';
         $now = datetime();
         $fileHash = strtolower(trim((string)($plugin['file_hash'] ?? '')));
 
         $rewardId = Db::name('plugin_reward')->insertGetId([
             'plugin_id' => $pluginId,
             'user_id' => $userId,
-            'plugin_name' => sf_plain_text($plugin['name'] ?? '', 255),
+            'plugin_name' => qh_plain_text($plugin['name'] ?? '', 255),
             'scene' => self::SCENE_FIRST_APPROVAL,
             'status' => $status,
             'points' => $points,
@@ -139,8 +139,8 @@ class PluginRewardService
         if (intval($reward['points'] ?? 0) > 0) {
             $parts[] = intval($reward['points']) . ' 积分';
         }
-        if (sf_money_to_cents($reward['balance'] ?? 0) > 0) {
-            $parts[] = sf_money_format($reward['balance']) . ' 元平台余额';
+        if (qh_money_to_cents($reward['balance'] ?? 0) > 0) {
+            $parts[] = qh_money_format($reward['balance']) . ' 元平台余额';
         }
         return implode(' + ', $parts);
     }
@@ -165,7 +165,7 @@ class PluginRewardService
         if ($config['original_only'] && intval($plugin['origin_type'] ?? 1) !== 1) {
             return '转载插件不参与发布奖励';
         }
-        if (intval($config['points']) <= 0 && sf_money_to_cents($config['balance']) <= 0) {
+        if (intval($config['points']) <= 0 && qh_money_to_cents($config['balance']) <= 0) {
             return '奖励积分和金额均为零';
         }
 
@@ -213,7 +213,7 @@ class PluginRewardService
             throw new \RuntimeException('插件奖励用户无效');
         }
         $sourceNo = 'plugin_reward_' . $pluginId;
-        $description = '插件首次审核通过奖励：' . sf_plain_text($pluginName, 150);
+        $description = '插件首次审核通过奖励：' . qh_plain_text($pluginName, 150);
 
         if ($points > 0) {
             $updated = Db::name('user')->where('id', $userId)->inc('integral', $points)->update();
@@ -231,7 +231,7 @@ class PluginRewardService
             );
         }
 
-        if (sf_money_to_cents($balance) > 0) {
+        if (qh_money_to_cents($balance) > 0) {
             $updated = Db::name('user')->where('id', $userId)->inc('balance', $balance)->update();
             if ($updated !== 1) {
                 throw new \RuntimeException('插件余额奖励入账失败');
@@ -249,11 +249,11 @@ class PluginRewardService
         }
 
         $rewardText = self::rewardText(['status' => 'issued', 'points' => $points, 'balance' => $balance]);
-        $balanceNotice = sf_money_to_cents($balance) > 0 ? '。金额奖励为平台余额，不可提现。' : '。';
+        $balanceNotice = qh_money_to_cents($balance) > 0 ? '。金额奖励为平台余额，不可提现。' : '。';
         NotificationModel::add([
             'user_id' => $userId,
             'title' => '插件发布奖励到账',
-            'content' => '您的插件「' . sf_plain_text($pluginName, 150) . '」首次审核通过，获得 ' . $rewardText . $balanceNotice,
+            'content' => '您的插件「' . qh_plain_text($pluginName, 150) . '」首次审核通过，获得 ' . $rewardText . $balanceNotice,
             'type' => 'plugin_reward',
             'link' => '/UserPlugin/list.html',
             'variables' => ['plugin_name' => $pluginName, 'reward' => $rewardText],
@@ -268,7 +268,7 @@ class PluginRewardService
             'id' => intval($row['id'] ?? 0),
             'status' => (string)($row['status'] ?? ''),
             'points' => intval($row['points'] ?? 0),
-            'balance' => sf_money_format($row['balance'] ?? 0),
+            'balance' => qh_money_format($row['balance'] ?? 0),
             'reason' => (string)($row['reason'] ?? ''),
             'duplicate' => $duplicate,
         ];

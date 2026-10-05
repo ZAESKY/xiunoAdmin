@@ -1,4 +1,4 @@
-# SF授权系统 - 上线部署说明
+# QH授权系统 - 上线部署说明
 
 ## 版本: 4.2.9 → 4.3.0
 
@@ -60,7 +60,7 @@ vim .env
 |--------|------|------|
 | `app_debug` | **必须为 `false`** | `app_debug = false` |
 | `database.hostname` | 数据库地址 | `localhost` |
-| `database.database` | 数据库名 | `sf_auth` |
+| `database.database` | 数据库名 | `qh_auth` |
 | `database.username` | 数据库用户 | `your_db_user` |
 | `database.password` | 数据库密码 | `your_strong_password` |
 | `domain.img_url` | 图片域名（完整URL） | `https://your-domain.com` |
@@ -102,16 +102,16 @@ chmod 644 config/*
 
 ```sql
 -- 检查新表是否存在
-SHOW TABLES LIKE 'SF_balance_log';
-SHOW TABLES LIKE 'SF_withdraw';
+SHOW TABLES LIKE 'QH_balance_log';
+SHOW TABLES LIKE 'QH_withdraw';
 
 -- 检查模板菜单是否已删除
-SELECT * FROM SF_menu WHERE url = 'Set/template';  -- 应返回空
+SELECT * FROM QH_menu WHERE url = 'Set/template';  -- 应返回空
 ```
 
 ### 3.2 功能验证清单
 
-- [ ] 访问首页，确认 SF3.0 模板正常显示
+- [ ] 访问首页，确认 QH3.0 模板正常显示
 - [ ] 点击"开始查询"→ 选择应用 → 查询授权，结果正常
 - [ ] 点击"插件市场"→ 插件列表正常加载
 - [ ] 点击插件 → 弹出"需要登录"提示
@@ -167,7 +167,7 @@ rm -rf runtime/cache/*
 
 ### 5.2 授权接口配置
 
-文件 `config/sf.php` 中的 `api_url` 需要指向正确的授权服务器地址。
+文件 `config/qh.php` 中的 `api_url` 需要指向正确的授权服务器地址。
 
 ### 5.3 邮件配置（后台设置）
 

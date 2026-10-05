@@ -98,7 +98,7 @@ class Menu extends BaseModel
         $all_node_lists = $this->pruneEmptyParents($all_node_lists);
         $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
         try {
-            Cache::tag('SF_Menu')->set($cacheKey, $all_node_lists);
+            Cache::tag('QH_Menu')->set($cacheKey, $all_node_lists);
         } catch (\Throwable $e) {
             // 缓存属于可选加速层，写入失败不影响菜单正常返回。
         }
@@ -110,7 +110,7 @@ class Menu extends BaseModel
         if ($userId <= 0) {
             return;
         }
-        foreach ([self::cacheKey($userId), 'SF_UserMenu'.$userId] as $key) {
+        foreach ([self::cacheKey($userId), 'QH_UserMenu'.$userId] as $key) {
             try {
                 Cache::delete($key);
             } catch (\Throwable $e) {
@@ -121,7 +121,7 @@ class Menu extends BaseModel
 
     private static function cacheKey(int $userId): string
     {
-        return 'SF_UserMenu:'.self::CACHE_VERSION.':'.$userId;
+        return 'QH_UserMenu:'.self::CACHE_VERSION.':'.$userId;
     }
 
     private function isValidMenuTree($menus): bool

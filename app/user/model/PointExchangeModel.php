@@ -14,8 +14,8 @@ class PointExchangeModel extends BaseModel
     public function list()
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 12);
-        $currentPage = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 12);
+        $currentPage = qh_page_number($post['current_page'] ?? null);
         $data = [['status', '=', 1]];
         $text = trim((string)($post['text'] ?? ''));
         if ($text !== '') {
@@ -148,8 +148,8 @@ class PointExchangeModel extends BaseModel
     public function myRecords(int $userId)
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $currentPage = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $currentPage = qh_page_number($post['current_page'] ?? null);
 
         $list = Db::name('point_exchange_record')->alias('r')
             ->join('point_product p', 'r.product_id = p.id', 'LEFT')

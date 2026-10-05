@@ -58,7 +58,7 @@ class Backend extends CommonBase
             if (!$adminInfo) {
                 throw new Exception(t('login.session_expired'));
             }
-            $expectedSign = data_auth_sign($adminInfo['username'].$adminInfo['password'].sf_password_hash());
+            $expectedSign = data_auth_sign($adminInfo['username'].$adminInfo['password'].qh_password_hash());
             if(!empty($adminId) && !hash_equals((string)$expectedSign, (string)$sign)){
                 session('adminId',null);
                 session('adminSign',null);

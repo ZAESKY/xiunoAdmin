@@ -90,7 +90,7 @@ class LoginService extends UserBaseService
         }
         // 密码校验：兼容旧生产的明文/双 MD5，并在成功登录后升级为现代哈希。
         $needsRehash = false;
-        if (!sf_password_verify($password, $info['password'], $needsRehash)) {
+        if (!qh_password_verify($password, $info['password'], $needsRehash)) {
             $this->recordLoginFailure($rateKeys);
             $content = [
                 'Title' => '登录后台',
@@ -113,12 +113,12 @@ class LoginService extends UserBaseService
             return message(t('login.account_disabled'), false);
         }
         if ($needsRehash) {
-            $newHash = sf_password_make($password);
+            $newHash = qh_password_make($password);
             $this->model->where('id', $info['id'])->update(['password' => $newHash]);
             $info['password'] = $newHash;
         }
         if(!empty($info['ip'])) {
-            if (!in_array(get_client_ip(), sf_safe_unserialize_array($info['ip']), true)) {
+            if (!in_array(get_client_ip(), qh_safe_unserialize_array($info['ip']), true)) {
                 $this->recordLoginFailure($rateKeys);
                 $content = [
                     'Title' => '登录后台',
@@ -132,7 +132,7 @@ class LoginService extends UserBaseService
         // 本地cookie存储登录信息
         Session::regenerate(true);
         cookie('userId', $info['id']);
-        cookie('userSign',data_auth_sign($info['appid'].$info['username'].$info['password'].sf_password_hash()));
+        cookie('userSign',data_auth_sign($info['appid'].$info['username'].$info['password'].qh_password_hash()));
         Cache::delete($rateKeys['account']);
 
         $content = [
@@ -141,7 +141,7 @@ class LoginService extends UserBaseService
             'Result' => 'success'
         ];
         event('UserLogin', $content);
-        $redirect = sf_plugin_detail_redirect((string)($param['redirect'] ?? Session::get('user_login_redirect', '')));
+        $redirect = qh_plugin_detail_redirect((string)($param['redirect'] ?? Session::get('user_login_redirect', '')));
         Session::delete('user_login_redirect');
         return message(t('login.success').' '.$username.', '.t('common.home').t('common.back').'~', true, [
             'url' => $redirect !== '' ? '/user.php' . $redirect : '/user.php/Index/index.html',

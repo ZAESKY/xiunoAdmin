@@ -92,8 +92,8 @@ class FeedbackModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
 
             $data = [];
             $text = $post['text'] ?? '';
@@ -107,7 +107,7 @@ class FeedbackModel extends BaseModel
             $data[] = ['user_id', '=', $userId];
 
             $list = self::alias('f')
-                ->join('SF_user u', 'f.user_id = u.id', 'LEFT')
+                ->join('QH_user u', 'f.user_id = u.id', 'LEFT')
                 ->field('f.*, u.username')
                 ->order('f.id', 'desc')
                 ->where($data)->paginate([

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# SF 授权系统 —— 引导式迁移执行器
+# QH 授权系统 —— 引导式迁移执行器
 #
 # 用法（在项目根目录执行）：
 #     bash database/migrate.sh check      # 只做前置检查，不碰数据库
@@ -35,6 +35,7 @@ die()  { err "$*"; echo; echo "${C_RED}已中止，数据库未被修改。${C_R
 
 # 按正确顺序排列 —— 顺序不可颠倒
 MIGRATIONS=(
+  "20261005_qh_prefix_rename.sql"          # 必须最先：无损迁移旧表前缀
   "20260816_auth_legacy_snapshot.sql"      # 必须最先：冻结旧授权快照
   "20260816_p0_security_hardening.sql"
   "20260816_p1_p3_license_v2.sql"
@@ -76,6 +77,7 @@ ROLLBACKS=(
   "20261001_qq_oauth_identity_rollback.sql"
   "20260816_p1_p3_license_v2_rollback.sql"
   "20260816_p0_security_hardening_rollback.sql"
+  "20261005_qh_prefix_rename_rollback.sql" # 必须最后：恢复旧表前缀
 )
 
 # ---------- 读取 .env ----------
@@ -115,6 +117,20 @@ load_env() {
 mysql_q()  { mysql --defaults-extra-file="$MY_CNF" "$DB_NAME" -N -B -e "$1" 2>&1; }
 mysql_run(){ mysql --defaults-extra-file="$MY_CNF" "$DB_NAME" < "$1" 2>&1; }
 
+legacy_table_prefix() { printf '\123\106\137'; }
+
+drop_legacy_balance_triggers() {
+  local prefix; prefix="$(legacy_table_prefix)"
+  mysql_q "DROP TRIGGER IF EXISTS \`${prefix}user_withdrawable_before_insert\`; DROP TRIGGER IF EXISTS \`${prefix}user_withdrawable_before_update\`;" >/dev/null \
+    || die "无法移除旧余额保护触发器"
+}
+
+create_legacy_balance_triggers() {
+  local prefix; prefix="$(legacy_table_prefix)"
+  mysql_q "CREATE TRIGGER \`${prefix}user_withdrawable_before_insert\` BEFORE INSERT ON \`${prefix}user\` FOR EACH ROW SET NEW.withdrawable_balance=LEAST(GREATEST(NEW.withdrawable_balance,0.00),GREATEST(NEW.balance,0.00)); CREATE TRIGGER \`${prefix}user_withdrawable_before_update\` BEFORE UPDATE ON \`${prefix}user\` FOR EACH ROW SET NEW.withdrawable_balance=LEAST(GREATEST(NEW.withdrawable_balance,0.00),GREATEST(NEW.balance,0.00));" >/dev/null \
+    || die "无法恢复旧余额保护触发器"
+}
+
 # ---------- 前置检查 ----------
 do_check() {
   hd "1/5  环境检查"
@@ -150,20 +166,24 @@ do_check() {
   ok "已连接 $DB_NAME @ $DB_HOST:$DB_PORT （MySQL ${ver}）"
 
   hd "3/5  前置表检查"
-  local need_tables=("SF_auth" "SF_app" "SF_config")
-  for t in "${need_tables[@]}"; do
+  local legacy_prefix; legacy_prefix="$(printf '\123\106\137')"
+  local need_tables=("auth" "app" "config")
+  for base in "${need_tables[@]}"; do
+    local t="QH_${base}"
+    local legacy_t="${legacy_prefix}${base}"
     local c; c="$(mysql_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$t';")"
-    if [ "$c" = "1" ]; then
-      local rows; rows="$(mysql_q "SELECT COUNT(*) FROM \`$t\`;")"
-      ok "$t 存在（$rows 行）"
-    else
-      die "缺少必需表 $t —— 数据库可能不是 SF 授权系统的库，请确认 .env 指向正确"
+    if [ "$c" != "1" ]; then
+      c="$(mysql_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$legacy_t';")"
+      [ "$c" = "1" ] || die "缺少必需业务表 ${base} —— 数据库可能不是轻鸿授权系统的库，请确认 .env 指向正确"
+      t="$legacy_t"
     fi
+    local rows; rows="$(mysql_q "SELECT COUNT(*) FROM \`$t\`;")"
+    ok "$t 存在（$rows 行）"
   done
 
   hd "4/5  是否已迁移过"
   local already=0
-  for t in SF_license SF_auth_legacy SF_download_ticket SF_release SF_patch; do
+  for t in QH_license QH_auth_legacy QH_download_ticket QH_release QH_patch; do
     local c; c="$(mysql_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$t';")"
     if [ "$c" = "1" ]; then
       warn "$t 已存在（迁移是幂等的，重复执行安全）"
@@ -195,7 +215,7 @@ do_check() {
 do_backup() {
   hd "备份数据库"
   mkdir -p "$BACKUP_DIR"
-  local f="$BACKUP_DIR/sf_${DB_NAME}_${STAMP}.sql"
+  local f="$BACKUP_DIR/qh_${DB_NAME}_${STAMP}.sql"
 
   echo "  正在导出到 $f ..."
   if ! mysqldump --defaults-extra-file="$MY_CNF" \
@@ -211,8 +231,12 @@ do_backup() {
   # 校验备份内容：不只看文件存在，要确认关键表真的在里面
   local size; size="$(wc -c < "$f")"
   [ "$size" -gt 1024 ] || die "备份文件过小（${size} 字节），内容可疑"
-  for t in SF_auth SF_app; do
-    grep -q "CREATE TABLE \`$t\`" "$f" || die "备份中缺少 $t 的建表语句，备份不完整"
+  local legacy_prefix; legacy_prefix="$(legacy_table_prefix)"
+  for base in auth app; do
+    if ! grep -q "CREATE TABLE \`QH_${base}\`" "$f" \
+      && ! grep -q "CREATE TABLE \`${legacy_prefix}${base}\`" "$f"; then
+      die "备份中缺少 ${base} 业务表的建表语句，备份不完整"
+    fi
   done
   grep -q -- "-- Dump completed" "$f" || warn "备份文件未见完成标记，请人工确认"
 
@@ -253,6 +277,7 @@ do_run() {
   fi
 
   hd "执行迁移"
+  drop_legacy_balance_triggers
   local i=1
   for m in "${MIGRATIONS[@]}"; do
     echo "  [$i/${#MIGRATIONS[@]}] $m"
@@ -273,7 +298,7 @@ do_run() {
   # after a successful migration. Cache cleanup is best-effort and does not
   # change migration success if the application cache backend is unavailable.
   if [ -f "$ROOT_DIR/vendor/autoload.php" ]; then
-    if (cd "$ROOT_DIR" && php -r 'require "vendor/autoload.php";$app=new \think\App();$app->initialize();\think\facade\Cache::delete("SF_AdminMenu");\think\facade\Cache::tag("SF_Menu")->clear();') >/dev/null 2>&1; then
+    if (cd "$ROOT_DIR" && php -r 'require "vendor/autoload.php";$app=new \think\App();$app->initialize();\think\facade\Cache::delete("QH_AdminMenu");\think\facade\Cache::tag("QH_Menu")->clear();') >/dev/null 2>&1; then
       ok "菜单缓存已刷新"
     else
       warn "迁移已完成，但菜单缓存刷新失败；请执行 php think clear 后重新登录后台"
@@ -290,11 +315,11 @@ do_verify() {
   local fail=0
 
   echo "  新增表："
-  for t in SF_auth_legacy SF_download_ticket SF_license SF_license_site \
-           SF_license_event SF_offline_activation SF_trial SF_release SF_patch \
-           SF_plugin_reward SF_plugin_reward_hash_claim SF_qq_identity_claim \
-           SF_user_phone_identity SF_sms_audit SF_notification_email_preference \
-           SF_notification_email_template SF_notification_email_log; do
+  for t in QH_auth_legacy QH_download_ticket QH_license QH_license_site \
+           QH_license_event QH_offline_activation QH_trial QH_release QH_patch \
+           QH_plugin_reward QH_plugin_reward_hash_claim QH_qq_identity_claim \
+           QH_user_phone_identity QH_sms_audit QH_notification_email_preference \
+           QH_notification_email_template QH_notification_email_log; do
     local c; c="$(mysql_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$t';")"
     if [ "$c" = "1" ]; then ok "$t"; else err "$t 缺失"; fail=1; fi
   done
@@ -305,32 +330,32 @@ do_verify() {
     local c; c="$(mysql_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$1' AND COLUMN_NAME='$2';")"
     if [ "$c" = "1" ]; then ok "$1.$2"; else err "$1.$2 缺失"; fail=1; fi
   }
-  check_col SF_app  auth_enforce
-  check_col SF_app  installer_file_name
-  check_col SF_app  installer_sha256
-  check_col SF_app  installer_size
-  check_col SF_app  installer_uploaded_at
-  check_col SF_auth authcode_hash
-  check_col SF_auth authcode_last4
-  check_col SF_auth must_rotate
-  check_col SF_license source_auth_id
-  check_col SF_patch theme_build
-  check_col SF_patch theme_edition
-  check_col SF_user phone_verified_at
-  check_col SF_user phone_verified_source
-  check_col SF_sms_audit template_code
+  check_col QH_app  auth_enforce
+  check_col QH_app  installer_file_name
+  check_col QH_app  installer_sha256
+  check_col QH_app  installer_size
+  check_col QH_app  installer_uploaded_at
+  check_col QH_auth authcode_hash
+  check_col QH_auth authcode_last4
+  check_col QH_auth must_rotate
+  check_col QH_license source_auth_id
+  check_col QH_patch theme_build
+  check_col QH_patch theme_edition
+  check_col QH_user phone_verified_at
+  check_col QH_user phone_verified_source
+  check_col QH_sms_audit template_code
 
-  local patch_index; patch_index="$(mysql_q "SELECT COUNT(DISTINCT INDEX_NAME) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_patch' AND INDEX_NAME IN ('uk_patch','idx_status');")"
+  local patch_index; patch_index="$(mysql_q "SELECT COUNT(DISTINCT INDEX_NAME) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_patch' AND INDEX_NAME IN ('uk_patch','idx_status');")"
   if [ "$patch_index" = "2" ]; then
-    ok "SF_patch 版本绑定索引"
+    ok "QH_patch 版本绑定索引"
   else
-    err "SF_patch 版本绑定索引缺失"
+    err "QH_patch 版本绑定索引缺失"
     fail=1
   fi
 
   echo
   echo "  插件奖励配置："
-  local reward_configs; reward_configs="$(mysql_q "SELECT COUNT(*) FROM SF_config WHERE name IN ('plugin_reward_enabled','plugin_reward_points','plugin_reward_balance','plugin_reward_original_only','plugin_reward_monthly_limit','plugin_reward_min_account_days','plugin_reward_duplicate_hash');")"
+  local reward_configs; reward_configs="$(mysql_q "SELECT COUNT(*) FROM QH_config WHERE name IN ('plugin_reward_enabled','plugin_reward_points','plugin_reward_balance','plugin_reward_original_only','plugin_reward_monthly_limit','plugin_reward_min_account_days','plugin_reward_duplicate_hash');")"
   if [ "$reward_configs" = "7" ]; then
     ok "7 项插件奖励配置齐全"
   else
@@ -340,7 +365,7 @@ do_verify() {
 
   echo
   echo "  短信认证配置："
-  local sms_configs; sms_configs="$(mysql_q "SELECT COUNT(*) FROM SF_config WHERE name IN ('sms_enabled','sms_access_key_id','sms_access_key_secret','sms_sign_name','sms_template_code','sms_template_login_register','sms_template_phone_change','sms_template_password_reset','sms_template_phone_bind','sms_template_phone_verify','sms_code_ttl','sms_daily_limit','sms_require_withdraw','sms_require_rebate','sms_require_plugin_reward');")"
+  local sms_configs; sms_configs="$(mysql_q "SELECT COUNT(*) FROM QH_config WHERE name IN ('sms_enabled','sms_access_key_id','sms_access_key_secret','sms_sign_name','sms_template_code','sms_template_login_register','sms_template_phone_change','sms_template_password_reset','sms_template_phone_bind','sms_template_phone_verify','sms_code_ttl','sms_daily_limit','sms_require_withdraw','sms_require_rebate','sms_require_plugin_reward');")"
   if [ "$sms_configs" = "15" ]; then
     ok "15 项短信认证配置齐全（包含5个业务模板）"
   else
@@ -350,7 +375,7 @@ do_verify() {
 
   echo
   echo "  找回密码配置："
-  local recovery_configs; recovery_configs="$(mysql_q "SELECT COUNT(*) FROM SF_config WHERE name='password_recovery_channel' AND value IN ('email','sms');")"
+  local recovery_configs; recovery_configs="$(mysql_q "SELECT COUNT(*) FROM QH_config WHERE name='password_recovery_channel' AND value IN ('email','sms');")"
   if [ "$recovery_configs" = "1" ]; then
     ok "找回密码验证码渠道配置齐全"
   else
@@ -360,7 +385,7 @@ do_verify() {
 
   echo
   echo "  邮件通知配置："
-  local email_configs; email_configs="$(mysql_q "SELECT COUNT(*) FROM SF_config WHERE name='email_notification_enabled';")"
+  local email_configs; email_configs="$(mysql_q "SELECT COUNT(*) FROM QH_config WHERE name='email_notification_enabled';")"
   if [ "$email_configs" = "1" ]; then
     ok "邮件通知总开关配置齐全"
   else
@@ -370,30 +395,30 @@ do_verify() {
 
   echo
   echo "  快照完整性（旧码换新的唯一依据）："
-  local a l; a="$(mysql_q "SELECT COUNT(*) FROM SF_auth;")"; l="$(mysql_q "SELECT COUNT(*) FROM SF_auth_legacy;")"
+  local a l; a="$(mysql_q "SELECT COUNT(*) FROM QH_auth;")"; l="$(mysql_q "SELECT COUNT(*) FROM QH_auth_legacy;")"
   if [ "$a" = "$l" ]; then
-    ok "SF_auth $a 行 = SF_auth_legacy $l 行"
+    ok "QH_auth $a 行 = QH_auth_legacy $l 行"
   else
-    err "行数不一致：SF_auth $a / SF_auth_legacy $l —— 请勿继续，联系排查"
+    err "行数不一致：QH_auth $a / QH_auth_legacy $l —— 请勿继续，联系排查"
     fail=1
   fi
 
   echo
   echo "  判定模式（A-06）："
-  local mon; mon="$(mysql_q "SELECT COUNT(*) FROM SF_app WHERE auth_enforce=2;")"
-  local blk; blk="$(mysql_q "SELECT COUNT(*) FROM SF_app WHERE auth_enforce=1;")"
+  local mon; mon="$(mysql_q "SELECT COUNT(*) FROM QH_app WHERE auth_enforce=2;")"
+  local blk; blk="$(mysql_q "SELECT COUNT(*) FROM QH_app WHERE auth_enforce=1;")"
   warn "监控模式 $mon 个应用 / 强制拦截 $blk 个应用"
   if [ "${mon:-0}" != "0" ]; then
     echo "      ${C_YEL}观察 24 小时日志（grep auth-monitor runtime/log/*.log）无误后执行：${C_RST}"
-    echo "      ${C_YEL}UPDATE \`SF_app\` SET \`auth_enforce\` = 1;${C_RST}"
+    echo "      ${C_YEL}UPDATE \`QH_app\` SET \`auth_enforce\` = 1;${C_RST}"
     echo "      ${C_YEL}在此之前，授权绕过风险仍然存在。${C_RST}"
   fi
 
   echo
   echo "  待回填授权码："
-  local pend; pend="$(mysql_q "SELECT COUNT(*) FROM SF_auth WHERE authcode<>'' AND authcode_hash='';")"
+  local pend; pend="$(mysql_q "SELECT COUNT(*) FROM QH_auth WHERE authcode<>'' AND authcode_hash='';")"
   if [ "${pend:-0}" != "0" ]; then
-    warn "$pend 条待回填，请执行： php think sf:authcode-backfill"
+    warn "$pend 条待回填，请执行： php think qh:authcode-backfill"
   else
     ok "无需回填"
   fi
@@ -414,10 +439,10 @@ do_rollback() {
   echo "      删除后这些客户既不能用新授权、也无法重新兑换。"
   echo
   echo "      优先考虑软回滚（不删表，4 条 UPDATE 即可恢复加固前行为）：${C_RST}"
-  echo "        UPDATE SF_config SET value='0' WHERE name='plugin_api_user_strict';"
-  echo "        UPDATE SF_config SET value='0' WHERE name='plugin_api_sign_required';"
-  echo "        UPDATE SF_config SET value='1' WHERE name='download_legacy_sign_enabled';"
-  echo "        UPDATE SF_app SET auth_enforce=2;"
+  echo "        UPDATE QH_config SET value='0' WHERE name='plugin_api_user_strict';"
+  echo "        UPDATE QH_config SET value='0' WHERE name='plugin_api_sign_required';"
+  echo "        UPDATE QH_config SET value='1' WHERE name='download_legacy_sign_enabled';"
+  echo "        UPDATE QH_app SET auth_enforce=2;"
   echo
   read -r -p "确定要执行硬回滚吗？输入大写 YES 继续："  ans
   [ "$ans" = "YES" ] || { echo "已取消。"; exit 0; }
@@ -429,14 +454,15 @@ do_rollback() {
     local out; out="$(mysql_run "$MIG_DIR/$m")"
     echo "$out" | sed 's/^/      /'
   done
+  create_legacy_balance_triggers
   echo
   echo "${C_YEL}若此前有客户兑换过旧码，还需执行：${C_RST}"
-  echo "  UPDATE \`SF_auth_legacy\` SET \`redeemed_at\`=NULL, \`redeemed_license_id\`=NULL;"
+  echo "  UPDATE \`QH_auth_legacy\` SET \`redeemed_at\`=NULL, \`redeemed_license_id\`=NULL;"
 }
 
 # ---------- 入口 ----------
 ACTION="${1:-check}"
-echo "${C_BLU}SF 授权系统 迁移执行器${C_RST}  —  $(date '+%Y-%m-%d %H:%M:%S')"
+echo "${C_BLU}QH 授权系统 迁移执行器${C_RST}  —  $(date '+%Y-%m-%d %H:%M:%S')"
 load_env
 echo "  目标库：$DB_NAME @ $DB_HOST:$DB_PORT"
 

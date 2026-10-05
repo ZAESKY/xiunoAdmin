@@ -54,8 +54,8 @@ class DiscountCodeModel extends BaseModel
     public function list()
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
 
         $data = $this->buildSearchWhere('id|code');
         return self::order('id', 'desc')->where($data)->paginate([

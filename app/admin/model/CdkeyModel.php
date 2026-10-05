@@ -54,7 +54,7 @@ class CdkeyModel extends BaseModel
             return message($e->getError() ,false);
         }
         try {
-            $balance = sf_money_format($balance);
+            $balance = qh_money_format($balance);
         } catch (\InvalidArgumentException $e) {
             return message('validation.balance_format', false);
         }
@@ -200,7 +200,7 @@ class CdkeyModel extends BaseModel
                     break;
             }
             for($i=0;$i<$number;$i++){
-                $cdkey = (conf('cdkey_head')??'SF').'_'.get_random_str(20,5);
+                $cdkey = (conf('cdkey_head')??'QH').'_'.get_random_str(20,5);
                 $data = [
                     "cdkey" => $cdkey,
                     "cdkey_type" => $cdkey_type,
@@ -262,8 +262,8 @@ class CdkeyModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($post['appid'])?intval($post['appid']):null;
             $userid = isset($post['userid']) && $post['userid'] !== '' ? intval($post['userid']) : null;
             $data = $this->buildSearchWhere('id|cdkey');

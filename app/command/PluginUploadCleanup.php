@@ -12,7 +12,7 @@ class PluginUploadCleanup extends Command
 {
     protected function configure()
     {
-        $this->setName('sf:plugin-upload-cleanup')
+        $this->setName('qh:plugin-upload-cleanup')
             ->addOption('limit', null, Option::VALUE_REQUIRED, '单次最多清理数量', '500')
             ->setDescription('清理过期且从未提交发布的插件压缩包');
     }

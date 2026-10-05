@@ -13,7 +13,7 @@ use think\facade\Db;
 
 /**
  * 插件-模型
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class PluginModel extends BaseModel
@@ -81,7 +81,7 @@ class PluginModel extends BaseModel
         $cover = !empty($post['cover']) ? $post['cover'] : '';
         $images = !empty($post['images']) ? $post['images'] : [];
         try {
-            $price = sf_money_format(!empty($post['price']) ? $post['price'] : '0.00');
+            $price = qh_money_format(!empty($post['price']) ? $post['price'] : '0.00');
         } catch (\InvalidArgumentException $e) {
             return message('plugin_action.price_format_error', false);
         }
@@ -135,7 +135,7 @@ class PluginModel extends BaseModel
             return message('plugin_admin.icon_required', false);
         }
         if ($origin_type == 2) {
-            if (sf_money_to_cents($price) > 0) {
+            if (qh_money_to_cents($price) > 0) {
                 return message('plugin_action.repost_paid_forbidden', false);
             }
             $price = '0.00';
@@ -283,7 +283,7 @@ class PluginModel extends BaseModel
                     );
                 }
                 Db::commit();
-                Cache::tag('SF_Plugin')->clear();
+                Cache::tag('QH_Plugin')->clear();
                 $message = t('user.edit_success');
                 $rewardText = $reward ? PluginRewardService::rewardText($reward) : '';
                 if ($rewardText !== '') {
@@ -351,7 +351,7 @@ class PluginModel extends BaseModel
                 PluginPackageUploadService::consume(intval($package['upload_id']), intval($pluginId));
                 $this->syncPluginResources($pluginId, $versionId, 0, $icon, $cover, $storage_driver, $post);
                 Db::commit();
-                Cache::tag('SF_Plugin')->clear();
+                Cache::tag('QH_Plugin')->clear();
                 return message(t('user.add_success'), true);
             } catch (\Exception $e) {
                 Db::rollback();
@@ -394,7 +394,7 @@ class PluginModel extends BaseModel
             Db::name('plugin_resources')->where('plugin_id', $id)->delete();
             Db::name('plugin_versions')->where('plugin_id', $id)->delete();
 
-            Cache::tag('SF_Plugin')->clear();
+            Cache::tag('QH_Plugin')->clear();
             return true;
         } catch (\Exception $e) {
             throw new Exception($e->getMessage());
@@ -526,7 +526,7 @@ class PluginModel extends BaseModel
                 throw $e;
             }
 
-            Cache::tag('SF_Plugin')->clear();
+            Cache::tag('QH_Plugin')->clear();
 
             // 审核通过时将临时图片移动到正式目录
             if ($status == 1 && !empty($row['content'])) {
@@ -588,8 +588,8 @@ class PluginModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|name|slug|author');
 
             $list = self::order('sort', 'desc')
@@ -616,7 +616,7 @@ class PluginModel extends BaseModel
                 $reward = $rewardMap[$pluginId] ?? [];
                 $item['reward_status'] = $reward['status'] ?? '';
                 $item['reward_points'] = intval($reward['points'] ?? 0);
-                $item['reward_balance'] = sf_money_format($reward['balance'] ?? 0);
+                $item['reward_balance'] = qh_money_format($reward['balance'] ?? 0);
                 $item['reward_reason'] = $reward['reason'] ?? '';
             }
             return $list;
@@ -717,7 +717,7 @@ class PluginModel extends BaseModel
                     $url = '';
                 }
             } else {
-                $url = sf_safe_url($resource['url'] ?? '', true);
+                $url = qh_safe_url($resource['url'] ?? '', true);
             }
             if ($resource['resource_type'] === 'icon' && $url !== '') {
                 $plugin['icon'] = $url;
@@ -735,17 +735,17 @@ class PluginModel extends BaseModel
     {
         foreach (['name' => 100, 'version' => 50, 'author' => 100, 'description' => 1000, 'update_description' => 2000, 'origin_author' => 100, 'origin_note' => 1000] as $field => $limit) {
             if (isset($plugin[$field])) {
-                $plugin[$field] = sf_plain_text($plugin[$field], $limit);
+                $plugin[$field] = qh_plain_text($plugin[$field], $limit);
             }
         }
         foreach (['icon', 'cover', 'iconUrl', 'coverUrl'] as $field) {
             if (isset($plugin[$field])) {
-                $plugin[$field] = sf_safe_url($plugin[$field], true);
+                $plugin[$field] = qh_safe_url($plugin[$field], true);
             }
         }
         foreach (['author_url', 'origin_url'] as $field) {
             if (isset($plugin[$field])) {
-                $plugin[$field] = sf_safe_url($plugin[$field], false);
+                $plugin[$field] = qh_safe_url($plugin[$field], false);
             }
         }
         if (isset($plugin['content'])) {
@@ -753,12 +753,12 @@ class PluginModel extends BaseModel
         }
         if (isset($plugin['images']) && is_array($plugin['images'])) {
             $plugin['images'] = array_values(array_filter(array_map(static function ($url) {
-                return sf_safe_url($url, true);
+                return qh_safe_url($url, true);
             }, $plugin['images'])));
         }
         if (!empty($plugin['related_plugin']) && is_array($plugin['related_plugin'])) {
-            $plugin['related_plugin']['name'] = sf_plain_text($plugin['related_plugin']['name'] ?? '', 100);
-            $plugin['related_plugin']['icon'] = sf_safe_url($plugin['related_plugin']['icon'] ?? '', true);
+            $plugin['related_plugin']['name'] = qh_plain_text($plugin['related_plugin']['name'] ?? '', 100);
+            $plugin['related_plugin']['icon'] = qh_safe_url($plugin['related_plugin']['icon'] ?? '', true);
         }
     }
 
@@ -769,7 +769,7 @@ class PluginModel extends BaseModel
     {
         try {
             self::where('id', $id)->inc('download_count')->update();
-            Cache::tag('SF_Plugin')->clear();
+            Cache::tag('QH_Plugin')->clear();
             return true;
         } catch (\Exception $e) {
             return false;
@@ -806,7 +806,7 @@ class PluginModel extends BaseModel
             ];
 
             self::where('id', $pluginId)->data($data)->update();
-            Cache::tag('SF_Plugin')->clear();
+            Cache::tag('QH_Plugin')->clear();
             return true;
         } catch (\Exception $e) {
             return false;
@@ -825,7 +825,7 @@ class PluginModel extends BaseModel
                 ->count();
 
             self::where('id', $pluginId)->data(['comment_count' => $count])->update();
-            Cache::tag('SF_Plugin')->clear();
+            Cache::tag('QH_Plugin')->clear();
             return true;
         } catch (\Exception $e) {
             return false;

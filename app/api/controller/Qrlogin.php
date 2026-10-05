@@ -68,12 +68,12 @@ class Qrlogin extends ApiBackend
                     try{
                         parent::userLogin();
                     }catch (\Exception $e){
-                        return message(sf_public_exception_message($e, t('qq.login_check_failed')) ,false ,['code' => 6]);
+                        return message(qh_public_exception_message($e, t('qq.login_check_failed')) ,false ,['code' => 6]);
                     }
                     if($this->myAppInfo['binding_auth_switch'] != 1) return message(t('auth.bind_auth_disabled') ,false ,['code' => 6]);
                     break;
                 case 'download':
-                    if (sf_download_mode() !== 'qrcode') {
+                    if (qh_download_mode() !== 'qrcode') {
                         return message(t('download.qq_disabled'), false, ['code' => 6]);
                     }
                     $appid = !empty($post['appid'])?intval($post['appid']):null;
@@ -154,7 +154,7 @@ class Qrlogin extends ApiBackend
             if(empty($row))return message(t('user.not_exist') ,false);
             Session::regenerate(true);
             cookie('userId', $row['id']);
-            cookie('userSign', data_auth_sign($row['appid'].$row['username'].$row['password'].sf_password_hash()));
+            cookie('userSign', data_auth_sign($row['appid'].$row['username'].$row['password'].qh_password_hash()));
             Session::delete('get_token');
             Session::delete('get_qq');
             Session::save();
@@ -179,7 +179,7 @@ class Qrlogin extends ApiBackend
                     }
                     Session::regenerate(true);
                     cookie('userId', $user['id']);
-                    cookie('userSign', data_auth_sign($user['appid'].$user['username'].$user['password'].sf_password_hash()));
+                    cookie('userSign', data_auth_sign($user['appid'].$user['username'].$user['password'].qh_password_hash()));
                     Session::delete('get_token');
                     Session::delete('get_qq');
                     Session::save();
@@ -223,7 +223,7 @@ class Qrlogin extends ApiBackend
         try{
             parent::userLogin();
         }catch (\Exception $e){
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')) ,false);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')) ,false);
         }
         $userId = cookie('userId');
         if(empty($userId)){
@@ -242,7 +242,7 @@ class Qrlogin extends ApiBackend
                 Db::name('user')->where('id', $userId)->data(['qq' => $get_qq])->update();
             });
         }catch (\Exception $e){
-            return message(sf_public_exception_message($e, t('profile.qq_bind_failed')) ,false);
+            return message(qh_public_exception_message($e, t('profile.qq_bind_failed')) ,false);
         }
         Session::delete('get_token');
         Session::delete('get_qq');
@@ -268,7 +268,7 @@ class Qrlogin extends ApiBackend
         }
         Session::regenerate(true);
         session('adminId', $admin['id'], 86400);
-        session('adminSign', data_auth_sign($admin['username'].$admin['password'].sf_password_hash()), 86400);
+        session('adminSign', data_auth_sign($admin['username'].$admin['password'].qh_password_hash()), 86400);
         Session::delete('get_token');
         Session::delete('get_qq');
         Session::save();
@@ -304,7 +304,7 @@ class Qrlogin extends ApiBackend
                 Db::name('admin')->where('id', $adminId)->data(['qq' => $get_qq])->update();
             });
         }catch (\Exception $e){
-            return message(sf_public_exception_message($e, t('profile.qq_bind_failed')) ,false);
+            return message(qh_public_exception_message($e, t('profile.qq_bind_failed')) ,false);
         }
         Session::delete('get_token');
         Session::delete('get_qq');
@@ -349,7 +349,7 @@ class Qrlogin extends ApiBackend
         try{
             parent::userLogin();
         }catch (\Exception $e){
-            return message(sf_public_exception_message($e, t('qq.login_check_failed')) ,false ,['code' => 6]);
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')) ,false ,['code' => 6]);
         }
         if($get_qq != $this->userInfo['qq']){
             return message(t('user.qq_bind_auth_mismatch') ,false);
@@ -397,7 +397,7 @@ class Qrlogin extends ApiBackend
                             }
                         });
                     } catch (\Exception $e) {
-                        return message(sf_public_exception_message($e, t('auth.bind_retry')), false);
+                        return message(qh_public_exception_message($e, t('auth.bind_retry')), false);
                     }
                     Session::delete('get_token');
                     Session::delete('get_qq');
@@ -421,7 +421,7 @@ class Qrlogin extends ApiBackend
         if (!IS_POST) {
             return message(t('common.illegal_request'), false);
         }
-        if (sf_download_mode() !== 'qrcode') {
+        if (qh_download_mode() !== 'qrcode') {
             return message(t('download.qq_disabled'), false);
         }
         $post = $this->request->post();

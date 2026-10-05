@@ -292,7 +292,7 @@ class Set extends Backend
 
     private static function getServerUrl()
     {
-        return config('sf.api_url');
+        return config('qh.api_url');
     }
 
     private static function getClient()
@@ -324,7 +324,7 @@ class Set extends Backend
             /* @deprecated unreachable legacy implementation retained only for migration reference.
             try {
                 $client = self::getClient();
-                $response = $client->post('update', ['query' => ['version' => config('sf.version')]]);
+                $response = $client->post('update', ['query' => ['version' => config('qh.version')]]);
                 $body = $response->getBody();
                 $content = $body->getContents();
 
@@ -396,8 +396,8 @@ class Set extends Backend
                 Session::save();
                 return message(t('system.update_unzip_success', ['res' => $res]), true, ['code' => 1, 'count' => $count]);
             }
-            $file = ROOT_PATH . DS . 'config' . DS . 'sf.php';
-            $config = config('sf');
+            $file = ROOT_PATH . DS . 'config' . DS . 'qh.php';
+            $config = config('qh');
             $config['version'] = $json['data']['version'];
             $config['edition'] = $json['data']['edition'];
             if (!file_exists($file)) {
@@ -445,7 +445,7 @@ class Set extends Backend
     }
 
     public function update(){
-        View::assign('edition', config('sf.edition'));
+        View::assign('edition', config('qh.edition'));
         return $this->render();
     }
 

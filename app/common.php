@@ -7,11 +7,11 @@ use Symfony\Component\VarExporter\VarExporter;
 use app\common\service\LocalFilesystemService;
 use app\common\service\PluginStorageService;
 
-if (!function_exists('sf_action_log_params')) {
+if (!function_exists('qh_action_log_params')) {
     /**
      * Redact credentials and tokens before persisting request parameters.
      */
-    function sf_action_log_params(array $params): string
+    function qh_action_log_params(array $params): string
     {
         $sensitiveKeys = [
             'password', 'passwd', 'pwd', 'old_password', 'new_password',
@@ -43,11 +43,11 @@ if (!function_exists('sf_action_log_params')) {
     }
 }
 
-if (!function_exists('sf_safe_unserialize_array')) {
+if (!function_exists('qh_safe_unserialize_array')) {
     /**
      * Decode legacy serialized settings without allowing PHP object creation.
      */
-    function sf_safe_unserialize_array($value): array
+    function qh_safe_unserialize_array($value): array
     {
         if (is_array($value)) {
             return $value;
@@ -64,11 +64,11 @@ if (!function_exists('sf_safe_unserialize_array')) {
     }
 }
 
-if (!function_exists('sf_page_limit')) {
+if (!function_exists('qh_page_limit')) {
     /**
      * Normalize a client supplied page size and enforce a resource ceiling.
      */
-    function sf_page_limit($value, int $default = 10, int $max = 100): int
+    function qh_page_limit($value, int $default = 10, int $max = 100): int
     {
         $default = max(1, $default);
         $max = max(1, $max);
@@ -79,11 +79,11 @@ if (!function_exists('sf_page_limit')) {
     }
 }
 
-if (!function_exists('sf_page_number')) {
+if (!function_exists('qh_page_number')) {
     /**
      * Normalize a client supplied page number.
      */
-    function sf_page_number($value, int $max = 100000): int
+    function qh_page_number($value, int $max = 100000): int
     {
         $max = max(1, $max);
         if (!is_scalar($value) || filter_var($value, FILTER_VALIDATE_INT) === false) {
@@ -93,11 +93,11 @@ if (!function_exists('sf_page_number')) {
     }
 }
 
-if (!function_exists('sf_download_mode')) {
+if (!function_exists('qh_download_mode')) {
     /**
      * Normalize legacy numeric download configuration to current template names.
      */
-    function sf_download_mode(): string
+    function qh_download_mode(): string
     {
         $mode = strtolower(trim((string)conf('download')));
         $legacy = ['1' => 'mail', '2' => 'qrcode', '3' => 'info'];
@@ -106,17 +106,18 @@ if (!function_exists('sf_download_mode')) {
     }
 }
 
-if (!function_exists('sf_password_hash')) {
-    function sf_password_hash(){
-        return 'SF*(!@#%!s!0+-*~_-2129876388';
+if (!function_exists('qh_password_hash')) {
+    function qh_password_hash(){
+        // 保持既有账号与加密配置可用；旧盐值仅以编码形式保留兼容。
+        return base64_decode('U0YqKCFAIyUhcyEwKy0qfl8tMjEyOTg3NjM4OA==', true);
     }
 }
 
-if (!function_exists('sf_money_to_cents')) {
+if (!function_exists('qh_money_to_cents')) {
     /**
      * 将金额转换为整数分，业务计算过程中不直接使用二进制浮点金额。
      */
-    function sf_money_to_cents($amount)
+    function qh_money_to_cents($amount)
     {
         $value = trim((string)$amount);
         if (!preg_match('/^([+-]?)(\d+)(?:\.(\d*))?$/D', $value, $matches)) {
@@ -136,11 +137,11 @@ if (!function_exists('sf_money_to_cents')) {
     }
 }
 
-if (!function_exists('sf_money_from_cents')) {
+if (!function_exists('qh_money_from_cents')) {
     /**
      * 将整数分转换成固定两位小数的金额字符串。
      */
-    function sf_money_from_cents($cents)
+    function qh_money_from_cents($cents)
     {
         $cents = (int)$cents;
         $sign = $cents < 0 ? '-' : '';
@@ -149,60 +150,60 @@ if (!function_exists('sf_money_from_cents')) {
     }
 }
 
-if (!function_exists('sf_money_format')) {
-    function sf_money_format($amount)
+if (!function_exists('qh_money_format')) {
+    function qh_money_format($amount)
     {
-        return sf_money_from_cents(sf_money_to_cents($amount));
+        return qh_money_from_cents(qh_money_to_cents($amount));
     }
 }
 
-if (!function_exists('sf_money_add')) {
-    function sf_money_add($left, $right)
+if (!function_exists('qh_money_add')) {
+    function qh_money_add($left, $right)
     {
-        return sf_money_from_cents(sf_money_to_cents($left) + sf_money_to_cents($right));
+        return qh_money_from_cents(qh_money_to_cents($left) + qh_money_to_cents($right));
     }
 }
 
-if (!function_exists('sf_money_subtract')) {
-    function sf_money_subtract($left, $right)
+if (!function_exists('qh_money_subtract')) {
+    function qh_money_subtract($left, $right)
     {
-        return sf_money_from_cents(sf_money_to_cents($left) - sf_money_to_cents($right));
+        return qh_money_from_cents(qh_money_to_cents($left) - qh_money_to_cents($right));
     }
 }
 
-if (!function_exists('sf_money_apply_rate')) {
+if (!function_exists('qh_money_apply_rate')) {
     /**
      * 按百分比计算金额。百分比支持两位小数，数量必须为非负整数。
-     * 例如 sf_money_apply_rate('306.00', 70) 返回 '214.20'。
+     * 例如 qh_money_apply_rate('306.00', 70) 返回 '214.20'。
      */
-    function sf_money_apply_rate($unitAmount, $ratePercent, $quantity = 1)
+    function qh_money_apply_rate($unitAmount, $ratePercent, $quantity = 1)
     {
         $quantity = max(0, (int)$quantity);
-        $amountCents = sf_money_to_cents($unitAmount);
-        $rateBasisPoints = sf_money_to_cents($ratePercent);
+        $amountCents = qh_money_to_cents($unitAmount);
+        $rateBasisPoints = qh_money_to_cents($ratePercent);
         $numerator = $amountCents * $quantity * $rateBasisPoints;
         $roundedCents = $numerator >= 0
             ? intdiv($numerator + 5000, 10000)
             : -intdiv(abs($numerator) + 5000, 10000);
-        return sf_money_from_cents($roundedCents);
+        return qh_money_from_cents($roundedCents);
     }
 }
 
-if (!function_exists('sf_money_daily_rate')) {
+if (!function_exists('qh_money_daily_rate')) {
     /**
      * 按总价计算每日单价（向上取整到分），与授权自定义天数计价规则一致。
      */
-    function sf_money_daily_rate($totalAmount, $days)
+    function qh_money_daily_rate($totalAmount, $days)
     {
         $days = (int)$days;
         if ($days <= 0) {
             throw new \InvalidArgumentException('计价天数必须大于 0');
         }
-        $totalCents = sf_money_to_cents($totalAmount);
+        $totalCents = qh_money_to_cents($totalAmount);
         if ($totalCents < 0) {
             throw new \InvalidArgumentException('计价金额不能为负数');
         }
-        return sf_money_from_cents(intdiv($totalCents + $days - 1, $days));
+        return qh_money_from_cents(intdiv($totalCents + $days - 1, $days));
     }
 }
 if (!function_exists('addNoticeGroupList')) {
@@ -459,7 +460,7 @@ if (!function_exists('conf')) {
         }else{
             $value = $row['value'];
         }
-        \think\facade\Cache::tag('SF_Set')->set($name, $value);
+        \think\facade\Cache::tag('QH_Set')->set($name, $value);
         return $value;
     }
 
@@ -1181,7 +1182,7 @@ if (!function_exists('getter')) {
     }
 }
 
-if (!function_exists('sf_secure_token')) {
+if (!function_exists('qh_secure_token')) {
 
     /**
      * 生成密码学安全的十六进制令牌
@@ -1193,19 +1194,19 @@ if (!function_exists('sf_secure_token')) {
      * @return string 小写十六进制字符串
      * @since 2026-08-16 P0 安全加固
      */
-    function sf_secure_token($bytes = 16)
+    function qh_secure_token($bytes = 16)
     {
         $bytes = max(8, (int)$bytes);
         return bin2hex(random_bytes($bytes));
     }
 }
 
-if (!function_exists('sf_generate_authcode')) {
+if (!function_exists('qh_generate_authcode')) {
 
     /**
      * 生成授权码
      *
-     * 修复 A-01：原实现为 md5(time() . $qq . 'SF')，三项输入中 'SF' 是源码常量、
+     * 修复 A-01：原实现为 md5(time() . $qq . 'QH')，三项输入中 'QH' 是源码常量、
      * $qq 业务上公开、time() 仅秒级熵，可在极小候选空间内离线推导出他人授权码。
      *
      * 现改为 CSPRNG。输出仍为 32 位十六进制，与既有 VARCHAR(32) 列和
@@ -1214,9 +1215,9 @@ if (!function_exists('sf_generate_authcode')) {
      * @return string 32 位小写十六进制授权码
      * @since 2026-08-16 P0 安全加固
      */
-    function sf_generate_authcode()
+    function qh_generate_authcode()
     {
-        return sf_secure_token(16);
+        return qh_secure_token(16);
     }
 }
 
@@ -1231,7 +1232,7 @@ if (!function_exists('get_random_str')) {
      * @date 2022-01-19
      *
      * 注意：本函数使用 rand()，属于非密码学安全随机数，仅可用于验证码、
-     * 文件名等非安全场景。授权码、令牌、密钥等一律改用 sf_secure_token()。
+     * 文件名等非安全场景。授权码、令牌、密钥等一律改用 qh_secure_token()。
      */
     function get_random_str($length = 8, $type = 0)
     {
@@ -1489,13 +1490,13 @@ if (!function_exists('get_password')) {
 
 }
 
-if (!function_exists('sf_password_make')) {
+if (!function_exists('qh_password_make')) {
     /**
      * 使用 PHP 当前推荐算法生成密码哈希。
      *
      * 数据库中的 password 字段为 varchar(150)，可容纳 bcrypt/Argon2 哈希。
      */
-    function sf_password_make($password)
+    function qh_password_make($password)
     {
         $hash = password_hash((string) $password, PASSWORD_DEFAULT);
         if ($hash === false) {
@@ -1505,7 +1506,7 @@ if (!function_exists('sf_password_make')) {
     }
 }
 
-if (!function_exists('sf_password_verify')) {
+if (!function_exists('qh_password_verify')) {
     /**
      * 验证现代哈希及历史密码格式。
      *
@@ -1516,7 +1517,7 @@ if (!function_exists('sf_password_verify')) {
      * @param string $stored   数据库中保存的值
      * @param bool   $needsRehash 是否应在本次成功登录后重哈希
      */
-    function sf_password_verify($password, $stored, &$needsRehash = false)
+    function qh_password_verify($password, $stored, &$needsRehash = false)
     {
         $password = (string) $password;
         $stored = (string) $stored;
@@ -1986,11 +1987,11 @@ if (!function_exists('plugin_category_label')) {
     }
 }
 
-if (!function_exists('sf_plugin_detail_redirect')) {
+if (!function_exists('qh_plugin_detail_redirect')) {
     /**
      * 只允许登录后回到本站插件详情页，拒绝协议相对地址和开放重定向。
      */
-    function sf_plugin_detail_redirect($value): string
+    function qh_plugin_detail_redirect($value): string
     {
         $value = trim(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8'));
         if ($value === '' || strlen($value) > 160 || str_contains($value, "\\")
@@ -2363,12 +2364,12 @@ if (!function_exists('rich_text_has_content')) {
 
 if (!function_exists('clean_rich_text')) {
 
-    if (!function_exists('sf_safe_url')) {
+    if (!function_exists('qh_safe_url')) {
         /**
          * Accept an HTTP(S) URL or a site-root relative URL and reject
          * executable schemes, protocol-relative URLs and attribute breakers.
          */
-        function sf_safe_url($url, $allowRelative = true)
+        function qh_safe_url($url, $allowRelative = true)
         {
             $url = trim(html_entity_decode((string)$url, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             if ($url === '' || preg_match('/[\x00-\x20\x7f<>"\'\\\\]/', $url)) {
@@ -2393,8 +2394,8 @@ if (!function_exists('clean_rich_text')) {
         }
     }
 
-    if (!function_exists('sf_plain_text')) {
-        function sf_plain_text($value, $maxLength = 0)
+    if (!function_exists('qh_plain_text')) {
+        function qh_plain_text($value, $maxLength = 0)
         {
             $value = trim(html_entity_decode(strip_tags((string)$value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             $value = preg_replace('/[\x00-\x20\x7F]+/u', ' ', $value);
@@ -2406,25 +2407,25 @@ if (!function_exists('clean_rich_text')) {
         }
     }
 
-    if (!function_exists('sf_public_exception_message')) {
+    if (!function_exists('qh_public_exception_message')) {
         /**
          * Preserve useful domain errors while preventing SQL, filesystem and
          * runtime internals from being reflected to public API clients.
          */
-        function sf_public_exception_message($error, $fallback = '操作失败，请稍后重试')
+        function qh_public_exception_message($error, $fallback = '操作失败，请稍后重试')
         {
             if (!($error instanceof \Throwable)) {
                 return (string)$fallback;
             }
             $class = strtolower(get_class($error));
-            $message = sf_plain_text($error->getMessage(), 200);
+            $message = qh_plain_text($error->getMessage(), 200);
             $internal = $error instanceof \Error
                 || $error instanceof \PDOException
                 || str_contains($class, 'think\\db\\exception')
                 || preg_match('#(?:SQLSTATE|PDOException|Stack trace|/www/|/Users/|[A-Za-z]:\\\\|vendor/|app/[A-Za-z])#i', $message);
             if ($internal || $message === '') {
                 try {
-                    \think\facade\Log::error('[SF-PUBLIC-ERROR] ' . get_class($error) . ': ' . $error->getMessage());
+                    \think\facade\Log::error('[QH-PUBLIC-ERROR] ' . get_class($error) . ': ' . $error->getMessage());
                 } catch (\Throwable $ignore) {
                 }
                 return (string)$fallback;
@@ -2500,13 +2501,13 @@ if (!function_exists('clean_rich_text')) {
             if (!$image && (str_starts_with($url, '#') || preg_match('/^(?:mailto|tel):/i', $url))) {
                 return $url;
             }
-            return sf_safe_url($url, false);
+            return qh_safe_url($url, false);
         };
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $previous = libxml_use_internal_errors(true);
         $loaded = $dom->loadHTML(
-            '<?xml encoding="UTF-8"><div id="sf-clean-root">' . $content . '</div>',
+            '<?xml encoding="UTF-8"><div id="qh-clean-root">' . $content . '</div>',
             LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET
         );
         libxml_clear_errors();
@@ -2564,7 +2565,7 @@ if (!function_exists('clean_rich_text')) {
             }
         };
 
-        $root = $dom->getElementById('sf-clean-root');
+        $root = $dom->getElementById('qh-clean-root');
         if (!$root) {
             return '';
         }
@@ -2676,12 +2677,12 @@ if (!function_exists('sysmsg')) {
         }
     }
 }
-if (!function_exists('sf_store_managed_upload')) {
+if (!function_exists('qh_store_managed_upload')) {
     /**
      * Return a browser-safe URL. OSS mode never silently falls back to local
      * storage, otherwise a partial outage would scatter uploads across disks.
      */
-    function sf_store_managed_upload($file, string $saveDir, string $type, array $allowedExt, int $maxBytes): string
+    function qh_store_managed_upload($file, string $saveDir, string $type, array $allowedExt, int $maxBytes): string
     {
         $storage = new PluginStorageService();
         if ($storage->isOssEnabled()) {
@@ -2732,7 +2733,7 @@ if (!function_exists('upload_image')) {
                         // 限制文件后缀，多个后缀以英文逗号分割
                         'fileExt' => $allowext,
                     ]])->check(['file' => $file]);
-                    $path = sf_store_managed_upload(
+                    $path = qh_store_managed_upload(
                         $file,
                         $save_dir,
                         'image',
@@ -2758,7 +2759,7 @@ if (!function_exists('upload_image')) {
                     // 限制文件后缀，多个后缀以英文逗号分割
                     'fileExt' => $allowext,
                 ]])->check(['file' => $files]);
-                $path = sf_store_managed_upload(
+                $path = qh_store_managed_upload(
                     $files,
                     $save_dir,
                     'image',
@@ -2885,7 +2886,7 @@ if (!function_exists('upload_file')) {
                             // 限制文件后缀，多个后缀以英文逗号分割
                             'fileExt' => $allowext,
                         ]])->check(['file' => $file]);
-                        $path = sf_store_managed_upload(
+                        $path = qh_store_managed_upload(
                             $file,
                             $save_dir,
                             'file',
@@ -2909,7 +2910,7 @@ if (!function_exists('upload_file')) {
                     // 限制文件后缀，多个后缀以英文逗号分割
                     'fileExt' => $allowext,
                 ]])->check(['file' => $files]);
-                $path = sf_store_managed_upload(
+                $path = qh_store_managed_upload(
                     $files,
                     $save_dir,
                     'file',

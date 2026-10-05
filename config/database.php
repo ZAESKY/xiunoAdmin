@@ -16,7 +16,7 @@ return [
             'hostport' => env('database_hostport', 3306),
             'params' => [],
             'charset' => env('database_charset', 'utf8mb4'),
-            'prefix' => 'SF_',
+            'prefix' => 'QH_',
             'deploy' => 0,
             'rw_separate' => false,
             'master_num' => 1,

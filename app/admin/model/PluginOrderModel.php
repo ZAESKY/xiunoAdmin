@@ -8,7 +8,7 @@ use think\facade\Db;
 
 /**
  * 插件订单-模型
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class PluginOrderModel extends BaseModel
@@ -83,8 +83,8 @@ class PluginOrderModel extends BaseModel
     {
         try {
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|order_no|plugin_name');
             if (!empty($post['plugin_id'])) {
                 $data[] = ['plugin_id', '=', intval($post['plugin_id'])];

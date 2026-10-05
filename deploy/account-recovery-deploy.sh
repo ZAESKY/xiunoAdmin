@@ -16,7 +16,7 @@ FILES_CHANGED=0
 DB_CHANGED=0
 CONFIG_EXISTED=0
 FILES=(
-  app/SF_Auth.sql
+  app/QH_Auth.sql
   app/admin/controller/Set.php
   app/api/controller/Social.php
   app/common/lang/en-us.php
@@ -46,7 +46,7 @@ finish() {
   if [ "$deploy_result" -ne 0 ]; then
     if [ "$DB_CHANGED" -eq 1 ]; then
       "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" \
-        -e "DELETE FROM SF_config WHERE name='password_recovery_channel'"
+        -e "DELETE FROM QH_config WHERE name='password_recovery_channel'"
       if [ "$CONFIG_EXISTED" -eq 1 ] && [ -s "$BACKUP_DIR/password-recovery-config.sql" ]; then
         "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" \
           < "$BACKUP_DIR/password-recovery-config.sql"
@@ -135,11 +135,11 @@ done
 [ "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024 ]
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 sha256sum "$BACKUP_DIR/database.sql" > "$BACKUP_DIR/database.sql.sha256"
-CONFIG_EXISTED="$(db_q "SELECT COUNT(*) FROM SF_config WHERE name='password_recovery_channel'")"
+CONFIG_EXISTED="$(db_q "SELECT COUNT(*) FROM QH_config WHERE name='password_recovery_channel'")"
 if [ "$CONFIG_EXISTED" -eq 1 ]; then
   "$DUMP_BIN" --defaults-extra-file="$CLIENT_CNF" --no-create-info --skip-add-locks \
     --skip-comments --skip-extended-insert --no-tablespaces \
-    --where="name='password_recovery_channel'" "$DB_NAME" SF_config \
+    --where="name='password_recovery_channel'" "$DB_NAME" QH_config \
     > "$BACKUP_DIR/password-recovery-config.sql"
 fi
 chmod 600 "$BACKUP_DIR/database.sql" "$BACKUP_DIR/database.sql.sha256"
@@ -179,7 +179,7 @@ for rel in "${FILES[@]}"; do
     *.sh) bash -n "$SITE_DIR/$rel" ;;
   esac
 done
-[ "$(db_q "SELECT COUNT(*) FROM SF_config WHERE name='password_recovery_channel' AND value IN ('email','sms')")" = "1" ]
+[ "$(db_q "SELECT COUNT(*) FROM QH_config WHERE name='password_recovery_channel' AND value IN ('email','sms')")" = "1" ]
 "$PHP_BIN" -r 'require "vendor/autoload.php";$app=new think\App();$app->initialize();$channel=app\common\service\PasswordRecoveryService::channel();if(!in_array($channel,["email","sms"],true)){exit(1);}$zh=require "app/common/lang/zh-cn.php";$en=require "app/common/lang/en-us.php";if(array_keys($zh)!==array_keys($en)){exit(2);}echo "account recovery self-check passed: $channel\n";'
 
 echo "[6/7] 线上 HTTP 健康检查"

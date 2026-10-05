@@ -3,23 +3,23 @@
     <div class="layui-card">
         <div class="layui-card-header">{:t('withdraw_admin.title')}</div>
         <div class="layui-card-body">
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     {{# if(d.status === 'pending'){ }}
     <a class="layui-btn layui-btn-sm layui-btn-normal" lay-event="approve"><i class="layui-icon layui-icon-ok"></i>{:t('feedback.handle')}</a>
     <a class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reject"><i class="layui-icon layui-icon-close"></i>{:t('withdraw_admin.reject')}</a>
     {{# } }}
 </script>
-<script type="text/html" id="SF_TbStatus">
+<script type="text/html" id="QH_TbStatus">
     {{# var m = {pending:'<span class="layui-badge layui-bg-orange">{:t('common_ui.status_pending')}</span>', approved:'<span class="layui-badge layui-badge-green">{:t('notification_email.sample.remark')}</span>', rejected:'<span class="layui-badge layui-badge-red">{:t('feedback.status_rejected')}</span>', withdrawn:'<span class="layui-badge layui-bg-gray">{:t('withdraw_admin.withdrawn')}</span>'}; }}
     {{# return m[d.status] || d.status; }}
 </script>
-<script type="text/html" id="SF_ApproveDialog">
-    <form id="SF_ApproveForm" lay-filter="SF_ApproveForm" class="layui-form model-form">
+<script type="text/html" id="QH_ApproveDialog">
+    <form id="QH_ApproveForm" lay-filter="QH_ApproveForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
             <label class="layui-form-label layui-form-required">{:t('withdraw_admin.process_remark')}</label>
@@ -36,13 +36,13 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_ApproveSubmit" lay-submit>{:t('withdraw_admin.confirm_process')}</button>
+            <button class="layui-btn" lay-filter="QH_ApproveSubmit" lay-submit>{:t('withdraw_admin.confirm_process')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
-<script type="text/html" id="SF_RejectDialog">
-    <form id="SF_RejectForm" lay-filter="SF_RejectForm" class="layui-form model-form">
+<script type="text/html" id="QH_RejectDialog">
+    <form id="QH_RejectForm" lay-filter="QH_RejectForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
             <label class="layui-form-label layui-form-required">{:t('withdraw_admin.reject_reason')}</label>
@@ -51,7 +51,7 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn layui-btn-danger" lay-filter="SF_RejectSubmit" lay-submit>{:t('withdraw_admin.confirm_reject')}</button>
+            <button class="layui-btn layui-btn-danger" lay-filter="QH_RejectSubmit" lay-submit>{:t('withdraw_admin.confirm_reject')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
@@ -63,7 +63,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
     var $ = layui.jquery, layer = layui.layer, form = layui.form, table = layui.table, admin = layui.admin, notice = layui.notice, upload = layui.upload;
 
     var insTb = table.render({
-        elem: '#SF_Table', url: '{:url("/Order/withdraw")}', method: 'post', page: true, skin: 'line', size: 'lg',
+        elem: '#QH_Table', url: '{:url("/Order/withdraw")}', method: 'post', page: true, skin: 'line', size: 'lg',
         request: { pageName: 'current_page', limitName: 'limit' },
         parseData: function(res) { return { code: res.code, msg: res.msg, count: res.data.total, data: res.data.data }; },
         cols: [[
@@ -75,27 +75,27 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
             {field: 'pay_method', title: '{:t("withdraw_admin.payment_method")}', width: 90, templet: function(d) { var m={alipay:'{:t("order_ui.alipay")}',wechat:'{:t("order_ui.wechat")}',bank:'{:t("withdraw_admin.bank_card")}'}; return m[d.pay_method]||d.pay_method||'-'; }},
             {field: 'qr_image', title: '{:t("withdraw_admin.payment_qr")}', width: 80, templet: function(d) { return d.qr_image ? '<a href="'+d.qr_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '-'; }},
             {field: 'user_remark', title: '{:t("withdraw_admin.user_remark")}', minWidth: 120},
-            {field: 'status', title: '{:t("common.status")}', width: 90, templet: '#SF_TbStatus'},
+            {field: 'status', title: '{:t("common.status")}', width: 90, templet: '#QH_TbStatus'},
             {field: 'admin_remark', title: '{:t("withdraw_admin.admin_remark")}', minWidth: 130, templet: '<span style="color:#8c8c8c;">{{d.admin_remark||"-"}}</span>'},
             {field: 'transfer_image', title: '{:t("withdraw_admin.proof")}', width: 80, templet: function(d) { return d.transfer_image ? '<a href="'+d.transfer_image+'" target="_blank"><span class="layui-badge layui-badge-blue">{:t('common.view')}</span></a>' : '-'; }},
             {field: 'applied_at', title: '{:t("withdraw_admin.applied_at")}', width: 150},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', width: 140}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', width: 140}
         ]]
     });
 
     function reloadTb() { insTb.reload(); }
 
-    table.on('tool(SF_Table)', function(obj) {
+    table.on('tool(QH_Table)', function(obj) {
         if (obj.event === 'approve') {
-            admin.open({ type: 1, area: ['520px', '340px'], title: '{:t("withdraw_admin.process_title")}', content: $('#SF_ApproveDialog').html(),
+            admin.open({ type: 1, area: ['520px', '340px'], title: '{:t("withdraw_admin.process_title")}', content: $('#QH_ApproveDialog').html(),
                 success: function(layero, dIndex) {
                     form.render();
-                    form.val('SF_ApproveForm', {id: obj.data.id});
+                    form.val('QH_ApproveForm', {id: obj.data.id});
                     upload.render({ elem: '#approveUploadBtn', url: '{:url("/Upload/image")}',
                         before: function() { notice.msg('{:t("withdraw_admin.uploading")}', {icon:4, close:true}); },
                         done: function(res) { notice.destroy(); if (res.code == 0) { $('#approveImage').val(res.data.path); $('#approveImgPreview').show().find('img').attr('src', res.data.path); notice.msg('{:t("version_ui.upload_success")}', {icon:1}); } }
                     });
-                    form.on('submit(SF_ApproveSubmit)', function(data) {
+                    form.on('submit(QH_ApproveSubmit)', function(data) {
                         notice.msg('{:t("common_ui.processing")}', {icon:4, close:true});
                         $.ajax({ type:'POST', url:'{:url("/Order/withdraw")}', data:{action:'approve', id: data.field.id, remark: data.field.remark, image: data.field.image}, dataType:'json',
                             success: function(r) { notice.destroy(); if (r.code == 0) { reloadTb(); admin.closeDialog(dIndex); } notice.msg(r.msg, {icon: r.code==0?1:2}); } });
@@ -104,11 +104,11 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload'], function () {
                 }
             });
         } else if (obj.event === 'reject') {
-            admin.open({ type: 1, area: ['460px', '260px'], title: '{:t("withdraw_admin.reject_title")}', content: $('#SF_RejectDialog').html(),
+            admin.open({ type: 1, area: ['460px', '260px'], title: '{:t("withdraw_admin.reject_title")}', content: $('#QH_RejectDialog').html(),
                 success: function(layero, dIndex) {
                     form.render();
-                    form.val('SF_RejectForm', {id: obj.data.id});
-                    form.on('submit(SF_RejectSubmit)', function(data) {
+                    form.val('QH_RejectForm', {id: obj.data.id});
+                    form.on('submit(QH_RejectSubmit)', function(data) {
                         notice.msg('{:t("common_ui.processing")}', {icon:4, close:true});
                         $.ajax({ type:'POST', url:'{:url("/Order/withdraw")}', data:{action:'reject', id: data.field.id, remark: data.field.remark}, dataType:'json',
                             success: function(r) { notice.destroy(); if (r.code == 0) { reloadTb(); admin.closeDialog(dIndex); } notice.msg(r.msg, {icon: r.code==0?1:2}); } });

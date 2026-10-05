@@ -1,4 +1,4 @@
-DELETE FROM `SF_config` WHERE `name` IN (
+DELETE FROM `QH_config` WHERE `name` IN (
   'plugin_reward_enabled',
   'plugin_reward_points',
   'plugin_reward_balance',
@@ -8,5 +8,5 @@ DELETE FROM `SF_config` WHERE `name` IN (
   'plugin_reward_duplicate_hash'
 );
 
-DROP TABLE IF EXISTS `SF_plugin_reward_hash_claim`;
-DROP TABLE IF EXISTS `SF_plugin_reward`;
+DROP TABLE IF EXISTS `QH_plugin_reward_hash_claim`;
+DROP TABLE IF EXISTS `QH_plugin_reward`;

@@ -35,7 +35,7 @@ class AjaxService extends BaseService
                 ])
                 ->field('id,name,logo,introduce,register_notice,app_notice')
                 ->find();
-            Cache::tag('SF_App')->set('appid'.$appid, $appInfo);
+            Cache::tag('QH_App')->set('appid'.$appid, $appInfo);
         }
         if (is_array($appInfo)) {
             foreach (['register_notice', 'app_notice'] as $field) {

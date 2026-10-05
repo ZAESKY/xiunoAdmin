@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `SF_config`;
-CREATE TABLE `SF_config` (
+DROP TABLE IF EXISTS `QH_config`;
+CREATE TABLE `QH_config` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '变量名',
   `group` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '分组',
@@ -14,11 +14,11 @@ CREATE TABLE `SF_config` (
   PRIMARY KEY (`id`),KEY (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统配置';
 
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
-('title', 'site', '站点名称', '请填写站点名称', 'string', 'SF授权平台', '', 'required', '', NULL),
-('keywords', 'site', '站点关键词', '请填写站点关键词', 'string', 'PHP网络验证系统,多应用授权系统,SF综合验证授权系统,SF授权系统,SF授权站,授权中心,授权系统,机器人授权,授权', '', '', '', NULL),
-('description', 'site', '站点描述', '请填写站点描述', 'text', 'SF综合验证授权系统，专业帮助站长开发程序，帮您火速开发程序，我们提供最专业的售前指导，提供最优质的售后服务，给您一个放心的平台！', '', '', '', NULL),
-('foot', 'site', '底部版权', '请填写底部版权', 'string', 'Copyright © SF-陌上花开', '', 'required', '', NULL),
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
+('title', 'site', '站点名称', '请填写站点名称', 'string', 'QH授权平台', '', 'required', '', NULL),
+('keywords', 'site', '站点关键词', '请填写站点关键词', 'string', 'PHP网络验证系统,多应用授权系统,QH综合验证授权系统,QH授权系统,QH授权站,授权中心,授权系统,机器人授权,授权', '', '', '', NULL),
+('description', 'site', '站点描述', '请填写站点描述', 'text', 'QH综合验证授权系统，专业帮助站长开发程序，帮您火速开发程序，我们提供最专业的售前指导，提供最优质的售后服务，给您一个放心的平台！', '', '', '', NULL),
+('foot', 'site', '底部版权', '请填写底部版权', 'string', 'Copyright © QH-陌上花开', '', 'required', '', NULL),
 ('ICP', 'site', 'ICP备案', '请填写备案号', 'string', '', '', '', '', NULL),
 ('kfqq', 'site', '客服QQ', '可填写多个客服，回车来分割多个客服。<br>“|”来分割跳转联系方式和客服名称。', 'text', 'tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=2129876388|客服一号', '', '', '', 'tag-orange'),
 ('qq_group', 'site', 'QQ群链接', '用于前台加入群聊时跳转', 'string', 'https://jq.qq.com/?_wv=1027&k=', '', '', '', NULL),
@@ -46,8 +46,8 @@ INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `cont
 ('user_query_switch', 'function', '代理查询', '', 'bool', '0', '', '', '', NULL),
 ('queue_query_switch', 'function', '队列查询', '', 'bool', '0', '', '', '', NULL),
 ('download', 'function', '下载方式', '', 'radio', '0', '{"0":"关闭","mail":"邮箱验证","qrcode":"QQ扫码","info":"信息验证"}', '', '', NULL),
-('cdkey_head', 'function', '卡密前缀', '留空默认前缀为SF', 'string', 'SF', '', '', '', NULL),
-('api_key', 'function', 'API密钥', '用于操作敏感API验证', 'string', 'sf-2129876388', '', '', '', NULL),
+('cdkey_head', 'function', '卡密前缀', '留空默认前缀为QH', 'string', 'QH', '', '', '', NULL),
+('api_key', 'function', 'API密钥', '用于操作敏感API验证', 'string', 'qh-2129876388', '', '', '', NULL),
 ('create_cdkey_max_number', 'function', '卡密生成数量', '用户一次性最多生成卡密数量', 'string', '20', '', '', '', NULL),
 ('have_cdkey_max_number', 'function', '卡密拥有数量', '用户最多拥有未使用卡密数量', 'string', '999', '', '', '', NULL),
 ('login_switch', 'function', '登录方式', '', 'checkbox', '', '{"qq":"<img src=\'/Assets/img/qq.png\' width=\'15\'> QQ Login","qrcode":"<img src=\'/Assets/img/pays.png\' width=\'15\'> QQ QR Login","wechat_mp":"<img src=\'/Assets/img/wechat.svg\' width=\'15\'> WeChat MP Login"}', '', '', NULL),
@@ -111,11 +111,11 @@ INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `cont
 ('change_binding_phone_message', 'message', '用户绑定手机', '', 'config', '', 'notice', '', '', NULL),
 ('change_binding_mail_message', 'message', '用户绑定邮箱', '', 'config', '', 'notice', '', '', NULL),
 ('download_mail_message', 'message', '源码下载', '', 'config', '', 'notice', '', '', NULL);
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
 ('email_notification_enabled', 'email_notification', '业务邮件通知', '总开关关闭时仅保留站内消息，不发送审核、交易等业务邮件', 'bool', '0', '', '', '', NULL);
 
-DROP TABLE IF EXISTS `SF_cdkey`;
-CREATE TABLE IF NOT EXISTS `SF_cdkey` (
+DROP TABLE IF EXISTS `QH_cdkey`;
+CREATE TABLE IF NOT EXISTS `QH_cdkey` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `cdkey` varchar(50) NOT NULL COMMENT '卡密',
   `cdkey_type` varchar(20) NOT NULL COMMENT '卡密类型',
@@ -130,8 +130,8 @@ CREATE TABLE IF NOT EXISTS `SF_cdkey` (
   KEY (`cdkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_auth_template`;
-CREATE TABLE `SF_auth_template`(
+DROP TABLE IF EXISTS `QH_auth_template`;
+CREATE TABLE `QH_auth_template`(
   `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '模板名称',
   `check_type` varchar(150) NOT NULL COMMENT '类型ID',
@@ -141,13 +141,13 @@ CREATE TABLE `SF_auth_template`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_auth_template`(`id`, `check_type`, `name`, `sort`, `addtime`, `status`) VALUES
+INSERT INTO `QH_auth_template`(`id`, `check_type`, `name`, `sort`, `addtime`, `status`) VALUES
 (1, 'domain', '授权域名模板', 1, NOW(), 1),
 (2, 'qq',  '授权QQ模板', 1, NOW(), 1),
 (3, 'machineCode', '授权机器码模板', 1, NOW(), 1);
 
-DROP TABLE IF EXISTS `SF_auth_price`;
-CREATE TABLE `SF_auth_price`(
+DROP TABLE IF EXISTS `QH_auth_price`;
+CREATE TABLE `QH_auth_price`(
   `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
   `tid` INT(11) unsigned NOT NULL COMMENT '模板ID',
   `name` varchar(150) NOT NULL COMMENT '价格名称',
@@ -162,7 +162,7 @@ CREATE TABLE `SF_auth_price`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_auth_price`(`tid`, `name`, `sort`, `day`, `permanent_switch`, `diy_switch`, `money`, `all_money`, `addtime`, `status`) VALUES
+INSERT INTO `QH_auth_price`(`tid`, `name`, `sort`, `day`, `permanent_switch`, `diy_switch`, `money`, `all_money`, `addtime`, `status`) VALUES
 (1,'自定义时间', 1, 1, 0, 1, 1, 1, NOW(), 1),
 (1,'天卡', 2, 1, 0, 0, 1, 1, NOW(), 1),
 (1, '周卡', 3, 7, 0, 0, 3, 3, NOW(), 1),
@@ -182,8 +182,8 @@ INSERT INTO `SF_auth_price`(`tid`, `name`, `sort`, `day`, `permanent_switch`, `d
 (3, '年卡', 5, 1, 0, 0, 18, 18, NOW(), 1),
 (3, '永久授权', 6, 0, 1, 0, 30, 30, NOW(), 1);
 
-DROP TABLE IF EXISTS `SF_check_type`;
-CREATE TABLE `SF_check_type`(
+DROP TABLE IF EXISTS `QH_check_type`;
+CREATE TABLE `QH_check_type`(
   `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '类型名称',
   `type` varchar(150) NOT NULL COMMENT '规则名称',
@@ -192,8 +192,8 @@ CREATE TABLE `SF_check_type`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_power_template`;
-CREATE TABLE `SF_power_template`(
+DROP TABLE IF EXISTS `QH_power_template`;
+CREATE TABLE `QH_power_template`(
   `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '模板名称',
   `sort` int(11) DEFAULT NULL COMMENT '模板排序',
@@ -202,12 +202,12 @@ CREATE TABLE `SF_power_template`(
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_power_template`(`id`, `name`, `sort`, `addtime`, `status`) VALUES
+INSERT INTO `QH_power_template`(`id`, `name`, `sort`, `addtime`, `status`) VALUES
 (1, '授权域名模板', 1, NOW(), 1),
 (2, '授权QQ模板', 1, NOW(), 1);
 
-DROP TABLE IF EXISTS `SF_power_price`;
-CREATE TABLE `SF_power_price`(
+DROP TABLE IF EXISTS `QH_power_price`;
+CREATE TABLE `QH_power_price`(
    `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
    `name` varchar(150) NOT NULL COMMENT '权限名称',
    `tid` INT(11) unsigned NOT NULL COMMENT '模板ID',
@@ -231,7 +231,7 @@ CREATE TABLE `SF_power_price`(
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_power_price`(`id`, `name`, `tid`, `addauth_power`, `addpay_power`, `pirate_power`, `adduser_power`, `parentid`, `addauth_discount`, `addpay_discount`, `pirate_discount`, `adduser_discount`, `introduce`, `money`, `addtime`, `default_power`, `status`) VALUES
+INSERT INTO `QH_power_price`(`id`, `name`, `tid`, `addauth_power`, `addpay_power`, `pirate_power`, `adduser_power`, `parentid`, `addauth_discount`, `addpay_discount`, `pirate_discount`, `adduser_discount`, `introduce`, `money`, `addtime`, `default_power`, `status`) VALUES
 (1, '普通用户', 1, 0, 0, 0, 0, 2, 100, 100, 100, 100, '注册默认权限', 0, NOW(), 1, 1),
 (2, '青铜代理', 1, 1, 0, 0, 0, 3, 80, 100, 100, 100, '八折添加授权', 100, NOW(), 0, 1),
 (3, '白银代理', 1, 1, 0, 0, 1, 4, 70, 100, 100, 80, '七折添加授权，八折添加下级（青铜代理）', 200, NOW(), 0, 1),
@@ -248,8 +248,8 @@ INSERT INTO `SF_power_price`(`id`, `name`, `tid`, `addauth_power`, `addpay_power
 (14, '合作商', 2, 1, 0, 0, 1, 15, 0, 100, 100, 50, '无限授权，低价添加下级代理（超级代理商，授权代理商）', 400, NOW(), 0, 1),
 (15, '副站长', 2, 1, 0, 0, 1, 0, 0, 100, 100, 0, '无限授权，无限添加下级代理（合作商，超级代理商，授权代理商）', 800, NOW(), 0, 1);
 
-DROP TABLE IF EXISTS `SF_pay`;
-CREATE TABLE `SF_pay` (
+DROP TABLE IF EXISTS `QH_pay`;
+CREATE TABLE `QH_pay` (
   `trade_no` varchar(64) NOT NULL,
   `api_trade_no` varchar(64) DEFAULT NULL,
   `buy_type` varchar(20) NULL,
@@ -268,8 +268,8 @@ CREATE TABLE `SF_pay` (
   PRIMARY KEY (`trade_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `SF_order`;
-CREATE TABLE `SF_order` (
+DROP TABLE IF EXISTS `QH_order`;
+CREATE TABLE `QH_order` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `trade_no` varchar(255) DEFAULT NULL COMMENT '订单号',
   `api_trade_no` varchar(64) DEFAULT NULL COMMENT '对接订单号',
@@ -290,8 +290,8 @@ CREATE TABLE `SF_order` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_admin`;
-CREATE TABLE `SF_admin` (
+DROP TABLE IF EXISTS `QH_admin`;
+CREATE TABLE `QH_admin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(150) NOT NULL,
   `password` varchar(150) NOT NULL,
@@ -310,11 +310,11 @@ CREATE TABLE `SF_admin` (
   UNIQUE KEY `uk_admin_access_token` (`access_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_admin`(`username`, `password`, `qq`, `status`) VALUES
+INSERT INTO `QH_admin`(`username`, `password`, `qq`, `status`) VALUES
 ('admin', '123456', '2129876388', '1');
 
-DROP TABLE IF EXISTS `SF_user`;
-CREATE TABLE `SF_user` (
+DROP TABLE IF EXISTS `QH_user`;
+CREATE TABLE `QH_user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(150) NOT NULL COMMENT '用户名',
   `password` varchar(150) NOT NULL COMMENT '密码',
@@ -346,16 +346,16 @@ CREATE TABLE `SF_user` (
   UNIQUE KEY `uk_user_qq` (`qq`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TRIGGER `SF_user_withdrawable_before_insert`
-BEFORE INSERT ON `SF_user`
+CREATE TRIGGER `QH_user_withdrawable_before_insert`
+BEFORE INSERT ON `QH_user`
 FOR EACH ROW SET NEW.`withdrawable_balance` = LEAST(GREATEST(NEW.`withdrawable_balance`, 0.00), GREATEST(NEW.`balance`, 0.00));
 
-CREATE TRIGGER `SF_user_withdrawable_before_update`
-BEFORE UPDATE ON `SF_user`
+CREATE TRIGGER `QH_user_withdrawable_before_update`
+BEFORE UPDATE ON `QH_user`
 FOR EACH ROW SET NEW.`withdrawable_balance` = LEAST(GREATEST(NEW.`withdrawable_balance`, 0.00), GREATEST(NEW.`balance`, 0.00));
 
-DROP TABLE IF EXISTS `SF_social_identity`;
-CREATE TABLE `SF_social_identity` (
+DROP TABLE IF EXISTS `QH_social_identity`;
+CREATE TABLE `QH_social_identity` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `provider` varchar(32) NOT NULL COMMENT 'qq/wechat/etc',
   `provider_appid` varchar(64) NOT NULL COMMENT '第三方平台应用ID',
@@ -370,8 +370,8 @@ CREATE TABLE `SF_social_identity` (
   KEY `idx_unionid` (`provider`,`unionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='第三方登录身份';
 
-DROP TABLE IF EXISTS `SF_user_social_identity`;
-CREATE TABLE `SF_user_social_identity` (
+DROP TABLE IF EXISTS `QH_user_social_identity`;
+CREATE TABLE `QH_user_social_identity` (
   `identity_id` int(11) unsigned NOT NULL,
   `user_id` int(11) unsigned NOT NULL,
   `created_at` datetime NOT NULL,
@@ -381,8 +381,8 @@ CREATE TABLE `SF_user_social_identity` (
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户与第三方身份关联';
 
-DROP TABLE IF EXISTS `SF_user_phone_identity`;
-CREATE TABLE `SF_user_phone_identity` (
+DROP TABLE IF EXISTS `QH_user_phone_identity`;
+CREATE TABLE `QH_user_phone_identity` (
   `user_id` int(11) unsigned NOT NULL,
   `phone_hash` char(64) NOT NULL COMMENT '带服务端pepper的手机号HMAC',
   `phone_last4` char(4) NOT NULL DEFAULT '',
@@ -393,8 +393,8 @@ CREATE TABLE `SF_user_phone_identity` (
   UNIQUE KEY `uk_phone_hash` (`phone_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='已验证手机号唯一身份';
 
-DROP TABLE IF EXISTS `SF_sms_audit`;
-CREATE TABLE `SF_sms_audit` (
+DROP TABLE IF EXISTS `QH_sms_audit`;
+CREATE TABLE `QH_sms_audit` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL DEFAULT 0,
   `scene` varchar(32) NOT NULL DEFAULT '',
@@ -412,11 +412,11 @@ CREATE TABLE `SF_sms_audit` (
   KEY `idx_status_time` (`status`,`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='短信发送与验证审计（不保存验证码）';
 
-DROP TABLE IF EXISTS `SF_qq_identity_claim`;
-CREATE TABLE `SF_qq_identity_claim` (
+DROP TABLE IF EXISTS `QH_qq_identity_claim`;
+CREATE TABLE `QH_qq_identity_claim` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `identity_id` int(11) unsigned NOT NULL COMMENT 'SF_social_identity.id',
-  `user_id` int(11) unsigned NOT NULL COMMENT 'SF_user.id',
+  `identity_id` int(11) unsigned NOT NULL COMMENT 'QH_social_identity.id',
+  `user_id` int(11) unsigned NOT NULL COMMENT 'QH_user.id',
   `legacy_qq` varchar(20) NOT NULL COMMENT '旧扫码一次性验证的数字QQ',
   `proof_method` varchar(32) NOT NULL DEFAULT 'legacy_qr',
   `verified_at` datetime NOT NULL,
@@ -430,8 +430,8 @@ CREATE TABLE `SF_qq_identity_claim` (
   KEY `idx_qq_claim_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='正规QQ身份与已验证历史QQ关系';
 
-DROP TABLE IF EXISTS `SF_menu`;
-CREATE TABLE `SF_menu` (
+DROP TABLE IF EXISTS `QH_menu`;
+CREATE TABLE `QH_menu` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT '菜单名称',
   `url` varchar(255) NOT NULL COMMENT '菜单链接',
@@ -443,7 +443,7 @@ CREATE TABLE `SF_menu` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_menu`(`id`,`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+INSERT INTO `QH_menu`(`id`,`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
 (1, '后台首页', 'Index/main', 'layui-icon-home', 0, NOW(), 0, 1),
 (2, '安全中心', 'Safe/index', 'layui-icon-auz', 1, NOW(), 0, 1),
 (3, '订单列表', 'Order/list', 'layui-icon-list', 0, NOW(), 0, 1),
@@ -472,8 +472,8 @@ INSERT INTO `SF_menu`(`id`,`name`, `url`, `icon`, `parentid`, `addtime`, `power`
 (31, '插件管理', 'Addon/list', 'layui-icon-component', 0, NOW(), 1, 1),
 (32, '系统日志', 'Log/list', 'layui-icon-log', 0, NOW(), 1, 1);
 
-DROP TABLE IF EXISTS `SF_log`;
-CREATE TABLE `SF_log` (
+DROP TABLE IF EXISTS `QH_log`;
+CREATE TABLE `QH_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '唯一性标识',
   `action_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '行为ID',
   `is_admin` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT '是否后台操作：1是 2否',
@@ -494,8 +494,8 @@ CREATE TABLE `SF_log` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='系统行为日志表';
 
-DROP TABLE IF EXISTS `SF_auth`;
-CREATE TABLE `SF_auth` (
+DROP TABLE IF EXISTS `QH_auth`;
+CREATE TABLE `QH_auth` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `qq` varchar(20) NOT NULL COMMENT '授权者QQ',
   `auth_info` varchar(255) NOT NULL COMMENT '授权信息',
@@ -515,8 +515,8 @@ CREATE TABLE `SF_auth` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_payment`;
-CREATE TABLE `SF_payment` (
+DROP TABLE IF EXISTS `QH_payment`;
+CREATE TABLE `QH_payment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `qq` varchar(20) NOT NULL COMMENT '持有者QQ',
   `url` varchar(255) NOT NULL COMMENT '易支付网址',
@@ -532,8 +532,8 @@ CREATE TABLE `SF_payment` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_black`;
-CREATE TABLE `SF_black` (
+DROP TABLE IF EXISTS `QH_black`;
+CREATE TABLE `QH_black` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `qq` varchar(20) NOT NULL COMMENT '联系QQ',
   `auth_info` varchar(255) NOT NULL COMMENT '黑名单信息',
@@ -546,8 +546,8 @@ CREATE TABLE `SF_black` (
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_version`;
-CREATE TABLE `SF_version` (
+DROP TABLE IF EXISTS `QH_version`;
+CREATE TABLE `QH_version` (
 `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 `edition` varchar(255) NOT NULL COMMENT '版本',
 `version` int(11) unsigned NOT NULL COMMENT '版本号',
@@ -566,8 +566,8 @@ CREATE TABLE `SF_version` (
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_pirate`;
-CREATE TABLE `SF_pirate` (
+DROP TABLE IF EXISTS `QH_pirate`;
+CREATE TABLE `QH_pirate` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `pirate_info` varchar(255) NOT NULL COMMENT '盗版内容',
   `param` text CHARACTER SET utf8mb4 COMMENT '请求参数(JSON格式)',
@@ -577,8 +577,8 @@ CREATE TABLE `SF_pirate` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_check_type`;
-CREATE TABLE `SF_check_type` (
+DROP TABLE IF EXISTS `QH_check_type`;
+CREATE TABLE `QH_check_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT '规则名称',
   `type` varchar(255) NOT NULL COMMENT '规则键值',
@@ -587,8 +587,8 @@ CREATE TABLE `SF_check_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_app`;
-CREATE TABLE `SF_app` (
+DROP TABLE IF EXISTS `QH_app`;
+CREATE TABLE `QH_app` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '应用名称',
   `check_type` varchar(150) NOT NULL DEFAULT 'domain' COMMENT '判断授权内容规则',
@@ -648,8 +648,8 @@ CREATE TABLE `SF_app` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_download`;
-CREATE TABLE `SF_download` (
+DROP TABLE IF EXISTS `QH_download`;
+CREATE TABLE `QH_download` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NULL,
   `img` varchar(100) NULL,
@@ -661,20 +661,20 @@ CREATE TABLE `SF_download` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `SF_check_type`(`id`, `name`, `type`, `addtime`, `status`) VALUES
+INSERT INTO `QH_check_type`(`id`, `name`, `type`, `addtime`, `status`) VALUES
 (1, '域名规则', 'domain', NOW(), 1),
 (2, 'QQ规则', 'qq', NOW(), 1),
 (3, '机器码规则', 'machineCode', NOW(), 1);
 
 -- ==================== 功能反馈 / feedback ====================
-DROP TABLE IF EXISTS `SF_feedback`;
-CREATE TABLE `SF_feedback` (
+DROP TABLE IF EXISTS `QH_feedback`;
+CREATE TABLE `QH_feedback` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `title` varchar(255) NOT NULL COMMENT '反馈标题',
   `content` text NOT NULL COMMENT '反馈内容',
   `type` varchar(20) NOT NULL DEFAULT 'other' COMMENT '反馈类型：bug/feature/other',
-  `reply` text COMMENT '历史回复字段，新增回复请写入SF_feedback_reply',
+  `reply` text COMMENT '历史回复字段，新增回复请写入QH_feedback_reply',
   `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0待处理 1已受理 2已驳回 3已解决',
   `created_at` datetime NOT NULL COMMENT '提交时间',
   `updated_at` datetime DEFAULT NULL COMMENT '处理时间',
@@ -682,8 +682,8 @@ CREATE TABLE `SF_feedback` (
   KEY `idx_user_status` (`user_id`, `status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_feedback_reply`;
-CREATE TABLE `SF_feedback_reply` (
+DROP TABLE IF EXISTS `QH_feedback_reply`;
+CREATE TABLE `QH_feedback_reply` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `feedback_id` int(11) unsigned NOT NULL COMMENT '反馈ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '回复用户ID，0=管理员',
@@ -696,8 +696,8 @@ CREATE TABLE `SF_feedback_reply` (
   KEY `idx_feedback_admin` (`feedback_id`, `is_admin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_notification`;
-CREATE TABLE `SF_notification` (
+DROP TABLE IF EXISTS `QH_notification`;
+CREATE TABLE `QH_notification` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '接收用户ID，0=管理员',
   `title` varchar(255) NOT NULL COMMENT '通知标题',
@@ -710,8 +710,8 @@ CREATE TABLE `SF_notification` (
   KEY `idx_user_read` (`user_id`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `SF_notification_email_preference`;
-CREATE TABLE `SF_notification_email_preference` (
+DROP TABLE IF EXISTS `QH_notification_email_preference`;
+CREATE TABLE `QH_notification_email_preference` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `owner_type` varchar(16) NOT NULL COMMENT 'user/admin',
   `owner_id` int(11) unsigned NOT NULL,
@@ -724,8 +724,8 @@ CREATE TABLE `SF_notification_email_preference` (
   KEY `idx_event_enabled` (`event_code`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='邮件通知接收偏好';
 
-DROP TABLE IF EXISTS `SF_notification_email_template`;
-CREATE TABLE `SF_notification_email_template` (
+DROP TABLE IF EXISTS `QH_notification_email_template`;
+CREATE TABLE `QH_notification_email_template` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `event_code` varchar(64) NOT NULL,
   `audience` varchar(16) NOT NULL COMMENT 'user/admin',
@@ -740,8 +740,8 @@ CREATE TABLE `SF_notification_email_template` (
   KEY `idx_audience_enabled` (`audience`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务邮件HTML模板覆盖';
 
-DROP TABLE IF EXISTS `SF_notification_email_log`;
-CREATE TABLE `SF_notification_email_log` (
+DROP TABLE IF EXISTS `QH_notification_email_log`;
+CREATE TABLE `QH_notification_email_log` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `event_code` varchar(64) NOT NULL,
   `recipient_type` varchar(16) NOT NULL,
@@ -757,8 +757,8 @@ CREATE TABLE `SF_notification_email_log` (
   KEY `idx_status_time` (`status`,`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务邮件发送审计（不保存正文和完整邮箱）';
 
-DROP TABLE IF EXISTS `SF_point_log`;
-CREATE TABLE `SF_point_log` (
+DROP TABLE IF EXISTS `QH_point_log`;
+CREATE TABLE `QH_point_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `type` varchar(30) NOT NULL COMMENT 'consume/recharge/exchange/refund',
@@ -776,8 +776,8 @@ CREATE TABLE `SF_point_log` (
   KEY `idx_related` (`related_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `SF_wechat_mp_login`;
-CREATE TABLE `SF_wechat_mp_login` (
+DROP TABLE IF EXISTS `QH_wechat_mp_login`;
+CREATE TABLE `QH_wechat_mp_login` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `token` varchar(64) NOT NULL COMMENT '本地登录token',
   `scene` varchar(80) NOT NULL DEFAULT '' COMMENT '微信二维码场景值',
@@ -795,8 +795,8 @@ CREATE TABLE `SF_wechat_mp_login` (
   KEY `idx_status_expire` (`status`, `expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='微信公众号扫码登录状态表';
 
-DROP TABLE IF EXISTS `SF_point_product`;
-CREATE TABLE `SF_point_product` (
+DROP TABLE IF EXISTS `QH_point_product`;
+CREATE TABLE `QH_point_product` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '商品名称',
   `image` varchar(255) DEFAULT '' COMMENT '商品图片',
@@ -814,8 +814,8 @@ CREATE TABLE `SF_point_product` (
   KEY `idx_type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `SF_point_exchange_record`;
-CREATE TABLE `SF_point_exchange_record` (
+DROP TABLE IF EXISTS `QH_point_exchange_record`;
+CREATE TABLE `QH_point_exchange_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `product_id` int(11) unsigned NOT NULL COMMENT '商品ID',
@@ -829,8 +829,8 @@ CREATE TABLE `SF_point_exchange_record` (
   KEY `idx_product` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `SF_point_product_reward`;
-CREATE TABLE `SF_point_product_reward` (
+DROP TABLE IF EXISTS `QH_point_product_reward`;
+CREATE TABLE `QH_point_product_reward` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int(11) unsigned NOT NULL COMMENT '商品ID',
   `reward_content` text NOT NULL COMMENT '奖品内容',
@@ -846,20 +846,20 @@ CREATE TABLE `SF_point_product_reward` (
   KEY `idx_record` (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+INSERT INTO `QH_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
 ('功能反馈', 'Feedback/index', 'layui-icon-dialogue', 0, NOW(), 2, 1);
 
-INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+INSERT INTO `QH_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
 ('反馈管理', 'Feedback/list', 'layui-icon-dialogue', 0, NOW(), 1, 1);
 
-INSERT INTO `SF_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
+INSERT INTO `QH_menu`(`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`) VALUES
 ('积分兑换', 'PointExchange/list', 'layui-icon-gift', 0, NOW(), 2, 1),
 ('积分商品', 'PointProduct/list', 'layui-icon-gift', 0, NOW(), 1, 1),
 ('兑换记录', 'PointProduct/records', 'layui-icon-list', 0, NOW(), 1, 1);
 
 -- ==================== balance_log ====================
-DROP TABLE IF EXISTS `SF_balance_log`;
-CREATE TABLE `SF_balance_log` (
+DROP TABLE IF EXISTS `QH_balance_log`;
+CREATE TABLE `QH_balance_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `type` varchar(30) DEFAULT 'recharge' COMMENT '类型: recharge/consume/refund/adjust',
@@ -875,8 +875,8 @@ CREATE TABLE `SF_balance_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='余额变动日志';
 
 -- ==================== withdraw ====================
-DROP TABLE IF EXISTS `SF_withdraw`;
-CREATE TABLE `SF_withdraw` (
+DROP TABLE IF EXISTS `QH_withdraw`;
+CREATE TABLE `QH_withdraw` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '申请人用户ID',
   `amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '提现金额',
@@ -899,8 +899,8 @@ CREATE TABLE `SF_withdraw` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='提现记录';
 
 -- ==================== checkin_record ====================
-DROP TABLE IF EXISTS `SF_checkin_record`;
-CREATE TABLE `SF_checkin_record` (
+DROP TABLE IF EXISTS `QH_checkin_record`;
+CREATE TABLE `QH_checkin_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '用户ID',
   `checkin_date` date NOT NULL COMMENT '打卡日期',
@@ -915,8 +915,8 @@ CREATE TABLE `SF_checkin_record` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='打卡记录表';
 
 -- ==================== carousel ====================
-DROP TABLE IF EXISTS `SF_carousel`;
-CREATE TABLE `SF_carousel` (
+DROP TABLE IF EXISTS `QH_carousel`;
+CREATE TABLE `QH_carousel` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(100) NOT NULL DEFAULT '' COMMENT '标题',
   `image` varchar(255) NOT NULL DEFAULT '' COMMENT '图片URL',
@@ -931,8 +931,8 @@ CREATE TABLE `SF_carousel` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='轮播图管理';
 
 -- ==================== user_notice ====================
-DROP TABLE IF EXISTS `SF_user_notice`;
-CREATE TABLE `SF_user_notice` (
+DROP TABLE IF EXISTS `QH_user_notice`;
+CREATE TABLE `QH_user_notice` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(200) NOT NULL DEFAULT '' COMMENT '公告标题',
   `content` text COMMENT '公告内容',
@@ -946,8 +946,8 @@ CREATE TABLE `SF_user_notice` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户公告';
 
 -- ==================== discount_code ====================
-DROP TABLE IF EXISTS `SF_discount_code`;
-CREATE TABLE `SF_discount_code` (
+DROP TABLE IF EXISTS `QH_discount_code`;
+CREATE TABLE `QH_discount_code` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL COMMENT '所属用户ID',
   `code` varchar(32) NOT NULL COMMENT '唯一折扣码',
@@ -960,11 +960,11 @@ CREATE TABLE `SF_discount_code` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='折扣码表';
 
 -- ==================== rebate_record ====================
-DROP TABLE IF EXISTS `SF_rebate_record`;
-CREATE TABLE `SF_rebate_record` (
+DROP TABLE IF EXISTS `QH_rebate_record`;
+CREATE TABLE `QH_rebate_record` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) unsigned NOT NULL COMMENT 'SF_order.id',
-  `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'SF_pay.trade_no',
+  `order_id` int(11) unsigned NOT NULL COMMENT 'QH_order.id',
+  `pay_trade_no` varchar(255) DEFAULT NULL COMMENT 'QH_pay.trade_no',
   `payer_user_id` int(11) unsigned NOT NULL COMMENT '付款用户ID',
   `referrer_user_id` int(11) unsigned NOT NULL COMMENT '返利归属用户ID（折扣码所有者）',
   `discount_code` varchar(32) NOT NULL COMMENT '使用的折扣码',
@@ -986,8 +986,8 @@ CREATE TABLE `SF_rebate_record` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='返利记录表';
 
 -- ==================== plugin tables ====================
-DROP TABLE IF EXISTS `SF_plugin`;
-CREATE TABLE `SF_plugin` (
+DROP TABLE IF EXISTS `QH_plugin`;
+CREATE TABLE `QH_plugin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '发布者用户ID',
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '插件名称',
@@ -1044,8 +1044,8 @@ CREATE TABLE `SF_plugin` (
   KEY `is_recommend` (`is_recommend`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表';
 
-DROP TABLE IF EXISTS `SF_plugin_reward`;
-CREATE TABLE `SF_plugin_reward` (
+DROP TABLE IF EXISTS `QH_plugin_reward`;
+CREATE TABLE `QH_plugin_reward` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '奖励ID',
   `plugin_id` int(11) unsigned NOT NULL COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '发布者用户ID',
@@ -1069,8 +1069,8 @@ CREATE TABLE `SF_plugin_reward` (
   KEY `idx_approved_by` (`approved_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件发布奖励记录';
 
-DROP TABLE IF EXISTS `SF_plugin_reward_hash_claim`;
-CREATE TABLE `SF_plugin_reward_hash_claim` (
+DROP TABLE IF EXISTS `QH_plugin_reward_hash_claim`;
+CREATE TABLE `QH_plugin_reward_hash_claim` (
   `file_hash` varchar(64) NOT NULL COMMENT '已占用的插件包哈希',
   `plugin_id` int(11) unsigned NOT NULL COMMENT '首次获奖插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '首次获奖用户ID',
@@ -1080,8 +1080,8 @@ CREATE TABLE `SF_plugin_reward_hash_claim` (
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件奖励包哈希原子占用';
 
-DROP TABLE IF EXISTS `SF_plugin_versions`;
-CREATE TABLE `SF_plugin_versions` (
+DROP TABLE IF EXISTS `QH_plugin_versions`;
+CREATE TABLE `QH_plugin_versions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '版本记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `version` varchar(50) NOT NULL DEFAULT '' COMMENT '版本号',
@@ -1102,8 +1102,8 @@ CREATE TABLE `SF_plugin_versions` (
   KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件版本历史表';
 
-DROP TABLE IF EXISTS `SF_plugin_package_upload`;
-CREATE TABLE `SF_plugin_package_upload` (
+DROP TABLE IF EXISTS `QH_plugin_package_upload`;
+CREATE TABLE `QH_plugin_package_upload` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '上传记录ID',
   `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '一次性上传凭证SHA-256',
   `actor_type` varchar(10) NOT NULL COMMENT 'user/admin',
@@ -1129,8 +1129,8 @@ CREATE TABLE `SF_plugin_package_upload` (
   KEY `idx_consumed_plugin` (`consumed_plugin_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件包待提交上传记录';
 
-DROP TABLE IF EXISTS `SF_plugin_resources`;
-CREATE TABLE `SF_plugin_resources` (
+DROP TABLE IF EXISTS `QH_plugin_resources`;
+CREATE TABLE `QH_plugin_resources` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '资源ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `version_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件版本ID',
@@ -1152,8 +1152,8 @@ CREATE TABLE `SF_plugin_resources` (
   KEY `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件资源表';
 
-DROP TABLE IF EXISTS `SF_plugin_order`;
-CREATE TABLE `SF_plugin_order` (
+DROP TABLE IF EXISTS `QH_plugin_order`;
+CREATE TABLE `QH_plugin_order` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '订单ID',
   `order_no` varchar(64) NOT NULL DEFAULT '' COMMENT '订单号',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
@@ -1181,8 +1181,8 @@ CREATE TABLE `SF_plugin_order` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件订单表';
 
-DROP TABLE IF EXISTS `SF_plugin_comment`;
-CREATE TABLE `SF_plugin_comment` (
+DROP TABLE IF EXISTS `QH_plugin_comment`;
+CREATE TABLE `QH_plugin_comment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '评论ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '用户ID',
@@ -1203,8 +1203,8 @@ CREATE TABLE `SF_plugin_comment` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件评论表';
 
-DROP TABLE IF EXISTS `SF_plugin_rating`;
-CREATE TABLE `SF_plugin_rating` (
+DROP TABLE IF EXISTS `QH_plugin_rating`;
+CREATE TABLE `QH_plugin_rating` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '评分ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '用户ID',
@@ -1219,8 +1219,8 @@ CREATE TABLE `SF_plugin_rating` (
   KEY `app_id` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件评分表';
 
-DROP TABLE IF EXISTS `SF_plugin_download`;
-CREATE TABLE `SF_plugin_download` (
+DROP TABLE IF EXISTS `QH_plugin_download`;
+CREATE TABLE `QH_plugin_download` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '下载记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `plugin_version` varchar(50) NOT NULL DEFAULT '' COMMENT '插件版本',
@@ -1237,8 +1237,8 @@ CREATE TABLE `SF_plugin_download` (
   KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件下载记录表';
 
-DROP TABLE IF EXISTS `SF_plugin_download_token`;
-CREATE TABLE `SF_plugin_download_token` (
+DROP TABLE IF EXISTS `QH_plugin_download_token`;
+CREATE TABLE `QH_plugin_download_token` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Token ID',
   `token` varchar(64) NOT NULL DEFAULT '' COMMENT '下载凭证',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
@@ -1259,8 +1259,8 @@ CREATE TABLE `SF_plugin_download_token` (
   KEY `expires_at` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='临时下载凭证表';
 
-DROP TABLE IF EXISTS `SF_plugin_purchase`;
-CREATE TABLE `SF_plugin_purchase` (
+DROP TABLE IF EXISTS `QH_plugin_purchase`;
+CREATE TABLE `QH_plugin_purchase` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '购买记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '用户ID',
@@ -1277,7 +1277,7 @@ CREATE TABLE `SF_plugin_purchase` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件购买记录表';
 
 -- 登录日志表(新环境需要,从初始化 SQL 直接创建,避免线上缺表)
-CREATE TABLE IF NOT EXISTS `SF_loginlog` (
+CREATE TABLE IF NOT EXISTS `QH_loginlog` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `uid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
   `username` varchar(100) NOT NULL DEFAULT '' COMMENT '登录名',
@@ -1291,278 +1291,278 @@ CREATE TABLE IF NOT EXISTS `SF_loginlog` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日志表';
 
 -- ==================== config entries ====================
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`) VALUES
 ('checkin_enabled', 'checkin', '启用打卡功能', '开启后用户可在面板首页进行每日打卡获取积分', 'bool', '1', '', '', '', ''),
 ('checkin_base_points', 'checkin', '单次打卡积分', '用户每次打卡获得的基础积分', 'number', '5', '', 'required', '', ''),
 ('checkin_consecutive_days', 'checkin', '连续打卡天数阈值', '使用英文逗号分隔，并与奖励积分逐项对应，例如：3,7,15,30', 'string', '3,7,15,30', '', 'required', '', ''),
 ('checkin_consecutive_bonus', 'checkin', '连续打卡奖励积分', '使用英文逗号分隔，并与天数阈值逐项对应，例如：3,7,15,30', 'string', '3,7,15,30', '', 'required', '', '');
 
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
 SELECT 'plugin_commission_enabled', 'plugin_market', '启用插件销售平台抽成', '开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。', 'bool', '1', '', '', '', ''
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_enabled');
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_config` WHERE `name` = 'plugin_commission_enabled');
 
-INSERT INTO `SF_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
+INSERT INTO `QH_config` (`name`, `group`, `title`, `tip`, `type`, `value`, `content`, `rule`, `extend`, `tip_type`)
 SELECT 'plugin_commission_rate', 'plugin_market', '插件销售平台抽成比例（%）', '仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。', 'number', '10.00', '', 'required', 'min="0" max="100" step="0.01"', ''
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name` = 'plugin_commission_rate');
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_config` WHERE `name` = 'plugin_commission_rate');
 
 -- ==================== corrected menus ====================
 -- Remove any malformed menu entries that may have been created above
-DELETE FROM `SF_menu`
+DELETE FROM `QH_menu`
 WHERE `url` IN ('/Plugin/list', '/PluginOrder/list', '/PluginComment/list',
                 '/UserPlugin/market', '/UserPlugin/list', '/UserPlugin/comments', '/UserPlugin/purchases');
 
 -- Admin-only feature menus: power=1
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `power` = 1, `status` = 1
 WHERE `url` IN ('Plugin/list', 'PluginOrder/list', 'PluginComment/list',
                 'Feedback/list', 'Checkin/records', 'Checkin/config', 'PointProduct/list');
 
 -- Admin plugin center
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件中心', '#', 'layui-icon-component', 0, NOW(), 1, 1
 FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `SF_menu`
+  SELECT 1 FROM `QH_menu`
   WHERE `name` = '插件中心' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
 );
 
 SET @admin_plugin_id = (
-  SELECT `id` FROM `SF_menu`
+  SELECT `id` FROM `QH_menu`
   WHERE `name` = '插件中心' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
   ORDER BY `id` ASC LIMIT 1
 );
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件列表', 'Plugin/list', '', @admin_plugin_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Plugin/list' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Plugin/list' AND `power` = 1);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件订单', 'PluginOrder/list', '', @admin_plugin_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'PluginOrder/list' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'PluginOrder/list' AND `power` = 1);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件评论', 'PluginComment/list', '', @admin_plugin_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'PluginComment/list' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'PluginComment/list' AND `power` = 1);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = @admin_plugin_id, `power` = 1, `status` = 1
 WHERE `url` IN ('Plugin/list', 'PluginOrder/list', 'PluginComment/list');
 
 -- Admin feedback management
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '反馈管理', 'Feedback/list', 'layui-icon-email', 0, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Feedback/list' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Feedback/list' AND `power` = 1);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `name` = '反馈管理', `icon` = 'layui-icon-email', `parentid` = 0, `power` = 1, `status` = 1
 WHERE `url` = 'Feedback/list';
 
 -- Admin system settings children
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '系统设置', '#', 'layui-icon-set', 0, NOW(), 1, 1
 FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `SF_menu`
+  SELECT 1 FROM `QH_menu`
   WHERE `name` = '系统设置' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
 );
 
 SET @admin_set_id = (
-  SELECT `id` FROM `SF_menu`
+  SELECT `id` FROM `QH_menu`
   WHERE `name` = '系统设置' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
   ORDER BY `id` ASC LIMIT 1
 );
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '轮播图管理', 'Set/carousel', '', @admin_set_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Set/carousel' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Set/carousel' AND `power` = 1);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '用户通知', 'Set/userNotice', '', @admin_set_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Set/userNotice' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Set/userNotice' AND `power` = 1);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = @admin_set_id, `power` = 1, `status` = 1
 WHERE `url` IN ('Set/index', 'Set/carousel', 'Set/userNotice') AND `power` = 1;
 
 -- Admin checkin management
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '打卡管理', '#', 'layui-icon-date', 0, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `name` = '打卡管理' AND `url` = '#' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `name` = '打卡管理' AND `url` = '#' AND `power` = 1);
 
 SET @admin_checkin_id = (
-  SELECT `id` FROM `SF_menu`
+  SELECT `id` FROM `QH_menu`
   WHERE `name` = '打卡管理' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
   ORDER BY `id` ASC LIMIT 1
 );
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '打卡配置', 'Checkin/config', '', @admin_checkin_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Checkin/config' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Checkin/config' AND `power` = 1);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '打卡记录', 'Checkin/records', '', @admin_checkin_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Checkin/records' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Checkin/records' AND `power` = 1);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `name` = '打卡记录', `icon` = '', `parentid` = @admin_checkin_id, `power` = 1, `status` = 1
 WHERE `url` = 'Checkin/records' AND `power` = 1;
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `name` = '打卡配置', `icon` = '', `parentid` = @admin_checkin_id, `power` = 1, `status` = 1
 WHERE `url` = 'Checkin/config' AND `power` = 1;
 
 -- Admin point management (parent)
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '积分管理', '#', 'layui-icon-cart-simple', 0, NOW(), 1, 1
 FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `SF_menu`
+  SELECT 1 FROM `QH_menu`
   WHERE `name` = '积分管理' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
 );
 
 SET @admin_point_id = (
-  SELECT `id` FROM `SF_menu`
+  SELECT `id` FROM `QH_menu`
   WHERE `name` = '积分管理' AND `parentid` = 0 AND `url` = '#' AND `power` = 1
   ORDER BY `id` ASC LIMIT 1
 );
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '积分商品', 'PointProduct/list', '', @admin_point_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'PointProduct/list' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'PointProduct/list' AND `power` = 1);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '兑换记录', 'PointProduct/records', '', @admin_point_id, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'PointProduct/records' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'PointProduct/records' AND `power` = 1);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = @admin_point_id, `power` = 1, `status` = 1
 WHERE `url` IN ('PointProduct/list', 'PointProduct/records');
 
 -- User plugin center
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件中心', '#', 'layui-icon-util', 0, NOW(), 2, 1
 FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `SF_menu`
+  SELECT 1 FROM `QH_menu`
   WHERE `name` = '插件中心' AND `parentid` = 0 AND `url` = '#' AND `power` = 2
 );
 
 SET @user_plugin_id = (
-  SELECT `id` FROM `SF_menu`
+  SELECT `id` FROM `QH_menu`
   WHERE `name` = '插件中心' AND `parentid` = 0 AND `url` = '#' AND `power` = 2
   ORDER BY `id` ASC LIMIT 1
 );
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '插件市场', 'UserPlugin/market', '', @user_plugin_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/market' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/market' AND `power` = 2);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '我的插件', 'UserPlugin/list', '', @user_plugin_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/list' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/list' AND `power` = 2);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '发布插件', 'UserPlugin/create', '', @user_plugin_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/create' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/create' AND `power` = 2);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '评论管理', 'UserPlugin/comments', '', @user_plugin_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/comments' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/comments' AND `power` = 2);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '我的购买', 'UserPlugin/purchases', '', @user_plugin_id, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'UserPlugin/purchases' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'UserPlugin/purchases' AND `power` = 2);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = @user_plugin_id, `power` = 2, `status` = 1
 WHERE `url` IN ('UserPlugin/market', 'UserPlugin/list', 'UserPlugin/create', 'UserPlugin/comments', 'UserPlugin/purchases');
 
 -- User feature menus (top-level, power=2)
 -- 每日打卡已合并到个人中心打卡记录tab，不再作为独立菜单项
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '意见反馈', 'Feedback/index', 'layui-icon-email', 0, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Feedback/index' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Feedback/index' AND `power` = 2);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '积分兑换', 'PointExchange/list', 'layui-icon-cart-simple', 0, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'PointExchange/list' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'PointExchange/list' AND `power` = 2);
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '积分日志', 'PointLog/list', 'layui-icon-list', 0, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'PointLog/list' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'PointLog/list' AND `power` = 2);
 
 -- 余额日志已合并到个人中心余额明细tab，移除独立菜单项（彻底删除，避免历史菜单残留）
-DELETE FROM `SF_menu`
+DELETE FROM `QH_menu`
 WHERE `url` IN ('BalanceLog/list', 'BalanceLog/index') AND `power` = 2;
 
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '余额提现', 'Withdraw/index', 'layui-icon-rmb', 0, NOW(), 2, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Withdraw/index' AND `power` = 2);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Withdraw/index' AND `power` = 2);
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = 0, `power` = 2, `status` = 1
 WHERE `url` IN ('Feedback/index', 'PointExchange/list',
                 'PointLog/list', 'Withdraw/index')
   AND `power` = 2;
 
 -- Normalize routes that existed in older install scripts.
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `name` = '积分兑换', `url` = 'PointExchange/list', `icon` = 'layui-icon-cart-simple', `parentid` = 0, `power` = 2, `status` = 1
 WHERE `url` = 'PointExchange/index' AND `power` = 2;
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `name` = '积分兑换', `icon` = 'layui-icon-cart-simple', `parentid` = 0, `power` = 2, `status` = 1
 WHERE `url` = 'PointExchange/list' AND `power` = 2;
 
 -- 每日打卡已合并到个人中心打卡记录tab，移除独立菜单项
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `status` = 0
 WHERE `url` IN ('Checkin/index', 'Checkin/list', 'Checkin/records') AND `power` = 2;
 
 -- User rebate center
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '返利中心', 'Rebate/index', 'layui-icon-rmb', 0, NOW(), 2, 1
 FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `SF_menu`
+  SELECT 1 FROM `QH_menu`
   WHERE `name` = '返利中心' AND `parentid` = 0 AND `url` = 'Rebate/index' AND `power` = 2
 );
 
 SET @user_rebate_id = (
-  SELECT `id` FROM `SF_menu`
+  SELECT `id` FROM `QH_menu`
   WHERE `name` = '返利中心' AND `parentid` = 0 AND `url` = 'Rebate/index' AND `power` = 2
   ORDER BY `id` ASC LIMIT 1
 );
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = 0, `url` = 'Rebate/index', `icon` = 'layui-icon-rmb', `power` = 2, `status` = 1
 WHERE `id` = @user_rebate_id;
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `status` = 0
 WHERE `parentid` = @user_rebate_id AND `url` = 'Rebate/index';
 
-UPDATE `SF_menu`
+UPDATE `QH_menu`
 SET `parentid` = @user_rebate_id, `power` = 2, `status` = 1
 WHERE `url` = 'Rebate/myRebateList' AND `power` = 2;
 
 -- Admin withdraw management
-INSERT INTO `SF_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
+INSERT INTO `QH_menu` (`name`, `url`, `icon`, `parentid`, `addtime`, `power`, `status`)
 SELECT '提现管理', 'Order/withdraw', 'layui-icon-rmb', 0, NOW(), 1, 1
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_menu` WHERE `url` = 'Order/withdraw' AND `power` = 1);
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_menu` WHERE `url` = 'Order/withdraw' AND `power` = 1);
 
 -- Deduplicate menus: keep only one row per unique url+power combination
-DELETE m1 FROM `SF_menu` m1
-JOIN `SF_menu` m2
+DELETE m1 FROM `QH_menu` m1
+JOIN `QH_menu` m2
   ON m1.`id` > m2.`id`
  AND m1.`url` = m2.`url`
  AND m1.`power` = m2.`power`
 WHERE m1.`url` NOT IN ('', '#');
 
 -- Deduplicate placeholder parents: keep only one per name+url+power+parentid
-DELETE m1 FROM `SF_menu` m1
-JOIN `SF_menu` m2
+DELETE m1 FROM `QH_menu` m1
+JOIN `QH_menu` m2
   ON m1.`id` > m2.`id`
  AND m1.`name` = m2.`name`
  AND m1.`url` = m2.`url`

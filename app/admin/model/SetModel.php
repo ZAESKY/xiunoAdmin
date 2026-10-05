@@ -20,7 +20,7 @@ class SetModel extends BaseModel
     public function all(){
         try{
             $all = self::select();
-            Cache::tag('SF_Set')->set('SF_SiteAllList', $all);
+            Cache::tag('QH_Set')->set('QH_SiteAllList', $all);
             return $all;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

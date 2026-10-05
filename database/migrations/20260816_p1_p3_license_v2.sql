@@ -1,10 +1,10 @@
 -- Migration: P1–P3 授权体系 v2
 --
--- P1  SF_auth 授权码哈希化（A-13）
--- P2  SF_license / SF_license_site / SF_license_event / SF_offline_activation / SF_trial
--- P3  SF_release / SF_patch（签名发布物与核心兼容补丁）
+-- P1  QH_auth 授权码哈希化（A-13）
+-- P2  QH_license / QH_license_site / QH_license_event / QH_offline_activation / QH_trial
+-- P3  QH_release / QH_patch（签名发布物与核心兼容补丁）
 --
--- 与 v1 完全并行：本迁移不修改 SF_auth 的既有列语义，不删除任何数据，
+-- 与 v1 完全并行：本迁移不修改 QH_auth 的既有列语义，不删除任何数据，
 -- v1 接口（/api.php/Auth/*）行为不受影响。
 --
 -- 幂等：可重复执行。
@@ -12,8 +12,8 @@
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sf_add_column_if_missing $$
-CREATE PROCEDURE sf_add_column_if_missing(
+DROP PROCEDURE IF EXISTS qh_add_column_if_missing $$
+CREATE PROCEDURE qh_add_column_if_missing(
     IN p_table VARCHAR(64), IN p_column VARCHAR(64),
     IN p_definition TEXT,   IN p_after VARCHAR(64)
 )
@@ -35,23 +35,23 @@ DELIMITER ;
 
 
 -- ============================================================
--- P1  SF_auth 授权码哈希化（A-13）
+-- P1  QH_auth 授权码哈希化（A-13）
 -- ============================================================
 -- 过渡策略：新增哈希列并回填，明文列暂时保留以保证 v1 接口不中断。
 -- 全部客户迁移到 v2 后，执行清理脚本把明文列置空（见文件末尾说明）。
 
-CALL sf_add_column_if_missing('SF_auth', 'authcode_hash',
+CALL qh_add_column_if_missing('QH_auth', 'authcode_hash',
     "char(64) NOT NULL DEFAULT '' COMMENT '授权码 HMAC-SHA256'", 'authcode');
-CALL sf_add_column_if_missing('SF_auth', 'authcode_last4',
+CALL qh_add_column_if_missing('QH_auth', 'authcode_last4',
     "char(4) NOT NULL DEFAULT '' COMMENT '授权码尾4位，供客服核对'", 'authcode_hash');
-CALL sf_add_column_if_missing('SF_auth', 'must_rotate',
+CALL qh_add_column_if_missing('QH_auth', 'must_rotate',
     "tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=该授权码由旧的可预测算法生成，应换发'", 'authcode_last4');
-CALL sf_add_column_if_missing('SF_auth', 'pepper_version',
+CALL qh_add_column_if_missing('QH_auth', 'pepper_version',
     "smallint(6) NOT NULL DEFAULT 1 COMMENT 'pepper 版本'", 'must_rotate');
 
 -- 尾4位可直接回填；authcode_hash 需要 pepper，由 CLI 完成：
---     php think sf:authcode-backfill
-UPDATE `SF_auth`
+--     php think qh:authcode-backfill
+UPDATE `QH_auth`
    SET `authcode_last4` = RIGHT(`authcode`, 4)
  WHERE `authcode_last4` = '' AND `authcode` IS NOT NULL AND `authcode` != '';
 
@@ -59,7 +59,7 @@ UPDATE `SF_auth`
 -- ============================================================
 -- P2  授权主表
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_license` (
+CREATE TABLE IF NOT EXISTS `QH_license` (
   `id`                    bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `license_id`            char(32)    NOT NULL COMMENT '对外授权标识',
   `product_id`            varchar(64) NOT NULL DEFAULT '' COMMENT '产品标识，如 zaesky_theme_light',
@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS `SF_license` (
   `rebind_limit`          smallint(6) NOT NULL DEFAULT 3,
   `rebind_count`          smallint(6) NOT NULL DEFAULT 0,
   `rebind_cooldown_until` datetime    NULL DEFAULT NULL,
-  `migrated_from`         int(11)     NOT NULL DEFAULT 0 COMMENT '来源 SF_auth_legacy.id',
-  `source_auth_id`        int(11)     NULL DEFAULT NULL COMMENT '按需迁移来源 SF_auth.id',
+  `migrated_from`         int(11)     NOT NULL DEFAULT 0 COMMENT '来源 QH_auth_legacy.id',
+  `source_auth_id`        int(11)     NULL DEFAULT NULL COMMENT '按需迁移来源 QH_auth.id',
   `last_seen_at`          datetime    NULL DEFAULT NULL,
   `created_at`            datetime    NOT NULL,
   `updated_at`            datetime    NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `SF_license` (
 -- ============================================================
 -- P2  站点绑定（一个授权仅允许一个规范化域名）
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_license_site` (
+CREATE TABLE IF NOT EXISTS `QH_license_site` (
   `id`            bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `license_id`    char(32)    NOT NULL,
   `site_id`       char(64)    NOT NULL COMMENT 'SHA-256(归一化域名|install_uuid)',
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `SF_license_site` (
 -- ============================================================
 -- P2  审计（需求 ⑩：不落完整授权码与明文 IP）
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_license_event` (
+CREATE TABLE IF NOT EXISTS `QH_license_event` (
   `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `license_id` char(32)    NOT NULL DEFAULT '',
   `event`      varchar(32) NOT NULL DEFAULT '' COMMENT 'activate/redeem/verify/rebind/channel/ticket/upgrade/offline_issue',
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `SF_license_event` (
 -- ============================================================
 -- P2  离线激活记账
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_offline_activation` (
+CREATE TABLE IF NOT EXISTS `QH_offline_activation` (
   `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `license_id` char(32)    NOT NULL,
   `site_id`    char(64)    NOT NULL DEFAULT '',
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `SF_offline_activation` (
 -- ============================================================
 -- P2  试用（用户需求 ③：盗版站 7 天体验）
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_trial` (
+CREATE TABLE IF NOT EXISTS `QH_trial` (
   `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `site_id`     char(64)    NOT NULL,
   `product_id`  varchar(64) NOT NULL DEFAULT '',
@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `SF_trial` (
 -- ============================================================
 -- P3  发布物（签名后的更新包）
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_release` (
+CREATE TABLE IF NOT EXISTS `QH_release` (
   `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `product_id`      varchar(64) NOT NULL DEFAULT '',
   `build_no`        int(11)     NOT NULL DEFAULT 0 COMMENT '单调递增，版本比较只用它',
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS `SF_release` (
 -- ============================================================
 -- P3  Xiuno 核心兼容补丁（用户需求 ⑧⑨）
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `SF_patch` (
+CREATE TABLE IF NOT EXISTS `QH_patch` (
   `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `product_id`      varchar(64) NOT NULL DEFAULT '',
   `patch_id`        varchar(64) NOT NULL DEFAULT '' COMMENT '如 php8-html-safe',
@@ -246,14 +246,14 @@ CREATE TABLE IF NOT EXISTS `SF_patch` (
 -- ============================================================
 -- 票据表补列：v2 票据需要关联 license
 -- ============================================================
-CALL sf_add_column_if_missing('SF_download_ticket', 'license_id',
+CALL qh_add_column_if_missing('QH_download_ticket', 'license_id',
     "char(32) NOT NULL DEFAULT '' COMMENT 'v2 授权标识'", 'auth_id');
 
 
-DROP PROCEDURE IF EXISTS sf_add_column_if_missing;
+DROP PROCEDURE IF EXISTS qh_add_column_if_missing;
 
 -- ============================================================
 -- 后续清理（全部客户迁移到 v2 后再执行，不属于本次迁移）
 -- ============================================================
---   UPDATE `SF_auth` SET `authcode` = '' WHERE `authcode_hash` != '';
+--   UPDATE `QH_auth` SET `authcode` = '' WHERE `authcode_hash` != '';
 -- 执行前请确认 v1 接口已下线，否则 v1 的授权码校验会全部失败。

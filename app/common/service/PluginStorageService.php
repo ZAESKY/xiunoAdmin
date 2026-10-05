@@ -639,7 +639,7 @@ class PluginStorageService
     {
         if ($this->publicBaseUrl !== '') {
             $url = $this->publicBaseUrl . '/' . ltrim($objectKey, '/');
-            $safeUrl = sf_safe_url($url, false);
+            $safeUrl = qh_safe_url($url, false);
             if ($safeUrl === '' || strtolower((string)parse_url($safeUrl, PHP_URL_SCHEME)) !== 'https') {
                 throw new Exception(t('plugin_storage.public_url_invalid'));
             }

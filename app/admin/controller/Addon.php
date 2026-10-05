@@ -127,7 +127,7 @@ class Addon extends Backend
                     return message(t('addon.not_exist'), false);
                 }
                 $addon->$action();
-                Cache::tag('SF_Menu')->clear();
+                Cache::tag('QH_Menu')->clear();
             } catch (Exception $e) {
                 return message($e->getMessage(), false);
             }
@@ -182,7 +182,7 @@ class Addon extends Backend
             }
             // 由 AdminService 处理具体更新逻辑(文件解压/覆盖/refresh)
             $this->service->updateAddon($name, $file);
-            Cache::tag('SF_Menu')->clear();
+            Cache::tag('QH_Menu')->clear();
         } catch (Exception $e) {
             return message($e->getMessage(), false);
         }
@@ -246,7 +246,7 @@ class Addon extends Backend
                     Db::execute("DROP TABLE IF EXISTS `{$table}`");
                 }
             }
-            Cache::tag('SF_Menu')->clear();
+            Cache::tag('QH_Menu')->clear();
         } catch (Exception $e) {
             return message($e->getMessage(), false);
         }

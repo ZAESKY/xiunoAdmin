@@ -109,60 +109,60 @@
     }
 
     /* ===== 权限升级 卡片网格 ===== */
-    .sf-upgrade-header {
+    .qh-upgrade-header {
         display: flex; align-items: center; justify-content: space-between; gap: 16px;
         padding: 20px 24px; margin-bottom: 22px;
         background: linear-gradient(135deg, #1f2a44 0%, #2c3a64 50%, #3a4a85 100%);
         border-radius: 14px; color: #fff; position: relative; overflow: hidden;
         box-shadow: 0 8px 24px rgba(31,42,68,.18);
     }
-    .sf-upgrade-header::before {
+    .qh-upgrade-header::before {
         content: ''; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px;
         background: radial-gradient(circle, rgba(255,255,255,.10) 0%, transparent 70%);
         border-radius: 50%;
     }
-    .sf-upgrade-header::after {
+    .qh-upgrade-header::after {
         content: ''; position: absolute; right: 60px; bottom: -60px; width: 160px; height: 160px;
         background: radial-gradient(circle, rgba(124,92,231,.28) 0%, transparent 70%);
         border-radius: 50%;
     }
-    .sf-uh-left { position: relative; z-index: 1; }
-    .sf-uh-eyebrow { font-size: 12px; color: rgba(255,255,255,.65); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-    .sf-uh-name { font-size: 26px; font-weight: 800; line-height: 1.1; display: flex; align-items: center; gap: 10px; }
-    .sf-uh-name i { font-size: 28px; color: #ffd66b; }
-    .sf-uh-sub { margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.72); }
-    .sf-uh-right { position: relative; z-index: 1; text-align: right; }
-    .sf-uh-balance-label { font-size: 12px; color: rgba(255,255,255,.65); margin-bottom: 4px; }
-    .sf-uh-balance { font-size: 30px; font-weight: 800; color: #ffd66b; line-height: 1; letter-spacing: -.5px; }
-    .sf-uh-balance .currency { font-size: 18px; font-weight: 600; margin-right: 2px; }
+    .qh-uh-left { position: relative; z-index: 1; }
+    .qh-uh-eyebrow { font-size: 12px; color: rgba(255,255,255,.65); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .qh-uh-name { font-size: 26px; font-weight: 800; line-height: 1.1; display: flex; align-items: center; gap: 10px; }
+    .qh-uh-name i { font-size: 28px; color: #ffd66b; }
+    .qh-uh-sub { margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.72); }
+    .qh-uh-right { position: relative; z-index: 1; text-align: right; }
+    .qh-uh-balance-label { font-size: 12px; color: rgba(255,255,255,.65); margin-bottom: 4px; }
+    .qh-uh-balance { font-size: 30px; font-weight: 800; color: #ffd66b; line-height: 1; letter-spacing: -.5px; }
+    .qh-uh-balance .currency { font-size: 18px; font-weight: 600; margin-right: 2px; }
 
-    .sf-upgrade-grid {
+    .qh-upgrade-grid {
         display: grid; gap: 16px; padding: 4px 2px 4px;
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .sf-upgrade-card {
+    .qh-upgrade-card {
         position: relative; background: #fff; border: 2px solid #ebeef5; border-radius: 14px;
         padding: 20px 20px 18px; cursor: pointer;
         transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
         display: flex; flex-direction: column;
     }
-    .sf-upgrade-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(58,111,216,.12); border-color: #b6cdf3; }
-    .sf-upgrade-card .uc-name { font-size: 17px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
-    .sf-upgrade-card .uc-price-row { margin-top: 14px; display: flex; align-items: baseline; gap: 4px; }
-    .sf-upgrade-card .uc-currency { font-size: 15px; color: #ff5722; font-weight: 600; }
-    .sf-upgrade-card .uc-price { font-size: 32px; font-weight: 800; color: #ff5722; line-height: 1; letter-spacing: -1px; }
-    .sf-upgrade-card .uc-price.free { color: #34a853; font-size: 24px; }
+    .qh-upgrade-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(58,111,216,.12); border-color: #b6cdf3; }
+    .qh-upgrade-card .uc-name { font-size: 17px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+    .qh-upgrade-card .uc-price-row { margin-top: 14px; display: flex; align-items: baseline; gap: 4px; }
+    .qh-upgrade-card .uc-currency { font-size: 15px; color: #ff5722; font-weight: 600; }
+    .qh-upgrade-card .uc-price { font-size: 32px; font-weight: 800; color: #ff5722; line-height: 1; letter-spacing: -1px; }
+    .qh-upgrade-card .uc-price.free { color: #34a853; font-size: 24px; }
 
-    .sf-upgrade-card.selected {
+    .qh-upgrade-card.selected {
         border-color: #2563eb;
         box-shadow: 0 12px 30px rgba(37,99,235,.20), 0 0 0 4px rgba(37,99,235,.10);
         transform: translateY(-3px);
     }
-    .sf-upgrade-card.selected::after {
+    .qh-upgrade-card.selected::after {
         content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
         background: linear-gradient(180deg, rgba(37,99,235,.04) 0%, transparent 45%);
     }
-    .sf-upgrade-card.selected .uc-check {
+    .qh-upgrade-card.selected .uc-check {
         position: absolute; bottom: 14px; right: 14px; z-index: 3;
         width: 24px; height: 24px; border-radius: 50%;
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff;
@@ -171,30 +171,30 @@
     }
 
     /* ===== 权益详情面板 ===== */
-    .sf-upgrade-detail {
+    .qh-upgrade-detail {
         margin-top: 22px; padding: 20px 24px;
         background: linear-gradient(135deg, #eff6ff 0%, #fff 70%);
         border: 1px solid #bfdbfe; border-left: 4px solid #2563eb;
         border-radius: 12px; min-height: 88px;
     }
-    .sf-ud-title {
+    .qh-ud-title {
         display: flex; align-items: center; gap: 10px;
         font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 10px;
     }
-    .sf-ud-title i { font-size: 16px; }
-    .sf-ud-target { color: #0f172a; font-weight: 800; font-size: 16px; }
-    .sf-ud-text { font-size: 14px; line-height: 1.7; color: #475569; word-break: break-word; }
-    .sf-ud-text.empty { color: #b6b6b6; font-style: italic; }
+    .qh-ud-title i { font-size: 16px; }
+    .qh-ud-target { color: #0f172a; font-weight: 800; font-size: 16px; }
+    .qh-ud-text { font-size: 14px; line-height: 1.7; color: #475569; word-break: break-word; }
+    .qh-ud-text.empty { color: #b6b6b6; font-style: italic; }
 
     /* ===== 底部升级按钮 ===== */
-    .sf-upgrade-action {
+    .qh-upgrade-action {
         margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
         padding: 18px 24px; background: #fafbfc; border-radius: 12px; border: 1px solid #ebeef5;
     }
-    .sf-ua-info { font-size: 13px; color: #6b7280; }
-    .sf-ua-info b { color: #1a1a1a; font-weight: 700; }
-    .sf-ua-price { color: #2563eb; font-weight: 800; }
-    .sf-ua-btn {
+    .qh-ua-info { font-size: 13px; color: #6b7280; }
+    .qh-ua-info b { color: #1a1a1a; font-weight: 700; }
+    .qh-ua-price { color: #2563eb; font-weight: 800; }
+    .qh-ua-btn {
         min-width: 200px; height: 46px; border: 0; border-radius: 23px; cursor: pointer;
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
         color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 1px;
@@ -202,33 +202,33 @@
         transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .sf-ua-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(37,99,235,.45); }
-    .sf-ua-btn:active { transform: translateY(0); }
-    .sf-ua-btn[disabled] { background: #c9d1d9; box-shadow: none; cursor: not-allowed; opacity: .85; }
+    .qh-ua-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(37,99,235,.45); }
+    .qh-ua-btn:active { transform: translateY(0); }
+    .qh-ua-btn[disabled] { background: #c9d1d9; box-shadow: none; cursor: not-allowed; opacity: .85; }
 
-    .sf-upgrade-empty {
+    .qh-upgrade-empty {
         text-align: center; padding: 60px 20px; color: #8c8c8c; font-size: 14px;
         background: #f9fafb; border-radius: 12px; border: 1px dashed #e0e0e0;
     }
-    .sf-upgrade-empty .ue-icon {
+    .qh-upgrade-empty .ue-icon {
         display: inline-flex; width: 64px; height: 64px; border-radius: 50%;
         background: #eaf2ff; color: #3a6fd8; align-items: center; justify-content: center;
         font-size: 32px; margin-bottom: 12px;
     }
-    .sf-upgrade-empty .ue-sub { margin-top: 6px; font-size: 12px; color: #bbb; }
-    .sf-upgrade-loading { padding: 40px; text-align: center; color: #8c8c8c; font-size: 13px; }
+    .qh-upgrade-empty .ue-sub { margin-top: 6px; font-size: 12px; color: #bbb; }
+    .qh-upgrade-loading { padding: 40px; text-align: center; color: #8c8c8c; font-size: 13px; }
     @media (max-width: 900px) {
-        .sf-upgrade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .qh-upgrade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 600px) {
-        .sf-upgrade-header { padding: 16px 18px; flex-direction: column; align-items: flex-start; }
-        .sf-uh-right { text-align: left; }
-        .sf-upgrade-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sf-upgrade-card { padding: 16px 14px 14px; }
-        .sf-upgrade-card .uc-price { font-size: 26px; }
-        .sf-upgrade-action { flex-direction: column; align-items: stretch; }
-        .sf-ua-btn { width: 100%; }
+        .qh-upgrade-header { padding: 16px 18px; flex-direction: column; align-items: flex-start; }
+        .qh-uh-right { text-align: left; }
+        .qh-upgrade-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+        .qh-upgrade-card { padding: 16px 14px 14px; }
+        .qh-upgrade-card .uc-price { font-size: 26px; }
+        .qh-upgrade-action { flex-direction: column; align-items: stretch; }
+        .qh-ua-btn { width: 100%; }
     }
     @media (max-width: 420px) {
-        .sf-upgrade-grid { grid-template-columns: 1fr; }
+        .qh-upgrade-grid { grid-template-columns: 1fr; }
     }

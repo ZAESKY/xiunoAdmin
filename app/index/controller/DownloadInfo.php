@@ -16,7 +16,7 @@ class DownloadInfo extends Frontend
 
     public function verification(){
         if(IS_POST){
-            if (sf_download_mode() !== 'info') {
+            if (qh_download_mode() !== 'info') {
                 return message(t('download.info_disabled'), false);
             }
             $post = $this->request->post();

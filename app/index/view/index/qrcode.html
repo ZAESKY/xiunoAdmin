@@ -21,10 +21,10 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <div class="layui-input-block sf-form-help sf-download-help">{:t('download_ui.qq_oauth_help')}</div>
+                    <div class="layui-input-block qh-form-help qh-download-help">{:t('download_ui.qq_oauth_help')}</div>
                 </div>
                 <div class="layui-form-item text-right">
-                    <button id="SF_DownloadBtn" type="button" class="layui-btn" lay-filter="SF_DownloadSubmit" lay-submit>{:t('download_ui.get_btn')}</button>
+                    <button id="QH_DownloadBtn" type="button" class="layui-btn" lay-filter="QH_DownloadSubmit" lay-submit>{:t('download_ui.get_btn')}</button>
                     <button type="button" class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
                 </div>
             </form>
@@ -41,14 +41,14 @@
         var admin = layui.admin;
         var notice = layui.notice;
 
-        form.on('submit(SF_DownloadSubmit)', function (info) {
-            admin.btnLoading('#SF_DownloadBtn');
+        form.on('submit(QH_DownloadSubmit)', function (info) {
+            admin.btnLoading('#QH_DownloadBtn');
             admin.showLoading('#divLoading', 3, '.8');
-            SfQqOauth.start({
+            QHQqOauth.start({
                 url:'/api.php/Social/verify',
                 data:{scene:'download',appid:info.field.appid,auth_info:info.field.auth_info,return_to:location.pathname+location.search},
                 onResult:function(data){
-                    admin.btnLoading('#SF_DownloadBtn', false);
+                    admin.btnLoading('#QH_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     if(data && data.code == 0 && data.data && data.data.status === 'download'){
                         parent.layui.notice.msg(data.msg,{icon:1});
@@ -58,14 +58,14 @@
                     }
                 },
                 onError:function(message){
-                    admin.btnLoading('#SF_DownloadBtn', false);
+                    admin.btnLoading('#QH_DownloadBtn', false);
                     admin.removeLoading('#divLoading', true, true);
                     parent.layui.notice.msg(message,{icon:2});
                 }
             });
             return false;
         });
-        SfQqOauth.resume(function(data){
+        QHQqOauth.resume(function(data){
             if(data && data.code == 0 && data.data && data.data.status === 'download'){
                 (parent.top || parent).location.href=data.data.url;
             }else{

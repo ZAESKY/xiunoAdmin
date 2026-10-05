@@ -26,32 +26,32 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
-                        <button type="button" class="layui-btn layui-btn-normal icon-btn" id="SF_Add">
+                        <button type="button" class="layui-btn layui-btn-normal icon-btn" id="QH_Add">
                             <i class="layui-icon">&#xe654;</i>{:t('point_product.add_product')}
                         </button>
                     </div>
                 </div>
             </form>
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">{:t('common_ui.edit')}</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">{:t('common.delete')}</a>
 </script>
 
-<script type="text/html" id="SF_Status">
-    <input type="checkbox" lay-filter="SF_StatusCk" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_Status">
+    <input type="checkbox" lay-filter="QH_StatusCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('point_product.listed_unlisted')}" {{d.status==1?'checked':''}}/>
 </script>
 
-<script type="text/html" id="SF_EditDialog">
-    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+<script type="text/html" id="QH_EditDialog">
+    <form id="QH_EditForm" lay-filter="QH_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <input name="image" type="hidden"/>
         <div class="layui-form-item">
@@ -63,10 +63,10 @@
         <div class="layui-form-item">
             <label class="layui-form-label">{:t('point_product.image')}</label>
             <div class="layui-input-block">
-                <button type="button" class="layui-btn layui-btn-primary" id="SF_UploadImage">
+                <button type="button" class="layui-btn layui-btn-primary" id="QH_UploadImage">
                     <i class="layui-icon layui-icon-upload"></i>{:t('set_ui.upload_image')}
                 </button>
-                <div class="point-upload-preview layui-hide" id="SF_ImagePreview">
+                <div class="point-upload-preview layui-hide" id="QH_ImagePreview">
                     <img src="" alt="{:t('point_product.image')}"/>
                 </div>
             </div>
@@ -86,7 +86,7 @@
         <div class="layui-form-item layui-form-text">
             <label class="layui-form-label">{:t('point_product.description')}</label>
             <div class="layui-input-block">
-                <textarea name="description" class="sf-product-desc" style="display:none;"></textarea>
+                <textarea name="description" class="qh-product-desc" style="display:none;"></textarea>
             </div>
         </div>
         <div class="layui-form-item layui-form-text">
@@ -102,7 +102,7 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('common.save')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
@@ -121,7 +121,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
     var descLayeditIndex;
 
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/PointProduct/list")}',
         method: 'post',
         page: true,
@@ -140,25 +140,25 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
             {field: 'required_points', title: '{:t("point_product.required_points")}', width: 110, sort: true},
             {field: 'stock', title: '{:t("point_product.remaining_stock")}', width: 100, sort: true},
             {field: 'exchange_limit', title: '{:t("point_product.user_limit")}', width: 100, templet:function(d){return d.exchange_limit > 0 ? d.exchange_limit : '{:t("point_product.unlimited")}';}},
-            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#SF_Status'},
+            {field: 'status', title: '{:t("common.status")}', width: 100, templet: '#QH_Status'},
             {field: 'created_at', title: '{:t("payment_ui.create_time")}', minWidth: 170},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 150}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 150}
         ]]
     });
 
-    form.on('submit(SF_TbSearch)', function (data) {
+    form.on('submit(QH_TbSearch)', function (data) {
         insTb.reload({where: data.field, page: {curr: 1}});
         return false;
     });
 
-    $('#SF_Add').on('click', function(){ showEdit(); });
+    $('#QH_Add').on('click', function(){ showEdit(); });
 
-    table.on('tool(SF_Table)', function(obj){
+    table.on('tool(QH_Table)', function(obj){
         if (obj.event === 'edit') showEdit(obj.data);
         if (obj.event === 'del') doDel(obj);
     });
 
-    form.on('switch(SF_StatusCk)', function(obj){
+    form.on('switch(QH_StatusCk)', function(obj){
         $.post('{:url("/PointProduct/setStatus")}', {id: obj.value, status: obj.elem.checked ? 1 : 0}, function(res){
             notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2});
             if (res.code != 0) insTb.reload();
@@ -170,18 +170,18 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
             type: 1,
             title: data ? '{:t("point_product.edit_product")}' : '{:t("point_product.add_product")}',
             area: ['720px', '700px'],
-            content: $('#SF_EditDialog').html(),
+            content: $('#QH_EditDialog').html(),
             success: function(layero, index){
                 var initData = data || {stock:0, exchange_limit:0, status:1};
-                form.val('SF_EditForm', initData);
+                form.val('QH_EditForm', initData);
                 if (initData.image) {
-                    $(layero).find('#SF_ImagePreview').removeClass('layui-hide').find('img').attr('src', initData.image);
+                    $(layero).find('#QH_ImagePreview').removeClass('layui-hide').find('img').attr('src', initData.image);
                 }
                 form.render();
 
                 // 初始化富文本编辑器（使用唯一ID避免DOM冲突）
-                var descId = 'SF_ProductDesc_' + Date.now();
-                $(layero).find('.sf-product-desc').attr('id', descId);
+                var descId = 'QH_ProductDesc_' + Date.now();
+                $(layero).find('.qh-product-desc').attr('id', descId);
                 descLayeditIndex = layedit.build(descId, {
                     height: 200,
                     uploadImage: { url: '{:url("/Feedback/uploadImage")}', type: 'post' }
@@ -209,11 +209,11 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
                 }, 500);
 
                 upload.render({
-                    elem: $(layero).find('#SF_UploadImage')[0],
+                    elem: $(layero).find('#QH_UploadImage')[0],
                     url: '{:url("/Upload/image")}',
                     before: function(obj){
                         obj.preview(function(index, file, result){
-                            $(layero).find('#SF_ImagePreview').removeClass('layui-hide').find('img').attr('src', result);
+                            $(layero).find('#QH_ImagePreview').removeClass('layui-hide').find('img').attr('src', result);
                         });
                         notice.msg('{:t("app_ui.uploading")}', {icon: 4, close: true});
                     },
@@ -221,7 +221,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
                         notice.destroy();
                         if(res.code == 0){
                             $(layero).find('input[name="image"]').val(res.data.path);
-                            $(layero).find('#SF_ImagePreview').removeClass('layui-hide').find('img').attr('src', res.data.path);
+                            $(layero).find('#QH_ImagePreview').removeClass('layui-hide').find('img').attr('src', res.data.path);
                             notice.msg('{:t("upload.upload_success")}', {icon: 1, audio:'1'});
                         }else{
                             notice.msg(res.msg || '{:t("common.upload_failed")}', {icon: 2, audio:'1'});
@@ -233,7 +233,7 @@ layui.use(['layer', 'form', 'table', 'admin', 'notice', 'upload', 'layedit'], fu
                     }
                 });
 
-                form.on('submit(SF_EditSubmit)', function(fd){
+                form.on('submit(QH_EditSubmit)', function(fd){
                     fd.field.description = layedit.getContent(descLayeditIndex);
                     $.post('{:url("/PointProduct/edit")}', fd.field, function(res){
                         notice.msg(res.msg, {icon: res.code == 0 ? 1 : 2});

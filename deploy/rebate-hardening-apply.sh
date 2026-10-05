@@ -73,8 +73,8 @@ files=(
   config/console.php
   database/migrations/20261002_rebate_withdrawal_hardening.sql
   database/migrations/20261002_rebate_withdrawal_hardening_rollback.sql
-  app/SF_Auth.sql
-  app/SF_rebate_migration.sql
+  app/QH_Auth.sql
+  app/QH_rebate_migration.sql
   database/migrations/20260816_legacy_429_bridge_tables.sql
   app/command/LegacyBridge.php
   database/migrate.sh
@@ -113,14 +113,14 @@ done < <(find \
   -type f -name '*.php' -print0)
 
 "$PHP_BIN" think clear >/dev/null
-"$PHP_BIN" think sf:rebate-settle --limit=500
+"$PHP_BIN" think qh:rebate-settle --limit=500
 
 field_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND ((TABLE_NAME='SF_user' AND COLUMN_NAME='withdrawable_balance') OR (TABLE_NAME='SF_rebate_record' AND COLUMN_NAME IN ('rebate_base_amount','settle_at','settled_at','risk_reason')));")"
+  "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND ((TABLE_NAME='QH_user' AND COLUMN_NAME='withdrawable_balance') OR (TABLE_NAME='QH_rebate_record' AND COLUMN_NAME IN ('rebate_base_amount','settle_at','settled_at','risk_reason')));")"
 trigger_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND TRIGGER_NAME LIKE 'SF_user_withdrawable_before_%';")"
+  "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND TRIGGER_NAME LIKE 'QH_user_withdrawable_before_%';")"
 config_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM SF_config WHERE name IN ('rebate_hold_days','rebate_pair_daily_count','rebate_daily_limit','rebate_monthly_limit');")"
+  "SELECT COUNT(*) FROM QH_config WHERE name IN ('rebate_hold_days','rebate_pair_daily_count','rebate_daily_limit','rebate_monthly_limit');")"
 
 test "$field_count" = "5"
 test "$trigger_count" = "2"

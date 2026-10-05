@@ -40,7 +40,7 @@ class MultiTask{
     }
 
     private static function cache($key, $value){
-        Cache::tag('SF_CheckAuth')->set('queue_check'.$key, $value);
+        Cache::tag('QH_CheckAuth')->set('queue_check'.$key, $value);
         return true;
     }
 

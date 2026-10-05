@@ -20,50 +20,50 @@ class LegacyBridge extends Command
     private const DEFAULT_TARGET = 'admin_noteweb_to';
 
     private const TABLES = [
-        'SF_feedback',
-        'SF_feedback_reply',
-        'SF_notification',
-        'SF_point_log',
-        'SF_wechat_mp_login',
-        'SF_point_product',
-        'SF_point_exchange_record',
-        'SF_point_product_reward',
-        'SF_balance_log',
-        'SF_withdraw',
-        'SF_checkin_record',
-        'SF_carousel',
-        'SF_user_notice',
-        'SF_discount_code',
-        'SF_rebate_record',
-        'SF_plugin',
-        'SF_plugin_versions',
-        'SF_plugin_resources',
-        'SF_plugin_order',
-        'SF_plugin_comment',
-        'SF_plugin_rating',
-        'SF_plugin_download',
-        'SF_plugin_download_token',
-        'SF_plugin_purchase',
-        'SF_loginlog',
+        'QH_feedback',
+        'QH_feedback_reply',
+        'QH_notification',
+        'QH_point_log',
+        'QH_wechat_mp_login',
+        'QH_point_product',
+        'QH_point_exchange_record',
+        'QH_point_product_reward',
+        'QH_balance_log',
+        'QH_withdraw',
+        'QH_checkin_record',
+        'QH_carousel',
+        'QH_user_notice',
+        'QH_discount_code',
+        'QH_rebate_record',
+        'QH_plugin',
+        'QH_plugin_versions',
+        'QH_plugin_resources',
+        'QH_plugin_order',
+        'QH_plugin_comment',
+        'QH_plugin_rating',
+        'QH_plugin_download',
+        'QH_plugin_download_token',
+        'QH_plugin_purchase',
+        'QH_loginlog',
     ];
 
     private const COLUMNS = [
-        'SF_admin' => [
+        'QH_admin' => [
             'wechat_openid' => "varchar(64) NOT NULL DEFAULT '' COMMENT '微信公众号openid'",
         ],
-        'SF_user' => [
+        'QH_user' => [
             'wechat_openid' => "varchar(64) NOT NULL DEFAULT '' COMMENT '微信公众号openid'",
             'created_at' => "datetime DEFAULT NULL COMMENT '注册时间'",
             'is_developer' => "tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为开发者'",
             'withdrawable_balance' => "decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '可提现收益余额，为总余额的子集'",
         ],
-        'SF_order' => [
+        'QH_order' => [
             'discount_code' => "varchar(32) DEFAULT NULL COMMENT '使用的折扣码'",
         ],
-        'SF_pay' => [
+        'QH_pay' => [
             'discount_code' => "varchar(32) DEFAULT NULL COMMENT '使用的折扣码'",
         ],
-        'SF_power_price' => [
+        'QH_power_price' => [
             'rebate_enabled' => "tinyint(1) NOT NULL DEFAULT 0 COMMENT '启用返利 0=否 1=是'",
             'rebate_rate' => "decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT '返利比例(%)'",
             'discount_code_enabled' => "tinyint(1) NOT NULL DEFAULT 0 COMMENT '启用折扣码功能 0=否 1=是'",
@@ -72,7 +72,7 @@ class LegacyBridge extends Command
 
     protected function configure()
     {
-        $this->setName('sf:legacy-bridge')
+        $this->setName('qh:legacy-bridge')
             ->addOption('dry-run', null, Option::VALUE_NONE, '只检查并报告，不写入')
             ->addOption('apply', null, Option::VALUE_NONE, '执行仅新增表和字段的迁移')
             ->addOption(
@@ -243,14 +243,14 @@ class LegacyBridge extends Command
 
     private function acquireLock(string $database): bool
     {
-        $rows = Db::query('SELECT GET_LOCK(?, 0) AS acquired', ['sf_legacy_bridge_' . $database]);
+        $rows = Db::query('SELECT GET_LOCK(?, 0) AS acquired', ['qh_legacy_bridge_' . $database]);
         return (int) ($rows[0]['acquired'] ?? 0) === 1;
     }
 
     private function releaseLock(string $database): void
     {
         try {
-            Db::query('SELECT RELEASE_LOCK(?)', ['sf_legacy_bridge_' . $database]);
+            Db::query('SELECT RELEASE_LOCK(?)', ['qh_legacy_bridge_' . $database]);
         } catch (\Throwable $e) {
             // Connection teardown also releases named locks.
         }

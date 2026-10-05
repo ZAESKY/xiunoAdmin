@@ -256,7 +256,7 @@ class EmailNotificationService
             ]);
         }
         Cache::delete('email_notification_enabled');
-        Cache::tag('SF_Set')->clear();
+        Cache::tag('QH_Set')->clear();
     }
 
     /** Called after a station notification was persisted. Never throws. */
@@ -382,7 +382,7 @@ class EmailNotificationService
         $title = self::plain((string)($notification['title'] ?? ''), 255);
         $content = self::plain((string)($notification['content'] ?? ''), 4000);
         $variables = [
-            'site_name' => self::plain((string)(conf('title') ?: (defined('SITE_NAME') ? SITE_NAME : 'SF授权平台')), 150),
+            'site_name' => self::plain((string)(conf('title') ?: (defined('SITE_NAME') ? SITE_NAME : 'QH授权平台')), 150),
             'recipient_name' => self::plain((string)($recipient['username'] ?? ''), 150),
             'notification_title' => $title,
             'notification_content' => $content,

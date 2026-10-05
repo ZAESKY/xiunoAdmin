@@ -11,8 +11,8 @@
     <link href="/favicon.ico" rel="icon">
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
-    <link rel="stylesheet" href="{__CSS__}sf-style.css"/>
-    <link rel="stylesheet" href="{__TEMPLATE_HOME_ASSETS__}SF3.0/style.css"/>
+    <link rel="stylesheet" href="{__CSS__}qh-style.css"/>
+    <link rel="stylesheet" href="{__TEMPLATE_HOME_ASSETS__}QH3.0/style.css"/>
     <!--[if lt IE 9]>
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
     <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
@@ -33,7 +33,7 @@
             <li><a href="#query">{:t('home.auth_query')}</a></li>
             <li><a href="javascript:;" id="btn-download">{:t('home.source_download')}</a></li>
             <li><a href="{:url('/Index/pluginMarket')}">{:t('home.plugin_market')}</a></li>
-            <li><a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}">{:t('common.lang_toggle')}</a></li>
+            <li><a href="javascript:QH_LANG.toggle();" title="{:t('common.language')}">{:t('common.lang_toggle')}</a></li>
             <li><a href="/user.php/Index/index" class="vp-nav-login">{:t('home.backend_login')}</a></li>
         </ul>
         <button class="vp-nav-toggle" id="navToggle" aria-label="{:t('home.menu')}">
@@ -131,8 +131,8 @@
                     <div id="introduceContent"></div>
                 </div>
                 <div class="vp-form-actions">
-                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="SF_Query" lay-submit>{:t('home.query')}</button>
-                    <button type="button" class="vp-btn vp-btn-ghost" id="SF_Query_Reset">{:t('home.reset')}</button>
+                    <button type="button" class="vp-btn vp-btn-brand" lay-filter="QH_Query" lay-submit>{:t('home.query')}</button>
+                    <button type="button" class="vp-btn vp-btn-ghost" id="QH_Query_Reset">{:t('home.reset')}</button>
                 </div>
             </form>
         </div>
@@ -149,7 +149,7 @@
 {$background_notice|raw}
 {$background_music|raw}
 
-<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script>window.QH_I18N_LOCALE = "{:t('common.lang_code')}"; window.QH_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
 <script type="text/javascript" src="{__JS__}common.js?v={__I18N_VERSION__}"></script>
@@ -173,7 +173,7 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
     var layer = layui.layer;
 
     /* ---- Query submit ---- */
-    form.on('submit(SF_Query)', function (data) {
+    form.on('submit(QH_Query)', function (data) {
         ajax_msg(data.field, data.field.query_type || 'auth');
         return false;
     });
@@ -186,7 +186,7 @@ layui.use(['form', 'admin', 'notice', 'layer', 'element'], function () {
     });
 
     /* ---- Reset query form ---- */
-    $('#SF_Query_Reset').click(function () {
+    $('#QH_Query_Reset').click(function () {
         document.getElementById('divLoading').querySelector('form').reset();
         $('#introduce').hide();
         form.render('select');

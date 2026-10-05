@@ -36,7 +36,7 @@ class VersionModel extends BaseModel
             }
             $count = count($list);
             $data = ['list' => $list, 'count' => $count];
-            Cache::tag('SF_Version')->set($cacheKey, $data);
+            Cache::tag('QH_Version')->set($cacheKey, $data);
             return $data;
         }
     }

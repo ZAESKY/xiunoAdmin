@@ -84,7 +84,7 @@ final class PasswordRecoveryService
             if (!is_array($provider) || intval($provider['code'] ?? -1) !== 0) {
                 Log::warning('Password recovery email dispatch failed', [
                     'user_id' => intval($user['id']),
-                    'provider_message' => is_array($provider) ? sf_plain_text($provider['msg'] ?? '', 160) : 'invalid response',
+                    'provider_message' => is_array($provider) ? qh_plain_text($provider['msg'] ?? '', 160) : 'invalid response',
                 ]);
                 return message(t('password_recovery.mail_failed'), false);
             }
@@ -143,7 +143,7 @@ final class PasswordRecoveryService
 
         try {
             $updated = Db::name('user')->where('id', intval($user['id']))->update([
-                'password' => sf_password_make($newPassword),
+                'password' => qh_password_make($newPassword),
             ]);
             if ($updated === false) {
                 throw new \RuntimeException('password update failed');

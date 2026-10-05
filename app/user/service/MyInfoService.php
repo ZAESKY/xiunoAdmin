@@ -67,11 +67,11 @@ class MyInfoService extends UserBaseService
             $duplicate = $e instanceof \DomainException
                 || strpos(strtolower($e->getMessage()), 'duplicate') !== false
                 || (string)$e->getCode() === '23000';
-            return message($duplicate ? t('profile_username.duplicate') : sf_public_exception_message($e, t('profile_username.failed')), false);
+            return message($duplicate ? t('profile_username.duplicate') : qh_public_exception_message($e, t('profile_username.failed')), false);
         }
 
         $user = $result['user'];
-        cookie('userSign', data_auth_sign($user['appid'] . $user['username'] . $user['password'] . sf_password_hash()));
+        cookie('userSign', data_auth_sign($user['appid'] . $user['username'] . $user['password'] . qh_password_hash()));
         if (!empty($result['changed'])) {
             event('ActionLog', [
                 'Title' => t('profile_username.action_title'),

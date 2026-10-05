@@ -13,7 +13,7 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
@@ -34,12 +34,12 @@
             </form>
             <!-- 数据表格 -->
 
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 
@@ -55,7 +55,7 @@
 
         /* 渲染表格 */
         var insTb = table.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/Log/list")}',
             method: 'post',
             page: true,
@@ -98,12 +98,12 @@
                 {field: 'ip', title: 'IP', sort: true, minWidth: 100},
                 {field: 'user_agent', title: 'User-Agent', sort: true, minWidth: 160},
                 {field: 'create_time', title: '{:t("common.add_time")}', sort: true, minWidth: 180},
-                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 100}
+                {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', minWidth: 100}
             ]]
         });
 
         /* 表格搜索 */
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
@@ -118,7 +118,7 @@
         });
 
         /* 表格工具条点击事件 */
-        table.on('tool(SF_Table)', function (obj) {
+        table.on('tool(QH_Table)', function (obj) {
             if (obj.event === 'edit') { // 修改
                 showEditModel(obj.data);
             } else if (obj.event === 'del') { // 删除
@@ -126,11 +126,11 @@
             }
         });
         /* 表格头工具栏点击事件 */
-        table.on('toolbar(SF_Table)', function (obj) {
+        table.on('toolbar(QH_Table)', function (obj) {
             if (obj.event === 'add') { // 添加
                 showEditModel();
             } else if (obj.event === 'del') { // 删除
-                var checkRows = table.checkStatus('SF_Table');
+                var checkRows = table.checkStatus('QH_Table');
                 if (checkRows.data.length === 0) {
                     notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                     return;
@@ -159,7 +159,7 @@
                     success: function(data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            table.reload('SF_Table');
+                            table.reload('QH_Table');
                             notice.msg(data.msg, {icon: 1, audio:'1'});
                         }else{
                             notice.msg(data.msg, {icon: 2, audio:'1'});

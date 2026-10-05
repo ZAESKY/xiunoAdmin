@@ -33,21 +33,21 @@ if [ -z "$mysql_bin" ]; then
   mysql_bin="/www/server/mysql/bin/mysql"
 fi
 
-"$PHP_BIN" think list | grep -q 'sf:rebate-settle'
-"$PHP_BIN" think sf:rebate-settle --limit=500
+"$PHP_BIN" think list | grep -q 'qh:rebate-settle'
+"$PHP_BIN" think qh:rebate-settle --limit=500
 
 field_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND ((TABLE_NAME='SF_user' AND COLUMN_NAME='withdrawable_balance') OR (TABLE_NAME='SF_rebate_record' AND COLUMN_NAME IN ('rebate_base_amount','settle_at','settled_at','risk_reason')));")"
+  "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND ((TABLE_NAME='QH_user' AND COLUMN_NAME='withdrawable_balance') OR (TABLE_NAME='QH_rebate_record' AND COLUMN_NAME IN ('rebate_base_amount','settle_at','settled_at','risk_reason')));")"
 trigger_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND TRIGGER_NAME LIKE 'SF_user_withdrawable_before_%';")"
+  "SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND TRIGGER_NAME LIKE 'QH_user_withdrawable_before_%';")"
 config_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM SF_config WHERE name IN ('rebate_hold_days','rebate_pair_daily_count','rebate_daily_limit','rebate_monthly_limit');")"
+  "SELECT COUNT(*) FROM QH_config WHERE name IN ('rebate_hold_days','rebate_pair_daily_count','rebate_daily_limit','rebate_monthly_limit');")"
 invalid_balance_count="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT COUNT(*) FROM SF_user WHERE withdrawable_balance < 0 OR withdrawable_balance > balance;")"
+  "SELECT COUNT(*) FROM QH_user WHERE withdrawable_balance < 0 OR withdrawable_balance > balance;")"
 rebate_statuses="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT CONCAT(status, ':', COUNT(*)) FROM SF_rebate_record GROUP BY status ORDER BY status;" | paste -sd, -)"
+  "SELECT CONCAT(status, ':', COUNT(*)) FROM QH_rebate_record GROUP BY status ORDER BY status;" | paste -sd, -)"
 withdrawable_summary="$("$mysql_bin" --defaults-extra-file="$client_cnf" "$db_name" -N -B -e \
-  "SELECT CONCAT(COUNT(*), ':', COALESCE(FORMAT(SUM(withdrawable_balance),2), '0.00')) FROM SF_user WHERE withdrawable_balance > 0;")"
+  "SELECT CONCAT(COUNT(*), ':', COALESCE(FORMAT(SUM(withdrawable_balance),2), '0.00')) FROM QH_user WHERE withdrawable_balance > 0;")"
 
 test "$field_count" = "5"
 test "$trigger_count" = "2"

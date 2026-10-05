@@ -39,7 +39,7 @@
         return;
     }
 
-    window.SF_LANG = {
+    window.QH_LANG = {
         current: next,
         set: function (lang) {
             var normalized = normalize(lang);

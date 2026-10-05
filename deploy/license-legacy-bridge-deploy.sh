@@ -102,7 +102,7 @@ fi
   --single-transaction --quick --routines --triggers --events --no-tablespaces \
   --default-character-set=utf8mb4 "$db_name" > "$BACKUP_DIR/database.sql"
 test "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024
-grep -q 'Table structure for table `SF_auth`' "$BACKUP_DIR/database.sql"
+grep -q 'Table structure for table `QH_auth`' "$BACKUP_DIR/database.sql"
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 sha256sum "$BACKUP_DIR/database.sql" > "$BACKUP_DIR/database.sql.sha256"
 chmod 600 "$BACKUP_DIR/database.sql" "$BACKUP_DIR/database.sql.sha256"
@@ -111,9 +111,9 @@ echo "[4/8] 执行幂等数据库迁移"
 mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" \
   < "$STAGE_DIR/20261002_license_legacy_bridge.sql"
 column_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B \
-  -e "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_license' AND COLUMN_NAME='source_auth_id'")"
+  -e "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_license' AND COLUMN_NAME='source_auth_id'")"
 index_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B \
-  -e "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_license' AND INDEX_NAME='uk_product_source_auth'")"
+  -e "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_license' AND INDEX_NAME='uk_product_source_auth'")"
 test "$column_count" = 1
 test "$index_count" = 2
 
@@ -121,7 +121,7 @@ echo "[5/8] 原子部署服务文件"
 deploy_file() {
   src="$1"
   dst="$2"
-  tmp="${dst}.sfnew.$$"
+  tmp="${dst}.qhnew.$$"
   install -m 0644 "$src" "$tmp"
   if [ -e "$dst" ]; then
     chown --reference="$dst" "$tmp"
@@ -143,7 +143,7 @@ echo "[6/8] 配置产品映射"
 if grep -Eq '^[[:space:]]*license_product_app_map[[:space:]]*=' .env; then
   grep -Eq '^[[:space:]]*license_product_app_map[[:space:]]*=[[:space:]]*zaesky_theme_light:1[[:space:]]*$' .env
 else
-  env_tmp=".env.sfnew.$$"
+  env_tmp=".env.qhnew.$$"
   cp -p .env "$env_tmp"
   printf '\n# v2 产品标识到旧授权应用的显式映射\nlicense_product_app_map = zaesky_theme_light:1\n' \
     >> "$env_tmp"
@@ -158,11 +158,11 @@ echo "[7/8] 清理框架缓存并复检"
 "$PHP_BIN" think clear
 
 legacy_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B \
-  -e 'SELECT COUNT(*) FROM SF_auth')"
+  -e 'SELECT COUNT(*) FROM QH_auth')"
 v2_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B \
-  -e 'SELECT COUNT(*) FROM SF_license')"
+  -e 'SELECT COUNT(*) FROM QH_license')"
 product_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B \
-  -e 'SELECT COUNT(*) FROM SF_app WHERE id=1')"
+  -e 'SELECT COUNT(*) FROM QH_app WHERE id=1')"
 test "$product_count" = 1
 
 echo "[8/8] 部署结果"

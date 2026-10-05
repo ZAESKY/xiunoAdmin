@@ -170,7 +170,7 @@ class Index extends Backend
                 return message(t('user.old_password_empty'), false);
             }
             $needsRehash = false;
-            if(!sf_password_verify($oldPassword, $this->adminInfo['password'], $needsRehash)){
+            if(!qh_password_verify($oldPassword, $this->adminInfo['password'], $needsRehash)){
                 return message(t('user.old_password_wrong'), false);
             }
             if($username == $this->adminInfo['username']){
@@ -186,7 +186,7 @@ class Index extends Backend
                 try{
                     Db::name('admin')
                         ->where('id', $this->adminId)
-                        ->data(['password' => sf_password_make($newPassword)])
+                        ->data(['password' => qh_password_make($newPassword)])
                         ->update();
                     return message(t('user.password_change_success'), true);
                 }catch (\Exception $e){
@@ -204,7 +204,7 @@ class Index extends Backend
                     if(strlen($newPassword) < 6){
                         return message(t('user.new_password_short'), false);
                     }
-                    $password = sf_password_make($newPassword);
+                    $password = qh_password_make($newPassword);
                 }else{
                     $password = $this->adminInfo['password'];
                 }

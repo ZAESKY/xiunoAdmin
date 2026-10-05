@@ -29,13 +29,13 @@
                                     </div>
                                 </div>
                                 <div class="layui-inline layui-btn-container">
-                                    <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                                    <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                                         <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                                     </button>
                                 </div>
                             </div>
                         </form>
-                        <table id="SF_Table" lay-filter="SF_Table"></table>
+                        <table id="QH_Table" lay-filter="QH_Table"></table>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
     </div>
 </div>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view"><i class="layui-icon">&#xe705;</i>{:t('common.view')}</a>
     {{# if(currentType === 'my_app_comments'){ }}
         {{# if(!d.reply_content){ }}
@@ -67,7 +67,7 @@ layui.use(['layer', 'form', 'table', 'notice', 'element'], function () {
     var currentType = 'my_comments';
 
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/UserPlugin/comments")}',
         method: 'post',
         page: true,
@@ -108,7 +108,7 @@ layui.use(['layer', 'form', 'table', 'notice', 'element'], function () {
                 return d.reply_content ? '<span class="layui-badge layui-badge-green">{:t('plugin_record.replied')}</span>' : '<span style="color:#999;">{:t('plugin_record.not_replied')}</span>';
             }},
             {field: 'created_at', title: '{:t("plugin_record.comment_time")}', width: 160},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 180, fixed: 'right'}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 180, fixed: 'right'}
         ]]
     });
 
@@ -134,13 +134,13 @@ layui.use(['layer', 'form', 'table', 'notice', 'element'], function () {
         }
     });
 
-    form.on('submit(SF_TbSearch)', function (data) {
+    form.on('submit(QH_TbSearch)', function (data) {
         var params = Object.assign({}, data.field, { type: currentType });
         insTb.reload({where: params, page: {curr: 1}});
         return false;
     });
 
-    table.on('tool(SF_Table)', function (obj) {
+    table.on('tool(QH_Table)', function (obj) {
         if (obj.event === 'view') {
             showDetail(obj.data);
         } else if (obj.event === 'reply') {
@@ -202,7 +202,7 @@ layui.use(['layer', 'form', 'table', 'notice', 'element'], function () {
                     notice.destroy();
                     if (res.code == 0) {
                         layer.close(index);
-                        table.reload('SF_Table');
+                        table.reload('QH_Table');
                         notice.msg(res.msg, {icon: 1, audio: '1'});
                     } else {
                         notice.msg(res.msg, {icon: 2, audio: '1'});

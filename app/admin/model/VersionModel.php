@@ -72,7 +72,7 @@ class VersionModel extends BaseModel
                 }
             }
             VersionReleaseService::deleteForVersion($this->rowArray($row));
-            Cache::tag('SF_Version')->clear();
+            Cache::tag('QH_Version')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -185,7 +185,7 @@ class VersionModel extends BaseModel
                     ->update();
                 $publishedRow = array_merge($this->rowArray($row), $data, ['id' => $id]);
                 VersionReleaseService::syncStatus($publishedRow);
-                Cache::tag('SF_Version')->clear();
+                Cache::tag('QH_Version')->clear();
                 return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
                 $this->rollbackDownloadDirectoryMove($moved);
@@ -200,7 +200,7 @@ class VersionModel extends BaseModel
             if ($row) {
                 return message(t('version.number_exists'), false);
             }
-            $download_catalogue = $appid.'_'.$version.'_'.sf_secure_token(16) /* A-15: 原 md5(time().常量) 可预测 */;
+            $download_catalogue = $appid.'_'.$version.'_'.qh_secure_token(16) /* A-15: 原 md5(time().常量) 可预测 */;
             try {
                 $newDir = ReleasePackageService::dir($type, $download_catalogue);
                 $result = $newDir !== '' && mkdirs($newDir, 0755);
@@ -223,7 +223,7 @@ class VersionModel extends BaseModel
             ];
             try{
                 self::insert($data);
-                Cache::tag('SF_Version')->clear();
+                Cache::tag('QH_Version')->clear();
                 return message(t('user.add_success') ,true);
             } catch (\Exception $e) {
                 if (!empty($newDir) && is_dir($newDir) && !is_link($newDir)) {
@@ -258,7 +258,7 @@ class VersionModel extends BaseModel
             if ($dir !== '') {
                 @rmdir(rtrim($dir, DIRECTORY_SEPARATOR));
             }
-            Cache::tag('SF_Version')->clear();
+            Cache::tag('QH_Version')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -285,7 +285,7 @@ class VersionModel extends BaseModel
             $version = $this->rowArray($row);
             $version['status'] = $status;
             VersionReleaseService::syncStatus($version);
-            Cache::tag('SF_Version')->clear();
+            Cache::tag('QH_Version')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -326,7 +326,7 @@ class VersionModel extends BaseModel
                 $this->rollbackDownloadDirectoryMove($moved);
                 throw $e;
             }
-            Cache::tag('SF_Version')->clear();
+            Cache::tag('QH_Version')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -385,7 +385,7 @@ class VersionModel extends BaseModel
             self::where('id', $id)
                 ->data(['beta' => $beta])
                 ->update();
-            Cache::tag('SF_Version')->clear();
+            Cache::tag('QH_Version')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -406,8 +406,8 @@ class VersionModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $appid = !empty($post['appid'])?intval($post['appid']):null;
             $data = $this->buildSearchWhere('id|edition|version');
 

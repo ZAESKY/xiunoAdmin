@@ -17,7 +17,7 @@
 
 </head>
 <body style="background-image: url('{__IMG__}background.svg');background-size: cover;">
-<a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}" style="position:absolute;right:24px;top:18px;color:#fff;z-index:3;">{:t('common.lang_toggle')}</a>
+<a href="javascript:QH_LANG.toggle();" title="{:t('common.language')}" style="position:absolute;right:24px;top:18px;color:#fff;z-index:3;">{:t('common.lang_toggle')}</a>
 <div class="login-wrapper layui-anim layui-anim-scale layui-hide">
     <form class="layui-form layui-card-body" id="divLoading"
     style="padding: 28px 15px;box-sizing: border-box;min-height: 126px;opacity: 0.95">
@@ -43,7 +43,7 @@
             <a href="{:url('/login/reg')}" class="layui-link">{:t('login.register_user')}</a>
         </div>
         <div class="layui-form-item">
-            <button type="button" class="layui-btn layui-btn-fluid sf" id="loginBtn">{:t('login.login_user')}</button>
+            <button type="button" class="layui-btn layui-btn-fluid qh" id="loginBtn">{:t('login.login_user')}</button>
         </div>
         {if condition="!empty($login_switch)"}
         <div class="layui-form-item page-account-other" style="font-size: 14px;">
@@ -56,13 +56,13 @@
 
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script>window.QH_I18N_LOCALE = "{:t('common.lang_code')}"; window.QH_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}common.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
 <script src="{__JS__}gt.js"></script>
 <script>
-    window.SF_LOGIN_REDIRECT = {$login_redirect_json|raw};
+    window.QH_LOGIN_REDIRECT = {$login_redirect_json|raw};
     layui.use(['layer', 'form', 'admin', 'notice'], function () {
         var $ = layui.jquery;
         var layer = layui.layer;
@@ -257,7 +257,7 @@
         $("#qq_login").click(function(){
             admin.btnLoading(' #loginBtn');
             admin.showLoading('#divLoading', 2, '.8');
-            SfQqOauth.start({
+            QHQqOauth.start({
                 url: '/api.php/Social/login',
                 data: {userType:'user'},
                 onResult: function(data) {
@@ -272,7 +272,7 @@
                 }
             });
         });
-        SfQqOauth.resume(window.handleQqOauthResult, function(message){
+        QHQqOauth.resume(window.handleQqOauthResult, function(message){
             notice.error({title:t('login.qq_notice'), message:message, position:'topCenter'});
         });
         {/if}
@@ -291,7 +291,7 @@
                         var result = gt.getValidate();
                         result.username = username;
                         result.password = password;
-                        result.redirect = window.SF_LOGIN_REDIRECT;
+                        result.redirect = window.QH_LOGIN_REDIRECT;
                         admin.btnLoading('#loginBtn');
                         admin.showLoading('#divLoading', 2, '.8');
                         $.ajax({
@@ -417,7 +417,7 @@
                     data: {
                         "username": user,
                         "password": pass,
-                        "redirect": window.SF_LOGIN_REDIRECT,
+                        "redirect": window.QH_LOGIN_REDIRECT,
                     },
                     dataType: "json",
                     success: function(data) {

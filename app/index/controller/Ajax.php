@@ -34,8 +34,8 @@ class Ajax extends Frontend
     public function pluginMarket(){
         if(IS_POST){
             $post = $this->request->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 12, 50);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 12, 50);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $keyword = !empty($post['text']) ? trim($post['text']) : '';
 
             $where = [['status', '=', 1]];
@@ -138,7 +138,7 @@ class Ajax extends Frontend
             try{
                 $data = [
                     'username' => $username,
-                    'password' => sf_password_make($password),
+                    'password' => qh_password_make($password),
                     'phone' => '',
                     'qq' => $qq,
                     'email' => $email,

@@ -28,7 +28,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.removeLoading('#divLoading', true, true);
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit1"]', false);
                 steps.next('stepsDemoForget');
-                $('#SF_title').html(window.t('install.env_check'));
+                $('#QH_title').html(window.t('install.env_check'));
                 }
             }, 600);
             return false;
@@ -53,16 +53,16 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
 		}, function(index){
 		    $.ajax({
 	             type: "GET",
-	             url: "SF_install_ajax.php?SF=is_config",
+	             url: "QH_install_ajax.php?QH=is_config",
 	             dataType: "json",
 	             success: function(data) {
 	               if (data.code == 0) {
 	               steps.next('stepsDemoForget');
 	               steps.next('stepsDemoForget');
-	               $('#SF_title').html(window.t('install.create_table'));
+	               $('#QH_title').html(window.t('install.create_table'));
 	               } else {
 	               steps.next('stepsDemoForget');
-	               $('#SF_title').html(window.t('install.db_info'));
+	               $('#QH_title').html(window.t('install.db_info'));
 	               }
 	             }
 	            });
@@ -76,18 +76,18 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit2"]', false);
                 $.ajax({
                   type: "GET",
-                  url: "SF_install_ajax.php?SF=config",
+                  url: "QH_install_ajax.php?QH=config",
                   dataType: "json",
                     success: function(data) {
                         if (data.code == 0) {
                             steps.next('stepsDemoForget');
                             steps.next('stepsDemoForget');
-                            $('#SF_title').html(window.t('install.create_table'));
+                            $('#QH_title').html(window.t('install.create_table'));
                             $('#mysql_install').html(data.data);
                             notice.msg(window.t('install.db_connected'), {icon: 1});
                         } else {
                             steps.next('stepsDemoForget');
-                            $('#SF_title').html(window.t('install.db_info'));
+                            $('#QH_title').html(window.t('install.db_info'));
                         }
                     }
                 });
@@ -113,7 +113,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             }
              $.ajax({
              type: "POST",
-             url: "SF_install_ajax.php?SF=config",
+             url: "QH_install_ajax.php?QH=config",
              data : {host:a,port:b,user:c,pwd:d,name:e},
              dataType: "json",
              success: function(data) {
@@ -122,7 +122,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="stepDemoFormSubmit3"]', false);
                 steps.next('stepsDemoForget');
                 notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html(window.t('install.create_table'));
+                $('#QH_title').html(window.t('install.create_table'));
                 $('#mysql_install').html(data.data);
 
                } else {
@@ -141,19 +141,19 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             admin.btnLoading('[lay-filter="jump_install"]');
 		    steps.next('stepsDemoForget');
 		    steps.next('stepsDemoForget');
-		    $('#SF_title').html(window.t('install.complete'));
+		    $('#QH_title').html(window.t('install.complete'));
 		    admin.removeLoading('#divLoading4', true, true);
             admin.btnLoading('[lay-filter="jump_install"]', false);
             $.ajax({
 	             type: "GET",
-	             url: "SF_install_ajax.php?SF=put_SF_install_lock",
+	             url: "QH_install_ajax.php?QH=put_QH_install_lock",
 	             dataType: "json",
 	             success: function(data) {
 	               if (data.code == 0) {
 	               notice.msg(window.t('install.install_success'), {icon: 1});
-	               $('#SF_user').html(data.user);
-	               $('#SF_pwd').html(data.pwd);
-	               $('#SF_qq').html(data.qq);
+	               $('#QH_user').html(data.user);
+	               $('#QH_pwd').html(data.pwd);
+	               $('#QH_qq').html(data.qq);
 	               } else {
 	               notice.msg(window.t('install.lock_not_created'), {icon: 2});
 	               }
@@ -170,7 +170,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             admin.btnLoading('[lay-filter="must_install"]');
 		     $.ajax({
 	             type: "GET",
-	             url: "SF_install_ajax.php?SF=mysql",
+	             url: "QH_install_ajax.php?QH=mysql",
 	             dataType: "json",
 	             success: function(data) {
 	               if (data.code == 0) {
@@ -178,7 +178,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
 	                admin.btnLoading('[lay-filter="must_install"]', false);
 	                steps.next('stepsDemoForget');
 	                notice.msg(data.msg, {icon: 1});
-	                $('#SF_title').html(window.t('install.admin_info'));
+	                $('#QH_title').html(window.t('install.admin_info'));
 	                $('#admin').html(data.data);
 
 	               } else {
@@ -199,7 +199,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             admin.btnLoading('[lay-filter="mysql_install"]');
              $.ajax({
              type: "GET",
-             url: "SF_install_ajax.php?SF=mysql",
+             url: "QH_install_ajax.php?QH=mysql",
              dataType: "json",
              success: function(data) {
                if (data.code == 0) {
@@ -207,7 +207,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="mysql_install"]', false);
                 steps.next('stepsDemoForget');
                 notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html(window.t('install.admin_info'));
+                $('#QH_title').html(window.t('install.admin_info'));
                 $('#admin').html(data.data);
 
                } else {
@@ -240,7 +240,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             }
              $.ajax({
              type: "POST",
-             url: "SF_install_ajax.php?SF=admin",
+             url: "QH_install_ajax.php?QH=admin",
              data : {user:a,pwd:b,qq:c,mail:d,authcode:e,login_key:login_key,sitename:sitename},
              dataType: "json",
              success: function(data) {
@@ -249,10 +249,10 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
                 admin.btnLoading('[lay-filter="admin_info"]', false);
                 steps.next('stepsDemoForget');
                 notice.msg(data.msg, {icon: 1});
-                $('#SF_title').html(window.t('install.complete'));
+                $('#QH_title').html(window.t('install.complete'));
                 $.ajax({
                  type: "GET",
-                 url: "SF_install_ajax.php?SF=put_SF_install_lock",
+                 url: "QH_install_ajax.php?QH=put_QH_install_lock",
                  dataType: "json",
                  success: function(data) {
                    if (data.code == 0) {
@@ -274,9 +274,9 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             return false;
         });
 
-        form.on('submit(SFindex)', function (data) {
+        form.on('submit(QHindex)', function (data) {
             admin.showLoading('#divLoading6', 2, '.8');
-            admin.btnLoading('[lay-filter="SFindex"]');
+            admin.btnLoading('[lay-filter="QHindex"]');
             window.location.href="/";
             return false;
     });
@@ -286,7 +286,7 @@ layui.use(['layer', 'steps', 'form', 'admin', 'formX', 'notice'], function () {
             admin.btnLoading('[lay-filter="loginadmin"]');
              $.ajax({
              type: "GET",
-             url: "SF_install_ajax.php?SF=SF_login",
+             url: "QH_install_ajax.php?QH=QH_login",
              dataType: "json",
              success: function(data) {
                if (data.code == 0) {

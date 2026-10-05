@@ -260,7 +260,7 @@ class UpdateV2Service extends BaseService
         Db::name($table)->where('id', $id)->inc('download_count')->update();
 
         Log::info(sprintf(
-            '[SF-V2][download] kind=%s id=%d license=%s',
+            '[QH-V2][download] kind=%s id=%d license=%s',
             $kind,
             $id,
             substr((string)($payload['_license_id'] ?? ''), 0, 8)
@@ -619,7 +619,7 @@ class UpdateV2Service extends BaseService
         // 实际哈希必须与登记值一致，避免磁盘上的包被替换后仍被下发
         $actual = @hash_file('sha256', $file);
         if (!is_string($actual) || !hash_equals((string)$row['package_sha256'], $actual)) {
-            Log::error('[SF-V2] package hash mismatch on disk: ' . $name);
+            Log::error('[QH-V2] package hash mismatch on disk: ' . $name);
             return '';
         }
         return $file;

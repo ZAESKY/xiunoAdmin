@@ -23,19 +23,19 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
             </form>
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 
 <style>
-    #SF_Table + .layui-table-view td[data-off="true"] > .layui-table-cell {
+    #QH_Table + .layui-table-view td[data-off="true"] > .layui-table-cell {
         height: 40px;
         overflow: hidden;
         white-space: nowrap;
@@ -47,7 +47,7 @@
     }
 </style>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <div class="plugin-table-actions">
     {{# if(d.price > 0 && d.status == 1){ }}
     <a class="layui-btn layui-btn-sm layui-btn-warm" lay-event="purchases"><i class="layui-icon layui-icon-user"></i>{:t('plugin_ui.purchase_records')}</a>
@@ -71,7 +71,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     var notice = layui.notice;
 
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/UserPlugin/list")}',
         method: 'post',
         page: true,
@@ -122,16 +122,16 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 return d.audit_note || '-';
             }},
             {field: 'created_at', title: '{:t("payment_ui.create_time")}', minWidth: 160},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 260, unresize: true}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 260, unresize: true}
         ]]
     });
 
-    form.on('submit(SF_TbSearch)', function (data) {
+    form.on('submit(QH_TbSearch)', function (data) {
         insTb.reload({where: data.field, page: {curr: 1}});
         return false;
     });
 
-    table.on('tool(SF_Table)', function (obj) {
+    table.on('tool(QH_Table)', function (obj) {
         if (obj.event === 'purchases') {
             showPurchases(obj.data);
             return;
@@ -141,7 +141,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 type: 2, title: '{:t("plugin_ui.edit_plugin")}',
                 content: '{:url("/UserPlugin/create")}?id=' + obj.data.id,
                 area: ['90%', '90%'], maxmin: true,
-                end: function() { table.reload('SF_Table'); }
+                end: function() { table.reload('QH_Table'); }
             });
         } else if (obj.event === 'del') {
             layer.confirm('{:t("plugin_record.confirm_delete_plugin")}', {skin:'layui-layer-admin',icon:3,shade:.1}, function(i) {
@@ -149,7 +149,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 $.ajax({
                     type: "POST", url: '{:url("/UserPlugin/drop")}', data: {id: obj.data.id}, dataType: "json",
                     success: function(res) {
-                        if (res.code == 0) { table.reload('SF_Table'); notice.msg(res.msg, {icon:1}); }
+                        if (res.code == 0) { table.reload('QH_Table'); notice.msg(res.msg, {icon:1}); }
                         else { notice.msg(res.msg, {icon:2}); }
                     }
                 });
@@ -161,10 +161,10 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         var t2 = layui.table;
         layer.open({
             type: 1, title: '{:t("plugin_ui.purchase_records")} - '+data.name, area: ['700px', '480px'],
-            content: '<table id="SF_PurchaseTable" lay-filter="SF_PurchaseTable"></table>',
+            content: '<table id="QH_PurchaseTable" lay-filter="QH_PurchaseTable"></table>',
             success: function() {
                 t2.render({
-                    elem: '#SF_PurchaseTable', url: '{:url("/UserPlugin/pluginPurchases")}', method: 'post',
+                    elem: '#QH_PurchaseTable', url: '{:url("/UserPlugin/pluginPurchases")}', method: 'post',
                     page: true, limit: 15, where: { plugin_id: data.id },
                     request: { pageName: 'current_page', limitName: 'limit' },
                     parseData: function(r){ return {code:r.code,msg:r.msg,count:r.data.data.total,data:r.data.data.data}; },

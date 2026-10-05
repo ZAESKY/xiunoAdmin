@@ -45,7 +45,7 @@ class EPay extends PayBackend
         if (!$this->isPaidStatus($trade_status)) {
             return $this->renderPayResult(false, '验证订单交易状态失败！[errorCode:CheckPayStatusError]', $out_trade_no);
         }
-        if (sf_money_to_cents($srow['money']) !== sf_money_to_cents($money)) {
+        if (qh_money_to_cents($srow['money']) !== qh_money_to_cents($money)) {
             return $this->renderPayResult(false, '订单金额不一致！[errorCode:PayOrderMoneyError]', $out_trade_no);
         }
 
@@ -76,7 +76,7 @@ class EPay extends PayBackend
         if ($verify_result
             && $this->isEpayEnabled($pay_config)
             && $this->isPaidStatus($trade_status)
-            && sf_money_to_cents($srow['money']) === sf_money_to_cents($money)
+            && qh_money_to_cents($srow['money']) === qh_money_to_cents($money)
             && $this->completeOrder($srow, $trade_no)
         ) {
             echo "success";
@@ -174,7 +174,7 @@ class EPay extends PayBackend
     {
         return $this->render('e_pay/return', [
             'success' => $success ? 1 : 0,
-            'message_type' => $success ? 'sf-pay-success' : 'sf-pay-fail',
+            'message_type' => $success ? 'qh-pay-success' : 'qh-pay-fail',
             'msg' => $msg,
             'trade_no' => $tradeNo,
             'time' => $success ? 1 : 5,

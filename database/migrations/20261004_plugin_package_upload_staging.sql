@@ -2,7 +2,7 @@
 -- The table makes private OSS uploads publishable without exposing a URL and
 -- allows abandoned uploads to be removed safely after their token expires.
 
-CREATE TABLE IF NOT EXISTS `SF_plugin_package_upload` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_package_upload` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '上传记录ID',
   `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '一次性上传凭证SHA-256',
   `actor_type` varchar(10) NOT NULL COMMENT 'user/admin',

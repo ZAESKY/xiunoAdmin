@@ -99,7 +99,7 @@ printf '[client]\nhost=%s\nport=%s\nuser=%s\npassword=%s\ndefault-character-set=
 unset DB_PASS
 DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/mysql/bin/mysqldump}"
 "$DUMP_BIN" --defaults-extra-file="$CLIENT_CNF" --single-transaction --quick --no-tablespaces \
-  "$DB_NAME" SF_license SF_license_site SF_auth SF_release > "$BACKUP_DIR/affected_tables.sql"
+  "$DB_NAME" QH_license QH_license_site QH_auth QH_release > "$BACKUP_DIR/affected_tables.sql"
 [ "$(wc -c < "$BACKUP_DIR/affected_tables.sql")" -gt 1024 ]
 grep -q 'Dump completed' "$BACKUP_DIR/affected_tables.sql"
 sha256sum "$BACKUP_DIR/affected_tables.sql" > "$BACKUP_DIR/affected_tables.sql.sha256"

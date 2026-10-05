@@ -23,18 +23,18 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
             </form>
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-sm" lay-event="status"><i class="layui-icon">&#xe605;</i>{:t('common.status')}</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</a>
 </script>
@@ -49,7 +49,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
     var notice = layui.notice;
 
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/PluginOrder/list")}',
         method: 'post',
         page: true,
@@ -114,16 +114,16 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
             {field: 'ip', title: 'IP', width: 120},
             {field: 'created_at', title: '{:t("payment_ui.create_time")}', minWidth: 160},
             {field: 'paid_at', title: '{:t("plugin_ui.payment_time")}', minWidth: 160},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 150, fixed: 'right'}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', minWidth: 150, fixed: 'right'}
         ]]
     });
 
-    form.on('submit(SF_TbSearch)', function (data) {
+    form.on('submit(QH_TbSearch)', function (data) {
         insTb.reload({where: data.field, page: {curr: 1}});
         return false;
     });
 
-    table.on('tool(SF_Table)', function (obj) {
+    table.on('tool(QH_Table)', function (obj) {
         if (obj.event === 'status') {
             var statusOptions = [{value:0,text:'{:t("plugin_ui.pending_payment")}'},{value:1,text:'{:t("plugin_ui.paid")}'},{value:2,text:'{:t("plugin_ui.cancelled")}'},{value:3,text:'{:t("plugin_ui.refunded")}'}];
             var html = '<div style="padding:20px;"><select id="order_status">';
@@ -141,7 +141,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                         data: {id: obj.data.id, status: $('#order_status').val()},
                         dataType: "json",
                         success: function(res) {
-                            if (res.code == 0) { notice.msg(res.msg, {icon:1}); table.reload('SF_Table'); layer.close(index); }
+                            if (res.code == 0) { notice.msg(res.msg, {icon:1}); table.reload('QH_Table'); layer.close(index); }
                             else { notice.msg(res.msg, {icon:2}); }
                         }
                     });
@@ -154,7 +154,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 $.ajax({
                     type: "POST", url: '{:url("/PluginOrder/drop")}', data: {id: obj.data.id}, dataType: "json",
                     success: function(res) {
-                        if (res.code == 0) { table.reload('SF_Table'); notice.msg(res.msg, {icon:1}); }
+                        if (res.code == 0) { table.reload('QH_Table'); notice.msg(res.msg, {icon:1}); }
                         else { notice.msg(res.msg, {icon:2}); }
                     }
                 });
@@ -162,9 +162,9 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
         }
     });
 
-    table.on('toolbar(SF_Table)', function (obj) {
+    table.on('toolbar(QH_Table)', function (obj) {
         if (obj.event === 'del') {
-            var checkRows = table.checkStatus('SF_Table');
+            var checkRows = table.checkStatus('QH_Table');
             if (checkRows.data.length === 0) { notice.msg('{:t("confirm.please_select_data")}', {icon:3}); return; }
             var ids = checkRows.data.map(function(d){ return d.id; });
             layer.confirm('{:t("auth_portal.confirm_delete")}', {skin:'layui-layer-admin',icon:3,shade:.1}, function(i) {
@@ -172,7 +172,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 $.ajax({
                     type: "POST", url: '{:url("/PluginOrder/batchDrop")}', data: {id: ids.join(',')}, dataType: "json",
                     success: function(res) {
-                        if (res.code == 0) { table.reload('SF_Table'); notice.msg(res.msg, {icon:1}); }
+                        if (res.code == 0) { table.reload('QH_Table'); notice.msg(res.msg, {icon:1}); }
                         else { notice.msg(res.msg, {icon:2}); }
                     }
                 });

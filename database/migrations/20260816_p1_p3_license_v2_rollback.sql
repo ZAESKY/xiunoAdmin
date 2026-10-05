@@ -8,18 +8,18 @@
 --
 -- ⚠ 硬回滚会删除已签发的 v2 授权、站点绑定与全部审计日志。
 --   若已有客户完成激活或旧码兑换，删除后这些客户将无法验证授权，
---   且 SF_auth_legacy 中的 redeemed_at 仍为已兑换状态 —— 会造成
+--   且 QH_auth_legacy 中的 redeemed_at 仍为已兑换状态 —— 会造成
 --   「既不能用新授权、也不能重新兑换」的死锁。
 --
 --   如确需硬回滚，必须同时清除兑换标记：
---     UPDATE `SF_auth_legacy` SET `redeemed_at` = NULL, `redeemed_license_id` = NULL;
+--     UPDATE `QH_auth_legacy` SET `redeemed_at` = NULL, `redeemed_license_id` = NULL;
 --
 -- 幂等：可重复执行。
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists $$
-CREATE PROCEDURE sf_drop_column_if_exists(IN p_table VARCHAR(64), IN p_column VARCHAR(64))
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists $$
+CREATE PROCEDURE qh_drop_column_if_exists(IN p_table VARCHAR(64), IN p_column VARCHAR(64))
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.COLUMNS
                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = p_table AND COLUMN_NAME = p_column)
@@ -32,22 +32,22 @@ END $$
 DELIMITER ;
 
 -- P1 列（删除后 v1 行为完全不变，因为 v1 只读 authcode 明文列）
-CALL sf_drop_column_if_exists('SF_auth', 'authcode_hash');
-CALL sf_drop_column_if_exists('SF_auth', 'authcode_last4');
-CALL sf_drop_column_if_exists('SF_auth', 'must_rotate');
-CALL sf_drop_column_if_exists('SF_auth', 'pepper_version');
+CALL qh_drop_column_if_exists('QH_auth', 'authcode_hash');
+CALL qh_drop_column_if_exists('QH_auth', 'authcode_last4');
+CALL qh_drop_column_if_exists('QH_auth', 'must_rotate');
+CALL qh_drop_column_if_exists('QH_auth', 'pepper_version');
 
-CALL sf_drop_column_if_exists('SF_download_ticket', 'license_id');
+CALL qh_drop_column_if_exists('QH_download_ticket', 'license_id');
 
 -- P2 / P3 表
-DROP TABLE IF EXISTS `SF_license_event`;
-DROP TABLE IF EXISTS `SF_license_site`;
-DROP TABLE IF EXISTS `SF_offline_activation`;
-DROP TABLE IF EXISTS `SF_trial`;
-DROP TABLE IF EXISTS `SF_license`;
-DROP TABLE IF EXISTS `SF_patch`;
-DROP TABLE IF EXISTS `SF_release`;
+DROP TABLE IF EXISTS `QH_license_event`;
+DROP TABLE IF EXISTS `QH_license_site`;
+DROP TABLE IF EXISTS `QH_offline_activation`;
+DROP TABLE IF EXISTS `QH_trial`;
+DROP TABLE IF EXISTS `QH_license`;
+DROP TABLE IF EXISTS `QH_patch`;
+DROP TABLE IF EXISTS `QH_release`;
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists;
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists;
 
-SELECT '硬回滚完成。若此前已有客户兑换过旧码，请务必执行上方注释中的 SF_auth_legacy 重置语句。' AS notice;
+SELECT '硬回滚完成。若此前已有客户兑换过旧码，请务必执行上方注释中的 QH_auth_legacy 重置语句。' AS notice;

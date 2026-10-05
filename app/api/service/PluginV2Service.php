@@ -45,8 +45,8 @@ class PluginV2Service extends BaseService
         $auth = $guard['auth'];
         $in = $auth['body'];
 
-        $page = sf_page_number($in['page'] ?? null);
-        $limit = sf_page_limit($in['limit'] ?? null, 12, 48);
+        $page = qh_page_number($in['page'] ?? null);
+        $limit = qh_page_limit($in['limit'] ?? null, 12, 48);
         $keyword = trim((string)($in['keyword'] ?? ''));
         if (strlen($keyword) > 100) {
             return $this->out('4500', '搜索关键词不能超过 100 个字符');
@@ -102,7 +102,7 @@ class PluginV2Service extends BaseService
             ];
             return $this->signedOut($data, $auth, '');
         } catch (\Throwable $e) {
-            Log::error('[SF-V2][plugin-list] ' . $e->getMessage());
+            Log::error('[QH-V2][plugin-list] ' . $e->getMessage());
             return $this->out('5000', '插件市场暂时不可用，请稍后重试');
         }
     }
@@ -145,7 +145,7 @@ class PluginV2Service extends BaseService
                 'generated_at' => time(),
             ], $auth, '');
         } catch (\Throwable $e) {
-            Log::error('[SF-V2][plugin-detail] id=' . $pluginId . ' ' . $e->getMessage());
+            Log::error('[QH-V2][plugin-detail] id=' . $pluginId . ' ' . $e->getMessage());
             return $this->out('5000', '插件详情暂时不可用，请稍后重试');
         }
     }
@@ -221,7 +221,7 @@ class PluginV2Service extends BaseService
                 ->where('ticket_hash', hash('sha256', $ticket))
                 ->update(['license_id' => (string)$license['license_id']]);
         } catch (\Throwable $e) {
-            Log::error('[SF-V2][plugin-ticket] ' . $e->getMessage());
+            Log::error('[QH-V2][plugin-ticket] ' . $e->getMessage());
             return $this->out('5000', '下载凭证签发失败，请稍后重试');
         }
 
@@ -286,7 +286,7 @@ class PluginV2Service extends BaseService
             $storage->assertValidPackageRecord($record);
             $file = $storage->getDownloadFile($record);
         } catch (\Throwable $e) {
-            Log::error('[SF-V2][plugin-download] resource id=' . $pluginId . ' ' . $e->getMessage());
+            Log::error('[QH-V2][plugin-download] resource id=' . $pluginId . ' ' . $e->getMessage());
             return $this->out('4503', '插件安装包不存在或暂不可下载');
         }
 
@@ -298,7 +298,7 @@ class PluginV2Service extends BaseService
             || !hash_equals($expectedHash, $actualHash)
             || ($expectedSize > 0 && $expectedSize !== $actualSize)) {
             $storage->deleteTemporaryDownloadFile($file);
-            Log::error('[SF-V2][plugin-download] package integrity mismatch id=' . $pluginId);
+            Log::error('[QH-V2][plugin-download] package integrity mismatch id=' . $pluginId);
             return $this->out('4503', '插件安装包完整性校验失败');
         }
 
@@ -317,7 +317,7 @@ class PluginV2Service extends BaseService
             Db::commit();
         } catch (\Throwable $e) {
             Db::rollback();
-            Log::error('[SF-V2][plugin-download] statistic id=' . $pluginId . ' ' . $e->getMessage());
+            Log::error('[QH-V2][plugin-download] statistic id=' . $pluginId . ' ' . $e->getMessage());
         }
 
         $fileName = $this->safePackageName(
@@ -388,7 +388,7 @@ class PluginV2Service extends BaseService
 
     private function absoluteUrl(string $url): string
     {
-        $url = sf_safe_url($url, true);
+        $url = qh_safe_url($url, true);
         if ($url === '') {
             return '';
         }

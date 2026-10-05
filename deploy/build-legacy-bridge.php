@@ -10,35 +10,35 @@ declare(strict_types=1);
  */
 
 $root = dirname(__DIR__);
-$sourcePath = $root . '/app/SF_Auth.sql';
+$sourcePath = $root . '/app/QH_Auth.sql';
 $targetPath = $root . '/database/migrations/20260816_legacy_429_bridge_tables.sql';
 
 $tables = [
-    'SF_feedback',
-    'SF_feedback_reply',
-    'SF_notification',
-    'SF_point_log',
-    'SF_wechat_mp_login',
-    'SF_point_product',
-    'SF_point_exchange_record',
-    'SF_point_product_reward',
-    'SF_balance_log',
-    'SF_withdraw',
-    'SF_checkin_record',
-    'SF_carousel',
-    'SF_user_notice',
-    'SF_discount_code',
-    'SF_rebate_record',
-    'SF_plugin',
-    'SF_plugin_versions',
-    'SF_plugin_resources',
-    'SF_plugin_order',
-    'SF_plugin_comment',
-    'SF_plugin_rating',
-    'SF_plugin_download',
-    'SF_plugin_download_token',
-    'SF_plugin_purchase',
-    'SF_loginlog',
+    'QH_feedback',
+    'QH_feedback_reply',
+    'QH_notification',
+    'QH_point_log',
+    'QH_wechat_mp_login',
+    'QH_point_product',
+    'QH_point_exchange_record',
+    'QH_point_product_reward',
+    'QH_balance_log',
+    'QH_withdraw',
+    'QH_checkin_record',
+    'QH_carousel',
+    'QH_user_notice',
+    'QH_discount_code',
+    'QH_rebate_record',
+    'QH_plugin',
+    'QH_plugin_versions',
+    'QH_plugin_resources',
+    'QH_plugin_order',
+    'QH_plugin_comment',
+    'QH_plugin_rating',
+    'QH_plugin_download',
+    'QH_plugin_download_token',
+    'QH_plugin_purchase',
+    'QH_loginlog',
 ];
 
 $source = file_get_contents($sourcePath);

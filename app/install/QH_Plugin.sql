@@ -2,7 +2,7 @@
 -- 创建时间: 2026-05-03
 
 -- 插件表
-CREATE TABLE IF NOT EXISTS `SF_plugin` (
+CREATE TABLE IF NOT EXISTS `QH_plugin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '发布者用户ID',
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '插件名称',
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件表';
 
 -- 插件版本历史表
-CREATE TABLE IF NOT EXISTS `SF_plugin_versions` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_versions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '版本记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
   `version` varchar(50) NOT NULL DEFAULT '' COMMENT '版本号',
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_versions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件版本历史表';
 
 -- 插件包上传后、提交发布前的私有暂存记录
-CREATE TABLE IF NOT EXISTS `SF_plugin_package_upload` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_package_upload` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '上传记录ID',
   `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL COMMENT '一次性上传凭证SHA-256',
   `actor_type` varchar(10) NOT NULL COMMENT 'user/admin',
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_package_upload` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件包待提交上传记录';
 
 -- 插件资源表
-CREATE TABLE IF NOT EXISTS `SF_plugin_resources` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_resources` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '资源ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
   `version_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件版本ID',
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_resources` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件资源表';
 
 -- 插件订单表
-CREATE TABLE IF NOT EXISTS `SF_plugin_order` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_order` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '订单ID',
   `order_no` varchar(64) NOT NULL DEFAULT '' COMMENT '订单号',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件订单表';
 
 -- 插件评论表
-CREATE TABLE IF NOT EXISTS `SF_plugin_comment` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_comment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '评论ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_comment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件评论表';
 
 -- 插件评分表
-CREATE TABLE IF NOT EXISTS `SF_plugin_rating` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_rating` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '评分ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_rating` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件评分表';
 
 -- 插件下载记录表
-CREATE TABLE IF NOT EXISTS `SF_plugin_download` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_download` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '下载记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
   `plugin_version` varchar(50) NOT NULL DEFAULT '' COMMENT '插件版本',
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_download` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件下载记录表';
 
 -- 临时下载凭证表
-CREATE TABLE IF NOT EXISTS `SF_plugin_download_token` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_download_token` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Token ID',
   `token` varchar(64) NOT NULL DEFAULT '' COMMENT '下载凭证',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_download_token` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='临时下载凭证表';
 
 -- 插件购买记录表(用于快速查询用户是否已购买)
-CREATE TABLE IF NOT EXISTS `SF_plugin_purchase` (
+CREATE TABLE IF NOT EXISTS `QH_plugin_purchase` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '购买记录ID',
   `plugin_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '插件ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
@@ -255,10 +255,10 @@ CREATE TABLE IF NOT EXISTS `SF_plugin_purchase` (
   KEY `order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件购买记录表';
 
-INSERT INTO `SF_config` (`name`,`group`,`title`,`tip`,`type`,`value`,`content`,`rule`,`extend`,`tip_type`)
+INSERT INTO `QH_config` (`name`,`group`,`title`,`tip`,`type`,`value`,`content`,`rule`,`extend`,`tip_type`)
 SELECT 'plugin_commission_enabled','plugin_market','启用插件销售平台抽成','开启后，余额及在线支付的插件订单按设置比例抽成；关闭后发布者获得全部销售收入。积分支付始终免抽成。','bool','1','','','',''
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name`='plugin_commission_enabled');
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_config` WHERE `name`='plugin_commission_enabled');
 
-INSERT INTO `SF_config` (`name`,`group`,`title`,`tip`,`type`,`value`,`content`,`rule`,`extend`,`tip_type`)
+INSERT INTO `QH_config` (`name`,`group`,`title`,`tip`,`type`,`value`,`content`,`rule`,`extend`,`tip_type`)
 SELECT 'plugin_commission_rate','plugin_market','插件销售平台抽成比例（%）','仅在抽成开关开启时生效，范围 0～100，最多保留两位小数；新比例仅影响后续支付成功的订单。','number','10.00','','required','min="0" max="100" step="0.01"',''
-FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `SF_config` WHERE `name`='plugin_commission_rate');
+FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `QH_config` WHERE `name`='plugin_commission_rate');

@@ -3,8 +3,8 @@
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sf_drop_index_if_exists $$
-CREATE PROCEDURE sf_drop_index_if_exists(IN p_table VARCHAR(64), IN p_index VARCHAR(64))
+DROP PROCEDURE IF EXISTS qh_drop_index_if_exists $$
+CREATE PROCEDURE qh_drop_index_if_exists(IN p_table VARCHAR(64), IN p_index VARCHAR(64))
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.STATISTICS
                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = p_table AND INDEX_NAME = p_index)
@@ -14,8 +14,8 @@ BEGIN
     END IF;
 END $$
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists $$
-CREATE PROCEDURE sf_drop_column_if_exists(IN p_table VARCHAR(64), IN p_column VARCHAR(64))
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists $$
+CREATE PROCEDURE qh_drop_column_if_exists(IN p_table VARCHAR(64), IN p_column VARCHAR(64))
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.COLUMNS
                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = p_table AND COLUMN_NAME = p_column)
@@ -27,17 +27,17 @@ END $$
 
 DELIMITER ;
 
-CALL sf_drop_index_if_exists('SF_patch', 'uk_patch');
-CALL sf_drop_index_if_exists('SF_patch', 'idx_status');
+CALL qh_drop_index_if_exists('QH_patch', 'uk_patch');
+CALL qh_drop_index_if_exists('QH_patch', 'idx_status');
 
-ALTER TABLE `SF_patch`
+ALTER TABLE `QH_patch`
   ADD UNIQUE KEY `uk_patch` (`product_id`,`patch_id`,`revision`),
   ADD KEY `idx_status` (`product_id`,`status`,`level`);
 
-CALL sf_drop_column_if_exists('SF_patch', 'theme_edition');
-CALL sf_drop_column_if_exists('SF_patch', 'theme_build');
+CALL qh_drop_column_if_exists('QH_patch', 'theme_edition');
+CALL qh_drop_column_if_exists('QH_patch', 'theme_build');
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists;
-DROP PROCEDURE IF EXISTS sf_drop_index_if_exists;
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists;
+DROP PROCEDURE IF EXISTS qh_drop_index_if_exists;
 
 SELECT '20261003_program_patch_version_binding rolled back' AS migration_result;

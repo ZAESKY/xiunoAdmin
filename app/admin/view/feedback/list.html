@@ -36,18 +36,18 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
                 </div>
             </form>
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 
-<script type="text/html" id="SF_TbState">
+<script type="text/html" id="QH_TbState">
     {{# if(d.status == 0) { }}
     <span class="layui-badge layui-badge-orange">{:t('feedback.status_pending')}</span>
     {{# } else if(d.status == 1) { }}
@@ -57,7 +57,7 @@
     {{# } }}
 </script>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-sm layui-btn-primary" lay-event="view">{:t('common.view')}</a>
 </script>
 
@@ -83,7 +83,7 @@
         }
 
         var insTb = table.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/Feedback/list")}',
             method: 'post', page: true, skin: 'line', size: 'lg',
             request: { pageName: 'current_page', limitName: 'limit' },
@@ -103,19 +103,19 @@
                     var t = (d.reply||'').replace(/<[^>]+>/g,'');
                     return t ? (t.length > 40 ? t.substring(0,40)+'...' : t) : '<span style="color:#999">{:t('feedback.no_reply_short')}</span>';
                 }},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, width: 100},
+                {field: 'status', title: '{:t("common.status")}', templet: '#QH_TbState', sort: true, width: 100},
                 {field: 'created_at', title: '{:t("feedback.submit_time")}', sort: true, width: 170},
                 {field: 'updated_at', title: '{:t("feedback.handle_time")}', sort: true, width: 170},
-                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 110}
+                {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 110}
             ]]
         });
 
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
 
-        table.on('tool(SF_Table)', function (obj) {
+        table.on('tool(QH_Table)', function (obj) {
             if (obj.event === 'view') {
                 showView(obj.data);
             }
@@ -126,7 +126,7 @@
             var statusMap = {0:'<span class="layui-badge layui-badge-orange" style="float:right;">{:t('common_ui.status_pending')}</span>',
                              1:'<span class="layui-badge layui-badge-green" style="float:right;">{:t('feedback.status_accepted')}</span>',
                              2:'<span class="layui-badge layui-badge-red" style="float:right;">{:t('feedback.status_rejected')}</span>'};
-            var replyId = 'SF_Reply_' + d.id;
+            var replyId = 'QH_Reply_' + d.id;
             var html = '<div style="padding:16px;max-height:700px;overflow:auto;">'+
                 '<div style="border:1px solid #e6e6e6;border-radius:6px;padding:14px 16px;margin-bottom:12px;background:#fafafa;">'+
                 '<div style="margin-bottom:8px;font-size:13px;color:#999;">'+
@@ -148,14 +148,14 @@
                 '<div class="layui-form-item">'+
                 '<label class="layui-form-label" style="width:80px;padding-left:0;text-align:left;">{:t("feedback.handle_status")}</label>'+
                 '<div class="layui-input-block">'+
-                '<select id="SF_FeedbackStatus">'+
+                '<select id="QH_FeedbackStatus">'+
                 '<option value="0"'+(parseInt(d.status, 10) === 0 ? ' selected' : '')+'>{:t("feedback.status_pending")}</option>'+
                 '<option value="1"'+(parseInt(d.status, 10) === 1 ? ' selected' : '')+'>{:t("feedback.status_accepted")}</option>'+
                 '<option value="2"'+(parseInt(d.status, 10) === 2 ? ' selected' : '')+'>{:t("feedback.status_rejected")}</option>'+
                 '</select></div></div></div>'+
                 '<div style="font-size:13px;color:#666;margin-bottom:6px;">{:t("feedback.reply")}</div>'+
                 '<textarea id="'+replyId+'" style="display:none;"></textarea>'+
-                '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm" id="SF_ReplyBtn">{:t("feedback.save_handle")}</button></div>'+
+                '<div style="text-align:right;margin-top:10px;"><button class="layui-btn layui-btn-sm" id="QH_ReplyBtn">{:t("feedback.save_handle")}</button></div>'+
                 '</div>';
             layer.open({
                 type: 1, title: '{:t("feedback.detail_title")}', area: ['760px', '680px'], content: html,
@@ -174,11 +174,11 @@
                             doc.head.appendChild(s);
                         }
                     }, 500);
-                    $(layero).find('#SF_ReplyBtn').on('click', function(){
+                    $(layero).find('#QH_ReplyBtn').on('click', function(){
                         var $button = $(this);
                         if ($button.prop('disabled')) return;
                         var reply = layedit.getContent(replyLayedit);
-                        var status = parseInt($(layero).find('#SF_FeedbackStatus').val(), 10);
+                        var status = parseInt($(layero).find('#QH_FeedbackStatus').val(), 10);
                         var hasImg = /<img[^>]+>/i.test(reply || '');
                         var hasText = (reply || '').replace(/<[^>]+>/g, '').trim() !== '';
                         if (!hasImg && !hasText) {
@@ -199,7 +199,7 @@
                                     layer.close(index);
                                     insTb.reload({page: {curr: 1}});
                                     notice.msg(res.msg, {icon: 1, audio:'1'});
-                                    if (parent && parent.SF_updateNotifyBadge) parent.SF_updateNotifyBadge();
+                                    if (parent && parent.QH_updateNotifyBadge) parent.QH_updateNotifyBadge();
                                 } else { notice.msg(res.msg, {icon: 2}); }
                             },
                             error: function() { notice.destroy(); notice.msg('{:t("common.server_error")}', {icon: 2}); },

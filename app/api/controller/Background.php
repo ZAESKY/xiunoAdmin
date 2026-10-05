@@ -12,7 +12,7 @@ class Background
             return Cache::get($cacheKey);
         }
         if (conf('notice_' . $type) != 1) {
-            Cache::tag('SF_Set')->set($cacheKey, '');
+            Cache::tag('QH_Set')->set($cacheKey, '');
             return '';
         }
         $info = [];
@@ -39,12 +39,12 @@ class Background
         } elseif ($method === 'alert') {
             $notice .= 'layer.alert(content,options);';
         } elseif ($method === 'black') {
-            $notice .= 'layer.open(Object.assign({type:1,title:false,closeBtn:0,area:"300px",btn:["好的了解","<div style=\"color:#4FC3F7\">不再提醒</div>"],btnAlign:"c",moveOut:true,moveType:0,btn2:function(){setCookie("gonggao","SF2129876388",1);},content:"<div style=\"background-color:#393D49;color:#eeeeee;padding:0.5em\"><h2 style=\"text-align:center;padding-top:0.5em\">平台公告</h2><hr>"+content+"</div>"},options));';
+            $notice .= 'layer.open(Object.assign({type:1,title:false,closeBtn:0,area:"300px",btn:["好的了解","<div style=\"color:#4FC3F7\">不再提醒</div>"],btnAlign:"c",moveOut:true,moveType:0,btn2:function(){setCookie("gonggao","QH2129876388",1);},content:"<div style=\"background-color:#393D49;color:#eeeeee;padding:0.5em\"><h2 style=\"text-align:center;padding-top:0.5em\">平台公告</h2><hr>"+content+"</div>"},options));';
         } else {
             $notice .= 'layer.open(Object.assign({type:1,title:false,area:["420px","auto"],content:\'<div class="layui-card layui-card-body">\'+content+\'</div>\'},options));';
         }
         $notice .= '},500);});});}</script>';
-        Cache::tag('SF_Set')->set($cacheKey, $notice);
+        Cache::tag('QH_Set')->set($cacheKey, $notice);
         return $notice;
     }
     public function css(){
@@ -71,7 +71,7 @@ class Background
                     $css = '';
                     break;
             }
-            Cache::tag('SF_Set')->set('css', $css);
+            Cache::tag('QH_Set')->set('css', $css);
             return $css;
         }
     }
@@ -120,9 +120,9 @@ class Background
                     $site_background = '';
                     break;
             }
-            $site_background = sf_safe_url($site_background, true);
+            $site_background = qh_safe_url($site_background, true);
             $site_background = '<style>body{ background:#ecedf0 url("' . $site_background . '") fixed;' . $repeat . '}</style>';
-            Cache::tag('SF_Set')->set('image', $site_background);
+            Cache::tag('QH_Set')->set('image', $site_background);
             return $site_background;
         }
     }
@@ -137,7 +137,7 @@ class Background
                 case 2:
                 case 4:
                 case 5:
-                    $music = '<script src="https://lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script><script type="text/javascript" src="/Assets/js/SF_Music.js"></script>';
+                    $music = '<script src="https://lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script><script type="text/javascript" src="/Assets/js/QH_Music.js"></script>';
                     break;
                 case 3:
                     $music = $this->baiduSpeechSounds(conf('background_text'), conf('background_text_per'), conf('background_text_spd'), 1);
@@ -146,7 +146,7 @@ class Background
                     $music = '';
                     break;
             }
-            Cache::tag('SF_Set')->set('music', $music);
+            Cache::tag('QH_Set')->set('music', $music);
             return $music;
         }
     }
@@ -169,7 +169,7 @@ class Background
                     break;
             }
             $Speech_Sounds = $star . 'https://fanyi.sogou.com/reventondc/synthesis?text=' . $text . '&speed=' . $spd . '&lang=zh-CHS&from=translateweb&speaker=' . $per . $end;
-            Cache::tag('SF_Set')->set('baiduSpeechSounds', $Speech_Sounds);
+            Cache::tag('QH_Set')->set('baiduSpeechSounds', $Speech_Sounds);
             return $Speech_Sounds;
         }
     }

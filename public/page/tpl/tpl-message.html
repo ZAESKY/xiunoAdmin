@@ -1,16 +1,16 @@
-<div class="layui-card sf-message-card">
+<div class="layui-card qh-message-card">
     <div class="layui-tab layui-tab-brief">
         <ul class="layui-tab-title">
-            <li class="layui-this"><span data-i18n="feedback.notifications"></span> (<span id="SF_NotifyCount">0</span>)</li>
+            <li class="layui-this"><span data-i18n="feedback.notifications"></span> (<span id="QH_NotifyCount">0</span>)</li>
         </ul>
         <div class="layui-tab-content">
             <div class="layui-tab-item layui-show">
-                <div class="message-list" id="SF_NotifyList"></div>
-                <div class="message-list-empty" id="SF_NotifyEmpty">
+                <div class="message-list" id="QH_NotifyList"></div>
+                <div class="message-list-empty" id="QH_NotifyEmpty">
                     <i class="layui-icon layui-icon-notice"></i>
                     <div data-i18n="feedback.no_notifications"></div>
                 </div>
-                <a id="messageClearBtn1" class="message-btn-clear" onclick="SF_Notification.markAllRead()" data-i18n="feedback.mark_all_read"></a>
+                <a id="messageClearBtn1" class="message-btn-clear" onclick="QH_Notification.markAllRead()" data-i18n="feedback.mark_all_read"></a>
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@
     }
 
     function setBadge(count) {
-        var dots = parentDoc.querySelectorAll('.sf-notify-badge');
+        var dots = parentDoc.querySelectorAll('.qh-notify-badge');
         dots.forEach(function(dot) {
             dot.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
             dot.style.display = count > 0 ? 'inline-block' : 'none';
@@ -163,11 +163,11 @@
         node.textContent = t(node.getAttribute('data-i18n'));
     });
 
-    window.SF_Notification = {
+    window.QH_Notification = {
         loadList: function() {
-            var listEl = document.getElementById('SF_NotifyList');
-            var emptyEl = document.getElementById('SF_NotifyEmpty');
-            var countEl = document.getElementById('SF_NotifyCount');
+            var listEl = document.getElementById('QH_NotifyList');
+            var emptyEl = document.getElementById('QH_NotifyEmpty');
+            var countEl = document.getElementById('QH_NotifyCount');
 
             request('/Feedback/notificationList.html', '', function(res) {
                 var items = (res.code === 0 && res.data && Array.isArray(res.data.data)) ? res.data.data : [];
@@ -176,7 +176,7 @@
                     items.forEach(function(item) {
                         var link = item.link || '';
                         var type = item.type || '';
-                        html += '<a class="message-list-item" href="javascript:;" data-id="' + encodeURIComponent(item.id) + '" data-link="' + escapeHtml(link) + '" data-type="' + escapeHtml(type) + '" onclick="SF_Notification.markRead(' + parseInt(item.id, 10) + ', true, this.getAttribute(\'data-link\'), this.getAttribute(\'data-type\'))">';
+                        html += '<a class="message-list-item" href="javascript:;" data-id="' + encodeURIComponent(item.id) + '" data-link="' + escapeHtml(link) + '" data-type="' + escapeHtml(type) + '" onclick="QH_Notification.markRead(' + parseInt(item.id, 10) + ', true, this.getAttribute(\'data-link\'), this.getAttribute(\'data-type\'))">';
                         var iconClass = 'layui-icon-speaker';
                         var iconColor = '#2d8cf0';
                         switch(item.type) {
@@ -208,8 +208,8 @@
         },
         markRead: function(id, openAfterRead, link, type) {
             request('/Feedback/notificationRead.html', 'id=' + encodeURIComponent(id), function() {
-                SF_Notification.loadList();
-                SF_Notification.updateBadge();
+                QH_Notification.loadList();
+                QH_Notification.updateBadge();
                 if (openAfterRead) {
                     openFeedbackPage(link, type);
                 }
@@ -217,8 +217,8 @@
         },
         markAllRead: function() {
             request('/Feedback/notificationReadAll.html', '', function() {
-                SF_Notification.loadList();
-                SF_Notification.updateBadge();
+                QH_Notification.loadList();
+                QH_Notification.updateBadge();
             });
         },
         updateBadge: function() {
@@ -229,21 +229,21 @@
         }
     };
 
-    SF_Notification.loadList();
-    SF_Notification.updateBadge();
+    QH_Notification.loadList();
+    QH_Notification.updateBadge();
 })();
 </script>
 
 <style>
-    .sf-message-card {
+    .qh-message-card {
         box-shadow: none;
         border: none;
         height: 100%;
     }
-    .sf-message-card .layui-tab-title {
+    .qh-message-card .layui-tab-title {
         text-align: center;
     }
-    .sf-message-card .layui-tab-content {
+    .qh-message-card .layui-tab-content {
         padding: 0;
     }
     .message-list {

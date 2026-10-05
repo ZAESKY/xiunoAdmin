@@ -369,16 +369,16 @@ class CodePay extends PayBackend
 
             $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
             $paidAmount = $get['price'] ?? $get['money'] ?? null;
-            if (!$srow || $paidAmount === null || sf_money_to_cents($srow['money']) !== sf_money_to_cents($paidAmount)) {
+            if (!$srow || $paidAmount === null || qh_money_to_cents($srow['money']) !== qh_money_to_cents($paidAmount)) {
                 return $this->render('public/error', ['msg' => t('pay.amount_verify_failed'),'time' => 5, 'url' => '/']);
             }
             if($srow['status']==0){
                 if (!$this->completeOrder($srow, (string)$trade_no)) {
                     return $this->render('public/error', ['msg' => t('pay.credit_failed'),'time' => 5, 'url' => '/']);
                 }
-                return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => sf_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
+                return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => qh_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
             }else{
-                return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => sf_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
+                return $this->render('public/success', ['msg' => t('pay.purchase_success_order', ['order' => qh_plain_text($out_trade_no, 64)]),'time' => 5, 'url' => '/']);
             }
         }
     }
@@ -415,7 +415,7 @@ class CodePay extends PayBackend
 
             $srow = Db::name('pay')->where('trade_no', $out_trade_no)->find();
             $paidAmount = $post['price'] ?? $post['money'] ?? null;
-            if (!$srow || $paidAmount === null || sf_money_to_cents($srow['money']) !== sf_money_to_cents($paidAmount)) {
+            if (!$srow || $paidAmount === null || qh_money_to_cents($srow['money']) !== qh_money_to_cents($paidAmount)) {
                 exit('fail');
             }
             if($srow['status']==0) {

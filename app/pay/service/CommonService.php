@@ -36,11 +36,11 @@ class CommonService extends BaseService
             }
 
             $userId = (int)($srow['userid'] ?? 0);
-            $rechargeAmount = sf_money_format($srow['money'] ?? 0);
+            $rechargeAmount = qh_money_format($srow['money'] ?? 0);
             if (!empty($srow['input'])) {
                 $inputData = json_decode($srow['input'], true);
                 if (is_array($inputData) && isset($inputData['original_money'])) {
-                    $rechargeAmount = sf_money_format($inputData['original_money']);
+                    $rechargeAmount = qh_money_format($inputData['original_money']);
                 }
             }
             if ($userId <= 0 || $rechargeAmount <= 0) {
@@ -126,9 +126,9 @@ class CommonService extends BaseService
         }
 
         // 5. 计算返利金额（基于充值面额，避免在折扣后的实付金额上二次折算）
-        $paidAmount = sf_money_format($payRow['money']);
+        $paidAmount = qh_money_format($payRow['money']);
         $rebateBaseAmount = $this->resolveRebateBaseAmount($payRow);
-        $rebateAmount = sf_money_apply_rate($rebateBaseAmount, $rebateRate);
+        $rebateAmount = qh_money_apply_rate($rebateBaseAmount, $rebateRate);
         if ($rebateAmount <= 0) {
             return;
         }
@@ -183,7 +183,7 @@ class CommonService extends BaseService
                 'status' => $status,
                 'settle_at' => $settleAt,
                 'settled_at' => null,
-                'risk_reason' => sf_plain_text($riskReason, 255),
+                'risk_reason' => qh_plain_text($riskReason, 255),
                 'created_at' => datetime(),
                 'updated_at' => datetime(),
             ]);
@@ -249,18 +249,18 @@ class CommonService extends BaseService
      */
     private function resolveRebateBaseAmount(array $payRow): string
     {
-        $paidAmount = sf_money_format($payRow['money'] ?? 0);
+        $paidAmount = qh_money_format($payRow['money'] ?? 0);
         $inputData = json_decode((string)($payRow['input'] ?? ''), true);
         if (!is_array($inputData) || !array_key_exists('original_money', $inputData)) {
             return $paidAmount;
         }
 
         try {
-            $originalAmount = sf_money_format($inputData['original_money']);
+            $originalAmount = qh_money_format($inputData['original_money']);
         } catch (\InvalidArgumentException $e) {
             return $paidAmount;
         }
 
-        return sf_money_to_cents($originalAmount) > 0 ? $originalAmount : $paidAmount;
+        return qh_money_to_cents($originalAmount) > 0 ? $originalAmount : $paidAmount;
     }
 }

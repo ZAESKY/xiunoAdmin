@@ -1,4 +1,4 @@
-# SF 授权系统 · 新环境部署手册
+# QH 授权系统 · 新环境部署手册
 
 适用场景:把本地项目部署到新服务器的新域名,并把现有生产数据库迁移过去,
 作为**平行验证环境**先跑通,确认无误后再切换。
@@ -41,7 +41,7 @@ bash preflight.sh
 bash deploy/package.sh
 ```
 
-会生成 `deploy/sf_admin_<时间戳>.tar.gz`,并打印 SHA256。
+会生成 `deploy/qh_admin_<时间戳>.tar.gz`,并打印 SHA256。
 
 **包里已排除**:`.git`(104MB 历史)、`.env`(真实凭据)、`runtime/`、`tests/`、
 `phpMyAdmin4.8.5/`(该版本线有已知高危漏洞,**绝不应部署到公网**)、根目录历史 `*.sql`。
@@ -49,7 +49,7 @@ bash deploy/package.sh
 上传后在服务器上核对哈希:
 
 ```bash
-sha256sum sf_admin_*.tar.gz     # 与本地输出一致才继续
+sha256sum qh_admin_*.tar.gz     # 与本地输出一致才继续
 ```
 
 ---
@@ -80,7 +80,7 @@ sha256sum sf_admin_*.tar.gz     # 与本地输出一致才继续
 
 ```bash
 cd /www/wwwroot/你的新域名
-tar -xzf ~/sf_admin_*.tar.gz
+tar -xzf ~/qh_admin_*.tar.gz
 ls public/index.php    # 应存在
 ```
 
@@ -133,9 +133,9 @@ location ~ /\.(env|git) {
 ```bash
 mysqldump -u<用户> -p --single-transaction --quick \
   --routines --triggers --events --default-character-set=utf8mb4 \
-  <旧库名> > sf_prod_$(date +%Y%m%d).sql
+  <旧库名> > qh_prod_$(date +%Y%m%d).sql
 
-gzip sf_prod_*.sql
+gzip qh_prod_*.sql
 ```
 
 `--single-transaction` 保证导出期间不锁表,旧站点可继续正常服务。
@@ -145,7 +145,7 @@ gzip sf_prod_*.sql
 宝塔 → **数据库 → 添加数据库**(记下用户名密码),然后:
 
 ```bash
-gunzip -c sf_prod_*.sql.gz | mysql -u<新用户> -p <新库名>
+gunzip -c qh_prod_*.sql.gz | mysql -u<新用户> -p <新库名>
 ```
 
 ### 4.3 核对导入完整性
@@ -153,9 +153,9 @@ gunzip -c sf_prod_*.sql.gz | mysql -u<新用户> -p <新库名>
 ```bash
 mysql -u<新用户> -p <新库名> -e "
   SELECT COUNT(*) AS tables FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE();
-  SELECT COUNT(*) AS auth_rows FROM SF_auth;
-  SELECT COUNT(*) AS app_rows FROM SF_app;
-  SELECT COUNT(*) AS user_rows FROM SF_user;"
+  SELECT COUNT(*) AS auth_rows FROM QH_auth;
+  SELECT COUNT(*) AS app_rows FROM QH_app;
+  SELECT COUNT(*) AS user_rows FROM QH_user;"
 ```
 
 **逐个与旧库的数字比对,完全一致才继续。**
@@ -192,8 +192,8 @@ domain_img_url = https://你的新域名      # 不带末尾斜杠
 ```bash
 PHP=/www/server/php/82/bin/php      # 用 preflight 打印的路径
 
-$PHP think sf:keygen license        # 输出三行，贴进 .env
-$PHP think sf:keygen release        # 输出三行，贴进 .env
+$PHP think qh:keygen license        # 输出三行，贴进 .env
+$PHP think qh:keygen release        # 输出三行，贴进 .env
 
 $PHP -r 'echo "security_pepper = ".bin2hex(random_bytes(32))."\n";'
 $PHP -r 'echo "license_secret_key = ".bin2hex(random_bytes(32))."\n";'
@@ -205,7 +205,7 @@ $PHP -r 'echo "license_secret_key = ".bin2hex(random_bytes(32))."\n";'
 > 改动会让所有已回填的 `authcode_hash` 全部失效。
 
 > **`release_sign_secret_key`**:严格来说不该放在授权服务器上。
-> 更安全的做法是只在本地/离线机保留,发布时在本地执行 `sf:sign` 后把结果导入线上。
+> 更安全的做法是只在本地/离线机保留,发布时在本地执行 `qh:sign` 后把结果导入线上。
 > 初期为了简便可以先放服务器,但要记在待办里。
 
 ### 5.3 目录权限
@@ -226,7 +226,7 @@ chmod 600 .env
 ### 5.4 保留安装锁
 
 ```bash
-ls app/install/SF_Auth.Lock     # 必须存在
+ls app/install/QH_Auth.Lock     # 必须存在
 ```
 
 不存在的话系统会认为未安装并跳转到安装向导。部署包里已包含,正常不用管。
@@ -244,17 +244,17 @@ bash database/migrate.sh run        # 正式执行（自动先备份）
 然后回填授权码哈希:
 
 ```bash
-$PHP think sf:authcode-backfill --dry-run
-$PHP think sf:authcode-backfill
+$PHP think qh:authcode-backfill --dry-run
+$PHP think qh:authcode-backfill
 ```
 
 ### 更新数据库里的域名相关配置
 
 ```sql
-UPDATE `SF_config` SET `value` = 'https://你的新域名' WHERE `name` = 'download_base_url';
-UPDATE `SF_config` SET `value` = '1'                  WHERE `name` = 'force_https_download';
+UPDATE `QH_config` SET `value` = 'https://你的新域名' WHERE `name` = 'download_base_url';
+UPDATE `QH_config` SET `value` = '1'                  WHERE `name` = 'force_https_download';
 -- 若启用了 OSS
-UPDATE `SF_config` SET `value` = 'https://你的CDN域名' WHERE `name` = 'oss_public_base_url';
+UPDATE `QH_config` SET `value` = 'https://你的CDN域名' WHERE `name` = 'oss_public_base_url';
 ```
 
 ---
@@ -287,7 +287,7 @@ chown -R www:www public/upload
 **授权系统**
 - [ ] 后台能看到用户、授权、应用列表,数据与旧环境一致
 - [ ] `bash database/migrate.sh verify` 全绿
-- [ ] `SF_auth` 与 `SF_auth_legacy` 行数一致
+- [ ] `QH_auth` 与 `QH_auth_legacy` 行数一致
 - [ ] 上传/下载附件正常
 
 **接口**
@@ -301,7 +301,7 @@ curl -s "https://新域名/api.php/Auth/checkAuth" | head -c 200
 
 **签名管线**
 ```bash
-$PHP think sf:sign release /tmp/test.zip --product=zaesky_theme_light \
+$PHP think qh:sign release /tmp/test.zip --product=zaesky_theme_light \
   --build=999999 --edition=test --dry-run
 ```
 应输出"清单构建并验签通过"。
@@ -319,8 +319,8 @@ const API_BASE = 'https://你的新域名';     // 当前是 https://www.noteweb
 public static function publicKeys()
 {
     return array(
-        'license-2026xxxx-xxxxxxxx' => '刚才 sf:keygen license 输出的公钥',
-        'release-2026xxxx-xxxxxxxx' => '刚才 sf:keygen release 输出的公钥',
+        'license-2026xxxx-xxxxxxxx' => '刚才 qh:keygen license 输出的公钥',
+        'release-2026xxxx-xxxxxxxx' => '刚才 qh:keygen release 输出的公钥',
     );
 }
 ```

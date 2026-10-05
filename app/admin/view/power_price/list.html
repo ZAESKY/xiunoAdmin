@@ -23,7 +23,7 @@
 <!--                        </div>-->
 <!--                    </div>-->
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
@@ -41,11 +41,11 @@
             </form>
             <!-- 数据表格 -->
 
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
-<script type="text/html" id="SF_PowerBar">
+<script type="text/html" id="QH_PowerBar">
 <a lay-event="setPowerTop" lay-tips="{:t('price_ui.move_top')}" lay-direction="4" lay-bg="#4facfe">
     <img src="{__IMG__}top.svg" style="width: 25px;">
 </a>
@@ -60,30 +60,30 @@
 </a>
 </script>
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit">{:t('common.edit')}</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
-<script type="text/html" id="SF_TbState">
-    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_TbState">
+    <input type="checkbox" lay-filter="QH_TbStateCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_TbAddAuthPower">
-    <input type="checkbox" lay-filter="SF_TbAddAuthPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addauth_power==1?'checked':''}} style="display: none;"/>
+<script type="text/html" id="QH_TbAddAuthPower">
+    <input type="checkbox" lay-filter="QH_TbAddAuthPowerCk" value="{{d.id}}" lay-skin="switch" {{d.addauth_power==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_TbAddUserPower">
-    <input type="checkbox" lay-filter="SF_TbAddUserPowerCk" value="{{d.id}}" lay-skin="switch" {{d.adduser_power==1?'checked':''}} style="display: none;"/>
+<script type="text/html" id="QH_TbAddUserPower">
+    <input type="checkbox" lay-filter="QH_TbAddUserPowerCk" value="{{d.id}}" lay-skin="switch" {{d.adduser_power==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_TbDefaultPower">
-    <input type="checkbox" lay-filter="SF_TbDefaultPowerCk" value="{{d.id}}" lay-skin="switch" {{d.default_power==1?'checked':''}} style="display: none;"/>
+<script type="text/html" id="QH_TbDefaultPower">
+    <input type="checkbox" lay-filter="QH_TbDefaultPowerCk" value="{{d.id}}" lay-skin="switch" {{d.default_power==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_Tbid">
-    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+<script type="text/html" id="QH_Tbid">
+    <span id="QH_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-qh-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
 </script>
 <!-- 表单弹窗 -->
-<script type="text/html" id="SF_EditDialog">
-    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+<script type="text/html" id="QH_EditDialog">
+    <form id="QH_EditForm" lay-filter="QH_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <div class="layui-form-item">
             <label class="layui-form-label layui-form-required">{:t('price_ui.template_label')}</label>
@@ -171,7 +171,7 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('common.save')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
@@ -188,7 +188,7 @@
         var treeTable = layui.treeTable;
         var util = layui.util;
         var insTb = treeTable.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/PowerPrice/list")}',
             method: 'post',
             skin: 'line',
@@ -206,7 +206,7 @@
             },
             cols: [[
                 {type: 'checkbox', fixed: true},
-                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'id', title: 'ID', templet: '#QH_Tbid', sort: true, width: 80, fixed: true},
                 {field: 'templateName', title: '{:t("price_ui.owned_template")}', sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+d.templateName+'</span>';
                     }},
@@ -235,8 +235,8 @@
                     return addauth + adduser;
                     }, sort: true, minWidth: 352
                 },
-                {field: 'addauth_power', title: '{:t("auth_portal.add_auth")}', templet: '#SF_TbAddAuthPower', sort: true, minWidth: 110},
-                {field: 'adduser_power', title: '{:t("power_price.add_subordinate")}', templet: '#SF_TbAddUserPower', sort: true, minWidth: 110},
+                {field: 'addauth_power', title: '{:t("auth_portal.add_auth")}', templet: '#QH_TbAddAuthPower', sort: true, minWidth: 110},
+                {field: 'adduser_power', title: '{:t("power_price.add_subordinate")}', templet: '#QH_TbAddUserPower', sort: true, minWidth: 110},
                 {field: 'discount_code_enabled', title: '{:t("recharge.discount_code")}', templet: function(d){
                     return d.discount_code_enabled==1
                         ? '<span class="layui-badge layui-badge-green">{:t('common.open')}</span>'
@@ -249,10 +249,10 @@
                 }, sort: true, minWidth: 130},
                 {field: 'introduce', title: '{:t("power_price.introduction")}', sort: true, minWidth: 120},
                 {field: 'money', title: '{:t("common_ui.power_price")}', sort: true, minWidth: 100},
-                {field: 'default_power', title: '{:t("user_home.default_permission")}', templet: '#SF_TbDefaultPower', sort: true, minWidth: 100},
+                {field: 'default_power', title: '{:t("user_home.default_permission")}', templet: '#QH_TbDefaultPower', sort: true, minWidth: 100},
                 {field: 'addtime', title: '{:t("common.add_time")}', sort: true, minWidth: 200},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, minWidth: 100},
-                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 200, minWidth: 200}
+                {field: 'status', title: '{:t("common.status")}', templet: '#QH_TbState', sort: true, minWidth: 100},
+                {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 200, minWidth: 200}
             ]]
         });
 
@@ -291,7 +291,7 @@
                     url: '{:url("/PowerPrice/getPowerList")}',
                     data: {
                         "tid": data.value,
-                        "exclude_id": $("#SF_EditForm input[name='id']").val() || 0,
+                        "exclude_id": $("#QH_EditForm input[name='id']").val() || 0,
                         "include_disabled": 1
                     },
                     dataType: "json",
@@ -327,7 +327,7 @@
         });
 
         /* 表格搜索 */
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
@@ -344,7 +344,7 @@
         insTb.reload({where: {tid:{$tid}}});
         {/if}
         /* 表格工具条点击事件 */
-        treeTable.on('tool(SF_Table)', function (obj) {
+        treeTable.on('tool(QH_Table)', function (obj) {
             if (obj.event === 'edit') { // 修改
                 showEditModel(obj.data);
             } else if (obj.event === 'del') { // 删除
@@ -353,7 +353,7 @@
         });
 
         /* 表格头工具栏点击事件 */
-        treeTable.on('toolbar(SF_Table)', function (obj) {
+        treeTable.on('toolbar(QH_Table)', function (obj) {
             if (obj.event === 'add') { // 添加
                 showEditModel();
             } else if (obj.event === 'del') { // 删除
@@ -374,7 +374,7 @@
             admin.popupRight({
                 type: 1,
                 title: (mData ? '{:t("common.edit")}' : '{:t("common.add")}') + '{:t("common_ui.power_type")}',
-                content: $('#SF_EditDialog').html(),
+                content: $('#QH_EditDialog').html(),
                 success: function (layero, dIndex) {
                     notice.msg('{:t("common.loading_text")}', {icon: 4, close: true});
                     $.ajax({
@@ -422,7 +422,7 @@
                                     notice.msg(data.msg, {icon: 2, audio:'1'});
                                 }
                                 form.render();
-                                form.val('SF_EditForm', mData);
+                                form.val('QH_EditForm', mData);
                             },
                             error: function() {
                                 notice.destroy();
@@ -435,7 +435,7 @@
                     }
 
                     // 表单提交事件
-                    form.on('submit(SF_EditSubmit)', function (data) {
+                    form.on('submit(QH_EditSubmit)', function (data) {
                         notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                         $.ajax({
                             type: "POST",
@@ -496,7 +496,7 @@
         }
 
         /* 修改用户状态 */
-        form.on('switch(SF_TbStateCk)', function (obj) {
+        form.on('switch(QH_TbStateCk)', function (obj) {
             notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
@@ -520,7 +520,7 @@
             });
         });
 
-        form.on('switch(SF_TbAddAuthPowerCk)', function (obj) {
+        form.on('switch(QH_TbAddAuthPowerCk)', function (obj) {
             notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
@@ -546,7 +546,7 @@
 
 
 
-        form.on('switch(SF_TbAddUserPowerCk)', function (obj) {
+        form.on('switch(QH_TbAddUserPowerCk)', function (obj) {
             notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",
@@ -570,7 +570,7 @@
             });
         });
 
-        form.on('switch(SF_TbDefaultPowerCk)', function (obj) {
+        form.on('switch(QH_TbDefaultPowerCk)', function (obj) {
             notice.msg('{:t("common.loading")}', {icon: 4, close: true});
             $.ajax({
                 type: "POST",

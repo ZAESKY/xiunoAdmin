@@ -16,16 +16,16 @@ class ClearData extends Backend
             $type = $this->request->post('type');
             switch ($type){
                 case 'menu':
-                    Cache::tag('SF_Menu')->clear();
+                    Cache::tag('QH_Menu')->clear();
                     break;
                 case 'app':
-                    Cache::tag('SF_App')->clear();
+                    Cache::tag('QH_App')->clear();
                     break;
                 case 'set':
-                    Cache::tag('SF_Set')->clear();
+                    Cache::tag('QH_Set')->clear();
                     break;
                  case 'version':
-                    Cache::tag('SF_Version')->clear();
+                    Cache::tag('QH_Version')->clear();
                     break;
                 case 'all':
                     Cache::clear();

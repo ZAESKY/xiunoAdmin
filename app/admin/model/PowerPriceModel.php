@@ -163,7 +163,7 @@ class PowerPriceModel extends BaseModel
             return message($e->getError() ,false);
         }
         try {
-            $money = sf_money_format($money);
+            $money = qh_money_format($money);
         } catch (\InvalidArgumentException $e) {
             return message('validation.amount_format', false);
         }

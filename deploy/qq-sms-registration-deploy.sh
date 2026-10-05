@@ -15,7 +15,7 @@ FILES_CHANGED=0
 
 FILES=(
   .env.example
-  app/SF_Auth.sql
+  app/QH_Auth.sql
   app/admin/config/site.php
   app/admin/controller/Set.php
   app/admin/model/UserModel.php
@@ -117,8 +117,8 @@ MYSQL_BIN="$(command -v mysql || true)"; MYSQL_BIN="${MYSQL_BIN:-/www/server/mys
 DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/mysql/bin/mysqldump}"
 db_q() { "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "$1"; }
 
-[ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_social_identity'")" = 1 ]
-[ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user_social_identity'")" = 1 ]
+[ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_social_identity'")" = 1 ]
+[ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user_social_identity'")" = 1 ]
 
 echo "[2/8] 备份线上文件和数据库"
 [ ! -e "$BACKUP_DIR" ] || { echo "备份目录已存在" >&2; exit 73; }
@@ -138,7 +138,7 @@ done
   --routines --triggers --events --no-tablespaces --default-character-set=utf8mb4 \
   "$DB_NAME" > "$BACKUP_DIR/database.sql"
 [ "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024 ]
-grep -q 'SF_user' "$BACKUP_DIR/database.sql"
+grep -q 'QH_user' "$BACKUP_DIR/database.sql"
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 sha256sum "$BACKUP_DIR/database.sql" > "$BACKUP_DIR/database.sql.sha256"
 chmod 600 "$BACKUP_DIR/database.sql" "$BACKUP_DIR/database.sql.sha256"
@@ -180,14 +180,14 @@ done
 "$PHP_BIN" think clear
 
 echo "[6/8] 验证数据库结构"
-for table in SF_user_phone_identity SF_sms_audit; do
+for table in QH_user_phone_identity QH_sms_audit; do
   [ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$table'")" = 1 ]
 done
 for column in phone_verified_at phone_verified_source; do
-  [ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user' AND COLUMN_NAME='$column'")" = 1 ]
+  [ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user' AND COLUMN_NAME='$column'")" = 1 ]
 done
-[ "$(db_q "SELECT COUNT(*) FROM SF_config WHERE name LIKE 'sms_%'")" -ge 15 ]
-[ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_sms_audit' AND COLUMN_NAME='template_code'")" = 1 ]
+[ "$(db_q "SELECT COUNT(*) FROM QH_config WHERE name LIKE 'sms_%'")" -ge 15 ]
+[ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_sms_audit' AND COLUMN_NAME='template_code'")" = 1 ]
 
 echo "[7/8] 检查注册页和接口静态断言"
 # 生产 Nginx 使用公网 IP 白名单，服务器回环访问公网域名会按预期得到 403。

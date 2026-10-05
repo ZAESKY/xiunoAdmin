@@ -70,7 +70,7 @@ class ApiErrorService
                 $url = ' | ' . request()->method() . ' ' . request()->baseUrl();
             } catch (\Throwable $ignore) {
             }
-            Log::error(sprintf('[SF-API][%s] %s%s%s%s', $traceId, $message, $location, $url, $extra));
+            Log::error(sprintf('[QH-API][%s] %s%s%s%s', $traceId, $message, $location, $url, $extra));
         } catch (\Throwable $ignore) {
             // 日志通道故障时静默，保证接口仍能返回
         }

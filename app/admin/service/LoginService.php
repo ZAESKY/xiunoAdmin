@@ -34,7 +34,7 @@ class LoginService extends BaseService
     public function login()
     {
         // 参数
-        if (!hash_equals((string)conf('SF_LOGIN_KEY'), (string)session('SF_LOGIN_KEY'))) {
+        if (!hash_equals((string)conf('QH_LOGIN_KEY'), (string)session('QH_LOGIN_KEY'))) {
             return message(t('login.token_empty'), false);
         }
         $param = request()->param();
@@ -96,7 +96,7 @@ class LoginService extends BaseService
         }
         // 密码校验：兼容旧生产的明文/双 MD5，并在成功登录后升级为现代哈希。
         $needsRehash = false;
-        if (!sf_password_verify($password, $info['password'], $needsRehash)) {
+        if (!qh_password_verify($password, $info['password'], $needsRehash)) {
             $this->recordLoginFailure($rateKeys);
             ActionLog::setContent("账号密码错误|用户名:".$username."|IP:".get_client_ip());
             return message(t('login.password_incorrect'), false, "password");
@@ -109,7 +109,7 @@ class LoginService extends BaseService
         }
 
         if ($needsRehash) {
-            $newHash = sf_password_make($password);
+            $newHash = qh_password_make($password);
             $this->model->where('id', $info['id'])->update(['password' => $newHash]);
             $info['password'] = $newHash;
         }
@@ -117,7 +117,7 @@ class LoginService extends BaseService
         // 本地SESSION存储登录信息
         Session::regenerate(true);
         session('adminId', $info['id'], 86400);
-        session('adminSign', data_auth_sign($info['username'].$info['password'].sf_password_hash()), 86400);
+        session('adminSign', data_auth_sign($info['username'].$info['password'].qh_password_hash()), 86400);
         Cache::delete($rateKeys['account']);
 
         ActionLog::setContent("登录成功|用户名:".$username."|IP:".get_client_ip());
@@ -138,7 +138,7 @@ class LoginService extends BaseService
             return message(t('validation.not_empty'), false);
         }
         // 使用状态校验
-        if (empty($param['SF_LOGIN_KEY'])) {
+        if (empty($param['QH_LOGIN_KEY'])) {
             return message(t('login.token_empty'), false);
         }
 
@@ -147,14 +147,14 @@ class LoginService extends BaseService
             return message('login.token_too_many_attempts', false);
         }
 
-        if (!hash_equals((string)conf('SF_LOGIN_KEY'), (string)$param['SF_LOGIN_KEY'])) {
+        if (!hash_equals((string)conf('QH_LOGIN_KEY'), (string)$param['QH_LOGIN_KEY'])) {
             Cache::set($rateKey, (int)Cache::get($rateKey, 0) + 1, 600);
             ActionLog::setContent("口令输入错误|IP:".get_client_ip());
             return message(t('login.token_incorrect'), false);
         }
         // 本地SESSION存储登录口令信息
         Session::regenerate(true);
-        session('SF_LOGIN_KEY', conf('SF_LOGIN_KEY'));
+        session('QH_LOGIN_KEY', conf('QH_LOGIN_KEY'));
         Cache::delete($rateKey);
         ActionLog::setContent("口令输入正确|IP:".get_client_ip());
         return message(t('login.verify_success'), true);

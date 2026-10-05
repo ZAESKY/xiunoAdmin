@@ -20,7 +20,7 @@
         #formBasForm .layui-form-item {
             margin-bottom: 25px;
         }
-        .sf-avatar {
+        .qh-avatar {
             display: inline-block;
             text-align: center;
             background: #ccc;
@@ -34,16 +34,16 @@
             line-height: 32px;
             border-radius: 50%;
         }
-        .sf-avatar.sf-avatar-icon {
+        .qh-avatar.qh-avatar-icon {
             font-size: 12px;
         }
-        .sf-avatar-small {
+        .qh-avatar-small {
             width: 24px;
             height: 24px;
             line-height: 24px;
             border-radius: 50%;
         }
-        .sf-avatar-small.ivu-avatar-icon {
+        .qh-avatar-small.ivu-avatar-icon {
             font-size: 12px;
         }
         .images {
@@ -58,25 +58,25 @@
         <div class="layui-col-md6 layui-col-md-offset3">
             <div class="layui-card layui-hide" id="loading" style="opacity: 0.95">
                 <div class="layui-card-body images" style="color:black;background-image: url('https://bing.ioliu.cn/v1/rand?h=70');">
-                    <img style="border-radius:50%;width:50px;height:50px;"  src="{__IMG__}logo.png" alt="SF">
+                    <img style="border-radius:50%;width:50px;height:50px;"  src="{__IMG__}logo.png" alt="QH">
                     <b style="color:#fff;font-size: 18px">{:t('login.token_tip')}</b>
                     <span id="tip" class="pull-right">
-                        <i class="sf-avatar sf-avatar-icon sf-avatar-small layui-icon layui-icon-help" style="position: relative;top: 12px;color: rgb(255, 169, 64); background-color: rgb(255, 247, 230);"></i>
+                        <i class="qh-avatar qh-avatar-icon qh-avatar-small layui-icon layui-icon-help" style="position: relative;top: 12px;color: rgb(255, 169, 64); background-color: rgb(255, 247, 230);"></i>
                     </span>
                 </div>
                 <div class="layui-card-body">
                     <form class="layui-form layui-form-pane" id="formBasForm" lay-filter="formBasForm">
                         <div class="layui-form-item">
-                            <blockquote class="layui-elem-quote-sf-danger">{:t('login.no_access')} {:t('login.ip_recorded', ['ip' => get_client_ip()])}
+                            <blockquote class="layui-elem-quote-qh-danger">{:t('login.no_access')} {:t('login.ip_recorded', ['ip' => get_client_ip()])}
                             </blockquote>
-                            <blockquote class="layui-elem-quote-sf-warning">
+                            <blockquote class="layui-elem-quote-qh-warning">
                                 {:t('login.token_access_tip', ['domain' => DOMAIN])}
                             </blockquote>
                         </div>
                         <div class="layui-form-item">
                             <label class="layui-form-label">{:t('login.token_label')}</label>
                             <div class="layui-input-block">
-                                <input type="password" name="SF_LOGIN_KEY" class="layui-input"  placeholder="{:t('login.token_placeholder')}" required/>
+                                <input type="password" name="QH_LOGIN_KEY" class="layui-input"  placeholder="{:t('login.token_placeholder')}" required/>
                             </div>
                         </div>
                         <div class="layui-form-item layui-row layui-col-space10 ">
@@ -95,7 +95,7 @@
 </div>
 <script src="//lib.baomitu.com/jquery/1.12.4/jquery.min.js"></script>
 <script type="text/javascript" src="{__LIBS__}layui/layui.js"></script>
-<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script>window.QH_I18N_LOCALE = "{:t('common.lang_code')}"; window.QH_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}common.js?v={__I18N_VERSION__}"></script>
 <script>
@@ -119,15 +119,15 @@
                 title:t('login.forgot_token'),
                 closeBtn:0,
                 btn:[t('login.got_it')],
-                content: '<div class="layui-card-body"><blockquote class="layui-elem-quote-sf-info">'+t('login.forgot_token_help')+'</blockquote></div>'
+                content: '<div class="layui-card-body"><blockquote class="layui-elem-quote-qh-info">'+t('login.forgot_token_help')+'</blockquote></div>'
             });
         });
         layer.tips(t('login.forgot_token_tip'), '#tip', {
             tips: 3
         });
         $('#noticeBtn').click(function () {
-            var SF_LOGIN_KEY = $("input[name='SF_LOGIN_KEY']").val();
-            if (SF_LOGIN_KEY == "") {
+            var QH_LOGIN_KEY = $("input[name='QH_LOGIN_KEY']").val();
+            if (QH_LOGIN_KEY == "") {
                 notice.warning({
                     title: t('common.nice_tips'),
                     message: t('login.token_empty'),
@@ -145,7 +145,7 @@
             $.ajax({
                 type: "POST",
                 url: "{:url('/Login/checkLoginKey')}",
-                data : {SF_LOGIN_KEY:SF_LOGIN_KEY},
+                data : {QH_LOGIN_KEY:QH_LOGIN_KEY},
                 dataType: "json",
                 success: function(data) {
                     if (data.code == 0) {

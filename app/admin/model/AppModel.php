@@ -42,7 +42,7 @@ class AppModel extends BaseModel
                 return Cache::get('appCount');
             }else{
                 $count = self::count();
-                Cache::tag('SF_App')->set('appCount', $count);
+                Cache::tag('QH_App')->set('appCount', $count);
                 return $count;
             }
         }catch (\Exception $e){
@@ -103,9 +103,9 @@ class AppModel extends BaseModel
             return message($e->getError() ,false);
         }
         try {
-            $pirate_money = sf_money_format($pirate_money);
-            $replace_money = sf_money_format($replace_money);
-            $give_money = sf_money_format($give_money);
+            $pirate_money = qh_money_format($pirate_money);
+            $replace_money = qh_money_format($replace_money);
+            $give_money = qh_money_format($give_money);
         } catch (\InvalidArgumentException $e) {
             return message('validation.amount_format', false);
         }
@@ -164,13 +164,13 @@ class AppModel extends BaseModel
                 self::where('id', $id)
                     ->data($data)
                     ->update();
-                Cache::tag('SF_App')->clear();
+                Cache::tag('QH_App')->clear();
                 return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
                 return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
-            $download_file = sf_secure_token(16) /* A-15: 原 md5(time().常量) 可预测 */;
+            $download_file = qh_secure_token(16) /* A-15: 原 md5(time().常量) 可预测 */;
             try {
                 $downloadPath = APP_PATH . DS . 'common' . DS . 'download' . DS . $download_file;
                 if (!mkdir($downloadPath . DS . 'release', 0755, true)
@@ -230,7 +230,7 @@ class AppModel extends BaseModel
             ];
             try {
                 self::insert($data);
-                Cache::tag('SF_App')->clear();
+                Cache::tag('QH_App')->clear();
                 return message(t('user.add_success'), true);
             } catch (\Exception $e) {
                 $this->deleteDownloadPath($download_file);
@@ -245,7 +245,7 @@ class AppModel extends BaseModel
                 return Cache::get('AppList');
             }else{
                 $list = self::order('id' ,'desc')->where('status','2')->field('id,name')->select();
-                Cache::tag('SF_App')->set('AppList',$list);
+                Cache::tag('QH_App')->set('AppList',$list);
                 return $list;
             }
         }catch (\Exception $e){
@@ -264,7 +264,7 @@ class AppModel extends BaseModel
             }
             self::where('id', $id)->delete();
             $this->deleteDownloadPath($row['download_file']);
-            Cache::tag('SF_App')->clear();
+            Cache::tag('QH_App')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -334,7 +334,7 @@ class AppModel extends BaseModel
             self::where('id', $id)
                 ->data(['status' => $status])
                 ->update();
-            Cache::tag('SF_App')->clear();
+            Cache::tag('QH_App')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
@@ -344,8 +344,8 @@ class AppModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|name');
             $list = self::order('id' ,'desc')->where($data)->paginate([
                 'list_rows'=> $limit,

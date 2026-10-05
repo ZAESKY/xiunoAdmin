@@ -45,7 +45,7 @@ class RebateSettlementService
                 $result = self::settleOne($id);
                 if ($result['status'] === 'settled') {
                     $summary['settled']++;
-                    $summary['amount'] = sf_money_add($summary['amount'], $result['amount']);
+                    $summary['amount'] = qh_money_add($summary['amount'], $result['amount']);
                 } elseif ($result['status'] === 'rejected') {
                     $summary['rejected']++;
                 }
@@ -83,7 +83,7 @@ class RebateSettlementService
                 return self::reject($record, $riskReason);
             }
 
-            $amount = sf_money_format($record['rebate_amount']);
+            $amount = qh_money_format($record['rebate_amount']);
             $claimed = Db::name('rebate_record')
                 ->where('id', $id)
                 ->where('status', 'pending')
@@ -140,7 +140,7 @@ class RebateSettlementService
             ->where('status', 'pending')
             ->update([
                 'status' => 'rejected',
-                'risk_reason' => sf_plain_text($reason, 255),
+                'risk_reason' => qh_plain_text($reason, 255),
                 'updated_at' => datetime(),
             ]);
 

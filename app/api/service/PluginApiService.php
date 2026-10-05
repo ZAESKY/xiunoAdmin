@@ -12,7 +12,7 @@ use think\facade\Db;
 
 /**
  * 插件中心API服务
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class PluginApiService extends BaseService
@@ -206,7 +206,7 @@ class PluginApiService extends BaseService
 
             // 无论账号是否存在都走同一分支，避免账号枚举
             $needsRehash = false;
-            $passwordOk = !empty($user) && sf_password_verify($password, $user['password'], $needsRehash);
+            $passwordOk = !empty($user) && qh_password_verify($password, $user['password'], $needsRehash);
             if (!$passwordOk) {
                 Cache::set($failKey, (int)Cache::get($failKey, 0) + 1, 900);
                 throw new Exception(t('plugin_api.credentials_invalid'));
@@ -216,7 +216,7 @@ class PluginApiService extends BaseService
             }
 
             if ($needsRehash) {
-                $newHash = sf_password_make($password);
+                $newHash = qh_password_make($password);
                 Db::name('user')->where('id', $user['id'])->update(['password' => $newHash]);
                 $user['password'] = $newHash;
             }
@@ -234,7 +234,7 @@ class PluginApiService extends BaseService
                 ]
             ]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -247,8 +247,8 @@ class PluginApiService extends BaseService
             $appInfo = $this->validateRequest();
 
             $param = request()->param();
-            $page = sf_page_number($param['page'] ?? null);
-            $limit = sf_page_limit($param['limit'] ?? null, 12, 50);
+            $page = qh_page_number($param['page'] ?? null);
+            $limit = qh_page_limit($param['limit'] ?? null, 12, 50);
             $keyword = !empty($param['keyword']) ? trim($param['keyword']) : '';
             $sort = !empty($param['sort']) ? $param['sort'] : 'default';
             $price_type = !empty($param['price_type']) ? $param['price_type'] : '';
@@ -292,7 +292,7 @@ class PluginApiService extends BaseService
 
             return json(message(t('plugin_action.get_success'), true, ['data' => $list]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -350,7 +350,7 @@ class PluginApiService extends BaseService
 
             return json(message(t('plugin_action.get_success'), true, ['data' => $plugin]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -452,7 +452,7 @@ class PluginApiService extends BaseService
                 ]
             ]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -488,7 +488,7 @@ class PluginApiService extends BaseService
 
             return json(message(t('plugin_action.get_success'), true, ['data' => $order]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -562,7 +562,7 @@ class PluginApiService extends BaseService
                 ]
             ]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -657,7 +657,7 @@ class PluginApiService extends BaseService
             $fileName = preg_replace('/[^A-Za-z0-9._-]/', '_', (string)$plugin['slug'] . '_v' . (string)$plugin['version']) . '.zip';
 
             if (preg_match('#^https?://#i', $filePath)) {
-                $safeUrl = sf_safe_url($filePath, false);
+                $safeUrl = qh_safe_url($filePath, false);
                 if ($safeUrl === '' || strtolower((string)parse_url($safeUrl, PHP_URL_SCHEME)) !== 'https') {
                     throw new Exception(t('plugin_action.unsafe_download_url'));
                 }
@@ -676,7 +676,7 @@ class PluginApiService extends BaseService
             $storage->deleteTemporaryDownloadFile($filePath);
             exit;
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -781,7 +781,7 @@ class PluginApiService extends BaseService
 
             return json(message(t('plugin_action.comment_submitted'), true));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -853,7 +853,7 @@ class PluginApiService extends BaseService
 
             return json(message(t('plugin_api.rating_success'), true));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -867,8 +867,8 @@ class PluginApiService extends BaseService
 
             $param = request()->param();
             $plugin_id = !empty($param['plugin_id']) ? intval($param['plugin_id']) : null;
-            $page = sf_page_number($param['page'] ?? null);
-            $limit = sf_page_limit($param['limit'] ?? null, 10, 50);
+            $page = qh_page_number($param['page'] ?? null);
+            $limit = qh_page_limit($param['limit'] ?? null, 10, 50);
 
             if (empty($plugin_id)) {
                 throw new Exception(t('plugin_action.id_required'));
@@ -886,13 +886,13 @@ class PluginApiService extends BaseService
 
             $list = $list->toArray();
             foreach ($list['data'] as &$comment) {
-                $comment['content'] = sf_plain_text($comment['content'] ?? '', 500);
+                $comment['content'] = qh_plain_text($comment['content'] ?? '', 500);
             }
             unset($comment);
 
             return json(message(t('plugin_action.get_success'), true, ['data' => $list]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -935,7 +935,7 @@ class PluginApiService extends BaseService
 
             return json(message(t('plugin_action.get_success'), true, ['data' => ['purchased' => $purchased]]));
         } catch (\Exception $e) {
-            return json(message(sf_public_exception_message($e, t('plugin_api.operation_failed')), false));
+            return json(message(qh_public_exception_message($e, t('plugin_api.operation_failed')), false));
         }
     }
 
@@ -960,14 +960,14 @@ class PluginApiService extends BaseService
     {
         foreach (['name' => 100, 'slug' => 100, 'version' => 50, 'author' => 100, 'description' => 1000] as $field => $limit) {
             if (isset($plugin[$field])) {
-                $plugin[$field] = sf_plain_text($plugin[$field], $limit);
+                $plugin[$field] = qh_plain_text($plugin[$field], $limit);
             }
         }
         if (isset($plugin['icon'])) {
-            $plugin['icon'] = sf_safe_url($plugin['icon'], true);
+            $plugin['icon'] = qh_safe_url($plugin['icon'], true);
         }
         if (isset($plugin['author_url'])) {
-            $plugin['author_url'] = sf_safe_url($plugin['author_url'], false);
+            $plugin['author_url'] = qh_safe_url($plugin['author_url'], false);
         }
         if ($includeRichText && isset($plugin['content'])) {
             $plugin['content'] = clean_rich_text($plugin['content']);
@@ -975,7 +975,7 @@ class PluginApiService extends BaseService
         if (isset($plugin['images'])) {
             $images = is_array($plugin['images']) ? $plugin['images'] : json_decode((string)$plugin['images'], true);
             $plugin['images'] = is_array($images)
-                ? array_values(array_filter(array_map(static fn($url) => sf_safe_url($url, true), $images)))
+                ? array_values(array_filter(array_map(static fn($url) => qh_safe_url($url, true), $images)))
                 : [];
         }
     }

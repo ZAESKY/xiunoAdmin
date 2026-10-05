@@ -3,8 +3,8 @@
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists $$
-CREATE PROCEDURE sf_drop_column_if_exists(IN p_table VARCHAR(64), IN p_column VARCHAR(64))
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists $$
+CREATE PROCEDURE qh_drop_column_if_exists(IN p_table VARCHAR(64), IN p_column VARCHAR(64))
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.COLUMNS
                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = p_table AND COLUMN_NAME = p_column)
@@ -16,11 +16,11 @@ END $$
 
 DELIMITER ;
 
-CALL sf_drop_column_if_exists('SF_app', 'installer_uploaded_at');
-CALL sf_drop_column_if_exists('SF_app', 'installer_size');
-CALL sf_drop_column_if_exists('SF_app', 'installer_sha256');
-CALL sf_drop_column_if_exists('SF_app', 'installer_file_name');
+CALL qh_drop_column_if_exists('QH_app', 'installer_uploaded_at');
+CALL qh_drop_column_if_exists('QH_app', 'installer_size');
+CALL qh_drop_column_if_exists('QH_app', 'installer_sha256');
+CALL qh_drop_column_if_exists('QH_app', 'installer_file_name');
 
-DROP PROCEDURE IF EXISTS sf_drop_column_if_exists;
+DROP PROCEDURE IF EXISTS qh_drop_column_if_exists;
 
 SELECT '20261002_application_installer_packages rolled back' AS migration_result;

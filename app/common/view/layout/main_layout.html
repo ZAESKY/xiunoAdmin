@@ -10,12 +10,12 @@
     <meta name="description" content="{$description}"/>
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
-    <link rel="stylesheet" href="{__CSS__}sf-style.css?v=20261004.2"/>
+    <link rel="stylesheet" href="{__CSS__}qh-style.css?v=20261004.2"/>
 </head>
 <body class="page-no-scroll">
 
 <!-- Shared main layout: admin/user differences are driven by layoutRole and menu roles. -->
-<div class="layui-layout layui-layout-admin sf-admin-shell" data-role="{$layoutRole}">
+<div class="layui-layout layui-layout-admin qh-admin-shell" data-role="{$layoutRole}">
     <div class="layui-header">
         <div class="layui-logo">
             <img src="{__IMG__}logo.png"/>
@@ -31,14 +31,14 @@
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item" lay-unselect>
-                <a class="sf-header-message" ew-event="message" title="{:t('layout.messages')}">
+                <a class="qh-header-message" ew-event="message" title="{:t('layout.messages')}">
                     <i class="layui-icon layui-icon-notice"></i>
-                    <span class="sf-notify-badge"></span>
+                    <span class="qh-notify-badge"></span>
                 </a>
             </li>
 
             <li class="layui-nav-item" lay-unselect>
-                <a href="javascript:SF_LANG.toggle();" title="{:t('common.language')}">{:t('common.lang_toggle')}</a>
+                <a href="javascript:QH_LANG.toggle();" title="{:t('common.language')}">{:t('common.lang_toggle')}</a>
             </li>
             <li class="layui-nav-item" lay-unselect>
                 <a>
@@ -115,7 +115,7 @@
 </div>
 
 <script type="text/javascript" src="{__LIBS__}layui/layui.js?v=20260820"></script>
-<script>window.SF_I18N_LOCALE = "{:t('common.lang_code')}"; window.SF_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
+<script>window.QH_I18N_LOCALE = "{:t('common.lang_code')}"; window.QH_I18N_MESSAGES = {:json_encode(app()->lang->get(), 271)};</script>
 <script type="text/javascript" src="{__JS__}lang.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}common.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
@@ -161,7 +161,7 @@
                 });
             } else {
                 notice.msg(t('auth_portal.opening_qq'), {icon:4, close:true});
-                SfQqOauth.start({
+                QHQqOauth.start({
                     url:'/api.php/Social/binding',
                     data:{userType:'admin',return_to:location.pathname+location.search},
                     onResult:function(data){
@@ -174,7 +174,7 @@
             }
         });
         if (layoutRole === 'admin') {
-            SfQqOauth.resume(function(data){
+            QHQqOauth.resume(function(data){
                 notice.msg(data.msg || (data.code == 0 ? t('layout.qq_operation_success') : t('layout.qq_operation_failed')), {icon:data.code == 0 ? 1 : 2});
                 if(data.code == 0) setTimeout(function(){ location.reload(); },800);
             }, function(message){notice.msg(message,{icon:2});});
@@ -209,7 +209,7 @@
 (function(){
     var notiUrl = '{:url("/Feedback/notificationCount")}';
     function setBadge(count) {
-        var badges = document.querySelectorAll('.sf-notify-badge');
+        var badges = document.querySelectorAll('.qh-notify-badge');
         badges.forEach(function(badge) {
             badge.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
             badge.style.display = count > 0 ? 'inline-block' : 'none';
@@ -229,7 +229,7 @@
         };
         xhr.send();
     }
-    window.SF_updateNotifyBadge = updateBadge;
+    window.QH_updateNotifyBadge = updateBadge;
     updateBadge();
     window.addEventListener('load', updateBadge);
     window.addEventListener('focus', updateBadge);

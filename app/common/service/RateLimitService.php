@@ -28,7 +28,7 @@ class RateLimitService
     {
         $window = max(1, $window);
         $slot = (int)floor(time() / $window);
-        $cacheKey = 'sf_rl_' . $bucket . '_' . substr(hash('sha256', $key), 0, 24) . '_' . $slot;
+        $cacheKey = 'qh_rl_' . $bucket . '_' . substr(hash('sha256', $key), 0, 24) . '_' . $slot;
 
         $count = (int)Cache::get($cacheKey, 0);
         if ($count >= $limit) {
@@ -55,7 +55,7 @@ class RateLimitService
     {
         $window = max(1, $window);
         $slot = (int)floor(time() / $window);
-        $cacheKey = 'sf_rl_' . $bucket . '_' . substr(hash('sha256', $key), 0, 24) . '_' . $slot;
+        $cacheKey = 'qh_rl_' . $bucket . '_' . substr(hash('sha256', $key), 0, 24) . '_' . $slot;
         return (int)Cache::get($cacheKey, 0) < $limit;
     }
 }

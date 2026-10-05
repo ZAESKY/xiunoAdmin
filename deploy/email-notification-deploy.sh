@@ -17,7 +17,7 @@ MIGRATION_APPLIED=0
 FEATURE_TABLES_BEFORE=0
 FILES=(
   addons/mail/Plugin.php
-  app/SF_Auth.sql
+  app/QH_Auth.sql
   app/common/model/NotificationModel.php
   app/common/service/NotificationEventService.php
   app/common/service/EmailNotificationService.php
@@ -116,7 +116,7 @@ printf '[client]\nhost=%s\nport=%s\nuser=%s\npassword=%s\ndefault-character-set=
   "$DB_HOST" "$DB_PORT" "$DB_USER" "$DB_PASS" > "$CLIENT_CNF"
 unset DB_PASS
 DUMP_BIN="$(command -v mysqldump || true)"; DUMP_BIN="${DUMP_BIN:-/www/server/mysql/bin/mysqldump}"
-FEATURE_TABLES_BEFORE="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('SF_notification_email_preference','SF_notification_email_template','SF_notification_email_log');")"
+FEATURE_TABLES_BEFORE="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('QH_notification_email_preference','QH_notification_email_template','QH_notification_email_log');")"
 
 echo "[2/7] 备份线上文件和数据库"
 [ ! -e "$BACKUP_DIR" ] || { echo "备份目录已存在" >&2; exit 73; }
@@ -170,13 +170,13 @@ MIGRATION_APPLIED=1
 echo "[5/7] 清缓存并执行功能自检"
 cd "$SITE_DIR"
 "$PHP_BIN" think clear
-"$PHP_BIN" -r 'require "vendor/autoload.php";$app=new \think\App();$app->initialize();\think\facade\Cache::delete("SF_AdminMenu");\think\facade\Cache::tag("SF_Menu")->clear();echo "menu cache cleared\n";'
+"$PHP_BIN" -r 'require "vendor/autoload.php";$app=new \think\App();$app->initialize();\think\facade\Cache::delete("QH_AdminMenu");\think\facade\Cache::tag("QH_Menu")->clear();echo "menu cache cleared\n";'
 for rel in "${FILES[@]}"; do cmp -s "$STAGE_DIR/$rel" "$SITE_DIR/$rel"; done
-table_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('SF_notification_email_preference','SF_notification_email_template','SF_notification_email_log');")"
+table_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('QH_notification_email_preference','QH_notification_email_template','QH_notification_email_log');")"
 [ "$table_count" = "3" ]
-config_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM SF_config WHERE name='email_notification_enabled';")"
+config_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM QH_config WHERE name='email_notification_enabled';")"
 [ "$config_count" = "1" ]
-menu_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM SF_menu WHERE url='Set/emailNotification' AND power=1 AND status=1;")"
+menu_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" -N -B -e "SELECT COUNT(*) FROM QH_menu WHERE url='Set/emailNotification' AND power=1 AND status=1;")"
 [ "$menu_count" = "1" ]
 "$PHP_BIN" -r 'require "vendor/autoload.php";$app=new \think\App();$app->initialize();$u=\app\common\service\EmailNotificationService::catalog("user",2147483647);$a=\app\common\service\EmailNotificationService::catalog("admin",2147483647);if(count($u)!==10||count($a)!==4){exit(1);}$p=\app\common\service\EmailNotificationService::preview("plugin_audit","{{site_name}} {{plugin_name}}","<script>x</script><h2>{{review_status}}</h2>");if(strpos($p["html"],"<script")!==false){exit(2);}echo "email notification self-check passed\n";'
 

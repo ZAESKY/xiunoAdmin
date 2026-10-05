@@ -11,7 +11,7 @@ use think\facade\Log;
 
 /**
  * 插件订单支付回调处理
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class PluginPayCallbackService
@@ -41,7 +41,7 @@ class PluginPayCallbackService
                     return ['success' => true, 'msg' => t('pay.already_paid_short')];
                 }
 
-                $price = sf_money_format($order['price']);
+                $price = qh_money_format($order['price']);
                 $settlement = PluginCommissionService::settle($price, (string)$payType);
                 $commissionRate = $settlement['rate'];
                 $commissionAmount = $settlement['amount'];
@@ -132,11 +132,11 @@ class PluginPayCallbackService
                     if ($plugin && $developerId > 0 && $developerId !== intval($order['user_id'])) {
                         $buyer = Db::name('user')->where('id', intval($order['user_id']))->field('username')->find();
                         $buyerName = $buyer ? (string)$buyer['username'] : t('plugin_action.unknown_user');
-                        $commissionSummary = sf_money_to_cents($settlement['amount'] ?? 0) <= 0
+                        $commissionSummary = qh_money_to_cents($settlement['amount'] ?? 0) <= 0
                             ? t('plugin_commission.no_commission')
                             : t('plugin_commission.summary', [
                                 'rate' => PluginCommissionService::displayRate($settlement['rate'] ?? 0),
-                                'amount' => sf_money_format($settlement['amount'] ?? 0),
+                                'amount' => qh_money_format($settlement['amount'] ?? 0),
                             ]);
                         $incomeText = t('plugin_action.balance_income', [
                             'amount' => $developerIncome,

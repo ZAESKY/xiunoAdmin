@@ -5,7 +5,7 @@ namespace app\common\service;
 /**
  * 授权码哈希服务（P1）
  *
- * 修复 A-13：授权码此前在服务端 SF_auth.authcode 与客户端 authCode 表均为明文，
+ * 修复 A-13：授权码此前在服务端 QH_auth.authcode 与客户端 authCode 表均为明文，
  * 任一侧数据库或备份泄露即导致授权码批量外泄。
  *
  * 方案：

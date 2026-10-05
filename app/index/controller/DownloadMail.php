@@ -19,7 +19,7 @@ class DownloadMail extends Frontend
 
     public function getCode(){
         if(IS_POST){
-            if (sf_download_mode() !== 'mail') {
+            if (qh_download_mode() !== 'mail') {
                 return message(t('download.mail_disabled'), false);
             }
             $post = $this->request->post();
@@ -89,7 +89,7 @@ class DownloadMail extends Frontend
 
     public function verification(){
         if(IS_POST){
-            if (sf_download_mode() !== 'mail') {
+            if (qh_download_mode() !== 'mail') {
                 return message(t('download.mail_disabled'), false);
             }
             $post = $this->request->post();

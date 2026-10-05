@@ -20,7 +20,7 @@
                     <div class="layui-inline"><select name="category"><option value="">{:t('plugin_market.all_categories')}</option><option value="feature">{:t('plugin_ui.category_feature')}</option><option value="security">{:t('plugin_ui.category_security')}</option><option value="content">{:t('plugin_ui.category_content')}</option><option value="ui">{:t('plugin_ui.category_ui')}</option><option value="payment">{:t('plugin_ui.category_payment')}</option><option value="dev">{:t('plugin_ui.category_dev')}</option><option value="analytics">{:t('plugin_ui.category_analytics')}</option><option value="social">{:t('plugin_ui.category_social')}</option><option value="other">{:t('feedback.type_other')}</option></select></div>
                     <div class="layui-inline"><select name="price_type"><option value="">{:t('plugin_market.all_prices')}</option><option value="free">{:t('upgrade.free')}</option><option value="paid">{:t('plugin_market.paid')}</option></select></div>
                     <div class="layui-inline"><select name="sort"><option value="default">{:t('plugin_market.default_sort')}</option><option value="downloads">{:t('plugin_market.download_sort')}</option><option value="comments">{:t('plugin_market.comment_sort')}</option><option value="rating">{:t('plugin_market.rating_sort')}</option><option value="newest">{:t('plugin_market.newest_sort')}</option></select></div>
-                    <div class="layui-inline"><button class="layui-btn" lay-filter="SF_TbSearch" lay-submit><i class="layui-icon layui-icon-search"></i></button></div>
+                    <div class="layui-inline"><button class="layui-btn" lay-filter="QH_TbSearch" lay-submit><i class="layui-icon layui-icon-search"></i></button></div>
                 </div></form>
             </div>
             <div id="pluginGrid" class="plugin-grid"><div class="market-loading" style="grid-column:1/-1;">{:t('plugin_market.loading_all')}</div></div>
@@ -36,7 +36,7 @@ layui.use(['layer','form','laypage'], function () {
     var searchParams={}, pageLimit=12;
     var catMap={feature:'{:t("plugin_ui.category_feature")}',security:'{:t("plugin_ui.category_security")}',content:'{:t("plugin_ui.category_content")}',ui:'{:t("plugin_ui.category_ui")}',payment:'{:t("plugin_ui.category_payment")}',dev:'{:t("plugin_ui.category_dev")}',analytics:'{:t("plugin_ui.category_analytics")}',social:'{:t("plugin_ui.category_social")}',other:'{:t("feedback.type_other")}'};
     function esc(value){var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};return String(value==null?'':value).replace(/[&<>"']/g,function(c){return map[c];});}
-    function fmtCount(value){var n=Math.max(0,Number(value)||0);try{return new Intl.NumberFormat(window.SF_I18N_LOCALE||'en-US',{notation:'compact',maximumFractionDigits:1}).format(n);}catch(e){if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'K';return String(Math.floor(n));}}
+    function fmtCount(value){var n=Math.max(0,Number(value)||0);try{return new Intl.NumberFormat(window.QH_I18N_LOCALE||'en-US',{notation:'compact',maximumFractionDigits:1}).format(n);}catch(e){if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'K';return String(Math.floor(n));}}
     function renderStars(value){var rating=Math.round(Number(value)||0),stars='';for(var i=1;i<=5;i++)stars+=i<=rating?'★':'☆';return stars;}
     function authorHtml(p){var name=p.authorDisplayName||p.author||'{:t("admin_home.unknown_user")}';return p.isOfficialAuthor?'<span class="official-badge"><i class="layui-icon layui-icon-vercode"></i>'+esc(name)+'</span>':esc(name);}
     function priceHtml(p,compact){var free=Number(p.price)===0,text=free?'{:t("upgrade.free")}':(p.pay_type==='points'?parseInt(p.price,10)+' {:t("accounting.point_unit")}':'¥'+esc(p.price));return '<span class="'+(compact?'chart-price':'card-price')+(free?' free':'')+'">'+text+'</span>';}
@@ -82,7 +82,7 @@ layui.use(['layer','form','laypage'], function () {
     $(document).on('click','.js-plugin-card',function(){showDetail($(this).data('id'));});
     $(document).on('click','.card-version',function(event){event.stopPropagation();showVersions($(this).data('plugin-id'));});
     $(document).on('click','.market-version-download',function(event){event.stopPropagation();var pluginId=$(this).data('plugin-id'),versionId=$(this).data('version-id');layer.msg('{:t("plugin_detail.checking_download")}',{icon:16,shade:.01,time:0});$.ajax({type:'GET',url:'{:url("/UserPlugin/checkVersionDownload")}',data:{plugin_id:pluginId,version_id:versionId},dataType:'json',success:function(res){layer.closeAll('dialog');if(res.code!==0){layer.msg(res.msg||'{:t("plugin_detail.version_unavailable")}',{icon:2});return;}window.location.href='{:url("/UserPlugin/downloadVersion")}?plugin_id='+encodeURIComponent(pluginId)+'&version_id='+encodeURIComponent(versionId);},error:function(){layer.closeAll('dialog');layer.msg('{:t("plugin_detail.download_check_failed")}',{icon:2});}});});
-    form.on('submit(SF_TbSearch)',function(data){searchParams=data.field;loadPlugins(1);return false;});
+    form.on('submit(QH_TbSearch)',function(data){searchParams=data.field;loadPlugins(1);return false;});
     loadShowcase();loadPlugins(1);
 });
 </script>

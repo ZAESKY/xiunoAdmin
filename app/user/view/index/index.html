@@ -10,7 +10,7 @@
     <meta name="description" content="{$description}"/>
     <link rel="stylesheet" href="{__LIBS__}layui/css/layui.css"/>
     <link rel="stylesheet" href="{__MODULE__}admin.css?v=318"/>
-    <link rel="stylesheet" href="{__CSS__}sf-style.css"/>
+    <link rel="stylesheet" href="{__CSS__}qh-style.css"/>
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -18,7 +18,7 @@
 </head>
 <body class="page-no-scroll">
 
-<div class="layui-layout layui-layout-admin sf-admin-shell" data-role="user">
+<div class="layui-layout layui-layout-admin qh-admin-shell" data-role="user">
     <!-- 头部 -->
     <div class="layui-header">
         <div class="layui-logo">
@@ -35,9 +35,9 @@
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item" lay-unselect>
-                <a class="sf-header-message" ew-event="message" title="{:t('layout.messages')}">
+                <a class="qh-header-message" ew-event="message" title="{:t('layout.messages')}">
                     <i class="layui-icon layui-icon-notice"></i>
-                    <span class="sf-notify-badge"></span>
+                    <span class="qh-notify-badge"></span>
                 </a>
             </li>
 
@@ -165,7 +165,7 @@
 (function(){
     var notiUrl = '{:url("/Feedback/notificationCount")}';
     function setBadge(count) {
-        var badges = document.querySelectorAll('.sf-notify-badge');
+        var badges = document.querySelectorAll('.qh-notify-badge');
         badges.forEach(function(badge) {
             badge.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
             badge.style.display = count > 0 ? 'inline-block' : 'none';
@@ -185,7 +185,7 @@
         };
         xhr.send();
     }
-    window.SF_updateNotifyBadge = updateBadge;
+    window.QH_updateNotifyBadge = updateBadge;
     updateBadge();
     window.addEventListener('load', updateBadge);
     window.addEventListener('focus', updateBadge);
@@ -200,15 +200,15 @@
 })();
 </script>
 <style>
-    .sf-admin-shell .layui-header .layui-layout-right .sf-header-message {
+    .qh-admin-shell .layui-header .layui-layout-right .qh-header-message {
         position: relative;
         min-width: 46px;
         text-align: center;
     }
-    .sf-admin-shell .layui-header .layui-layout-right .sf-header-message .layui-icon {
+    .qh-admin-shell .layui-header .layui-layout-right .qh-header-message .layui-icon {
         font-size: 18px;
     }
-    .sf-admin-shell .layui-header .sf-notify-badge {
+    .qh-admin-shell .layui-header .qh-notify-badge {
         position: absolute;
         top: 13px;
         right: 8px;

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# SF 授权系统 —— 构建干净的部署包
+# QH 授权系统 —— 构建干净的部署包
 #
 # 在本地项目根目录执行：
 #     bash deploy/package.sh              # 含 vendor（服务器无需 composer）
@@ -34,26 +34,26 @@ for a in "$@"; do
 done
 
 STAMP="$(date +%Y%m%d_%H%M%S)"
-OUT="$ROOT_DIR/deploy/sf_admin_${STAMP}.tar.gz"
+OUT="$ROOT_DIR/deploy/qh_admin_${STAMP}.tar.gz"
 
 EXCLUDES=(
   --exclude=./.git
   --exclude=./.git/*
   --exclude=./.env
-  --exclude=./sf.env
+  --exclude=./qh.env
   --exclude=./.idea
   --exclude=./.vscode
   --exclude=./.claude
   --exclude=./.stitch
   --exclude=./runtime
   --exclude=./app/common/download
-  --exclude=./app/SF_Auth.sql
+  --exclude=./app/QH_Auth.sql
   --exclude=./app/checkin.sql
-  --exclude=./app/SF_rebate_migration.sql
+  --exclude=./app/QH_rebate_migration.sql
   --exclude=./tests
   --exclude=./storage
   --exclude=./phpMyAdmin4.8.5
-  --exclude=./deploy/sf_admin_*.tar.gz
+  --exclude=./deploy/*_admin_*.tar.gz
   --exclude=./forum.html
   --exclude=./update_online_test.sql
   --exclude=./*.log
@@ -115,7 +115,7 @@ COPYFILE_DISABLE=1 tar --no-xattrs -czf "$OUT" "${EXCLUDES[@]}" -C "$ROOT_DIR" .
 
 # 不只信任参数层面的 exclude：对最终产物再做一次 fail-closed 审计，
 # 防止以后调整 tar 参数或目录结构时把运行时数据/凭据带进生产包。
-FORBIDDEN_ENTRY_RE='^\./(\.git(/|$)|\.env$|sf\.env$|runtime(/|$)|tests(/|$)|storage(/|$)|app/common/download(/|$)|public/upload(/|$)|phpMyAdmin[^/]*(/|$)|forum\.html$|update_online_test\.sql$|node_modules(/|$)|.*\.log$)'
+FORBIDDEN_ENTRY_RE='^\./(\.git(/|$)|\.env$|qh\.env$|runtime(/|$)|tests(/|$)|storage(/|$)|app/common/download(/|$)|public/upload(/|$)|phpMyAdmin[^/]*(/|$)|deploy/[^/]*_admin_[^/]*\.tar\.gz$|forum\.html$|update_online_test\.sql$|node_modules(/|$)|.*\.log$)'
 FORBIDDEN_FOUND="$(tar -tzf "$OUT" | grep -E "$FORBIDDEN_ENTRY_RE" | head -20 || true)"
 if [ -n "$FORBIDDEN_FOUND" ]; then
   echo "    部署包包含禁止条目，已中止："

@@ -34,14 +34,14 @@ class AddCode extends Backend
                     ->where('id', $appid)
                     ->field('public_key,api_key,check_auth_method')
                     ->find();
-                $authcode_str = file_get_contents(ADDONS_PATH . DS . 'addCode' . DS . 'common' . DS . 'AuthCode.SF');
-                $authcode_str = str_replace('SF_DOMAIN', DOMAIN, $authcode_str);
-                $authcode_str = str_replace('SF_APPID', $appid, $authcode_str);
-                $authcode_str = str_replace('SF_API_KEY', $appInfo['api_key'], $authcode_str);
-                $authcode_str = str_replace('SF_METHOD', $appInfo['check_auth_method'], $authcode_str);
-                $authcode_str = str_replace('SF_HTTP', is_https()?'true':'false', $authcode_str);
-                $authinfo_str = file_get_contents(ADDONS_PATH . DS . 'addCode' . DS . 'common' . DS . 'AuthInfo.SF');
-                $authinfo_str = str_replace('SF_PUBLIC_KEY', $appInfo['public_key'], $authinfo_str);
+                $authcode_str = file_get_contents(ADDONS_PATH . DS . 'addCode' . DS . 'common' . DS . 'AuthCode.QH');
+                $authcode_str = str_replace('QH_DOMAIN', DOMAIN, $authcode_str);
+                $authcode_str = str_replace('QH_APPID', $appid, $authcode_str);
+                $authcode_str = str_replace('QH_API_KEY', $appInfo['api_key'], $authcode_str);
+                $authcode_str = str_replace('QH_METHOD', $appInfo['check_auth_method'], $authcode_str);
+                $authcode_str = str_replace('QH_HTTP', is_https()?'true':'false', $authcode_str);
+                $authinfo_str = file_get_contents(ADDONS_PATH . DS . 'addCode' . DS . 'common' . DS . 'AuthInfo.QH');
+                $authinfo_str = str_replace('QH_PUBLIC_KEY', $appInfo['public_key'], $authinfo_str);
             }catch (\Exception $e){
                 return message($e->getMessage() ,false);
             }
@@ -192,7 +192,7 @@ class AddCode extends Backend
                         $msg = '系统检测到您上传的是ThinkPHP V6.0，已采用ThinkPHP V6.0系统方案添加授权代码成功！';
                         break;
                 }
-                $zip_name = 'SF-一键添加授权代码盗版追踪' . time() . '.zip';
+                $zip_name = 'QH-一键添加授权代码盗版追踪' . time() . '.zip';
                 $dir_file = $filePath . $zip_name;
                 $dir_name = $tempDir;
                 $zip = new \ZipArchive;

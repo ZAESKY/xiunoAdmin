@@ -61,8 +61,8 @@ class AuthPriceModel extends BaseModel
             return message($e->getError() ,false);
         }
         try {
-            $money = sf_money_format($money);
-            $all_money = sf_money_format($all_money);
+            $money = qh_money_format($money);
+            $all_money = qh_money_format($all_money);
         } catch (\InvalidArgumentException $e) {
             return message('validation.amount_format', false);
         }
@@ -229,8 +229,8 @@ class AuthPriceModel extends BaseModel
     public function list(){
         try{
             $post = request()->post();
-            $limit = sf_page_limit($post['limit'] ?? null, 10);
-            $current_page = sf_page_number($post['current_page'] ?? null);
+            $limit = qh_page_limit($post['limit'] ?? null, 10);
+            $current_page = qh_page_number($post['current_page'] ?? null);
             $tid = !empty($post['tid'])?intval($post['tid']):null;
             $data = $this->buildSearchWhere('id|name');
 

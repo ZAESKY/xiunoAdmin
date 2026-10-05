@@ -28,7 +28,7 @@ a:hover {
     transition: 0.5s;
 }
 
-.sf-input {
+.qh-input {
     transition: 0.5s;
 }
 
@@ -489,7 +489,7 @@ i.iconfont.icon-link {
     justify-content: center;
 }
 
-.sf-input {
+.qh-input {
     height: 100px;
     width: 100%;
     border-radius: 6px;
@@ -504,7 +504,7 @@ i.iconfont.icon-link {
     text-align: center;
 }
 
-.sf-introduce {
+.qh-introduce {
     height: 150px;
     overflow: auto;
     width: 100%;
@@ -517,7 +517,7 @@ i.iconfont.icon-link {
 }
 
 
-.sf-input input:focus{
+.qh-input input:focus{
     color: inherit;
     background: rgba(255,255,255,.9);
     box-shadow: rgb(0 0 0 / 20%) 0 0 10px;
@@ -540,7 +540,7 @@ input:-ms-input-placeholder{  /* Internet Explorer 10-11 */
 }
 
 
-.sf-input:hover {
+.qh-input:hover {
     background: rgb(0 0 0 / 40%);
     transition: 0.5s;
 }
@@ -655,7 +655,7 @@ i.iconfont.icon-z_shangpinheji {
     height: 48px !important;
 }
 
-.mores .sf-input {
+.mores .qh-input {
     height: 48px !important;
 }
 

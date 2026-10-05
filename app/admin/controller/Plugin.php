@@ -12,7 +12,7 @@ use think\facade\View;
 
 /**
  * 插件管理控制器
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class Plugin extends Backend
@@ -122,8 +122,8 @@ class Plugin extends Backend
             try {
                 $post = $this->request->post();
                 $pluginId = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
-                $limit = sf_page_limit($post['limit'] ?? null, 10);
-                $currentPage = sf_page_number($post['current_page'] ?? null);
+                $limit = qh_page_limit($post['limit'] ?? null, 10);
+                $currentPage = qh_page_number($post['current_page'] ?? null);
                 $query = Db::name('plugin_download')
                     ->alias('d')
                     ->leftJoin('plugin p', 'd.plugin_id = p.id')
@@ -154,8 +154,8 @@ class Plugin extends Backend
             try {
                 $post = $this->request->post();
                 $pluginId = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
-                $limit = sf_page_limit($post['limit'] ?? null, 10);
-                $currentPage = sf_page_number($post['current_page'] ?? null);
+                $limit = qh_page_limit($post['limit'] ?? null, 10);
+                $currentPage = qh_page_number($post['current_page'] ?? null);
                 $query = Db::name('plugin_reward')
                     ->alias('r')
                     ->leftJoin('user u', 'r.user_id = u.id')

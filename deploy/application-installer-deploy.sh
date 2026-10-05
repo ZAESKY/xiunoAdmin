@@ -150,7 +150,7 @@ dump_bin="$(command -v mysqldump || true)"
   --routines --triggers --events --no-tablespaces --default-character-set=utf8mb4 \
   "$db_name" > "$BACKUP_DIR/database.sql"
 [ "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024 ]
-grep -q 'Table structure for table `SF_app`' "$BACKUP_DIR/database.sql"
+grep -q 'Table structure for table `QH_app`' "$BACKUP_DIR/database.sql"
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 sha256sum "$BACKUP_DIR/database.sql" > "$BACKUP_DIR/database.sql.sha256"
 chmod 600 "$BACKUP_DIR/database.sql" "$BACKUP_DIR/database.sql.sha256"
@@ -169,7 +169,7 @@ read_key() {
 release_key_id="$(read_key release_sign_key_id)"
 release_secret="$(read_key release_sign_secret_key)"
 release_public="$(read_key release_sign_public_key)"
-env_tmp="$SITE_DIR/.env.sfnew.$$"
+env_tmp="$SITE_DIR/.env.qhnew.$$"
 awk '!/^[[:space:]]*release_sign_(key_id|secret_key|public_key)[[:space:]]*=/' "$SITE_DIR/.env" > "$env_tmp"
 printf '\n# 完整安装包 Ed25519 发布签名（仅服务端持有私钥）\nrelease_sign_key_id = %s\nrelease_sign_secret_key = %s\nrelease_sign_public_key = %s\n' \
   "$release_key_id" "$release_secret" "$release_public" >> "$env_tmp"
@@ -181,7 +181,7 @@ unset release_secret
 
 echo "[5/9] 原子部署授权系统文件"
 deploy_file() {
-  src="$1"; dst="$2"; tmp="${dst}.sfnew.$$"
+  src="$1"; dst="$2"; tmp="${dst}.qhnew.$$"
   install -d "$(dirname "$dst")"
   install -m 0644 "$src" "$tmp"
   if [ -e "$dst" ]; then
@@ -212,10 +212,10 @@ done
 echo "[7/9] 验证数据库、产品映射和发布密钥"
 for column in installer_file_name installer_sha256 installer_size installer_uploaded_at; do
   count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B -e \
-    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_app' AND COLUMN_NAME='$column'")"
-  [ "$count" = 1 ] || { echo "缺少字段 SF_app.$column" >&2; exit 1; }
+    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_app' AND COLUMN_NAME='$column'")"
+  [ "$count" = 1 ] || { echo "缺少字段 QH_app.$column" >&2; exit 1; }
 done
-app_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B -e 'SELECT COUNT(*) FROM SF_app WHERE id=1')"
+app_count="$(mysql --defaults-extra-file="$CLIENT_CNF" "$db_name" -N -B -e 'SELECT COUNT(*) FROM QH_app WHERE id=1')"
 [ "$app_count" = 1 ]
 grep -Eq '^[[:space:]]*license_product_app_map[[:space:]]*=[[:space:]]*zaesky_theme_light:1([[:space:]]*$|,)' .env
 "$PHP_BIN" -r '

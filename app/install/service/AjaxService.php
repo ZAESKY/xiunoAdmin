@@ -8,7 +8,7 @@ class AjaxService extends BaseService
 {
     public function check()
     {
-        if(file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')){
+        if(file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')){
             return message(t('install.already_installed'), false);
         }
         $check_msg = $this->checkSafeMsg();
@@ -20,7 +20,7 @@ class AjaxService extends BaseService
 
     private function checkSafeMsg()
     {
-        session('SF_CheckSession', 2129876388);
+        session('QH_CheckSession', 2129876388);
         $success = array();
         $error = array();
         if (class_exists('PDO')) {
@@ -55,7 +55,7 @@ class AjaxService extends BaseService
         } else {
             $error[] = 'mkdir()';
         }
-        if (session('SF_CheckSession') == 2129876388) {
+        if (session('QH_CheckSession') == 2129876388) {
             $success[] = 'session()';
         } else {
             $error[] = 'session()';
@@ -66,13 +66,13 @@ class AjaxService extends BaseService
             $error[] = 'fileinfo()';
         }
 
-        $SF_msg = array('success' => $success, 'error' => $error);
-        return $SF_msg;
+        $QH_msg = array('success' => $success, 'error' => $error);
+        return $QH_msg;
     }
 
     public function install()
     {
-        if(file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')){
+        if(file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')){
             return message(t('install.already_installed'), false);
         }
         $post = request()->post();
@@ -102,7 +102,7 @@ class AjaxService extends BaseService
         $config['connections']['mysql']['username'] = $username;
         $config['connections']['mysql']['password'] = $password;
         $config['connections']['mysql']['hostport'] = $hostport;
-        $config['connections']['mysql']['prefix'] = 'SF_';
+        $config['connections']['mysql']['prefix'] = 'QH_';
         try {
             $db = new \PDO('mysql:host=' . $hostname . ';dbname=' . $database . ';port=' . $hostport, $username, $password);
             $file = ROOT_PATH . 'config/database.php';
@@ -116,7 +116,7 @@ class AjaxService extends BaseService
             } else {
                 return message(t('install.db_write_failed'), false);
             }
-            if (!$db->query("SELECT * FROM `SF_config` where 1")) {
+            if (!$db->query("SELECT * FROM `QH_config` where 1")) {
                 return message(t('install.db_config_saved'), true, ['type' => 1]);
             } else {
                 return message(t('install.db_config_saved'), true, ['type' => 2]);
@@ -129,14 +129,14 @@ class AjaxService extends BaseService
 
     public function importSQL()
     {
-        if (file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')) {
+        if (file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')) {
             return message(t('install.already_installed'), false);
         } else {
             $dbconfig = config('database.connections.mysql');
             if (!$dbconfig['username'] || !$dbconfig['password'] || !$dbconfig['database']) {
                 return message(t('install.db_need_first'), false);
             } else {
-                $sql = file_get_contents(APP_PATH . DS . 'SF_Auth.sql');
+                $sql = file_get_contents(APP_PATH . DS . 'QH_Auth.sql');
                 $sql = explode(';', $sql);
                 try {
                     $cn = new \PDO('mysql:host=' . $dbconfig['hostname'] . ';dbname=' . $dbconfig['database'] . ';port=' . $dbconfig['hostport'], $dbconfig['username'], $dbconfig['password']);
@@ -169,7 +169,7 @@ class AjaxService extends BaseService
         }
     }
     public function bindingCheck(){
-        if(file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')){
+        if(file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')){
             return message(t('install.already_installed'), false);
         }
         $dbconfig = config('database.connections.mysql');
@@ -181,7 +181,7 @@ class AjaxService extends BaseService
         } catch (\Exception $e) {
             return message(t('install.db_connect_failed').$e->getMessage(), false);
         }
-        $result = $db->query("SELECT access_token FROM `SF_admin` WHERE id = 1 limit 1");
+        $result = $db->query("SELECT access_token FROM `QH_admin` WHERE id = 1 limit 1");
         $result = $result->fetch(\PDO::FETCH_ASSOC);
         if(empty($result['access_token'])){
             return message(t('install_bind.not_bound'), false);
@@ -191,7 +191,7 @@ class AjaxService extends BaseService
     }
 
     public function adminInfo(){
-        if(file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')){
+        if(file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')){
             return message(t('install.already_installed'), false);
         }
         $post = request()->post();
@@ -201,7 +201,7 @@ class AjaxService extends BaseService
         $admin_email = !empty($post['admin_email']) ? $post['admin_email'] : null;
         $sitename = !empty($post['sitename']) ? $post['sitename'] : null;
         $login_address = !empty($post['login_address']) ? $post['login_address'] : 'admin';
-        $SF_LOGIN_KEY = !empty($post['SF_LOGIN_KEY']) ? $post['SF_LOGIN_KEY'] : '';
+        $QH_LOGIN_KEY = !empty($post['QH_LOGIN_KEY']) ? $post['QH_LOGIN_KEY'] : '';
 
         session('login_address', $login_address);
         if (empty($admin_username)) {
@@ -230,20 +230,20 @@ class AjaxService extends BaseService
             return message(t('install.db_connect_failed').$e->getMessage(), false);
         }
 
-        $stmt = $db->prepare("update SF_admin set `username` = ?, `password` = ?, `qq` = ?, `email` = ? where `id` = 1");
-        $stmt->execute([$admin_username, sf_password_make($admin_password), $admin_qq, $admin_email]);
-        $stmt = $db->prepare("update SF_config set `value` = ? where `name` = 'title'");
+        $stmt = $db->prepare("update QH_admin set `username` = ?, `password` = ?, `qq` = ?, `email` = ? where `id` = 1");
+        $stmt->execute([$admin_username, qh_password_make($admin_password), $admin_qq, $admin_email]);
+        $stmt = $db->prepare("update QH_config set `value` = ? where `name` = 'title'");
         $stmt->execute([$sitename]);
-        $stmt = $db->prepare("update SF_config set `value` = ? where `name` = 'login_key'");
-        $stmt->execute([$SF_LOGIN_KEY]);
-        session('SF_LOGIN_KEY', $SF_LOGIN_KEY);
+        $stmt = $db->prepare("update QH_config set `value` = ? where `name` = 'login_key'");
+        $stmt->execute([$QH_LOGIN_KEY]);
+        session('QH_LOGIN_KEY', $QH_LOGIN_KEY);
         rename(PUBLIC_PATH . DS . 'admin.php',$login_address.'.php');
         return message(t('install.config_save_success'), true);
     }
 
     public function putInstallLock(){
-        @file_put_contents(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock', 'SF 授权系统安装锁');
-        if (file_exists(APP_PATH . DS . 'install' . DS . 'SF_Auth.Lock')) {
+        @file_put_contents(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock', 'QH 授权系统安装锁');
+        if (file_exists(APP_PATH . DS . 'install' . DS . 'QH_Auth.Lock')) {
             return message('success', true);
         } else {
             return message('error', false);

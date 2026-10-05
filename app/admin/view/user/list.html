@@ -43,7 +43,7 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
@@ -63,28 +63,28 @@
                 </div>
             </form>
             <!-- 数据表格 -->
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>{:t('common.edit')}</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
 </script>
 <!-- 表格状态列 -->
-<script type="text/html" id="SF_TbState">
-    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_TbState">
+    <input type="checkbox" lay-filter="QH_TbStateCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common_ui.show_hide')}" {{d.status==1?'checked':''}} style="display: none;"/>
     <p style="display: none;">{{d.status==0?'{:t("common.normal")}':'{:t("common.ban")}'}}</p>
 </script>
 
-<script type="text/html" id="SF_Tbid">
-    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
+<script type="text/html" id="QH_Tbid">
+    <span id="QH_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-qh-indigo" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id:'<span class="layui-badge-dot layui-bg-red" style="height: 6px;width: 6px;position: relative;top: -2px"></span></span> '+d.id}}
 </script>
 <!-- 表单弹窗 -->
-<script type="text/html" id="SF_EditDialog">
-    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+<script type="text/html" id="QH_EditDialog">
+    <form id="QH_EditForm" lay-filter="QH_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
         <input name="form_mode" type="hidden" value=""/>
         <div class="layui-form-item">
@@ -140,14 +140,14 @@
                 <div class="layui-input-block">
                     <input type="text" name="phone" placeholder="{:t('admin_user.phone_placeholder')}" class="layui-input"
                            maxlength="11" inputmode="numeric" autocomplete="off" lay-verType="tips"/>
-                    <div class="sf-form-help">{:t('admin_user.phone_help')}</div>
+                    <div class="qh-form-help">{:t('admin_user.phone_help')}</div>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">{:t('admin_user.verification_status')}:</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="phone_verified" value="1" lay-skin="switch" lay-text="{:t('admin_user.verified_unverified')}"/>
-                    <div class="sf-form-help">{:t('admin_user.verify_help')}</div>
+                    <div class="qh-form-help">{:t('admin_user.verify_help')}</div>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -186,7 +186,7 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('common.save')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
@@ -208,7 +208,7 @@
 
         /* 渲染表格 */
         var insTb = table.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/User/list")}',
             method: 'post',
             where: initialWhere,
@@ -234,7 +234,7 @@
             },
             cols: [[
                 {type: 'checkbox', fixed: true},
-                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'id', title: 'ID', templet: '#QH_Tbid', sort: true, width: 80, fixed: true},
                 {field: 'img', title: '{:t("common_ui.avatar_field")}', templet: function (d) {
                         var url = d.imgUrl || '//q4.qlogo.cn/headimg_dl?dst_uin='+d.qq+'&spec=100';
                         return '<img data-index="' + (d.LAY_INDEX - 1) + '" src="' + url + '" class="tb-img-circle" tb-img alt=""/>';
@@ -289,12 +289,12 @@
                     return '<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="viewPointLog">{:t("admin_user.activity_details")}</a>';
                 }},
                 {field: 'addtime', title: '{:t("common.add_time")}', sort: true, minWidth: 200},
-                {field: 'status', title: '{:t("common.status")}', templet: '#SF_TbState', sort: true, minWidth: 100},
-                {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', minWidth: 180}
+                {field: 'status', title: '{:t("common.status")}', templet: '#QH_TbState', sort: true, minWidth: 100},
+                {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', minWidth: 180}
             ]]
         });
         $(document).off('click.tbImg').on('click.tbImg', '[tb-img]', function () {
-            var imgList = table.cache['SF_Table'].map(function (d) {
+            var imgList = table.cache['QH_Table'].map(function (d) {
                 return {
                     alt: d.username,
                     src: d.imgUrl || '//q4.qlogo.cn/headimg_dl?dst_uin='+d.qq+'&spec=100'
@@ -360,7 +360,7 @@
             }
         });
         /* 表格搜索 */
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
@@ -376,7 +376,7 @@
         insTb.reload({where: initialWhere, page: {curr: 1}});
         {/if}
             /* 表格工具条点击事件 */
-            table.on('tool(SF_Table)', function (obj) {
+            table.on('tool(QH_Table)', function (obj) {
                 if (obj.event === 'edit') { // 修改
                     showEditModel(obj.data);
                 } else if (obj.event === 'del') { // 删除
@@ -395,11 +395,11 @@
             });
 
             /* 表格头工具栏点击事件 */
-            table.on('toolbar(SF_Table)', function (obj) {
+            table.on('toolbar(QH_Table)', function (obj) {
                 if (obj.event === 'add') { // 添加
                     showEditModel();
                 } else if (obj.event === 'del') { // 删除
-                    var checkRows = table.checkStatus('SF_Table');
+                    var checkRows = table.checkStatus('QH_Table');
                     if (checkRows.data.length === 0) {
                         notice.msg('{:t("confirm.please_select_data")}', {icon: 3, audio:'1'});
                         return;
@@ -416,7 +416,7 @@
                 admin.popupRight({
                     type: 1,
                     title: (mData ? '{:t("common.edit")}' : '{:t("common.add")}') + ' {:t("admin_user.user_suffix")}',
-                    content: $('#SF_EditDialog').html(),
+                    content: $('#QH_EditDialog').html(),
                     success: function (layero, dIndex) {
                         // 设置表单模式
                         $('input[name="form_mode"]').val(mData ? 'edit' : 'add');
@@ -442,7 +442,7 @@
                                         notice.msg(data.msg, {icon: 2, audio:'1'});
                                     }
                                     form.render();
-                                    form.val('SF_EditForm', mData);
+                                    form.val('QH_EditForm', mData);
                                     $(layero).find('input[name="phone_verified"]')
                                         .prop('checked', parseInt(mData.phone_verified, 10) === 1);
                                     form.render('checkbox');
@@ -472,7 +472,7 @@
                                         notice.msg(data.msg, {icon: 2, audio:'1'});
                                     }
                                     form.render();
-                                    form.val('SF_EditForm', mData);
+                                    form.val('QH_EditForm', mData);
                                     $(layero).find('input[name="phone_verified"]')
                                         .prop('checked', parseInt(mData.phone_verified, 10) === 1);
                                     form.render('checkbox');
@@ -487,7 +487,7 @@
                             $("#form_data").css("display","none");
                         }
                         // 表单提交事件
-                        form.on('submit(SF_EditSubmit)', function (data) {
+                        form.on('submit(QH_EditSubmit)', function (data) {
                             var phone = $.trim(data.field.phone || '');
                             if (phone && !/^1[3-9][0-9]{9}$/.test(phone)) {
                                 notice.msg('{:t("admin_user.invalid_phone")}', {icon: 2});
@@ -506,7 +506,7 @@
                                 success: function(data) {
                                     notice.destroy();
                                     if (data.code == 0) {
-                                        table.reload('SF_Table');
+                                        table.reload('QH_Table');
                                         notice.msg(data.msg, {icon: 1, audio:'1'});
                                     } else {
                                         notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -530,11 +530,11 @@
                 admin.popupRight({
                     type: 1,
                     title: mData.username + ' - {:t("accounting.balance_detail")}',
-                    content: '<table id="SF_BalanceLogTable" lay-filter="SF_BalanceLogTable"></table>',
+                    content: '<table id="QH_BalanceLogTable" lay-filter="QH_BalanceLogTable"></table>',
                     area: ['800px', '600px'],
                     success: function(layero, dIndex){
                         table.render({
-                            elem: '#SF_BalanceLogTable',
+                            elem: '#QH_BalanceLogTable',
                             url: '{:url("/User/balanceLog")}',
                             method: 'post',
                             where: {user_id: mData.id},
@@ -564,11 +564,11 @@
                 admin.popupRight({
                     type: 1,
                     title: mData.username + ' - {:t("accounting.point_detail")}',
-                    content: '<table id="SF_PointLogTable" lay-filter="SF_PointLogTable"></table>',
+                    content: '<table id="QH_PointLogTable" lay-filter="QH_PointLogTable"></table>',
                     area: ['800px', '600px'],
                     success: function(layero, dIndex){
                         table.render({
-                            elem: '#SF_PointLogTable',
+                            elem: '#QH_PointLogTable',
                             url: '{:url("/User/pointLog")}',
                             method: 'post',
                             where: {user_id: mData.id},
@@ -626,7 +626,7 @@
             }
 
             /* 修改用户状态 */
-            form.on('switch(SF_TbStateCk)', function (obj) {
+            form.on('switch(QH_TbStateCk)', function (obj) {
                 notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                 $.ajax({
                     type: "POST",

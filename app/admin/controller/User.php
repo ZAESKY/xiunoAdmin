@@ -20,8 +20,8 @@ class User extends Backend
         try{
             if(IS_POST){
                 $userId = request()->post('user_id/d');
-                $limit = sf_page_limit(request()->post('limit', null), 15);
-                $page = sf_page_number(request()->post('current_page', null));
+                $limit = qh_page_limit(request()->post('limit', null), 15);
+                $page = qh_page_number(request()->post('current_page', null));
                 if(empty($userId)) return json(message(t('validation.missing_id'), false));
                 $list = \app\common\model\BalanceLogModel::where('user_id', $userId)
                     ->order('id', 'desc')
@@ -42,8 +42,8 @@ class User extends Backend
         try{
             if(IS_POST){
                 $userId = request()->post('user_id/d');
-                $limit = sf_page_limit(request()->post('limit', null), 15);
-                $page = sf_page_number(request()->post('current_page', null));
+                $limit = qh_page_limit(request()->post('limit', null), 15);
+                $page = qh_page_number(request()->post('current_page', null));
                 if(empty($userId)) return json(message(t('validation.missing_id'), false));
                 $list = \app\common\model\PointLogModel::where('user_id', $userId)
                     ->order('id', 'desc')

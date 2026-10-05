@@ -1,10 +1,10 @@
 -- Migration: unify official QQ OAuth and persist one-time verified legacy QQ claims.
 -- Additive and safe to run repeatedly on MySQL 5.7+/8.0+.
 
-CREATE TABLE IF NOT EXISTS `SF_qq_identity_claim` (
+CREATE TABLE IF NOT EXISTS `QH_qq_identity_claim` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `identity_id` int(11) unsigned NOT NULL COMMENT 'SF_social_identity.id',
-  `user_id` int(11) unsigned NOT NULL COMMENT 'SF_user.id',
+  `identity_id` int(11) unsigned NOT NULL COMMENT 'QH_social_identity.id',
+  `user_id` int(11) unsigned NOT NULL COMMENT 'QH_user.id',
   `legacy_qq` varchar(20) NOT NULL COMMENT '旧扫码一次性验证的数字QQ',
   `proof_method` varchar(32) NOT NULL DEFAULT 'legacy_qr',
   `verified_at` datetime NOT NULL,

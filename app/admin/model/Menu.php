@@ -44,7 +44,7 @@ class Menu extends BaseModel
 
     public function getList(){
         try{
-            $cache = Cache::get('SF_AdminMenu');
+            $cache = Cache::get('QH_AdminMenu');
             if(!empty($cache)){
                 return $cache;
             }
@@ -63,7 +63,7 @@ class Menu extends BaseModel
             }
             $all_node_lists = $this->setMenuTree($parent_id, $data); //用于检测是否有子菜单
             $all_node_lists = MenuPermissionService::tagRole($all_node_lists);
-            Cache::tag('SF_Menu')->set('SF_AdminMenu', $all_node_lists);
+            Cache::tag('QH_Menu')->set('QH_AdminMenu', $all_node_lists);
             return $all_node_lists;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

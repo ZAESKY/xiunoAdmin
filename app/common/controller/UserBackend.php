@@ -61,7 +61,7 @@ class UserBackend extends CommonBase
             if(!$userInfo){
                 throw new Exception(t('user.account_abnormal').'[errorCode:UserInfoError]');
             }
-            $expectedSign = data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].sf_password_hash());
+            $expectedSign = data_auth_sign($userInfo['appid'].$userInfo['username'].$userInfo['password'].qh_password_hash());
             if(!empty($userId) && !hash_equals((string)$expectedSign, (string)$sign)){
                 cookie('userId',null);
                 cookie('userSign',null);
@@ -78,7 +78,7 @@ class UserBackend extends CommonBase
                 throw new Exception(t('user.account_blocked').'[errorCode:UserStatusBlocked]');
             }
             if(!empty($userInfo['ip'])){
-                if(!in_array(get_client_ip(), sf_safe_unserialize_array($userInfo['ip']), true)){
+                if(!in_array(get_client_ip(), qh_safe_unserialize_array($userInfo['ip']), true)){
                     throw new Exception(t('user.ip_not_whitelist'));
                 }
             }
@@ -209,7 +209,7 @@ class UserBackend extends CommonBase
             'content' => str_replace('{{code}}', $code, $mailContent),
         ];
         if(!empty($this->userInfo['config'])){
-            $param = array_replace_recursive($param, sf_safe_unserialize_array($this->userInfo['config']));
+            $param = array_replace_recursive($param, qh_safe_unserialize_array($this->userInfo['config']));
         }
         // 用户邮件配置只能提供 SMTP 参数，不允许改写本次收件人和验证内容。
         $param['to'] = $recipient;
@@ -585,7 +585,7 @@ class UserBackend extends CommonBase
                 if($this->myPowerInfo['pirate_power'] != 1){
                     return $this->render('public/error', ['msg' => t('login.no_access')]);
                 }
-                View::assign('price', sf_money_apply_rate($this->myAppInfo['pirate_money'], $this->myPowerInfo['pirate_discount']));
+                View::assign('price', qh_money_apply_rate($this->myAppInfo['pirate_money'], $this->myPowerInfo['pirate_discount']));
             } else if ($this->service instanceof \app\user\service\UserService){
                 if($this->myPowerInfo['adduser_power'] != 1){
                     return $this->render('public/error', ['msg' => t('login.no_access')]);

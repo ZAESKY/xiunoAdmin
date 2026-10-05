@@ -12,7 +12,7 @@ namespace app\common\service;
  *   - HMAC 工具（请求签名、pepper 派生）
  *
  * 密钥来源一律为环境变量，绝不写入代码或数据库。
- * 生成方式见： php think sf:keygen
+ * 生成方式见： php think qh:keygen
  *
  * @since 2026-08-16 P2
  */
@@ -191,7 +191,7 @@ class CryptoService
         $b64 = trim((string)env($purpose . '_sign_secret_key', ''));
         if ($b64 === '') {
             throw new \RuntimeException(sprintf(
-                '未配置 %s_sign_secret_key。请先执行 php think sf:keygen %s 并写入 .env',
+                '未配置 %s_sign_secret_key。请先执行 php think qh:keygen %s 并写入 .env',
                 $purpose,
                 $purpose
             ));
@@ -213,7 +213,7 @@ class CryptoService
         $pepper = trim((string)env('security_pepper', ''));
         if ($pepper === '') {
             // 未配置时退回既有全局常量，保证功能可用；生产环境应显式配置
-            $pepper = function_exists('sf_password_hash') ? sf_password_hash() : 'SF_DEFAULT_PEPPER';
+            $pepper = function_exists('qh_password_hash') ? qh_password_hash() : 'QH_DEFAULT_PEPPER';
         }
         return $pepper;
     }

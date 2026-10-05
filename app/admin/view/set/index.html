@@ -27,7 +27,7 @@
                                     <textarea {$item.extend} name="row[{$item.name}]" class="layui-textarea" lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} row="5">{$item.value|htmlentities}</textarea>
                                     {/case}
                                     {case ueditor}
-                                    <textarea {$item.extend} id="rich_{$item.name}" name="row[{$item.name}]" class="layui-textarea sf-rich-editor" lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} row="8">{$item.value|htmlentities}</textarea>
+                                    <textarea {$item.extend} id="rich_{$item.name}" name="row[{$item.name}]" class="layui-textarea qh-rich-editor" lay-verType="tips" lay-verify="{$item.rule}" {empty name="item.tip_type"}{notempty name="item.tip"}lay-tips="{$item.tip}"{/notempty}{/empty} row="8">{$item.value|htmlentities}</textarea>
                                     {/case}
                                     {case array}
                                     <div style="white-space:nowrap;overflow-x: auto;">
@@ -117,7 +117,7 @@
                                             laydate.render({
                                                 elem: '#date{$item.name}',
                                                 mark: {
-                                                    '0-3-15': 'SF'
+                                                    '0-3-15': 'QH'
                                                 },
                                                 type: 'date',
                                                 trigger: 'click'
@@ -135,7 +135,7 @@
                                             laydate.render({
                                                 elem: '#time{$item.name}',
                                                 mark: {
-                                                    '0-3-15': 'SF'
+                                                    '0-3-15': 'QH'
                                                 },
                                                 type: 'time',
                                                 trigger: 'click'
@@ -153,7 +153,7 @@
                                             laydate.render({
                                                 elem: '#datetime{$item.name}',
                                                 mark: {
-                                                    '0-3-15': 'SF'
+                                                    '0-3-15': 'QH'
                                                 },
                                                 type: 'datetime',
                                                 trigger: 'click'
@@ -262,7 +262,7 @@
                                         </div>
                                     </div>
                                     <div class="layui-form-item text-center">
-                                        <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="SF_DeleteFile"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>
+                                        <button type="button" class="layui-btn layui-btn-primary" lay-submit lay-filter="QH_DeleteFile"><i class="layui-icon">&#xe640;</i>{:t('common.delete')}</button>
                                     </div>
                                     <div class="mask"></div>
                                     <div class="loading">
@@ -369,7 +369,7 @@
                                                     });
                                                 }
                                             });
-                                            form.on('submit(SF_DeleteFile{$item.name})', function () {
+                                            form.on('submit(QH_DeleteFile{$item.name})', function () {
                                                 notice.msg('{:t("common.loading")}', {icon: 4, close: true});
                                                 $.ajax({
                                                     type: "POST",
@@ -404,57 +404,57 @@
                                     {/switch}
                                     {switch $item.tip_type}
                                     {case tag-orange}
-                                    <div class="sf-tag layui-badge-orange" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-orange" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case tag-blue}
-                                    <div class="sf-tag layui-badge-blue" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-blue" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case tag-red}
-                                    <div class="sf-tag layui-badge-red" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-red" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case tag-green}
-                                    <div class="sf-tag layui-badge-green" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-green" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case tag-purple}
-                                    <div class="sf-tag layui-badge-purple" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-purple" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case tag-gray}
-                                    <div class="sf-tag layui-badge-gray" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-gray" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case tag-yellow}
-                                    <div class="sf-tag layui-badge-yellow" style="margin-bottom:10px;">
+                                    <div class="qh-tag layui-badge-yellow" style="margin-bottom:10px;">
                                         {$item.tip|raw}
                                     </div>
                                     {/case}
                                     {case blockquote-blue}
-                                    <blockquote class="layui-elem-quote-sf-info">
+                                    <blockquote class="layui-elem-quote-qh-info">
                                         {$item.tip|raw}
                                     </blockquote>
                                     {/case}
                                     {case blockquote-red}
-                                    <blockquote class="layui-elem-quote-sf-danger">
+                                    <blockquote class="layui-elem-quote-qh-danger">
                                         {$item.tip|raw}
                                     </blockquote>
                                     {/case}
                                     {case blockquote-yellow}
-                                    <blockquote class="layui-elem-quote-sf-warning">
+                                    <blockquote class="layui-elem-quote-qh-warning">
                                         {$item.tip|raw}
                                     </blockquote>
                                     {/case}
                                     {case blockquote-green}
-                                    <blockquote class="layui-elem-quote-sf-success">
+                                    <blockquote class="layui-elem-quote-qh-success">
                                         {$item.tip|raw}
                                     </blockquote>
                                     {/case}
@@ -577,7 +577,7 @@
         var layedit = layui.layedit;
         var richEditors = [];
 
-        $('.sf-rich-editor, textarea[name="row[notice_home]"]').each(function () {
+        $('.qh-rich-editor, textarea[name="row[notice_home]"]').each(function () {
             var id = $(this).attr('id');
             if (!id) {
                 id = 'rich_' + $(this).attr('name').replace(/[^a-zA-Z0-9_]/g, '_');

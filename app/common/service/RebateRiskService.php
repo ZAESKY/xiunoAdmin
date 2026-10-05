@@ -69,7 +69,7 @@ class RebateRiskService
 
     public static function limitReason(int $payerUserId, int $referrerUserId, $rebateAmount): string
     {
-        $rebateAmount = sf_money_format($rebateAmount);
+        $rebateAmount = qh_money_format($rebateAmount);
         $activeStatuses = ['pending', 'settled'];
         $dayStart = date('Y-m-d 00:00:00');
         $dayEnd = date('Y-m-d 23:59:59');
@@ -87,23 +87,23 @@ class RebateRiskService
             return '同一邀请关系当日返利次数已达上限';
         }
 
-        $dailyLimit = sf_money_format(conf('rebate_daily_limit') ?: '50.00');
-        $dailyUsed = sf_money_format(Db::name('rebate_record')
+        $dailyLimit = qh_money_format(conf('rebate_daily_limit') ?: '50.00');
+        $dailyUsed = qh_money_format(Db::name('rebate_record')
             ->where('referrer_user_id', $referrerUserId)
             ->whereIn('status', $activeStatuses)
             ->whereBetween('created_at', [$dayStart, $dayEnd])
             ->sum('rebate_amount') ?: 0);
-        if (sf_money_to_cents(sf_money_add($dailyUsed, $rebateAmount)) > sf_money_to_cents($dailyLimit)) {
+        if (qh_money_to_cents(qh_money_add($dailyUsed, $rebateAmount)) > qh_money_to_cents($dailyLimit)) {
             return '当日返利金额已达上限';
         }
 
-        $monthlyLimit = sf_money_format(conf('rebate_monthly_limit') ?: '500.00');
-        $monthlyUsed = sf_money_format(Db::name('rebate_record')
+        $monthlyLimit = qh_money_format(conf('rebate_monthly_limit') ?: '500.00');
+        $monthlyUsed = qh_money_format(Db::name('rebate_record')
             ->where('referrer_user_id', $referrerUserId)
             ->whereIn('status', $activeStatuses)
             ->whereBetween('created_at', [$monthStart, $monthEnd])
             ->sum('rebate_amount') ?: 0);
-        if (sf_money_to_cents(sf_money_add($monthlyUsed, $rebateAmount)) > sf_money_to_cents($monthlyLimit)) {
+        if (qh_money_to_cents(qh_money_add($monthlyUsed, $rebateAmount)) > qh_money_to_cents($monthlyLimit)) {
             return '当月返利金额已达上限';
         }
 

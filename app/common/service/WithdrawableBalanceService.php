@@ -22,8 +22,8 @@ class WithdrawableBalanceService
         string $sourceType = '',
         $sourceNo = ''
     ): bool {
-        $amount = sf_money_format($amount);
-        if ($userId <= 0 || sf_money_to_cents($amount) <= 0) {
+        $amount = qh_money_format($amount);
+        if ($userId <= 0 || qh_money_to_cents($amount) <= 0) {
             return false;
         }
 

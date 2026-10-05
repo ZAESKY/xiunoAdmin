@@ -23,7 +23,7 @@ return [
         ],
         'redis'    => [
             'type'       => 'redis',
-            'queue'      => env('queue.name', 'sf_admin_default'),
+            'queue'      => env('queue.name', 'qh_admin_default'),
             'host'       => env('redis.host', '127.0.0.1'),
             'port'       => (int) env('redis.port', 6379),
             'password'   => env('redis.password', ''),

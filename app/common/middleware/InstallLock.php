@@ -16,7 +16,7 @@ class InstallLock
 {
     public function handle(Request $request, Closure $next)
     {
-        $lockFile = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'install' . DIRECTORY_SEPARATOR . 'SF_Auth.Lock';
+        $lockFile = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'install' . DIRECTORY_SEPARATOR . 'QH_Auth.Lock';
         if (!is_file($lockFile)) {
             return $next($request);
         }

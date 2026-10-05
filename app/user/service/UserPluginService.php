@@ -15,7 +15,7 @@ use think\Exception;
 
 /**
  * 用户插件服务
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class UserPluginService extends BaseService
@@ -32,8 +32,8 @@ class UserPluginService extends BaseService
     {
         // v2 主题市场接口与授权中心页面共用同一套查询，避免筛选和字段口径分叉。
         $post = $params ?? request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
         $keyword = !empty($post['text']) ? trim($post['text']) : '';
         $price_type = !empty($post['price_type']) ? $post['price_type'] : '';
         $category = !empty($post['category']) ? $post['category'] : '';
@@ -106,7 +106,7 @@ class UserPluginService extends BaseService
             $images = json_decode((string)$plugin['images'], true);
             $plugin['images'] = is_array($images)
                 ? array_values(array_filter(array_map(static function ($url) {
-                    return sf_safe_url($url, true);
+                    return qh_safe_url($url, true);
                 }, $images)))
                 : [];
         } else {
@@ -132,7 +132,7 @@ class UserPluginService extends BaseService
             } catch (\Throwable $e) {
                 $version['is_available'] = false;
             }
-            $version['update_description'] = sf_plain_text(
+            $version['update_description'] = qh_plain_text(
                 $version['update_description'] ?? '',
                 2000
             );
@@ -265,8 +265,8 @@ class UserPluginService extends BaseService
     public function myList($userId)
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
         $keyword = !empty($post['text']) ? trim($post['text']) : '';
         $status = isset($post['status']) && $post['status'] !== '' ? intval($post['status']) : null;
 
@@ -310,7 +310,7 @@ class UserPluginService extends BaseService
             $reward = $rewardMap[intval($item['id'] ?? 0)] ?? [];
             $item['reward_status'] = $reward['status'] ?? '';
             $item['reward_points'] = intval($reward['points'] ?? 0);
-            $item['reward_balance'] = sf_money_format($reward['balance'] ?? 0);
+            $item['reward_balance'] = qh_money_format($reward['balance'] ?? 0);
             $item['reward_reason'] = $reward['reason'] ?? '';
         }
 
@@ -324,22 +324,22 @@ class UserPluginService extends BaseService
     {
         $post = request()->post();
         $id = !empty($post['id']) ? intval($post['id']) : null;
-        $name = !empty($post['name']) ? sf_plain_text($post['name'], 100) : null;
+        $name = !empty($post['name']) ? qh_plain_text($post['name'], 100) : null;
         $slug = !empty($post['slug']) ? trim($post['slug']) : null;
         $category = !empty($post['category']) ? trim((string)$post['category']) : '';
-        $version = !empty($post['version']) ? sf_plain_text($post['version'], 50) : '1.0.0';
+        $version = !empty($post['version']) ? qh_plain_text($post['version'], 50) : '1.0.0';
         // 作者默认取当前用户名
         $userInfo = \think\facade\Db::name('user')->where('id', intval($userId))->find();
-        $author = !empty($post['author']) ? sf_plain_text($post['author'], 100) : sf_plain_text($userInfo['username'] ?? '', 100);
-        $author_url = !empty($post['author_url']) ? sf_safe_url($post['author_url'], false) : '';
-        $description = !empty($post['description']) ? sf_plain_text($post['description'], 1000) : '';
+        $author = !empty($post['author']) ? qh_plain_text($post['author'], 100) : qh_plain_text($userInfo['username'] ?? '', 100);
+        $author_url = !empty($post['author_url']) ? qh_safe_url($post['author_url'], false) : '';
+        $description = !empty($post['description']) ? qh_plain_text($post['description'], 1000) : '';
         $content = !empty($post['content']) ? clean_rich_text($post['content']) : '';
-        $icon = !empty($post['icon']) ? sf_safe_url($post['icon'], true) : '';
-        $cover = !empty($post['cover']) ? sf_safe_url($post['cover'], true) : '';
+        $icon = !empty($post['icon']) ? qh_safe_url($post['icon'], true) : '';
+        $cover = !empty($post['cover']) ? qh_safe_url($post['cover'], true) : '';
         $images = !empty($post['images']) ? $post['images'] : [];
-        $updateDescription = isset($post['update_description']) ? sf_plain_text($post['update_description'], 2000) : sf_plain_text($post['updateDescription'] ?? '', 2000);
+        $updateDescription = isset($post['update_description']) ? qh_plain_text($post['update_description'], 2000) : qh_plain_text($post['updateDescription'] ?? '', 2000);
         try {
-            $price = sf_money_format(!empty($post['price']) ? $post['price'] : '0.00');
+            $price = qh_money_format(!empty($post['price']) ? $post['price'] : '0.00');
         } catch (\InvalidArgumentException $e) {
             return message('plugin_action.price_format_error', false);
         }
@@ -347,9 +347,9 @@ class UserPluginService extends BaseService
 
         // 原创/转载
         $origin_type = !empty($post['origin_type']) ? intval($post['origin_type']) : 1;
-        $origin_url = !empty($post['origin_url']) ? sf_safe_url($post['origin_url'], false) : '';
-        $origin_author = !empty($post['origin_author']) ? sf_plain_text($post['origin_author'], 100) : '';
-        $origin_note = !empty($post['origin_note']) ? sf_plain_text($post['origin_note'], 1000) : '';
+        $origin_url = !empty($post['origin_url']) ? qh_safe_url($post['origin_url'], false) : '';
+        $origin_author = !empty($post['origin_author']) ? qh_plain_text($post['origin_author'], 100) : '';
+        $origin_note = !empty($post['origin_note']) ? qh_plain_text($post['origin_note'], 1000) : '';
         $related_plugin_id = !empty($post['related_plugin_id']) ? intval($post['related_plugin_id']) : 0;
 
         if (empty($name)) {
@@ -379,10 +379,10 @@ class UserPluginService extends BaseService
         if (!in_array($pay_type, ['balance', 'points'], true)) {
             return message('plugin_action.payment_method_invalid', false);
         }
-        if (sf_money_to_cents($price) < 0 || sf_money_to_cents($price) > 1000000000) {
+        if (qh_money_to_cents($price) < 0 || qh_money_to_cents($price) > 1000000000) {
             return message('plugin_action.price_out_of_range', false);
         }
-        if ($pay_type === 'points' && sf_money_to_cents($price) % 100 !== 0) {
+        if ($pay_type === 'points' && qh_money_to_cents($price) % 100 !== 0) {
             return message('plugin_action.points_integer', false);
         }
 
@@ -444,7 +444,7 @@ class UserPluginService extends BaseService
 
         if (is_array($images)) {
             $images = array_values(array_filter(array_map(static function ($url) {
-                return sf_safe_url($url, true);
+                return qh_safe_url($url, true);
             }, array_slice($images, 0, 20))));
             $images = json_encode($images, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } else {
@@ -591,7 +591,7 @@ class UserPluginService extends BaseService
                     $this->syncPluginResources(intval($id), $latestVersion ? intval($latestVersion['id']) : 0, $userId, $icon, $cover, $storageDriver, $post);
                 }
                 \think\facade\Db::commit();
-                \think\facade\Cache::tag('SF_Plugin')->clear();
+                \think\facade\Cache::tag('QH_Plugin')->clear();
                 if ($newStatus == 0 && $row['status'] == 1) {
                     try {
                         $editor = \think\facade\Db::name('user')->where('id', intval($userId))->field('username')->find();
@@ -698,7 +698,7 @@ class UserPluginService extends BaseService
                 PluginPackageUploadService::consume(intval($package['upload_id']), intval($pluginId));
                 $this->syncPluginResources($pluginId, $versionId, $userId, $icon, $cover, $storageDriver, $post);
                 \think\facade\Db::commit();
-                \think\facade\Cache::tag('SF_Plugin')->clear();
+                \think\facade\Cache::tag('QH_Plugin')->clear();
 
                 // 将临时图片移动到正式目录
                 if (!empty($content)) {
@@ -921,8 +921,8 @@ class UserPluginService extends BaseService
     public function getMyAllComments($userId)
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
         $text = !empty($post['text']) ? trim($post['text']) : '';
         $status = isset($post['status']) && $post['status'] !== '' ? intval($post['status']) : null;
 
@@ -958,8 +958,8 @@ class UserPluginService extends BaseService
     public function getMyPluginComments($userId)
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
         $plugin_id = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
         $text = !empty($post['text']) ? trim($post['text']) : '';
         $status = isset($post['status']) && $post['status'] !== '' ? intval($post['status']) : null;
@@ -1145,8 +1145,8 @@ class UserPluginService extends BaseService
     public function getComments($pluginId)
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
 
         if (empty($pluginId)) {
             return ['total' => 0, 'data' => []];
@@ -1205,8 +1205,8 @@ class UserPluginService extends BaseService
         }
 
         // 检查支付方式
-        $price = sf_money_format($plugin['price']);
-        $priceCents = sf_money_to_cents($price);
+        $price = qh_money_format($plugin['price']);
+        $priceCents = qh_money_to_cents($price);
         $payType = !empty($plugin['pay_type']) ? $plugin['pay_type'] : 'balance';
 
         if ($payType === 'points') {
@@ -1216,8 +1216,8 @@ class UserPluginService extends BaseService
                 return message(t('plugin_action.points_insufficient', ['current' => $userPoints, 'required' => $pointsNeeded]), false);
             }
         } else {
-            $balance = sf_money_format($user['balance']);
-            if (sf_money_to_cents($balance) < $priceCents) {
+            $balance = qh_money_format($user['balance']);
+            if (qh_money_to_cents($balance) < $priceCents) {
                 return message(t('plugin_action.balance_insufficient', ['current' => $balance, 'required' => $price]), false);
             }
         }
@@ -1503,8 +1503,8 @@ class UserPluginService extends BaseService
     {
         $post = request()->post();
         $plugin_id = !empty($post['plugin_id']) ? intval($post['plugin_id']) : 0;
-        $limit = sf_page_limit($post['limit'] ?? null, 20);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 20);
+        $current_page = qh_page_number($post['current_page'] ?? null);
 
         if (empty($plugin_id)) {
             return ['total' => 0, 'data' => []];
@@ -1532,8 +1532,8 @@ class UserPluginService extends BaseService
     public function getMyPurchases($userId)
     {
         $post = request()->post();
-        $limit = sf_page_limit($post['limit'] ?? null, 10);
-        $current_page = sf_page_number($post['current_page'] ?? null);
+        $limit = qh_page_limit($post['limit'] ?? null, 10);
+        $current_page = qh_page_number($post['current_page'] ?? null);
         $type = !empty($post['type']) ? $post['type'] : 'purchase';
         $text = !empty($post['text']) ? trim($post['text']) : '';
 
@@ -1626,7 +1626,7 @@ class UserPluginService extends BaseService
         }
 
         if (preg_match('#^https?://#i', $filePath)) {
-            $safeUrl = sf_safe_url($filePath, false);
+            $safeUrl = qh_safe_url($filePath, false);
             if ($safeUrl === '' || strtolower((string)parse_url($safeUrl, PHP_URL_SCHEME)) !== 'https') {
                 throw new Exception(t('plugin_action.unsafe_download_url'));
             }
@@ -1728,7 +1728,7 @@ class UserPluginService extends BaseService
         \think\facade\Db::name('plugin')->where('id', $pluginId)->inc('download_count')->update();
 
         if (preg_match('#^https?://#i', $downloadPath)) {
-            $safeUrl = sf_safe_url($downloadPath, false);
+            $safeUrl = qh_safe_url($downloadPath, false);
             if ($safeUrl === '' || strtolower((string)parse_url($safeUrl, PHP_URL_SCHEME)) !== 'https') {
                 throw new Exception(t('plugin_action.unsafe_download_url'));
             }
@@ -1807,7 +1807,7 @@ class UserPluginService extends BaseService
                     $url = '';
                 }
             } else {
-                $url = sf_safe_url($item['url'] ?? '', true);
+                $url = qh_safe_url($item['url'] ?? '', true);
             }
             if ($url === '') {
                 continue;
@@ -1829,19 +1829,19 @@ class UserPluginService extends BaseService
     {
         foreach (['name' => 100, 'version' => 50, 'author' => 100, 'description' => 1000, 'update_description' => 2000] as $field => $limit) {
             if (isset($plugin[$field])) {
-                $plugin[$field] = sf_plain_text($plugin[$field], $limit);
+                $plugin[$field] = qh_plain_text($plugin[$field], $limit);
             }
         }
         foreach (['icon', 'cover', 'iconUrl', 'coverUrl'] as $field) {
             if (isset($plugin[$field])) {
-                $plugin[$field] = sf_safe_url($plugin[$field], true);
+                $plugin[$field] = qh_safe_url($plugin[$field], true);
             }
         }
         if (isset($plugin['author_url'])) {
-            $plugin['author_url'] = sf_safe_url($plugin['author_url'], false);
+            $plugin['author_url'] = qh_safe_url($plugin['author_url'], false);
         }
         if (isset($plugin['origin_url'])) {
-            $plugin['origin_url'] = sf_safe_url($plugin['origin_url'], false);
+            $plugin['origin_url'] = qh_safe_url($plugin['origin_url'], false);
         }
         if ($includeRichText && isset($plugin['content'])) {
             $plugin['content'] = clean_rich_text($plugin['content']);
@@ -1916,12 +1916,12 @@ class UserPluginService extends BaseService
         if (($settlement['pay_type'] ?? '') === 'points') {
             return t('plugin_commission.points_exempt');
         }
-        if (sf_money_to_cents($settlement['amount'] ?? 0) <= 0) {
+        if (qh_money_to_cents($settlement['amount'] ?? 0) <= 0) {
             return t('plugin_commission.no_commission');
         }
         return t('plugin_commission.summary', [
             'rate' => PluginCommissionService::displayRate($settlement['rate'] ?? 0),
-            'amount' => sf_money_format($settlement['amount'] ?? 0),
+            'amount' => qh_money_format($settlement['amount'] ?? 0),
         ]);
     }
 

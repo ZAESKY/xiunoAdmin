@@ -5,7 +5,7 @@
         <span></span><span></span><span></span><span></span>
     </div>
 </div>
-<div id="SF"></div>
+<div id="QH"></div>
 {include file="/public/footer"}
 <script>
     layui.use(['form', 'admin', 'notice'], function () {
@@ -28,7 +28,7 @@
                         if(data.data.hasOwnProperty('url')){
                             window.location.replace(data.data.url);
                         }else if(data.data.hasOwnProperty('html')){
-                            $("#SF").html(data.data.html);
+                            $("#QH").html(data.data.html);
                         }else{
                             notice.error({
                                 title: window.t('order_ui.redirect_fail'),

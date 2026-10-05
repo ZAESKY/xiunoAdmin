@@ -55,7 +55,7 @@ class PowerPriceService extends BaseService
             }
             $status = intval($rawStatus);
             $this->model->setPower($id, $type, $status);
-            Cache::tag('SF_Menu')->clear();
+            Cache::tag('QH_Menu')->clear();
             return true;
         }catch (\Exception $e){
             throw new Exception($e->getMessage());

@@ -43,7 +43,7 @@ fi
   --single-transaction --quick --routines --triggers --events --no-tablespaces \
   --default-character-set=utf8mb4 "$db_name" > "$backup_dir/database.sql"
 test "$(wc -c < "$backup_dir/database.sql")" -gt 1024
-grep -q 'Table structure for table `SF_user`' "$backup_dir/database.sql"
+grep -q 'Table structure for table `QH_user`' "$backup_dir/database.sql"
 
 files=(
   app/common/service/WithdrawableBalanceService.php
@@ -66,8 +66,8 @@ files=(
   config/console.php
   database/migrations/20261002_rebate_withdrawal_hardening.sql
   database/migrations/20261002_rebate_withdrawal_hardening_rollback.sql
-  app/SF_Auth.sql
-  app/SF_rebate_migration.sql
+  app/QH_Auth.sql
+  app/QH_rebate_migration.sql
   database/migrations/20260816_legacy_429_bridge_tables.sql
   app/command/LegacyBridge.php
   database/migrate.sh

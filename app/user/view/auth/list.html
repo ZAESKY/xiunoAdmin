@@ -9,7 +9,7 @@
             <blockquote class="layui-elem-quote">{:t('auth_portal.subtitle')}</blockquote>
             {notempty name="replace_notice"}
             <div class="layui-form-item formBasForm">
-                <div class="sf-tag layui-badge-blue">
+                <div class="qh-tag layui-badge-blue">
                     {$replace_notice|raw}
                 </div>
             </div>
@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="layui-inline layui-btn-container">&emsp;&emsp;
-                        <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                        <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                         </button>
                     </div>
@@ -42,12 +42,12 @@
             </form>
             <!-- 数据表格 -->
 
-            <table id="SF_Table" lay-filter="SF_Table"></table>
+            <table id="QH_Table" lay-filter="QH_Table"></table>
         </div>
     </div>
 </div>
 <!-- 表格操作列 -->
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     {{# if (d.can_manage == 1) { }}
     <a class="layui-btn layui-btn-primary layui-btn-sm" lay-event="editManage"><i class="layui-icon layui-icon-edit"></i>{:t('auth_portal.manage_edit')}</a>
     <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon layui-icon-delete"></i>{:t('common.delete')}</a>
@@ -63,28 +63,28 @@
     {{# } }}
 </script>
 <!-- 表格状态列 -->
-<script type="text/html" id="SF_TbState">
+<script type="text/html" id="QH_TbState">
     {{# if (d.can_manage == 1) { }}
-    <input type="checkbox" lay-filter="SF_TbStateCk" value="{{d.id}}" lay-skin="switch"
+    <input type="checkbox" lay-filter="QH_TbStateCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common.normal')}|{:t('common.ban')}" {{d.status==1?'checked':''}} style="display: none;"/>
     {{# } else { }}
     <span class="layui-badge {{d.status==1?'layui-badge-green':'layui-badge-red'}}">{{d.status==1?'{:t("common.normal")}':'{:t("common.ban")}'}}</span>
     {{# } }}
 </script>
-<script type="text/html" id="SF_TbPermanent_Switch">
-    <input type="checkbox" lay-filter="SF_TbPermanent_SwitchCk" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_TbPermanent_Switch">
+    <input type="checkbox" lay-filter="QH_TbPermanent_SwitchCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common.open')}|{:t('common.closed')}" {{d.permanent_switch==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_Beta_Switch">
-    <input type="checkbox" lay-filter="SF_Beta_SwitchCk" value="{{d.id}}" lay-skin="switch"
+<script type="text/html" id="QH_Beta_Switch">
+    <input type="checkbox" lay-filter="QH_Beta_SwitchCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common.open')}|{:t('common.closed')}" {{d.beta==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="SF_Tbid">
-    <span id="SF_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-sf-indigo"></span> '+d.id:'<span class="layui-badge-dot layui-bg-red"></span> '+d.id}}</span>
+<script type="text/html" id="QH_Tbid">
+    <span id="QH_span_{{d.id}}">{{d.status==1?'<span class="layui-badge-dot layui-bg-qh-indigo"></span> '+d.id:'<span class="layui-badge-dot layui-bg-red"></span> '+d.id}}</span>
 </script>
 <!-- 表单弹窗 -->
-<script type="text/html" id="SF_EditDialog">
-    <form id="SF_EditForm" lay-filter="SF_EditForm" class="layui-form model-form">
+<script type="text/html" id="QH_EditDialog">
+    <form id="QH_EditForm" lay-filter="QH_EditForm" class="layui-form model-form">
         <input name="id" type="hidden"/>
 
         <div class="layui-form-item">
@@ -101,7 +101,7 @@
                        lay-verType="tips" lay-verify="required"/>
             </div>
         </div>
-        <div class="layui-form-item layui-form-text sf-manager-only">
+        <div class="layui-form-item layui-form-text qh-manager-only">
             <label class="layui-form-label">{:t('auth_portal.auth_ip_label')}</label>
             <div class="layui-input-block">
                 <textarea name="ip" class="layui-textarea" placeholder="{:t('common_ui.ip_placeholder_hint')}"></textarea>
@@ -124,13 +124,13 @@
                 </div>
             </div>
         </div>
-        <div class="layui-form-item sf-manager-only">
+        <div class="layui-form-item qh-manager-only">
             <label class="layui-form-label layui-form-required">{:t('auth_portal.status_label')}</label>
             <div class="layui-input-block">
                 <input type="checkbox" name="status" value="1" lay-skin="switch" checked/>
             </div>
         </div>
-        <div class="layui-form-item sf-binding-only" style="display:none;">
+        <div class="layui-form-item qh-binding-only" style="display:none;">
             <label class="layui-form-label">{:t('auth_portal.replace_price_label')}</label>
             <div class="layui-input-block">
                 <input type="text" name="remainderReplacePrice" class="layui-input layui-disabled" disabled/>
@@ -144,14 +144,14 @@
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn" lay-filter="SF_EditSubmit" lay-submit>{:t('common.save')}</button>
+            <button class="layui-btn" lay-filter="QH_EditSubmit" lay-submit>{:t('common.save')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.cancel')}</button>
         </div>
     </form>
 </script>
 <!-- 离线激活弹窗 -->
-<script type="text/html" id="SF_OfflineDialog">
-    <form id="SF_OfflineForm" lay-filter="SF_OfflineForm" class="layui-form model-form">
+<script type="text/html" id="QH_OfflineDialog">
+    <form id="QH_OfflineForm" lay-filter="QH_OfflineForm" class="layui-form model-form">
         <div class="layui-form-item">
             <blockquote class="layui-elem-quote">{:t('auth_portal.offline_help')}</blockquote>
         </div>
@@ -167,21 +167,21 @@
             <label class="layui-form-label layui-form-required">{:t('auth_portal.request_code_label')}</label>
             <div class="layui-input-block">
                 <textarea name="request_code" maxlength="16384" rows="5" autocomplete="off"
-                          placeholder="{:t('auth_portal.request_code_placeholder')}" class="layui-textarea sf-offline-request"
+                          placeholder="{:t('auth_portal.request_code_placeholder')}" class="layui-textarea qh-offline-request"
                           lay-verType="tips" lay-verify="required"></textarea>
             </div>
         </div>
-        <div class="layui-form-item sf-offline-result" style="display:none;">
+        <div class="layui-form-item qh-offline-result" style="display:none;">
             <label class="layui-form-label">{:t('auth_portal.credential_label')}</label>
             <div class="layui-input-block">
-                <textarea class="layui-textarea sf-offline-code" rows="6" readonly
+                <textarea class="layui-textarea qh-offline-code" rows="6" readonly
                           aria-label="{:t('auth_portal.credential_label')}"></textarea>
                 <div class="layui-word-aux">{:t('auth_portal.credential_help')}</div>
             </div>
         </div>
         <div class="layui-form-item text-right">
-            <button class="layui-btn sf-offline-submit" lay-filter="SF_OfflineSubmit" lay-submit>{:t('auth_portal.issue_credential')}</button>
-            <button class="layui-btn layui-btn-normal sf-offline-copy" type="button" style="display:none;">{:t('auth_portal.copy_credential')}</button>
+            <button class="layui-btn qh-offline-submit" lay-filter="QH_OfflineSubmit" lay-submit>{:t('auth_portal.issue_credential')}</button>
+            <button class="layui-btn layui-btn-normal qh-offline-copy" type="button" style="display:none;">{:t('auth_portal.copy_credential')}</button>
             <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">{:t('common.close')}</button>
         </div>
     </form>
@@ -283,7 +283,7 @@
 
         /* 渲染统一授权表格 */
         var insTb = table.render({
-            elem: '#SF_Table',
+            elem: '#QH_Table',
             url: '{:url("/Auth/list")}',
             method: 'post',
             page: true,
@@ -305,7 +305,7 @@
             },
             cols: [[
                 {type: 'checkbox', fixed: true},
-                {field: 'id', title: 'ID', templet: '#SF_Tbid', sort: true, width: 80, fixed: true},
+                {field: 'id', title: 'ID', templet: '#QH_Tbid', sort: true, width: 80, fixed: true},
                 {field: 'appName', title: authText.app, sort: true, minWidth: 120, templet: function (d) {
                         return '<span class="layui-badge layui-badge-orange">'+escapeHtml(d.appName)+'</span>';
                     }},
@@ -338,8 +338,8 @@
                 },
                 {field: 'sign', title: authText.featureCode, sort: true, minWidth: 100},
                 {field: 'addtime', title: authText.addTime, sort: true, minWidth: 180},
-                {field: 'status', title: authText.status, templet: '#SF_TbState', minWidth: 100},
-                {title: authText.operation, toolbar: '#SF_TbBar', align: 'center', minWidth: 390}
+                {field: 'status', title: authText.status, templet: '#QH_TbState', minWidth: 100},
+                {title: authText.operation, toolbar: '#QH_TbBar', align: 'center', minWidth: 390}
             ]]
         });
         function checkEndTime(date){
@@ -375,7 +375,7 @@
         });
 
         /* 表格搜索 */
-        form.on('submit(SF_TbSearch)', function (data) {
+        form.on('submit(QH_TbSearch)', function (data) {
             insTb.reload({where: data.field, page: {curr: 1}});
             return false;
         });
@@ -406,7 +406,7 @@
         }
 
         /* 表格工具条点击事件 */
-        table.on('tool(SF_Table)', function (obj) {
+        table.on('tool(QH_Table)', function (obj) {
             if (obj.event === 'editManage') {
                 showEditModel(obj.data, 'manage');
             } else if (obj.event === 'editBinding') {
@@ -427,7 +427,7 @@
             laydate.render({
                 elem: '#test', //指定元素
                 mark: {
-                    '0-3-15': 'SF'
+                    '0-3-15': 'QH'
                 },
                 type: 'datetime',
                 trigger: 'click',
@@ -451,13 +451,13 @@
             notice.msg(authText.copied, {icon: 1, audio:'1'});
         }
         /* 表格头工具栏点击事件 */
-        table.on('toolbar(SF_Table)', function (obj) {
+        table.on('toolbar(QH_Table)', function (obj) {
             if (obj.event === 'add') { // 添加
                 showEditModel(null, 'manage');
             } else if (obj.event === 'bind') {
                 binding();
             } else if (obj.event === 'del') { // 删除
-                var checkRows = table.checkStatus('SF_Table');
+                var checkRows = table.checkStatus('QH_Table');
                 var managedRows = checkRows.data.filter(function (row) { return row.can_manage == 1; });
                 if (managedRows.length === 0) {
                     notice.msg(authText.selectManaged, {icon: 3, audio:'1'});
@@ -468,7 +468,7 @@
                 });
                 doDel({ids: ids});
             } else if (obj.event === 'unbind') {
-                var boundRows = table.checkStatus('SF_Table').data.filter(function (row) { return row.can_unbind == 1; });
+                var boundRows = table.checkStatus('QH_Table').data.filter(function (row) { return row.can_unbind == 1; });
                 if (boundRows.length === 0) {
                     notice.msg(authText.selectBound, {icon: 3, audio:'1'});
                     return;
@@ -480,7 +480,7 @@
             laydate.render({
                 elem: '#test', //指定元素
                 mark: {
-                    '0-3-15': 'SF'
+                    '0-3-15': 'QH'
                 },
                 type: 'datetime',
                 trigger: 'click',
@@ -515,14 +515,14 @@
         }
         function binding(){
             notice.msg(authText.openingQq,{icon:4,close:true});
-            SfQqOauth.start({
+            QHQqOauth.start({
                 url:'/api.php/Social/verify',
                 data:{scene:'auth_binding',return_to:location.pathname+location.search},
                 onResult:handleAuthOauthResult,
                 onError:function(message){notice.destroy();notice.msg(message,{icon:2});}
             });
         }
-        SfQqOauth.resume(handleAuthOauthResult,function(message){notice.msg(message,{icon:2});});
+        QHQqOauth.resume(handleAuthOauthResult,function(message){notice.msg(message,{icon:2});});
 
         form.on('checkbox(allChoose)', function (data) {
             $(data.elem).closest('form').find("input[name='list[]']").each(function () {
@@ -545,7 +545,7 @@
                     notice.destroy();
                     if (result.code == 0) {
                         layer.closeAll();
-                        table.reload('SF_Table');
+                        table.reload('QH_Table');
                         notice.msg(result.msg, {icon: 1, audio:'1'});
                     } else {
                         notice.msg(result.msg, {icon: 2, audio:'1'});
@@ -565,27 +565,27 @@
                 type: 1,
                 title: authText.offlineTitle,
                 area: ['680px', '600px'],
-                content: $('#SF_OfflineDialog').html(),
+                content: $('#QH_OfflineDialog').html(),
                 success: function () {
                     form.render();
                     if (authcode) {
-                        form.val('SF_OfflineForm', {authcode: authcode});
+                        form.val('QH_OfflineForm', {authcode: authcode});
                     }
                 }
             });
         }
 
-        form.on('submit(SF_OfflineSubmit)', function (data) {
+        form.on('submit(QH_OfflineSubmit)', function (data) {
             if (offlineSubmitting) {
                 return false;
             }
             offlineSubmitting = true;
             var formElem = $(data.form);
-            var submitButton = formElem.find('.sf-offline-submit');
+            var submitButton = formElem.find('.qh-offline-submit');
             submitButton.prop('disabled', true).addClass('layui-btn-disabled').text(authText.issuing);
-            formElem.find('.sf-offline-result').hide();
-            formElem.find('.sf-offline-copy').hide();
-            formElem.find('.sf-offline-code').val('');
+            formElem.find('.qh-offline-result').hide();
+            formElem.find('.qh-offline-copy').hide();
+            formElem.find('.qh-offline-code').val('');
 
             $.ajax({
                 type: 'POST',
@@ -594,9 +594,9 @@
                 dataType: 'json',
                 success: function (res) {
                     if (res && res.code == 0 && res.data && typeof res.data.activation_code === 'string') {
-                        formElem.find('.sf-offline-code').val(res.data.activation_code);
-                        formElem.find('.sf-offline-result').show();
-                        formElem.find('.sf-offline-copy').show();
+                        formElem.find('.qh-offline-code').val(res.data.activation_code);
+                        formElem.find('.qh-offline-result').show();
+                        formElem.find('.qh-offline-copy').show();
                         notice.msg(res.msg || authText.issueSuccess, {icon: 1, audio:'1'});
                     } else {
                         notice.msg((res && res.msg) || authText.issueFailed, {icon: 2, audio:'1'});
@@ -617,8 +617,8 @@
             return false;
         });
 
-        $(document).on('click', '.sf-offline-copy', function () {
-            var codeField = $(this).closest('form').find('.sf-offline-code').get(0);
+        $(document).on('click', '.qh-offline-copy', function () {
+            var codeField = $(this).closest('form').find('.qh-offline-code').get(0);
             if (!codeField || !codeField.value) {
                 notice.msg(authText.noCredential, {icon: 3});
                 return;
@@ -645,11 +645,11 @@
             admin.popupRight({
                 type: 1,
                 title: bindingMode ? authText.editBinding : (mData ? authText.editAuth : authText.addAuthTitle),
-                content: $('#SF_EditDialog').html(),
+                content: $('#QH_EditDialog').html(),
                 success: function (layero, dIndex) {
-                    var formRoot = $(layero).find('#SF_EditForm');
-                    formRoot.find('.sf-manager-only').toggle(!bindingMode);
-                    formRoot.find('.sf-binding-only').toggle(bindingMode);
+                    var formRoot = $(layero).find('#QH_EditForm');
+                    formRoot.find('.qh-manager-only').toggle(!bindingMode);
+                    formRoot.find('.qh-binding-only').toggle(bindingMode);
                     // 回显表单数据
                     if(mData){
                         notice.msg(authText.listLoading, {icon: 4, close: true});
@@ -676,7 +676,7 @@
                                     notice.msg(data.msg, {icon: 2, audio:'1'});
                                 }
                                 form.render();
-                                form.val('SF_EditForm', mData);
+                                form.val('QH_EditForm', mData);
                             },
                             error: function() {
                                 notice.destroy();
@@ -719,7 +719,7 @@
                     }
 
                     // 表单提交事件
-                    form.on('submit(SF_EditSubmit)', function (data) {
+                    form.on('submit(QH_EditSubmit)', function (data) {
                         notice.msg(authText.processing, {icon: 4, close: true});
                         if (bindingMode) {
                             data.field.bindingType = 'auth';
@@ -732,7 +732,7 @@
                             success: function(data) {
                                 notice.destroy();
                                 if (data.code == 0) {
-                                    table.reload('SF_Table');
+                                    table.reload('QH_Table');
                                     notice.msg(data.msg, {icon: 1, audio:'1'});
                                 } else {
                                     notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -768,7 +768,7 @@
                     success: function(data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            table.reload('SF_Table');
+                            table.reload('QH_Table');
                             notice.msg(data.msg, {icon: 1, audio:'1'});
                         }else{
                             notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -802,7 +802,7 @@
                     success: function (data) {
                         notice.destroy();
                         if (data.code == 0) {
-                            table.reload('SF_Table');
+                            table.reload('QH_Table');
                             notice.msg(data.msg, {icon: 1, audio:'1'});
                         } else {
                             notice.msg(data.msg, {icon: 2, audio:'1'});
@@ -817,7 +817,7 @@
         }
 
         /* 修改用户状态 */
-        form.on('switch(SF_TbStateCk)', function (obj) {
+        form.on('switch(QH_TbStateCk)', function (obj) {
             notice.msg(authText.processing, {icon: 4, close: true});
             $.ajax({
                 type: "POST",
@@ -827,7 +827,7 @@
                 success: function(data) {
                     notice.destroy();
                     if (data.code == 0) {
-                        table.reload('SF_Table');
+                        table.reload('QH_Table');
                         notice.msg(data.msg, {icon: 1, audio:'1'});
                     }else{
                         notice.msg(data.msg, {icon: 2, audio:'1'});

@@ -20,7 +20,7 @@ CLIENT_CNF=""
 FILES_CHANGED=0
 DB_CHANGED=0
 FILES=(
-  app/SF_Auth.sql
+  app/QH_Auth.sql
   app/admin/controller/Set.php
   app/common/service/AliyunSmsService.php
   database/migrations/20261004_qq_sms_registration.sql
@@ -39,7 +39,7 @@ finish() {
   if [ "$status" -ne 0 ]; then
     if [ "$DB_CHANGED" -eq 1 ] && [ -s "$BACKUP_DIR/sms-template.sql" ]; then
       "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" \
-        -e "DELETE FROM SF_config WHERE name='sms_template_code'"
+        -e "DELETE FROM QH_config WHERE name='sms_template_code'"
       "$MYSQL_BIN" --defaults-extra-file="$CLIENT_CNF" "$DB_NAME" \
         < "$BACKUP_DIR/sms-template.sql"
     fi
@@ -120,7 +120,7 @@ done
 "$DUMP_BIN" --defaults-extra-file="$CLIENT_CNF" --no-create-info --skip-add-locks \
   --no-tablespaces \
   --skip-comments --skip-extended-insert --where="name='sms_template_code'" \
-  "$DB_NAME" SF_config > "$BACKUP_DIR/sms-template.sql"
+  "$DB_NAME" QH_config > "$BACKUP_DIR/sms-template.sql"
 [ "$(wc -c < "$BACKUP_DIR/database.sql")" -gt 1024 ]
 grep -q 'Dump completed' "$BACKUP_DIR/database.sql"
 grep -q 'sms_template_code' "$BACKUP_DIR/sms-template.sql"
@@ -147,9 +147,9 @@ for rel in "${FILES[@]}"; do deploy_file "$STAGE_DIR/$rel" "$SITE_DIR/$rel"; don
 chmod 0755 "$SITE_DIR/deploy/qq-sms-registration-deploy.sh" "$SITE_DIR/deploy/sms-pnvs-deploy.sh"
 
 echo "[4/7] 切换为号码认证赠送模板"
-db_q "UPDATE SF_config SET value='$TEMPLATE_CODE', tip='号码认证赠送模板填数字 CODE（如 100001），普通短信模板填 SMS_ 开头的 CODE；模板须包含 \${code}' WHERE name='sms_template_code'"
+db_q "UPDATE QH_config SET value='$TEMPLATE_CODE', tip='号码认证赠送模板填数字 CODE（如 100001），普通短信模板填 SMS_ 开头的 CODE；模板须包含 \${code}' WHERE name='sms_template_code'"
 DB_CHANGED=1
-[ "$(db_q "SELECT value FROM SF_config WHERE name='sms_template_code' LIMIT 1")" = "$TEMPLATE_CODE" ]
+[ "$(db_q "SELECT value FROM QH_config WHERE name='sms_template_code' LIMIT 1")" = "$TEMPLATE_CODE" ]
 
 echo "[5/7] 清缓存并验证 PHP"
 cd "$SITE_DIR"

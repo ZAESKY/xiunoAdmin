@@ -29,8 +29,8 @@ class Order extends Backend
 
             if ($action === 'approve') {
                 $id = intval($post['id'] ?? 0);
-                $remark = sf_plain_text($post['remark'] ?? '', 500);
-                $image = sf_safe_url($post['image'] ?? '', true);
+                $remark = qh_plain_text($post['remark'] ?? '', 500);
+                $image = qh_safe_url($post['image'] ?? '', true);
                 if ($id <= 0) return json(message('withdraw.record_not_found', false));
                 if (empty($remark)) return json(message('withdraw.process_remark_required', false));
                 if (empty($image)) return json(message('withdraw.transfer_proof_required', false));
@@ -64,7 +64,7 @@ class Order extends Backend
 
             if ($action === 'reject') {
                 $id = intval($post['id'] ?? 0);
-                $remark = sf_plain_text($post['remark'] ?? '', 500);
+                $remark = qh_plain_text($post['remark'] ?? '', 500);
                 if ($id <= 0) return json(message('withdraw.record_not_found', false));
                 if (empty($remark)) return json(message('withdraw.reject_reason_required', false));
                 try {
@@ -73,7 +73,7 @@ class Order extends Backend
                         if (!$row) throw new \RuntimeException(t('withdraw.record_not_found'));
                         if ((string)$row['status'] !== 'pending') throw new \RuntimeException(t('withdraw.status_not_processable'));
 
-                        $amount = sf_money_format($row['amount']);
+                        $amount = qh_money_format($row['amount']);
                         $userId = intval($row['user_id']);
                         $user = \think\facade\Db::name('user')->where('id', $userId)->lock(true)->find();
                         if (!$user) throw new \RuntimeException(t('withdraw.user_not_found'));
@@ -112,21 +112,21 @@ class Order extends Backend
             }
 
             // List
-            $limit = sf_page_limit(input('post.limit', null), 15);
-            $page = sf_page_number(input('post.current_page', null));
+            $limit = qh_page_limit(input('post.limit', null), 15);
+            $page = qh_page_number(input('post.current_page', null));
             $query = \think\facade\Db::name('withdraw')->alias('w')
                 ->join('user u', 'w.user_id = u.id', 'left')
                 ->order('w.id', 'desc')
                 ->field('w.*, u.username');
             $list = $query->paginate(['list_rows' => $limit, 'page' => $page]);
             $items = array_map(static function (array $row): array {
-                $row['username'] = sf_plain_text($row['username'] ?? '', 150);
+                $row['username'] = qh_plain_text($row['username'] ?? '', 150);
                 $row['phone'] = preg_replace('/[^0-9+ -]/', '', (string)($row['phone'] ?? ''));
-                $row['real_name'] = sf_plain_text($row['real_name'] ?? '', 50);
-                $row['user_remark'] = sf_plain_text($row['user_remark'] ?? '', 200);
-                $row['admin_remark'] = sf_plain_text($row['admin_remark'] ?? '', 500);
-                $row['qr_image'] = sf_safe_url($row['qr_image'] ?? '', true);
-                $row['transfer_image'] = sf_safe_url($row['transfer_image'] ?? '', true);
+                $row['real_name'] = qh_plain_text($row['real_name'] ?? '', 50);
+                $row['user_remark'] = qh_plain_text($row['user_remark'] ?? '', 200);
+                $row['admin_remark'] = qh_plain_text($row['admin_remark'] ?? '', 500);
+                $row['qr_image'] = qh_safe_url($row['qr_image'] ?? '', true);
+                $row['transfer_image'] = qh_safe_url($row['transfer_image'] ?? '', true);
                 return $row;
             }, $list->items());
             return json(message('ok', true, ['data' => $items, 'total' => $list->total()]));

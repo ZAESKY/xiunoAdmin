@@ -141,9 +141,9 @@ for rel in "${FILES[@]}"; do
 done
 
 echo "[5/6] 验证手机号管理和发布提示"
-[ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user_phone_identity'")" = 1 ]
+[ "$(db_q "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user_phone_identity'")" = 1 ]
 for column in phone_verified_at phone_verified_source; do
-  [ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='SF_user' AND COLUMN_NAME='$column'")" = 1 ]
+  [ "$(db_q "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='QH_user' AND COLUMN_NAME='$column'")" = 1 ]
 done
 grep -q 'syncAdminPhone' app/common/service/PhoneVerificationService.php
 grep -q 'phone_verified' app/admin/view/user/list.html

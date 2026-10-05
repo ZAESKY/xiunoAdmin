@@ -15,13 +15,13 @@ use think\facade\Db;
  * 构建并签名发布物 / 补丁
  *
  * 更新包：
- *   php think sf:sign release /path/SF.zip \
+ *   php think qh:sign release /path/QH.zip \
  *       --product=zaesky_theme_light --build=260100 --edition=26.1.0 \
  *       --channel=stable --min-bbs=4.0.0 --max-bbs=4.0.3 --min-php=7.4 \
  *       --note="修复若干问题"
  *
  * 核心兼容补丁：
- *   php think sf:sign patch /path/php8-html-safe.zip \
+ *   php think qh:sign patch /path/php8-html-safe.zip \
  *       --product=zaesky_theme_light --patch-id=php8-html-safe --revision=1 --level=1 \
  *       --theme-build=260100 --theme-edition=26.1.0 \
  *       --title="PHP 8 HTML 净化兼容" --min-bbs=4.0.0 --max-bbs=4.0.3 --min-php=8.0
@@ -34,7 +34,7 @@ class Sign extends Command
 {
     protected function configure()
     {
-        $this->setName('sf:sign')
+        $this->setName('qh:sign')
             ->addArgument('kind', Argument::REQUIRED, 'release 或 patch')
             ->addArgument('zip', Argument::REQUIRED, 'ZIP 包路径')
             ->addOption('product', null, Option::VALUE_REQUIRED, '产品标识（必须显式提供）', '')
@@ -74,7 +74,7 @@ class Sign extends Command
             return 1;
         }
         if (!CryptoService::configured(CryptoService::PURPOSE_RELEASE)) {
-            $output->error('未配置 release_sign_secret_key，请先执行 php think sf:keygen release');
+            $output->error('未配置 release_sign_secret_key，请先执行 php think qh:keygen release');
             return 1;
         }
 
@@ -173,7 +173,7 @@ class Sign extends Command
         // 4) 复制包到分发目录 + 落库
         $subDir = $kind === 'patch' ? 'patch' : 'v2';
         // HTTP 中间件会定义 APP_PATH/DS，但 CLI 命令不会经过该中间件。
-        // 使用框架路径助手，保证 sf:sign 在真实发布机的命令行环境可运行。
+        // 使用框架路径助手，保证 qh:sign 在真实发布机的命令行环境可运行。
         $destDir = app_path('common' . DIRECTORY_SEPARATOR . 'download' . DIRECTORY_SEPARATOR . $subDir);
         if (!is_dir($destDir) && !@mkdir($destDir, 0755, true)) {
             $output->error('无法创建分发目录：' . $destDir);
@@ -227,10 +227,10 @@ class Sign extends Command
                     ->find();
                 if ($exists) {
                     Db::name('release')->where('id', $exists['id'])->update($row);
-                    $output->writeln('<info>已更新 SF_release #' . $exists['id'] . '</info>');
+                    $output->writeln('<info>已更新 QH_release #' . $exists['id'] . '</info>');
                 } else {
                     $id = Db::name('release')->insertGetId($row);
-                    $output->writeln('<info>已写入 SF_release #' . $id . '</info>');
+                    $output->writeln('<info>已写入 QH_release #' . $id . '</info>');
                 }
             } else {
                 $row = [
@@ -262,10 +262,10 @@ class Sign extends Command
                     ->find();
                 if ($exists) {
                     Db::name('patch')->where('id', $exists['id'])->update($row);
-                    $output->writeln('<info>已更新 SF_patch #' . $exists['id'] . '</info>');
+                    $output->writeln('<info>已更新 QH_patch #' . $exists['id'] . '</info>');
                 } else {
                     $id = Db::name('patch')->insertGetId($row);
-                    $output->writeln('<info>已写入 SF_patch #' . $id . '</info>');
+                    $output->writeln('<info>已写入 QH_patch #' . $id . '</info>');
                 }
             }
         } catch (\Throwable $e) {

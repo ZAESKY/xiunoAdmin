@@ -27,14 +27,14 @@
 <script type="text/javascript" src="/Assets/libs/layui/layui.js"></script>
 <script>
     try {
-        window.SF_I18N_LOCALE = parent.SF_I18N_LOCALE;
-        window.SF_I18N_MESSAGES = parent.SF_I18N_MESSAGES;
+        window.QH_I18N_LOCALE = parent.QH_I18N_LOCALE;
+        window.QH_I18N_MESSAGES = parent.QH_I18N_MESSAGES;
     } catch (e) {}
 </script>
 <script type="text/javascript" src="/Assets/js/common.js?v=20261004.5"></script>
 <script>
     document.title = t('qrlogin.title');
-    document.documentElement.lang = window.SF_I18N ? window.SF_I18N.lang() : 'en-us';
+    document.documentElement.lang = window.QH_I18N ? window.QH_I18N.lang() : 'en-us';
     document.getElementById('loginmsg').textContent = t('qrlogin.scan_mobile');
 
     layui.use(['layer', 'admin', 'form', 'notice', 'jquery'], function () {

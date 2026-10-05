@@ -97,8 +97,8 @@ class Checkin extends Backend
     {
         if (!IS_POST) return $this->render();
 
-        $page = sf_page_number(input('page', null));
-        $limit = sf_page_limit(input('limit', null), 15);
+        $page = qh_page_number(input('page', null));
+        $limit = qh_page_limit(input('limit', null), 15);
         $username = input('username', '');
 
         $query = Db::name('checkin_record')

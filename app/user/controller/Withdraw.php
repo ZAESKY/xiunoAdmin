@@ -34,8 +34,8 @@ class Withdraw extends UserBackend
     public function index()
     {
         if (IS_POST) {
-            $limit = sf_page_limit(input('post.limit', null), 15);
-            $page = sf_page_number(input('post.current_page', null));
+            $limit = qh_page_limit(input('post.limit', null), 15);
+            $page = qh_page_number(input('post.current_page', null));
             $list = Db::name('withdraw')
                 ->where('user_id', $this->userId)
                 ->order('id', 'desc')
@@ -71,13 +71,13 @@ class Withdraw extends UserBackend
         if (!$user) {
             return json(message('withdraw.user_not_found', false));
         }
-        $balance = sf_money_format($user['withdrawable_balance'] ?? 0);
-        $balanceCents = sf_money_to_cents($balance);
+        $balance = qh_money_format($user['withdrawable_balance'] ?? 0);
+        $balanceCents = qh_money_to_cents($balance);
 
         // Check min amount
-        $minAmount = sf_money_format(Db::name('config')->where('name', 'withdraw_min_amount')->value('value') ?: '10.00');
-        if (sf_money_to_cents($minAmount) <= 0) $minAmount = '10.00';
-        $minAmountCents = sf_money_to_cents($minAmount);
+        $minAmount = qh_money_format(Db::name('config')->where('name', 'withdraw_min_amount')->value('value') ?: '10.00');
+        if (qh_money_to_cents($minAmount) <= 0) $minAmount = '10.00';
+        $minAmountCents = qh_money_to_cents($minAmount);
         if ($balanceCents < $minAmountCents) {
             return json(message(t('withdraw.balance_below_minimum', ['amount' => $minAmount]), false));
         }
@@ -99,11 +99,11 @@ class Withdraw extends UserBackend
         }
 
         try {
-            $amount = sf_money_format(input('post.amount', '0'));
+            $amount = qh_money_format(input('post.amount', '0'));
         } catch (\InvalidArgumentException $e) {
             return json(message('withdraw.amount_format_error', false));
         }
-        $amountCents = sf_money_to_cents($amount);
+        $amountCents = qh_money_to_cents($amount);
         if ($amountCents <= 0) {
             return json(message('withdraw.amount_zero', false));
         }
@@ -119,8 +119,8 @@ class Withdraw extends UserBackend
         $phone = $smsRequired
             ? (string)($phoneStatus['phone'] ?? '')
             : trim((string)input('post.phone', ''));
-        $realName = sf_plain_text(input('post.real_name', ''), 50);
-        $remark = sf_plain_text(input('post.remark', ''), 200);
+        $realName = qh_plain_text(input('post.real_name', ''), 50);
+        $remark = qh_plain_text(input('post.remark', ''), 200);
 
         if ($smsRequired && empty($phoneStatus['verified'])) {
             return json(message('withdraw.bind_verified_phone', false));
@@ -132,7 +132,7 @@ class Withdraw extends UserBackend
             return json(message('withdraw.real_name_required', false));
         }
         $payMethod = trim((string)input('post.pay_method', ''));
-        $qrImage = sf_safe_url(input('post.qr_image', ''), true);
+        $qrImage = qh_safe_url(input('post.qr_image', ''), true);
         if (empty($payMethod) || !in_array($payMethod, ['alipay', 'wechat', 'bank'], true)) {
             return json(message('withdraw.payment_method_required', false));
         }
@@ -149,11 +149,11 @@ class Withdraw extends UserBackend
             if (!$lockedUser) {
                 throw new \RuntimeException('user not found');
             }
-            $lockedBalance = sf_money_format($lockedUser['balance']);
-            $lockedWithdrawableBalance = sf_money_format($lockedUser['withdrawable_balance'] ?? 0);
+            $lockedBalance = qh_money_format($lockedUser['balance']);
+            $lockedWithdrawableBalance = qh_money_format($lockedUser['withdrawable_balance'] ?? 0);
             if (
-                $amountCents > sf_money_to_cents($lockedWithdrawableBalance)
-                || $amountCents > sf_money_to_cents($lockedBalance)
+                $amountCents > qh_money_to_cents($lockedWithdrawableBalance)
+                || $amountCents > qh_money_to_cents($lockedBalance)
             ) {
                 Db::rollback();
                 return json(message('withdraw.exceeds_available', false));
@@ -188,8 +188,8 @@ class Withdraw extends UserBackend
             }
 
             // 提现只允许扣减收益余额，同时从总余额中扣除同额资金。
-            $newBalance = sf_money_subtract($lockedBalance, $amount);
-            $newWithdrawableBalance = sf_money_subtract($lockedWithdrawableBalance, $amount);
+            $newBalance = qh_money_subtract($lockedBalance, $amount);
+            $newWithdrawableBalance = qh_money_subtract($lockedWithdrawableBalance, $amount);
             $updated = Db::name('user')->where('id', $userId)->data([
                 'balance' => $newBalance,
                 'withdrawable_balance' => $newWithdrawableBalance,
@@ -199,7 +199,7 @@ class Withdraw extends UserBackend
             }
 
             // Balance log
-            BalanceLogModel::add($userId, 'withdraw_apply', sf_money_from_cents(-sf_money_to_cents($amount)),
+            BalanceLogModel::add($userId, 'withdraw_apply', qh_money_from_cents(-qh_money_to_cents($amount)),
                 t('withdraw.balance_log_apply', ['amount' => $amount]));
 
             // Withdraw record
@@ -258,7 +258,7 @@ class Withdraw extends UserBackend
                 Db::rollback();
                 return json(message('withdraw.cannot_cancel', false));
             }
-            $amount = sf_money_format($row['amount']);
+            $amount = qh_money_format($row['amount']);
             $now = datetime();
 
             $user = Db::name('user')->where('id', $userId)->lock(true)->find();
@@ -321,13 +321,13 @@ class Withdraw extends UserBackend
         if (!$user) {
             return json(message('withdraw.user_not_found', false));
         }
-        $accountBalance = sf_money_format($user['balance']);
-        $balance = sf_money_format($user['withdrawable_balance'] ?? 0);
+        $accountBalance = qh_money_format($user['balance']);
+        $balance = qh_money_format($user['withdrawable_balance'] ?? 0);
 
         // Always return the configured threshold so the page can display it even
         // when the current account does not yet meet the withdrawal conditions.
-        $minAmount = sf_money_format(Db::name('config')->where('name', 'withdraw_min_amount')->value('value') ?: '10.00');
-        if (sf_money_to_cents($minAmount) <= 0) $minAmount = '10.00';
+        $minAmount = qh_money_format(Db::name('config')->where('name', 'withdraw_min_amount')->value('value') ?: '10.00');
+        if (qh_money_to_cents($minAmount) <= 0) $minAmount = '10.00';
         $conditionData = [
             'balance' => $balance,
             'withdrawable_balance' => $balance,
@@ -347,7 +347,7 @@ class Withdraw extends UserBackend
         if ($conditionData['sms_required'] && !$conditionData['phone_verified']) {
             return json(['code' => -1, 'msg' => t('withdraw.bind_verified_phone'), 'reason' => 'phone_unverified', 'data' => $conditionData]);
         }
-        if (sf_money_to_cents($balance) < sf_money_to_cents($minAmount)) {
+        if (qh_money_to_cents($balance) < qh_money_to_cents($minAmount)) {
             return json(['code' => -1, 'msg' => t('withdraw.current_below_minimum', ['balance' => $balance, 'min' => $minAmount]), 'reason' => 'min', 'data' => $conditionData]);
         }
 
@@ -373,11 +373,11 @@ class Withdraw extends UserBackend
     private function sanitizeWithdrawRow(array $row): array
     {
         $row['phone'] = preg_replace('/[^0-9+ -]/', '', (string)($row['phone'] ?? ''));
-        $row['real_name'] = sf_plain_text($row['real_name'] ?? '', 50);
-        $row['user_remark'] = sf_plain_text($row['user_remark'] ?? '', 200);
-        $row['admin_remark'] = sf_plain_text($row['admin_remark'] ?? '', 500);
-        $row['qr_image'] = sf_safe_url($row['qr_image'] ?? '', true);
-        $row['transfer_image'] = sf_safe_url($row['transfer_image'] ?? '', true);
+        $row['real_name'] = qh_plain_text($row['real_name'] ?? '', 50);
+        $row['user_remark'] = qh_plain_text($row['user_remark'] ?? '', 200);
+        $row['admin_remark'] = qh_plain_text($row['admin_remark'] ?? '', 500);
+        $row['qr_image'] = qh_safe_url($row['qr_image'] ?? '', true);
+        $row['transfer_image'] = qh_safe_url($row['transfer_image'] ?? '', true);
         return $row;
     }
 }

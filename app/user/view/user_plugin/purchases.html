@@ -18,13 +18,13 @@
                                     </div>
                                 </div>
                                 <div class="layui-inline layui-btn-container">
-                                    <button class="layui-btn icon-btn" lay-filter="SF_TbSearch" lay-submit>
+                                    <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                                         <i class="layui-icon">&#xe615;</i>{:t('common_ui.search_btn')}
                                     </button>
                                 </div>
                             </div>
                         </form>
-                        <table id="SF_Table" lay-filter="SF_Table"></table>
+                        <table id="QH_Table" lay-filter="QH_Table"></table>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
     </div>
 </div>
 
-<script type="text/html" id="SF_TbBar">
+<script type="text/html" id="QH_TbBar">
     <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="detail"><i class="layui-icon">&#xe705;</i>{:t('common.detail')}</a>
 </script>
 
@@ -48,7 +48,7 @@ layui.use(['layer', 'form', 'table', 'element'], function () {
     var currentType = 'purchase';
 
     var insTb = table.render({
-        elem: '#SF_Table',
+        elem: '#QH_Table',
         url: '{:url("/UserPlugin/purchases")}',
         method: 'post',
         page: true,
@@ -93,7 +93,7 @@ layui.use(['layer', 'form', 'table', 'element'], function () {
                 if (s == 3) return '<span class="layui-badge layui-badge-red">{:t('plugin_detail.rejected')}</span>';
                 return '-';
             }},
-            {title: '{:t("common.operation")}', toolbar: '#SF_TbBar', align: 'center', width: 100}
+            {title: '{:t("common.operation")}', toolbar: '#QH_TbBar', align: 'center', width: 100}
         ]]
     });
 
@@ -110,13 +110,13 @@ layui.use(['layer', 'form', 'table', 'element'], function () {
         });
     });
 
-    form.on('submit(SF_TbSearch)', function (data) {
+    form.on('submit(QH_TbSearch)', function (data) {
         var params = Object.assign({}, data.field, { type: currentType });
         insTb.reload({where: params, page: {curr: 1}});
         return false;
     });
 
-    table.on('tool(SF_Table)', function (obj) {
+    table.on('tool(QH_Table)', function (obj) {
         if (obj.event === 'detail') {
             var pluginId = obj.data.plugin_id;
             layer.open({

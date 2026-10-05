@@ -7,7 +7,7 @@ use app\common\controller\Frontend;
 
 /**
  * 插件中心API控制器
- * @author SF授权系统
+ * @author QH授权系统
  * @since 2026-05-03
  */
 class PluginApi extends Frontend

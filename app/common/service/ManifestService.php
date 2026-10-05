@@ -362,6 +362,85 @@ class ManifestService
         return ['ok' => true, 'msg' => '', 'files' => $normalized, 'restore' => $restore];
     }
 
+    /**
+     * 校验签名发布清单中的 Xiuno 主程序同步声明。
+     *
+     * 发布阶段会通过 normalizeBundledProgram() 生成这两组字段；更新接口仍需
+     * 在返回清单前重新校验，避免数据库中的异常或历史脏数据进入下载流程。
+     */
+    public static function validateBundledProgramManifest(array $manifest): array
+    {
+        $files = $manifest['program_files'] ?? null;
+        $restore = $manifest['program_restore'] ?? null;
+        $packageFiles = $manifest['files'] ?? null;
+        if (!is_array($files) || !is_array($restore) || !is_array($packageFiles)
+            || count($files) > 128 || count($restore) > 128
+            || empty($packageFiles['program/_zaesky_program.json'])) {
+            return ['ok' => false, 'msg' => '主程序同步清单结构无效'];
+        }
+
+        $normalizedTargets = [];
+        foreach ($files as $target => $entry) {
+            $target = (string)$target;
+            if (!is_array($entry) || self::coreTargetProblem($target) !== '') {
+                return ['ok' => false, 'msg' => '主程序同步目标不安全：'.$target];
+            }
+            $source = (string)($entry['source'] ?? '');
+            $hash = strtolower((string)($entry['sha256'] ?? ''));
+            $sourceEntry = $packageFiles[$source] ?? null;
+            $accepted = $entry['expect_sha256'] ?? null;
+            $mode = $entry['mode'] ?? null;
+            if ($source !== 'program/'.$target || !is_array($sourceEntry)
+                || !preg_match('/^[a-f0-9]{64}$/D', $hash)
+                || !hash_equals($hash, strtolower((string)($sourceEntry['sha256'] ?? '')))
+                || !is_array($accepted) || !$accepted || count($accepted) > 64
+                || !is_int($mode) || $mode <= 0 || $mode > 0777) {
+                return ['ok' => false, 'msg' => '主程序同步源文件、哈希或原文声明无效：'.$target];
+            }
+            $seenHashes = [];
+            foreach ($accepted as $oldHash) {
+                $oldHash = strtolower((string)$oldHash);
+                if (!preg_match('/^[a-f0-9]{64}$/D', $oldHash) || isset($seenHashes[$oldHash])) {
+                    return ['ok' => false, 'msg' => '主程序同步原文哈希无效或重复：'.$target];
+                }
+                $seenHashes[$oldHash] = true;
+            }
+            $normalizedTargets[$target] = true;
+        }
+
+        $restoreSeen = [];
+        foreach ($restore as $target) {
+            $target = (string)$target;
+            if (self::coreTargetProblem($target) !== ''
+                || isset($normalizedTargets[$target]) || isset($restoreSeen[$target])) {
+                return ['ok' => false, 'msg' => '主程序恢复目标无效、重复或冲突：'.$target];
+            }
+            $restoreSeen[$target] = true;
+        }
+
+        $sortedFiles = array_keys($files);
+        $canonicalFiles = $sortedFiles;
+        sort($canonicalFiles, SORT_STRING);
+        $canonicalRestore = array_values($restore);
+        sort($canonicalRestore, SORT_STRING);
+        if ($sortedFiles !== $canonicalFiles || array_values($restore) !== $canonicalRestore) {
+            return ['ok' => false, 'msg' => '主程序同步清单必须按路径排序'];
+        }
+
+        foreach (array_keys($packageFiles) as $source) {
+            $source = (string)$source;
+            if (strpos($source, 'program/') !== 0 || $source === 'program/_zaesky_program.json') {
+                continue;
+            }
+            $target = substr($source, strlen('program/'));
+            if (!isset($normalizedTargets[$target])
+                || (string)($files[$target]['source'] ?? '') !== $source) {
+                return ['ok' => false, 'msg' => '主程序目录包含未声明文件：'.$source];
+            }
+        }
+        return ['ok' => true, 'msg' => ''];
+    }
+
     /** 主题正式发布包必须存在的运行文件。 */
     public static function themeRequiredFiles(): array
     {

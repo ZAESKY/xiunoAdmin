@@ -540,14 +540,16 @@ class UpdateV2Service extends BaseService
         return null;
     }
 
-    /** 发布记录必须是可由当前发布公钥验证的 schema 2 完整包。 */
+    /** 发布记录必须是可由当前发布公钥验证的 schema 2/3 完整包。 */
     private function releaseManifest(array $row): ?array
     {
         $manifest = json_decode((string)($row['manifest_json'] ?? ''), true);
+        $schemaVersion = is_array($manifest) ? (int)($manifest['schema_version'] ?? 0) : 0;
         if (!is_array($manifest)
-            || (int)($manifest['schema_version'] ?? 0) !== 2
+            || !in_array($schemaVersion, [2, 3], true)
             || (string)($manifest['kind'] ?? '') !== 'release'
             || (string)($manifest['package_type'] ?? '') !== 'full'
+            || !isset($manifest['files']) || !is_array($manifest['files'])
             || !isset($manifest['migrations']) || !is_array($manifest['migrations'])
             || (string)($manifest['product_id'] ?? '') !== (string)($row['product_id'] ?? '')
             || (int)($manifest['build_no'] ?? 0) !== (int)($row['build_no'] ?? 0)
@@ -562,6 +564,10 @@ class UpdateV2Service extends BaseService
                 if (!empty($manifest['files'][$legacyFile])) { return null; }
             }
             if (!$manifest['migrations']) { return null; }
+            if ($schemaVersion >= 3
+                && empty(ManifestService::validateBundledProgramManifest($manifest)['ok'])) {
+                return null;
+            }
         }
         $keyId = (string)($row['sig_key_id'] ?? '');
         $keys = CryptoService::publicKeys(CryptoService::PURPOSE_RELEASE);

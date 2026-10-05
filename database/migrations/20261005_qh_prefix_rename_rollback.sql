@@ -14,7 +14,12 @@ SET @qh_target_lower = CONVERT('qh' USING utf8mb4) COLLATE utf8mb4_unicode_ci;
 UPDATE `QH_config`
 SET `value` = REPLACE(REPLACE(`value` COLLATE utf8mb4_unicode_ci, @qh_target_upper, @qh_legacy_upper), @qh_target_lower, @qh_legacy_lower),
     `tip` = REPLACE(REPLACE(`tip` COLLATE utf8mb4_unicode_ci, @qh_target_upper, @qh_legacy_upper), @qh_target_lower, @qh_legacy_lower)
-WHERE `name` IN ('title', 'keywords', 'description', 'foot', 'cdkey_head', 'api_key');
+WHERE `name` IN ('title', 'keywords', 'description', 'foot', 'cdkey_head');
+
+UPDATE `QH_config`
+SET `value` = CONCAT(@qh_legacy_lower, '-2129876388')
+WHERE `name` = 'api_key'
+  AND BINARY `value` = BINARY CONCAT(@qh_target_lower, '-2129876388');
 
 SET @qh_old_group_concat_max_len = @@SESSION.group_concat_max_len;
 SET SESSION group_concat_max_len = 65535;

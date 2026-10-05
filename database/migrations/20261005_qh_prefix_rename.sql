@@ -76,7 +76,13 @@ SET @qh_target_lower = CONVERT('qh' USING utf8mb4) COLLATE utf8mb4_unicode_ci;
 UPDATE `QH_config`
 SET `value` = REPLACE(REPLACE(`value` COLLATE utf8mb4_unicode_ci, @qh_legacy_upper, @qh_target_upper), @qh_legacy_lower, @qh_target_lower),
     `tip` = REPLACE(REPLACE(`tip` COLLATE utf8mb4_unicode_ci, @qh_legacy_upper, @qh_target_upper), @qh_legacy_lower, @qh_target_lower)
-WHERE `name` IN ('title', 'keywords', 'description', 'foot', 'cdkey_head', 'api_key');
+WHERE `name` IN ('title', 'keywords', 'description', 'foot', 'cdkey_head');
+
+-- API 密钥属于凭据，绝不能对自定义值做模糊替换；仅迁移历史安装器的公开默认值。
+UPDATE `QH_config`
+SET `value` = CONCAT(@qh_target_lower, '-2129876388')
+WHERE `name` = 'api_key'
+  AND BINARY `value` = BINARY CONCAT(@qh_legacy_lower, '-2129876388');
 
 SET @qh_legacy_prefix = NULL;
 SET @qh_target_prefix = NULL;

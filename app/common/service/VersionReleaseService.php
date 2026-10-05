@@ -6,15 +6,12 @@ namespace app\common\service;
 use think\facade\Db;
 
 /**
- * 把版本列表中的“安装包”(type=0)安全发布到 v2 授权更新通道。
+ * 把版本列表中的完整发布包安全发布到 v2 授权更新通道，并自动生成差分。
  */
 class VersionReleaseService
 {
     public static function publishInstaller(array $version, string $zipPath): array
     {
-        if ((int)($version['type'] ?? -1) !== 0) {
-            return ['ok' => true, 'published' => false, 'msg' => '更新包沿用旧版更新通道'];
-        }
         $appId = (int)($version['appid'] ?? 0);
         $productId = LicenseService::productIdForApp($appId);
         if ($productId === '') {
@@ -188,9 +185,6 @@ class VersionReleaseService
 
     public static function syncStatus(array $version): void
     {
-        if ((int)($version['type'] ?? -1) !== 0) {
-            return;
-        }
         $productId = LicenseService::productIdForApp((int)($version['appid'] ?? 0));
         $buildNo = (int)($version['version'] ?? 0);
         if ($productId === '' || $buildNo <= 0) {

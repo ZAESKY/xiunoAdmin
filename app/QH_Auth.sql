@@ -374,11 +374,13 @@ DROP TABLE IF EXISTS `QH_user_social_identity`;
 CREATE TABLE `QH_user_social_identity` (
   `identity_id` int(11) unsigned NOT NULL,
   `user_id` int(11) unsigned NOT NULL,
+  `app_id` int(11) unsigned NOT NULL COMMENT '关联账号所属应用ID',
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`identity_id`,`user_id`),
-  UNIQUE KEY `uk_social_identity_once` (`identity_id`),
+  UNIQUE KEY `uk_social_identity_app` (`identity_id`,`app_id`),
   UNIQUE KEY `uk_social_user_once` (`user_id`),
-  KEY `idx_user_id` (`user_id`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_social_app` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户与第三方身份关联';
 
 DROP TABLE IF EXISTS `QH_user_phone_identity`;
@@ -561,7 +563,7 @@ CREATE TABLE `QH_version` (
 `addtime` datetime NOT NULL COMMENT '授权添加时间',
 `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '版本状态',
 `beta` tinyint(1) NOT NULL DEFAULT 0 COMMENT '内测版',
-`type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0为安装包 1为更新包',
+`type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '保留字段，发布流程固定为完整包',
 `appid` int(11) unsigned NOT NULL COMMENT '所属应用ID',
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -591,6 +593,8 @@ DROP TABLE IF EXISTS `QH_app`;
 CREATE TABLE `QH_app` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL COMMENT '应用名称',
+  `product_id` varchar(64) DEFAULT NULL COMMENT '对外稳定产品标识',
+  `package_profile` varchar(32) NOT NULL DEFAULT 'generic' COMMENT '发布包校验规则 generic/xiuno_theme',
   `check_type` varchar(150) NOT NULL DEFAULT 'domain' COMMENT '判断授权内容规则',
   `introduce` text COMMENT '应用介绍',
   `logo` varchar(500) NOT NULL DEFAULT '/Assets/img/logo.png' COMMENT '应用LOGO或私有OSS媒体网关URL',
@@ -645,7 +649,8 @@ CREATE TABLE `QH_app` (
   `api_key` text COMMENT '操作API密钥',
   `addtime` datetime NOT NULL COMMENT '添加时间',
   `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '程序状态 0=停止运营,1=维护中,2=正常运营',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_app_product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `QH_download`;
@@ -989,9 +994,11 @@ CREATE TABLE `QH_rebate_record` (
 DROP TABLE IF EXISTS `QH_plugin`;
 CREATE TABLE `QH_plugin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '插件ID',
+  `app_id` int(11) unsigned NOT NULL DEFAULT 1 COMMENT '所属应用ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '发布者用户ID',
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '插件名称',
   `slug` varchar(100) NOT NULL DEFAULT '' COMMENT '插件标识(唯一)',
+  `plugin_dir` varchar(64) NOT NULL DEFAULT '' COMMENT 'Xiuno插件安装目录',
   `category` varchar(30) DEFAULT '' COMMENT '分类',
   `version` varchar(50) NOT NULL DEFAULT '1.0.0' COMMENT '插件版本',
   `author` varchar(100) NOT NULL DEFAULT '' COMMENT '作者',
@@ -1033,7 +1040,8 @@ CREATE TABLE `QH_plugin` (
   `publish_type` tinyint(1) NOT NULL DEFAULT 0 COMMENT '发布类型:0=立即发布,1=定时发布',
   `publish_time` datetime DEFAULT NULL COMMENT '定时发布时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `slug` (`slug`),
+  UNIQUE KEY `uk_plugin_app_slug` (`app_id`,`slug`),
+  KEY `idx_plugin_app_status` (`app_id`,`status`,`sort`),
   KEY `status` (`status`),
   KEY `price` (`price`),
   KEY `download_count` (`download_count`),

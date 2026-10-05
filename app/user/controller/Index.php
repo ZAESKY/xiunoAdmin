@@ -38,12 +38,28 @@ class Index extends UserBackend
         try{
             $meunService = new MenuService();
             $menuList = $meunService->getList();
+            $switchAccounts = Db::name('user_social_identity')->alias('current_link')
+                ->join('social_identity current_identity', 'current_identity.id = current_link.identity_id')
+                ->join('user_social_identity target_link', 'target_link.identity_id = current_link.identity_id')
+                ->join('user target_user', 'target_user.id = target_link.user_id AND target_user.appid = target_link.app_id')
+                ->join('app target_app', 'target_app.id = target_link.app_id')
+                ->where('current_link.user_id', intval($this->userId))
+                ->where('current_link.app_id', intval($this->userInfo['appid']))
+                ->where('current_identity.provider', 'qq')
+                ->where('target_user.status', 1)
+                ->where('target_app.status', 2)
+                ->field('target_user.id,target_user.username,target_user.appid,target_app.name AS appname')
+                ->order('target_user.appid', 'asc')
+                ->select()
+                ->toArray();
             // Shared layout is role-driven; business menu source remains unchanged.
             View::assign([
                 'layoutRole' => 'user',
                 'layoutAvatar' => $this->userInfo['img'],
                 'layoutUsername' => $this->userInfo['username'],
                 'layoutAdminQqOauthBound' => false,
+                'layoutSwitchAccounts' => $switchAccounts,
+                'layoutCurrentUserId' => intval($this->userId),
                 'menuList' => $menuList,
             ]);
         }catch (\Throwable $e){
@@ -93,8 +109,9 @@ class Index extends UserBackend
         $showPowerBadge = intval($this->myPowerInfo['default_power'] ?? 0) !== 1;
 
         // Hot & latest plugins
-        $hotPlugins = Db::name('plugin')->where('status', 1)->where('is_hot', 1)->order('sort', 'desc')->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
-        $latestPlugins = Db::name('plugin')->where('status', 1)->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
+        $currentAppId = intval($this->userInfo['appid']);
+        $hotPlugins = Db::name('plugin')->where('app_id', $currentAppId)->where('status', 1)->where('is_hot', 1)->order('sort', 'desc')->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
+        $latestPlugins = Db::name('plugin')->where('app_id', $currentAppId)->where('status', 1)->order('id', 'desc')->limit(4)->field('id,name,icon,author,price,description')->select()->toArray();
 
         // My recent purchases
         $myPurchases = [];
@@ -103,6 +120,8 @@ class Index extends UserBackend
                 ->alias('p')
                 ->join('plugin pl', 'p.plugin_id = pl.id')
                 ->where('p.user_id', intval($this->userId))
+                ->where('p.app_id', $currentAppId)
+                ->where('pl.app_id', $currentAppId)
                 ->order('p.id', 'desc')
                 ->limit(4)
                 ->field('pl.id, pl.name, pl.icon, pl.price, p.created_at')

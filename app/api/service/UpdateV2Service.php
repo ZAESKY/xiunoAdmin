@@ -627,7 +627,7 @@ class UpdateV2Service extends BaseService
             || !hash_equals((string)($manifest['package_sha256'] ?? ''), (string)($row['package_sha256'] ?? ''))) {
             return null;
         }
-        if (LicenseService::productAppId((string)$row['product_id']) === LicenseService::THEME_APPLICATION_ID) {
+        if (LicenseService::isThemeProduct((string)$row['product_id'])) {
             foreach (ManifestService::themeRequiredFiles() as $requiredFile) {
                 if (empty($manifest['files'][$requiredFile])) { return null; }
             }

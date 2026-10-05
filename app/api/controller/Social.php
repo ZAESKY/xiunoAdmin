@@ -13,6 +13,7 @@ class Social extends ApiBackend
 {
     private const OAUTH_EXPIRE_SECONDS = 600;
     private const PENDING_EXPIRE_SECONDS = 600;
+    private const SELECTION_EXPIRE_SECONDS = 300;
     private const PROOF_EXPIRE_SECONDS = 300;
     private const FLOW_RESULT_EXPIRE_SECONDS = 600;
     private const UNIFIED_CALLBACK = 'api.php/Social/callback';
@@ -58,10 +59,15 @@ class Social extends ApiBackend
             return message(t('qq.login_disabled'), false);
         }
 
+        $appId = $userType === 'user' ? intval(input('post.appid/d', 0)) : 0;
+        if ($appId < 0 || ($appId > 0 && !$this->activeApplication($appId))) {
+            return message(t('qq.application_unavailable'), false);
+        }
+
         return $this->beginOauth(
             $userType,
             'login',
-            [],
+            $userType === 'user' ? ['app_id' => $appId] : [],
             $userType === 'admin' ? '/admin.php/login/index.html' : '/user.php/login/index.html'
         );
     }
@@ -78,7 +84,11 @@ class Social extends ApiBackend
         if (!$this->qqLoginEnabled()) {
             return message(t('qq.registration_disabled'), false);
         }
-        return $this->beginOauth('user', 'register', [], '/user.php/login/reg.html');
+        $appId = intval(input('post.appid/d', 0));
+        if ($appId <= 0 || !$this->activeApplication($appId, true)) {
+            return message(t('qq.registration_application_invalid'), false);
+        }
+        return $this->beginOauth('user', 'register', ['app_id' => $appId], '/user.php/login/reg.html');
     }
 
     /**
@@ -350,30 +360,37 @@ class Social extends ApiBackend
         if (!$pending) {
             return message(t('qq.credential_expired'), false);
         }
+        $appId = intval($pending['app_id'] ?? 0);
+        if ($appId <= 0 || !$this->activeApplication($appId, true)) {
+            return message(t('qq.select_registration_application'), false);
+        }
         $rate = RateLimitService::hit('qq_register_ip_day', (string)get_client_ip(), 20, 86400);
         if (!$rate['ok']) {
             return message(t('qq.daily_registration_limited'), false);
         }
 
         try {
-            $result = Db::transaction(function () use ($pending) {
+            $result = Db::transaction(function () use ($pending, $appId) {
                 $identity = Db::name('social_identity')->where('id', intval($pending['identity_id']))->lock(true)->find();
                 if (!$identity || $identity['provider'] !== 'qq') {
                     throw new \RuntimeException(t('qq.identity_not_found'));
                 }
 
-                $users = $this->getBoundUsers(intval($identity['id']), true);
+                $users = $this->getBoundUsers(intval($identity['id']), true, $appId);
                 if (empty($users)) {
-                    $userId = $this->createOauthUser($identity);
+                    if (!empty($this->getBoundUsers(intval($identity['id']), false, $appId))) {
+                        throw new \RuntimeException(t('qq.account_disabled'));
+                    }
+                    $userId = $this->createOauthUser($identity, $appId);
                     $this->insertUserBinding(intval($identity['id']), $userId);
-                    $users = $this->getBoundUsers(intval($identity['id']), true);
+                    $users = $this->getBoundUsers(intval($identity['id']), true, $appId);
                 }
                 return ['identity_id' => intval($identity['id']), 'users' => $users];
             });
 
             Session::delete('qq_oauth_pending');
             Session::save();
-            return $this->completeUserLogin($result['users'], $result['identity_id'], true);
+            return $this->completeUserLogin($result['users'], $result['identity_id'], true, $appId);
         } catch (\Throwable $e) {
             return message(qh_public_exception_message($e, t('qq.auto_registration_failed')), false);
         }
@@ -389,19 +406,24 @@ class Social extends ApiBackend
         }
 
         $pending = $this->getPendingIdentity(trim((string)input('post.pending_token/s', '')));
+        $appId = intval($pending['app_id'] ?? 0);
         $legacyQq = trim((string)session('get_qq'));
         if (!$pending || $legacyQq === '' || !preg_match('/^[1-9][0-9]{4,11}$/D', $legacyQq)) {
             return message(t('qq.migration_credential_expired'), false);
         }
 
         try {
-            $result = Db::transaction(function () use ($pending, $legacyQq) {
+            $result = Db::transaction(function () use ($pending, $legacyQq, $appId) {
                 $identity = Db::name('social_identity')->where('id', intval($pending['identity_id']))->lock(true)->find();
                 if (!$identity || $identity['provider'] !== 'qq') {
                     throw new \RuntimeException(t('qq.identity_not_found'));
                 }
 
-                $userIds = Db::name('user')->where('qq', $legacyQq)->order('id', 'asc')->column('id');
+                $userQuery = Db::name('user')->where('qq', $legacyQq);
+                if ($appId > 0) {
+                    $userQuery->where('appid', $appId);
+                }
+                $userIds = $userQuery->order('id', 'asc')->column('id');
                 if (empty($userIds)) {
                     throw new \RuntimeException(t('qq.legacy_account_not_found'));
                 }
@@ -417,7 +439,7 @@ class Social extends ApiBackend
 
                 return [
                     'identity_id' => intval($identity['id']),
-                    'users' => $this->getBoundUsers(intval($identity['id']), true),
+                    'users' => $this->getBoundUsers(intval($identity['id']), true, $appId),
                 ];
             });
 
@@ -429,7 +451,7 @@ class Social extends ApiBackend
             if (empty($result['users'])) {
                 return message(t('qq.migrated_account_disabled'), false);
             }
-            return $this->completeUserLogin($result['users'], $result['identity_id'], false);
+            return $this->completeUserLogin($result['users'], $result['identity_id'], false, $appId);
         } catch (\Throwable $e) {
             Session::delete('get_token');
             Session::delete('get_qq');
@@ -438,17 +460,83 @@ class Social extends ApiBackend
         }
     }
 
-    /**
-     * 兼容旧版前端入口。QQ 身份现已强制与本地账号一对一，不再允许选择多个账号。
-     */
     public function chooseUser()
     {
         if (!$this->isTrustedPost()) {
             return message(t('common.illegal_request'), false);
         }
+        $token = trim((string)input('post.selection_token/s', ''));
+        $userId = intval(input('post.user_id/d', 0));
+        $selection = session('qq_oauth_selection');
+        if (!is_array($selection)
+            || !preg_match('/^[a-f0-9]{64}$/D', $token)
+            || !hash_equals((string)($selection['token'] ?? ''), $token)
+            || time() - intval($selection['created_at'] ?? 0) > self::SELECTION_EXPIRE_SECONDS
+            || $userId <= 0
+            || !in_array($userId, array_map('intval', (array)($selection['user_ids'] ?? [])), true)
+        ) {
+            Session::delete('qq_oauth_selection');
+            Session::save();
+            return message(t('qq.selection_expired'), false);
+        }
+        $identityId = intval($selection['identity_id'] ?? 0);
+        $users = $this->getBoundUsers($identityId, true);
+        foreach ($users as $user) {
+            if (intval($user['id'] ?? 0) !== $userId) {
+                continue;
+            }
+            Session::delete('qq_oauth_selection');
+            Session::save();
+            return $this->completeUserLogin([$user], $identityId, false, intval($user['appid'] ?? 0));
+        }
         Session::delete('qq_oauth_selection');
         Session::save();
-        return message(t('qq.single_account_only'), false);
+        return message(t('qq.selection_invalid'), false);
+    }
+
+    /** 已登录用户在同一个 QQ 身份已加入的应用账号之间切换。 */
+    public function switchApp()
+    {
+        if (!$this->isTrustedPost()) {
+            return message(t('common.illegal_request'), false);
+        }
+        try {
+            parent::userLogin();
+        } catch (\Throwable $e) {
+            return message(qh_public_exception_message($e, t('qq.login_check_failed')), false);
+        }
+        $targetUserId = intval(input('post.user_id/d', 0));
+        $currentUserId = intval($this->userId);
+        if ($targetUserId <= 0 || $targetUserId === $currentUserId) {
+            return message(t('qq.switch_target_invalid'), false);
+        }
+        $identityIds = Db::name('user_social_identity')->alias('usi')
+            ->join('social_identity si', 'si.id = usi.identity_id')
+            ->where('usi.user_id', $currentUserId)
+            ->where('usi.app_id', intval($this->userInfo['appid'] ?? 0))
+            ->where('si.provider', 'qq')
+            ->column('usi.identity_id');
+        if (empty($identityIds)) {
+            return message(t('qq.switch_identity_required'), false);
+        }
+        $target = Db::name('user_social_identity')->alias('usi')
+            ->join('user u', 'u.id = usi.user_id')
+            ->join('app a', 'a.id = u.appid')
+            ->whereIn('usi.identity_id', array_map('intval', $identityIds))
+            ->where('usi.user_id', $targetUserId)
+            ->whereRaw('usi.app_id = u.appid')
+            ->where('u.status', 1)
+            ->where('a.status', 2)
+            ->field('u.*,a.name AS appname')
+            ->find();
+        if (!$target) {
+            return message(t('qq.switch_target_invalid'), false);
+        }
+        $this->setUserLogin(is_object($target) && method_exists($target, 'toArray') ? $target->toArray() : (array)$target);
+        return message(t('qq.switch_success'), true, [
+            'status' => 'success',
+            'url' => '/user.php/Index/index.html',
+        ]);
     }
 
     public function unbind()
@@ -570,7 +658,7 @@ class Social extends ApiBackend
                 if ($userType !== 'user') {
                     return message(t('qq.registration_scene_invalid'), false);
                 }
-                return $this->finishUserOauthRegistration($oauth, $oauthClient->getAppId());
+                return $this->finishUserOauthRegistration($context, $oauth, $oauthClient->getAppId());
             }
             if ($action === 'bind') {
                 return $userType === 'admin'
@@ -586,39 +674,54 @@ class Social extends ApiBackend
 
             return $userType === 'admin'
                 ? $this->finishAdminLogin($oauth)
-                : $this->finishUserOauthLogin($oauth, $oauthClient->getAppId());
+                : $this->finishUserOauthLogin($context, $oauth, $oauthClient->getAppId());
         } catch (\Throwable $e) {
             return message(qh_public_exception_message($e, t('qq.login_retry')), false);
         }
     }
 
-    private function finishUserOauthLogin(array $oauth, string $providerAppId): array
+    private function finishUserOauthLogin(array $context, array $oauth, string $providerAppId): array
     {
         $identity = $this->ensureIdentity($oauth, $providerAppId);
-        $users = $this->getBoundUsers(intval($identity['id']), true);
+        $appId = $this->contextAppId($context);
+        $users = $this->getBoundUsers(intval($identity['id']), true, $appId);
         if (empty($users)) {
+            if (!empty($this->getBoundUsers(intval($identity['id']), false, $appId))) {
+                return message(t('qq.account_disabled'), false);
+            }
             $token = bin2hex(random_bytes(32));
             session('qq_oauth_pending', [
                 'token' => $token,
                 'identity_id' => intval($identity['id']),
+                'app_id' => $appId,
                 'created_at' => time(),
             ]);
             Session::save();
             return message(t('qq.first_login_action_required'), true, [
                 'status' => 'unbound',
                 'pending_token' => $token,
+                'app_id' => $appId,
+                'can_register' => $appId > 0 && $this->activeApplication($appId, true),
+                'registration_url' => '/user.php/login/reg.html' . ($appId > 0 ? '?appid=' . $appId : ''),
             ]);
         }
 
-        return $this->completeUserLogin($users, intval($identity['id']), false);
+        return $this->completeUserLogin($users, intval($identity['id']), false, $appId);
     }
 
-    private function finishUserOauthRegistration(array $oauth, string $providerAppId): array
+    private function finishUserOauthRegistration(array $context, array $oauth, string $providerAppId): array
     {
+        $appId = $this->contextAppId($context);
+        if ($appId <= 0 || !$this->activeApplication($appId, true)) {
+            return message(t('qq.registration_application_invalid'), false);
+        }
         $identity = $this->ensureIdentity($oauth, $providerAppId);
-        $users = $this->getBoundUsers(intval($identity['id']), true);
+        $users = $this->getBoundUsers(intval($identity['id']), true, $appId);
         if (!empty($users)) {
-            return $this->completeUserLogin($users, intval($identity['id']), false);
+            return $this->completeUserLogin($users, intval($identity['id']), false, $appId);
+        }
+        if (!empty($this->getBoundUsers(intval($identity['id']), false, $appId))) {
+            return message(t('qq.account_disabled'), false);
         }
         $rate = RateLimitService::hit('qq_register_ip_day', (string)get_client_ip(), 20, 86400);
         if (!$rate['ok']) {
@@ -626,7 +729,7 @@ class Social extends ApiBackend
         }
 
         try {
-            $result = Db::transaction(function () use ($identity) {
+            $result = Db::transaction(function () use ($identity, $appId) {
                 $lockedIdentity = Db::name('social_identity')
                     ->where('id', intval($identity['id']))
                     ->lock(true)
@@ -634,15 +737,18 @@ class Social extends ApiBackend
                 if (!$lockedIdentity) {
                     throw new \RuntimeException(t('qq.identity_not_found'));
                 }
-                $boundUsers = $this->getBoundUsers(intval($identity['id']), true);
+                $boundUsers = $this->getBoundUsers(intval($identity['id']), true, $appId);
                 if (empty($boundUsers)) {
-                    $userId = $this->createOauthUser($lockedIdentity);
+                    if (!empty($this->getBoundUsers(intval($identity['id']), false, $appId))) {
+                        throw new \RuntimeException(t('qq.account_disabled'));
+                    }
+                    $userId = $this->createOauthUser($lockedIdentity, $appId);
                     $this->insertUserBinding(intval($identity['id']), $userId);
-                    $boundUsers = $this->getBoundUsers(intval($identity['id']), true);
+                    $boundUsers = $this->getBoundUsers(intval($identity['id']), true, $appId);
                 }
                 return $boundUsers;
             });
-            return $this->completeUserLogin($result, intval($identity['id']), true);
+            return $this->completeUserLogin($result, intval($identity['id']), true, $appId);
         } catch (\Throwable $e) {
             return message(qh_public_exception_message($e, t('qq.registration_failed')), false);
         }
@@ -687,7 +793,11 @@ class Social extends ApiBackend
             return message(t('qq.verification_login_changed'), false);
         }
         $identity = $this->ensureIdentity($oauth, $providerAppId);
-        if ($this->getIdentityUserId(intval($identity['id'])) !== $currentUserId) {
+        if (!Db::name('user_social_identity')->where([
+            'identity_id' => intval($identity['id']),
+            'user_id' => $currentUserId,
+            'app_id' => intval($this->userInfo['appid'] ?? 0),
+        ])->find()) {
             return message(t('qq.official_identity_mismatch'), false);
         }
         $claim = $this->getLegacyClaim(intval($identity['id']), $currentUserId);
@@ -705,13 +815,13 @@ class Social extends ApiBackend
     private function finishDownloadProof(array $context, array $oauth, string $providerAppId): array
     {
         $identity = $this->ensureIdentity($oauth, $providerAppId);
-        $userId = $this->getIdentityUserId(intval($identity['id']));
-        if ($userId <= 0) {
-            return message(t('qq.platform_account_not_bound'), false);
-        }
         $payload = is_array($context['payload'] ?? null) ? $context['payload'] : [];
         $appId = intval($payload['appid'] ?? 0);
         $authInfo = trim((string)($payload['auth_info'] ?? ''));
+        $userId = $this->getIdentityUserId(intval($identity['id']), $appId);
+        if ($userId <= 0) {
+            return message(t('qq.platform_account_not_bound'), false);
+        }
         $auth = Db::name('auth')
             ->where(['appid' => $appId, 'auth_info' => $authInfo])
             ->field('id,appid,qq,bindingid')
@@ -814,24 +924,62 @@ class Social extends ApiBackend
         return $identity;
     }
 
-    private function getBoundUsers(int $identityId, bool $activeOnly): array
+    private function getBoundUsers(int $identityId, bool $activeOnly, int $appId = 0): array
     {
         $query = Db::name('user_social_identity')->alias('usi')
             ->join('user u', 'u.id = usi.user_id')
             ->leftJoin('app a', 'a.id = u.appid')
             ->where('usi.identity_id', $identityId)
+            ->whereRaw('usi.app_id = u.appid')
             ->field('u.*, a.name AS appname')
+            ->order('u.appid', 'asc')
             ->order('u.id', 'asc');
+        if ($appId > 0) {
+            $query->where('usi.app_id', $appId);
+        }
         if ($activeOnly) {
             $query->where('u.status', 1);
+            $query->where('a.status', 2);
         }
         return $query->select()->toArray();
     }
 
-    private function completeUserLogin(array $users, int $identityId, bool $registered): array
+    private function completeUserLogin(array $users, int $identityId, bool $registered, int $appId = 0): array
     {
-        if (count($users) !== 1) {
+        if ($appId > 0) {
+            $users = array_values(array_filter($users, static function ($user) use ($appId) {
+                return intval($user['appid'] ?? 0) === $appId;
+            }));
+        }
+        if (empty($users)) {
             return message(t('qq.binding_data_abnormal'), false);
+        }
+        if (count($users) > 1) {
+            $token = bin2hex(random_bytes(32));
+            $userIds = array_values(array_map(static function ($user) {
+                return intval($user['id'] ?? 0);
+            }, $users));
+            session('qq_oauth_selection', [
+                'token' => $token,
+                'identity_id' => $identityId,
+                'user_ids' => $userIds,
+                'created_at' => time(),
+            ]);
+            Session::save();
+            $accounts = array_map(static function ($user) {
+                return [
+                    'id' => intval($user['id'] ?? 0),
+                    'appid' => intval($user['appid'] ?? 0),
+                    'username' => (string)($user['username'] ?? ''),
+                    'appname' => (string)($user['appname'] ?? ''),
+                    'avatar' => (string)($user['img'] ?? ''),
+                ];
+            }, $users);
+            return message(t('qq.select_application_account'), true, [
+                'status' => 'select',
+                'selection_token' => $token,
+                'accounts' => $accounts,
+            ]);
         }
 
         $this->setUserLogin($users[0]);
@@ -847,6 +995,8 @@ class Social extends ApiBackend
     private function setUserLogin(array $user): void
     {
         Session::regenerate(true);
+        Session::delete('qq_oauth_selection');
+        Session::delete('qq_oauth_pending');
         cookie('userId', $user['id']);
         cookie('userSign', data_auth_sign($user['appid'] . $user['username'] . $user['password'] . qh_password_hash()));
         event('UserLogin', [
@@ -856,9 +1006,8 @@ class Social extends ApiBackend
         ]);
     }
 
-    private function createOauthUser(array $identity): int
+    private function createOauthUser(array $identity, int $appId): int
     {
-        $appId = max(1, intval(env('qq_oauth_default_appid', 1)));
         $app = Db::name('app')->where(['id' => $appId, 'status' => 2, 'register_switch' => 1])->find();
         if (!$app) {
             throw new \RuntimeException(t('qq.auto_registration_disabled'));
@@ -880,7 +1029,7 @@ class Social extends ApiBackend
             $base = 'QQUser';
         }
         $base = mb_substr($base, 0, 28, 'UTF-8');
-        $suffix = substr(hash('sha256', $identity['provider_appid'] . '|' . $identity['provider_uid']), 0, 8);
+        $suffix = substr(hash('sha256', $identity['provider_appid'] . '|' . $identity['provider_uid'] . '|' . $appId), 0, 8);
         $username = $base . '_' . $suffix;
         for ($attempt = 0; Db::name('user')->where('username', $username)->find(); $attempt++) {
             if ($attempt >= 10) {
@@ -909,42 +1058,59 @@ class Social extends ApiBackend
     private function bindUsersToIdentity(int $identityId, array $userIds): int
     {
         $userIds = array_values(array_unique(array_filter(array_map('intval', $userIds))));
-        if (count($userIds) !== 1) {
+        if (empty($userIds)) {
             return 0;
         }
-        $userId = $userIds[0];
-
-        $identityOwner = Db::name('user_social_identity')
-            ->where('identity_id', $identityId)
-            ->where('user_id', '<>', $userId)
+        $selected = Db::name('user')
+            ->whereIn('id', $userIds)
+            ->field('id,appid')
             ->lock(true)
-            ->value('user_id');
-        if (!empty($identityOwner)) {
+            ->select();
+        $users = is_object($selected) && method_exists($selected, 'toArray') ? $selected->toArray() : (array)$selected;
+        if (count($users) !== count($userIds)) {
             return 0;
         }
-
-        $conflictingIdentity = Db::name('user_social_identity')->alias('usi')
-            ->join('social_identity si', 'si.id = usi.identity_id')
-            ->where('usi.user_id', $userId)
-            ->where('si.provider', 'qq')
-            ->where('si.id', '<>', $identityId)
-            ->lock(true)
-            ->value('si.id');
-        if (!empty($conflictingIdentity)) {
-            return 0;
+        $apps = [];
+        foreach ($users as $user) {
+            $userId = intval($user['id'] ?? 0);
+            $appId = intval($user['appid'] ?? 0);
+            if ($userId <= 0 || $appId <= 0 || isset($apps[$appId])) {
+                return 0;
+            }
+            $apps[$appId] = true;
+            $identityOwner = Db::name('user_social_identity')
+                ->where('identity_id', $identityId)
+                ->where('app_id', $appId)
+                ->where('user_id', '<>', $userId)
+                ->lock(true)
+                ->value('user_id');
+            if (!empty($identityOwner)) {
+                return 0;
+            }
+            $conflictingIdentity = Db::name('user_social_identity')
+                ->where('user_id', $userId)
+                ->where('identity_id', '<>', $identityId)
+                ->lock(true)
+                ->value('identity_id');
+            if (!empty($conflictingIdentity)) {
+                return 0;
+            }
         }
 
         $prefix = (string)config('database.connections.mysql.prefix');
         $table = '`' . str_replace('`', '``', $prefix . 'user_social_identity') . '`';
-        Db::execute(
-            "INSERT IGNORE INTO {$table} (`identity_id`,`user_id`,`created_at`) VALUES (?,?,?)",
-            [$identityId, $userId, datetime()]
-        );
+        foreach ($users as $user) {
+            Db::execute(
+                "INSERT IGNORE INTO {$table} (`identity_id`,`user_id`,`app_id`,`created_at`) VALUES (?,?,?,?)",
+                [$identityId, intval($user['id']), intval($user['appid']), datetime()]
+            );
+        }
 
-        return Db::name('user_social_identity')->where([
-            'identity_id' => $identityId,
-            'user_id' => $userId,
-        ])->find() ? 1 : 0;
+        return intval(Db::name('user_social_identity')
+            ->where('identity_id', $identityId)
+            ->whereIn('user_id', $userIds)
+            ->whereIn('app_id', array_keys($apps))
+            ->count());
     }
 
     private function insertUserBinding(int $identityId, int $userId): void
@@ -1068,9 +1234,14 @@ class Social extends ApiBackend
         return $row ?: null;
     }
 
-    private function getIdentityUserId(int $identityId): int
+    private function getIdentityUserId(int $identityId, int $appId = 0): int
     {
-        return intval(Db::name('user_social_identity')->where('identity_id', $identityId)->value('user_id'));
+        $query = Db::name('user_social_identity')->where('identity_id', $identityId);
+        if ($appId > 0) {
+            $query->where('app_id', $appId);
+        }
+        $ids = array_map('intval', $query->limit(2)->column('user_id'));
+        return count($ids) === 1 ? $ids[0] : 0;
     }
 
     private function getLegacyClaim(int $identityId, int $userId): ?array
@@ -1088,7 +1259,10 @@ class Social extends ApiBackend
         if (!preg_match('/^[1-9][0-9]{4,11}$/D', $legacyQq)) {
             throw new \RuntimeException(t('qq.legacy_format_invalid'));
         }
-        if ($this->getIdentityUserId($identityId) !== $userId) {
+        if (!Db::name('user_social_identity')->where([
+            'identity_id' => $identityId,
+            'user_id' => $userId,
+        ])->find()) {
             throw new \RuntimeException(t('qq.official_identity_mismatch'));
         }
         $user = Db::name('user')->where('id', $userId)->lock(true)->field('id,qq')->find();
@@ -1142,6 +1316,25 @@ class Social extends ApiBackend
         if ((string)($user['qq'] ?? '') === '') {
             Db::name('user')->where('id', $userId)->update(['qq' => $legacyQq]);
         }
+    }
+
+    /** OAuth 业务应用只从服务端 state 对应的 payload 读取。 */
+    private function contextAppId(array $context): int
+    {
+        $payload = is_array($context['payload'] ?? null) ? $context['payload'] : [];
+        return max(0, intval($payload['app_id'] ?? 0));
+    }
+
+    private function activeApplication(int $appId, bool $registrationRequired = false): bool
+    {
+        if ($appId <= 0) {
+            return false;
+        }
+        $query = Db::name('app')->where(['id' => $appId, 'status' => 2]);
+        if ($registrationRequired) {
+            $query->where('register_switch', 1);
+        }
+        return (bool)$query->field('id')->find();
     }
 
     private function safeReturnTo(string $value, string $fallback): string

@@ -4,6 +4,7 @@
 -- 插件表
 CREATE TABLE IF NOT EXISTS `QH_plugin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '插件ID',
+  `app_id` int(11) unsigned NOT NULL DEFAULT '1' COMMENT '所属应用ID',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '发布者用户ID',
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '插件名称',
   `slug` varchar(100) NOT NULL DEFAULT '' COMMENT '插件标识(唯一)',
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `QH_plugin` (
   `publish_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '发布类型:0=立即发布,1=定时发布',
   `publish_time` datetime DEFAULT NULL COMMENT '定时发布时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `slug` (`slug`),
+  UNIQUE KEY `uk_plugin_app_slug` (`app_id`,`slug`),
+  KEY `idx_plugin_app_status` (`app_id`,`status`,`sort`),
   KEY `idx_plugin_dir` (`plugin_dir`),
   KEY `status` (`status`),
   KEY `price` (`price`),

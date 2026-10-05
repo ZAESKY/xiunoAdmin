@@ -22,7 +22,7 @@ class RebateRiskService
 
         $users = Db::name('user')
             ->whereIn('id', [$payerUserId, $referrerUserId])
-            ->field('id,qq,email,phone,status')
+            ->field('id,appid,qq,email,phone,status')
             ->select()
             ->toArray();
         if (count($users) !== 2) {
@@ -38,6 +38,10 @@ class RebateRiskService
         if (!$payer || !$referrer || intval($payer['status']) !== 1 || intval($referrer['status']) !== 1) {
             return '关联账号状态异常';
         }
+        $appId = intval($payer['appid'] ?? 0);
+        if ($appId <= 0 || $appId !== intval($referrer['appid'] ?? 0)) {
+            return '付款账号与返利账号不属于同一应用';
+        }
 
         foreach (['qq' => 'QQ', 'email' => '邮箱', 'phone' => '手机号'] as $field => $label) {
             $left = self::normalizeIdentity($field, $payer[$field] ?? '');
@@ -50,6 +54,7 @@ class RebateRiskService
         try {
             $sharedIdentity = Db::name('user_social_identity')
                 ->whereIn('user_id', [$payerUserId, $referrerUserId])
+                ->where('app_id', $appId)
                 ->group('identity_id')
                 ->havingRaw('COUNT(DISTINCT user_id) > 1')
                 ->count();

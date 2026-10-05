@@ -24,6 +24,21 @@
                                 </div>
                             </div>
                             <div class="layui-form-item">
+                                <label class="layui-form-label layui-form-required">{:t('app_ui.product_id')}</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="product_id" maxlength="64" class="layui-input" placeholder="{:t('app_ui.product_id_placeholder')}"/>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label layui-form-required">{:t('app_ui.package_profile')}</label>
+                                <div class="layui-input-block">
+                                    <select name="package_profile">
+                                        <option value="generic">{:t('app_ui.package_profile_generic')}</option>
+                                        <option value="xiuno_theme">{:t('app_ui.package_profile_xiuno_theme')}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
                                 <label class="layui-form-label">{:t('app_ui.app_logo')}</label>
                                 <div class="layui-input-block">
                                     <input type="text" class="layui-input" name="logo" placeholder="{:t('app_ui.app_logo_placeholder')}">
@@ -557,6 +572,10 @@
             });
             if (data.field.name == "") {
                 notice.msg('{:t("app_ui.enter_app_name")}', {icon: 3, audio:'1'});
+                return false;
+            }
+            if (!/^[A-Za-z0-9_.-]{1,64}$/.test(data.field.product_id || '')) {
+                notice.msg('{:t("app_ui.enter_product_id")}', {icon: 3, audio:'1'});
                 return false;
             }
             if (data.field.public_key == "") {

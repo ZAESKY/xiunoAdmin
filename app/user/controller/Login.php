@@ -53,10 +53,15 @@ class Login extends CommonBase
         } else {
             $loginRedirect = qh_plugin_detail_redirect((string)Session::get('user_login_redirect', ''));
         }
+        $loginAppId = intval(request()->get('appid', 0));
+        if ($loginAppId > 0 && !Db::name('app')->where(['id' => $loginAppId, 'status' => 2])->find()) {
+            $loginAppId = 0;
+        }
         View::assign(array(
             'captcha_open' => conf('captcha_open'),
             'captcha_id' => conf('captcha_id'),
             'login_switch' => $loginSwitch,
+            'login_app_id' => $loginAppId,
             'login_redirect_json' => json_encode(
                 $loginRedirect,
                 JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
@@ -154,7 +159,23 @@ class Login extends CommonBase
         if (!is_array($loginSwitch)) {
             $loginSwitch = array_filter(array_map('trim', explode(',', (string)$loginSwitch)));
         }
-        View::assign('qq_register_enabled', in_array('qq', $loginSwitch, true));
+        $applications = Db::name('app')
+            ->where(['status' => 2, 'register_switch' => 1])
+            ->field('id,name,product_id,logo,register_notice')
+            ->order('id', 'asc')
+            ->select()
+            ->toArray();
+        $selectedAppId = intval(request()->get('appid', 0));
+        if ($selectedAppId <= 0 || !in_array($selectedAppId, array_map(static function ($app) {
+            return intval($app['id'] ?? 0);
+        }, $applications), true)) {
+            $selectedAppId = count($applications) === 1 ? intval($applications[0]['id']) : 0;
+        }
+        View::assign([
+            'qq_register_enabled' => in_array('qq', $loginSwitch, true) && !empty($applications),
+            'register_applications' => $applications,
+            'selected_app_id' => $selectedAppId,
+        ]);
         return $this->render('reg');
     }
 

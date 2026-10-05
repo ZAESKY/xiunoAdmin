@@ -17,9 +17,6 @@ class ProgramPatchService
 
     public static function publishForVersion(array $version, string $zipPath): array
     {
-        if ((int)($version['type'] ?? -1) !== 0) {
-            return ['ok' => false, 'published' => false, 'msg' => '程序补丁只能绑定安装包版本'];
-        }
         $productId = LicenseService::productIdForApp((int)($version['appid'] ?? 0));
         if ($productId === '') {
             return ['ok' => false, 'published' => false, 'msg' => '该应用未映射授权产品'];

@@ -103,8 +103,8 @@ class DownloadService extends BaseService
                     return json(message(t('download.cloud_package_invalid'), false));
                 }
             } else {
-                // A-23：目录解析统一走 ReleasePackageService（含目录名清洗与 type 判别）
-                $type = !empty($versionData['type']) ? (int)$versionData['type'] : 0;
+                // 所有版本记录均指向完整发布包，差分由 v2 更新通道独立分发。
+                $type = 0;
                 $catalogue = ReleasePackageService::normalizeCatalogue($versionData['download_catalogue'] ?? '');
                 if ($catalogue === '') {
                     return json(message(t('version.dir_empty'), false));

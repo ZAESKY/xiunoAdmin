@@ -253,7 +253,7 @@ class PluginApiService extends BaseService
             $sort = !empty($param['sort']) ? $param['sort'] : 'default';
             $price_type = !empty($param['price_type']) ? $param['price_type'] : '';
 
-            $where = [['status', '=', 1]]; // 只返回已上架的
+            $where = [['status', '=', 1], ['app_id', '=', intval($appInfo['id'])]]; // 只返回当前应用已上架的
 
             if (!empty($keyword)) {
                 $keyword = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $keyword);
@@ -313,6 +313,7 @@ class PluginApiService extends BaseService
 
             $plugin = Db::name('plugin')
                 ->where('id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->where('status', 1)
                 ->field('id,name,slug,version,author,author_url,description,content,icon,images,price,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,created_at')
                 ->find();
@@ -372,6 +373,7 @@ class PluginApiService extends BaseService
 
             $plugin = Db::name('plugin')
                 ->where('id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->where('status', 1)
                 ->find();
 
@@ -510,6 +512,7 @@ class PluginApiService extends BaseService
 
             $plugin = Db::name('plugin')
                 ->where('id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->where('status', 1)
                 ->find();
 
@@ -609,6 +612,7 @@ class PluginApiService extends BaseService
             // 获取插件信息
             $plugin = Db::name('plugin')
                 ->where('id', $tokenRecord['plugin_id'])
+                ->where('app_id', intval($tokenRecord['app_id']))
                 ->where('status', 1)
                 ->find();
 
@@ -708,6 +712,7 @@ class PluginApiService extends BaseService
 
             $plugin = Db::name('plugin')
                 ->where('id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->where('status', 1)
                 ->find();
 
@@ -807,6 +812,7 @@ class PluginApiService extends BaseService
 
             $plugin = Db::name('plugin')
                 ->where('id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->where('status', 1)
                 ->find();
 
@@ -876,6 +882,7 @@ class PluginApiService extends BaseService
 
             $list = Db::name('plugin_comment')
                 ->where('plugin_id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->where('status', 1)
                 ->field('id,user_id,content,rating,created_at')
                 ->order('id', 'desc')
@@ -914,6 +921,7 @@ class PluginApiService extends BaseService
 
             $plugin = Db::name('plugin')
                 ->where('id', $plugin_id)
+                ->where('app_id', intval($appInfo['id']))
                 ->field('id,price')
                 ->find();
 

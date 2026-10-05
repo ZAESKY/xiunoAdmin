@@ -13,15 +13,6 @@ class VersionService extends BaseService
         $this->model = new VersionModel();
     }
 
-    public function setType(){
-        try{
-            $result = $this->model->setType();
-            return true;
-        }catch (\Exception $e){
-            throw new Exception($e->getMessage());
-        }
-    }
-
     public function setBeta(){
         try{
             $result = $this->model->setBeta();

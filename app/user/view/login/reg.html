@@ -29,6 +29,14 @@
 <div class="login-wrapper layui-anim layui-anim-scale">
     <form class="layui-form layui-card-body" id="registerCard" style="opacity:.95;">
         <div class="layui-form-item">
+            <select id="registerApplication" lay-filter="registerApplication">
+                <option value="">{:t('qq_register.select_application')}</option>
+                {volist name="register_applications" id="application"}
+                <option value="{$application.id}" {if $selected_app_id == $application.id}selected{/if}>{$application.name}</option>
+                {/volist}
+            </select>
+        </div>
+        <div class="layui-form-item">
             <img class="logo" src="{__IMG__}logo.png" alt="logo"/>
             <div class="title">{:t('qq_register.title')}</div>
             <div class="desc">{:t('qq_register.subtitle')}</div>
@@ -59,9 +67,10 @@
 <script type="text/javascript" src="{__JS__}common.js?v={__I18N_VERSION__}"></script>
 <script type="text/javascript" src="{__JS__}qq-oauth.js?v=20261004_3"></script>
 <script>
-layui.use(['layer', 'notice'], function () {
+layui.use(['layer', 'notice', 'form'], function () {
     var $ = layui.jquery;
     var notice = layui.notice;
+    layui.form.render('select');
     var busy = false;
     var $button = $('#qqRegisterButton');
     var registerText = {
@@ -99,10 +108,15 @@ layui.use(['layer', 'notice'], function () {
 
     $button.on('click', function () {
         if (busy || !window.QHQqOauth) return;
+        var appId = parseInt($('#registerApplication').val() || '0', 10);
+        if (!appId) {
+            notice.msg('{:t("qq_register.select_application_required")}', {icon: 3});
+            return;
+        }
         setBusy(true);
         QHQqOauth.start({
             url: '/api.php/Social/register',
-            data: {},
+            data: {appid: appId},
             onResult: handleResult,
             onError: handleError
         });

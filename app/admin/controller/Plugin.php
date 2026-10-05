@@ -23,6 +23,7 @@ class Plugin extends Backend
         $this->denyIfClosed();
         $this->service = new PluginService();
         View::assign('pluginRewardConfig', PluginRewardService::config());
+        View::assign('appList', Db::name('app')->order('id', 'asc')->field('id,name,product_id')->select()->toArray());
     }
 
     private function denyIfClosed()
@@ -105,8 +106,9 @@ class Plugin extends Backend
             try {
                 $keyword = input('post.keyword', '', 'trim');
                 $excludeId = input('post.exclude_id', 0, 'intval');
+                $appId = input('post.app_id', 0, 'intval');
                 $pluginModel = new PluginModel();
-                return json(message('ok', true, ['list' => $pluginModel->searchRelatedOptions($keyword, $excludeId)]));
+                return json(message('ok', true, ['list' => $pluginModel->searchRelatedOptions($keyword, $excludeId, 20, $appId)]));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false, ['list' => []]));
             }

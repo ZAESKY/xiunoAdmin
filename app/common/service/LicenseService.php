@@ -21,8 +21,8 @@ use think\facade\Log;
  */
 class LicenseService
 {
-    /** Xiuno 轻鸿主题在授权系统中的稳定应用 ID；产品别名可以独立改名。 */
-    public const THEME_APPLICATION_ID = 1;
+    /** 仅供无数据库单元测试注入应用查询；生产环境始终从 QH_app 读取。 */
+    private static $applicationResolverForTests = null;
 
     public const STATUS_PENDING   = 'pending';
     public const STATUS_ACTIVE    = 'active';
@@ -148,49 +148,76 @@ class LicenseService
         return count($rows) === 1 ? self::syncSourceAuth($rows[0]) : null;
     }
 
-    /**
-     * 服务端产品标识到旧授权应用的明确映射。
-     * 格式：license_product_app_map=product_a:1,product_b:2
-     */
+    public static function setApplicationResolverForTests(?callable $resolver): void
+    {
+        self::$applicationResolverForTests = $resolver;
+    }
+
+    /** 产品标识到应用的唯一映射来自 QH_app.product_id。 */
     public static function productAppId(string $productId): int
     {
         $productId = trim($productId);
         if (!preg_match('/^[A-Za-z0-9_.-]{1,64}$/D', $productId)) {
             return 0;
         }
-        $raw = trim((string)env('license_product_app_map', ''));
-        foreach (explode(',', $raw) as $entry) {
-            $parts = array_map('trim', explode(':', $entry, 2));
-            if (count($parts) !== 2 || !hash_equals($productId, $parts[0])) {
-                continue;
-            }
-            return ctype_digit($parts[1]) ? max(0, (int)$parts[1]) : 0;
-        }
-        return 0;
+        $application = self::applicationBy('product_id', $productId);
+        return is_array($application) ? max(0, (int)($application['id'] ?? 0)) : 0;
     }
 
-    /**
-     * 旧应用 ID 反查 v2 产品标识。映射必须一一对应；若同一应用配置了多个
-     * 产品则拒绝自动发布，避免把安装包签给错误产品。
-     */
+    /** 应用 ID 反查稳定产品标识。 */
     public static function productIdForApp(int $appId): string
     {
         if ($appId <= 0) {
             return '';
         }
-        $matches = [];
-        $raw = trim((string)env('license_product_app_map', ''));
-        foreach (explode(',', $raw) as $entry) {
-            $parts = array_map('trim', explode(':', $entry, 2));
-            if (count($parts) !== 2
-                || !preg_match('/^[A-Za-z0-9_.-]{1,64}$/D', $parts[0])
-                || !ctype_digit($parts[1])
-                || (int)$parts[1] !== $appId) {
-                continue;
-            }
-            $matches[$parts[0]] = true;
+        $application = self::applicationBy('id', $appId);
+        $productId = trim((string)($application['product_id'] ?? ''));
+        return preg_match('/^[A-Za-z0-9_.-]{1,64}$/D', $productId) ? $productId : '';
+    }
+
+    public static function packageProfileForApp(int $appId): string
+    {
+        if ($appId <= 0) {
+            return '';
         }
-        return count($matches) === 1 ? (string)array_key_first($matches) : '';
+        $application = self::applicationBy('id', $appId);
+        return self::normalizePackageProfile((string)($application['package_profile'] ?? ''));
+    }
+
+    public static function isThemeProduct(string $productId): bool
+    {
+        $productId = trim($productId);
+        if (!preg_match('/^[A-Za-z0-9_.-]{1,64}$/D', $productId)) {
+            return false;
+        }
+        $application = self::applicationBy('product_id', $productId);
+        return self::normalizePackageProfile((string)($application['package_profile'] ?? '')) === 'xiuno_theme';
+    }
+
+    private static function normalizePackageProfile(string $profile): string
+    {
+        return in_array($profile, ['generic', 'xiuno_theme'], true) ? $profile : '';
+    }
+
+    private static function applicationBy(string $field, $value): ?array
+    {
+        if (is_callable(self::$applicationResolverForTests)) {
+            $row = call_user_func(self::$applicationResolverForTests, $field, $value);
+            return is_array($row) ? $row : null;
+        }
+        try {
+            $row = Db::name('app')
+                ->where($field, $value)
+                ->field('id,product_id,package_profile,status')
+                ->find();
+            return is_array($row) ? $row : ($row && method_exists($row, 'toArray') ? $row->toArray() : null);
+        } catch (\Throwable $e) {
+            Log::warning('Application product mapping unavailable', [
+                'field' => $field,
+                'value' => is_scalar($value) ? (string)$value : '',
+            ]);
+            return null;
+        }
     }
 
     /**

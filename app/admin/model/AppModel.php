@@ -54,6 +54,8 @@ class AppModel extends BaseModel
         $post = request()->post();
         $id = !empty($post['id'])?intval($post['id']):null;
         $name = !empty($post['name'])?$post['name']:null;
+        $product_id = trim((string)($post['product_id'] ?? ''));
+        $package_profile = trim((string)($post['package_profile'] ?? 'generic'));
         $logo = !empty($post['logo'])?$post['logo']:'/Assets/img/logo.png';
         $introduce = !empty($post['introduce'])?$post['introduce']:null;
         $check_type = !empty($post['check_type'])?$post['check_type']:null;
@@ -102,6 +104,25 @@ class AppModel extends BaseModel
             // 验证失败 输出错误信息
             return message($e->getError() ,false);
         }
+        if (!preg_match('/^[A-Za-z0-9_.-]{1,64}$/D', $product_id)) {
+            return message('validation.product_id_invalid', false);
+        }
+        if (!in_array($package_profile, ['generic', 'xiuno_theme'], true)) {
+            return message('validation.package_profile_invalid', false);
+        }
+        $productQuery = self::where('product_id', $product_id);
+        if (!empty($id)) {
+            $productQuery->where('id', '<>', $id);
+        }
+        if ($productQuery->find()) {
+            return message('app.product_id_exists', false);
+        }
+        if (!empty($id)) {
+            $currentProductId = trim((string)self::where('id', $id)->value('product_id'));
+            if ($currentProductId !== '' && !hash_equals($currentProductId, $product_id)) {
+                return message('app.product_id_immutable', false);
+            }
+        }
         try {
             $pirate_money = qh_money_format($pirate_money);
             $replace_money = qh_money_format($replace_money);
@@ -117,6 +138,8 @@ class AppModel extends BaseModel
 
             $data = [
                 'name' => $name,
+                'product_id' => $product_id,
+                'package_profile' => $package_profile,
                 'logo' => $logo,
                 'introduce' => $introduce,
                 'check_type' => $check_type,
@@ -183,6 +206,8 @@ class AppModel extends BaseModel
             }
             $data = [
                 'name' => $name,
+                'product_id' => $product_id,
+                'package_profile' => $package_profile,
                 'logo' => $logo,
                 'introduce' => $introduce,
                 'check_type' => $check_type,

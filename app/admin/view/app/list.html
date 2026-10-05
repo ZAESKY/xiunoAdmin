@@ -744,6 +744,21 @@ if(Object.keys(session).length > 0){
                         </div>
                     </div>
                     <div class="layui-form-item">
+                        <label class="layui-form-label layui-form-required">{:t('app_ui.product_id')}</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="product_id" maxlength="64" class="layui-input" placeholder="{:t('app_ui.product_id_placeholder')}"/>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-form-required">{:t('app_ui.package_profile')}</label>
+                        <div class="layui-input-block">
+                            <select name="package_profile">
+                                <option value="generic">{:t('app_ui.package_profile_generic')}</option>
+                                <option value="xiuno_theme">{:t('app_ui.package_profile_xiuno_theme')}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
                         <label class="layui-form-label">{:t('app_ui.app_logo')}</label>
                         <div class="layui-input-block">
                             <input type="text" class="layui-input" name="logo" placeholder="{:t('app_ui.app_logo_placeholder')}">
@@ -1140,6 +1155,7 @@ if(Object.keys(session).length > 0){
                         return '<img data-index="' + (d.LAY_INDEX - 1) + '" src="' + url + '" class="tb-img-circle" tb-img alt=""/>';
                     }, width: 100, unresize: true},
                 {field: 'name', title: window.t('app_ui.app_name'), sort: true, minWidth: 120},
+                {field: 'product_id', title: window.t('app_ui.product_id'), sort: true, minWidth: 180},
                 {field: 'checkTypeName', title: window.t('app_ui.judge_rule'), sort: true, minWidth: 130, templet: function (d) {
                         return '<span class="layui-badge layui-badge-green">'+d.checkTypeName+'</span>';
                     },
@@ -1461,6 +1477,10 @@ if(Object.keys(session).length > 0){
                             });
                             if (data.field.name == "") {
                                 notice.msg(window.t('app_ui.enter_app_name'), {icon: 3, audio:'1'});
+                                return false;
+                            }
+                            if (!/^[A-Za-z0-9_.-]{1,64}$/.test(data.field.product_id || '')) {
+                                notice.msg(window.t('app_ui.enter_product_id'), {icon: 3, audio:'1'});
                                 return false;
                             }
                             if (data.field.public_key == "") {

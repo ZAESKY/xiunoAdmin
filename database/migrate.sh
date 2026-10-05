@@ -56,8 +56,13 @@ MIGRATIONS=(
   "20261004_sms_template_scenes.sql"
   "20261004_password_recovery_channel.sql"
   "20261004_email_notifications.sql"
+  "20261005_plugin_directory_identity.sql"
+  "20261005_release_delta.sql"
+  "20261005_application_context_v2.sql"
 )
 ROLLBACKS=(
+  "20261005_application_context_v2_rollback.sql"
+  "20261005_release_delta_rollback.sql"
   "20261004_email_notifications_rollback.sql"
   "20261004_password_recovery_channel_rollback.sql"
   "20261004_sms_template_scenes_rollback.sql"

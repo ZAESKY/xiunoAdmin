@@ -212,7 +212,7 @@ class ManifestService
             if ($manifest['build_no'] <= 0) {
                 return ['ok' => false, 'msg' => 'build_no 必须为正整数', 'manifest' => []];
             }
-            if (LicenseService::productAppId($manifest['product_id']) === LicenseService::THEME_APPLICATION_ID) {
+            if (LicenseService::isThemeProduct($manifest['product_id'])) {
                 foreach (self::themeRequiredFiles() as $requiredFile) {
                     if (!isset($files[$requiredFile])) {
                         return ['ok' => false, 'msg' => '完整主题包缺少必要文件：'.$requiredFile, 'manifest' => []];
@@ -241,10 +241,12 @@ class ManifestService
                     return ['ok' => false, 'msg' => '完整主题包缺少固定自动迁移文件', 'manifest' => []];
                 }
                 $productIdentity = is_string($productIdentityJson) ? json_decode($productIdentityJson, true) : null;
-                if (!is_array($productIdentity)
+                $applicationId = LicenseService::productAppId($manifest['product_id']);
+                if ($applicationId <= 0
+                    || !is_array($productIdentity)
                     || !ProductIdentityService::verify(
                         $productIdentity,
-                        LicenseService::THEME_APPLICATION_ID,
+                        $applicationId,
                         $manifest['product_id']
                     )) {
                     return ['ok' => false, 'msg' => '完整主题包产品身份文件无效或签名不匹配', 'manifest' => []];

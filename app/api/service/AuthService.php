@@ -466,8 +466,8 @@ class AuthService extends BaseService
             if (($res['storage_driver'] ?? 'local') === 'oss') {
                 $meta['filesize'] += round(((int)($res['package_size'] ?? 0)) / 1048576 * 100) / 100;
             } else {
-                // A-23：本地包统一走 ReleasePackageService，含目录名清洗与 type 判别
-                $meta['filesize'] += ReleasePackageService::sizeMb($res['type'] ?? 1, $res['download_catalogue'] ?? '');
+                // 本地完整包统一从 release 目录读取。
+                $meta['filesize'] += ReleasePackageService::sizeMb(0, $res['download_catalogue'] ?? '');
             }
             $meta['version_ids'][] = (int)$res['id'];
             $meta['introduce'] .= $res['update_log'].',';

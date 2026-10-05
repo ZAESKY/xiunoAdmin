@@ -71,7 +71,8 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'user_id', '`user_id` int(11) unsigned NOT NULL DEFAULT ''0'' COMMENT ''发布者用户ID'' AFTER `id`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'app_id', '`app_id` int(11) unsigned NOT NULL DEFAULT ''1'' COMMENT ''所属应用ID'' AFTER `id`');
+CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'user_id', '`user_id` int(11) unsigned NOT NULL DEFAULT ''0'' COMMENT ''发布者用户ID'' AFTER `app_id`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'category', '`category` varchar(30) DEFAULT '''' COMMENT ''分类'' AFTER `slug`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin', 'plugin_dir', '`plugin_dir` varchar(64) NOT NULL DEFAULT '''' COMMENT ''Xiuno插件安装目录'' AFTER `slug`');
 CALL QH_ADD_COLUMN_IF_MISSING('QH_plugin_package_upload', 'plugin_dir', '`plugin_dir` varchar(64) NOT NULL DEFAULT '''' COMMENT ''ZIP唯一顶层插件目录'' AFTER `package_file_name`');

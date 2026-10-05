@@ -29,7 +29,7 @@ class UserPluginService extends BaseService
     /**
      * 插件市场列表（所有已上架的插件）
      */
-    public function marketList(?array $params = null)
+    public function marketList(?array $params = null, int $appId = 0)
     {
         // v2 主题市场接口与授权中心页面共用同一套查询，避免筛选和字段口径分叉。
         $post = $params ?? request()->post();
@@ -40,7 +40,10 @@ class UserPluginService extends BaseService
         $category = !empty($post['category']) ? $post['category'] : '';
         $sort = !empty($post['sort']) ? $post['sort'] : 'default';
 
-        $where = [['status', '=', 1]];
+        if ($appId <= 0) {
+            throw new Exception(t('plugin_action.app_context_invalid'));
+        }
+        $where = [['status', '=', 1], ['app_id', '=', $appId]];
 
         if (!empty($keyword)) {
             $keyword = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $keyword);
@@ -88,14 +91,15 @@ class UserPluginService extends BaseService
     /**
      * 已上架插件的公共详情。只返回市场展示需要的字段，不包含私有存储路径。
      */
-    public function publicMarketDetail(int $pluginId): ?array
+    public function publicMarketDetail(int $pluginId, int $appId): ?array
     {
-        if ($pluginId <= 0) {
+        if ($pluginId <= 0 || $appId <= 0) {
             return null;
         }
 
         $plugin = \think\facade\Db::name('plugin')
             ->where('id', $pluginId)
+            ->where('app_id', $appId)
             ->where('status', 1)
             ->field('id,user_id,name,slug,plugin_dir,category,version,author,author_url,description,content,icon,cover,images,origin_type,origin_url,origin_author,origin_note,related_plugin_id,package_file_name,file_size,file_hash,update_description,price,pay_type,download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,published_at,created_at,updated_at')
             ->find();
@@ -118,9 +122,11 @@ class UserPluginService extends BaseService
 
         $versions = \think\facade\Db::name('plugin_versions')
             ->where('plugin_id', $pluginId)
+            ->where('version', (string)$plugin['version'])
             ->field('id,plugin_id,version,package_file_name,package_file_size,package_hash,update_description,created_by,created_at,updated_at,storage_driver,package_path,package_object_key')
             ->order('created_at', 'desc')
             ->order('id', 'desc')
+            ->limit(1)
             ->select()
             ->toArray();
         $storage = new PluginStorageService();
@@ -152,6 +158,7 @@ class UserPluginService extends BaseService
         if (!empty($plugin['related_plugin_id'])) {
             $related = \think\facade\Db::name('plugin')
                 ->where('id', intval($plugin['related_plugin_id']))
+                ->where('app_id', $appId)
                 ->where('status', 1)
                 ->field('id,user_id,name,slug,plugin_dir,version,author,icon,cover,price,pay_type,description,updated_at')
                 ->find();
@@ -167,6 +174,7 @@ class UserPluginService extends BaseService
         if (!empty($plugin['user_id'])) {
             $authorPlugins = \think\facade\Db::name('plugin')
                 ->where('user_id', intval($plugin['user_id']))
+                ->where('app_id', $appId)
                 ->where('id', '<>', $pluginId)
                 ->where('status', 1)
                 ->field('id,user_id,name,slug,plugin_dir,version,author,icon,cover,price,pay_type,description,updated_at')
@@ -186,6 +194,7 @@ class UserPluginService extends BaseService
 
         $referencing = \think\facade\Db::name('plugin')
             ->where('related_plugin_id', $pluginId)
+            ->where('app_id', $appId)
             ->where('status', 1)
             ->field('id,user_id,name,slug,plugin_dir,version,author,icon,cover,price,pay_type,description,updated_at')
             ->order('sort', 'desc')
@@ -207,6 +216,7 @@ class UserPluginService extends BaseService
             ->alias('c')
             ->leftJoin('user u', 'c.user_id = u.id')
             ->where('c.plugin_id', $pluginId)
+            ->where('c.app_id', $appId)
             ->where('c.status', 1)
             ->field('c.id,c.content,c.rating,c.reply_content,c.reply_at,c.created_at,u.username')
             ->order('c.id', 'desc')
@@ -232,13 +242,17 @@ class UserPluginService extends BaseService
     /**
      * 插件市场首页聚合数据：推荐、新发布、下载最多。
      */
-    public function marketShowcase(): array
+    public function marketShowcase(int $appId): array
     {
+        if ($appId <= 0) {
+            throw new Exception(t('plugin_action.app_context_invalid'));
+        }
         $fields = 'id,user_id,name,slug,plugin_dir,category,version,author,icon,cover,price,pay_type,description,'
             . 'download_count,rating_count,rating_avg,comment_count,is_hot,is_recommend,sort,'
             . 'published_at,publish_type,publish_time,updated_at';
 
         $featured = \think\facade\Db::name('plugin')
+            ->where('app_id', $appId)
             ->where('status', 1)
             ->where('is_recommend', 1)
             ->field($fields)
@@ -249,6 +263,7 @@ class UserPluginService extends BaseService
             ->toArray();
 
         $newest = \think\facade\Db::name('plugin')
+            ->where('app_id', $appId)
             ->where('status', 1)
             ->field($fields)
             ->order('published_at', 'desc')
@@ -258,6 +273,7 @@ class UserPluginService extends BaseService
             ->toArray();
 
         $downloads = \think\facade\Db::name('plugin')
+            ->where('app_id', $appId)
             ->where('status', 1)
             ->field($fields)
             ->order('download_count', 'desc')
@@ -355,6 +371,10 @@ class UserPluginService extends BaseService
         $version = !empty($post['version']) ? qh_plain_text($post['version'], 50) : '1.0.0';
         // 作者默认取当前用户名
         $userInfo = \think\facade\Db::name('user')->where('id', intval($userId))->find();
+        if (!$userInfo || intval($userInfo['appid'] ?? 0) <= 0) {
+            return message('plugin_action.app_context_invalid', false);
+        }
+        $appId = intval($userInfo['appid']);
         $author = !empty($post['author']) ? qh_plain_text($post['author'], 100) : qh_plain_text($userInfo['username'] ?? '', 100);
         $author_url = !empty($post['author_url']) ? qh_safe_url($post['author_url'], false) : '';
         $description = !empty($post['description']) ? qh_plain_text($post['description'], 1000) : '';
@@ -458,7 +478,11 @@ class UserPluginService extends BaseService
 
         // XSS过滤转载声明
         if ($related_plugin_id > 0) {
-            $relatedPlugin = \think\facade\Db::name('plugin')->where('id', $related_plugin_id)->where('status', 1)->find();
+            $relatedPlugin = \think\facade\Db::name('plugin')
+                ->where('id', $related_plugin_id)
+                ->where('app_id', $appId)
+                ->where('status', 1)
+                ->find();
             if (!$relatedPlugin) {
                 return message('plugin_action.related_unavailable', false);
             }
@@ -495,6 +519,9 @@ class UserPluginService extends BaseService
                 return message('plugin_action.not_found', false);
             }
             if ($row['user_id'] != $userId) {
+                return message('plugin_action.edit_forbidden', false);
+            }
+            if (intval($row['app_id'] ?? 0) !== $appId) {
                 return message('plugin_action.edit_forbidden', false);
             }
             if ($slug !== $row['slug']) {
@@ -541,6 +568,7 @@ class UserPluginService extends BaseService
             if ($pluginDir !== '') {
                 $dirExists = \think\facade\Db::name('plugin')
                     ->where('plugin_dir', $pluginDir)
+                    ->where('app_id', $appId)
                     ->where('id', '<>', $id)
                     ->find();
                 if ($dirExists) {
@@ -548,11 +576,11 @@ class UserPluginService extends BaseService
                 }
             }
 
-            $exists = \think\facade\Db::name('plugin')->where('slug', $slug)->where('id', '<>', $id)->find();
+            $exists = \think\facade\Db::name('plugin')->where('app_id', $appId)->where('slug', $slug)->where('id', '<>', $id)->find();
             if ($exists) {
                 return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
             }
-            $nameExists = \think\facade\Db::name('plugin')->where('name', $name)->where('id', '<>', $id)->find();
+            $nameExists = \think\facade\Db::name('plugin')->where('app_id', $appId)->where('name', $name)->where('id', '<>', $id)->find();
             if ($nameExists) {
                 return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
@@ -676,21 +704,22 @@ class UserPluginService extends BaseService
             $packageFileName = $package['package_file_name'];
             $packageMimeType = $package['package_mime_type'];
             $pluginDir = (string)$package['plugin_dir'];
-            $exists = \think\facade\Db::name('plugin')->where('slug', $slug)->find();
+            $exists = \think\facade\Db::name('plugin')->where('app_id', $appId)->where('slug', $slug)->find();
             if ($exists) {
                 return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
             }
-            $nameExists = \think\facade\Db::name('plugin')->where('name', $name)->find();
+            $nameExists = \think\facade\Db::name('plugin')->where('app_id', $appId)->where('name', $name)->find();
             if ($nameExists) {
                 return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
-            $dirExists = \think\facade\Db::name('plugin')->where('plugin_dir', $pluginDir)->find();
+            $dirExists = \think\facade\Db::name('plugin')->where('app_id', $appId)->where('plugin_dir', $pluginDir)->find();
             if ($dirExists) {
                 return message('插件安装目录已被其他市场插件使用：' . $pluginDir, false);
             }
 
             $data = [
                 'user_id' => intval($userId),
+                'app_id' => $appId,
                 'origin_type' => $origin_type,
                 'origin_url' => $origin_url,
                 'origin_author' => $origin_author,
@@ -1110,6 +1139,9 @@ class UserPluginService extends BaseService
             }
         }
         $app_id = intval($user['appid']);
+        if (intval($plugin['app_id'] ?? 0) !== $app_id) {
+            return message('plugin_action.not_found', false);
+        }
         if (!$this->hasPurchasedOrDownloaded($plugin_id, intval($userId), $app_id)) {
             return message('plugin_action.purchase_before_comment', false);
         }
@@ -1193,13 +1225,17 @@ class UserPluginService extends BaseService
     /**
      * 获取插件的评论列表（仅已审核通过的）
      */
-    public function getComments($pluginId)
+    public function getComments($pluginId, int $appId)
     {
         $post = request()->post();
         $limit = qh_page_limit($post['limit'] ?? null, 10);
         $current_page = qh_page_number($post['current_page'] ?? null);
 
-        if (empty($pluginId)) {
+        if (empty($pluginId) || $appId <= 0 || !\think\facade\Db::name('plugin')
+            ->where('id', intval($pluginId))
+            ->where('app_id', $appId)
+            ->where('status', 1)
+            ->find()) {
             return ['total' => 0, 'data' => []];
         }
 
@@ -1207,6 +1243,7 @@ class UserPluginService extends BaseService
             ->alias('c')
             ->leftJoin('user u', 'c.user_id = u.id')
             ->where('c.plugin_id', intval($pluginId))
+            ->where('c.app_id', $appId)
             ->where('c.status', 1) // 只显示已审核通过的
             ->field('c.*, u.username')
             ->order('c.id', 'desc')
@@ -1244,6 +1281,9 @@ class UserPluginService extends BaseService
         }
         $developerId = intval($plugin['user_id'] ?? 0);
         $app_id = intval($user['appid']);
+        if (intval($plugin['app_id'] ?? 0) !== $app_id) {
+            return message('plugin_action.not_published', false);
+        }
 
         // 检查是否已购买
         $purchase = \think\facade\Db::name('plugin_purchase')
@@ -1486,12 +1526,16 @@ class UserPluginService extends BaseService
             return message('plugin_action.user_info_error', false);
         }
         $app_id = intval($user['appid']);
+        if (intval($plugin['app_id'] ?? 0) !== $app_id) {
+            return message('plugin_action.not_published', false);
+        }
         $orderId = 0;
         $relatedNotice = '';
 
         if (!empty($plugin['related_plugin_id'])) {
             $relatedPlugin = \think\facade\Db::name('plugin')
                 ->where('id', intval($plugin['related_plugin_id']))
+                ->where('app_id', $app_id)
                 ->where('status', 1)
                 ->find();
             if (!$relatedPlugin) {
@@ -1642,7 +1686,16 @@ class UserPluginService extends BaseService
             throw new Exception(t('plugin_action.credential_account_mismatch'));
         }
 
-        $plugin = \think\facade\Db::name('plugin')->where('id', $tokenRecord['plugin_id'])->where('status', 1)->find();
+        $userAppId = $this->userAppId(intval($userId));
+        if (intval($tokenRecord['app_id'] ?? 0) !== $userAppId) {
+            throw new Exception(t('plugin_action.credential_account_mismatch'));
+        }
+
+        $plugin = \think\facade\Db::name('plugin')
+            ->where('id', $tokenRecord['plugin_id'])
+            ->where('app_id', $userAppId)
+            ->where('status', 1)
+            ->find();
         if (!$plugin) {
             throw new Exception(t('plugin_action.unavailable'));
         }
@@ -1724,7 +1777,11 @@ class UserPluginService extends BaseService
         if ($pluginId <= 0) {
             throw new Exception(t('plugin_action.id_required'));
         }
-        $plugin = \think\facade\Db::name('plugin')->where('id', $pluginId)->find();
+        $appId = $this->userAppId($userId);
+        $plugin = \think\facade\Db::name('plugin')
+            ->where('id', $pluginId)
+            ->where('app_id', $appId)
+            ->find();
         if (!$plugin) {
             throw new Exception(t('plugin_action.not_found'));
         }
@@ -1813,7 +1870,12 @@ class UserPluginService extends BaseService
             throw new Exception(t('plugin_action.version_params_invalid'));
         }
 
-        $plugin = \think\facade\Db::name('plugin')->where('id', $pluginId)->where('status', 1)->find();
+        $appId = $this->userAppId($userId);
+        $plugin = \think\facade\Db::name('plugin')
+            ->where('id', $pluginId)
+            ->where('app_id', $appId)
+            ->where('status', 1)
+            ->find();
         if (!$plugin) {
             throw new Exception(t('plugin_action.not_published'));
         }
@@ -2002,6 +2064,9 @@ class UserPluginService extends BaseService
 
     private function assertCanDownload(array $plugin, int $userId): void
     {
+        if (intval($plugin['app_id'] ?? 0) !== $this->userAppId($userId)) {
+            throw new Exception(t('plugin_action.not_published'));
+        }
         if (floatval($plugin['price']) <= 0 || (!empty($plugin['user_id']) && intval($plugin['user_id']) === intval($userId))) {
             return;
         }
@@ -2022,6 +2087,13 @@ class UserPluginService extends BaseService
     private function canAccessPlugin(array $plugin, int $userId): bool
     {
         if ($userId <= 0) {
+            return false;
+        }
+        try {
+            if (intval($plugin['app_id'] ?? 0) !== $this->userAppId($userId)) {
+                return false;
+            }
+        } catch (\Throwable $e) {
             return false;
         }
         if (floatval($plugin['price']) <= 0 || (!empty($plugin['user_id']) && intval($plugin['user_id']) === intval($userId))) {
@@ -2053,5 +2125,17 @@ class UserPluginService extends BaseService
             ->where('user_id', $userId)
             ->where('app_id', $appId)
             ->find();
+    }
+
+    private function userAppId(int $userId): int
+    {
+        if ($userId <= 0) {
+            throw new Exception(t('plugin_action.user_info_error'));
+        }
+        $appId = intval(\think\facade\Db::name('user')->where('id', $userId)->value('appid'));
+        if ($appId <= 0) {
+            throw new Exception(t('plugin_action.app_context_invalid'));
+        }
+        return $appId;
     }
 }

@@ -118,13 +118,10 @@ class VersionModel extends BaseModel
         $edition = !empty($post['edition'])?$post['edition']:null;
         $version = !empty($post['version'])?intval($post['version']):null;
         $update_log = !empty($post['update_log'])?$post['update_log']:'';
-        $type = !empty($post['type'])?intval($post['type']):0;
+        // 版本记录只保存完整发布包；差分包由发布流程自动生成。
+        $type = 0;
         $beta = !empty($post['beta'])?intval($post['beta']):0;
         $status = !empty($post['status'])?1:0;
-
-        if (!in_array($type, [0, 1], true)) {
-            return message('version.type_invalid', false);
-        }
 
         try {
             validate(Version::class)->check($post);
@@ -137,6 +134,8 @@ class VersionModel extends BaseModel
             if(!$row){
                 return message(t('version.not_exist') ,false);
             }
+            // 应用决定产品标识、签名发布物和差分链，版本创建后禁止跨应用迁移。
+            $appid = intval($row['appid']);
             if($edition != $row['edition']){
                 $row2 = self::where(['edition' => $edition, 'appid' => $appid])->find();
                 if ($row2) {
@@ -156,7 +155,6 @@ class VersionModel extends BaseModel
             if ($hasPackage && (
                 (string)$edition !== (string)$row['edition']
                 || (int)$version !== (int)$row['version']
-                || (int)$type !== (int)$row['type']
                 || (int)$beta !== (int)$row['beta']
             )) {
                 return message('version.package_blocks_metadata_change', false);
@@ -164,11 +162,6 @@ class VersionModel extends BaseModel
             $currentDir = ReleasePackageService::existingDir($row['type'], $row['download_catalogue']);
             if($currentDir === ''){
                 return message(t('version.download_dir_not_exist'), false);
-            }
-            try {
-                $moved = $this->moveDownloadDirectory($row, $type, $currentDir);
-            } catch (\Exception $e) {
-                return message($e->getMessage(), false);
             }
             $data = [
                 'edition' => $edition,
@@ -188,7 +181,6 @@ class VersionModel extends BaseModel
                 Cache::tag('QH_Version')->clear();
                 return message(t('user.edit_success') ,true);
             } catch (\Exception $e) {
-                $this->rollbackDownloadDirectoryMove($moved);
                 return message(t('user.edit_failed').$e->getMessage() ,false);
             }
         }else{
@@ -290,79 +282,6 @@ class VersionModel extends BaseModel
         }catch (\Exception $e){
             throw new Exception($e->getMessage());
         }
-    }
-
-    public function setType(){
-        try{
-            $post = request()->post();
-            $id = !empty($post['id'])?intval($post['id']):null;
-            $type = !empty($post['type'])?intval($post['type']):0;
-
-            if (!in_array($type, [0, 1], true)) {
-                throw new Exception(t('version.type_invalid'));
-            }
-
-            if(empty($id)){
-                throw new Exception(t('validation.missing_id'));
-            }
-            $row = $this->getInfo($id);
-            if(!$row){
-                throw new Exception(t('version.not_exist'));
-            }
-            $currentDir = ReleasePackageService::existingDir($row['type'], $row['download_catalogue']);
-            if ($currentDir === '') {
-                throw new Exception(t('version.download_dir_not_exist'));
-            }
-            if ((int)$row['type'] !== $type
-                && $this->hasPackage($row)) {
-                throw new Exception(t('version.package_blocks_type_change'));
-            }
-            $moved = $this->moveDownloadDirectory($row, $type, $currentDir);
-            try {
-                self::where('id', $id)
-                    ->data(['type' => $type])
-                    ->update();
-            } catch (\Exception $e) {
-                $this->rollbackDownloadDirectoryMove($moved);
-                throw $e;
-            }
-            Cache::tag('QH_Version')->clear();
-            return true;
-        }catch (\Exception $e){
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    private function moveDownloadDirectory($row, int $newType, string $currentDir): array
-    {
-        $oldType = (int)($row['type'] ?? 0);
-        if ($oldType === $newType) {
-            return [];
-        }
-
-        $targetDir = ReleasePackageService::dir($newType, $row['download_catalogue'] ?? '');
-        if ($targetDir === '' || file_exists($targetDir) || is_link($targetDir)) {
-            throw new Exception(t('version.download_dir_not_exist'));
-        }
-        $targetParent = dirname(rtrim($targetDir, DS));
-        if (!is_dir($targetParent) || is_link($targetParent)) {
-            throw new Exception(t('version.download_dir_not_exist'));
-        }
-
-        $from = rtrim($currentDir, DS);
-        $to = rtrim($targetDir, DS);
-        if (!rename($from, $to)) {
-            throw new Exception(t('user.edit_failed'));
-        }
-        return ['from' => $from, 'to' => $to];
-    }
-
-    private function rollbackDownloadDirectoryMove(array $moved): void
-    {
-        if (empty($moved['from']) || empty($moved['to']) || !is_dir($moved['to']) || file_exists($moved['from'])) {
-            return;
-        }
-        @rename($moved['to'], $moved['from']);
     }
 
     public function setBeta(){

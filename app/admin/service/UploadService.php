@@ -90,8 +90,7 @@ class UploadService extends BaseService
             $versionArray = is_object($versionInfo) && method_exists($versionInfo, 'toArray')
                 ? $versionInfo->toArray() : (array)$versionInfo;
             $storage = new PluginStorageService();
-            $resourceType = (int)($versionArray['type'] ?? 0) === 0
-                ? 'application_release' : 'application_update';
+            $resourceType = 'application_release';
             try {
                 $stored = $storage->storePath(
                     $fname,

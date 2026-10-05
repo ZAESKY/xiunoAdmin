@@ -3,10 +3,10 @@
 namespace app\common\service;
 
 /**
- * 更新包路径解析（统一入口）
+ * 完整发布包路径解析（统一入口）
  *
  * 修复 A-23：AuthService 计算 filesize 时未做目录名清洗且把 type 硬编码为 update，
- * 与 DownloadService 的解析规则不一致。此处收敛为单一实现，两侧共用。
+ * 与 DownloadService 的解析规则不一致。此处收敛为单一 release 目录实现，两侧共用。
  *
  * @since 2026-08-16 P0 安全加固
  */
@@ -26,11 +26,11 @@ class ReleasePackageService
     }
 
     /**
-     * type: 0 = release(首发包)，其余 = update(升级包)
+     * 保留参数只为兼容旧调用签名；所有版本包统一进入 release 目录。
      */
     public static function subDir($type): string
     {
-        return ((int)$type === 0) ? 'release' : 'update';
+        return 'release';
     }
 
     /**
@@ -48,7 +48,7 @@ class ReleasePackageService
 
     /**
      * Resolve an existing package directory and prove that it is a real child
-     * of the expected release/update root. Symlinks are deliberately rejected:
+     * of the expected release root. Symlinks are deliberately rejected:
      * package upload and deletion must never escape through a filesystem link.
      */
     public static function existingDir($type, $catalogue): string

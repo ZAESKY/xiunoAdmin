@@ -13,17 +13,6 @@ class Version extends Backend
         $this->service = new VersionService();
     }
 
-    public function setType(){
-        try{
-            if(IS_POST){
-                $result = $this->service->setType();
-                return message(t('version.change_type_success') ,true);
-            }
-        }catch (\Exception $e){
-            return message($e->getMessage(), false);
-        }
-    }
-
     public function setBeta(){
         try{
             if(IS_POST){

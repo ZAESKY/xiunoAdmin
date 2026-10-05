@@ -59,10 +59,6 @@
     <input type="checkbox" lay-filter="QH_TbStateCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common_ui.normal_separator')}" {{d.status==1?'checked':''}} style="display: none;"/>
 </script>
-<script type="text/html" id="QH_TbType">
-    <input type="checkbox" lay-filter="QH_TbTypeCk" value="{{d.id}}" lay-skin="switch"
-           lay-text="{:t('common_ui.update_package_separator')}" {{d.type==1?'checked':''}} style="display: none;"/>
-</script>
 <script type="text/html" id="QH_TbBeta">
     <input type="checkbox" lay-filter="QH_TbBetaCk" value="{{d.id}}" lay-skin="switch"
            lay-text="{:t('common_ui.beta_formal')}" {{d.beta==1?'checked':''}} style="display: none;"/>
@@ -152,12 +148,6 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label layui-form-required">{:t('common_ui.type')}:</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" name="type" value="1" lay-text="{:t('common_ui.update_package_separator')}" lay-skin="switch"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
                 <label class="layui-form-label layui-form-required">{:t('version_ui.beta')}:</label>
                 <div class="layui-input-block">
                     <input type="checkbox" name="beta" value="1" lay-skin="switch"/>
@@ -231,7 +221,6 @@
                     }
                 },
                 {field: 'download_catalogue', title: '{:t("common_ui.dir")}', minWidth: 180},
-                {field: 'type', title: '{:t("common_ui.type")}', templet: '#QH_TbType', sort: true, minWidth: 100},
                 {field: 'beta', title: '{:t("common_ui.is_beta")}', templet: '#QH_TbBeta', sort: true, minWidth: 100},
                 {field: 'status', title: '{:t("common.status")}', templet: '#QH_TbState', sort: true, minWidth: 100},
                 {field: 'addtime', title: '{:t("common.add_time")}', sort: true, minWidth: 180},
@@ -284,13 +273,13 @@
                     success: function(data) {
                         notice.destroy();
                         admin.open({
-                            title: (obj.data.type==0?'{:t("version_ui.upload_install_package")}':'{:t("version_ui.upload_update_package")}')+'：'+obj.data.edition+' ({:t("version_ui.build")} '+obj.data.version+')',
+                            title: '{:t("version_ui.upload_release_package")}：'+obj.data.edition+' ({:t("version_ui.build")} '+obj.data.version+')',
                             type: 1,
                             content: $('#QH_TbUpload').html(),
                         });
-                        $('#qhVersionUploadHelp').text(obj.data.type == 0
-                            ? '{:t("version_ui.current_version")}：'+obj.data.edition+'，{:t("version_ui.build_number")}：'+obj.data.version+'。{:t("version_ui.install_package_help")}'
-                            : '{:t("version_ui.update_package_help")}');
+                        $('#qhVersionUploadHelp').text(
+                            '{:t("version_ui.current_version")}：'+obj.data.edition+'，{:t("version_ui.build_number")}：'+obj.data.version+'。{:t("version_ui.release_package_help")}'
+                        );
                         if (data.code == 0) {
                             $('#name').val('QH.zip');
                             layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', '{__MODULE__}fileChoose/img/zip.png');
@@ -542,28 +531,6 @@
                 type: "POST",
                 url:'{:url("/Version/setBeta")}',
                 data: {id:obj.value,beta:obj.elem.checked ? 1 : 0},
-                dataType: "json",
-                success: function(data) {
-                    notice.destroy();
-                    if (data.code == 0) {
-                        table.reload('QH_Table');
-                        notice.msg(data.msg, {icon: 1, audio:'1'});
-                    }else{
-                        notice.msg(data.msg, {icon: 2, audio:'1'});
-                    }
-                },
-                error: function() {
-                    notice.destroy();
-                    notice.msg('{:t("common.server_error")}', {icon: 2, audio:'1'});
-                }
-            });
-        });
-        form.on('switch(QH_TbTypeCk)', function (obj) {
-            notice.msg('{:t("common.loading")}', {icon: 4, close: true});
-            $.ajax({
-                type: "POST",
-                url:'{:url("/Version/setType")}',
-                data: {id:obj.value,type:obj.elem.checked ? 1 : 0},
                 dataType: "json",
                 success: function(data) {
                     notice.destroy();

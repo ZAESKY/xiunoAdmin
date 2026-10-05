@@ -105,9 +105,10 @@
 
             var payload = result.data || {};
             if (payload.status === 'unbound') {
-                layer.confirm(t('login.first_qq_help'), {
+                var canRegister = payload.can_register === true;
+                layer.confirm(canRegister ? t('login.first_qq_help') : t('login.qq_no_application_account'), {
                     title: t('login.first_qq_login'),
-                    btn: [t('login.migrate_legacy_account'), t('login.create_new_account')],
+                    btn: [t('login.migrate_legacy_account'), canRegister ? t('login.create_new_account') : t('login.choose_registration_app')],
                     skin: 'layui-layer-admin',
                     closeBtn: 0
                 }, function(index) {
@@ -120,6 +121,10 @@
                         data: {type:'oauthMigrate', pending_token:payload.pending_token}
                     });
                 }, function() {
+                    if (!canRegister) {
+                        location.href = payload.registration_url || '/user.php/login/reg.html';
+                        return;
+                    }
                     notice.msg(t('login.creating_account'), {icon: 4, close: true});
                     $.ajax({
                         type: 'POST',
@@ -259,7 +264,7 @@
             admin.showLoading('#divLoading', 2, '.8');
             QHQqOauth.start({
                 url: '/api.php/Social/login',
-                data: {userType:'user'},
+                data: {userType:'user', appid:{$login_app_id|default=0}},
                 onResult: function(data) {
                     admin.removeLoading('#divLoading', true, true);
                     admin.btnLoading(' #loginBtn', false);

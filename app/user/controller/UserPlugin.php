@@ -43,9 +43,10 @@ class UserPlugin extends UserBackend
         if (IS_POST) {
             try {
                 $mode = strtolower(trim((string)input('post.mode', 'list')));
+                $appId = intval($this->userInfo['appid']);
                 $result = $mode === 'showcase'
-                    ? $this->service->marketShowcase()
-                    : $this->service->marketList();
+                    ? $this->service->marketShowcase($appId)
+                    : $this->service->marketList(null, $appId);
                 return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false, ['data' => []]));
@@ -92,7 +93,8 @@ class UserPlugin extends UserBackend
                 return $this->render('public/error', ['msg' => t('plugin_action.not_found')]);
             }
             // 只能编辑自己的插件
-            if ($plugin['user_id'] != $this->userId) {
+            if ($plugin['user_id'] != $this->userId
+                || intval($plugin['app_id'] ?? 0) !== intval($this->userInfo['appid'])) {
                 return $this->render('public/error', ['msg' => t('plugin_action.edit_forbidden')]);
             }
             $this->service->enrichPluginDetail($plugin);
@@ -170,7 +172,14 @@ class UserPlugin extends UserBackend
                 $keyword = input('post.keyword', '', 'trim');
                 $excludeId = input('post.exclude_id', 0, 'intval');
                 $pluginModel = new PluginModel();
-                return json(message('ok', true, ['list' => $pluginModel->searchRelatedOptions($keyword, $excludeId)]));
+                return json(message('ok', true, [
+                    'list' => $pluginModel->searchRelatedOptions(
+                        $keyword,
+                        $excludeId,
+                        20,
+                        intval($this->userInfo['appid'])
+                    ),
+                ]));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false, ['list' => []]));
             }
@@ -191,7 +200,8 @@ class UserPlugin extends UserBackend
                     return json(message('plugin_action.not_found', false));
                 }
                 // 只能删除自己的插件
-                if ($info['user_id'] != $this->userId) {
+                if ($info['user_id'] != $this->userId
+                    || intval($info['app_id'] ?? 0) !== intval($this->userInfo['appid'])) {
                     return json(message('plugin_action.delete_forbidden', false));
                 }
                 // 已上架的插件不能删除
@@ -219,6 +229,10 @@ class UserPlugin extends UserBackend
         $pluginModel = new PluginModel();
         $plugin = $pluginModel->getInfo($id);
         if (!$plugin) {
+            return $this->render('public/error', ['msg' => t('plugin_action.not_found')]);
+        }
+        $appId = intval($this->userInfo['appid']);
+        if (intval($plugin['app_id'] ?? 0) !== $appId) {
             return $this->render('public/error', ['msg' => t('plugin_action.not_found')]);
         }
         if (intval($plugin['status'] ?? 0) !== 1 && intval($plugin['user_id'] ?? 0) !== intval($this->userId)) {
@@ -279,6 +293,7 @@ class UserPlugin extends UserBackend
         if (!empty($plugin['user_id'])) {
             $authorPlugins = \think\facade\Db::name('plugin')
                 ->where('user_id', intval($plugin['user_id']))
+                ->where('app_id', $appId)
                 ->where('id', '<>', $id)
                 ->where('status', 1)
                 ->order('id', 'desc')
@@ -291,6 +306,7 @@ class UserPlugin extends UserBackend
         // 哪些插件关联了当前插件
         $referencingPlugins = \think\facade\Db::name('plugin')
             ->where('related_plugin_id', $id)
+            ->where('app_id', $appId)
             ->where('status', 1)
             ->order('sort', 'desc')
             ->order('id', 'desc')
@@ -414,7 +430,7 @@ class UserPlugin extends UserBackend
         if (IS_POST) {
             try {
                 $plugin_id = input('post.plugin_id', 0, 'intval');
-                $result = $this->service->getComments($plugin_id);
+                $result = $this->service->getComments($plugin_id, intval($this->userInfo['appid']));
                 return json(message(t('common.list_success'), true, ['data' => $result]));
             } catch (\Exception $e) {
                 return json(message($e->getMessage(), false, ['data' => []]));

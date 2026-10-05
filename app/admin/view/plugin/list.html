@@ -23,6 +23,17 @@
                             </select>
                         </div>
                     </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">{:t('app_ui.app_name')}</label>
+                        <div class="layui-input-inline">
+                            <select name="app_id" class="ew-select-fixed" lay-search>
+                                <option value="">{:t('app_ui.all_apps')}</option>
+                                {volist name="appList" id="app"}
+                                <option value="{$app.id}">{$app.name} ({$app.product_id})</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
                     <div class="layui-inline layui-btn-container">
                         <button class="layui-btn icon-btn" lay-filter="QH_TbSearch" lay-submit>
                             <i class="layui-icon">&#xe615;</i>{:t('common.search')}
@@ -149,6 +160,7 @@ layui.use(['layer', 'form', 'table', 'notice'], function () {
                 return '<img src="'+(d.icon || '/Assets/img/default-plugin.png')+'" style="width:50px;height:50px;object-fit:cover;">';
             }},
             {field: 'name', title: '{:t("plugin_ui.name")}', minWidth: 150},
+            {field: 'app_name', title: '{:t("app_ui.app_name")}', minWidth: 150},
             {field: 'slug', title: '{:t("plugin_ui.slug")}', minWidth: 120},
             {field: 'version', title: '{:t("version_ui.version_suffix")}', width: 100},
             {field: 'author', title: '{:t("plugin_ui.author")}', width: 120},

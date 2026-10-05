@@ -80,7 +80,7 @@ class PluginV2Service extends BaseService
                 'category' => $category,
                 'price_type' => $priceType,
                 'sort' => $sort,
-            ])->toArray();
+            ], (int)$license['appid'])->toArray();
             $items = is_array($paginator['data'] ?? null) ? $paginator['data'] : [];
             $purchasedIds = $this->purchasedPluginIds($license, array_column($items, 'id'));
             foreach ($items as &$item) {
@@ -125,7 +125,7 @@ class PluginV2Service extends BaseService
         }
 
         try {
-            $plugin = (new UserPluginService())->publicMarketDetail($pluginId);
+            $plugin = (new UserPluginService())->publicMarketDetail($pluginId, (int)$license['appid']);
             if ($plugin === null) {
                 return $this->out('4501', '插件不存在或尚未上架');
             }
@@ -179,7 +179,11 @@ class PluginV2Service extends BaseService
             return $this->out('4500', '插件下载参数无效');
         }
 
-        $plugin = Db::name('plugin')->where('id', $pluginId)->where('status', 1)->find();
+        $plugin = Db::name('plugin')
+            ->where('id', $pluginId)
+            ->where('app_id', (int)$license['appid'])
+            ->where('status', 1)
+            ->find();
         if (!$plugin) {
             return $this->out('4501', '插件不存在或尚未上架');
         }
@@ -197,6 +201,7 @@ class PluginV2Service extends BaseService
             $record = Db::name('plugin_versions')
                 ->where('id', $versionId)
                 ->where('plugin_id', $pluginId)
+                ->where('version', (string)$plugin['version'])
                 ->find();
             if (!$record) {
                 return $this->out('4501', '插件版本不存在');
@@ -282,7 +287,11 @@ class PluginV2Service extends BaseService
 
         $pluginId = (int)($payload['plugin_id'] ?? 0);
         $versionId = (int)($payload['version_id'] ?? 0);
-        $plugin = Db::name('plugin')->where('id', $pluginId)->where('status', 1)->find();
+        $plugin = Db::name('plugin')
+            ->where('id', $pluginId)
+            ->where('app_id', (int)$license['appid'])
+            ->where('status', 1)
+            ->find();
         if (!$plugin) {
             return $this->out('4302', '插件资源不存在或已下架');
         }
@@ -297,6 +306,7 @@ class PluginV2Service extends BaseService
             $record = Db::name('plugin_versions')
                 ->where('id', $versionId)
                 ->where('plugin_id', $pluginId)
+                ->where('version', (string)$plugin['version'])
                 ->find();
             if (!$record) {
                 return $this->out('4302', '插件版本不存在或已下架');

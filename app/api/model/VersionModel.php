@@ -29,10 +29,11 @@ class VersionModel extends BaseModel
             return Cache::get($cacheKey);
         }else{
             if(is_array($beta)){
-                $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['type', '=', 1]])
-                    ->whereIn('beta', $beta)->select();
+                $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['type', '=', 0]])
+                    ->whereIn('beta', $beta)->order('version', 'desc')->limit(1)->select();
             }else{
-                $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['beta', '=', $beta],['type', '=', 1]])->select();
+                $list = VersionModel::where([['appid', '=', $appid],['status', '=', 1],['version', '>', $version],['beta', '=', $beta],['type', '=', 0]])
+                    ->order('version', 'desc')->limit(1)->select();
             }
             $count = count($list);
             $data = ['list' => $list, 'count' => $count];

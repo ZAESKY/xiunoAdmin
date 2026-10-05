@@ -50,6 +50,16 @@
                     <dd lay-unselect>
                         <a ew-href="{:url('/MyInfo/index')}">{:t('layout.personal_center')}</a>
                     </dd>
+                    {if count($layoutSwitchAccounts) > 1}
+                    <hr>
+                    {volist name="layoutSwitchAccounts" id="switchAccount"}
+                    {if $switchAccount.id != $layoutCurrentUserId}
+                    <dd lay-unselect>
+                        <a href="javascript:;" class="qh-switch-app" data-user-id="{$switchAccount.id}">{:t('layout.switch_to_app')} {$switchAccount.appname}</a>
+                    </dd>
+                    {/if}
+                    {/volist}
+                    {/if}
                     {/eq}
                     {eq name="layoutRole" value="admin"}
                     <dd lay-unselect>
@@ -178,6 +188,32 @@
                 notice.msg(data.msg || (data.code == 0 ? t('layout.qq_operation_success') : t('layout.qq_operation_failed')), {icon:data.code == 0 ? 1 : 2});
                 if(data.code == 0) setTimeout(function(){ location.reload(); },800);
             }, function(message){notice.msg(message,{icon:2});});
+        }
+        if (layoutRole === 'user') {
+            $(document).on('click', '.qh-switch-app', function () {
+                var userId = parseInt($(this).attr('data-user-id') || '0', 10);
+                if (!userId) return;
+                notice.msg(t('layout.switching_app'), {icon:4, close:true});
+                $.ajax({
+                    type: 'POST',
+                    url: '/api.php/Social/switchApp',
+                    data: {user_id:userId},
+                    dataType: 'json',
+                    success: function(data) {
+                        notice.destroy();
+                        if (data.code == 0) {
+                            notice.msg(data.msg, {icon:1});
+                            setTimeout(function(){ location.href=(data.data && data.data.url) || '/user.php/Index/index.html'; }, 500);
+                        } else {
+                            notice.msg(data.msg, {icon:2});
+                        }
+                    },
+                    error: function() {
+                        notice.destroy();
+                        notice.msg(t('common.server_error'), {icon:2});
+                    }
+                });
+            });
         }
         form.on('submit(logout)', function () {
             parent.layui.admin.confirm('{:t("confirm.logout")}', function (index) {

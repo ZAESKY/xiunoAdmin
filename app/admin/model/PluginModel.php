@@ -44,10 +44,14 @@ class PluginModel extends BaseModel
         }
     }
 
-    public function getInfoBySlug($slug)
+    public function getInfoBySlug($slug, int $appId = 0)
     {
         try {
-            $result = self::where('slug', $slug)->find();
+            $query = self::where('slug', $slug);
+            if ($appId > 0) {
+                $query->where('app_id', $appId);
+            }
+            $result = $query->find();
             if ($result) {
                 $result = $result->toArray();
                 if (!empty($result['images'])) {
@@ -113,6 +117,16 @@ class PluginModel extends BaseModel
         $icon_object_key = !empty($post['icon_object_key']) ? trim($post['icon_object_key']) : '';
         $cover_object_key = !empty($post['cover_object_key']) ? trim($post['cover_object_key']) : '';
         $update_description = isset($post['update_description']) ? trim((string)$post['update_description']) : '';
+        $appId = intval($post['app_id'] ?? 0);
+        if (!empty($id)) {
+            $existingAppId = intval(self::where('id', $id)->value('app_id'));
+            if ($existingAppId > 0) {
+                $appId = $existingAppId;
+            }
+        }
+        if ($appId <= 0 || !Db::name('app')->where('id', $appId)->find()) {
+            return message('plugin_action.app_context_invalid', false);
+        }
 
         if (empty($name)) {
             return message('plugin_action.name_required', false);
@@ -159,7 +173,10 @@ class PluginModel extends BaseModel
             $publish_time = null;
         }
         if ($related_plugin_id > 0) {
-            $relatedPlugin = self::where('id', $related_plugin_id)->where('status', 1)->find();
+            $relatedPlugin = self::where('id', $related_plugin_id)
+                ->where('app_id', $appId)
+                ->where('status', 1)
+                ->find();
             if (!$relatedPlugin) {
                 $related_plugin_id = 0;
             }
@@ -211,17 +228,17 @@ class PluginModel extends BaseModel
                 $plugin_dir = $currentPluginDir;
             }
             if ($plugin_dir !== '') {
-                $dirExists = self::where('plugin_dir', $plugin_dir)->where('id', '<>', $id)->find();
+                $dirExists = self::where('app_id', $appId)->where('plugin_dir', $plugin_dir)->where('id', '<>', $id)->find();
                 if ($dirExists) {
                     return message('插件安装目录已被其他市场插件使用：' . $plugin_dir, false);
                 }
             }
 
-            $exists = self::where('slug', $slug)->where('id', '<>', $id)->find();
+            $exists = self::where('app_id', $appId)->where('slug', $slug)->where('id', '<>', $id)->find();
             if ($exists) {
                 return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
             }
-            $nameExists = self::where('name', $name)->where('id', '<>', $id)->find();
+            $nameExists = self::where('app_id', $appId)->where('name', $name)->where('id', '<>', $id)->find();
             if ($nameExists) {
                 return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
@@ -316,20 +333,21 @@ class PluginModel extends BaseModel
                 return message('plugin_admin.file_required', false);
             }
 
-            $exists = self::where('slug', $slug)->find();
+            $exists = self::where('app_id', $appId)->where('slug', $slug)->find();
             if ($exists) {
                 return message(t('plugin_action.slug_exists', ['slug' => $slug]), false);
             }
-            $nameExists = self::where('name', $name)->find();
+            $nameExists = self::where('app_id', $appId)->where('name', $name)->find();
             if ($nameExists) {
                 return message(t('plugin_action.name_exists', ['name' => $name]), false);
             }
-            $dirExists = self::where('plugin_dir', $plugin_dir)->find();
+            $dirExists = self::where('app_id', $appId)->where('plugin_dir', $plugin_dir)->find();
             if ($dirExists) {
                 return message('插件安装目录已被其他市场插件使用：' . $plugin_dir, false);
             }
 
             $data = [
+                'app_id' => $appId,
                 'name' => $name, 'slug' => $slug, 'category' => $category,
                 'plugin_dir' => $plugin_dir,
                 'version' => $version, 'author' => $author, 'author_url' => $author_url,
@@ -613,6 +631,9 @@ class PluginModel extends BaseModel
             $limit = qh_page_limit($post['limit'] ?? null, 10);
             $current_page = qh_page_number($post['current_page'] ?? null);
             $data = $this->buildSearchWhere('id|name|slug|author');
+            if (isset($post['app_id']) && $post['app_id'] !== '') {
+                $data[] = ['app_id', '=', intval($post['app_id'])];
+            }
 
             $list = self::order('sort', 'desc')
                 ->order('id', 'desc')
@@ -640,6 +661,7 @@ class PluginModel extends BaseModel
                 $item['reward_points'] = intval($reward['points'] ?? 0);
                 $item['reward_balance'] = qh_money_format($reward['balance'] ?? 0);
                 $item['reward_reason'] = $reward['reason'] ?? '';
+                $item['app_name'] = (string)(Db::name('app')->where('id', intval($item['app_id'] ?? 0))->value('name') ?? '');
             }
             return $list;
         } catch (\Exception $e) {
@@ -685,9 +707,14 @@ class PluginModel extends BaseModel
         return $map;
     }
 
-    public function searchRelatedOptions($keyword = '', $excludeId = 0, $limit = 20)
+    public function searchRelatedOptions($keyword = '', $excludeId = 0, $limit = 20, $appId = 0)
     {
+        $appId = intval($appId);
+        if ($appId <= 0) {
+            return [];
+        }
         $query = self::where('status', 1)
+            ->where('app_id', $appId)
             ->field('id,name,slug,version,icon,price,pay_type');
         if ($excludeId > 0) {
             $query->where('id', '<>', intval($excludeId));
@@ -708,6 +735,7 @@ class PluginModel extends BaseModel
             return;
         }
         $related = self::where('id', $relatedId)
+            ->where('app_id', intval($plugin['app_id'] ?? 0))
             ->field('id,name,slug,version,icon,price,pay_type,status')
             ->find();
         $plugin['related_plugin'] = $related ? $related->toArray() : null;

@@ -11,6 +11,8 @@ class App extends Validate
     protected $rule =   [
         'check_type'  => 'require',
         'name'   => 'require',
+        'product_id' => 'require|regex:/^[A-Za-z0-9_.-]{1,64}$/',
+        'package_profile' => 'require|in:generic,xiuno_theme',
         'auth_template' => 'require|integer',
         'power_template' => 'require|integer',
         'public_key' => 'require',
@@ -27,6 +29,10 @@ class App extends Validate
     protected $message  =   [
         'check_type.require' => 'validation.check_type_required',
         'name.require' => 'validation.app_name_required',
+        'product_id.require' => 'validation.product_id_required',
+        'product_id.regex' => 'validation.product_id_invalid',
+        'package_profile.require' => 'validation.package_profile_required',
+        'package_profile.in' => 'validation.package_profile_invalid',
         'auth_template.require' => 'validation.auth_template_required',
         'auth_template.integer' => 'validation.auth_template_invalid',
         'power_template.require' => 'validation.power_template_required',
